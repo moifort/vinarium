@@ -1,26 +1,23 @@
 {
-  "name": "cave-a-vin",
-  "private": true,
-  "type": "module",
-  "scripts": {
-    "build": "nuxt build",
-    "dev": "nuxt dev",
-    "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
-    "lint": "eslint .",
-    "typecheck": "nuxt typecheck"
-  },
-  "dependencies": {
-    "@iconify-json/lucide": "1.2.82",
-    "@iconify-json/simple-icons": "1.2.63",
-    "@nuxt/ui": "4.3.0",
-    "nuxt": "4.2.2"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.3.11",
-    "@nuxt/eslint": "1.12.1",
-    "eslint": "9.39.2",
-    "typescript": "5.9.3",
-    "vue-tsc": "3.2.1"
-  }
+	"name": "cave-a-vin",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "nuxt build",
+		"dev": "nuxt dev",
+		"preview": "nuxt preview",
+		"postinstall": "nuxt prepare",
+		"typecheck": "nuxt typecheck"
+	},
+	"dependencies": {
+		"@iconify-json/lucide": "1.2.82",
+		"@iconify-json/simple-icons": "1.2.63",
+		"@nuxt/ui": "4.3.0",
+		"nuxt": "4.2.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.11",
+		"typescript": "5.9.3",
+		"vue-tsc": "3.2.1"
+	}
 }
