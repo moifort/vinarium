@@ -17,6 +17,7 @@
     "nuxt": "4.2.2"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.3.11",
     "@nuxt/eslint": "1.12.1",
     "eslint": "9.39.2",
     "typescript": "5.9.3",
