@@ -6,7 +6,7 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion } from '~/cellar/types'
+import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion, Rating } from '~/cellar/types'
 import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
 
@@ -63,11 +63,20 @@ export namespace Cellar {
     return entry
   }
 
-  export const removeWine = async (wineId: WineId) => {
+  export const removeWine = async (
+    wineId: WineId,
+    consumption?: { consumedDate?: Date; rating?: Rating; tastingNotes?: string },
+  ) => {
     const storage = useStorage('cellar')
     const existing = await getEntryByWineId(wineId)
     if (!existing || existing.dateOut) return 'not-in-cellar' as const
-    const updated: CellarEntry = { ...existing, dateOut: new Date() }
+    const updated: CellarEntry = {
+      ...existing,
+      dateOut: new Date(),
+      consumedDate: consumption?.consumedDate,
+      rating: consumption?.rating,
+      tastingNotes: consumption?.tastingNotes,
+    }
     await storage.setItem<CellarEntry>(`entries:${wineId}`, updated)
     return updated
   }

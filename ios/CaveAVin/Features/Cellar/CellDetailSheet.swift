@@ -7,7 +7,7 @@ struct CellDetailSheet: View {
     let onRemoved: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var showRemoveConfirm = false
+    @State private var showConsumption = false
 
     private var positionLabel: String {
         "\(String(UnicodeScalar(65 + row)!))\(col + 1)"
@@ -81,7 +81,7 @@ struct CellDetailSheet: View {
 
                 Section {
                     Button("Retirer de la cave", role: .destructive) {
-                        showRemoveConfirm = true
+                        showConsumption = true
                     }
                 }
             }
@@ -92,15 +92,21 @@ struct CellDetailSheet: View {
                     Button("Fermer") { dismiss() }
                 }
             }
-            .confirmationDialog("Retirer cette bouteille ?", isPresented: $showRemoveConfirm, titleVisibility: .visible) {
-                Button("Retirer", role: .destructive) {
+            .sheet(isPresented: $showConsumption) {
+                ConsumptionSheet(wine: wine) { date, rating, notes in
+                    let formatter = ISO8601DateFormatter()
                     Task {
-                        _ = try? await CellarAPI.remove(wineId: wine.id)
+                        _ = try? await CellarAPI.remove(
+                            wineId: wine.id,
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            tastingNotes: notes
+                        )
+                        showConsumption = false
                         dismiss()
                         onRemoved()
                     }
                 }
-                Button("Annuler", role: .cancel) {}
             }
         }
     }

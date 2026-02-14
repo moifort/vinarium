@@ -5,6 +5,7 @@ export type CellarRows = Brand<number, 'CellarRows'>
 export type CellarCols = Brand<number, 'CellarCols'>
 export type CellarRow = Brand<string, 'CellarRow'>
 export type CellarCol = Brand<number, 'CellarCol'>
+export type Rating = Brand<number, 'Rating'>
 
 export type CellarConfig = {
   rows: CellarRows
@@ -18,6 +19,9 @@ export type CellarEntry = {
   col: CellarCol
   dateIn: Date
   dateOut: Date | null
+  consumedDate?: Date
+  rating?: Rating
+  tastingNotes?: string
 }
 
 export type CellarSuggestion = {
