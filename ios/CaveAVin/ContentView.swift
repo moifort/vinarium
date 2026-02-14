@@ -12,10 +12,7 @@ struct ContentView: View {
             }
 
             Tab("Vins", systemImage: "list.bullet") {
-                NavigationStack {
-                    Text("Vins")
-                        .navigationTitle("Mes Vins")
-                }
+                WineListView()
             }
 
             Tab("Stats", systemImage: "chart.bar") {
