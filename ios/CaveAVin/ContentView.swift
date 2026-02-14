@@ -8,10 +8,7 @@ struct ContentView: View {
             }
 
             Tab("Cave", systemImage: "square.grid.3x3") {
-                NavigationStack {
-                    Text("Cave")
-                        .navigationTitle("Ma Cave")
-                }
+                CellarGridView()
             }
 
             Tab("Vins", systemImage: "list.bullet") {
