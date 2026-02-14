@@ -6,7 +6,7 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type { CellarCol, CellarConfig, CellarEntry, CellarRow } from '~/cellar/types'
+import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion } from '~/cellar/types'
 import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
 
@@ -70,6 +70,60 @@ export namespace Cellar {
     const updated: CellarEntry = { ...existing, dateOut: new Date() }
     await storage.setItem<CellarEntry>(`entries:${wineId}`, updated)
     return updated
+  }
+
+  export const suggestPosition = async (wineId: WineId): Promise<CellarSuggestion | 'wine-not-found' | 'cellar-full'> => {
+    const wine = await Wines.getById(wineId)
+    if (wine === 'not-found') return 'wine-not-found' as const
+
+    const cfg = await getConfig()
+    const activeEntries = await getActiveEntries()
+
+    const occupied = new Set(activeEntries.map((e) => `${rowToIndex(e.row)},${colToIndex(e.col)}`))
+
+    // Find cells with same-color wines
+    const sameColorCells: [number, number][] = []
+    for (const entry of activeEntries) {
+      const entryWine = await Wines.getById(entry.wineId)
+      if (entryWine !== 'not-found' && entryWine.color === wine.color) {
+        sameColorCells.push([rowToIndex(entry.row), colToIndex(entry.col)])
+      }
+    }
+
+    // Find nearest empty cell adjacent to same-color cluster
+    if (sameColorCells.length > 0) {
+      const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
+      // BFS from same-color cells
+      const queue: [number, number][] = [...sameColorCells]
+      const visited = new Set(sameColorCells.map(([r, c]) => `${r},${c}`))
+
+      while (queue.length > 0) {
+        const [r, c] = queue.shift()!
+        for (const [dr, dc] of directions) {
+          const nr = r + dr
+          const nc = c + dc
+          const key = `${nr},${nc}`
+          if (nr >= 0 && nr < cfg.rows && nc >= 0 && nc < cfg.cols && !visited.has(key)) {
+            visited.add(key)
+            if (!occupied.has(key)) {
+              return { row: indexToRow(nr), col: indexToCol(nc) }
+            }
+            queue.push([nr, nc])
+          }
+        }
+      }
+    }
+
+    // No same-color wines or no adjacent space: return first empty cell
+    for (let r = 0; r < cfg.rows; r++) {
+      for (let c = 0; c < cfg.cols; c++) {
+        if (!occupied.has(`${r},${c}`)) {
+          return { row: indexToRow(r), col: indexToCol(c) }
+        }
+      }
+    }
+
+    return 'cellar-full' as const
   }
 
   export const getGrid = async () => {

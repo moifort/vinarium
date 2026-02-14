@@ -19,3 +19,8 @@ export type CellarEntry = {
   dateIn: Date
   dateOut: Date | null
 }
+
+export type CellarSuggestion = {
+  row: CellarRow
+  col: CellarCol
+}
