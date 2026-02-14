@@ -1,12 +1,12 @@
 services:
-  cave-a-vin:
+  canvas-server:
     image: moifort/cave-a-vin:latest
-    container_name: cave-a-vin
+    container_name: canvas-server
     restart: unless-stopped
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
-      NITRO_SERVER_URL: http://127.0.0.1:3000
+      NITRO_SERVER_URL: http://192.168.0.165:3000
     ports:
       - "3000:3000"
     volumes:
