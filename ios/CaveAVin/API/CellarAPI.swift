@@ -11,6 +11,11 @@ enum CellarAPI {
         return response.data
     }
 
+    static func getEntry(wineId: String) async throws -> CellarEntry {
+        let response: APIResponse<CellarEntry> = try await APIClient.shared.get("/cellar/entry/\(wineId)")
+        return response.data
+    }
+
     static func suggest(wineId: String) async throws -> CellarSuggestion {
         struct Body: Encodable, Sendable { let wineId: String }
         let response: APIResponse<CellarSuggestion> = try await APIClient.shared.post(

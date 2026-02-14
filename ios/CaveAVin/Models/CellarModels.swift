@@ -17,6 +17,9 @@ struct CellarEntry: Codable, Identifiable, Sendable {
     let col: Int
     let dateIn: Date
     let dateOut: Date?
+    let consumedDate: Date?
+    let rating: Int?
+    let tastingNotes: String?
 
     var id: String { wineId }
 }
