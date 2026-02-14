@@ -9,3 +9,8 @@ dist
 .derivedData
 data
 output
+
+# iOS / Xcode
+.DS_Store
+*.xcworkspace
+xcuserdata/

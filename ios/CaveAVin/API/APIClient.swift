@@ -5,8 +5,8 @@ final class APIClient: Sendable {
 
     var baseURL: URL {
         get {
-            let stored = UserDefaults.standard.string(forKey: "serverURL") ?? "http://localhost:3000"
-            return URL(string: stored) ?? URL(string: "http://localhost:3000")!
+            let stored = UserDefaults.standard.string(forKey: "serverURL") ?? "http://192.168.0.160:3000"
+            return URL(string: stored) ?? URL(string: "http://192.168.0.160:3000")!
         }
         set {
             UserDefaults.standard.set(newValue.absoluteString, forKey: "serverURL")
