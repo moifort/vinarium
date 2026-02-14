@@ -12,15 +12,19 @@ struct StatsView: View {
                 } else if let error = viewModel.error, viewModel.summary == nil {
                     ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
                 } else if let summary = viewModel.summary {
-                    summaryContent(summary)
+                    if summary.bottleCount == 0 {
+                        ContentUnavailableView("Aucune statistique", systemImage: "chart.bar", description: Text("Ajoutez des bouteilles dans votre cave pour voir les statistiques"))
+                    } else {
+                        summaryContent(summary)
+                    }
                 }
             }
             .navigationTitle("Statistiques")
             .refreshable {
                 await viewModel.load()
             }
-            .task {
-                await viewModel.load()
+            .onAppear {
+                Task { await viewModel.load() }
             }
         }
     }

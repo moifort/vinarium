@@ -59,6 +59,9 @@ struct WineListView: View {
             .onChange(of: viewModel.statusFilter) { _, _ in
                 Task { await viewModel.load() }
             }
+            .onChange(of: viewModel.minRating) { _, _ in
+                Task { await viewModel.load() }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -74,6 +77,15 @@ struct WineListView: View {
                         Picker("Statut", selection: $viewModel.statusFilter) {
                             ForEach(WineStatusFilter.allCases) { f in
                                 Text(f.label).tag(f)
+                            }
+                        }
+
+                        Divider()
+
+                        Picker("Note minimum", selection: $viewModel.minRating) {
+                            Text("Toutes").tag(0)
+                            ForEach(1...5, id: \.self) { rating in
+                                Text(String(repeating: "\u{2605}", count: rating)).tag(rating)
                             }
                         }
                     } label: {

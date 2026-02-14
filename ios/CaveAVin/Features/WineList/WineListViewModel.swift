@@ -33,6 +33,7 @@ final class WineListViewModel {
     var sort: WineSort = .vintage
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
+    var minRating: Int = 0
 
     func load() async {
         isLoading = true
@@ -41,7 +42,8 @@ final class WineListViewModel {
             wines = try await WineAPI.list(
                 sort: sort.rawValue,
                 order: sortDescending ? "desc" : "asc",
-                status: statusFilter.rawValue
+                status: statusFilter.rawValue,
+                minRating: minRating > 0 ? minRating : nil
             )
         } catch {
             self.error = error.localizedDescription

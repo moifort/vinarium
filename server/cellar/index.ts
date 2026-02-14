@@ -11,9 +11,9 @@ import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
 
 const DEFAULT_CONFIG: CellarConfig = {
-  rows: CellarRows(10),
-  cols: CellarCols(10),
-  name: 'Ma cave',
+  rows: CellarRows(6),
+  cols: CellarCols(8),
+  name: 'DE DIETRICH DUW46DFB',
 }
 
 export namespace Cellar {

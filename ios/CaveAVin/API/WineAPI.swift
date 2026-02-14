@@ -15,12 +15,13 @@ enum WineAPI {
         return response.data
     }
 
-    static func list(color: WineColor? = nil, sort: String? = nil, order: String? = nil, status: String? = nil) async throws -> [Wine] {
+    static func list(color: WineColor? = nil, sort: String? = nil, order: String? = nil, status: String? = nil, minRating: Int? = nil) async throws -> [Wine] {
         var query: [String: String] = [:]
         if let color { query["color"] = color.rawValue }
         if let sort { query["sort"] = sort }
         if let order { query["order"] = order }
         if let status { query["status"] = status }
+        if let minRating { query["minRating"] = String(minRating) }
         let response: APIResponse<[Wine]> = try await APIClient.shared.get("/wines", query: query)
         return response.data
     }

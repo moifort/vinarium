@@ -34,6 +34,7 @@ export namespace Wines {
     sort?: WineSort
     order?: SortOrder
     status?: WineStatus
+    minRating?: number
   }) => {
     const storage = useStorage('wines')
     const keys = await storage.getKeys()
@@ -54,6 +55,23 @@ export namespace Wines {
       } else if (options.status === 'consumed') {
         wines = wines.filter((w) => !inCellarIds.has(w.id))
       }
+    }
+
+    // Rating filter (rating lives on CellarEntry, cross-reference)
+    if (options?.minRating) {
+      const cellarStorage = useStorage('cellar')
+      const entryKeys = await cellarStorage.getKeys('entries')
+      const entries = await Promise.all(entryKeys.map((key) => cellarStorage.getItem<import('~/cellar/types').CellarEntry>(key)))
+      const ratingByWineId = new Map<string, number>()
+      for (const entry of entries) {
+        if (entry?.rating != null) {
+          const existing = ratingByWineId.get(entry.wineId)
+          if (existing == null || entry.rating > existing) {
+            ratingByWineId.set(entry.wineId, entry.rating)
+          }
+        }
+      }
+      wines = wines.filter((w) => (ratingByWineId.get(w.id) ?? 0) >= options.minRating!)
     }
 
     // Sort
