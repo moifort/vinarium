@@ -16,10 +16,7 @@ struct ContentView: View {
             }
 
             Tab("Stats", systemImage: "chart.bar") {
-                NavigationStack {
-                    Text("Stats")
-                        .navigationTitle("Statistiques")
-                }
+                StatsView()
             }
         }
     }
