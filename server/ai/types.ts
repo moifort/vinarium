@@ -16,8 +16,3 @@ export type ScanResult = {
   estimatedPrice: number | null
 }
 
-export type PlacementSuggestion = {
-  row: string
-  col: number
-  reason: string
-}

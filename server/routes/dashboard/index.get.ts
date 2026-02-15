@@ -75,5 +75,16 @@ export default defineEventHandler(async () => {
     }
   }
 
-  return { status: 200, data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit } }
+  // Recent history (last 10 events)
+  const history = await Cellar.getHistory()
+  const recentHistory = history.slice(0, 10).map((e) => ({
+    type: e.type,
+    date: e.date,
+    wineName: e.wineName,
+    wineColor: e.wineColor,
+    position: e.position,
+    rating: e.rating,
+  }))
+
+  return { status: 200, data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit, history: recentHistory } }
 })

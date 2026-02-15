@@ -9,36 +9,15 @@ struct DashboardView: View {
             Group {
                 if let data = viewModel.data {
                     ScrollView {
-                        VStack(spacing: 16) {
+                        VStack(spacing: 20) {
                             statsRow(data)
 
                             if !data.readyToDrink.isEmpty {
-                                readyToDrinkSection(data.readyToDrink)
+                                readyToDrinkSection(data)
                             }
 
-                            if let entry = data.lastEntry {
-                                activityCard(
-                                    icon: "arrow.down.circle.fill",
-                                    iconColor: .green,
-                                    title: "Dernière entrée",
-                                    wine: entry.wine,
-                                    date: entry.date,
-                                    position: entry.position
-                                )
-                                .onTapGesture { selectedWineId = entry.wine.id }
-                            }
-
-                            if let exit = data.lastExit {
-                                activityCard(
-                                    icon: "arrow.up.circle.fill",
-                                    iconColor: .red,
-                                    title: "Dernière sortie",
-                                    wine: exit.wine,
-                                    date: exit.date,
-                                    position: exit.position,
-                                    rating: exit.rating
-                                )
-                                .onTapGesture { selectedWineId = exit.wine.id }
+                            if !data.history.isEmpty {
+                                journalSection(data)
                             }
                         }
                         .padding()
@@ -61,60 +40,41 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Stats Row
+    // MARK: - Stats
 
     private func statsRow(_ data: DashboardData) -> some View {
         HStack(spacing: 12) {
-            statCard(
-                icon: "wineglass",
-                iconColor: .purple,
+            GradientWidget(
+                title: "En cave",
                 value: "\(data.bottleCount)",
-                label: "Bouteilles"
+                subtitle: "Bouteilles",
+                icon: "wineglass",
+                gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)]
             )
-
-            statCard(
-                icon: "eurosign.circle",
-                iconColor: .green,
+            GradientWidget(
+                title: "Valeur",
                 value: String(format: "%.0f €", data.totalValue),
-                label: "Valeur totale"
+                subtitle: "Total",
+                icon: "eurosign.circle",
+                gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)]
             )
         }
-    }
-
-    private func statCard(icon: String, iconColor: Color, value: String, label: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(iconColor)
-            Text(value)
-                .font(.system(size: 28, weight: .bold))
-                .minimumScaleFactor(0.7)
-                .lineLimit(1)
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background(Color(.systemGray6))
-        .clipShape(.rect(cornerRadius: 16))
     }
 
     // MARK: - Ready to Drink
 
-    private func readyToDrinkSection(_ wines: [DashboardWine]) -> some View {
+    private func readyToDrinkSection(_ data: DashboardData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label {
-                Text("À déguster")
-                    .font(.headline)
-            } icon: {
-                Image(systemName: "clock.badge.checkmark")
-                    .foregroundStyle(.orange)
-            }
-            .padding(.horizontal, 4)
+            GradientWidget(
+                title: "Prêt à déguster",
+                value: "\(data.readyToDrink.count)",
+                subtitle: "Bouteilles",
+                icon: "clock.badge.checkmark",
+                gradient: [Color(red: 0.9, green: 0.45, blue: 0.15), Color(red: 0.95, green: 0.65, blue: 0.2)]
+            )
 
-            VStack(spacing: 8) {
-                ForEach(wines) { wine in
+            VStack(spacing: 0) {
+                ForEach(data.readyToDrink) { wine in
                     Button {
                         selectedWineId = wine.id
                     } label: {
@@ -138,76 +98,117 @@ struct DashboardView: View {
                                     .monospacedDigit()
                             }
                         }
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 12)
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
                     }
                     .tint(.primary)
                 }
             }
-            .padding(.vertical, 4)
             .background(Color(.systemGray6))
             .clipShape(.rect(cornerRadius: 12))
         }
     }
 
-    // MARK: - Activity Cards
+    // MARK: - Journal
 
-    private func activityCard(
-        icon: String,
-        iconColor: Color,
-        title: String,
-        wine: DashboardEntryWine,
-        date: Date,
-        position: String,
-        rating: Int? = nil
-    ) -> some View {
-        HStack(spacing: 0) {
-            iconColor
-                .frame(width: 4)
-                .clipShape(.rect(cornerRadius: 2))
+    private func journalSection(_ data: DashboardData) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            GradientWidget(
+                title: "Journal",
+                value: "\(data.history.count)",
+                subtitle: "Activités récentes",
+                icon: "book",
+                gradient: [Color(red: 0.2, green: 0.45, blue: 0.85), Color(red: 0.35, green: 0.65, blue: 0.95)]
+            )
 
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundStyle(iconColor)
-                        .font(.subheadline)
-                    Text(title)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Text(date.formatted(date: .abbreviated, time: .omitted))
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-
-                HStack(spacing: 10) {
-                    WineColorBadge(color: wine.color)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(wine.name)
+            VStack(spacing: 0) {
+                ForEach(data.history) { event in
+                    HStack(spacing: 10) {
+                        Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                            .foregroundStyle(event.isEntry ? .green : .red)
                             .font(.subheadline)
-                            .fontWeight(.medium)
-                        Text(position)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .monospacedDigit()
-                    }
-                    Spacer()
-                    if let rating {
-                        HStack(spacing: 2) {
-                            ForEach(1...5, id: \.self) { star in
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(star <= rating ? .yellow : Color(.systemGray4))
-                                    .font(.caption2)
+                        WineColorBadge(color: event.wineColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(event.wineName)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                            Text(event.position)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                        Spacer()
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text(event.date.formatted(date: .abbreviated, time: .omitted))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            if let rating = event.rating {
+                                HStack(spacing: 1) {
+                                    ForEach(1...5, id: \.self) { star in
+                                        Image(systemName: star <= rating ? "star.fill" : "star")
+                                            .foregroundStyle(star <= rating ? .yellow : Color(.systemGray4))
+                                            .font(.system(size: 8))
+                                    }
+                                }
                             }
                         }
                     }
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
                 }
             }
-            .padding(12)
+            .background(Color(.systemGray6))
+            .clipShape(.rect(cornerRadius: 12))
         }
-        .background(Color(.systemGray6))
-        .clipShape(.rect(cornerRadius: 12))
+    }
+}
+
+// MARK: - Gradient Widget (matching widget.png design)
+
+private struct GradientWidget: View {
+    let title: String
+    let value: String
+    let subtitle: String
+    let icon: String
+    let gradient: [Color]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text(title)
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundStyle(.white.opacity(0.9))
+
+            Spacer()
+
+            Text(value)
+                .font(.system(size: 34, weight: .bold))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
+
+            Spacer()
+
+            HStack(alignment: .bottom) {
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.8))
+                Spacer()
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.7))
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: gradient,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .clipShape(.rect(cornerRadius: 20))
     }
 }
 

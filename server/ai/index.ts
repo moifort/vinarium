@@ -1,6 +1,6 @@
-import type { PlacementSuggestion, ScanResult } from '~/ai/types'
+import type { ScanResult } from '~/ai/types'
 import { config } from '~/config/index'
-import type { Wine, WineColor } from '~/wine/types'
+import type { Wine } from '~/wine/types'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
@@ -169,81 +169,6 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
     } catch {
       return scanResult
     }
-  }
-
-  export const suggestPlacement = async (
-    wine: Wine,
-    grid: { position: string; wine: { name: string; color: WineColor; region?: string | null } | null }[][],
-    cellarConfig: { rows: number; cols: number; name: string },
-  ): Promise<PlacementSuggestion> => {
-    const { anthropicApiKey } = config()
-
-    const gridDescription = grid
-      .map((row, rowIdx) => {
-        const rowLetter = String.fromCharCode(65 + rowIdx)
-        return row
-          .map((cell, colIdx) => {
-            const pos = `${rowLetter}${colIdx + 1}`
-            if (cell.wine) {
-              return `${pos}: ${cell.wine.name} (${cell.wine.color}${cell.wine.region ? `, ${cell.wine.region}` : ''})`
-            }
-            return `${pos}: vide`
-          })
-          .join(' | ')
-      })
-      .join('\n')
-
-    const wineDesc = `${wine.name} (${wine.color}${wine.region ? `, ${wine.region}` : ''}${wine.appellation ? `, ${wine.appellation}` : ''})`
-
-    const response = await $fetch<{
-      content: { type: string; id?: string; name?: string; input?: PlacementSuggestion }[]
-    }>(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: {
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 256,
-        tools: [
-          {
-            name: 'suggest_position',
-            description: 'Suggest the best cellar position for a wine',
-            input_schema: {
-              type: 'object',
-              properties: {
-                row: { type: 'string', description: 'Row letter (A-F)' },
-                col: { type: 'integer', description: 'Column number (1-8)' },
-                reason: { type: 'string', description: 'Short explanation in French for why this position' },
-              },
-              required: ['row', 'col', 'reason'],
-            },
-          },
-        ],
-        tool_choice: { type: 'tool', name: 'suggest_position' },
-        messages: [
-          {
-            role: 'user',
-            content: `Cave à vin ${cellarConfig.name} (${cellarConfig.rows} rangées × ${cellarConfig.cols} colonnes, température uniforme).
-
-État actuel de la cave :
-${gridDescription}
-
-Nouveau vin à placer : ${wineDesc}
-
-Suggère la meilleure position VIDE en regroupant les vins par couleur et par région. Utilise l'outil suggest_position.`,
-          },
-        ],
-        system:
-          "Tu es un sommelier expert en organisation de cave à vin. Tu dois TOUJOURS suggérer une position VIDE (marquée 'vide'). Regroupe les vins par couleur, puis par région si possible. Réponds en français.",
-      },
-    })
-
-    const toolUse = response.content.find((block) => block.type === 'tool_use')
-    if (!toolUse?.input) throw new Error('AI did not return a placement suggestion')
-    return toolUse.input
   }
 
   export const getAdvice = async (wines: Wine[], occasion?: string) => {

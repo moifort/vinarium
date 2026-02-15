@@ -6,6 +6,7 @@ struct DashboardData: Codable, Sendable {
     let readyToDrink: [DashboardWine]
     let lastEntry: DashboardEntry?
     let lastExit: DashboardEntry?
+    let history: [DashboardHistoryEvent]
 }
 
 struct DashboardWine: Codable, Identifiable, Sendable {
@@ -29,4 +30,17 @@ struct DashboardEntryWine: Codable, Sendable {
     let name: String
     let color: WineColor
     let vintage: Int?
+}
+
+struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
+    let type: String
+    let date: Date
+    let wineName: String
+    let wineColor: WineColor
+    let position: String
+    let rating: Int?
+
+    var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
+
+    var isEntry: Bool { type == "entry" }
 }

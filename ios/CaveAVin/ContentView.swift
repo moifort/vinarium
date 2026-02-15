@@ -46,7 +46,8 @@ struct ScanFlowView: View {
                                 .frame(width: 56, height: 56)
                         }
                         .glassEffect(.regular, in: .circle)
-                        .padding(.bottom, 30)
+                        .padding(.bottom, 42)
+                        .offset(x: -90)
                     }
 
                 case .scanning:
@@ -74,11 +75,14 @@ struct ScanFlowView: View {
             .onChange(of: selectedPhoto) {
                 guard let item = selectedPhoto else { return }
                 selectedPhoto = nil
+                viewModel.step = .scanning
                 Task {
                     if let data = try? await item.loadTransferable(type: Data.self),
                        let image = UIImage(data: data),
                        let jpeg = image.jpegData(compressionQuality: 0.8) {
                         viewModel.capturePhoto(jpeg)
+                    } else {
+                        viewModel.step = .camera
                     }
                 }
             }

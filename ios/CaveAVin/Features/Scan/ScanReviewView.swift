@@ -13,7 +13,6 @@ struct ScanReviewView: View {
     @State private var region: String
     @State private var country: String
     @State private var grapeVarieties: String
-    @State private var alcoholContent: String
     @State private var classification: String
     @State private var estimatedPrice: String
     @State private var drinkFrom: String
@@ -31,7 +30,6 @@ struct ScanReviewView: View {
         _region = State(initialValue: scanResult.region ?? "")
         _country = State(initialValue: scanResult.country ?? "")
         _grapeVarieties = State(initialValue: scanResult.grapeVarieties.joined(separator: ", "))
-        _alcoholContent = State(initialValue: scanResult.alcoholContent.map { String(format: "%.1f", $0) } ?? "")
         _classification = State(initialValue: scanResult.classification ?? "")
         _estimatedPrice = State(initialValue: scanResult.estimatedPrice.map { String(format: "%.0f", $0) } ?? "")
         _drinkFrom = State(initialValue: scanResult.drinkFrom.map(String.init) ?? "")
@@ -147,18 +145,6 @@ struct ScanReviewView: View {
 
             LabeledContent {
                 HStack(spacing: 4) {
-                    TextField("0.0", text: $alcoholContent)
-                        .keyboardType(.decimalPad)
-                        .multilineTextAlignment(.trailing)
-                    Text("% vol")
-                        .foregroundStyle(.secondary)
-                }
-            } label: {
-                Label("Alcool", systemImage: "drop")
-            }
-
-            LabeledContent {
-                HStack(spacing: 4) {
                     TextField("0", text: $estimatedPrice)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
@@ -225,7 +211,6 @@ struct ScanReviewView: View {
             region: region.isEmpty ? nil : region,
             country: country.isEmpty ? nil : country,
             grapeVarieties: varieties.isEmpty ? nil : varieties,
-            alcoholContent: Double(alcoholContent),
             classification: classification.isEmpty ? nil : classification,
             purchasePrice: Double(estimatedPrice),
             drinkFrom: Int(drinkFrom),

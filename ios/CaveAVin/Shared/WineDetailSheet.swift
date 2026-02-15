@@ -196,6 +196,7 @@ struct WineDetailSheet: View {
                 showConsumption = true
             } label: {
                 Label("Retirer de la cave", systemImage: "arrow.up.circle")
+                    .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
         }
