@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 struct ContentView: View {
@@ -24,14 +25,32 @@ struct ContentView: View {
 
 struct ScanFlowView: View {
     @State private var viewModel = ScanViewModel()
+    @State private var selectedPhoto: PhotosPickerItem?
 
     var body: some View {
         NavigationStack {
             Group {
                 switch viewModel.step {
                 case .camera:
-                    CameraView { data in
-                        viewModel.capturePhoto(data)
+                    ZStack(alignment: .bottomLeading) {
+                        CameraView { data in
+                            viewModel.capturePhoto(data)
+                        }
+
+                        PhotosPicker(
+                            selection: $selectedPhoto,
+                            matching: .images
+                        ) {
+                            Label("Galerie", systemImage: "photo.on.rectangle")
+                                .font(.callout)
+                                .fontWeight(.medium)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(.ultraThinMaterial)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.leading)
+                        .padding(.bottom, 100)
                     }
 
                 case .scanning:
@@ -55,6 +74,17 @@ struct ScanFlowView: View {
                 }
             }
             .navigationTitle("Scanner")
+            .onChange(of: selectedPhoto) {
+                guard let item = selectedPhoto else { return }
+                selectedPhoto = nil
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let image = UIImage(data: data),
+                       let jpeg = image.jpegData(compressionQuality: 0.8) {
+                        viewModel.capturePhoto(jpeg)
+                    }
+                }
+            }
             .alert("Erreur", isPresented: .init(
                 get: { viewModel.error != nil },
                 set: { if !$0 { viewModel.error = nil } }
