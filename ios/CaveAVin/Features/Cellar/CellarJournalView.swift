@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CellarJournalView: View {
     let events: [HistoryEvent]
+    var onWineTapped: ((String) -> Void)?
 
     private var groupedByDate: [(date: String, events: [HistoryEvent])] {
         let formatter = DateFormatter()
@@ -25,7 +26,12 @@ struct CellarJournalView: View {
                 ForEach(groupedByDate, id: \.date) { group in
                     Section(group.date) {
                         ForEach(group.events) { event in
-                            eventRow(event)
+                            Button {
+                                onWineTapped?(event.wineId)
+                            } label: {
+                                eventRow(event)
+                            }
+                            .tint(.primary)
                         }
                     }
                 }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DashboardView: View {
     @State private var viewModel = DashboardViewModel()
+    @State private var selectedWineId: String?
 
     var body: some View {
         NavigationStack {
@@ -16,26 +17,32 @@ struct DashboardView: View {
                             }
 
                             if let entry = data.lastEntry {
-                                activityCard(
-                                    icon: "arrow.down.circle.fill",
-                                    iconColor: .green,
-                                    title: "Dernière entrée",
-                                    wine: entry.wine,
-                                    date: entry.date,
-                                    position: entry.position
-                                )
+                                Button { selectedWineId = entry.wine.id } label: {
+                                    activityCard(
+                                        icon: "arrow.down.circle.fill",
+                                        iconColor: .green,
+                                        title: "Dernière entrée",
+                                        wine: entry.wine,
+                                        date: entry.date,
+                                        position: entry.position
+                                    )
+                                }
+                                .tint(.primary)
                             }
 
                             if let exit = data.lastExit {
-                                activityCard(
-                                    icon: "arrow.up.circle.fill",
-                                    iconColor: .red,
-                                    title: "Dernière sortie",
-                                    wine: exit.wine,
-                                    date: exit.date,
-                                    position: exit.position,
-                                    rating: exit.rating
-                                )
+                                Button { selectedWineId = exit.wine.id } label: {
+                                    activityCard(
+                                        icon: "arrow.up.circle.fill",
+                                        iconColor: .red,
+                                        title: "Dernière sortie",
+                                        wine: exit.wine,
+                                        date: exit.date,
+                                        position: exit.position,
+                                        rating: exit.rating
+                                    )
+                                }
+                                .tint(.primary)
                             }
                         }
                         .padding()
@@ -49,6 +56,12 @@ struct DashboardView: View {
             .navigationTitle("Accueil")
             .refreshable { await viewModel.load() }
             .task { await viewModel.load() }
+            .sheet(item: Binding(
+                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
+                set: { selectedWineId = $0?.id }
+            )) { wrapper in
+                WineDetailSheet(wineId: wrapper.id)
+            }
         }
     }
 
@@ -75,15 +88,20 @@ struct DashboardView: View {
             Label("À boire maintenant", systemImage: "clock.badge.checkmark")
                 .font(.headline)
             ForEach(wines) { wine in
-                HStack {
-                    WineColorBadge(color: wine.color)
-                    Text(wine.name)
-                    Spacer()
-                    if let vintage = wine.vintage {
-                        Text("\(vintage)")
-                            .foregroundStyle(.secondary)
+                Button {
+                    selectedWineId = wine.id
+                } label: {
+                    HStack {
+                        WineColorBadge(color: wine.color)
+                        Text(wine.name)
+                        Spacer()
+                        if let vintage = wine.vintage {
+                            Text("\(vintage)")
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
+                .tint(.primary)
             }
         }
         .padding()
@@ -130,4 +148,8 @@ struct DashboardView: View {
         .background(Color(.systemGray6))
         .clipShape(.rect(cornerRadius: 12))
     }
+}
+
+private struct WineIdWrapper: Identifiable {
+    let id: String
 }

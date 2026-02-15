@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WineListView: View {
     @State private var viewModel = WineListViewModel()
+    @State private var selectedWineId: String?
 
     var body: some View {
         NavigationStack {
@@ -12,7 +13,9 @@ struct WineListView: View {
                     ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Ajoutez des vins en scannant une étiquette"))
                 } else {
                     List(viewModel.wines) { wine in
-                        NavigationLink(value: wine.id) {
+                        Button {
+                            selectedWineId = wine.id
+                        } label: {
                             HStack {
                                 WineColorBadge(color: wine.color)
                                 VStack(alignment: .leading) {
@@ -37,13 +40,11 @@ struct WineListView: View {
                                 }
                             }
                         }
+                        .tint(.primary)
                     }
                 }
             }
             .navigationTitle("Mes Vins")
-            .navigationDestination(for: String.self) { wineId in
-                WineDetailView(wineId: wineId)
-            }
             .refreshable {
                 await viewModel.load()
             }
@@ -103,6 +104,16 @@ struct WineListView: View {
                     }
                 }
             }
+            .sheet(item: Binding(
+                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
+                set: { selectedWineId = $0?.id }
+            )) { wrapper in
+                WineDetailSheet(wineId: wrapper.id)
+            }
         }
     }
+}
+
+private struct WineIdWrapper: Identifiable {
+    let id: String
 }

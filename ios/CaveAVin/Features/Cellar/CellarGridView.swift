@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CellarGridView: View {
     @State private var viewModel = CellarGridViewModel()
-    @State private var selectedCell: CellSelection?
+    @State private var selectedWineId: String?
 
     var body: some View {
         NavigationStack {
@@ -26,7 +26,9 @@ struct CellarGridView: View {
                         case .cave:
                             caveListContent
                         case .journal:
-                            CellarJournalView(events: viewModel.history)
+                            CellarJournalView(events: viewModel.history) { wineId in
+                                selectedWineId = wineId
+                            }
                         }
                     }
                 }
@@ -38,9 +40,11 @@ struct CellarGridView: View {
             .task {
                 await viewModel.load()
             }
-            .sheet(item: $selectedCell) { selection in
-                CellDetailSheet(wine: selection.wine, row: selection.row, col: selection.col) {
-                    selectedCell = nil
+            .sheet(item: Binding(
+                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
+                set: { selectedWineId = $0?.id }
+            )) { wrapper in
+                WineDetailSheet(wineId: wrapper.id) {
                     Task { await viewModel.load() }
                 }
             }
@@ -57,7 +61,7 @@ struct CellarGridView: View {
                     Section {
                         ForEach(group.items) { item in
                             Button {
-                                selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
+                                selectedWineId = item.wine.id
                             } label: {
                                 HStack {
                                     WineColorBadge(color: item.wine.color)
@@ -83,7 +87,7 @@ struct CellarGridView: View {
                             .tint(.primary)
                             .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
-                                    selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
+                                    selectedWineId = item.wine.id
                                 } label: {
                                     Label("Retirer", systemImage: "minus.circle")
                                 }
@@ -98,9 +102,6 @@ struct CellarGridView: View {
     }
 }
 
-private struct CellSelection: Identifiable {
-    let row: Int
-    let col: Int
-    let wine: Wine
-    var id: String { wine.id }
+private struct WineIdWrapper: Identifiable {
+    let id: String
 }
