@@ -1,8 +1,15 @@
 import Foundation
 
+enum CellarDisplayMode: String, CaseIterable {
+    case cave = "Cave"
+    case journal = "Journal"
+}
+
 @MainActor @Observable
 final class CellarGridViewModel {
     var grid: [[GridCell]] = []
+    var history: [HistoryEvent] = []
+    var displayMode: CellarDisplayMode = .cave
     var isLoading = false
     var error: String?
 
@@ -27,7 +34,11 @@ final class CellarGridViewModel {
         isLoading = true
         error = nil
         do {
-            grid = try await CellarAPI.getGrid()
+            async let gridData = CellarAPI.getGrid()
+            async let historyData = CellarAPI.getHistory()
+            let (g, h) = try await (gridData, historyData)
+            grid = g
+            history = h
         } catch {
             self.error = error.localizedDescription
         }

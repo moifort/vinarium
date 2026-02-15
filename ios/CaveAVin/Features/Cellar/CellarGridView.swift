@@ -6,54 +6,27 @@ struct CellarGridView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.grid.isEmpty {
-                    ProgressView("Chargement...")
-                } else if let error = viewModel.error, viewModel.grid.isEmpty {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
-                } else if viewModel.groupedRows.isEmpty {
-                    ContentUnavailableView("Cave vide", systemImage: "wineglass", description: Text("Ajoutez des bouteilles via le scanner"))
-                } else {
-                    List {
-                        ForEach(viewModel.groupedRows) { group in
-                            Section {
-                                ForEach(group.items) { item in
-                                    Button {
-                                        selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
-                                    } label: {
-                                        HStack {
-                                            WineColorBadge(color: item.wine.color)
-                                            VStack(alignment: .leading) {
-                                                Text(item.wine.name)
-                                                    .font(.headline)
-                                                if let vintage = item.wine.vintage {
-                                                    Text("\(vintage)")
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.secondary)
-                                                }
-                                            }
-                                            Spacer()
-                                            Text(item.position)
-                                                .font(.subheadline.monospaced())
-                                                .foregroundStyle(.secondary)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color(.systemGray5))
-                                                .clipShape(.rect(cornerRadius: 6))
-                                        }
-                                    }
-                                    .tint(.primary)
-                                    .swipeActions(edge: .trailing) {
-                                        Button(role: .destructive) {
-                                            selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
-                                        } label: {
-                                            Label("Retirer", systemImage: "minus.circle")
-                                        }
-                                    }
-                                }
-                            } header: {
-                                Label("Rangée \(group.row)", systemImage: "cabinet")
-                            }
+            VStack(spacing: 0) {
+                Picker("Vue", selection: $viewModel.displayMode) {
+                    ForEach(CellarDisplayMode.allCases, id: \.self) { mode in
+                        Text(mode.rawValue).tag(mode)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .padding()
+
+                Group {
+                    if viewModel.isLoading && viewModel.grid.isEmpty {
+                        ProgressView("Chargement...")
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if let error = viewModel.error, viewModel.grid.isEmpty {
+                        ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+                    } else {
+                        switch viewModel.displayMode {
+                        case .cave:
+                            caveListContent
+                        case .journal:
+                            CellarJournalView(events: viewModel.history)
                         }
                     }
                 }
@@ -69,6 +42,56 @@ struct CellarGridView: View {
                 CellDetailSheet(wine: selection.wine, row: selection.row, col: selection.col) {
                     selectedCell = nil
                     Task { await viewModel.load() }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var caveListContent: some View {
+        if viewModel.groupedRows.isEmpty {
+            ContentUnavailableView("Cave vide", systemImage: "wineglass", description: Text("Ajoutez des bouteilles via le scanner"))
+        } else {
+            List {
+                ForEach(viewModel.groupedRows) { group in
+                    Section {
+                        ForEach(group.items) { item in
+                            Button {
+                                selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
+                            } label: {
+                                HStack {
+                                    WineColorBadge(color: item.wine.color)
+                                    VStack(alignment: .leading) {
+                                        Text(item.wine.name)
+                                            .font(.headline)
+                                        if let vintage = item.wine.vintage {
+                                            Text("\(vintage)")
+                                                .font(.subheadline)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                    Spacer()
+                                    Text(item.position)
+                                        .font(.subheadline.monospaced())
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 4)
+                                        .background(Color(.systemGray5))
+                                        .clipShape(.rect(cornerRadius: 6))
+                                }
+                            }
+                            .tint(.primary)
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    selectedCell = CellSelection(row: item.rowIndex, col: item.colIndex, wine: item.wine)
+                                } label: {
+                                    Label("Retirer", systemImage: "minus.circle")
+                                }
+                            }
+                        }
+                    } header: {
+                        Label("Rangée \(group.row)", systemImage: "cabinet")
+                    }
                 }
             }
         }

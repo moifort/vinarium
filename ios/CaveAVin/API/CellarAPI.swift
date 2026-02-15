@@ -47,4 +47,9 @@ enum CellarAPI {
         )
         return response.data
     }
+
+    static func getHistory() async throws -> [HistoryEvent] {
+        let response: APIResponse<[HistoryEvent]> = try await APIClient.shared.get("/cellar/history")
+        return response.data
+    }
 }

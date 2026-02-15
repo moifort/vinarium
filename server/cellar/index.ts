@@ -8,7 +8,7 @@ import {
 } from '~/cellar/primitives'
 import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion, Rating } from '~/cellar/types'
 import { Wines } from '~/wine/index'
-import type { Wine, WineId } from '~/wine/types'
+import type { Wine, WineColor, WineId } from '~/wine/types'
 
 const DEFAULT_CONFIG: CellarConfig = {
   rows: CellarRows(6),
@@ -165,5 +165,51 @@ export namespace Cellar {
     )
 
     return grid
+  }
+
+  export const getHistory = async () => {
+    const allEntries = await getAllEntries()
+    const events: {
+      type: 'entry' | 'exit'
+      date: Date
+      wineId: string
+      wineName: string
+      wineColor: WineColor
+      position: string
+      rating?: number
+      tastingNotes?: string
+    }[] = []
+
+    for (const entry of allEntries) {
+      const wine = await Wines.getById(entry.wineId)
+      const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
+      const wineColor = wine !== 'not-found' ? wine.color : 'red'
+      const position = `${entry.row}${entry.col}`
+
+      events.push({
+        type: 'entry',
+        date: entry.dateIn,
+        wineId: entry.wineId as string,
+        wineName,
+        wineColor,
+        position,
+      })
+
+      if (entry.dateOut) {
+        events.push({
+          type: 'exit',
+          date: entry.dateOut,
+          wineId: entry.wineId as string,
+          wineName,
+          wineColor,
+          position,
+          rating: entry.rating as number | undefined,
+          tastingNotes: entry.tastingNotes,
+        })
+      }
+    }
+
+    events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    return events
   }
 }
