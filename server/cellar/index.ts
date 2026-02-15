@@ -94,37 +94,6 @@ export namespace Cellar {
     const activeEntries = await getActiveEntries()
     const occupied = new Set(activeEntries.map((e) => `${rowToIndex(e.row)},${colToIndex(e.col)}`))
 
-    // BFS: find cells adjacent to same-color wines
-    const sameColorCells: [number, number][] = []
-    for (const entry of activeEntries) {
-      const entryWine = await Wines.getById(entry.wineId)
-      if (entryWine !== 'not-found' && entryWine.color === wine.color) {
-        sameColorCells.push([rowToIndex(entry.row), colToIndex(entry.col)])
-      }
-    }
-
-    if (sameColorCells.length > 0) {
-      const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-      const queue: [number, number][] = [...sameColorCells]
-      const visited = new Set(sameColorCells.map(([r, c]) => `${r},${c}`))
-
-      while (queue.length > 0) {
-        const [r, c] = queue.shift()!
-        for (const [dr, dc] of directions) {
-          const nr = r + dr
-          const nc = c + dc
-          const key = `${nr},${nc}`
-          if (nr >= 0 && nr < cfg.rows && nc >= 0 && nc < cfg.cols && !visited.has(key)) {
-            visited.add(key)
-            if (!occupied.has(key)) {
-              return { row: indexToRow(nr), col: indexToCol(nc) }
-            }
-            queue.push([nr, nc])
-          }
-        }
-      }
-    }
-
     for (let r = 0; r < cfg.rows; r++) {
       for (let c = 0; c < cfg.cols; c++) {
         if (!occupied.has(`${r},${c}`)) {

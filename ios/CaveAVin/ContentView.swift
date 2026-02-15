@@ -2,28 +2,34 @@ import PhotosUI
 import SwiftUI
 
 struct ContentView: View {
+    @State private var selectedTab = 0
+
     var body: some View {
-        TabView {
-            Tab("Accueil", systemImage: "house") {
+        TabView(selection: $selectedTab) {
+            Tab("Accueil", systemImage: "house", value: 0) {
                 DashboardView()
             }
 
-            Tab("Cave", systemImage: "square.grid.3x3") {
+            Tab("Cave", systemImage: "square.grid.3x3", value: 1) {
                 CellarGridView()
             }
 
-            Tab("Vins", systemImage: "list.bullet") {
+            Tab("Vins", systemImage: "list.bullet", value: 2) {
                 WineListView()
             }
 
-            Tab("Scanner", systemImage: "camera", role: .search) {
-                ScanFlowView()
+            Tab("Scanner", systemImage: "camera", value: 3) {
+                ScanFlowView {
+                    selectedTab = 1
+                }
             }
         }
     }
 }
 
 struct ScanFlowView: View {
+    var onFlowCompleted: () -> Void = {}
+
     @State private var viewModel = ScanViewModel()
     @State private var selectedPhoto: PhotosPickerItem?
 
@@ -67,6 +73,7 @@ struct ScanFlowView: View {
                 case .confirmed(let wine, let position):
                     ConfirmationView(wine: wine, position: position) {
                         viewModel.reset()
+                        onFlowCompleted()
                     }
                 }
             }
