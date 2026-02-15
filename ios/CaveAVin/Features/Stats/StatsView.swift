@@ -23,8 +23,8 @@ struct StatsView: View {
             .refreshable {
                 await viewModel.load()
             }
-            .task {
-                await viewModel.load()
+            .onAppear {
+                Task { await viewModel.load() }
             }
         }
     }
