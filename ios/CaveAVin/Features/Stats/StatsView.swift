@@ -7,16 +7,16 @@ struct StatsView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if viewModel.isLoading && viewModel.summary == nil {
-                    ProgressView("Chargement...")
-                } else if let error = viewModel.error, viewModel.summary == nil {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
-                } else if let summary = viewModel.summary {
+                if let summary = viewModel.summary {
                     if summary.bottleCount == 0 {
                         ContentUnavailableView("Aucune statistique", systemImage: "chart.bar", description: Text("Ajoutez des bouteilles dans votre cave pour voir les statistiques"))
                     } else {
                         summaryContent(summary)
                     }
+                } else if let error = viewModel.error {
+                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+                } else {
+                    ProgressView("Chargement...")
                 }
             }
             .navigationTitle("Statistiques")
