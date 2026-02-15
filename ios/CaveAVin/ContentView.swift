@@ -41,14 +41,11 @@ struct ScanFlowView: View {
                             selection: $selectedPhoto,
                             matching: .images
                         ) {
-                            Label("Galerie", systemImage: "photo.on.rectangle")
-                                .font(.callout)
-                                .fontWeight(.medium)
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 10)
-                                .background(.ultraThinMaterial)
-                                .clipShape(Capsule())
+                            Image(systemName: "photo")
+                                .font(.title2)
+                                .frame(width: 44, height: 44)
                         }
+                        .glassEffect(.regular, in: .circle)
                         .padding(.leading)
                         .padding(.bottom, 100)
                     }
