@@ -4,6 +4,10 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         TabView {
+            Tab("Accueil", systemImage: "house") {
+                DashboardView()
+            }
+
             Tab("Cave", systemImage: "square.grid.3x3") {
                 CellarGridView()
             }

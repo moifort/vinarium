@@ -36,11 +36,16 @@ export namespace Cellar {
     return updated
   }
 
-  export const getActiveEntries = async () => {
+  export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
     const all = await Promise.all(keys.map((key) => storage.getItem<CellarEntry>(key)))
-    return all.filter((e): e is CellarEntry => e !== null).filter((e) => !e.dateOut)
+    return all.filter((e): e is CellarEntry => e !== null)
+  }
+
+  export const getActiveEntries = async () => {
+    const entries = await getAllEntries()
+    return entries.filter((e) => !e.dateOut)
   }
 
   export const getEntryByWineId = async (wineId: WineId) => {
