@@ -16,10 +16,6 @@ struct ContentView: View {
                 WineListView()
             }
 
-            Tab("Stats", systemImage: "chart.bar") {
-                StatsView()
-            }
-
             Tab("Scanner", systemImage: "camera", role: .search) {
                 ScanFlowView()
             }
