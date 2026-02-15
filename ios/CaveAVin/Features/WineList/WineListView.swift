@@ -63,6 +63,16 @@ struct WineListView: View {
                 Task { await viewModel.load() }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        viewModel.minRating = viewModel.minRating == 5 ? 0 : 5
+                    } label: {
+                        Image(systemName: viewModel.minRating == 5 ? "star.fill" : "star")
+                    }
+                    .tint(viewModel.minRating == 5 ? .yellow : nil)
+                    .accessibilityLabel("Top vins")
+                    .accessibilityHint(viewModel.minRating == 5 ? "Affiche tous les vins" : "Filtre les vins 5 étoiles")
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker("Tri", selection: $viewModel.sort) {
