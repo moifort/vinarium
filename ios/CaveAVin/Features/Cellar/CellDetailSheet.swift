@@ -17,71 +17,132 @@ struct CellDetailSheet: View {
         NavigationStack {
             List {
                 Section {
-                    HStack {
+                    HStack(spacing: 12) {
                         WineColorBadge(color: wine.color)
-                        Text(wine.name)
-                            .font(.headline)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(wine.name)
+                                .font(.headline)
+                            if let vintage = wine.vintage {
+                                Text("\(vintage)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        Spacer()
+                        Text(positionLabel)
+                            .font(.title3.monospaced())
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.blue)
                     }
-                    if let domain = wine.domain {
-                        LabeledContent("Domaine", value: domain)
-                    }
-                    if let vintage = wine.vintage {
-                        LabeledContent("Millésime", value: "\(vintage)")
-                    }
-                    LabeledContent("Position", value: positionLabel)
                 }
 
-                if wine.appellation != nil || wine.region != nil || wine.country != nil {
-                    Section("Origine") {
+                if wine.domain != nil || wine.appellation != nil || wine.region != nil || wine.country != nil {
+                    Section {
+                        if let domain = wine.domain {
+                            Label {
+                                LabeledContent("Domaine", value: domain)
+                            } icon: {
+                                Image(systemName: "building.2")
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
                         if let appellation = wine.appellation {
-                            LabeledContent("Appellation", value: appellation)
+                            Label {
+                                LabeledContent("Appellation", value: appellation)
+                            } icon: {
+                                Image(systemName: "seal")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let region = wine.region {
-                            LabeledContent("Région", value: region)
+                            Label {
+                                LabeledContent("Région", value: region)
+                            } icon: {
+                                Image(systemName: "map")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let country = wine.country {
-                            LabeledContent("Pays", value: country)
+                            Label {
+                                LabeledContent("Pays", value: country)
+                            } icon: {
+                                Image(systemName: "globe.europe.africa")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let classification = wine.classification {
-                            LabeledContent("Classification", value: classification)
+                            Label {
+                                LabeledContent("Classification", value: classification)
+                            } icon: {
+                                Image(systemName: "rosette")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                    } header: {
+                        Text("Origine")
                     }
                 }
 
-                if wine.alcoholContent != nil || wine.purchasePrice != nil {
-                    Section("Détails") {
+                if wine.alcoholContent != nil || wine.purchasePrice != nil || (wine.grapeVarieties != nil && !wine.grapeVarieties!.isEmpty) {
+                    Section {
                         if let alcohol = wine.alcoholContent {
-                            LabeledContent("Alcool", value: String(format: "%.1f%%", alcohol))
+                            Label {
+                                LabeledContent("Alcool", value: String(format: "%.1f %% vol", alcohol))
+                            } icon: {
+                                Image(systemName: "drop")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let price = wine.purchasePrice {
-                            LabeledContent("Prix", value: String(format: "%.0f €", price))
+                            Label {
+                                LabeledContent("Prix", value: String(format: "%.0f €", price))
+                            } icon: {
+                                Image(systemName: "eurosign.circle")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let grapes = wine.grapeVarieties, !grapes.isEmpty {
-                            LabeledContent("Cépages", value: grapes.joined(separator: ", "))
+                            Label {
+                                LabeledContent("Cépages", value: grapes.joined(separator: ", "))
+                            } icon: {
+                                Image(systemName: "leaf")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                    } header: {
+                        Text("Détails")
                     }
                 }
 
                 if wine.drinkFrom != nil || wine.drinkUntil != nil {
-                    Section("Garde") {
+                    Section {
                         if let from = wine.drinkFrom {
-                            LabeledContent("À boire à partir de", value: "\(from)")
+                            Label {
+                                LabeledContent("À partir de", value: "\(from)")
+                            } icon: {
+                                Image(systemName: "hourglass.bottomhalf.filled")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                         if let until = wine.drinkUntil {
-                            LabeledContent("À boire jusqu'à", value: "\(until)")
+                            Label {
+                                LabeledContent("Jusqu'à", value: "\(until)")
+                            } icon: {
+                                Image(systemName: "hourglass.tophalf.filled")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
-                    }
-                }
-
-                if let notes = wine.notes, !notes.isEmpty {
-                    Section("Notes") {
-                        Text(notes)
+                    } header: {
+                        Text("Garde")
                     }
                 }
 
                 Section {
-                    Button("Retirer de la cave", role: .destructive) {
+                    Button(role: .destructive) {
                         showConsumption = true
+                    } label: {
+                        Label("Retirer de la cave", systemImage: "arrow.up.circle")
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
             }

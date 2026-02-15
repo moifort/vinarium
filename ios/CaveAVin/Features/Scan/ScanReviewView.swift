@@ -40,80 +40,198 @@ struct ScanReviewView: View {
 
     var body: some View {
         Form {
-            if let uiImage = UIImage(data: imageData) {
-                Section {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxHeight: 200)
-                        .frame(maxWidth: .infinity)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-            }
-
-            Section("Informations principales") {
-                TextField("Nom", text: $name)
-                Picker("Couleur", selection: $color) {
-                    ForEach(WineColor.allCases) { c in
-                        Text(c.label).tag(c)
-                    }
-                }
-                TextField("Domaine", text: $domain)
-                TextField("Millésime", text: $vintage)
-                    .keyboardType(.numberPad)
-            }
-
-            Section("Origine") {
-                TextField("Appellation", text: $appellation)
-                TextField("Région", text: $region)
-                TextField("Pays", text: $country)
-                TextField("Classification", text: $classification)
-            }
-
-            Section("Détails") {
-                TextField("Cépages (séparés par des virgules)", text: $grapeVarieties)
-                TextField("Degré d'alcool", text: $alcoholContent)
-                    .keyboardType(.decimalPad)
-                TextField("Prix estimé (€)", text: $estimatedPrice)
-                    .keyboardType(.decimalPad)
-            }
-
-            Section("Garde") {
-                TextField("À boire à partir de", text: $drinkFrom)
-                    .keyboardType(.numberPad)
-                TextField("À boire jusqu'à", text: $drinkUntil)
-                    .keyboardType(.numberPad)
-            }
-
-            Section {
-                Button("Ajouter à la cave") {
-                    let varieties = grapeVarieties
-                        .split(separator: ",")
-                        .map { $0.trimmingCharacters(in: .whitespaces) }
-                        .filter { !$0.isEmpty }
-
-                    let request = CreateWineRequest(
-                        name: name,
-                        color: color,
-                        domain: domain.isEmpty ? nil : domain,
-                        vintage: Int(vintage),
-                        appellation: appellation.isEmpty ? nil : appellation,
-                        region: region.isEmpty ? nil : region,
-                        country: country.isEmpty ? nil : country,
-                        grapeVarieties: varieties.isEmpty ? nil : varieties,
-                        alcoholContent: Double(alcoholContent),
-                        classification: classification.isEmpty ? nil : classification,
-                        purchasePrice: Double(estimatedPrice),
-                        drinkFrom: Int(drinkFrom),
-                        drinkUntil: Int(drinkUntil),
-                        imageBase64: imageData.base64EncodedString()
-                    )
-                    onSave(request)
-                }
-                .frame(maxWidth: .infinity)
-                .disabled(name.isEmpty)
-            }
+            photoSection
+            mainInfoSection
+            originSection
+            detailsSection
+            gardeSection
+            saveSection
         }
         .navigationTitle("Vérifier le vin")
+    }
+
+    // MARK: - Sections
+
+    @ViewBuilder
+    private var photoSection: some View {
+        if let uiImage = UIImage(data: imageData) {
+            Section {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxHeight: 200)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(.rect(cornerRadius: 12))
+            }
+        }
+    }
+
+    private var mainInfoSection: some View {
+        Section {
+            LabeledContent {
+                TextField("Nom du vin", text: $name)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Nom", systemImage: "wineglass")
+            }
+
+            Picker(selection: $color) {
+                ForEach(WineColor.allCases) { c in
+                    Text(c.label).tag(c)
+                }
+            } label: {
+                Label("Couleur", systemImage: "paintpalette")
+            }
+
+            LabeledContent {
+                TextField("Domaine", text: $domain)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Domaine", systemImage: "building.2")
+            }
+
+            LabeledContent {
+                TextField("Année", text: $vintage)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Millésime", systemImage: "calendar")
+            }
+        } header: {
+            Label("Informations principales", systemImage: "info.circle")
+        }
+    }
+
+    private var originSection: some View {
+        Section {
+            LabeledContent {
+                TextField("Appellation", text: $appellation)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Appellation", systemImage: "seal")
+            }
+
+            LabeledContent {
+                TextField("Région", text: $region)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Région", systemImage: "map")
+            }
+
+            LabeledContent {
+                TextField("Pays", text: $country)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Pays", systemImage: "globe.europe.africa")
+            }
+
+            LabeledContent {
+                TextField("Classification", text: $classification)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Classification", systemImage: "rosette")
+            }
+        } header: {
+            Label("Origine", systemImage: "mappin.and.ellipse")
+        }
+    }
+
+    private var detailsSection: some View {
+        Section {
+            LabeledContent {
+                TextField("Cépages", text: $grapeVarieties)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Cépages", systemImage: "leaf")
+            }
+
+            LabeledContent {
+                HStack(spacing: 4) {
+                    TextField("0.0", text: $alcoholContent)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                    Text("% vol")
+                        .foregroundStyle(.secondary)
+                }
+            } label: {
+                Label("Alcool", systemImage: "drop")
+            }
+
+            LabeledContent {
+                HStack(spacing: 4) {
+                    TextField("0", text: $estimatedPrice)
+                        .keyboardType(.decimalPad)
+                        .multilineTextAlignment(.trailing)
+                    Text("€")
+                        .foregroundStyle(.secondary)
+                }
+            } label: {
+                Label("Prix", systemImage: "eurosign.circle")
+            }
+        } header: {
+            Label("Détails", systemImage: "list.bullet.rectangle")
+        }
+    }
+
+    private var gardeSection: some View {
+        Section {
+            LabeledContent {
+                TextField("Année", text: $drinkFrom)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("À partir de", systemImage: "hourglass.bottomhalf.filled")
+            }
+
+            LabeledContent {
+                TextField("Année", text: $drinkUntil)
+                    .keyboardType(.numberPad)
+                    .multilineTextAlignment(.trailing)
+            } label: {
+                Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
+            }
+        } header: {
+            Label("Garde", systemImage: "clock.arrow.2.circlepath")
+        }
+    }
+
+    private var saveSection: some View {
+        Section {
+            Button {
+                save()
+            } label: {
+                Label("Ajouter à la cave", systemImage: "plus.circle.fill")
+                    .frame(maxWidth: .infinity)
+                    .fontWeight(.semibold)
+            }
+            .disabled(name.isEmpty)
+        }
+    }
+
+    // MARK: - Actions
+
+    private func save() {
+        let varieties = grapeVarieties
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        let request = CreateWineRequest(
+            name: name,
+            color: color,
+            domain: domain.isEmpty ? nil : domain,
+            vintage: Int(vintage),
+            appellation: appellation.isEmpty ? nil : appellation,
+            region: region.isEmpty ? nil : region,
+            country: country.isEmpty ? nil : country,
+            grapeVarieties: varieties.isEmpty ? nil : varieties,
+            alcoholContent: Double(alcoholContent),
+            classification: classification.isEmpty ? nil : classification,
+            purchasePrice: Double(estimatedPrice),
+            drinkFrom: Int(drinkFrom),
+            drinkUntil: Int(drinkUntil),
+            imageBase64: imageData.base64EncodedString()
+        )
+        onSave(request)
     }
 }
