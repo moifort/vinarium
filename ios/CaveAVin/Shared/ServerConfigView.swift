@@ -8,7 +8,7 @@ struct ServerConfigView: View {
             Section("Serveur") {
                 TextField("URL du serveur", text: $urlText)
                     .textContentType(.URL)
-                    .autocapitalization(.none)
+                    .textInputAutocapitalization(.never)
                     .keyboardType(.URL)
 
                 Button("Enregistrer") {

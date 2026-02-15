@@ -27,12 +27,14 @@ struct ConsumptionSheet: View {
                 Section("Note") {
                     HStack(spacing: 8) {
                         ForEach(1...5, id: \.self) { star in
-                            Image(systemName: star <= rating ? "star.fill" : "star")
-                                .foregroundStyle(star <= rating ? .yellow : .gray)
-                                .font(.title2)
-                                .onTapGesture {
-                                    rating = star == rating ? 0 : star
-                                }
+                            Button {
+                                rating = star == rating ? 0 : star
+                            } label: {
+                                Image(systemName: star <= rating ? "star.fill" : "star")
+                                    .foregroundStyle(star <= rating ? .yellow : .gray)
+                                    .font(.title2)
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)

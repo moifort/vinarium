@@ -101,9 +101,9 @@ struct WineDetailView: View {
                 }
             }
 
-            if let entry = cellarEntry, entry.dateOut != nil {
+            if let entry = cellarEntry, let dateOut = entry.dateOut {
                 Section("Consommé") {
-                    LabeledContent("Retiré le", value: formatted(entry.dateOut!))
+                    LabeledContent("Retiré le", value: formatted(dateOut))
                     if let rating = entry.rating {
                         HStack {
                             Text("Note")

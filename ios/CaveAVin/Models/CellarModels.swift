@@ -6,9 +6,10 @@ struct CellarConfig: Codable, Sendable {
     let name: String
 }
 
-struct GridCell: Codable, Sendable {
+struct GridCell: Codable, Identifiable, Sendable {
     let position: String
     let wine: Wine?
+    var id: String { position }
 }
 
 struct CellarEntry: Codable, Identifiable, Sendable {

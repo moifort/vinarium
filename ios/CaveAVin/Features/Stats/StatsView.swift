@@ -23,8 +23,8 @@ struct StatsView: View {
             .refreshable {
                 await viewModel.load()
             }
-            .onAppear {
-                Task { await viewModel.load() }
+            .task {
+                await viewModel.load()
             }
         }
     }
@@ -43,18 +43,20 @@ struct StatsView: View {
 
                 // Pie chart by color
                 if !summary.byColor.isEmpty {
+                    let colorEntries = summary.byColor.sorted { $0.key < $1.key }
+
                     VStack(alignment: .leading) {
                         Text("Par couleur")
                             .font(.headline)
                             .padding(.horizontal)
 
-                        Chart(Array(summary.byColor), id: \.key) { item in
+                        Chart(colorEntries, id: \.key) { item in
                             SectorMark(
                                 angle: .value("Bouteilles", item.value.count),
                                 innerRadius: .ratio(0.5),
                                 angularInset: 2
                             )
-                            .foregroundStyle(colorForWineType(item.key))
+                            .foregroundStyle(WineColor(rawValue: item.key)?.displayColor.color ?? .gray)
                             .annotation(position: .overlay) {
                                 Text("\(item.value.count)")
                                     .font(.caption)
@@ -67,12 +69,12 @@ struct StatsView: View {
 
                         // Legend
                         HStack(spacing: 12) {
-                            ForEach(Array(summary.byColor), id: \.key) { item in
+                            ForEach(colorEntries, id: \.key) { item in
                                 HStack(spacing: 4) {
                                     Circle()
-                                        .fill(colorForWineType(item.key))
+                                        .fill(WineColor(rawValue: item.key)?.displayColor.color ?? .gray)
                                         .frame(width: 8, height: 8)
-                                    Text(labelForWineType(item.key))
+                                    Text(WineColor(rawValue: item.key)?.label ?? item.key)
                                         .font(.caption)
                                 }
                             }
@@ -168,25 +170,4 @@ struct StatsView: View {
         }
     }
 
-    private func colorForWineType(_ type: String) -> Color {
-        switch type {
-        case "red": .red
-        case "white": .yellow
-        case "rosé": .pink
-        case "sparkling": .mint
-        case "sweet": .orange
-        default: .gray
-        }
-    }
-
-    private func labelForWineType(_ type: String) -> String {
-        switch type {
-        case "red": "Rouge"
-        case "white": "Blanc"
-        case "rosé": "Rosé"
-        case "sparkling": "Pétillant"
-        case "sweet": "Moelleux"
-        default: type
-        }
-    }
 }

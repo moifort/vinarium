@@ -12,14 +12,14 @@ struct CellarGridComponent: View {
         } else {
             ScrollView([.horizontal, .vertical]) {
                 VStack(spacing: 2) {
-                    ForEach(Array(grid.enumerated()), id: \.offset) { rowIdx, row in
+                    ForEach(grid.indices, id: \.self) { rowIdx in
                         HStack(spacing: 2) {
                             Text(String(UnicodeScalar(65 + rowIdx)!))
                                 .font(.caption2)
                                 .frame(width: 20)
                                 .foregroundStyle(.secondary)
 
-                            ForEach(Array(row.enumerated()), id: \.offset) { colIdx, cell in
+                            ForEach(Array(grid[rowIdx].enumerated()), id: \.element.id) { colIdx, cell in
                                 let isHighlighted = highlightedRow == String(UnicodeScalar(65 + rowIdx)!) && highlightedCol == colIdx + 1
                                 cellView(cell: cell, isHighlighted: isHighlighted)
                                     .onTapGesture {
