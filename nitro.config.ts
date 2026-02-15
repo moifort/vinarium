@@ -3,6 +3,7 @@ export default defineNitroConfig({
   srcDir: 'server',
   runtimeConfig: {
     anthropicApiKey: '',
+    googleApiKey: '',
   },
   storage: {
     wines: { driver: 'fs', base: './.data/db/wines' },
