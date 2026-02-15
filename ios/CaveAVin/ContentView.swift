@@ -1,4 +1,3 @@
-import PhotosUI
 import SwiftUI
 
 struct ContentView: View {
@@ -25,7 +24,6 @@ struct ContentView: View {
 
 struct ScanFlowView: View {
     @State private var viewModel = ScanViewModel()
-    @State private var selectedPhoto: PhotosPickerItem?
 
     var body: some View {
         NavigationStack {
@@ -57,29 +55,6 @@ struct ScanFlowView: View {
                 }
             }
             .navigationTitle("Scanner")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    if case .camera = viewModel.step {
-                        PhotosPicker(
-                            selection: $selectedPhoto,
-                            matching: .images
-                        ) {
-                            Image(systemName: "photo.on.rectangle.angled")
-                        }
-                    }
-                }
-            }
-            .onChange(of: selectedPhoto) {
-                guard let item = selectedPhoto else { return }
-                selectedPhoto = nil
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self),
-                       let image = UIImage(data: data),
-                       let jpeg = image.jpegData(compressionQuality: 0.8) {
-                        viewModel.capturePhoto(jpeg)
-                    }
-                }
-            }
             .alert("Erreur", isPresented: .init(
                 get: { viewModel.error != nil },
                 set: { if !$0 { viewModel.error = nil } }
