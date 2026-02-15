@@ -1,15 +1,13 @@
 import { Cellar } from '~/cellar/index'
-import type { WineId } from '~/wine/types'
-import { Wines } from '~/wine/index'
 import type { UserWineDetail } from '~/user-wine/types'
+import { Wines } from '~/wine/index'
+import type { WineId } from '~/wine/types'
 
 export namespace UserWine {
   export async function getDetail(wineId: WineId): Promise<UserWineDetail | 'not-found'> {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'not-found'
-
     const entry = await Cellar.getEntryByWineId(wineId)
-
     let cellar: UserWineDetail['cellar'] = null
     let consumption: UserWineDetail['consumption'] = null
 

@@ -9,40 +9,36 @@ struct DashboardView: View {
             Group {
                 if let data = viewModel.data {
                     ScrollView {
-                        VStack(spacing: 20) {
-                            bottleCountCard(data.bottleCount)
+                        VStack(spacing: 16) {
+                            statsRow(data)
 
                             if !data.readyToDrink.isEmpty {
                                 readyToDrinkSection(data.readyToDrink)
                             }
 
                             if let entry = data.lastEntry {
-                                Button { selectedWineId = entry.wine.id } label: {
-                                    activityCard(
-                                        icon: "arrow.down.circle.fill",
-                                        iconColor: .green,
-                                        title: "Dernière entrée",
-                                        wine: entry.wine,
-                                        date: entry.date,
-                                        position: entry.position
-                                    )
-                                }
-                                .tint(.primary)
+                                activityCard(
+                                    icon: "arrow.down.circle.fill",
+                                    iconColor: .green,
+                                    title: "Dernière entrée",
+                                    wine: entry.wine,
+                                    date: entry.date,
+                                    position: entry.position
+                                )
+                                .onTapGesture { selectedWineId = entry.wine.id }
                             }
 
                             if let exit = data.lastExit {
-                                Button { selectedWineId = exit.wine.id } label: {
-                                    activityCard(
-                                        icon: "arrow.up.circle.fill",
-                                        iconColor: .red,
-                                        title: "Dernière sortie",
-                                        wine: exit.wine,
-                                        date: exit.date,
-                                        position: exit.position,
-                                        rating: exit.rating
-                                    )
-                                }
-                                .tint(.primary)
+                                activityCard(
+                                    icon: "arrow.up.circle.fill",
+                                    iconColor: .red,
+                                    title: "Dernière sortie",
+                                    wine: exit.wine,
+                                    date: exit.date,
+                                    position: exit.position,
+                                    rating: exit.rating
+                                )
+                                .onTapGesture { selectedWineId = exit.wine.id }
                             }
                         }
                         .padding()
@@ -65,49 +61,96 @@ struct DashboardView: View {
         }
     }
 
-    private func bottleCountCard(_ count: Int) -> some View {
+    // MARK: - Stats Row
+
+    private func statsRow(_ data: DashboardData) -> some View {
+        HStack(spacing: 12) {
+            statCard(
+                icon: "wineglass",
+                iconColor: .purple,
+                value: "\(data.bottleCount)",
+                label: "Bouteilles"
+            )
+
+            statCard(
+                icon: "eurosign.circle",
+                iconColor: .green,
+                value: String(format: "%.0f €", data.totalValue),
+                label: "Valeur totale"
+            )
+        }
+    }
+
+    private func statCard(icon: String, iconColor: Color, value: String, label: String) -> some View {
         VStack(spacing: 8) {
-            Image(systemName: "wineglass")
-                .font(.largeTitle)
-                .foregroundStyle(.purple)
-            Text("\(count)")
-                .font(.system(size: 48, weight: .bold))
-            Text("Bouteilles en cave")
-                .font(.subheadline)
+            Image(systemName: icon)
+                .font(.title2)
+                .foregroundStyle(iconColor)
+            Text(value)
+                .font(.system(size: 28, weight: .bold))
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text(label)
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 24)
+        .padding(.vertical, 20)
         .background(Color(.systemGray6))
-        .clipShape(.rect(cornerRadius: 12))
-        .accessibilityElement(children: .combine)
+        .clipShape(.rect(cornerRadius: 16))
     }
+
+    // MARK: - Ready to Drink
 
     private func readyToDrinkSection(_ wines: [DashboardWine]) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Label("À boire maintenant", systemImage: "clock.badge.checkmark")
-                .font(.headline)
-            ForEach(wines) { wine in
-                Button {
-                    selectedWineId = wine.id
-                } label: {
-                    HStack {
-                        WineColorBadge(color: wine.color)
-                        Text(wine.name)
-                        Spacer()
-                        if let vintage = wine.vintage {
-                            Text("\(vintage)")
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-                .tint(.primary)
+            Label {
+                Text("À déguster")
+                    .font(.headline)
+            } icon: {
+                Image(systemName: "clock.badge.checkmark")
+                    .foregroundStyle(.orange)
             }
+            .padding(.horizontal, 4)
+
+            VStack(spacing: 8) {
+                ForEach(wines) { wine in
+                    Button {
+                        selectedWineId = wine.id
+                    } label: {
+                        HStack(spacing: 12) {
+                            WineColorBadge(color: wine.color)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(wine.name)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                if let domain = wine.domain {
+                                    Text(domain)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            Spacer()
+                            if let vintage = wine.vintage {
+                                Text("\(vintage)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 12)
+                    }
+                    .tint(.primary)
+                }
+            }
+            .padding(.vertical, 4)
+            .background(Color(.systemGray6))
+            .clipShape(.rect(cornerRadius: 12))
         }
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(.rect(cornerRadius: 12))
     }
+
+    // MARK: - Activity Cards
 
     private func activityCard(
         icon: String,
@@ -118,33 +161,51 @@ struct DashboardView: View {
         position: String,
         rating: Int? = nil
     ) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label(title, systemImage: icon)
-                .font(.headline)
-                .foregroundStyle(iconColor)
-            HStack {
-                WineColorBadge(color: wine.color)
-                VStack(alignment: .leading) {
-                    Text(wine.name)
+        HStack(spacing: 0) {
+            iconColor
+                .frame(width: 4)
+                .clipShape(.rect(cornerRadius: 2))
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundStyle(iconColor)
+                        .font(.subheadline)
+                    Text(title)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    Text("\(position) · \(date.formatted(date: .abbreviated, time: .omitted))")
-                        .font(.caption)
                         .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(date.formatted(date: .abbreviated, time: .omitted))
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
                 }
-                Spacer()
-                if let rating {
-                    HStack(spacing: 2) {
-                        ForEach(1...5, id: \.self) { star in
-                            Image(systemName: star <= rating ? "star.fill" : "star")
-                                .foregroundStyle(star <= rating ? .yellow : .gray)
-                                .font(.caption2)
+
+                HStack(spacing: 10) {
+                    WineColorBadge(color: wine.color)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(wine.name)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Text(position)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    Spacer()
+                    if let rating {
+                        HStack(spacing: 2) {
+                            ForEach(1...5, id: \.self) { star in
+                                Image(systemName: star <= rating ? "star.fill" : "star")
+                                    .foregroundStyle(star <= rating ? .yellow : Color(.systemGray4))
+                                    .font(.caption2)
+                            }
                         }
                     }
                 }
             }
+            .padding(12)
         }
-        .padding()
         .background(Color(.systemGray6))
         .clipShape(.rect(cornerRadius: 12))
     }

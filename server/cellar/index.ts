@@ -7,6 +7,7 @@ import {
   rowToIndex,
 } from '~/cellar/primitives'
 import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion, Rating } from '~/cellar/types'
+import { AI } from '~/ai/index'
 import { Wines } from '~/wine/index'
 import type { Wine, WineColor, WineId } from '~/wine/types'
 
@@ -92,10 +93,33 @@ export namespace Cellar {
 
     const cfg = await getConfig()
     const activeEntries = await getActiveEntries()
-
     const occupied = new Set(activeEntries.map((e) => `${rowToIndex(e.row)},${colToIndex(e.col)}`))
 
-    // Find cells with same-color wines
+    // Try AI suggestion first
+    try {
+      const grid = await getGrid()
+      const suggestion = await AI.suggestPlacement(
+        wine,
+        grid.map((row) =>
+          row.map((cell) => ({
+            position: cell.position,
+            wine: cell.wine
+              ? { name: cell.wine.name as string, color: cell.wine.color, region: cell.wine.region as string | null | undefined }
+              : null,
+          })),
+        ),
+        { rows: cfg.rows as number, cols: cfg.cols as number, name: cfg.name },
+      )
+      const rowIdx = suggestion.row.charCodeAt(0) - 65
+      const colIdx = suggestion.col - 1
+      if (rowIdx >= 0 && rowIdx < cfg.rows && colIdx >= 0 && colIdx < cfg.cols && !occupied.has(`${rowIdx},${colIdx}`)) {
+        return { row: indexToRow(rowIdx), col: indexToCol(colIdx) }
+      }
+    } catch {
+      // AI failed, fall back to BFS
+    }
+
+    // BFS fallback: find cells with same-color wines
     const sameColorCells: [number, number][] = []
     for (const entry of activeEntries) {
       const entryWine = await Wines.getById(entry.wineId)
@@ -104,10 +128,8 @@ export namespace Cellar {
       }
     }
 
-    // Find nearest empty cell adjacent to same-color cluster
     if (sameColorCells.length > 0) {
       const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
-      // BFS from same-color cells
       const queue: [number, number][] = [...sameColorCells]
       const visited = new Set(sameColorCells.map(([r, c]) => `${r},${c}`))
 
@@ -128,7 +150,6 @@ export namespace Cellar {
       }
     }
 
-    // No same-color wines or no adjacent space: return first empty cell
     for (let r = 0; r < cfg.rows; r++) {
       for (let c = 0; c < cfg.cols; c++) {
         if (!occupied.has(`${r},${c}`)) {

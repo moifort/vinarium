@@ -99,7 +99,7 @@ struct WineDetailSheet: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(detail.name)
                         .font(.headline)
-                    Text(detail.color.label)
+                    Text(headerSubtitle(detail))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -154,7 +154,7 @@ struct WineDetailSheet: View {
                 if !detail.grapeVarieties.isEmpty {
                     labeledRow(
                         "Cépages",
-                        value: detail.grapeVarieties.joined(separator: ", "),
+                        value: detail.grapeVarieties.joined(separator: " \u{2022} "),
                         icon: "leaf"
                     )
                 }
@@ -242,6 +242,14 @@ struct WineDetailSheet: View {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    private func headerSubtitle(_ detail: UserWineDetail) -> String {
+        [detail.color.label,
+         detail.domain,
+         detail.vintage.map { "\($0)" }]
+            .compactMap { $0 }
+            .joined(separator: " \u{2022} ")
     }
 
     private func loadData() async {

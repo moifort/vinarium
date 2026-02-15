@@ -34,6 +34,11 @@ export default defineEventHandler(async () => {
       region: w.region as string | undefined,
     }))
 
+  // Total cellar value
+  const totalValue = activeWines
+    .filter((w): w is Wine => w !== null)
+    .reduce((sum, w) => sum + ((w.purchasePrice as number | undefined) ?? 0), 0)
+
   // Last entry (most recent dateIn)
   const sortedByDateIn = [...allEntries].sort(
     (a, b) => new Date(b.dateIn).getTime() - new Date(a.dateIn).getTime(),
@@ -70,5 +75,5 @@ export default defineEventHandler(async () => {
     }
   }
 
-  return { status: 200, data: { bottleCount, readyToDrink, lastEntry, lastExit } }
+  return { status: 200, data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit } }
 })

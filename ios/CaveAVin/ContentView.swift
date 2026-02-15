@@ -32,7 +32,7 @@ struct ScanFlowView: View {
             Group {
                 switch viewModel.step {
                 case .camera:
-                    ZStack(alignment: .bottomLeading) {
+                    ZStack(alignment: .bottom) {
                         CameraView { data in
                             viewModel.capturePhoto(data)
                         }
@@ -42,17 +42,16 @@ struct ScanFlowView: View {
                             matching: .images
                         ) {
                             Image(systemName: "photo")
-                                .font(.title2)
-                                .frame(width: 44, height: 44)
+                                .font(.title)
+                                .frame(width: 56, height: 56)
                         }
                         .glassEffect(.regular, in: .circle)
-                        .padding(.leading)
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 30)
                     }
 
                 case .scanning:
-                    ProgressView("Analyse de l'étiquette...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    AnalyzingView()
+                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
                 case .review(let result, let imageData):
                     ScanReviewView(scanResult: result, imageData: imageData) { request in
@@ -70,6 +69,7 @@ struct ScanFlowView: View {
                     }
                 }
             }
+            .animation(.easeInOut(duration: 0.3), value: viewModel.step)
             .navigationTitle("Scanner")
             .onChange(of: selectedPhoto) {
                 guard let item = selectedPhoto else { return }

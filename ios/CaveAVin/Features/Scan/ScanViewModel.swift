@@ -47,3 +47,13 @@ final class ScanViewModel {
         error = nil
     }
 }
+
+extension ScanStep: Equatable {
+    static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
+        switch (lhs, rhs) {
+        case (.camera, .camera), (.scanning, .scanning): return true
+        case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
+        default: return false
+        }
+    }
+}

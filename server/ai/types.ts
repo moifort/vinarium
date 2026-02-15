@@ -15,3 +15,9 @@ export type ScanResult = {
   drinkUntil: number | null
   estimatedPrice: number | null
 }
+
+export type PlacementSuggestion = {
+  row: string
+  col: number
+  reason: string
+}

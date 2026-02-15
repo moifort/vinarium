@@ -59,7 +59,7 @@ final class CameraViewController: UIViewController {
     private func setupUI() {
         let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 60, weight: .light)
+        let config = UIImage.SymbolConfiguration(pointSize: 80, weight: .light)
         button.setImage(UIImage(systemName: "circle.inset.filled", withConfiguration: config), for: .normal)
         button.tintColor = .white
         button.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
