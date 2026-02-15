@@ -102,6 +102,75 @@ export namespace AI {
     return toolUse.input
   }
 
+  const GEMINI_API_URL =
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+
+  export const enrichWithSearch = async (scanResult: ScanResult): Promise<ScanResult> => {
+    const { googleApiKey } = config()
+
+    const wineDescription = [
+      scanResult.name,
+      scanResult.domain,
+      scanResult.vintage ? `millésime ${scanResult.vintage}` : null,
+      scanResult.appellation,
+      scanResult.region,
+      scanResult.country,
+    ]
+      .filter(Boolean)
+      .join(', ')
+
+    const prompt = `Recherche des informations sur ce vin : ${wineDescription}.
+
+Donne-moi les informations suivantes au format JSON strict (sans markdown, juste le JSON) :
+{
+  "estimatedPrice": number ou null (prix moyen actuel en euros),
+  "drinkFrom": number ou null (année à partir de laquelle boire),
+  "drinkUntil": number ou null (année limite pour le boire),
+  "grapeVarieties": string[] (cépages principaux),
+  "region": string ou null (région viticole),
+  "country": string ou null (pays),
+  "classification": string ou null (classification officielle),
+  "appellation": string ou null (appellation)
+}
+
+Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves pas une information, mets null.`
+
+    const response = await $fetch<{
+      candidates: { content: { parts: { text?: string }[] } }[]
+    }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: {
+        contents: [{ parts: [{ text: prompt }] }],
+        tools: [{ google_search: {} }],
+      },
+    })
+
+    const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
+    if (!text) return scanResult
+
+    try {
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) return scanResult
+      const enriched = JSON.parse(jsonMatch[0])
+
+      return {
+        ...scanResult,
+        estimatedPrice: enriched.estimatedPrice ?? scanResult.estimatedPrice,
+        drinkFrom: enriched.drinkFrom ?? scanResult.drinkFrom,
+        drinkUntil: enriched.drinkUntil ?? scanResult.drinkUntil,
+        grapeVarieties:
+          enriched.grapeVarieties?.length > 0 ? enriched.grapeVarieties : scanResult.grapeVarieties,
+        region: enriched.region ?? scanResult.region,
+        country: enriched.country ?? scanResult.country,
+        classification: enriched.classification ?? scanResult.classification,
+        appellation: enriched.appellation ?? scanResult.appellation,
+      }
+    } catch {
+      return scanResult
+    }
+  }
+
   export const getAdvice = async (wines: Wine[], occasion?: string) => {
     const { anthropicApiKey } = config()
 
