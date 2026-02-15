@@ -6,6 +6,23 @@ final class CellarGridViewModel {
     var isLoading = false
     var error: String?
 
+    var groupedRows: [CellarRowGroup] {
+        grid.enumerated().compactMap { rowIdx, cells in
+            let rowLetter = String(UnicodeScalar(65 + rowIdx)!)
+            let occupiedCells = cells.enumerated().compactMap { colIdx, cell -> CellarRowItem? in
+                guard let wine = cell.wine else { return nil }
+                return CellarRowItem(
+                    position: "\(rowLetter)\(colIdx + 1)",
+                    wine: wine,
+                    rowIndex: rowIdx,
+                    colIndex: colIdx
+                )
+            }
+            guard !occupiedCells.isEmpty else { return nil }
+            return CellarRowGroup(row: rowLetter, items: occupiedCells)
+        }
+    }
+
     func load() async {
         isLoading = true
         error = nil

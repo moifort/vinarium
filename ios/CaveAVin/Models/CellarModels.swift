@@ -29,3 +29,17 @@ struct CellarSuggestion: Codable, Sendable {
     let row: String
     let col: Int
 }
+
+struct CellarRowGroup: Identifiable, Sendable {
+    let row: String
+    let items: [CellarRowItem]
+    var id: String { row }
+}
+
+struct CellarRowItem: Identifiable, Sendable {
+    let position: String
+    let wine: Wine
+    let rowIndex: Int
+    let colIndex: Int
+    var id: String { wine.id }
+}
