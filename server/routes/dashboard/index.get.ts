@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash-es'
 import { CellarQuery } from '~/cellar/query'
-import { CellarHistory } from '~/cellar-history/index'
+import { CellarLogQuery } from '~/cellar-log/query'
 import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
 
@@ -56,8 +56,8 @@ export default defineEventHandler(async () => {
     }
   }
 
-  const history = await CellarHistory.list()
-  const lastExit = history.find((event) => event.type === 'exit')
+  const history = await CellarLogQuery.list()
+  const lastExit = history.find((event) => event.type === 'out')
 
   const recentHistory = history.slice(0, 10).map((event) => ({
     type: event.type,

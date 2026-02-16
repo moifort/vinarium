@@ -1,6 +1,6 @@
-import { CellarHistory } from '~/cellar-history/index'
+import { CellarLogQuery } from '~/cellar-log/query'
 
 export default defineEventHandler(async () => {
-  const history = await CellarHistory.list()
+  const history = await CellarLogQuery.list()
   return { status: 200, data: history }
 })
