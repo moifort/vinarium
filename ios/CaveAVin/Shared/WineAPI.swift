@@ -31,6 +31,11 @@ enum WineAPI {
         return response.data
     }
 
+    static func getDetail(id: String) async throws -> UserWineDetail {
+        let response: APIResponse<UserWineDetail> = try await APIClient.shared.get("/wines/\(id)")
+        return response.data
+    }
+
     static func delete(id: String) async throws {
         try await APIClient.shared.delete("/wines/\(id)")
     }

@@ -4,8 +4,8 @@ struct DashboardData: Codable, Sendable {
     let bottleCount: Int
     let totalValue: Double
     let readyToDrink: [DashboardWine]
-    let lastEntry: DashboardEntry?
-    let lastExit: DashboardEntry?
+    let lastBottle: DashboardEntry?
+    let lastExit: DashboardHistoryEvent?
     let history: [DashboardHistoryEvent]
 }
 
@@ -42,5 +42,5 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
 
-    var isEntry: Bool { type == "entry" }
+    var isEntry: Bool { type == "in" }
 }

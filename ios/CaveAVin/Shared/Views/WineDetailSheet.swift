@@ -255,7 +255,7 @@ struct WineDetailSheet: View {
 
     private func loadData() async {
         do {
-            detail = try await UserWineAPI.get(id: wineId)
+            detail = try await WineAPI.getDetail(id: wineId)
             isLoading = false
         } catch {
             self.error = error.localizedDescription

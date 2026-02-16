@@ -27,11 +27,22 @@ struct CellarInfo: Codable, Sendable {
     let row: String
     let col: Int
     let dateIn: Date
+
+    enum CodingKeys: String, CodingKey {
+        case row = "rowLabel"
+        case col = "colLabel"
+        case dateIn = "createdAt"
+    }
 }
 
 struct ConsumptionInfo: Codable, Sendable {
     let dateOut: Date
-    let consumedDate: Date?
     let rating: Int?
     let tastingNotes: String?
+
+    enum CodingKeys: String, CodingKey {
+        case dateOut = "consumedDate"
+        case rating
+        case tastingNotes
+    }
 }
