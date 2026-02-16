@@ -1,4 +1,4 @@
-import { range, sortBy } from 'lodash-es'
+import { range } from 'lodash-es'
 import {
   CellarCols,
   CellarRows,
@@ -93,11 +93,9 @@ export namespace Cellar {
     const occupied = activeEntries.map(
       (entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`,
     )
-
     const firstFree = range(config.rows)
       .flatMap((row) => range(config.cols).map((col) => ({ row, col })))
       .find(({ row, col }) => !occupied.includes(`${row},${col}`))
-
     if (!firstFree) return 'cellar-full' as const
     return { row: indexToRow(firstFree.row), col: indexToCol(firstFree.col) }
   }
@@ -105,7 +103,6 @@ export namespace Cellar {
   export const getGrid = async () => {
     const config = await getConfig()
     const activeEntries = await getActiveEntries()
-
     const grid: { position: string; wine?: Wine }[][] = Array.from(
       { length: config.rows },
       (_, rowIdx) =>
@@ -113,7 +110,6 @@ export namespace Cellar {
           position: `${indexToRow(rowIdx)}${indexToCol(colIdx)}`,
         })),
     )
-
     await Promise.all(
       activeEntries
         .filter(
@@ -126,45 +122,6 @@ export namespace Cellar {
           }
         }),
     )
-
     return grid
-  }
-
-  export const getHistory = async () => {
-    const allEntries = await getAllEntries()
-
-    const events = await Promise.all(
-      allEntries.flatMap(async (entry) => {
-        const wine = await Wines.getById(entry.wineId)
-        const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
-        const wineColor = wine !== 'not-found' ? wine.color : 'red'
-        const position = `${entry.row}${entry.col}`
-
-        const base = {
-          wineId: entry.wineId as string,
-          wineName,
-          wineColor,
-          position,
-          rating: undefined as number | undefined,
-          tastingNotes: undefined as string | undefined,
-        }
-        const entryEvent = { ...base, type: 'entry' as const, date: entry.dateIn }
-
-        if (!entry.dateOut) return [entryEvent]
-
-        return [
-          entryEvent,
-          {
-            ...base,
-            type: 'exit' as const,
-            date: entry.dateOut,
-            rating: entry.rating as number | undefined,
-            tastingNotes: entry.tastingNotes,
-          },
-        ]
-      }),
-    )
-
-    return sortBy(events.flat(), (event) => -new Date(event.date).getTime())
   }
 }

@@ -1,3 +1,4 @@
+import { CellarHistory } from '~/cellar-history/index'
 import { Cellar } from '~/cellar/index'
 import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
@@ -76,7 +77,7 @@ export default defineEventHandler(async () => {
   }
 
   // Recent history (last 10 events)
-  const history = await Cellar.getHistory()
+  const history = await CellarHistory.list()
   const recentHistory = history.slice(0, 10).map((event) => ({
     type: event.type,
     date: event.date,
