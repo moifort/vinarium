@@ -25,7 +25,7 @@ export namespace Wines {
   }
 
   export const getById = async (id: WineId) => {
-    const wine = await repository.getById(id)
+    const wine = await repository.findBy(id)
     if (!wine) return 'not-found' as const
     return wine
   }
@@ -37,7 +37,7 @@ export namespace Wines {
     status?: WineStatus
     minRating?: number
   }) => {
-    let wines = await repository.getAll()
+    let wines = await repository.findAll()
 
     if (options?.color) {
       wines = wines.filter((wine) => wine.color === options.color)
@@ -54,7 +54,7 @@ export namespace Wines {
     }
 
     if (options?.minRating) {
-      const logs = await userLogRepository.getAll()
+      const logs = await userLogRepository.findAll()
       const bestRating = (wineId: string) =>
         maxBy(
           logs.filter((log) => log.wineId === wineId && log.rating != null),
@@ -66,11 +66,16 @@ export namespace Wines {
     if (options?.sort) {
       const sortKey = (wine: Wine) => {
         switch (options.sort) {
-          case 'vintage': return wine.vintage ?? 0
-          case 'region': return wine.region ?? ''
-          case 'color': return wine.color
-          case 'price': return wine.purchasePrice ?? 0
-          default: return 0
+          case 'vintage':
+            return wine.vintage ?? 0
+          case 'region':
+            return wine.region ?? ''
+          case 'color':
+            return wine.color
+          case 'price':
+            return wine.purchasePrice ?? 0
+          default:
+            return 0
         }
       }
       wines = orderBy(wines, sortKey, options.order === 'desc' ? 'desc' : 'asc')

@@ -8,5 +8,5 @@ export namespace UserLog {
     return entry
   }
 
-  export const getByWineId = (wineId: WineId) => repository.getByWineId(wineId)
+  export const getByWineId = (wineId: WineId) => repository.findBy(wineId)
 }

@@ -12,11 +12,11 @@ export namespace CellarHistory {
     return entry
   }
 
-  export const getByWineId = (wineId: WineId) => repository.getByWineId(wineId)
+  export const getByWineId = (wineId: WineId) => repository.findBy(wineId)
 
   export const list = async () => {
     const activeEntries = await Cellar.getAllEntries()
-    const historyEntries = await repository.getAll()
+    const historyEntries = await repository.findAll()
 
     const events = await Promise.all([
       ...activeEntries.map(async (entry) => {
