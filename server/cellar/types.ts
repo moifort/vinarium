@@ -6,12 +6,6 @@ export type CellarCols = Brand<number, 'CellarCols'>
 export type CellarRow = Brand<string, 'CellarRow'>
 export type CellarCol = Brand<number, 'CellarCol'>
 
-export type CellarConfig = {
-  rows: CellarRows
-  cols: CellarCols
-  name: string
-}
-
 export type CellarEntry = {
   wineId: WineId
   row: CellarRow

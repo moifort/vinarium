@@ -7,37 +7,15 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type { CellarCol, CellarConfig, CellarEntry, CellarRow } from '~/cellar/types'
+import type { CellarCol, CellarEntry, CellarRow } from '~/cellar/types'
 import { CellarHistory } from '~/cellar-history/index'
 import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
 
-const DEFAULT_CONFIG: CellarConfig = {
-  rows: CellarRows(6),
-  cols: CellarCols(8),
-  name: 'DE DIETRICH DUW46DFB',
-}
+const ROWS = CellarRows(6)
+const COLS = CellarCols(8)
 
 export namespace Cellar {
-  export const getConfig = async () => {
-    const storage = useStorage('cellar')
-    const config = await storage.getItem<CellarConfig>('config')
-    if (!config) return DEFAULT_CONFIG
-    return config
-  }
-
-  export const updateConfig = async (data: { rows?: number; cols?: number; name?: string }) => {
-    const storage = useStorage('cellar')
-    const current = await getConfig()
-    const updated: CellarConfig = {
-      rows: data.rows != null ? CellarRows(data.rows) : current.rows,
-      cols: data.cols != null ? CellarCols(data.cols) : current.cols,
-      name: data.name ?? current.name,
-    }
-    await storage.setItem<CellarConfig>('config', updated)
-    return updated
-  }
-
   export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
@@ -82,32 +60,30 @@ export namespace Cellar {
   export const suggestPosition = async (wineId: WineId) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
-    const config = await getConfig()
     const allEntries = await getAllEntries()
     const occupied = allEntries.map(
       (entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`,
     )
-    const firstFree = range(config.rows)
-      .flatMap((row) => range(config.cols).map((col) => ({ row, col })))
+    const firstFree = range(ROWS)
+      .flatMap((row) => range(COLS).map((col) => ({ row, col })))
       .find(({ row, col }) => !occupied.includes(`${row},${col}`))
     if (!firstFree) return 'cellar-full' as const
     return { row: indexToRow(firstFree.row), col: indexToCol(firstFree.col) }
   }
 
   export const getGrid = async () => {
-    const config = await getConfig()
     const allEntries = await getAllEntries()
     const grid: { position: string; wine?: Wine }[][] = Array.from(
-      { length: config.rows },
+      { length: ROWS },
       (_, rowIdx) =>
-        Array.from({ length: config.cols }, (_, colIdx) => ({
+        Array.from({ length: COLS }, (_, colIdx) => ({
           position: `${indexToRow(rowIdx)}${indexToCol(colIdx)}`,
         })),
     )
     await Promise.all(
       allEntries
         .filter(
-          (entry) => rowToIndex(entry.row) < config.rows && colToIndex(entry.col) < config.cols,
+          (entry) => rowToIndex(entry.row) < ROWS && colToIndex(entry.col) < COLS,
         )
         .map(async (entry) => {
           const wine = await Wines.getById(entry.wineId)
