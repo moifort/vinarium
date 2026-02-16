@@ -9,7 +9,7 @@ export namespace UserWine {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'not-found'
 
-    const entry = await CellarQuery.getEntryByWineId(wineId)
+    const bottle = await CellarQuery.getBottleByWineId(wineId)
     const history = await CellarLogQuery.getByWineId(wineId)
     const userLog = await UserLog.getByWineId(wineId)
 
@@ -33,13 +33,13 @@ export namespace UserWine {
       drinkUntil: wine.drinkUntil as number | undefined,
       notes: wine.notes,
       cellar:
-        entry !== 'not-found'
+        bottle !== 'not-found'
           ? {
-              row: entry.row as number,
-              col: entry.col as number,
-              rowLabel: entry.rowLabel as string,
-              colLabel: entry.colLabel as number,
-              createdAt: entry.createdAt,
+              row: bottle.row as number,
+              col: bottle.col as number,
+              rowLabel: bottle.rowLabel as string,
+              colLabel: bottle.colLabel as number,
+              createdAt: bottle.createdAt,
             }
           : undefined,
       history,

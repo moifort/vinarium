@@ -1,33 +1,47 @@
+import { range } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/cellar/primitives'
 import * as repository from '~/cellar/repository'
-import type { CellarEntry, CellarEntryView } from '~/cellar/types'
-import { CellarGrid } from '~/cellar-grid/index'
+import type { CellarBottle, CellarBottleView } from '~/cellar/types'
 import type { WineId } from '~/wine/types'
 
-const toView = (entry: CellarEntry): CellarEntryView => ({
-  ...entry,
-  rowLabel: CellarRow.toLabel(entry.row),
-  colLabel: CellarCol.toLabel(entry.col),
-})
+const CELLAR_SIZE = { rows: 6, cols: 8 }
 
 export namespace CellarQuery {
-  export const getAllEntries = async () => {
-    const entries = await repository.findAll()
-    return entries.map(toView)
+  export const getAllBottles = async () => {
+    const bottles = await repository.findAll()
+    return bottles.map(toView)
   }
 
-  export const getEntryByWineId = async (wineId: WineId) => {
-    const entry = await repository.findBy(wineId)
-    return entry ? toView(entry) : null
+  export const getBottleByWineId = async (wineId: WineId) => {
+    const bottle = await repository.findBy(wineId)
+    if (!bottle) return 'not-found' as const
+    return toView(bottle)
   }
 
-  export const suggestPosition = async (wineId: WineId) => {
-    const allEntries = await repository.findAll()
-    return CellarGrid.suggest(wineId, allEntries)
+  export const suggestPosition = async () => {
+    const allBottles = await repository.findAll()
+    const result = suggest(allBottles)
+    if (typeof result === 'string') return result
+    return {
+      row: result.row,
+      col: result.col,
+      rowLabel: CellarRow.toLabel(result.row),
+      colLabel: CellarCol.toLabel(result.col),
+    }
   }
 
-  export const getGrid = async () => {
-    const allEntries = await repository.findAll()
-    return CellarGrid.get(allEntries)
+  const suggest = (bottles: CellarBottle[]) => {
+    const occupied = bottles.map((bottle) => `${bottle.row},${bottle.col}`)
+    const firstFree = range(CELLAR_SIZE.rows)
+      .flatMap((row) => range(CELLAR_SIZE.cols).map((col) => ({ row, col })))
+      .find(({ row, col }) => !occupied.includes(`${row},${col}`))
+    if (!firstFree) return 'cellar-full' as const
+    return { row: CellarRow(firstFree.row), col: CellarCol(firstFree.col) }
   }
+
+  const toView = (bottle: CellarBottle): CellarBottleView => ({
+    ...bottle,
+    rowLabel: CellarRow.toLabel(bottle.row),
+    colLabel: CellarCol.toLabel(bottle.col),
+  })
 }

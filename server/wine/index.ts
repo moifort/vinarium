@@ -44,8 +44,8 @@ export namespace Wines {
     }
 
     if (options?.status && options.status !== 'all') {
-      const activeEntries = await CellarQuery.getAllEntries()
-      const inCellarIds = activeEntries.map((entry) => entry.wineId)
+      const bottles = await CellarQuery.getAllBottles()
+      const inCellarIds = bottles.map((bottle) => bottle.wineId)
       if (options.status === 'in-cellar') {
         wines = wines.filter((wine) => inCellarIds.includes(wine.id))
       } else if (options.status === 'consumed') {

@@ -5,14 +5,14 @@ import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
 
 export default defineEventHandler(async () => {
-  const allEntries = await CellarQuery.getAllEntries()
+  const allBottles = await CellarQuery.getAllBottles()
   const currentYear = new Date().getFullYear()
 
-  const bottleCount = allEntries.length
+  const bottleCount = allBottles.length
 
   const activeWines = await Promise.all(
-    allEntries.map(async (entry) => {
-      const wine = await Wines.getById(entry.wineId)
+    allBottles.map(async (bottle) => {
+      const wine = await Wines.getById(bottle.wineId)
       return wine !== 'not-found' ? wine : null
     }),
   )
@@ -37,21 +37,21 @@ export default defineEventHandler(async () => {
     .filter((wine): wine is Wine => wine !== null)
     .reduce((sum, wine) => sum + ((wine.purchasePrice as number | undefined) ?? 0), 0)
 
-  const sortedByCreatedAt = sortBy(allEntries, (entry) => -new Date(entry.createdAt).getTime())
-  let lastEntry
+  const sortedByCreatedAt = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
+  let lastBottle
   if (sortedByCreatedAt.length > 0) {
-    const entry = sortedByCreatedAt[0]
-    const wine = await Wines.getById(entry.wineId)
+    const bottle = sortedByCreatedAt[0]
+    const wine = await Wines.getById(bottle.wineId)
     if (wine !== 'not-found') {
-      lastEntry = {
+      lastBottle = {
         wine: {
           id: wine.id as string,
           name: wine.name as string,
           color: wine.color,
           vintage: wine.vintage as number | undefined,
         },
-        position: `${entry.rowLabel}${entry.colLabel}`,
-        date: entry.createdAt,
+        position: `${bottle.rowLabel}${bottle.colLabel}`,
+        date: bottle.createdAt,
       }
     }
   }
@@ -70,6 +70,6 @@ export default defineEventHandler(async () => {
 
   return {
     status: 200,
-    data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit, history: recentHistory },
+    data: { bottleCount, totalValue, readyToDrink, lastBottle, lastExit, history: recentHistory },
   }
 })

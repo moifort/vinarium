@@ -8,7 +8,7 @@ export type CellarCol = Brand<number, 'CellarCol'>
 export type CellarRowLabel = Brand<string, 'CellarRowLabel'>
 export type CellarColLabel = Brand<number, 'CellarColLabel'>
 
-export type CellarEntry = {
+export type CellarBottle = {
   wineId: WineId
   row: CellarRow
   col: CellarCol
@@ -16,7 +16,7 @@ export type CellarEntry = {
   updatedAt: Date
 }
 
-export type CellarEntryView = CellarEntry & {
+export type CellarBottleView = CellarBottle & {
   rowLabel: CellarRowLabel
   colLabel: CellarColLabel
 }
