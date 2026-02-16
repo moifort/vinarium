@@ -46,7 +46,7 @@ export namespace Cellar {
   export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
-    return Promise.all(keys.map((key) => storage.getItem<CellarEntry>(key) as Promise<CellarEntry>))
+    return Promise.all(keys.map(async (key) => (await storage.getItem<CellarEntry>(key))!))
   }
 
   export const getActiveEntries = async () => {
