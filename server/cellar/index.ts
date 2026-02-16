@@ -63,7 +63,7 @@ export namespace Cellar {
     const activeEntries = await getActiveEntries()
     if (activeEntries.some((e) => e.row === row && e.col === col)) return 'position-taken' as const
 
-    const entry: CellarEntry = { wineId, row, col, dateIn: new Date(), dateOut: null }
+    const entry: CellarEntry = { wineId, row, col, dateIn: new Date() }
     await useStorage('cellar').setItem<CellarEntry>(`entries:${wineId}`, entry)
     return entry
   }
@@ -109,12 +109,11 @@ export namespace Cellar {
     const cfg = await getConfig()
     const activeEntries = await getActiveEntries()
 
-    const grid: { position: string; wine: Wine | null }[][] = Array.from(
+    const grid: { position: string; wine?: Wine }[][] = Array.from(
       { length: cfg.rows },
       (_, rowIdx) =>
         Array.from({ length: cfg.cols }, (_, colIdx) => ({
           position: `${indexToRow(rowIdx)}${indexToCol(colIdx)}`,
-          wine: null,
         })),
     )
 

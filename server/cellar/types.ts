@@ -18,7 +18,7 @@ export type CellarEntry = {
   row: CellarRow
   col: CellarCol
   dateIn: Date
-  dateOut: Date | null
+  dateOut?: Date
   consumedDate?: Date
   rating?: Rating
   tastingNotes?: string

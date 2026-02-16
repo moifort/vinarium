@@ -2,17 +2,17 @@ import type { WineColor } from '~/wine/types'
 
 export type ScanResult = {
   name: string
-  domain: string | null
-  vintage: number | null
-  appellation: string | null
-  region: string | null
-  country: string | null
   color: WineColor
-  grapeVarieties: string[]
-  alcoholContent: number | null
-  classification: string | null
-  drinkFrom: number | null
-  drinkUntil: number | null
-  estimatedPrice: number | null
+  domain?: string
+  vintage?: number
+  appellation?: string
+  region?: string
+  country?: string
+  grapeVarieties?: string[]
+  alcoholContent?: number
+  classification?: string
+  drinkFrom?: number
+  drinkUntil?: number
+  estimatedPrice?: number
 }
 

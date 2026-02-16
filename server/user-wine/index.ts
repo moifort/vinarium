@@ -8,8 +8,8 @@ export namespace UserWine {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'not-found'
     const entry = await Cellar.getEntryByWineId(wineId)
-    let cellar: UserWineDetail['cellar'] = null
-    let consumption: UserWineDetail['consumption'] = null
+    let cellar: UserWineDetail['cellar']
+    let consumption: UserWineDetail['consumption']
 
     if (entry && !entry.dateOut) {
       cellar = {
@@ -20,9 +20,9 @@ export namespace UserWine {
     } else if (entry?.dateOut) {
       consumption = {
         dateOut: entry.dateOut,
-        consumedDate: entry.consumedDate ?? null,
-        rating: entry.rating != null ? (entry.rating as number) : null,
-        tastingNotes: entry.tastingNotes ?? null,
+        consumedDate: entry.consumedDate,
+        rating: entry.rating as number | undefined,
+        tastingNotes: entry.tastingNotes,
       }
     }
 
@@ -30,21 +30,21 @@ export namespace UserWine {
       id: wine.id as string,
       name: wine.name as string,
       color: wine.color,
-      domain: wine.domain ?? null,
-      vintage: wine.vintage != null ? (wine.vintage as number) : null,
-      appellation: wine.appellation ?? null,
-      region: wine.region != null ? (wine.region as string) : null,
-      country: wine.country != null ? (wine.country as string) : null,
       grapeVarieties: wine.grapeVarieties ?? [],
-      alcoholContent: wine.alcoholContent != null ? (wine.alcoholContent as number) : null,
-      classification: wine.classification ?? null,
-      purchasePrice: wine.purchasePrice != null ? (wine.purchasePrice as number) : null,
-      purchaseDate: wine.purchaseDate ?? null,
-      drinkFrom: wine.drinkFrom != null ? (wine.drinkFrom as number) : null,
-      drinkUntil: wine.drinkUntil != null ? (wine.drinkUntil as number) : null,
-      notes: wine.notes ?? null,
       createdAt: wine.createdAt,
       updatedAt: wine.updatedAt,
+      domain: wine.domain,
+      vintage: wine.vintage as number | undefined,
+      appellation: wine.appellation,
+      region: wine.region as string | undefined,
+      country: wine.country as string | undefined,
+      alcoholContent: wine.alcoholContent as number | undefined,
+      classification: wine.classification,
+      purchasePrice: wine.purchasePrice as number | undefined,
+      purchaseDate: wine.purchaseDate,
+      drinkFrom: wine.drinkFrom as number | undefined,
+      drinkUntil: wine.drinkUntil as number | undefined,
+      notes: wine.notes,
       cellar,
       consumption,
     }
