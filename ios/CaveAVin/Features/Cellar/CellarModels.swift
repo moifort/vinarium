@@ -22,8 +22,8 @@ struct CellarSuggestion: Codable, Sendable {
 }
 
 enum HistoryEventType: String, Codable, Sendable {
-    case entry
-    case exit
+    case entry = "in"
+    case exit = "out"
 }
 
 struct HistoryEvent: Codable, Identifiable, Sendable {
@@ -33,8 +33,6 @@ struct HistoryEvent: Codable, Identifiable, Sendable {
     let wineName: String
     let wineColor: WineColor
     let position: String
-    let rating: Int?
-    let tastingNotes: String?
 
     var id: String { "\(wineId)-\(type.rawValue)-\(date.timeIntervalSince1970)" }
 }

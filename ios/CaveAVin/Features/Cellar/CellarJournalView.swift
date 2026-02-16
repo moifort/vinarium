@@ -61,16 +61,6 @@ struct CellarJournalView: View {
             }
 
             Spacer()
-
-            if let rating = event.rating {
-                HStack(spacing: 1) {
-                    ForEach(1...5, id: \.self) { star in
-                        Image(systemName: star <= rating ? "star.fill" : "star")
-                            .foregroundStyle(star <= rating ? .yellow : .gray)
-                            .font(.caption2)
-                    }
-                }
-            }
         }
         .padding(.vertical, 2)
     }
