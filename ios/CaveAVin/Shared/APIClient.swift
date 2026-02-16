@@ -3,7 +3,7 @@ import Foundation
 final class APIClient: Sendable {
     static let shared = APIClient()
 
-    private static let defaultURL = "https://cave.mottet.me"
+    private static let defaultURL = "http://192.168.0.160:3000"
     private static let apiToken = "801B91EB-9D7E-4AAA-B944-DB7E500BD3A7"
 
     var baseURL: URL {
@@ -19,7 +19,15 @@ final class APIClient: Sendable {
     private let session = URLSession.shared
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
-        d.dateDecodingStrategy = .iso8601
+        let withFraction = ISO8601DateFormatter()
+        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let withoutFraction = ISO8601DateFormatter()
+        withoutFraction.formatOptions = [.withInternetDateTime]
+        d.dateDecodingStrategy = .custom { decoder in
+            let s = try decoder.singleValueContainer().decode(String.self)
+            if let date = withFraction.date(from: s) ?? withoutFraction.date(from: s) { return date }
+            throw DecodingError.dataCorrupted(.init(codingPath: decoder.codingPath, debugDescription: "Invalid date: \(s)"))
+        }
         return d
     }()
     private let encoder = JSONEncoder()
