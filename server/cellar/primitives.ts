@@ -1,8 +1,10 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
 import type {
+  CellarColLabel as CellarColLabelType,
   CellarCols as CellarColsType,
   CellarCol as CellarColType,
+  CellarRowLabel as CellarRowLabelType,
   CellarRows as CellarRowsType,
   CellarRow as CellarRowType,
 } from '~/cellar/types'
@@ -23,25 +25,22 @@ export const CellarCols = (value: unknown) => {
 
 const cellarRow = (value: unknown) => {
   const v = z
-    .string()
-    .regex(/^[A-Z]$/)
+    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().int().min(0))
     .parse(value)
   return make<CellarRowType>()(v)
 }
 
 export const CellarRow = Object.assign(cellarRow, {
-  fromIndex: (index: number) => cellarRow(String.fromCharCode(65 + index)),
-  toIndex: (row: CellarRowType) => row.charCodeAt(0) - 65,
+  toLabel: (row: CellarRowType) => make<CellarRowLabelType>()(String.fromCharCode(65 + row)),
 })
 
 const cellarCol = (value: unknown) => {
   const v = z
-    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().int().min(1).max(100))
+    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().int().min(0))
     .parse(value)
   return make<CellarColType>()(v)
 }
 
 export const CellarCol = Object.assign(cellarCol, {
-  fromIndex: (index: number) => cellarCol(index + 1),
-  toIndex: (col: CellarColType) => col - 1,
+  toLabel: (col: CellarColType) => make<CellarColLabelType>()(col + 1),
 })

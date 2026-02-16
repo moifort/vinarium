@@ -1,4 +1,5 @@
 import { sortBy } from 'lodash-es'
+import { CellarCol, CellarRow } from '~/cellar/primitives'
 import { CellarQuery } from '~/cellar/query'
 import * as repository from '~/cellar-history/repository'
 import type { CellarHistoryEntry, CellarHistoryEvent } from '~/cellar-history/types'
@@ -37,7 +38,7 @@ export namespace CellarHistory {
         const wine = await Wines.getById(entry.wineId)
         const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
         const wineColor = wine !== 'not-found' ? wine.color : 'red'
-        const position = `${entry.rowLabel}${entry.colLabel}`
+        const position = `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`
         const userLog = await UserLog.getByWineId(entry.wineId)
 
         const entryEvent: CellarHistoryEvent = {
@@ -48,6 +49,7 @@ export namespace CellarHistory {
           wineColor,
           position,
         }
+        if (!entry.dateOut) return [entryEvent]
         const exitEvent: CellarHistoryEvent = {
           type: 'exit',
           date: entry.dateOut,

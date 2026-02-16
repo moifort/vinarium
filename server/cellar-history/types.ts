@@ -6,7 +6,7 @@ export type CellarHistoryEntry = {
   row: CellarRow
   col: CellarCol
   dateIn: Date
-  dateOut: Date
+  dateOut?: Date
 }
 
 export type CellarHistoryEvent = {

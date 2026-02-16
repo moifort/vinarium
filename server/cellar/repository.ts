@@ -12,7 +12,10 @@ export const findBy = (wineId: WineId) =>
   useStorage('cellar').getItem<CellarEntry>(`entries:${wineId}`)
 
 export const save = async (entry: CellarEntry) => {
+  const existing = await findBy(entry.wineId)
+  if (existing) throw new Error(`Cellar entry already exists for wineId: ${entry.wineId}`)
   await useStorage('cellar').setItem<CellarEntry>(`entries:${entry.wineId}`, entry)
+  return entry
 }
 
 export const remove = async (wineId: WineId) => {
