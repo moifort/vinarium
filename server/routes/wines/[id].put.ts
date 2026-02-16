@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { Country, Eur, Region, Year } from '~/primitives'
+import { Country, Eur, Region, Year } from '~/shared/primitives'
 import { WineCommand } from '~/wine/command'
 import { Appellation, Classification, WineDomain, WineId, WineName } from '~/wine/primitives'
 import type { Wine } from '~/wine/types'

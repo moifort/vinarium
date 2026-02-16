@@ -1,5 +1,5 @@
 import type { CellarLogEventView } from '~/cellar-log/types'
-import type { Region, Year } from '~/types'
+import type { Region, Year } from '~/shared/types'
 import type { Appellation, WineColor, WineDomain, WineId, WineName } from '~/wine/types'
 
 export type DashboardView = {

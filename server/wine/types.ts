@@ -1,8 +1,8 @@
 import type { Brand } from 'ts-brand'
 import type { CellarCol, CellarColLabel, CellarRow, CellarRowLabel } from '~/cellar/types'
 import type { CellarLogEventView } from '~/cellar-log/types'
+import type { Country, Eur, Region, Year } from '~/shared/types'
 import type { Rating } from '~/tasting/types'
-import type { Country, Eur, Region, Year } from '~/types'
 
 export type WineId = Brand<string, 'WineId'>
 export type WineName = Brand<string, 'WineName'>

@@ -7,8 +7,7 @@ import type {
   Month as MonthType,
   Region as RegionType,
   Year as YearType,
-} from '~/types'
-
+} from '~/shared/types'
 export const Eur = (value: unknown) => {
   const v = z
     .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().nonnegative())
