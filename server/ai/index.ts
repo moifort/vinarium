@@ -176,8 +176,8 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
 
     const winesSummary = wines
       .map(
-        (w) =>
-          `- ${w.name}${w.vintage ? ` ${w.vintage}` : ''} (${w.color})${w.appellation ? `, ${w.appellation}` : ''}${w.drinkFrom || w.drinkUntil ? ` [boire ${w.drinkFrom ?? '?'}-${w.drinkUntil ?? '?'}]` : ''}`,
+        (wine) =>
+          `- ${wine.name}${wine.vintage ? ` ${wine.vintage}` : ''} (${wine.color})${wine.appellation ? `, ${wine.appellation}` : ''}${wine.drinkFrom || wine.drinkUntil ? ` [boire ${wine.drinkFrom ?? '?'}-${wine.drinkUntil ?? '?'}]` : ''}`,
       )
       .join('\n')
 

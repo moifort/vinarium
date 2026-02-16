@@ -1,3 +1,4 @@
+import { maxBy, orderBy } from 'lodash-es'
 import { Cellar } from '~/cellar/index'
 import { randomWineId } from '~/wine/primitives'
 import type { Wine, WineColor, WineId, WineName } from '~/wine/types'
@@ -38,59 +39,47 @@ export namespace Wines {
   }) => {
     const storage = useStorage('wines')
     const keys = await storage.getKeys()
-    const all = await Promise.all(keys.map((key) => storage.getItem<Wine>(key)))
-    let wines = all.filter((wine): wine is Wine => wine !== null)
+    // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
+    let wines = await Promise.all(keys.map(async (key) => (await storage.getItem<Wine>(key))!))
 
-    // Color filter
     if (options?.color) {
-      wines = wines.filter((w) => w.color === options.color)
+      wines = wines.filter((wine) => wine.color === options.color)
     }
 
-    // Status filter
     if (options?.status && options.status !== 'all') {
       const activeEntries = await Cellar.getActiveEntries()
-      const inCellarIds = new Set(activeEntries.map((e) => e.wineId))
+      const inCellarIds = activeEntries.map((entry) => entry.wineId)
       if (options.status === 'in-cellar') {
-        wines = wines.filter((w) => inCellarIds.has(w.id))
+        wines = wines.filter((wine) => inCellarIds.includes(wine.id))
       } else if (options.status === 'consumed') {
-        wines = wines.filter((w) => !inCellarIds.has(w.id))
+        wines = wines.filter((wine) => !inCellarIds.includes(wine.id))
       }
     }
 
-    // Rating filter (rating lives on CellarEntry, cross-reference)
     if (options?.minRating) {
       const cellarStorage = useStorage('cellar')
       const entryKeys = await cellarStorage.getKeys('entries')
-      const entries = await Promise.all(entryKeys.map((key) => cellarStorage.getItem<import('~/cellar/types').CellarEntry>(key)))
-      const ratingByWineId = new Map<string, number>()
-      for (const entry of entries) {
-        if (entry?.rating != null) {
-          const existing = ratingByWineId.get(entry.wineId)
-          if (existing == null || entry.rating > existing) {
-            ratingByWineId.set(entry.wineId, entry.rating)
-          }
-        }
-      }
-      wines = wines.filter((w) => (ratingByWineId.get(w.id) ?? 0) >= options.minRating!)
+      // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
+      const entries = await Promise.all(entryKeys.map(async (key) => (await cellarStorage.getItem<import('~/cellar/types').CellarEntry>(key))!))
+      const bestRating = (wineId: string) =>
+        maxBy(
+          entries.filter((entry) => entry.wineId === wineId && entry.rating != null),
+          (entry) => entry.rating,
+        )?.rating ?? 0
+      wines = wines.filter((wine) => bestRating(wine.id) >= options.minRating!)
     }
 
-    // Sort
     if (options?.sort) {
-      const dir = options.order === 'desc' ? -1 : 1
-      wines.sort((a, b) => {
+      const sortKey = (wine: Wine) => {
         switch (options.sort) {
-          case 'vintage':
-            return ((a.vintage ?? 0) - (b.vintage ?? 0)) * dir
-          case 'region':
-            return (a.region ?? '').localeCompare(b.region ?? '') * dir
-          case 'color':
-            return a.color.localeCompare(b.color) * dir
-          case 'price':
-            return ((a.purchasePrice ?? 0) - (b.purchasePrice ?? 0)) * dir
-          default:
-            return 0
+          case 'vintage': return wine.vintage ?? 0
+          case 'region': return wine.region ?? ''
+          case 'color': return wine.color
+          case 'price': return wine.purchasePrice ?? 0
+          default: return 0
         }
-      })
+      }
+      wines = orderBy(wines, sortKey, options.order === 'desc' ? 'desc' : 'asc')
     }
 
     return wines

@@ -18,26 +18,26 @@ export default defineEventHandler(async () => {
     }),
   )
   const readyToDrink = activeWines
-    .filter((w): w is Wine => {
-      if (!w) return false
-      const from = w.drinkFrom as number | undefined
-      const until = w.drinkUntil as number | undefined
+    .filter((wine): wine is Wine => {
+      if (!wine) return false
+      const from = wine.drinkFrom as number | undefined
+      const until = wine.drinkUntil as number | undefined
       if (!from && !until) return false
       return (!from || from <= currentYear) && (!until || until >= currentYear)
     })
-    .map((w) => ({
-      id: w.id as string,
-      name: w.name as string,
-      color: w.color,
-      domain: w.domain,
-      vintage: w.vintage as number | undefined,
-      region: w.region as string | undefined,
+    .map((wine) => ({
+      id: wine.id as string,
+      name: wine.name as string,
+      color: wine.color,
+      domain: wine.domain,
+      vintage: wine.vintage as number | undefined,
+      region: wine.region as string | undefined,
     }))
 
   // Total cellar value
   const totalValue = activeWines
-    .filter((w): w is Wine => w !== null)
-    .reduce((sum, w) => sum + ((w.purchasePrice as number | undefined) ?? 0), 0)
+    .filter((wine): wine is Wine => wine !== null)
+    .reduce((sum, wine) => sum + ((wine.purchasePrice as number | undefined) ?? 0), 0)
 
   // Last entry (most recent dateIn)
   const sortedByDateIn = [...allEntries].sort(
@@ -57,7 +57,7 @@ export default defineEventHandler(async () => {
   }
 
   // Last exit (most recent dateOut)
-  const exits = allEntries.filter((e) => e.dateOut != null)
+  const exits = allEntries.filter((entry) => entry.dateOut != null)
   const sortedByDateOut = exits.sort(
     (a, b) => new Date(b.dateOut!).getTime() - new Date(a.dateOut!).getTime(),
   )
@@ -77,13 +77,13 @@ export default defineEventHandler(async () => {
 
   // Recent history (last 10 events)
   const history = await Cellar.getHistory()
-  const recentHistory = history.slice(0, 10).map((e) => ({
-    type: e.type,
-    date: e.date,
-    wineName: e.wineName,
-    wineColor: e.wineColor,
-    position: e.position,
-    rating: e.rating,
+  const recentHistory = history.slice(0, 10).map((event) => ({
+    type: event.type,
+    date: event.date,
+    wineName: event.wineName,
+    wineColor: event.wineColor,
+    position: event.position,
+    rating: event.rating,
   }))
 
   return { status: 200, data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit, history: recentHistory } }

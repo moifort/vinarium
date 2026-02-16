@@ -1,3 +1,4 @@
+import { range, sortBy } from 'lodash-es'
 import {
   CellarCols,
   CellarRows,
@@ -8,7 +9,7 @@ import {
 } from '~/cellar/primitives'
 import type { CellarCol, CellarConfig, CellarEntry, CellarRow, Rating } from '~/cellar/types'
 import { Wines } from '~/wine/index'
-import type { Wine, WineColor, WineId } from '~/wine/types'
+import type { Wine, WineId } from '~/wine/types'
 
 const DEFAULT_CONFIG: CellarConfig = {
   rows: CellarRows(6),
@@ -87,22 +88,18 @@ export namespace Cellar {
   export const suggestPosition = async (wineId: WineId) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
-
     const config = await getConfig()
     const activeEntries = await getActiveEntries()
-    const occupied = new Set(
-      activeEntries.map((entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`),
+    const occupied = activeEntries.map(
+      (entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`,
     )
 
-    for (let r = 0; r < config.rows; r++) {
-      for (let c = 0; c < config.cols; c++) {
-        if (!occupied.has(`${r},${c}`)) {
-          return { row: indexToRow(r), col: indexToCol(c) }
-        }
-      }
-    }
+    const firstFree = range(config.rows)
+      .flatMap((row) => range(config.cols).map((col) => ({ row, col })))
+      .find(({ row, col }) => !occupied.includes(`${row},${col}`))
 
-    return 'cellar-full' as const
+    if (!firstFree) return 'cellar-full' as const
+    return { row: indexToRow(firstFree.row), col: indexToCol(firstFree.col) }
   }
 
   export const getGrid = async () => {
@@ -135,47 +132,39 @@ export namespace Cellar {
 
   export const getHistory = async () => {
     const allEntries = await getAllEntries()
-    const events: {
-      type: 'entry' | 'exit'
-      date: Date
-      wineId: string
-      wineName: string
-      wineColor: WineColor
-      position: string
-      rating?: number
-      tastingNotes?: string
-    }[] = []
 
-    for (const entry of allEntries) {
-      const wine = await Wines.getById(entry.wineId)
-      const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
-      const wineColor = wine !== 'not-found' ? wine.color : 'red'
-      const position = `${entry.row}${entry.col}`
+    const events = await Promise.all(
+      allEntries.flatMap(async (entry) => {
+        const wine = await Wines.getById(entry.wineId)
+        const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
+        const wineColor = wine !== 'not-found' ? wine.color : 'red'
+        const position = `${entry.row}${entry.col}`
 
-      events.push({
-        type: 'entry',
-        date: entry.dateIn,
-        wineId: entry.wineId as string,
-        wineName,
-        wineColor,
-        position,
-      })
-
-      if (entry.dateOut) {
-        events.push({
-          type: 'exit',
-          date: entry.dateOut,
+        const base = {
           wineId: entry.wineId as string,
           wineName,
           wineColor,
           position,
-          rating: entry.rating as number | undefined,
-          tastingNotes: entry.tastingNotes,
-        })
-      }
-    }
+          rating: undefined as number | undefined,
+          tastingNotes: undefined as string | undefined,
+        }
+        const entryEvent = { ...base, type: 'entry' as const, date: entry.dateIn }
 
-    events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    return events
+        if (!entry.dateOut) return [entryEvent]
+
+        return [
+          entryEvent,
+          {
+            ...base,
+            type: 'exit' as const,
+            date: entry.dateOut,
+            rating: entry.rating as number | undefined,
+            tastingNotes: entry.tastingNotes,
+          },
+        ]
+      }),
+    )
+
+    return sortBy(events.flat(), (event) => -new Date(event.date).getTime())
   }
 }
