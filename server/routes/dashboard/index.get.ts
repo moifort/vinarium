@@ -56,17 +56,10 @@ export default defineEventHandler(async () => {
     }
   }
 
-  const history = await CellarLogQuery.list()
+  const history = await CellarLogQuery.getAll()
   const lastExit = history.find((event) => event.type === 'out')
 
-  const recentHistory = history.slice(0, 10).map((event) => ({
-    type: event.type,
-    date: event.date,
-    wineName: event.wineName,
-    wineColor: event.wineColor,
-    position: event.position,
-    rating: event.rating,
-  }))
+  const recentHistory = history.slice(0, 10)
 
   return {
     status: 200,

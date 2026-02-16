@@ -10,7 +10,7 @@ export namespace UserWine {
     if (wine === 'not-found') return 'not-found'
 
     const bottle = await CellarQuery.getBottleByWineId(wineId)
-    const history = await CellarLogQuery.getByWineId(wineId)
+    const history = await CellarLogQuery.getAllByWineId(wineId)
     const userLog = await UserLog.getByWineId(wineId)
 
     return {
