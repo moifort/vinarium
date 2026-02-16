@@ -1,6 +1,6 @@
 import { maxBy, orderBy } from 'lodash-es'
 import { CellarQuery } from '~/cellar/query'
-import * as userLogRepository from '~/user-log/repository'
+import * as tastingRepository from '~/tasting/repository'
 import { randomWineId } from '~/wine/primitives'
 import * as repository from '~/wine/repository'
 import type { Wine, WineColor, WineId, WineName } from '~/wine/types'
@@ -54,7 +54,7 @@ export namespace Wines {
     }
 
     if (options?.minRating) {
-      const logs = await userLogRepository.findAll()
+      const logs = await tastingRepository.findAll()
       const bestRating = (wineId: string) =>
         maxBy(
           logs.filter((log) => log.wineId === wineId && log.rating != null),

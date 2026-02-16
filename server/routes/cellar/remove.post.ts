@@ -1,6 +1,6 @@
 import { CellarCommand } from '~/cellar/command'
-import { UserLog } from '~/user-log/index'
-import { Rating } from '~/user-log/primitives'
+import { TastingCommand } from '~/tasting/command'
+import { Rating } from '~/tasting/primitives'
 import { WineId } from '~/wine/primitives'
 
 export default defineEventHandler(async (event) => {
@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Wine not in cellar' })
 
   if (body.consumedDate || body.rating != null || body.tastingNotes) {
-    await UserLog.create({
+    await TastingCommand.create({
       wineId,
       consumedDate: body.consumedDate ? new Date(body.consumedDate) : undefined,
       rating: body.rating != null ? Rating(body.rating) : undefined,

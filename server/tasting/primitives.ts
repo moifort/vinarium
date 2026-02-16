@@ -1,6 +1,6 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
-import type { Rating as RatingType } from '~/user-log/types'
+import type { Rating as RatingType } from '~/tasting/types'
 
 export const Rating = (value: unknown) => {
   const v = z

@@ -3,7 +3,7 @@ import type { WineId } from '~/wine/types'
 
 export type Rating = Brand<number, 'Rating'>
 
-export type UserLogEntry = {
+export type TastingNote = {
   wineId: WineId
   consumedDate?: Date
   rating?: Rating

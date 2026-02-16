@@ -1,6 +1,6 @@
 import { CellarQuery } from '~/cellar/query'
 import { CellarLogQuery } from '~/cellar-log/query'
-import { UserLog } from '~/user-log/index'
+import { TastingQuery } from '~/tasting/query'
 import { Wines } from '~/wine/index'
 import type { WineId } from '~/wine/types'
 
@@ -11,7 +11,7 @@ export namespace UserWine {
 
     const bottle = await CellarQuery.getBottleByWineId(wineId)
     const history = await CellarLogQuery.getAllByWineId(wineId)
-    const userLog = await UserLog.getByWineId(wineId)
+    const tasting = await TastingQuery.getByWineId(wineId)
 
     return {
       id: wine.id as string,
@@ -43,13 +43,14 @@ export namespace UserWine {
             }
           : undefined,
       history,
-      consumption: userLog
-        ? {
-            consumedDate: userLog.consumedDate,
-            rating: userLog.rating as number | undefined,
-            tastingNotes: userLog.tastingNotes,
-          }
-        : undefined,
+      consumption:
+        tasting !== 'not-found'
+          ? {
+              consumedDate: tasting.consumedDate,
+              rating: tasting.rating as number | undefined,
+              tastingNotes: tasting.tastingNotes,
+            }
+          : undefined,
     }
   }
 }
