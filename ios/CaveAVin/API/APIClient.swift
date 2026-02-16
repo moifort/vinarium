@@ -3,10 +3,13 @@ import Foundation
 final class APIClient: Sendable {
     static let shared = APIClient()
 
+    private static let defaultURL = "https://cave.mottet.me"
+    private static let apiToken = "801B91EB-9D7E-4AAA-B944-DB7E500BD3A7"
+
     var baseURL: URL {
         get {
-            let stored = UserDefaults.standard.string(forKey: "serverURL") ?? "http://192.168.0.160:3000"
-            return URL(string: stored) ?? URL(string: "http://192.168.0.160:3000")!
+            let stored = UserDefaults.standard.string(forKey: "serverURL") ?? Self.defaultURL
+            return URL(string: stored) ?? URL(string: Self.defaultURL)!
         }
         set {
             UserDefaults.standard.set(newValue.absoluteString, forKey: "serverURL")
@@ -21,18 +24,25 @@ final class APIClient: Sendable {
     }()
     private let encoder = JSONEncoder()
 
+    private func authenticatedRequest(url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.setValue("Bearer \(Self.apiToken)", forHTTPHeaderField: "Authorization")
+        return request
+    }
+
     func get<T: Decodable & Sendable>(_ path: String, query: [String: String] = [:]) async throws -> T {
         var components = URLComponents(url: baseURL.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
         if !query.isEmpty {
             components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
-        let (data, response) = try await session.data(from: components.url!)
+        let request = authenticatedRequest(url: components.url!)
+        let (data, response) = try await session.data(for: request)
         try validateResponse(response)
         return try decoder.decode(T.self, from: data)
     }
 
     func post<T: Decodable & Sendable>(_ path: String, body: some Encodable & Sendable) async throws -> T {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
@@ -42,7 +52,7 @@ final class APIClient: Sendable {
     }
 
     func postRaw<T: Decodable & Sendable>(_ path: String, data bodyData: Data, contentType: String) async throws -> T {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "POST"
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.httpBody = bodyData
@@ -52,7 +62,7 @@ final class APIClient: Sendable {
     }
 
     func put<T: Decodable & Sendable>(_ path: String, body: some Encodable & Sendable) async throws -> T {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
@@ -62,7 +72,7 @@ final class APIClient: Sendable {
     }
 
     func delete(_ path: String) async throws {
-        var request = URLRequest(url: baseURL.appendingPathComponent(path))
+        var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "DELETE"
         let (_, response) = try await session.data(for: request)
         try validateResponse(response)
