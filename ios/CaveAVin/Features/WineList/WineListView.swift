@@ -59,17 +59,8 @@ struct WineListView: View {
             .refreshable {
                 await viewModel.load()
             }
-            .task {
+            .task(id: viewModel.filterKey) {
                 await viewModel.load()
-            }
-            .onChange(of: viewModel.sort) { _, _ in
-                Task { await viewModel.load() }
-            }
-            .onChange(of: viewModel.sortDescending) { _, _ in
-                Task { await viewModel.load() }
-            }
-            .onChange(of: viewModel.statusFilter) { _, _ in
-                Task { await viewModel.load() }
             }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {

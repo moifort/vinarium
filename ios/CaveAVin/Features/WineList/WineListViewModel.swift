@@ -34,6 +34,10 @@ final class WineListViewModel {
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
 
+    var filterKey: String {
+        "\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
+    }
+
     func load() async {
         isLoading = true
         error = nil
