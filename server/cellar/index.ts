@@ -6,7 +6,14 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type { CellarCol, CellarConfig, CellarEntry, CellarRow, CellarSuggestion, Rating } from '~/cellar/types'
+import type {
+  CellarCol,
+  CellarConfig,
+  CellarEntry,
+  CellarRow,
+  CellarSuggestion,
+  Rating,
+} from '~/cellar/types'
 import { Wines } from '~/wine/index'
 import type { Wine, WineColor, WineId } from '~/wine/types'
 
@@ -19,9 +26,9 @@ const DEFAULT_CONFIG: CellarConfig = {
 export namespace Cellar {
   export const getConfig = async () => {
     const storage = useStorage('cellar')
-    const cfg = await storage.getItem<CellarConfig>('config')
-    if (!cfg) return DEFAULT_CONFIG
-    return cfg
+    const config = await storage.getItem<CellarConfig>('config')
+    if (!config) return DEFAULT_CONFIG
+    return config
   }
 
   export const updateConfig = async (data: { rows?: number; cols?: number; name?: string }) => {
@@ -86,16 +93,18 @@ export namespace Cellar {
     return updated
   }
 
-  export const suggestPosition = async (wineId: WineId): Promise<CellarSuggestion | 'wine-not-found' | 'cellar-full'> => {
+  export const suggestPosition = async (
+    wineId: WineId,
+  ): Promise<CellarSuggestion | 'wine-not-found' | 'cellar-full'> => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
 
-    const cfg = await getConfig()
+    const config = await getConfig()
     const activeEntries = await getActiveEntries()
     const occupied = new Set(activeEntries.map((e) => `${rowToIndex(e.row)},${colToIndex(e.col)}`))
 
-    for (let r = 0; r < cfg.rows; r++) {
-      for (let c = 0; c < cfg.cols; c++) {
+    for (let r = 0; r < config.rows; r++) {
+      for (let c = 0; c < config.cols; c++) {
         if (!occupied.has(`${r},${c}`)) {
           return { row: indexToRow(r), col: indexToCol(c) }
         }
@@ -106,20 +115,20 @@ export namespace Cellar {
   }
 
   export const getGrid = async () => {
-    const cfg = await getConfig()
+    const config = await getConfig()
     const activeEntries = await getActiveEntries()
 
     const grid: { position: string; wine?: Wine }[][] = Array.from(
-      { length: cfg.rows },
+      { length: config.rows },
       (_, rowIdx) =>
-        Array.from({ length: cfg.cols }, (_, colIdx) => ({
+        Array.from({ length: config.cols }, (_, colIdx) => ({
           position: `${indexToRow(rowIdx)}${indexToCol(colIdx)}`,
         })),
     )
 
     await Promise.all(
       activeEntries
-        .filter((e) => rowToIndex(e.row) < cfg.rows && colToIndex(e.col) < cfg.cols)
+        .filter((e) => rowToIndex(e.row) < config.rows && colToIndex(e.col) < config.cols)
         .map(async (entry) => {
           const wine = await Wines.getById(entry.wineId)
           if (wine !== 'not-found') {
