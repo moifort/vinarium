@@ -3,7 +3,15 @@ import { CellarQuery } from '~/cellar/query'
 import { CellarLogQuery } from '~/cellar-log/query'
 import { TastingQuery } from '~/tasting/query'
 import * as repository from '~/wine/repository'
-import type { SortOrder, Wine, WineColor, WineId, WineSort, WineStatus } from '~/wine/types'
+import type {
+  SortOrder,
+  Wine,
+  WineColor,
+  WineId,
+  WineSort,
+  WineStatus,
+  WineView,
+} from '~/wine/types'
 
 export namespace WineQuery {
   export const getById = async (id: WineId) => {
@@ -32,10 +40,13 @@ export namespace WineQuery {
   export const getDetail = async (wineId: WineId) => {
     const wine = await repository.findBy(wineId)
     if (!wine) return 'not-found' as const
+    return toView(wine)
+  }
 
-    const bottle = await CellarQuery.getBottleByWineId(wineId)
-    const history = await CellarLogQuery.getAllByWineId(wineId)
-    const tasting = await TastingQuery.getByWineId(wineId)
+  const toView = async (wine: Wine): Promise<WineView> => {
+    const bottle = await CellarQuery.getBottleByWineId(wine.id)
+    const history = await CellarLogQuery.getAllByWineId(wine.id)
+    const tasting = await TastingQuery.getByWineId(wine.id)
 
     return {
       ...wine,
