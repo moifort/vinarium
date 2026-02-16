@@ -1,18 +1,20 @@
 import type { Wine, WineId } from '~/wine/types'
 
+const storage = () => useStorage('wines')
+
 export const findAll = async () => {
-  const storage = useStorage('wines')
-  const keys = await storage.getKeys()
+  const keys = await storage().getKeys()
   // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-  return Promise.all(keys.map(async (key) => (await storage.getItem<Wine>(key))!))
+  return Promise.all(keys.map(async (key) => (await storage().getItem<Wine>(key))!))
 }
 
-export const findBy = (id: WineId) => useStorage('wines').getItem<Wine>(id)
+export const findBy = (id: WineId) => storage().getItem<Wine>(id)
 
 export const save = async (wine: Wine) => {
-  await useStorage('wines').setItem<Wine>(wine.id, wine)
+  await storage().setItem<Wine>(wine.id, wine)
+  return wine
 }
 
 export const remove = async (id: WineId) => {
-  await useStorage('wines').removeItem(id)
+  await storage().removeItem(id)
 }

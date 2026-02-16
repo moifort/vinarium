@@ -9,7 +9,6 @@ export type ScanResult = {
   region?: string
   country?: string
   grapeVarieties?: string[]
-  alcoholContent?: number
   classification?: string
   drinkFrom?: number
   drinkUntil?: number

@@ -1,7 +1,7 @@
 import { sortBy } from 'lodash-es'
 import { CellarQuery } from '~/cellar/query'
 import { CellarLogQuery } from '~/cellar-log/query'
-import { Wines } from '~/wine/index'
+import { WineQuery } from '~/wine/query'
 import type { Wine } from '~/wine/types'
 
 export default defineEventHandler(async () => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async () => {
 
   const activeWines = await Promise.all(
     allBottles.map(async (bottle) => {
-      const wine = await Wines.getById(bottle.wineId)
+      const wine = await WineQuery.getById(bottle.wineId)
       return wine !== 'not-found' ? wine : null
     }),
   )
@@ -41,7 +41,7 @@ export default defineEventHandler(async () => {
   let lastBottle
   if (sortedByCreatedAt.length > 0) {
     const bottle = sortedByCreatedAt[0]
-    const wine = await Wines.getById(bottle.wineId)
+    const wine = await WineQuery.getById(bottle.wineId)
     if (wine !== 'not-found') {
       lastBottle = {
         wine: {

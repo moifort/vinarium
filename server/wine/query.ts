@@ -1,0 +1,85 @@
+import { orderBy } from 'lodash-es'
+import { CellarQuery } from '~/cellar/query'
+import { CellarLogQuery } from '~/cellar-log/query'
+import { TastingQuery } from '~/tasting/query'
+import * as repository from '~/wine/repository'
+import type { SortOrder, Wine, WineColor, WineId, WineSort, WineStatus } from '~/wine/types'
+
+export namespace WineQuery {
+  export const getById = async (id: WineId) => {
+    const wine = await repository.findBy(id)
+    if (!wine) return 'not-found' as const
+    return wine
+  }
+
+  export const list = async (options?: {
+    color?: WineColor
+    sort?: WineSort
+    order?: SortOrder
+    status?: WineStatus
+  }) => {
+    const all = await repository.findAll()
+    const byColor = options?.color ? all.filter((wine) => wine.color === options.color) : all
+    const byStatus =
+      options?.status && options.status !== 'all'
+        ? await filterByStatus(byColor, options.status)
+        : byColor
+    return options?.sort
+      ? orderBy(byStatus, sortKey(options.sort), options.order === 'desc' ? 'desc' : 'asc')
+      : byStatus
+  }
+
+  export const getDetail = async (wineId: WineId) => {
+    const wine = await repository.findBy(wineId)
+    if (!wine) return 'not-found' as const
+
+    const bottle = await CellarQuery.getBottleByWineId(wineId)
+    const history = await CellarLogQuery.getAllByWineId(wineId)
+    const tasting = await TastingQuery.getByWineId(wineId)
+
+    return {
+      ...wine,
+      cellar:
+        bottle !== 'not-found'
+          ? {
+              row: bottle.row,
+              col: bottle.col,
+              rowLabel: bottle.rowLabel,
+              colLabel: bottle.colLabel,
+              createdAt: bottle.createdAt,
+            }
+          : undefined,
+      history,
+      consumption:
+        tasting !== 'not-found'
+          ? {
+              consumedDate: tasting.consumedDate,
+              rating: tasting.rating,
+              tastingNotes: tasting.tastingNotes,
+            }
+          : undefined,
+    }
+  }
+
+  const filterByStatus = async (wines: Wine[], status: WineStatus) => {
+    const bottles = await CellarQuery.getAllBottles()
+    const inCellarIds = bottles.map((bottle) => bottle.wineId)
+    if (status === 'in-cellar') return wines.filter((wine) => inCellarIds.includes(wine.id))
+    return wines.filter((wine) => !inCellarIds.includes(wine.id))
+  }
+
+  const sortKey = (sort: WineSort) => (wine: Wine) => {
+    switch (sort) {
+      case 'vintage':
+        return wine.vintage ?? 0
+      case 'region':
+        return wine.region ?? ''
+      case 'color':
+        return wine.color
+      case 'price':
+        return wine.purchasePrice ?? 0
+      default:
+        return 0
+    }
+  }
+}

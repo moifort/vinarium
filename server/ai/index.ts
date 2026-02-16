@@ -1,6 +1,5 @@
 import type { ScanResult } from '~/ai/types'
 import { config } from '~/config/index'
-import type { Wine } from '~/wine/types'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
@@ -52,7 +51,6 @@ export namespace AI {
                   items: { type: 'string' },
                   description: 'Grape varieties if mentioned',
                 },
-                alcoholContent: { type: ['number', 'null'], description: 'Alcohol percentage' },
                 classification: {
                   type: ['string', 'null'],
                   description: 'Classification (e.g. Grand Cru, Premier Cru, AOC, AOP, IGP)',
@@ -169,41 +167,5 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
     } catch {
       return scanResult
     }
-  }
-
-  export const getAdvice = async (wines: Wine[], occasion?: string) => {
-    const { anthropicApiKey } = config()
-
-    const winesSummary = wines
-      .map(
-        (wine) =>
-          `- ${wine.name}${wine.vintage ? ` ${wine.vintage}` : ''} (${wine.color})${wine.appellation ? `, ${wine.appellation}` : ''}${wine.drinkFrom || wine.drinkUntil ? ` [boire ${wine.drinkFrom ?? '?'}-${wine.drinkUntil ?? '?'}]` : ''}`,
-      )
-      .join('\n')
-
-    const prompt = occasion
-      ? `Voici ma cave à vin :\n${winesSummary}\n\nOccasion : ${occasion}\n\nRecommande-moi des bouteilles à ouvrir pour cette occasion, en expliquant pourquoi.`
-      : `Voici ma cave à vin :\n${winesSummary}\n\nDonne-moi des conseils sur ma cave : quelles bouteilles ouvrir bientôt, lesquelles garder, et des suggestions pour équilibrer ma collection.`
-
-    const response = await $fetch<{
-      content: { type: string; text?: string }[]
-    }>(ANTHROPIC_API_URL, {
-      method: 'POST',
-      headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: {
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 2048,
-        messages: [{ role: 'user', content: prompt }],
-        system:
-          "Tu es un sommelier expert. Réponds en français. Sois précis et pratique dans tes conseils. Utilise l'année actuelle pour évaluer la maturité des vins.",
-      },
-    })
-
-    const textBlock = response.content.find((block) => block.type === 'text')
-    return textBlock?.text ?? 'Aucun conseil disponible.'
   }
 }

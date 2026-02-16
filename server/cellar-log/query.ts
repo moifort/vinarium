@@ -1,7 +1,7 @@
 import { sortBy } from 'lodash-es'
 import * as repository from '~/cellar-log/repository'
 import type { CellarLogEntry, CellarLogEventView } from '~/cellar-log/types'
-import { Wines } from '~/wine/index'
+import { WineQuery } from '~/wine/query'
 import type { WineId } from '~/wine/types'
 
 export namespace CellarLogQuery {
@@ -18,7 +18,7 @@ export namespace CellarLogQuery {
   }
 
   const toView = async (entry: CellarLogEntry): Promise<CellarLogEventView> => {
-    const wine = await Wines.getById(entry.wineId)
+    const wine = await WineQuery.getById(entry.wineId)
     if (wine === 'not-found') throw new Error(`Wine not found: ${entry.wineId}`)
     return {
       type: entry.type,

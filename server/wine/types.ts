@@ -3,21 +3,26 @@ import type { Country, Eur, Region, Year } from '~/types'
 
 export type WineId = Brand<string, 'WineId'>
 export type WineName = Brand<string, 'WineName'>
-export type AlcoholContent = Brand<number, 'AlcoholContent'>
+export type WineDomain = Brand<string, 'WineDomain'>
+export type Appellation = Brand<string, 'Appellation'>
+export type Classification = Brand<string, 'Classification'>
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'sweet'
+
+export type WineSort = 'vintage' | 'region' | 'color' | 'price'
+export type SortOrder = 'asc' | 'desc'
+export type WineStatus = 'in-cellar' | 'consumed' | 'all'
 
 export type Wine = {
   id: WineId
   name: WineName
   color: WineColor
-  domain?: string
+  domain?: WineDomain
   vintage?: Year
-  appellation?: string
+  appellation?: Appellation
   region?: Region
   country?: Country
   grapeVarieties?: string[]
-  alcoholContent?: AlcoholContent
-  classification?: string
+  classification?: Classification
   purchasePrice?: Eur
   purchaseDate?: string
   drinkFrom?: Year

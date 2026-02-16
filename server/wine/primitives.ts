@@ -1,7 +1,9 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
 import type {
-  AlcoholContent as AlcoholContentType,
+  Appellation as AppellationType,
+  Classification as ClassificationType,
+  WineDomain as WineDomainType,
   WineId as WineIdType,
   WineName as WineNameType,
 } from '~/wine/types'
@@ -18,9 +20,17 @@ export const WineName = (value: unknown) => {
   return make<WineNameType>()(v)
 }
 
-export const AlcoholContent = (value: unknown) => {
-  const v = z
-    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().min(0).max(25))
-    .parse(value)
-  return make<AlcoholContentType>()(v)
+export const WineDomain = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<WineDomainType>()(v)
+}
+
+export const Appellation = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AppellationType>()(v)
+}
+
+export const Classification = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<ClassificationType>()(v)
 }
