@@ -4,7 +4,7 @@ struct PlacementView: View {
     let wine: Wine
     let onPlaced: (String) -> Void
 
-    @State private var grid: [[GridCell]] = []
+    @State private var bottles: [CellarBottle] = []
     @State private var suggestedRow: String?
     @State private var suggestedCol: Int?
     @State private var selectedPosition: String?
@@ -13,11 +13,13 @@ struct PlacementView: View {
     @State private var isPlacing = false
 
     private var availablePositions: [(row: String, positions: [(label: String, rowStr: String, col: Int)])] {
-        grid.enumerated().compactMap { rowIdx, cells in
+        let occupied = Set(bottles.map { $0.position })
+        return (0..<6).compactMap { rowIdx in
             let rowLetter = String(UnicodeScalar(65 + rowIdx)!)
-            let free = cells.enumerated().compactMap { colIdx, cell -> (label: String, rowStr: String, col: Int)? in
-                guard cell.wine == nil else { return nil }
-                return (label: "\(rowLetter)\(colIdx + 1)", rowStr: rowLetter, col: colIdx + 1)
+            let free = (1...8).compactMap { col -> (label: String, rowStr: String, col: Int)? in
+                let label = "\(rowLetter)\(col)"
+                guard !occupied.contains(label) else { return nil }
+                return (label: label, rowStr: rowLetter, col: col)
             }
             guard !free.isEmpty else { return nil }
             return (row: rowLetter, positions: free)
@@ -125,10 +127,10 @@ struct PlacementView: View {
 
     private func loadData() async {
         do {
-            async let gridData = CellarAPI.getGrid()
+            async let bottlesData = CellarAPI.getBottles()
             async let suggestion = CellarAPI.suggest(wineId: wine.id)
-            let (g, s) = try await (gridData, suggestion)
-            grid = g
+            let (b, s) = try await (bottlesData, suggestion)
+            bottles = b
             suggestedRow = s.row
             suggestedCol = s.col
             selectedPosition = "\(s.row)\(s.col)"
@@ -148,7 +150,7 @@ struct PlacementView: View {
 
         Task {
             do {
-                _ = try await CellarAPI.place(wineId: wine.id, row: rowStr, col: col)
+                try await CellarAPI.place(wineId: wine.id, row: rowStr, col: col)
                 onPlaced(pos)
             } catch {
                 self.error = error.localizedDescription

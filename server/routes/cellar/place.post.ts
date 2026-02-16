@@ -6,8 +6,10 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   if (!body) throw createError({ statusCode: 400, statusMessage: 'Body is required' })
   const wineId = WineId(body.wineId)
-  const row = CellarRow(body.row)
-  const col = CellarCol(body.col)
+  const rowValue = typeof body.row === 'string' ? body.row.charCodeAt(0) - 65 : body.row
+  const colValue = typeof body.col === 'number' ? body.col - 1 : body.col
+  const row = CellarRow(rowValue)
+  const col = CellarCol(colValue)
   const entry = await CellarCommand.placeWine(wineId, row, col)
   return { status: 201, data: entry }
 })

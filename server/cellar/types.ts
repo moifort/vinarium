@@ -1,5 +1,5 @@
 import type { Brand } from 'ts-brand'
-import type { WineId } from '~/wine/types'
+import type { Wine, WineId } from '~/wine/types'
 
 export type CellarRows = Brand<number, 'CellarRows'>
 export type CellarCols = Brand<number, 'CellarCols'>
@@ -19,4 +19,8 @@ export type CellarBottle = {
 export type CellarBottleView = CellarBottle & {
   rowLabel: CellarRowLabel
   colLabel: CellarColLabel
+}
+
+export type CellarBottleWithWine = CellarBottleView & {
+  wine: Wine
 }

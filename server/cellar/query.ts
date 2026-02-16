@@ -3,6 +3,7 @@ import { CellarCol, CellarRow } from '~/cellar/primitives'
 import * as repository from '~/cellar/repository'
 import type { CellarBottle, CellarBottleView } from '~/cellar/types'
 import type { WineId } from '~/wine/types'
+import { WineQuery } from '~/wine/query'
 
 const CELLAR_SIZE = { rows: 6, cols: 8 }
 
@@ -10,6 +11,19 @@ export namespace CellarQuery {
   export const getAllBottles = async () => {
     const bottles = await repository.findAll()
     return bottles.map(toView)
+  }
+
+  export const getAllBottlesWithWines = async () => {
+    const bottles = await repository.findAll()
+    return (
+      await Promise.all(
+        bottles.map(async (bottle) => {
+          const wine = await WineQuery.getById(bottle.wineId)
+          if (wine === 'not-found') return undefined
+          return { ...toView(bottle), wine }
+        }),
+      )
+    ).filter((b): b is NonNullable<typeof b> => b !== undefined)
   }
 
   export const getBottleByWineId = async (wineId: WineId) => {

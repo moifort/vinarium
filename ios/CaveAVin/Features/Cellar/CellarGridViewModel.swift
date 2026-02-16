@@ -7,37 +7,33 @@ enum CellarDisplayMode: String, CaseIterable {
 
 @MainActor @Observable
 final class CellarGridViewModel {
-    var grid: [[GridCell]] = []
+    var bottles: [CellarBottle] = []
     var history: [HistoryEvent] = []
     var displayMode: CellarDisplayMode = .cave
     var isLoading = false
     var error: String?
 
     var groupedRows: [CellarRowGroup] {
-        grid.enumerated().compactMap { rowIdx, cells in
-            let rowLetter = String(UnicodeScalar(65 + rowIdx)!)
-            let occupiedCells = cells.enumerated().compactMap { colIdx, cell -> CellarRowItem? in
-                guard let wine = cell.wine else { return nil }
-                return CellarRowItem(
-                    position: "\(rowLetter)\(colIdx + 1)",
-                    wine: wine,
-                    rowIndex: rowIdx,
-                    colIndex: colIdx
+        Dictionary(grouping: bottles, by: \.rowLabel)
+            .sorted(by: { $0.key < $1.key })
+            .map { row, items in
+                CellarRowGroup(
+                    row: row,
+                    items: items.sorted(by: { $0.colLabel < $1.colLabel }).map {
+                        CellarRowItem(position: $0.position, wine: $0.wine, rowIndex: 0, colIndex: 0)
+                    }
                 )
             }
-            guard !occupiedCells.isEmpty else { return nil }
-            return CellarRowGroup(row: rowLetter, items: occupiedCells)
-        }
     }
 
     func load() async {
         isLoading = true
         error = nil
         do {
-            async let gridData = CellarAPI.getGrid()
+            async let bottlesData = CellarAPI.getBottles()
             async let historyData = CellarAPI.getHistory()
-            let (g, h) = try await (gridData, historyData)
-            grid = g
+            let (b, h) = try await (bottlesData, historyData)
+            bottles = b
             history = h
         } catch {
             self.error = error.localizedDescription

@@ -1,33 +1,24 @@
 import Foundation
 
-struct CellarConfig: Codable, Sendable {
-    let rows: Int
-    let cols: Int
-    let name: String
-}
-
-struct GridCell: Codable, Identifiable, Sendable {
-    let position: String
-    let wine: Wine?
-    var id: String { position }
-}
-
-struct CellarEntry: Codable, Identifiable, Sendable {
+struct CellarBottle: Codable, Identifiable, Sendable {
     let wineId: String
-    let row: String
-    let col: Int
-    let dateIn: Date
-    let dateOut: Date?
-    let consumedDate: Date?
-    let rating: Int?
-    let tastingNotes: String?
+    let wine: Wine
+    let rowLabel: String
+    let colLabel: Int
+    let createdAt: Date
 
     var id: String { wineId }
+    var position: String { "\(rowLabel)\(colLabel)" }
 }
 
 struct CellarSuggestion: Codable, Sendable {
     let row: String
     let col: Int
+
+    enum CodingKeys: String, CodingKey {
+        case row = "rowLabel"
+        case col = "colLabel"
+    }
 }
 
 enum HistoryEventType: String, Codable, Sendable {

@@ -16,10 +16,10 @@ struct CellarGridView: View {
                 .padding()
 
                 Group {
-                    if viewModel.isLoading && viewModel.grid.isEmpty {
+                    if viewModel.isLoading && viewModel.bottles.isEmpty {
                         ProgressView("Chargement...")
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = viewModel.error, viewModel.grid.isEmpty {
+                    } else if let error = viewModel.error, viewModel.bottles.isEmpty {
                         ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
                     } else {
                         switch viewModel.displayMode {
