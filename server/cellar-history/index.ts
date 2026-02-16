@@ -1,5 +1,6 @@
 import { sortBy } from 'lodash-es'
 import { Cellar } from '~/cellar/index'
+import * as repository from '~/cellar-history/repository'
 import type { CellarHistoryEntry, CellarHistoryEvent } from '~/cellar-history/types'
 import { UserLog } from '~/user-log/index'
 import { Wines } from '~/wine/index'
@@ -7,26 +8,15 @@ import type { WineId } from '~/wine/types'
 
 export namespace CellarHistory {
   export const create = async (entry: CellarHistoryEntry) => {
-    const storage = useStorage('cellar-history')
-    await storage.setItem<CellarHistoryEntry>(`entries:${entry.wineId}`, entry)
+    await repository.save(entry)
     return entry
   }
 
-  export const getByWineId = async (wineId: WineId) => {
-    const storage = useStorage('cellar-history')
-    return storage.getItem<CellarHistoryEntry>(`entries:${wineId}`)
-  }
-
-  const getAllEntries = async () => {
-    const storage = useStorage('cellar-history')
-    const keys = await storage.getKeys('entries')
-    // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-    return Promise.all(keys.map(async (key) => (await storage.getItem<CellarHistoryEntry>(key))!))
-  }
+  export const getByWineId = (wineId: WineId) => repository.getByWineId(wineId)
 
   export const list = async () => {
     const activeEntries = await Cellar.getAllEntries()
-    const historyEntries = await getAllEntries()
+    const historyEntries = await repository.getAll()
 
     const events = await Promise.all([
       ...activeEntries.map(async (entry) => {

@@ -1,6 +1,8 @@
 import { maxBy, orderBy } from 'lodash-es'
 import { Cellar } from '~/cellar/index'
+import * as userLogRepository from '~/user-log/repository'
 import { randomWineId } from '~/wine/primitives'
+import * as repository from '~/wine/repository'
 import type { Wine, WineColor, WineId, WineName } from '~/wine/types'
 
 type WineSort = 'vintage' | 'region' | 'color' | 'price' | 'consumedDate'
@@ -9,7 +11,6 @@ type WineStatus = 'in-cellar' | 'consumed' | 'all'
 
 export namespace Wines {
   export const create = async (name: WineName, color: WineColor, data: Partial<Wine>) => {
-    const storage = useStorage('wines')
     const id = randomWineId()
     const wine: Wine = {
       ...data,
@@ -19,13 +20,12 @@ export namespace Wines {
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-    await storage.setItem<Wine>(id, wine)
+    await repository.save(wine)
     return wine
   }
 
   export const getById = async (id: WineId) => {
-    const storage = useStorage('wines')
-    const wine = await storage.getItem<Wine>(id)
+    const wine = await repository.getById(id)
     if (!wine) return 'not-found' as const
     return wine
   }
@@ -37,10 +37,7 @@ export namespace Wines {
     status?: WineStatus
     minRating?: number
   }) => {
-    const storage = useStorage('wines')
-    const keys = await storage.getKeys()
-    // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-    let wines = await Promise.all(keys.map(async (key) => (await storage.getItem<Wine>(key))!))
+    let wines = await repository.getAll()
 
     if (options?.color) {
       wines = wines.filter((wine) => wine.color === options.color)
@@ -57,10 +54,7 @@ export namespace Wines {
     }
 
     if (options?.minRating) {
-      const logStorage = useStorage('user-log')
-      const logKeys = await logStorage.getKeys('entries')
-      // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-      const logs = await Promise.all(logKeys.map(async (key) => (await logStorage.getItem<import('~/user-log/types').UserLogEntry>(key))!))
+      const logs = await userLogRepository.getAll()
       const bestRating = (wineId: string) =>
         maxBy(
           logs.filter((log) => log.wineId === wineId && log.rating != null),
@@ -86,7 +80,6 @@ export namespace Wines {
   }
 
   export const update = async (id: WineId, data: Partial<Wine>) => {
-    const storage = useStorage('wines')
     const existing = await getById(id)
     if (existing === 'not-found') return 'not-found' as const
     const wine: Wine = {
@@ -94,15 +87,14 @@ export namespace Wines {
       ...data,
       updatedAt: new Date(),
     }
-    await storage.setItem<Wine>(id, wine)
+    await repository.save(wine)
     return wine
   }
 
   export const remove = async (id: WineId) => {
-    const storage = useStorage('wines')
     const existing = await getById(id)
     if (existing === 'not-found') return 'not-found' as const
-    await storage.removeItem(id)
+    await repository.remove(id)
     return
   }
 }
