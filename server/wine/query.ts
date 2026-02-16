@@ -1,4 +1,4 @@
-import { orderBy } from 'lodash-es'
+import { keyBy, orderBy } from 'lodash-es'
 import { CellarQuery } from '~/cellar/query'
 import { CellarLogQuery } from '~/cellar-log/query'
 import { TastingQuery } from '~/tasting/query'
@@ -20,14 +20,16 @@ export namespace WineQuery {
     return wine
   }
 
-  export const list = async (options?: {
+  export const getAll = async (options?: {
     color?: WineColor
     sort?: WineSort
     order?: SortOrder
     status?: WineStatus
   }) => {
-    const all = await repository.findAll()
-    const byColor = options?.color ? all.filter((wine) => wine.color === options.color) : all
+    const [all, tastings] = await Promise.all([repository.findAll(), TastingQuery.getAll()])
+    const ratingMap = keyBy(tastings, 'wineId')
+    const withRating = all.map((w) => ({ ...w, rating: ratingMap[w.id]?.rating ?? null }))
+    const byColor = options?.color ? withRating.filter((wine) => wine.color === options.color) : withRating
     const byStatus =
       options?.status && options.status !== 'all'
         ? await filterByStatus(byColor, options.status)
