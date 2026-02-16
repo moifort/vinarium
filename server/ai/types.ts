@@ -15,4 +15,3 @@ export type ScanResult = {
   drinkUntil?: number
   estimatedPrice?: number
 }
-

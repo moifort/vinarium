@@ -22,7 +22,10 @@ export const CellarCols = (value: unknown) => {
 }
 
 const cellarRow = (value: unknown) => {
-  const v = z.string().regex(/^[A-Z]$/).parse(value)
+  const v = z
+    .string()
+    .regex(/^[A-Z]$/)
+    .parse(value)
   return make<CellarRowType>()(v)
 }
 

@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash-es'
-import { CellarHistory } from '~/cellar-history/index'
 import { Cellar } from '~/cellar/index'
+import { CellarHistory } from '~/cellar-history/index'
 import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
 
@@ -44,7 +44,12 @@ export default defineEventHandler(async () => {
     const wine = await Wines.getById(entry.wineId)
     if (wine !== 'not-found') {
       lastEntry = {
-        wine: { id: wine.id as string, name: wine.name as string, color: wine.color, vintage: wine.vintage as number | undefined },
+        wine: {
+          id: wine.id as string,
+          name: wine.name as string,
+          color: wine.color,
+          vintage: wine.vintage as number | undefined,
+        },
         position: `${entry.row}${entry.col}`,
         date: entry.createdAt,
       }
@@ -63,5 +68,8 @@ export default defineEventHandler(async () => {
     rating: event.rating,
   }))
 
-  return { status: 200, data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit, history: recentHistory } }
+  return {
+    status: 200,
+    data: { bottleCount, totalValue, readyToDrink, lastEntry, lastExit, history: recentHistory },
+  }
 })

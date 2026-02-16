@@ -1,6 +1,10 @@
 import { range } from 'lodash-es'
 import { CellarCol, CellarCols, CellarRow, CellarRows } from '~/cellar/primitives'
-import type { CellarCol as CellarColType, CellarEntry, CellarRow as CellarRowType } from '~/cellar/types'
+import type {
+  CellarCol as CellarColType,
+  CellarEntry,
+  CellarRow as CellarRowType,
+} from '~/cellar/types'
 import type { GridCell } from '~/cellar-grid/types'
 import { Wines } from '~/wine/index'
 import type { WineId } from '~/wine/types'
@@ -26,12 +30,10 @@ export namespace CellarGrid {
   }
 
   export const get = async (entries: CellarEntry[]) => {
-    const grid: GridCell[][] = Array.from(
-      { length: ROWS },
-      (_, rowIdx) =>
-        Array.from({ length: COLS }, (_, colIdx) => ({
-          position: `${CellarRow.fromIndex(rowIdx)}${CellarCol.fromIndex(colIdx)}`,
-        })),
+    const grid: GridCell[][] = Array.from({ length: ROWS }, (_, rowIdx) =>
+      Array.from({ length: COLS }, (_, colIdx) => ({
+        position: `${CellarRow.fromIndex(rowIdx)}${CellarCol.fromIndex(colIdx)}`,
+      })),
     )
     await Promise.all(
       entries
