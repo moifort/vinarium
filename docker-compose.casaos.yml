@@ -1,21 +1,22 @@
-name: bloomin8
+name: cave-a-vin
 services:
-  canvas-server:
+  cave-a-vin:
     cpu_shares: 90
     command: []
-    container_name: canvas-server
+    container_name: cave-a-vin
     deploy:
       resources:
         limits:
           memory: 1816M
     environment:
       - HOST=0.0.0.0
-      - NITRO_SERVER_URL=http://192.168.0.165:3000
       - PORT=3000
-    hostname: canvas-server
+      - NITRO_ANTHROPIC_API_KEY=${NITRO_ANTHROPIC_API_KEY}
+      - NITRO_GOOGLE_API_KEY=${NITRO_GOOGLE_API_KEY}
+    hostname: cave-a-vin
     image: moifort/cave-a-vin:latest
     labels:
-      icon: https://icon.casaos.io/main/all/canvas-server.png
+      icon: https://cdn-icons-png.flaticon.com/512/763/763048.png
     ports:
       - target: 3000
         published: "3000"
@@ -24,7 +25,7 @@ services:
     restart: unless-stopped
     volumes:
       - type: bind
-        source: /DATA/AppData/canvas-server
+        source: /DATA/AppData/cave-a-vin
         target: /app/data
     devices: []
     cap_add: []
@@ -34,7 +35,7 @@ x-casaos:
   author: self
   category: self
   hostname: ""
-  icon: https://icon.casaos.io/main/all/canvas-server.png
+  icon: https://cdn-icons-png.flaticon.com/512/763/763048.png
   index: /
   is_uncontrolled: false
   port_map: "3000"
@@ -42,4 +43,4 @@ x-casaos:
   store_app_id: breathtaking_derek
   title:
     custom: ""
-    en_us: canvas-server
+    en_us: cave-a-vin
