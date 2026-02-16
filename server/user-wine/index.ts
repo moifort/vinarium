@@ -1,5 +1,6 @@
 import { Cellar } from '~/cellar/index'
-import type { UserWineDetail } from '~/user-wine/types'
+import { CellarHistory } from '~/cellar-history/index'
+import { UserLog } from '~/user-log/index'
 import { Wines } from '~/wine/index'
 import type { WineId } from '~/wine/types'
 
@@ -7,24 +8,10 @@ export namespace UserWine {
   export async function getDetail(wineId: WineId) {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'not-found'
-    const entry = await Cellar.getEntryByWineId(wineId)
-    let cellar: UserWineDetail['cellar']
-    let consumption: UserWineDetail['consumption']
 
-    if (entry && !entry.dateOut) {
-      cellar = {
-        row: entry.row as string,
-        col: entry.col as number,
-        dateIn: entry.dateIn,
-      }
-    } else if (entry?.dateOut) {
-      consumption = {
-        dateOut: entry.dateOut,
-        consumedDate: entry.consumedDate,
-        rating: entry.rating as number | undefined,
-        tastingNotes: entry.tastingNotes,
-      }
-    }
+    const entry = await Cellar.getEntryByWineId(wineId)
+    const historyEntry = await CellarHistory.getByWineId(wineId)
+    const userLog = await UserLog.getByWineId(wineId)
 
     return {
       id: wine.id as string,
@@ -45,8 +32,19 @@ export namespace UserWine {
       drinkFrom: wine.drinkFrom as number | undefined,
       drinkUntil: wine.drinkUntil as number | undefined,
       notes: wine.notes,
-      cellar,
-      consumption,
+      cellar: entry
+        ? { row: entry.row as string, col: entry.col as number, createdAt: entry.createdAt }
+        : undefined,
+      history: historyEntry
+        ? { dateIn: historyEntry.dateIn, dateOut: historyEntry.dateOut }
+        : undefined,
+      consumption: userLog
+        ? {
+            consumedDate: userLog.consumedDate,
+            rating: userLog.rating as number | undefined,
+            tastingNotes: userLog.tastingNotes,
+          }
+        : undefined,
     }
   }
 }

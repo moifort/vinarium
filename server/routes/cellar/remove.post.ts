@@ -1,5 +1,6 @@
 import { Cellar } from '~/cellar/index'
-import { Rating } from '~/cellar/primitives'
+import { UserLog } from '~/user-log/index'
+import { Rating } from '~/user-log/primitives'
 import { WineId } from '~/wine/primitives'
 
 export default defineEventHandler(async (event) => {
@@ -7,13 +8,18 @@ export default defineEventHandler(async (event) => {
   if (!body) throw createError({ statusCode: 400, statusMessage: 'Body is required' })
 
   const wineId = WineId(body.wineId)
-  const consumption = {
-    consumedDate: body.consumedDate ? new Date(body.consumedDate) : undefined,
-    rating: body.rating != null ? Rating(body.rating) : undefined,
-    tastingNotes: body.tastingNotes as string | undefined,
-  }
-  const result = await Cellar.removeWine(wineId, consumption)
+  const result = await Cellar.removeWine(wineId)
   if (result === 'not-in-cellar')
     throw createError({ statusCode: 404, statusMessage: 'Wine not in cellar' })
-  return { status: 200, data: result }
+
+  if (body.consumedDate || body.rating != null || body.tastingNotes) {
+    await UserLog.create({
+      wineId,
+      consumedDate: body.consumedDate ? new Date(body.consumedDate) : undefined,
+      rating: body.rating != null ? Rating(body.rating) : undefined,
+      tastingNotes: body.tastingNotes as string | undefined,
+    })
+  }
+
+  return { status: 200, data: { ok: true } }
 })

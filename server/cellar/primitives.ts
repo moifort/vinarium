@@ -5,7 +5,6 @@ import type {
   CellarCol as CellarColType,
   CellarRows as CellarRowsType,
   CellarRow as CellarRowType,
-  Rating as RatingType,
 } from '~/cellar/types'
 
 export const CellarRows = (value: unknown) => {
@@ -35,13 +34,6 @@ export const CellarCol = (value: unknown) => {
     .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().int().min(1).max(100))
     .parse(value)
   return make<CellarColType>()(v)
-}
-
-export const Rating = (value: unknown) => {
-  const v = z
-    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().int().min(1).max(5))
-    .parse(value)
-  return make<RatingType>()(v)
 }
 
 export const rowToIndex = (row: CellarRowType) => row.charCodeAt(0) - 65

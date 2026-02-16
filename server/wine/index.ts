@@ -47,7 +47,7 @@ export namespace Wines {
     }
 
     if (options?.status && options.status !== 'all') {
-      const activeEntries = await Cellar.getActiveEntries()
+      const activeEntries = await Cellar.getAllEntries()
       const inCellarIds = activeEntries.map((entry) => entry.wineId)
       if (options.status === 'in-cellar') {
         wines = wines.filter((wine) => inCellarIds.includes(wine.id))
@@ -57,14 +57,14 @@ export namespace Wines {
     }
 
     if (options?.minRating) {
-      const cellarStorage = useStorage('cellar')
-      const entryKeys = await cellarStorage.getKeys('entries')
+      const logStorage = useStorage('user-log')
+      const logKeys = await logStorage.getKeys('entries')
       // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-      const entries = await Promise.all(entryKeys.map(async (key) => (await cellarStorage.getItem<import('~/cellar/types').CellarEntry>(key))!))
+      const logs = await Promise.all(logKeys.map(async (key) => (await logStorage.getItem<import('~/user-log/types').UserLogEntry>(key))!))
       const bestRating = (wineId: string) =>
         maxBy(
-          entries.filter((entry) => entry.wineId === wineId && entry.rating != null),
-          (entry) => entry.rating,
+          logs.filter((log) => log.wineId === wineId && log.rating != null),
+          (log) => log.rating,
         )?.rating ?? 0
       wines = wines.filter((wine) => bestRating(wine.id) >= options.minRating!)
     }

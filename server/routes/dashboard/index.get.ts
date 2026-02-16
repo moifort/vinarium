@@ -1,19 +1,17 @@
+import { sortBy } from 'lodash-es'
 import { CellarHistory } from '~/cellar-history/index'
 import { Cellar } from '~/cellar/index'
 import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
 
 export default defineEventHandler(async () => {
-  const activeEntries = await Cellar.getActiveEntries()
   const allEntries = await Cellar.getAllEntries()
   const currentYear = new Date().getFullYear()
 
-  // Bottle count
-  const bottleCount = activeEntries.length
+  const bottleCount = allEntries.length
 
-  // Ready to drink: active wines where drinkFrom <= currentYear <= drinkUntil
   const activeWines = await Promise.all(
-    activeEntries.map(async (entry) => {
+    allEntries.map(async (entry) => {
       const wine = await Wines.getById(entry.wineId)
       return wine !== 'not-found' ? wine : null
     }),
@@ -35,49 +33,27 @@ export default defineEventHandler(async () => {
       region: wine.region as string | undefined,
     }))
 
-  // Total cellar value
   const totalValue = activeWines
     .filter((wine): wine is Wine => wine !== null)
     .reduce((sum, wine) => sum + ((wine.purchasePrice as number | undefined) ?? 0), 0)
 
-  // Last entry (most recent dateIn)
-  const sortedByDateIn = [...allEntries].sort(
-    (a, b) => new Date(b.dateIn).getTime() - new Date(a.dateIn).getTime(),
-  )
-  let lastEntry = null
-  if (sortedByDateIn.length > 0) {
-    const entry = sortedByDateIn[0]
+  const sortedByCreatedAt = sortBy(allEntries, (entry) => -new Date(entry.createdAt).getTime())
+  let lastEntry
+  if (sortedByCreatedAt.length > 0) {
+    const entry = sortedByCreatedAt[0]
     const wine = await Wines.getById(entry.wineId)
     if (wine !== 'not-found') {
       lastEntry = {
         wine: { id: wine.id as string, name: wine.name as string, color: wine.color, vintage: wine.vintage as number | undefined },
         position: `${entry.row}${entry.col}`,
-        date: entry.dateIn,
+        date: entry.createdAt,
       }
     }
   }
 
-  // Last exit (most recent dateOut)
-  const exits = allEntries.filter((entry) => entry.dateOut != null)
-  const sortedByDateOut = exits.sort(
-    (a, b) => new Date(b.dateOut!).getTime() - new Date(a.dateOut!).getTime(),
-  )
-  let lastExit = null
-  if (sortedByDateOut.length > 0) {
-    const entry = sortedByDateOut[0]
-    const wine = await Wines.getById(entry.wineId)
-    if (wine !== 'not-found') {
-      lastExit = {
-        wine: { id: wine.id as string, name: wine.name as string, color: wine.color, vintage: wine.vintage as number | undefined },
-        position: `${entry.row}${entry.col}`,
-        date: entry.dateOut,
-        rating: entry.rating as number | undefined,
-      }
-    }
-  }
-
-  // Recent history (last 10 events)
   const history = await CellarHistory.list()
+  const lastExit = history.find((event) => event.type === 'exit')
+
   const recentHistory = history.slice(0, 10).map((event) => ({
     type: event.type,
     date: event.date,

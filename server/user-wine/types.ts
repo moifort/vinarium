@@ -22,10 +22,13 @@ export type UserWineDetail = {
   cellar?: {
     row: string
     col: number
+    createdAt: Date
+  }
+  history?: {
     dateIn: Date
+    dateOut: Date
   }
   consumption?: {
-    dateOut: Date
     consumedDate?: Date
     rating?: number
     tastingNotes?: string

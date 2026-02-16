@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const occasion = body?.occasion as string | undefined
 
-  const entries = await Cellar.getActiveEntries()
+  const entries = await Cellar.getAllEntries()
   const wineIds = entries.map((entry) => String(entry.wineId))
   const allWines = await Wines.list()
   const inCellar = allWines.filter((wine) => wineIds.includes(String(wine.id)))

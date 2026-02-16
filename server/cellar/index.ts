@@ -7,7 +7,8 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type { CellarCol, CellarConfig, CellarEntry, CellarRow, Rating } from '~/cellar/types'
+import type { CellarCol, CellarConfig, CellarEntry, CellarRow } from '~/cellar/types'
+import { CellarHistory } from '~/cellar-history/index'
 import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
 
@@ -40,13 +41,8 @@ export namespace Cellar {
   export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
-    // biome-ignore lint/style/noNonNullAssertion: is not possible that an entry is not found
+    // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
     return Promise.all(keys.map(async (key) => (await storage.getItem<CellarEntry>(key))!))
-  }
-
-  export const getActiveEntries = async () => {
-    const entries = await getAllEntries()
-    return entries.filter((entry) => !entry.dateOut)
   }
 
   export const getEntryByWineId = async (wineId: WineId) => {
@@ -58,39 +54,37 @@ export namespace Cellar {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
     const existing = await getEntryByWineId(wineId)
-    if (existing && !existing.dateOut) return 'already-placed' as const
-    const activeEntries = await getActiveEntries()
-    if (activeEntries.some((entry) => entry.row === row && entry.col === col))
+    if (existing) return 'already-placed' as const
+    const allEntries = await getAllEntries()
+    if (allEntries.some((entry) => entry.row === row && entry.col === col))
       return 'position-taken' as const
-    const entry: CellarEntry = { wineId, row, col, dateIn: new Date() }
+    const now = new Date()
+    const entry: CellarEntry = { wineId, row, col, createdAt: now, updatedAt: now }
     await useStorage('cellar').setItem<CellarEntry>(`entries:${wineId}`, entry)
     return entry
   }
 
-  export const removeWine = async (
-    wineId: WineId,
-    consumption?: { consumedDate?: Date; rating?: Rating; tastingNotes?: string },
-  ) => {
+  export const removeWine = async (wineId: WineId) => {
     const storage = useStorage('cellar')
     const existing = await getEntryByWineId(wineId)
-    if (!existing || existing.dateOut) return 'not-in-cellar' as const
-    const updated: CellarEntry = {
-      ...existing,
+    if (!existing) return 'not-in-cellar' as const
+    await CellarHistory.create({
+      wineId: existing.wineId,
+      row: existing.row,
+      col: existing.col,
+      dateIn: existing.createdAt,
       dateOut: new Date(),
-      consumedDate: consumption?.consumedDate,
-      rating: consumption?.rating,
-      tastingNotes: consumption?.tastingNotes,
-    }
-    await storage.setItem<CellarEntry>(`entries:${wineId}`, updated)
-    return updated
+    })
+    await storage.removeItem(`entries:${wineId}`)
+    return 'ok' as const
   }
 
   export const suggestPosition = async (wineId: WineId) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
     const config = await getConfig()
-    const activeEntries = await getActiveEntries()
-    const occupied = activeEntries.map(
+    const allEntries = await getAllEntries()
+    const occupied = allEntries.map(
       (entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`,
     )
     const firstFree = range(config.rows)
@@ -102,7 +96,7 @@ export namespace Cellar {
 
   export const getGrid = async () => {
     const config = await getConfig()
-    const activeEntries = await getActiveEntries()
+    const allEntries = await getAllEntries()
     const grid: { position: string; wine?: Wine }[][] = Array.from(
       { length: config.rows },
       (_, rowIdx) =>
@@ -111,7 +105,7 @@ export namespace Cellar {
         })),
     )
     await Promise.all(
-      activeEntries
+      allEntries
         .filter(
           (entry) => rowToIndex(entry.row) < config.rows && colToIndex(entry.col) < config.cols,
         )
