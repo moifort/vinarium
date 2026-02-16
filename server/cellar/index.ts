@@ -1,13 +1,6 @@
 import { range } from 'lodash-es'
-import {
-  CellarCols,
-  CellarRows,
-  colToIndex,
-  indexToCol,
-  indexToRow,
-  rowToIndex,
-} from '~/cellar/primitives'
-import type { CellarCol, CellarEntry, CellarRow } from '~/cellar/types'
+import { CellarCol, CellarCols, CellarRow, CellarRows } from '~/cellar/primitives'
+import type { CellarCol as CellarColType, CellarEntry, CellarRow as CellarRowType } from '~/cellar/types'
 import { CellarHistory } from '~/cellar-history/index'
 import { Wines } from '~/wine/index'
 import type { Wine, WineId } from '~/wine/types'
@@ -28,7 +21,7 @@ export namespace Cellar {
     return storage.getItem<CellarEntry>(`entries:${wineId}`)
   }
 
-  export const placeWine = async (wineId: WineId, row: CellarRow, col: CellarCol) => {
+  export const placeWine = async (wineId: WineId, row: CellarRowType, col: CellarColType) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
     const existing = await getEntryByWineId(wineId)
@@ -62,13 +55,13 @@ export namespace Cellar {
     if (wine === 'not-found') return 'wine-not-found' as const
     const allEntries = await getAllEntries()
     const occupied = allEntries.map(
-      (entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`,
+      (entry) => `${CellarRow.toIndex(entry.row)},${CellarCol.toIndex(entry.col)}`,
     )
     const firstFree = range(ROWS)
       .flatMap((row) => range(COLS).map((col) => ({ row, col })))
       .find(({ row, col }) => !occupied.includes(`${row},${col}`))
     if (!firstFree) return 'cellar-full' as const
-    return { row: indexToRow(firstFree.row), col: indexToCol(firstFree.col) }
+    return { row: CellarRow.fromIndex(firstFree.row), col: CellarCol.fromIndex(firstFree.col) }
   }
 
   export const getGrid = async () => {
@@ -77,18 +70,18 @@ export namespace Cellar {
       { length: ROWS },
       (_, rowIdx) =>
         Array.from({ length: COLS }, (_, colIdx) => ({
-          position: `${indexToRow(rowIdx)}${indexToCol(colIdx)}`,
+          position: `${CellarRow.fromIndex(rowIdx)}${CellarCol.fromIndex(colIdx)}`,
         })),
     )
     await Promise.all(
       allEntries
         .filter(
-          (entry) => rowToIndex(entry.row) < ROWS && colToIndex(entry.col) < COLS,
+          (entry) => CellarRow.toIndex(entry.row) < ROWS && CellarCol.toIndex(entry.col) < COLS,
         )
         .map(async (entry) => {
           const wine = await Wines.getById(entry.wineId)
           if (wine !== 'not-found') {
-            grid[rowToIndex(entry.row)][colToIndex(entry.col)].wine = wine
+            grid[CellarRow.toIndex(entry.row)][CellarCol.toIndex(entry.col)].wine = wine
           }
         }),
     )
