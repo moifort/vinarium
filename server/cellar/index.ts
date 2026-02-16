@@ -46,13 +46,12 @@ export namespace Cellar {
   export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
-    const all = await Promise.all(keys.map((key) => storage.getItem<CellarEntry>(key)))
-    return all.filter((e): e is CellarEntry => e !== null)
+    return Promise.all(keys.map((key) => storage.getItem<CellarEntry>(key) as Promise<CellarEntry>))
   }
 
   export const getActiveEntries = async () => {
     const entries = await getAllEntries()
-    return entries.filter((e) => !e.dateOut)
+    return entries.filter((entry) => !entry.dateOut)
   }
 
   export const getEntryByWineId = async (wineId: WineId) => {
@@ -68,7 +67,7 @@ export namespace Cellar {
     if (existing && !existing.dateOut) return 'already-placed' as const
 
     const activeEntries = await getActiveEntries()
-    if (activeEntries.some((e) => e.row === row && e.col === col)) return 'position-taken' as const
+    if (activeEntries.some((entry) => entry.row === row && entry.col === col)) return 'position-taken' as const
 
     const entry: CellarEntry = { wineId, row, col, dateIn: new Date() }
     await useStorage('cellar').setItem<CellarEntry>(`entries:${wineId}`, entry)
@@ -101,7 +100,7 @@ export namespace Cellar {
 
     const config = await getConfig()
     const activeEntries = await getActiveEntries()
-    const occupied = new Set(activeEntries.map((e) => `${rowToIndex(e.row)},${colToIndex(e.col)}`))
+    const occupied = new Set(activeEntries.map((entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`))
 
     for (let r = 0; r < config.rows; r++) {
       for (let c = 0; c < config.cols; c++) {
@@ -128,7 +127,7 @@ export namespace Cellar {
 
     await Promise.all(
       activeEntries
-        .filter((e) => rowToIndex(e.row) < config.rows && colToIndex(e.col) < config.cols)
+        .filter((entry) => rowToIndex(entry.row) < config.rows && colToIndex(entry.col) < config.cols)
         .map(async (entry) => {
           const wine = await Wines.getById(entry.wineId)
           if (wine !== 'not-found') {
