@@ -1,4 +1,4 @@
-import { Cellar } from '~/cellar/index'
+import { CellarQuery } from '~/cellar/query'
 import { CellarHistory } from '~/cellar-history/index'
 import { UserLog } from '~/user-log/index'
 import { Wines } from '~/wine/index'
@@ -9,7 +9,7 @@ export namespace UserWine {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'not-found'
 
-    const entry = await Cellar.getEntryByWineId(wineId)
+    const entry = await CellarQuery.getEntryByWineId(wineId)
     const historyEntry = await CellarHistory.getByWineId(wineId)
     const userLog = await UserLog.getByWineId(wineId)
 
@@ -33,7 +33,13 @@ export namespace UserWine {
       drinkUntil: wine.drinkUntil as number | undefined,
       notes: wine.notes,
       cellar: entry
-        ? { row: entry.row as string, col: entry.col as number, createdAt: entry.createdAt }
+        ? {
+            row: entry.row as number,
+            col: entry.col as number,
+            rowLabel: entry.rowLabel as string,
+            colLabel: entry.colLabel as number,
+            createdAt: entry.createdAt,
+          }
         : undefined,
       history: historyEntry
         ? { dateIn: historyEntry.dateIn, dateOut: historyEntry.dateOut }

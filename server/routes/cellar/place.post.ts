@@ -1,4 +1,4 @@
-import { Cellar } from '~/cellar/index'
+import { CellarCommand } from '~/cellar/command'
 import { CellarCol, CellarRow } from '~/cellar/primitives'
 import { WineId } from '~/wine/primitives'
 
@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   const row = CellarRow(body.row)
   const col = CellarCol(body.col)
 
-  const result = await Cellar.placeWine(wineId, row, col)
+  const result = await CellarCommand.placeWine(wineId, row, col)
   if (result === 'wine-not-found')
     throw createError({ statusCode: 404, statusMessage: 'Wine not found' })
   if (result === 'already-placed')

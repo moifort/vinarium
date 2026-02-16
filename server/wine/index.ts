@@ -1,5 +1,5 @@
 import { maxBy, orderBy } from 'lodash-es'
-import { Cellar } from '~/cellar/index'
+import { CellarQuery } from '~/cellar/query'
 import * as userLogRepository from '~/user-log/repository'
 import { randomWineId } from '~/wine/primitives'
 import * as repository from '~/wine/repository'
@@ -44,7 +44,7 @@ export namespace Wines {
     }
 
     if (options?.status && options.status !== 'all') {
-      const activeEntries = await Cellar.getAllEntries()
+      const activeEntries = await CellarQuery.getAllEntries()
       const inCellarIds = activeEntries.map((entry) => entry.wineId)
       if (options.status === 'in-cellar') {
         wines = wines.filter((wine) => inCellarIds.includes(wine.id))

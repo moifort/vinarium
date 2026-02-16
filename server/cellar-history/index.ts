@@ -1,5 +1,5 @@
 import { sortBy } from 'lodash-es'
-import { Cellar } from '~/cellar/index'
+import { CellarQuery } from '~/cellar/query'
 import * as repository from '~/cellar-history/repository'
 import type { CellarHistoryEntry, CellarHistoryEvent } from '~/cellar-history/types'
 import { UserLog } from '~/user-log/index'
@@ -15,7 +15,7 @@ export namespace CellarHistory {
   export const getByWineId = (wineId: WineId) => repository.findBy(wineId)
 
   export const list = async () => {
-    const activeEntries = await Cellar.getAllEntries()
+    const activeEntries = await CellarQuery.getAllEntries()
     const historyEntries = await repository.findAll()
 
     const events = await Promise.all([
@@ -29,7 +29,7 @@ export namespace CellarHistory {
           wineId: entry.wineId as string,
           wineName,
           wineColor,
-          position: `${entry.row}${entry.col}`,
+          position: `${entry.rowLabel}${entry.colLabel}`,
         }
         return [event]
       }),
@@ -37,7 +37,7 @@ export namespace CellarHistory {
         const wine = await Wines.getById(entry.wineId)
         const wineName = wine !== 'not-found' ? (wine.name as string) : 'Vin inconnu'
         const wineColor = wine !== 'not-found' ? wine.color : 'red'
-        const position = `${entry.row}${entry.col}`
+        const position = `${entry.rowLabel}${entry.colLabel}`
         const userLog = await UserLog.getByWineId(entry.wineId)
 
         const entryEvent: CellarHistoryEvent = {

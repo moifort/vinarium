@@ -1,11 +1,11 @@
 import { sortBy } from 'lodash-es'
-import { Cellar } from '~/cellar/index'
+import { CellarQuery } from '~/cellar/query'
 import { CellarHistory } from '~/cellar-history/index'
 import { Wines } from '~/wine/index'
 import type { Wine } from '~/wine/types'
 
 export default defineEventHandler(async () => {
-  const allEntries = await Cellar.getAllEntries()
+  const allEntries = await CellarQuery.getAllEntries()
   const currentYear = new Date().getFullYear()
 
   const bottleCount = allEntries.length
@@ -50,7 +50,7 @@ export default defineEventHandler(async () => {
           color: wine.color,
           vintage: wine.vintage as number | undefined,
         },
-        position: `${entry.row}${entry.col}`,
+        position: `${entry.rowLabel}${entry.colLabel}`,
         date: entry.createdAt,
       }
     }

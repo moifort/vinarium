@@ -1,12 +1,12 @@
 import { AI } from '~/ai/index'
-import { Cellar } from '~/cellar/index'
+import { CellarQuery } from '~/cellar/query'
 import { Wines } from '~/wine/index'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const occasion = body?.occasion as string | undefined
 
-  const entries = await Cellar.getAllEntries()
+  const entries = await CellarQuery.getAllEntries()
   const wineIds = entries.map((entry) => String(entry.wineId))
   const allWines = await Wines.list()
   const inCellar = allWines.filter((wine) => wineIds.includes(String(wine.id)))

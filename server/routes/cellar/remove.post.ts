@@ -1,4 +1,4 @@
-import { Cellar } from '~/cellar/index'
+import { CellarCommand } from '~/cellar/command'
 import { UserLog } from '~/user-log/index'
 import { Rating } from '~/user-log/primitives'
 import { WineId } from '~/wine/primitives'
@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   if (!body) throw createError({ statusCode: 400, statusMessage: 'Body is required' })
 
   const wineId = WineId(body.wineId)
-  const error = await Cellar.removeWine(wineId)
+  const error = await CellarCommand.removeWine(wineId)
   if (error === 'not-in-cellar')
     throw createError({ statusCode: 404, statusMessage: 'Wine not in cellar' })
 
