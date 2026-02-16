@@ -64,6 +64,7 @@ struct Wine: Codable, Identifiable, Sendable {
     var drinkUntil: Int?
     var imageBase64: String?
     var notes: String?
+    var rating: Int?
     let createdAt: Date
     let updatedAt: Date
 }

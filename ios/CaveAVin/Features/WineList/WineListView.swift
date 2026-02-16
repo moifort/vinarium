@@ -33,10 +33,21 @@ struct WineListView: View {
                                     .foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if let price = wine.purchasePrice {
-                                    Text(String(format: "%.0f €", price))
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
+                                VStack(alignment: .trailing) {
+                                    if let price = wine.purchasePrice {
+                                        Text(String(format: "%.0f €", price))
+                                            .font(.subheadline)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    if let rating = wine.rating {
+                                        HStack(spacing: 1) {
+                                            ForEach(1...5, id: \.self) { star in
+                                                Image(systemName: star <= rating ? "star.fill" : "star")
+                                                    .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
+                                                    .font(.caption2)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -60,20 +71,7 @@ struct WineListView: View {
             .onChange(of: viewModel.statusFilter) { _, _ in
                 Task { await viewModel.load() }
             }
-            .onChange(of: viewModel.minRating) { _, _ in
-                Task { await viewModel.load() }
-            }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        viewModel.minRating = viewModel.minRating == 5 ? 0 : 5
-                    } label: {
-                        Image(systemName: viewModel.minRating == 5 ? "star.fill" : "star")
-                    }
-                    .tint(viewModel.minRating == 5 ? .yellow : nil)
-                    .accessibilityLabel("Top vins")
-                    .accessibilityHint(viewModel.minRating == 5 ? "Affiche tous les vins" : "Filtre les vins 5 étoiles")
-                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Picker("Tri", selection: $viewModel.sort) {
@@ -88,15 +86,6 @@ struct WineListView: View {
                         Picker("Statut", selection: $viewModel.statusFilter) {
                             ForEach(WineStatusFilter.allCases) { f in
                                 Text(f.label).tag(f)
-                            }
-                        }
-
-                        Divider()
-
-                        Picker("Note minimum", selection: $viewModel.minRating) {
-                            Text("Toutes").tag(0)
-                            ForEach(1...5, id: \.self) { rating in
-                                Text(String(repeating: "\u{2605}", count: rating)).tag(rating)
                             }
                         }
                     } label: {

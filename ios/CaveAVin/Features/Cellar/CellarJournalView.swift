@@ -49,18 +49,20 @@ struct CellarJournalView: View {
                 Text(event.wineName)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                HStack(spacing: 4) {
-                    WineColorBadge(color: event.wineColor)
-                    Text(event.type == .entry ? "Entrée" : "Sortie")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text("· \(event.position)")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Text(event.type == .entry ? "Entrée" : "Sortie")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
+
+            Text(event.position)
+                .font(.subheadline.monospaced())
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color(.systemGray5))
+                .clipShape(.rect(cornerRadius: 6))
         }
         .padding(.vertical, 2)
     }
