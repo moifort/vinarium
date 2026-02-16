@@ -47,7 +47,7 @@ export namespace Cellar {
       dateOut: new Date(),
     })
     await storage.removeItem(`entries:${wineId}`)
-    return 'ok' as const
+    return
   }
 
   export const suggestPosition = async (wineId: WineId) => {

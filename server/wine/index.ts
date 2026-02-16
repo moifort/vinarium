@@ -103,6 +103,6 @@ export namespace Wines {
     const existing = await getById(id)
     if (existing === 'not-found') return 'not-found' as const
     await storage.removeItem(id)
-    return 'ok' as const
+    return
   }
 }

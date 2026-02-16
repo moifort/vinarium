@@ -8,8 +8,8 @@ export default defineEventHandler(async (event) => {
   if (!body) throw createError({ statusCode: 400, statusMessage: 'Body is required' })
 
   const wineId = WineId(body.wineId)
-  const result = await Cellar.removeWine(wineId)
-  if (result === 'not-in-cellar')
+  const error = await Cellar.removeWine(wineId)
+  if (error === 'not-in-cellar')
     throw createError({ statusCode: 404, statusMessage: 'Wine not in cellar' })
 
   if (body.consumedDate || body.rating != null || body.tastingNotes) {
