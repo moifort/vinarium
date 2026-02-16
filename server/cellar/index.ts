@@ -6,14 +6,7 @@ import {
   indexToRow,
   rowToIndex,
 } from '~/cellar/primitives'
-import type {
-  CellarCol,
-  CellarConfig,
-  CellarEntry,
-  CellarRow,
-  CellarSuggestion,
-  Rating,
-} from '~/cellar/types'
+import type { CellarCol, CellarConfig, CellarEntry, CellarRow, Rating } from '~/cellar/types'
 import { Wines } from '~/wine/index'
 import type { Wine, WineColor, WineId } from '~/wine/types'
 
@@ -46,6 +39,7 @@ export namespace Cellar {
   export const getAllEntries = async () => {
     const storage = useStorage('cellar')
     const keys = await storage.getKeys('entries')
+    // biome-ignore lint/style/noNonNullAssertion: is not possible that an entry is not found
     return Promise.all(keys.map(async (key) => (await storage.getItem<CellarEntry>(key))!))
   }
 
@@ -62,13 +56,11 @@ export namespace Cellar {
   export const placeWine = async (wineId: WineId, row: CellarRow, col: CellarCol) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
-
     const existing = await getEntryByWineId(wineId)
     if (existing && !existing.dateOut) return 'already-placed' as const
-
     const activeEntries = await getActiveEntries()
-    if (activeEntries.some((entry) => entry.row === row && entry.col === col)) return 'position-taken' as const
-
+    if (activeEntries.some((entry) => entry.row === row && entry.col === col))
+      return 'position-taken' as const
     const entry: CellarEntry = { wineId, row, col, dateIn: new Date() }
     await useStorage('cellar').setItem<CellarEntry>(`entries:${wineId}`, entry)
     return entry
@@ -92,15 +84,15 @@ export namespace Cellar {
     return updated
   }
 
-  export const suggestPosition = async (
-    wineId: WineId,
-  ): Promise<CellarSuggestion | 'wine-not-found' | 'cellar-full'> => {
+  export const suggestPosition = async (wineId: WineId) => {
     const wine = await Wines.getById(wineId)
     if (wine === 'not-found') return 'wine-not-found' as const
 
     const config = await getConfig()
     const activeEntries = await getActiveEntries()
-    const occupied = new Set(activeEntries.map((entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`))
+    const occupied = new Set(
+      activeEntries.map((entry) => `${rowToIndex(entry.row)},${colToIndex(entry.col)}`),
+    )
 
     for (let r = 0; r < config.rows; r++) {
       for (let c = 0; c < config.cols; c++) {
@@ -127,7 +119,9 @@ export namespace Cellar {
 
     await Promise.all(
       activeEntries
-        .filter((entry) => rowToIndex(entry.row) < config.rows && colToIndex(entry.col) < config.cols)
+        .filter(
+          (entry) => rowToIndex(entry.row) < config.rows && colToIndex(entry.col) < config.cols,
+        )
         .map(async (entry) => {
           const wine = await Wines.getById(entry.wineId)
           if (wine !== 'not-found') {

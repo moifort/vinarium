@@ -105,7 +105,7 @@ export namespace AI {
   const GEMINI_API_URL =
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
-  export const enrichWithSearch = async (scanResult: ScanResult): Promise<ScanResult> => {
+  export const enrichWithSearch = async (scanResult: ScanResult) => {
     const { googleApiKey } = config()
 
     const wineDescription = [
