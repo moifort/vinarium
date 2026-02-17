@@ -2,13 +2,14 @@ import PhotosUI
 import SwiftUI
 
 enum TabSelection: Int, CaseIterable, Identifiable {
-    case home, cellar, wines
+    case home, cellar, wines, scan
     var id: Int { rawValue }
     var label: String {
         switch self {
         case .home: "Accueil"
         case .cellar: "Cave"
         case .wines: "Vins"
+        case .scan: "Scanner"
         }
     }
     var icon: String {
@@ -16,6 +17,7 @@ enum TabSelection: Int, CaseIterable, Identifiable {
         case .home: "house"
         case .cellar: "square.grid.3x3"
         case .wines: "list.bullet"
+        case .scan: "camera"
         }
     }
 }
@@ -26,31 +28,27 @@ struct ContentView: View {
     @State private var cellarRefreshTrigger = UUID()
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
-            TabView(selection: $selectedTab) {
-                Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
-                    DashboardView(selectedTab: $selectedTab)
-                }
-                Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
-                    CellarGridView(refreshTrigger: cellarRefreshTrigger)
-                }
-                Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
-                    WineListView()
-                }
+        TabView(selection: $selectedTab) {
+            Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
+                DashboardView(selectedTab: $selectedTab)
             }
-
-            Button { showScanner = true } label: {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(width: 56, height: 56)
-                    .background(.ultraThickMaterial.opacity(0.9), in: .circle)
-                    .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 0.5))
+            Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
+                CellarGridView(refreshTrigger: cellarRefreshTrigger)
             }
-            .buttonStyle(.plain)
-            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
-            .padding(.trailing, 16)
-            .padding(.bottom, 72)
+            Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
+                WineListView()
+            }
+            Tab(value: .scan, role: .search) {
+                Color.clear
+            } label: {
+                Label(TabSelection.scan.label, systemImage: TabSelection.scan.icon)
+            }
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            if newValue == .scan {
+                selectedTab = oldValue
+                showScanner = true
+            }
         }
         .fullScreenCover(isPresented: $showScanner) {
             ScanFlowView {
