@@ -37,11 +37,11 @@ enum WineDisplayColor {
 
     var color: Color {
         switch self {
-        case .red: Color(red: 0.5, green: 0.05, blue: 0.1)
-        case .yellow: Color(red: 0.9, green: 0.85, blue: 0.5)
-        case .pink: Color(red: 0.95, green: 0.6, blue: 0.6)
-        case .mint: Color(red: 0.85, green: 0.75, blue: 0.4)
-        case .orange: Color(red: 0.8, green: 0.6, blue: 0.2)
+        case .red: Color(red: 0.5, green: 0.05, blue: 0.1)      // bordeaux
+        case .yellow: Color(red: 0.85, green: 0.88, blue: 0.55)  // paille/vert clair
+        case .pink: Color(red: 1.0, green: 0.42, blue: 0.55)     // rose vif
+        case .mint: Color(red: 1.0, green: 0.82, blue: 0.0)      // or champagne
+        case .orange: Color(red: 0.82, green: 0.52, blue: 0.08)  // ambre miel
         }
     }
 }
