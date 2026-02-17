@@ -54,7 +54,23 @@ struct CellarGridView: View {
     @ViewBuilder
     private var caveListContent: some View {
         if viewModel.groupedRows.isEmpty {
-            ContentUnavailableView("Cave vide", systemImage: "wineglass", description: Text("Ajoutez des bouteilles via le scanner"))
+            VStack(spacing: 16) {
+                Spacer()
+                Image("empty-no-cellar")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 240)
+                    .clipShape(.rect(cornerRadius: 16))
+                    .opacity(0.85)
+                Text("Cave vide")
+                    .font(.title2)
+                    .fontWeight(.semibold)
+                Text("Ajoutez des bouteilles via le scanner")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
         } else {
             List {
                 ForEach(viewModel.groupedRows) { group in

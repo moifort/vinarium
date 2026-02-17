@@ -10,9 +10,39 @@ struct WineListView: View {
                 if viewModel.isLoading && viewModel.wines.isEmpty {
                     ProgressView("Chargement...")
                 } else if viewModel.wines.isEmpty {
-                    ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Ajoutez des vins en scannant une étiquette"))
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image("empty-no-wines")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 240)
+                            .clipShape(.rect(cornerRadius: 16))
+                            .opacity(0.85)
+                        Text("Aucun vin")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("Ajoutez des vins en scannant une étiquette")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
                 } else {
-                    List(viewModel.wines) { wine in
+                    VStack(spacing: 0) {
+                        Picker("Mode", selection: $viewModel.mode) {
+                            ForEach(WineListMode.allCases) { mode in
+                                Text(mode.label).tag(mode)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal)
+                        .padding(.vertical, 8)
+
+                        if viewModel.displayedWines.isEmpty {
+                            ContentUnavailableView("Aucun vin 5 étoiles", systemImage: "star", description: Text("Notez vos vins préférés 5 étoiles"))
+                                .frame(maxHeight: .infinity)
+                        } else {
+                    List(viewModel.displayedWines) { wine in
                         Button {
                             selectedWineId = wine.id
                         } label: {
@@ -52,6 +82,8 @@ struct WineListView: View {
                             }
                         }
                         .tint(.primary)
+                    }
+                        }
                     }
                 }
             }

@@ -49,14 +49,16 @@ struct DashboardView: View {
                 value: "\(data.bottleCount)",
                 subtitle: "Bouteilles",
                 icon: "wineglass",
-                gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)]
+                gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)],
+                backgroundImage: "widget-en-cave"
             )
             GradientWidget(
                 title: "Valeur",
                 value: String(format: "%.0f €", data.totalValue),
                 subtitle: "Total",
                 icon: "eurosign.circle",
-                gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)]
+                gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)],
+                backgroundImage: "widget-valeur"
             )
         }
     }
@@ -70,7 +72,8 @@ struct DashboardView: View {
                 value: "\(data.readyToDrink.count)",
                 subtitle: "Bouteilles",
                 icon: "clock.badge.checkmark",
-                gradient: [Color(red: 0.9, green: 0.45, blue: 0.15), Color(red: 0.95, green: 0.65, blue: 0.2)]
+                gradient: [Color(red: 0.9, green: 0.45, blue: 0.15), Color(red: 0.95, green: 0.65, blue: 0.2)],
+                backgroundImage: "widget-pret-a-deguster"
             )
 
             VStack(spacing: 0) {
@@ -118,7 +121,8 @@ struct DashboardView: View {
                 value: "\(data.history.count)",
                 subtitle: "Activités récentes",
                 icon: "book",
-                gradient: [Color(red: 0.2, green: 0.45, blue: 0.85), Color(red: 0.35, green: 0.65, blue: 0.95)]
+                gradient: [Color(red: 0.2, green: 0.45, blue: 0.85), Color(red: 0.35, green: 0.65, blue: 0.95)],
+                backgroundImage: "widget-journal"
             )
 
             VStack(spacing: 0) {
@@ -171,6 +175,7 @@ private struct GradientWidget: View {
     let subtitle: String
     let icon: String
     let gradient: [Color]
+    var backgroundImage: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -201,13 +206,20 @@ private struct GradientWidget: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
-        .background(
-            LinearGradient(
-                colors: gradient,
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+        .background {
+            if let bg = backgroundImage {
+                Image(bg)
+                    .resizable()
+                    .scaledToFill()
+                    .overlay(Color.black.opacity(0.4))
+            } else {
+                LinearGradient(
+                    colors: gradient,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            }
+        }
         .clipShape(.rect(cornerRadius: 20))
     }
 }
