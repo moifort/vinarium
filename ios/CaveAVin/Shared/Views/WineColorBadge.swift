@@ -6,6 +6,7 @@ struct WineColorBadge: View {
     var body: some View {
         Circle()
             .fill(color.displayColor.color)
-            .frame(width: 12, height: 12)
+            .overlay(Circle().stroke(.primary.opacity(0.15), lineWidth: 0.5))
+            .frame(width: 14, height: 14)
     }
 }

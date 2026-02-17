@@ -16,6 +16,7 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     let domain: String?
     let vintage: Int?
     let region: String?
+    let drinkUntil: Int?
 }
 
 struct DashboardEntry: Codable, Sendable {

@@ -12,9 +12,12 @@ export namespace DashboardQuery {
     const wines = allBottles.map((b) => b.wine)
     const bottleCount = allBottles.length
     const totalValue = wines.reduce((sum, wine) => sum + (wine.purchasePrice ?? 0), 0)
-    const readyToDrink = wines
-      .filter((wine) => isReadyToDrink(wine, currentYear))
-      .map(toReadyToDrinkWine)
+    const readyToDrink = sortBy(
+      wines
+        .filter((wine) => isUrgentToDrink(wine, currentYear))
+        .map(toReadyToDrinkWine),
+      (w) => w.drinkUntil ?? Infinity,
+    )
 
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
@@ -32,12 +35,11 @@ export namespace DashboardQuery {
     }
   }
 
-  const isReadyToDrink = (wine: Wine, currentYear: number) => {
-    if (!wine.drinkFrom && !wine.drinkUntil) return false
-    return (
-      (!wine.drinkFrom || wine.drinkFrom <= currentYear) &&
-      (!wine.drinkUntil || wine.drinkUntil >= currentYear)
-    )
+  const isUrgentToDrink = (wine: Wine, currentYear: number) => {
+    if (!wine.drinkUntil) return false
+    const isReady = !wine.drinkFrom || wine.drinkFrom <= currentYear
+    const isUrgent = wine.drinkUntil <= currentYear + 1
+    return isReady && isUrgent && wine.drinkUntil >= currentYear
   }
 
   const toReadyToDrinkWine = (wine: Wine): ReadyToDrinkWine => ({
@@ -48,6 +50,7 @@ export namespace DashboardQuery {
     vintage: wine.vintage,
     region: wine.region,
     appellation: wine.appellation,
+    drinkUntil: wine.drinkUntil,
   })
 
   const toLastBottle = (bottle?: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number]): LastBottle | undefined => {

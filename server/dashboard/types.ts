@@ -19,6 +19,7 @@ export type ReadyToDrinkWine = {
   vintage?: Year
   region?: Region
   appellation?: Appellation
+  drinkUntil?: Year
 }
 
 export type LastBottle = {

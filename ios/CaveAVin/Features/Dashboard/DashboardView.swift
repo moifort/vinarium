@@ -71,7 +71,7 @@ struct DashboardView: View {
     private func readyToDrinkSection(_ data: DashboardData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("Prêt à déguster", systemImage: "wineglass")
+                Label("À boire en priorité", systemImage: "clock.badge.exclamationmark")
                     .font(.headline)
                 Spacer()
                 if !data.readyToDrink.isEmpty {
@@ -82,7 +82,7 @@ struct DashboardView: View {
             }
 
             if data.readyToDrink.isEmpty {
-                Text("Aucun vin prêt à déguster")
+                Text("Aucun vin à déguster en urgence")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -109,11 +109,14 @@ struct DashboardView: View {
                                     }
                                 }
                                 Spacer()
-                                if let vintage = wine.vintage {
-                                    Text("\(vintage)")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                        .monospacedDigit()
+                                if let drinkUntil = wine.drinkUntil {
+                                    Text(verbatim: "avant \(drinkUntil)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 8)
+                                        .padding(.vertical, 3)
+                                        .background(.orange, in: .capsule)
                                 }
                             }
                             .padding(.vertical, 10)
@@ -178,8 +181,6 @@ struct DashboardView: View {
                 Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                     .foregroundStyle(event.isEntry ? .green : .red)
                     .font(.title3)
-
-                WineColorBadge(color: event.wineColor)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(event.wineName)
