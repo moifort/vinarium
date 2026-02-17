@@ -67,14 +67,14 @@ struct DashboardView: View {
 
     private func readyToDrinkSection(_ data: DashboardData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            GradientWidget(
-                title: "Prêt à déguster",
-                value: "\(data.readyToDrink.count)",
-                subtitle: "Bouteilles",
-                icon: "clock.badge.checkmark",
-                gradient: [Color(red: 0.9, green: 0.45, blue: 0.15), Color(red: 0.95, green: 0.65, blue: 0.2)],
-                backgroundImage: "widget-pret-a-deguster"
-            )
+            HStack {
+                Text("Prêt à déguster")
+                    .font(.headline)
+                Spacer()
+                Text("\(data.readyToDrink.count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             VStack(spacing: 0) {
                 ForEach(data.readyToDrink) { wine in
@@ -115,55 +115,61 @@ struct DashboardView: View {
     // MARK: - Journal
 
     private func journalSection(_ data: DashboardData) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            GradientWidget(
-                title: "Journal",
-                value: "\(data.history.count)",
-                subtitle: "Activités récentes",
-                icon: "book",
-                gradient: [Color(red: 0.2, green: 0.45, blue: 0.85), Color(red: 0.35, green: 0.65, blue: 0.95)],
-                backgroundImage: "widget-journal"
-            )
+        let lastEntry = data.history.first { $0.isEntry }
+        let lastExit = data.history.first { !$0.isEntry }
+
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Journal")
+                    .font(.headline)
+                Spacer()
+                Text("\(data.history.count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
 
             VStack(spacing: 0) {
-                ForEach(data.history) { event in
-                    HStack(spacing: 10) {
-                        Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
-                            .foregroundStyle(event.isEntry ? .green : .red)
-                            .font(.subheadline)
-                        WineColorBadge(color: event.wineColor)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(event.wineName)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            Text(event.position)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .monospacedDigit()
-                        }
-                        Spacer()
-                        VStack(alignment: .trailing, spacing: 2) {
-                            Text(event.date.formatted(date: .abbreviated, time: .omitted))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            if let rating = event.rating {
-                                HStack(spacing: 1) {
-                                    ForEach(1...5, id: \.self) { star in
-                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .foregroundStyle(star <= rating ? .yellow : Color(.systemGray4))
-                                            .font(.system(size: 8))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 14)
+                if let entry = lastEntry {
+                    eventRow(entry)
+                }
+                if let exit = lastExit {
+                    eventRow(exit)
                 }
             }
             .background(Color(.systemGray6))
             .clipShape(.rect(cornerRadius: 12))
         }
+    }
+
+    private func eventRow(_ event: DashboardHistoryEvent) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                .foregroundStyle(event.isEntry ? .green : .red)
+                .font(.title3)
+
+            WineColorBadge(color: event.wineColor)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(event.wineName)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Text(event.isEntry ? "Entrée" : "Sortie")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text(event.position)
+                .font(.subheadline.monospaced())
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color(.systemGray5))
+                .clipShape(.rect(cornerRadius: 6))
+        }
+        .padding(.vertical, 10)
+        .padding(.horizontal, 14)
     }
 }
 

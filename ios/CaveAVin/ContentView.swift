@@ -1,27 +1,57 @@
 import PhotosUI
 import SwiftUI
 
+enum TabSelection: Int, CaseIterable, Identifiable {
+    case home, cellar, wines
+    var id: Int { rawValue }
+    var label: String {
+        switch self {
+        case .home: "Accueil"
+        case .cellar: "Cave"
+        case .wines: "Vins"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .home: "house"
+        case .cellar: "square.grid.3x3"
+        case .wines: "list.bullet"
+        }
+    }
+}
+
 struct ContentView: View {
-    @State private var selectedTab = 0
+    @State private var selectedTab: TabSelection = .home
+    @State private var showScanner = false
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            Tab("Accueil", systemImage: "house", value: 0) {
-                DashboardView()
-            }
-
-            Tab("Cave", systemImage: "square.grid.3x3", value: 1) {
-                CellarGridView()
-            }
-
-            Tab("Vins", systemImage: "list.bullet", value: 2) {
-                WineListView()
-            }
-
-            Tab("Scanner", systemImage: "camera", value: 3) {
-                ScanFlowView {
-                    selectedTab = 1
+        ZStack(alignment: .bottomTrailing) {
+            TabView(selection: $selectedTab) {
+                Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
+                    DashboardView()
                 }
+                Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
+                    CellarGridView()
+                }
+                Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
+                    WineListView()
+                }
+            }
+
+            Button { showScanner = true } label: {
+                Image(systemName: "camera")
+                    .font(.system(size: 20))
+                    .frame(width: 56, height: 56)
+            }
+            .buttonStyle(.plain)
+            .glassEffect(.regular, in: .circle)
+            .padding(.trailing, 16)
+            .padding(.bottom, 72)
+        }
+        .fullScreenCover(isPresented: $showScanner) {
+            ScanFlowView {
+                showScanner = false
+                selectedTab = .cellar
             }
         }
     }
@@ -30,77 +60,123 @@ struct ContentView: View {
 struct ScanFlowView: View {
     var onFlowCompleted: () -> Void = {}
 
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ScanViewModel()
     @State private var selectedPhoto: PhotosPickerItem?
+    @State private var shouldCapture = false
 
     var body: some View {
-        NavigationStack {
-            Group {
-                switch viewModel.step {
-                case .camera:
-                    ZStack(alignment: .bottom) {
-                        CameraView { data in
-                            viewModel.capturePhoto(data)
-                        }
+        Group {
+            switch viewModel.step {
+            case .camera:
+                ZStack {
+                    CameraView(onCapture: { data in
+                        viewModel.capturePhoto(data)
+                    }, shouldCapture: $shouldCapture)
+                        .ignoresSafeArea()
 
-                        PhotosPicker(
-                            selection: $selectedPhoto,
-                            matching: .images
-                        ) {
-                            Image(systemName: "photo")
-                                .font(.title)
-                                .frame(width: 56, height: 56)
+                    ViewfinderOverlay()
+
+                    VStack {
+                        HStack {
+                            Button {
+                                dismiss()
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(.ultraThinMaterial, in: .circle)
+                            }
+                            Spacer()
                         }
-                        .glassEffect(.regular, in: .circle)
-                        .padding(.bottom, 42)
-                        .offset(x: -90)
+                        .padding()
+                        Spacer()
                     }
 
-                case .scanning:
-                    AnalyzingView()
-                        .transition(.opacity.combined(with: .scale(scale: 0.95)))
+                    VStack {
+                        Spacer()
+                        HStack {
+                            PhotosPicker(
+                                selection: $selectedPhoto,
+                                matching: .images
+                            ) {
+                                Image(systemName: "photo")
+                                    .font(.title2)
+                                    .foregroundStyle(.white)
+                                    .frame(width: 56, height: 56)
+                                    .background(.ultraThinMaterial, in: .circle)
+                            }
+                            Spacer()
+                            Button {
+                                shouldCapture = true
+                            } label: {
+                                Circle()
+                                    .stroke(.white, lineWidth: 4)
+                                    .frame(width: 72, height: 72)
+                                    .overlay(
+                                        Circle()
+                                            .fill(.white)
+                                            .frame(width: 60, height: 60)
+                                    )
+                            }
+                            Spacer()
+                            Color.clear.frame(width: 56, height: 56)
+                        }
+                        .padding(.horizontal, 32)
+                        .padding(.bottom, 32)
+                    }
+                }
 
-                case .review(let result, let imageData):
+            case .scanning:
+                AnalyzingView()
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)))
+
+            case .review(let result, let imageData):
+                NavigationStack {
                     ScanReviewView(scanResult: result, imageData: imageData) { request in
                         viewModel.saveWine(request)
                     }
+                }
 
-                case .placing(let wine):
+            case .placing(let wine):
+                NavigationStack {
                     PlacementView(wine: wine) { position in
                         viewModel.step = .confirmed(wine, position)
                     }
+                }
 
-                case .confirmed(let wine, let position):
+            case .confirmed(let wine, let position):
+                NavigationStack {
                     ConfirmationView(wine: wine, position: position) {
                         viewModel.reset()
                         onFlowCompleted()
                     }
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: viewModel.step)
-            .navigationTitle("Scanner")
-            .onChange(of: selectedPhoto) {
-                guard let item = selectedPhoto else { return }
-                selectedPhoto = nil
-                viewModel.step = .scanning
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self),
-                       let image = UIImage(data: data),
-                       let jpeg = image.jpegData(compressionQuality: 0.8) {
-                        viewModel.capturePhoto(jpeg)
-                    } else {
-                        viewModel.step = .camera
-                    }
+        }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.step)
+        .onChange(of: selectedPhoto) {
+            guard let item = selectedPhoto else { return }
+            selectedPhoto = nil
+            viewModel.step = .scanning
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data),
+                   let jpeg = image.jpegData(compressionQuality: 0.8) {
+                    viewModel.capturePhoto(jpeg)
+                } else {
+                    viewModel.step = .camera
                 }
             }
-            .alert("Erreur", isPresented: .init(
-                get: { viewModel.error != nil },
-                set: { if !$0 { viewModel.error = nil } }
-            )) {
-                Button("OK") { viewModel.error = nil }
-            } message: {
-                Text(viewModel.error ?? "")
-            }
+        }
+        .alert("Erreur", isPresented: .init(
+            get: { viewModel.error != nil },
+            set: { if !$0 { viewModel.error = nil } }
+        )) {
+            Button("OK") { viewModel.error = nil }
+        } message: {
+            Text(viewModel.error ?? "")
         }
     }
 }

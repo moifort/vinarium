@@ -65,7 +65,7 @@ const assets: Array<{ prompt: string; filename: string; aspect?: string }> = [
     filename: "app-icon.png",
   },
   {
-    prompt: `Atmospheric wine cellar interior with wooden barrels, dark moody tones, dramatic lighting from above. Used as a small widget background. ${designDirection}`,
+    prompt: `Atmospheric wine cellar interior with wooden barrels, dark moody tones, dramatic lighting from above. Sharp and clear across the entire image, no blur, no vignette, no depth of field effects. Used as a small widget background. ${designDirection}`,
     filename: "widget-en-cave.png",
     aspect: "1:1",
   },
