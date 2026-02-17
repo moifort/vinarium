@@ -3,6 +3,7 @@ import SwiftUI
 struct ScanReviewView: View {
     let scanResult: ScanResult
     let imageData: Data
+    let isSaving: Bool
     let onSave: (CreateWineRequest) -> Void
 
     @State private var name: String
@@ -18,9 +19,10 @@ struct ScanReviewView: View {
     @State private var drinkFrom: String
     @State private var drinkUntil: String
 
-    init(scanResult: ScanResult, imageData: Data, onSave: @escaping (CreateWineRequest) -> Void) {
+    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void) {
         self.scanResult = scanResult
         self.imageData = imageData
+        self.isSaving = isSaving
         self.onSave = onSave
         _name = State(initialValue: scanResult.name)
         _color = State(initialValue: scanResult.color)
@@ -190,7 +192,7 @@ struct ScanReviewView: View {
                     .frame(maxWidth: .infinity)
                     .fontWeight(.semibold)
             }
-            .disabled(name.isEmpty)
+            .disabled(name.isEmpty || isSaving)
         }
     }
 

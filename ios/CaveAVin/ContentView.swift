@@ -23,15 +23,16 @@ enum TabSelection: Int, CaseIterable, Identifiable {
 struct ContentView: View {
     @State private var selectedTab: TabSelection = .home
     @State private var showScanner = false
+    @State private var cellarRefreshTrigger = UUID()
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             TabView(selection: $selectedTab) {
                 Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
-                    DashboardView()
+                    DashboardView(selectedTab: $selectedTab)
                 }
                 Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
-                    CellarGridView()
+                    CellarGridView(refreshTrigger: cellarRefreshTrigger)
                 }
                 Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
                     WineListView()
@@ -39,12 +40,15 @@ struct ContentView: View {
             }
 
             Button { showScanner = true } label: {
-                Image(systemName: "camera")
-                    .font(.system(size: 20))
+                Image(systemName: "barcode.viewfinder")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(.white)
                     .frame(width: 56, height: 56)
+                    .background(.ultraThickMaterial.opacity(0.9), in: .circle)
+                    .overlay(Circle().stroke(.white.opacity(0.15), lineWidth: 0.5))
             }
             .buttonStyle(.plain)
-            .glassEffect(.regular, in: .circle)
+            .shadow(color: .black.opacity(0.25), radius: 8, y: 4)
             .padding(.trailing, 16)
             .padding(.bottom, 72)
         }
@@ -52,6 +56,7 @@ struct ContentView: View {
             ScanFlowView {
                 showScanner = false
                 selectedTab = .cellar
+                cellarRefreshTrigger = UUID()
             }
         }
     }
@@ -134,7 +139,7 @@ struct ScanFlowView: View {
 
             case .review(let result, let imageData):
                 NavigationStack {
-                    ScanReviewView(scanResult: result, imageData: imageData) { request in
+                    ScanReviewView(scanResult: result, imageData: imageData, isSaving: viewModel.isSaving) { request in
                         viewModel.saveWine(request)
                     }
                 }

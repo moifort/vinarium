@@ -35,6 +35,7 @@ struct DashboardEntryWine: Codable, Sendable {
 struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let type: String
     let date: Date
+    let wineId: String
     let wineName: String
     let wineColor: WineColor
     let position: String

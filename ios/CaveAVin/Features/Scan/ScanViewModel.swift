@@ -13,6 +13,7 @@ enum ScanStep {
 final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
+    var isSaving = false
 
     func capturePhoto(_ imageData: Data) {
         step = .scanning
@@ -30,6 +31,8 @@ final class ScanViewModel {
     }
 
     func saveWine(_ request: CreateWineRequest) {
+        guard !isSaving else { return }
+        isSaving = true
         error = nil
 
         Task {
@@ -39,6 +42,7 @@ final class ScanViewModel {
             } catch {
                 self.error = error.localizedDescription
             }
+            self.isSaving = false
         }
     }
 

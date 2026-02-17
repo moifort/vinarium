@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @Binding var selectedTab: TabSelection
+
     @State private var viewModel = DashboardViewModel()
     @State private var selectedWineId: String?
 
@@ -11,14 +13,8 @@ struct DashboardView: View {
                     ScrollView {
                         VStack(spacing: 20) {
                             statsRow(data)
-
-                            if !data.readyToDrink.isEmpty {
-                                readyToDrinkSection(data)
-                            }
-
-                            if !data.history.isEmpty {
-                                journalSection(data)
-                            }
+                            readyToDrinkSection(data)
+                            journalSection(data)
                         }
                         .padding()
                     }
@@ -44,22 +40,29 @@ struct DashboardView: View {
 
     private func statsRow(_ data: DashboardData) -> some View {
         HStack(spacing: 12) {
-            GradientWidget(
-                title: "En cave",
-                value: "\(data.bottleCount)",
-                subtitle: "Bouteilles",
-                icon: "wineglass",
-                gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)],
-                backgroundImage: "widget-en-cave"
-            )
-            GradientWidget(
-                title: "Valeur",
-                value: String(format: "%.0f €", data.totalValue),
-                subtitle: "Total",
-                icon: "eurosign.circle",
-                gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)],
-                backgroundImage: "widget-valeur"
-            )
+            Button { selectedTab = .cellar } label: {
+                GradientWidget(
+                    title: "En cave",
+                    value: "\(data.bottleCount)",
+                    subtitle: "Bouteilles",
+                    icon: "wineglass",
+                    gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)],
+                    backgroundImage: "widget-en-cave"
+                )
+            }
+            .buttonStyle(.plain)
+
+            Button { selectedTab = .cellar } label: {
+                GradientWidget(
+                    title: "Valeur",
+                    value: String(format: "%.0f €", data.totalValue),
+                    subtitle: "Total",
+                    icon: "eurosign.circle",
+                    gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)],
+                    backgroundImage: "widget-valeur"
+                )
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -68,47 +71,60 @@ struct DashboardView: View {
     private func readyToDrinkSection(_ data: DashboardData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Prêt à déguster")
+                Label("Prêt à déguster", systemImage: "wineglass")
                     .font(.headline)
                 Spacer()
-                Text("\(data.readyToDrink.count)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(spacing: 0) {
-                ForEach(data.readyToDrink) { wine in
-                    Button {
-                        selectedWineId = wine.id
-                    } label: {
-                        HStack(spacing: 12) {
-                            WineColorBadge(color: wine.color)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(wine.name)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                if let domain = wine.domain {
-                                    Text(domain)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            Spacer()
-                            if let vintage = wine.vintage {
-                                Text("\(vintage)")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .monospacedDigit()
-                            }
-                        }
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 14)
-                    }
-                    .tint(.primary)
+                if !data.readyToDrink.isEmpty {
+                    Text("\(data.readyToDrink.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .background(Color(.systemGray6))
-            .clipShape(.rect(cornerRadius: 12))
+
+            if data.readyToDrink.isEmpty {
+                Text("Aucun vin prêt à déguster")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 14)
+                    .background(Color(.systemGray6))
+                    .clipShape(.rect(cornerRadius: 12))
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(data.readyToDrink) { wine in
+                        Button {
+                            selectedWineId = wine.id
+                        } label: {
+                            HStack(spacing: 12) {
+                                WineColorBadge(color: wine.color)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(wine.name)
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    if let domain = wine.domain {
+                                        Text(domain)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+                                Spacer()
+                                if let vintage = wine.vintage {
+                                    Text("\(vintage)")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                        .monospacedDigit()
+                                }
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 14)
+                        }
+                        .tint(.primary)
+                    }
+                }
+                .background(Color(.systemGray6))
+                .clipShape(.rect(cornerRadius: 12))
+            }
         }
     }
 
@@ -120,56 +136,74 @@ struct DashboardView: View {
 
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Journal")
+                Label("Journal", systemImage: "book")
                     .font(.headline)
                 Spacer()
-                Text("\(data.history.count)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if !data.history.isEmpty {
+                    Text("\(data.history.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
-            VStack(spacing: 0) {
-                if let entry = lastEntry {
-                    eventRow(entry)
+            if data.history.isEmpty {
+                Text("Aucun événement récent")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 14)
+                    .background(Color(.systemGray6))
+                    .clipShape(.rect(cornerRadius: 12))
+            } else {
+                VStack(spacing: 0) {
+                    if let entry = lastEntry {
+                        eventRow(entry)
+                    }
+                    if let exit = lastExit {
+                        eventRow(exit)
+                    }
                 }
-                if let exit = lastExit {
-                    eventRow(exit)
-                }
+                .background(Color(.systemGray6))
+                .clipShape(.rect(cornerRadius: 12))
             }
-            .background(Color(.systemGray6))
-            .clipShape(.rect(cornerRadius: 12))
         }
     }
 
     private func eventRow(_ event: DashboardHistoryEvent) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
-                .foregroundStyle(event.isEntry ? .green : .red)
-                .font(.title3)
+        Button {
+            selectedWineId = event.wineId
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
+                    .foregroundStyle(event.isEntry ? .green : .red)
+                    .font(.title3)
 
-            WineColorBadge(color: event.wineColor)
+                WineColorBadge(color: event.wineColor)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(event.wineName)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                Text(event.isEntry ? "Entrée" : "Sortie")
-                    .font(.caption)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(event.wineName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Text(event.isEntry ? "Entrée" : "Sortie")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Text(event.position)
+                    .font(.subheadline.monospaced())
                     .foregroundStyle(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color(.systemGray5))
+                    .clipShape(.rect(cornerRadius: 6))
             }
-
-            Spacer()
-
-            Text(event.position)
-                .font(.subheadline.monospaced())
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(Color(.systemGray5))
-                .clipShape(.rect(cornerRadius: 6))
+            .padding(.vertical, 10)
+            .padding(.horizontal, 14)
         }
-        .padding(.vertical, 10)
-        .padding(.horizontal, 14)
+        .tint(.primary)
     }
 }
 

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct CellarGridView: View {
+    var refreshTrigger: UUID = UUID()
+
     @State private var viewModel = CellarGridViewModel()
     @State private var selectedWineId: String?
 
@@ -37,7 +39,7 @@ struct CellarGridView: View {
             .refreshable {
                 await viewModel.load()
             }
-            .task {
+            .task(id: refreshTrigger) {
                 await viewModel.load()
             }
             .sheet(item: Binding(
