@@ -3,6 +3,7 @@ import SwiftUI
 
 struct CameraView: UIViewControllerRepresentable {
     let onCapture: @MainActor (Data) -> Void
+    @Binding var shouldCapture: Bool
 
     func makeUIViewController(context: Context) -> CameraViewController {
         let controller = CameraViewController()
@@ -10,7 +11,12 @@ struct CameraView: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {}
+    func updateUIViewController(_ uiViewController: CameraViewController, context: Context) {
+        if shouldCapture {
+            uiViewController.capturePhoto()
+            DispatchQueue.main.async { shouldCapture = false }
+        }
+    }
 }
 
 @MainActor
@@ -26,7 +32,6 @@ final class CameraViewController: UIViewController {
         super.viewDidLoad()
         delegateHandler.viewController = self
         setupCamera()
-        setupUI()
     }
 
     override func viewDidLayoutSubviews() {
@@ -56,22 +61,7 @@ final class CameraViewController: UIViewController {
         }
     }
 
-    private func setupUI() {
-        let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        let config = UIImage.SymbolConfiguration(pointSize: 80, weight: .light)
-        button.setImage(UIImage(systemName: "circle.inset.filled", withConfiguration: config), for: .normal)
-        button.tintColor = .white
-        button.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
-        view.addSubview(button)
-
-        NSLayoutConstraint.activate([
-            button.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            button.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -30),
-        ])
-    }
-
-    @objc private func capturePhoto() {
+    func capturePhoto() {
         let settings = AVCapturePhotoSettings()
         photoOutput.capturePhoto(with: settings, delegate: delegateHandler)
     }
