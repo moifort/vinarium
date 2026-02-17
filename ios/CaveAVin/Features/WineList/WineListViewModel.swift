@@ -1,5 +1,16 @@
 import Foundation
 
+enum WineListMode: String, CaseIterable, Identifiable {
+    case all, favorites
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .all: "Tous"
+        case .favorites: "5 ⭐"
+        }
+    }
+}
+
 enum WineSort: String, CaseIterable, Identifiable {
     case vintage, region, color, price
     var id: String { rawValue }
@@ -33,6 +44,14 @@ final class WineListViewModel {
     var sort: WineSort = .vintage
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
+    var mode: WineListMode = .all
+
+    var displayedWines: [Wine] {
+        switch mode {
+        case .all: wines
+        case .favorites: wines.filter { $0.rating == 5 }
+        }
+    }
 
     var filterKey: String {
         "\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
