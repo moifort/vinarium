@@ -1,8 +1,8 @@
 # Feature Ideas
 
-- [ ] Ajouter a une liste d'envie
-- [ ] Utiliser Nano Banana Pro pour la fiche d'en-tete de la bouteille
-- [ ] Dans le Dashboard, remplacer le panneau "important" par un badge avant le nom
-- [ ] Avoir le background sur toutes les positions
-- [ ] Rajouter derniere entree et derniere sortie
-- [ ] Trier en sous-sections selon le tri dans la page les vins
+- [ ] Add to a wishlist
+- [ ] Use Nano Banana Pro for the bottle header card
+- [ ] In the Dashboard, replace the "important" panel with a badge before the name
+- [ ] Have the background on all positions
+- [ ] Add last entry and last exit
+- [ ] Sort into sub-sections based on the sort order in the wines page
