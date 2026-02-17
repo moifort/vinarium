@@ -71,7 +71,7 @@ struct DashboardView: View {
     private func readyToDrinkSection(_ data: DashboardData) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Label("À boire en priorité", systemImage: "clock.badge.exclamationmark")
+                Label("Prêt à déguster", systemImage: "wineglass")
                     .font(.headline)
                 Spacer()
                 if !data.readyToDrink.isEmpty {
@@ -82,7 +82,7 @@ struct DashboardView: View {
             }
 
             if data.readyToDrink.isEmpty {
-                Text("Aucun vin à déguster en urgence")
+                Text("Aucun vin prêt à déguster")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -96,30 +96,22 @@ struct DashboardView: View {
                         Button {
                             selectedWineId = wine.id
                         } label: {
-                            HStack(spacing: 12) {
-                                WineColorBadge(color: wine.color)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(wine.name)
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                    if let domain = wine.domain {
-                                        Text(domain)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-                                Spacer()
-                                if let drinkUntil = wine.drinkUntil {
-                                    Text(verbatim: "avant \(drinkUntil)")
+                            HStack(spacing: 10) {
+                                if wine.urgent {
+                                    Image(systemName: "exclamationmark.triangle.fill")
                                         .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundStyle(.white)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 3)
-                                        .background(.orange, in: .capsule)
+                                        .foregroundStyle(.orange)
                                 }
+                                WineColorBadge(color: wine.color)
+                                Text(wine.name)
+                                    .font(.subheadline)
+                                    .lineLimit(1)
+                                Spacer()
+                                Text(wine.position)
+                                    .font(.subheadline.monospaced())
+                                    .foregroundStyle(.secondary)
                             }
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 8)
                             .padding(.horizontal, 14)
                         }
                         .tint(.primary)

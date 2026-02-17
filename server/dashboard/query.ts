@@ -9,13 +9,13 @@ export namespace DashboardQuery {
     const allBottles = await CellarQuery.getAllBottles()
     const currentYear = new Date().getFullYear()
 
-    const wines = allBottles.map((b) => b.wine)
     const bottleCount = allBottles.length
-    const totalValue = wines.reduce((sum, wine) => sum + (wine.purchasePrice ?? 0), 0)
+    const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchasePrice ?? 0), 0)
     const readyToDrink = sortBy(
-      wines
-        .filter((wine) => isUrgentToDrink(wine, currentYear))
-        .map(toReadyToDrinkWine),
+      allBottles
+        .filter((b) => isReadyToDrink(b.wine, currentYear))
+        .map((b) => toReadyToDrinkWine(b, currentYear)),
+      (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Infinity,
     )
 
@@ -35,22 +35,24 @@ export namespace DashboardQuery {
     }
   }
 
-  const isUrgentToDrink = (wine: Wine, currentYear: number) => {
-    if (!wine.drinkUntil) return false
-    const isReady = !wine.drinkFrom || wine.drinkFrom <= currentYear
-    const isUrgent = wine.drinkUntil <= currentYear + 1
-    return isReady && isUrgent && wine.drinkUntil >= currentYear
+  const isReadyToDrink = (wine: Wine, currentYear: number) => {
+    if (!wine.drinkFrom && !wine.drinkUntil) return false
+    return (
+      (!wine.drinkFrom || wine.drinkFrom <= currentYear) &&
+      (!wine.drinkUntil || wine.drinkUntil >= currentYear)
+    )
   }
 
-  const toReadyToDrinkWine = (wine: Wine): ReadyToDrinkWine => ({
-    id: wine.id,
-    name: wine.name,
-    color: wine.color,
-    domain: wine.domain,
-    vintage: wine.vintage,
-    region: wine.region,
-    appellation: wine.appellation,
-    drinkUntil: wine.drinkUntil,
+  const toReadyToDrinkWine = (
+    bottle: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number],
+    currentYear: number,
+  ): ReadyToDrinkWine => ({
+    id: bottle.wine.id,
+    name: bottle.wine.name,
+    color: bottle.wine.color,
+    position: `${bottle.rowLabel}${bottle.colLabel}`,
+    urgent: !!bottle.wine.drinkUntil && bottle.wine.drinkUntil <= currentYear + 1,
+    drinkUntil: bottle.wine.drinkUntil,
   })
 
   const toLastBottle = (bottle?: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number]): LastBottle | undefined => {

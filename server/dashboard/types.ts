@@ -1,6 +1,6 @@
 import type { CellarLogEventView } from '~/cellar-log/types'
-import type { Region, Year } from '~/shared/types'
-import type { Appellation, WineColor, WineDomain, WineId, WineName } from '~/wine/types'
+import type { Year } from '~/shared/types'
+import type { WineColor, WineId, WineName } from '~/wine/types'
 
 export type DashboardView = {
   bottleCount: number
@@ -15,10 +15,8 @@ export type ReadyToDrinkWine = {
   id: WineId
   name: WineName
   color: WineColor
-  domain?: WineDomain
-  vintage?: Year
-  region?: Region
-  appellation?: Appellation
+  position: string
+  urgent: boolean
   drinkUntil?: Year
 }
 
