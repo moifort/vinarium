@@ -17,6 +17,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CaveAVin.xctestplan; sourceTree = "<group>"; };
 		E10000030000000000000001 /* CaveAVin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaveAVin.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E20000030000000000000001 /* CaveAVinUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaveAVinUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -47,6 +48,7 @@
 		E10000050000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */,
 				E10000050000000000000002 /* CaveAVin */,
 				E20000050000000000000001 /* CaveAVinUITests */,
 				E10000050000000000000009 /* Products */,
