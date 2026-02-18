@@ -32,6 +32,7 @@ export type Wine = {
   drinkUntil?: Year
   imageBase64?: string
   notes?: string
+  servingTemperature?: number
   createdAt: Date
   updatedAt: Date
 }
