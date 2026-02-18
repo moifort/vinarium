@@ -5,8 +5,8 @@ struct DashboardPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.navigationBars["Accueil"].waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.navigationBars["Accueil"].waitOrFail()
         return self
     }
 
@@ -18,50 +18,37 @@ struct DashboardPage {
         return self
     }
 
-    func verifyBottleCount(_ expected: String) {
-        let widget = app.buttons["stat-bottles"]
-        XCTAssertTrue(widget.waitForExistence(timeout: 5))
+    func verifyBottleCount(_ expected: String) throws {
+        let widget = try app.buttons["stat-bottles"].waitOrFail()
         XCTAssertTrue(widget.label.contains(expected), "stat-bottles label '\(widget.label)' should contain '\(expected)'")
     }
 
-    func verifyTotalValue(_ expected: String) {
-        let widget = app.buttons["stat-value"]
-        XCTAssertTrue(widget.waitForExistence(timeout: 5))
+    func verifyTotalValue(_ expected: String) throws {
+        let widget = try app.buttons["stat-value"].waitOrFail()
         XCTAssertTrue(widget.label.contains(expected), "stat-value label '\(widget.label)' should contain '\(expected)'")
     }
 
-    func verifyReadyToDrinkContains(_ wineName: String) {
+    func verifyJournalContains(_ wineName: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
         let element = app.staticTexts.matching(predicate).firstMatch
         if !element.waitForExistence(timeout: 3) {
             let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "'\(wineName)' not found in ready to drink")
+            try button.waitOrFail(timeout: 2, "'\(wineName)' not found in journal")
         }
     }
 
-    func verifyJournalContains(_ wineName: String) {
-        let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
-            let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "'\(wineName)' not found in journal")
-        }
-    }
-
-    func verifyJournalShowsEntry() {
+    func verifyJournalShowsEntry() throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", "Entrée")
         let element = app.staticTexts.matching(predicate).firstMatch
         if !element.waitForExistence(timeout: 3) {
             let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "'Entrée' not found in journal")
+            try button.waitOrFail(timeout: 2, "'Entrée' not found in journal")
         }
     }
 
-    func tapWine(named name: String) -> WineDetailPage {
+    func tapWine(named name: String) throws -> WineDetailPage {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
-        let wineButton = app.buttons.matching(predicate).firstMatch
-        XCTAssertTrue(wineButton.waitForExistence(timeout: 5), "Wine button '\(name)' not found")
-        wineButton.tap()
+        try app.buttons.matching(predicate).firstMatch.tapOrFail()
         return WineDetailPage(app: app)
     }
 }

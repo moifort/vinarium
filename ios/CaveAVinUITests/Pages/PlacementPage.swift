@@ -5,26 +5,22 @@ struct PlacementPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.navigationBars["Placement"].waitForExistence(timeout: 10))
+    func verify() throws -> Self {
+        try app.navigationBars["Placement"].waitOrFail()
         return self
     }
 
-    func verifyWineName(_ name: String) {
-        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5))
+    func verifyWineName(_ name: String) throws {
+        try app.staticTexts[name].waitOrFail()
     }
 
-    func selectPosition(_ position: String) -> Self {
-        let posButton = app.buttons[position]
-        XCTAssertTrue(posButton.waitForExistence(timeout: 5))
-        posButton.tap()
+    func selectPosition(_ position: String) throws -> Self {
+        try app.buttons[position].tapOrFail()
         return self
     }
 
-    func tapPlace() -> ConfirmationPage {
-        let placeButton = app.buttons["place-button"]
-        XCTAssertTrue(placeButton.waitForExistence(timeout: 5))
-        placeButton.tap()
+    func tapPlace() throws -> ConfirmationPage {
+        try app.buttons["place-button"].tapOrFail()
         return ConfirmationPage(app: app)
     }
 }

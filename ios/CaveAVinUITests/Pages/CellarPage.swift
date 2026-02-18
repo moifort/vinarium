@@ -5,48 +5,37 @@ struct CellarPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.navigationBars["Ma Cave"].waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.navigationBars["Ma Cave"].waitOrFail()
         return self
     }
 
-    func switchToCave() -> Self {
-        app.segmentedControls["cellar-segment"].buttons["Cave"].tap()
+    func switchToCave() throws -> Self {
+        try app.segmentedControls["cellar-segment"].buttons["Cave"].tapOrFail()
         return self
     }
 
-    func switchToJournal() -> Self {
-        app.segmentedControls["cellar-segment"].buttons["Journal"].tap()
+    func switchToJournal() throws -> Self {
+        try app.segmentedControls["cellar-segment"].buttons["Journal"].tapOrFail()
         return self
     }
 
-    func verifyRowHeader(_ row: String) {
+    func verifyRowHeader(_ row: String) throws {
         let text = "Rangée \(row)"
-        XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 5), "Row header '\(text)' not found")
+        try app.staticTexts[text].waitOrFail(timeout: 4, "Row header '\(text)' not found")
     }
 
-    func verifyPositionVisible(_ position: String) {
-        let predicate = NSPredicate(format: "label CONTAINS %@", position)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
-            let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "Position '\(position)' not found")
-        }
+    func verifyJournalShowsEntry() throws {
+        try app.staticTexts["Entrée"].waitOrFail(timeout: 4, "'Entrée' not found")
     }
 
-    func verifyJournalShowsEntry() {
-        XCTAssertTrue(app.staticTexts["Entrée"].waitForExistence(timeout: 5), "'Entrée' not found")
+    func verifyJournalShowsExit() throws {
+        try app.staticTexts["Sortie"].waitOrFail(timeout: 4, "'Sortie' not found")
     }
 
-    func verifyJournalShowsExit() {
-        XCTAssertTrue(app.staticTexts["Sortie"].waitForExistence(timeout: 5), "'Sortie' not found")
-    }
-
-    func tapWine(named name: String) -> WineDetailPage {
+    func tapWine(named name: String) throws -> WineDetailPage {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
-        let wineButton = app.buttons.matching(predicate).firstMatch
-        XCTAssertTrue(wineButton.waitForExistence(timeout: 5), "Wine button '\(name)' not found")
-        wineButton.tap()
+        try app.buttons.matching(predicate).firstMatch.tapOrFail()
         return WineDetailPage(app: app)
     }
 }

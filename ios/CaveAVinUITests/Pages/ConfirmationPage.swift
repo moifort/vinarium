@@ -5,22 +5,20 @@ struct ConfirmationPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.staticTexts["Bouteille ajoutée !"].waitForExistence(timeout: 10))
+    func verify() throws -> Self {
+        try app.staticTexts["Bouteille ajoutée !"].waitOrFail()
         return self
     }
 
-    func verifyWineName(_ name: String) {
-        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5))
+    func verifyWineName(_ name: String) throws {
+        try app.staticTexts[name].waitOrFail()
     }
 
-    func verifyPosition(_ position: String) {
-        XCTAssertTrue(app.staticTexts["Position : \(position)"].waitForExistence(timeout: 5))
+    func verifyPosition(_ position: String) throws {
+        try app.staticTexts["Position : \(position)"].waitOrFail()
     }
 
-    func tapDone() {
-        let doneButton = app.buttons["done-button"]
-        XCTAssertTrue(doneButton.waitForExistence(timeout: 5))
-        doneButton.tap()
+    func tapDone() throws {
+        try app.buttons["done-button"].tapOrFail()
     }
 }

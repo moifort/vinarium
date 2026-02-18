@@ -5,31 +5,31 @@ struct TabBarPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.tabBars.firstMatch.waitOrFail()
         return self
     }
 
     @discardableResult
-    func goToDashboard() -> DashboardPage {
-        app.tabBars.buttons["Accueil"].tap()
+    func goToDashboard() throws -> DashboardPage {
+        try app.tabBars.buttons["Accueil"].tapOrFail()
         return DashboardPage(app: app)
     }
 
     @discardableResult
-    func goToCellar() -> CellarPage {
-        app.tabBars.buttons["Cave"].tap()
+    func goToCellar() throws -> CellarPage {
+        try app.tabBars.buttons["Cave"].tapOrFail()
         return CellarPage(app: app)
     }
 
     @discardableResult
-    func goToWineList() -> WineListPage {
-        app.tabBars.buttons["Vins"].tap()
+    func goToWineList() throws -> WineListPage {
+        try app.tabBars.buttons["Vins"].tapOrFail()
         return WineListPage(app: app)
     }
 
-    func openScanner() -> ScanFlowPage {
-        app.tabBars.buttons["Scanner"].tap()
+    func openScanner() throws -> ScanFlowPage {
+        try app.tabBars.buttons["Scanner"].tapOrFail()
         return ScanFlowPage(app: app)
     }
 }

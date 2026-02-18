@@ -5,51 +5,33 @@ struct WineDetailPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.buttons["Fermer"].waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.buttons["Fermer"].waitOrFail()
         return self
     }
 
-    func verifyWineName(_ name: String) {
+    func verifyWineName(_ name: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        XCTAssertTrue(element.waitForExistence(timeout: 5), "Wine name '\(name)' not found")
+        try app.staticTexts.matching(predicate).firstMatch.waitOrFail(timeout: 4, "Wine name '\(name)' not found")
     }
 
-    func verifyTextVisible(_ text: String) {
-        let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
-            let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "Text '\(text)' not found")
-        }
+    func verifyCellarSection() throws {
+        app.swipeUp()
+        try app.staticTexts["En cave"].waitOrFail(timeout: 4, "'En cave' section not found")
     }
 
-    func verifyPosition(_ position: String) {
-        let predicate = NSPredicate(format: "label CONTAINS %@", position)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 3) {
-            let button = app.buttons.matching(predicate).firstMatch
-            XCTAssertTrue(button.waitForExistence(timeout: 2), "Position '\(position)' not found")
-        }
+    func verifyConsumptionSection() throws {
+        app.swipeUp()
+        try app.staticTexts["Consommé"].waitOrFail(timeout: 4, "'Consommé' section not found")
     }
 
-    func verifyCellarSection() {
-        XCTAssertTrue(app.staticTexts["En cave"].waitForExistence(timeout: 5), "'En cave' section not found")
-    }
-
-    func verifyConsumptionSection() {
-        XCTAssertTrue(app.staticTexts["Consommé"].waitForExistence(timeout: 5), "'Consommé' section not found")
-    }
-
-    func tapRemoveFromCellar() -> ConsumptionPage {
-        let removeButton = app.buttons["remove-from-cellar-button"]
-        XCTAssertTrue(removeButton.waitForExistence(timeout: 5))
-        removeButton.tap()
+    func tapRemoveFromCellar() throws -> ConsumptionPage {
+        app.swipeUp()
+        try app.buttons["remove-from-cellar-button"].tapOrFail()
         return ConsumptionPage(app: app)
     }
 
-    func close() {
-        app.buttons["Fermer"].tap()
+    func close() throws {
+        try app.buttons["Fermer"].tapOrFail()
     }
 }

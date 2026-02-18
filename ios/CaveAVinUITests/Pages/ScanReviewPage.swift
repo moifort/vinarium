@@ -5,61 +5,43 @@ struct ScanReviewPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.navigationBars["Vérifier le vin"].waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.navigationBars["Vérifier le vin"].waitOrFail()
         return self
     }
 
-    func clearAndTypeName(_ name: String) -> Self {
-        let nameField = app.textFields["Nom du vin"]
-        XCTAssertTrue(nameField.waitForExistence(timeout: 5))
-        nameField.tap()
-        // Select all and delete
-        nameField.press(forDuration: 1.0)
-        if app.menuItems["Tout sélectionner"].waitForExistence(timeout: 2) {
-            app.menuItems["Tout sélectionner"].tap()
-        }
+    func clearAndTypeName(_ name: String) throws -> Self {
+        let nameField = try app.textFields["Nom du vin"].waitOrFail()
+        // Triple-tap to select all text, then type to replace
+        nameField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
         nameField.typeText(name)
         return self
     }
 
-    func selectColor(_ color: String) -> Self {
-        let colorPicker = app.buttons["Couleur"]
-        XCTAssertTrue(colorPicker.waitForExistence(timeout: 5))
-        colorPicker.tap()
-        app.buttons[color].tap()
+    func selectColor(_ color: String) throws -> Self {
+        try app.buttons["Couleur"].tapOrFail()
+        try app.buttons[color].tapOrFail()
         return self
     }
 
-    func typeVintage(_ vintage: String) -> Self {
-        let vintageField = app.textFields["Année"]
-        if vintageField.waitForExistence(timeout: 3) {
-            vintageField.tap()
-            vintageField.press(forDuration: 1.0)
-            if app.menuItems["Tout sélectionner"].waitForExistence(timeout: 2) {
-                app.menuItems["Tout sélectionner"].tap()
-            }
-            vintageField.typeText(vintage)
-        }
+    func typeVintage(_ vintage: String) throws -> Self {
+        let vintageField = try app.textFields["Année"].waitOrFail()
+        vintageField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
+        vintageField.typeText(vintage)
         return self
     }
 
-    func typePrice(_ price: String) -> Self {
-        let priceField = app.textFields["review-price-field"]
-        XCTAssertTrue(priceField.waitForExistence(timeout: 5))
-        priceField.tap()
-        priceField.press(forDuration: 1.0)
-        if app.menuItems["Tout sélectionner"].waitForExistence(timeout: 2) {
-            app.menuItems["Tout sélectionner"].tap()
-        }
+    func typePrice(_ price: String) throws -> Self {
+        app.swipeUp()
+        let priceField = try app.textFields["review-price-field"].waitOrFail()
+        priceField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
         priceField.typeText(price)
         return self
     }
 
-    func tapSave() -> PlacementPage {
-        let saveButton = app.buttons["review-save-button"]
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 5))
-        saveButton.tap()
+    func tapSave() throws -> PlacementPage {
+        app.swipeUp()
+        try app.buttons["review-save-button"].tapOrFail()
         return PlacementPage(app: app)
     }
 }

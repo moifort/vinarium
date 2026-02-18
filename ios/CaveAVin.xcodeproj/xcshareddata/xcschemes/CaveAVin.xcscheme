@@ -33,7 +33,7 @@
             ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
             <ActionContent
                title = "Add test photo to simulator"
-               scriptText = "xcrun simctl addmedia booted &quot;$SRCROOT/CaveAVinUITests/Resources/etiquette.jpg&quot; 2>/dev/null || true">
+               scriptText = "xcrun simctl boot &quot;iPhone 17&quot; 2>/dev/null || true&#10;sleep 3&#10;xcrun simctl addmedia booted &quot;$SRCROOT/CaveAVinUITests/Resources/etiquette.jpg&quot; 2>/dev/null || true">
                <EnvironmentBuildable>
                   <BuildableReference
                      BuildableIdentifier = "primary"

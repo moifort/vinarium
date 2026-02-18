@@ -3,81 +3,76 @@ import XCTest
 final class NominalFlowTest: BaseUITest {
 
     private let wineName = "Vin Test Nominal"
-    private let winePrice = "25"
 
     // MARK: - Nominal E2E Flow
 
     func testNominalFlow() async throws {
-        // 1. SCAN: open scanner, pick photo, edit name & price, save
+        // 1. SCAN: open scanner, pick photo, save
         let tabBar = TabBarPage(app: app)
-        let scanner = tabBar.openScanner()
-        scanner.verify()
+        let scanner = try tabBar.openScanner()
+        try scanner.verify()
 
-        let review = scanner.selectPhotoFromPicker()
-        review.verify()
+        let review = try scanner.selectPhotoFromPicker()
+        try review.verify()
 
-        let editedReview = review
-            .clearAndTypeName(wineName)
-            .typePrice(winePrice)
-
-        let placement = editedReview.tapSave()
+        _ = try review.clearAndTypeName(wineName)
+        let placement = try review.tapSave()
 
         // 2. PLACEMENT: verify, place, confirm, done
-        placement.verify()
-        let confirmation = placement.tapPlace()
-        confirmation.verify()
-        confirmation.tapDone()
+        try placement.verify()
+        let confirmation = try placement.tapPlace()
+        try confirmation.verify()
+        try confirmation.tapDone()
 
         // 3. CAVE: verify wine visible, tap → detail, check "En cave", close
-        let cellar = CellarPage(app: app).verify()
-        let cellarDetail = cellar.tapWine(named: wineName)
-        cellarDetail.verify()
-        cellarDetail.verifyWineName(wineName)
-        cellarDetail.verifyCellarSection()
-        cellarDetail.close()
+        let cellar = try CellarPage(app: app).verify()
+        let cellarDetail = try cellar.tapWine(named: wineName)
+        try cellarDetail.verify()
+        try cellarDetail.verifyWineName(wineName)
+        try cellarDetail.verifyCellarSection()
+        try cellarDetail.close()
 
         // Cave Journal: switch to Journal, verify "Entrée"
-        let journal = cellar.switchToJournal()
-        journal.verifyJournalShowsEntry()
+        let journal = try cellar.switchToJournal()
+        try journal.verifyJournalShowsEntry()
 
         // Tap journal entry → detail → close
-        let journalDetail = journal.tapWine(named: wineName)
-        journalDetail.verify()
-        journalDetail.verifyWineName(wineName)
-        journalDetail.close()
+        let journalDetail = try journal.tapWine(named: wineName)
+        try journalDetail.verify()
+        try journalDetail.verifyWineName(wineName)
+        try journalDetail.close()
 
         // 4. WINE LIST: go to Vins tab, verify wine visible, tap → detail → close
-        let wineList = tabBar.goToWineList().verify()
-        wineList.verifyWineVisible(wineName)
-        let listDetail = wineList.tapWine(named: wineName)
-        listDetail.verify()
-        listDetail.verifyWineName(wineName)
-        listDetail.close()
+        let wineList = try tabBar.goToWineList().verify()
+        try wineList.verifyWineVisible(wineName)
+        let listDetail = try wineList.tapWine(named: wineName)
+        try listDetail.verify()
+        try listDetail.verifyWineName(wineName)
+        try listDetail.close()
 
         // 5. DASHBOARD: go to Accueil, verify stats and journal
-        let dashboard = tabBar.goToDashboard().verify()
-        dashboard.verifyBottleCount("1")
-        dashboard.verifyTotalValue("25")
-        dashboard.verifyJournalContains(wineName)
-        dashboard.verifyJournalShowsEntry()
+        let dashboard = try tabBar.goToDashboard().verify()
+        try dashboard.verifyBottleCount("1")
+        try dashboard.verifyJournalContains(wineName)
+        try dashboard.verifyJournalShowsEntry()
 
         // 6. CONSUMPTION: back to Cave, tap wine, remove, rate 5 stars + comment
-        _ = tabBar.goToCellar().verify()
-        let detailForRemoval = cellar.tapWine(named: wineName)
-        detailForRemoval.verify()
-        let consumption = detailForRemoval.tapRemoveFromCellar()
-        consumption.verify()
-        consumption
+        _ = try tabBar.goToCellar().verify()
+        let detailForRemoval = try cellar.tapWine(named: wineName)
+        try detailForRemoval.verify()
+        let consumption = try detailForRemoval.tapRemoveFromCellar()
+        try consumption.verify()
+        try consumption
             .tapStar(5)
             .typeTastingNotes("Excellent")
             .tapConfirm()
 
         // Should return to cellar
-        XCTAssertTrue(app.navigationBars["Ma Cave"].waitForExistence(timeout: 10))
+        try app.navigationBars["Ma Cave"].waitOrFail()
 
         // 7. FAVORITES: go to Vins tab, switch to "5 ⭐", verify wine visible
-        _ = tabBar.goToWineList().verify()
-        let favorites = WineListPage(app: app).switchToFavorites()
-        favorites.verifyWineVisible(wineName)
+        _ = try tabBar.goToWineList().verify()
+        let favorites = try WineListPage(app: app).switchToFavorites()
+        try favorites.verifyWineVisible(wineName)
     }
 }

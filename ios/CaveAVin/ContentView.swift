@@ -72,6 +72,10 @@ struct ScanFlowView: View {
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var shouldCapture = false
 
+    private var isUITest: Bool {
+        ProcessInfo.processInfo.arguments.contains("-UITestPhoto")
+    }
+
     var body: some View {
         Group {
             switch viewModel.step {
@@ -105,17 +109,30 @@ struct ScanFlowView: View {
                     VStack {
                         Spacer()
                         HStack {
-                            PhotosPicker(
-                                selection: $selectedPhoto,
-                                matching: .images
-                            ) {
-                                Image(systemName: "photo")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                                    .frame(width: 56, height: 56)
-                                    .background(.ultraThinMaterial, in: .circle)
+                            if isUITest {
+                                Button {
+                                    loadTestImage()
+                                } label: {
+                                    Image(systemName: "photo")
+                                        .font(.title2)
+                                        .foregroundStyle(.white)
+                                        .frame(width: 56, height: 56)
+                                        .background(.ultraThinMaterial, in: .circle)
+                                }
+                                .accessibilityIdentifier("scan-photo-picker")
+                            } else {
+                                PhotosPicker(
+                                    selection: $selectedPhoto,
+                                    matching: .images
+                                ) {
+                                    Image(systemName: "photo")
+                                        .font(.title2)
+                                        .foregroundStyle(.white)
+                                        .frame(width: 56, height: 56)
+                                        .background(.ultraThinMaterial, in: .circle)
+                                }
+                                .accessibilityIdentifier("scan-photo-picker")
                             }
-                            .accessibilityIdentifier("scan-photo-picker")
                             Spacer()
                             Button {
                                 shouldCapture = true
@@ -188,6 +205,15 @@ struct ScanFlowView: View {
         } message: {
             Text(viewModel.error ?? "")
         }
+    }
+
+    private func loadTestImage() {
+        guard let url = Bundle.main.url(forResource: "etiquette", withExtension: "jpg"),
+              let data = try? Data(contentsOf: url),
+              let image = UIImage(data: data),
+              let jpeg = image.jpegData(compressionQuality: 0.8) else { return }
+        viewModel.step = .scanning
+        viewModel.capturePhoto(jpeg)
     }
 }
 

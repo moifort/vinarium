@@ -5,24 +5,17 @@ struct ScanFlowPage {
     let app: XCUIApplication
 
     @discardableResult
-    func verify() -> Self {
-        XCTAssertTrue(app.buttons["scan-photo-picker"].waitForExistence(timeout: 5))
+    func verify() throws -> Self {
+        try app.buttons["scan-photo-picker"].waitOrFail()
         return self
     }
 
-    func selectPhotoFromPicker() -> ScanReviewPage {
-        let picker = app.buttons["scan-photo-picker"]
-        XCTAssertTrue(picker.waitForExistence(timeout: 5))
-        picker.tap()
+    func selectPhotoFromPicker() throws -> ScanReviewPage {
+        try app.buttons["scan-photo-picker"].tapOrFail()
 
-        // Wait for PHPicker to appear and select first photo
-        let firstPhoto = app.collectionViews.cells.firstMatch
-        XCTAssertTrue(firstPhoto.waitForExistence(timeout: 10))
-        firstPhoto.tap()
-
-        // Wait for scan review to appear (AI scan may take time)
-        let reviewTitle = app.navigationBars["Vérifier le vin"]
-        XCTAssertTrue(reviewTitle.waitForExistence(timeout: 30))
+        // In test mode (-UITestPhoto), tapping the button loads the bundled image
+        // directly — no PHPicker interaction needed. Wait longer for AI scan.
+        try app.navigationBars["Vérifier le vin"].waitOrFail(timeout: 15)
 
         return ScanReviewPage(app: app)
     }
