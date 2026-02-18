@@ -6,3 +6,6 @@
 - [ ] Have the background on all positions
 - [ ] Add last entry and last exit
 - [ ] Sort into sub-sections based on the sort order in the wines page
+- [ ] test end to end
+- [ ] migration db
+- 
