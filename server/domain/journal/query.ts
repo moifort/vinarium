@@ -1,10 +1,10 @@
 import { sortBy } from 'lodash-es'
-import * as repository from '~/domain/cellar-log/repository'
-import type { CellarLogEntry, CellarLogEventView } from '~/domain/cellar-log/types'
+import * as repository from '~/domain/journal/repository'
+import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
-export namespace CellarLogQuery {
+export namespace JournalQuery {
   export const getAll = async () => {
     const entries = await repository.findAll()
     const views = await Promise.all(entries.map(toView))
@@ -17,7 +17,7 @@ export namespace CellarLogQuery {
     return sortBy(views, ({ date }) => -new Date(date).getTime())
   }
 
-  const toView = async (entry: CellarLogEntry): Promise<CellarLogEventView> => {
+  const toView = async (entry: JournalEntry): Promise<JournalEventView> => {
     const wine = await WineQuery.getById(entry.wineId)
     if (wine === 'not-found') throw new Error(`Wine not found: ${entry.wineId}`)
     return {

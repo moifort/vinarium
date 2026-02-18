@@ -1,6 +1,6 @@
 import { sortBy } from 'lodash-es'
 import { CellarQuery } from '~/domain/cellar/query'
-import { CellarLogQuery } from '~/domain/cellar-log/query'
+import { JournalQuery } from '~/domain/journal/query'
 import type { DashboardView, LastBottle, ReadyToDrinkWine } from '~/domain/dashboard/types'
 import type { Wine } from '~/domain/wine/types'
 
@@ -22,7 +22,7 @@ export namespace DashboardQuery {
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
 
-    const history = await CellarLogQuery.getAll()
+    const history = await JournalQuery.getAll()
     const lastExit = history.find((event) => event.type === 'out')
 
     return {

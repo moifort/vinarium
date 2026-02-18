@@ -1,9 +1,9 @@
-import type { ScanResult } from '~/domain/ai/types'
+import type { ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
-export namespace AI {
+export namespace Scan {
   export const scanLabel = async (imageBuffer: Buffer) => {
     const { anthropicApiKey } = config()
     const base64 = imageBuffer.toString('base64')
