@@ -76,7 +76,7 @@ final class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate, @unch
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         guard let data = photo.fileDataRepresentation() else { return }
-        if let image = UIImage(data: data), let jpeg = image.jpegData(compressionQuality: 0.8) {
+        if let image = UIImage(data: data), let jpeg = image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) {
             Task { @MainActor in
                 self.viewController?.handleCapturedPhoto(jpeg)
             }
