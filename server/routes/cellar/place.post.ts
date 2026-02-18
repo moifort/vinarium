@@ -1,6 +1,6 @@
-import { CellarCommand } from '~/cellar/command'
-import { CellarCol, CellarRow } from '~/cellar/primitives'
-import { WineId } from '~/wine/primitives'
+import { CellarCommand } from '~/domain/cellar/command'
+import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
+import { WineId } from '~/domain/wine/primitives'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)

@@ -1,4 +1,4 @@
-import { AI } from '~/ai/index'
+import { AI } from '~/domain/ai/index'
 
 export default defineEventHandler(async (event) => {
   const body = await readRawBody(event, false)

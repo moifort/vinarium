@@ -1,5 +1,5 @@
-import { WineQuery } from '~/wine/query'
-import type { SortOrder, WineColor, WineSort, WineStatus } from '~/wine/types'
+import { WineQuery } from '~/domain/wine/query'
+import type { SortOrder, WineColor, WineSort, WineStatus } from '~/domain/wine/types'
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)

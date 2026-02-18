@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { Country, Eur, Region, Year } from '~/shared/primitives'
-import { WineCommand } from '~/wine/command'
-import { Appellation, Classification, WineDomain, WineId, WineName } from '~/wine/primitives'
-import type { Wine } from '~/wine/types'
+import { Country, Eur, Region, Year } from '~/domain/shared/primitives'
+import { WineCommand } from '~/domain/wine/command'
+import { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/primitives'
+import type { Wine } from '~/domain/wine/types'
 
 export default defineEventHandler(async (event) => {
   const id = WineId(getRouterParam(event, 'id'))

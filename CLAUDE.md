@@ -31,7 +31,7 @@
 
 ## Backend Patterns (TypeScript/Nitro)
 
-- Domain architecture: `server/{domain}/types.ts`, `primitives.ts`, `repository.ts`, `command.ts`, `query.ts`
+- Domain architecture: `server/domain/{domain}/types.ts`, `primitives.ts`, `repository.ts`, `command.ts`, `query.ts`
 - Branded types with `ts-brand` + Zod validation constructors in `primitives.ts`
 - Discriminated unions for errors (no exceptions)
 - File-based storage: `useStorage('wines')`, `useStorage('cellar')`, etc.
@@ -39,11 +39,11 @@
 
 ## Database Migrations
 
-- Location: `server/migration/`
+- Location: `server/system/migration/`
 - Forward-only sequential migrations, no rollback
 - Meta tracked in `useStorage('migration-meta')` (key `state`)
 - Nitro plugin (`server/plugins/migration.ts`) runs migrations at boot, `process.exit(1)` on failure
-- To add a migration: create `server/migration/migrations/NNNN-name.ts`, register in `migrations/index.ts`
+- To add a migration: create `server/system/migration/migrations/NNNN-name.ts`, register in `migrations/index.ts`
 - Migration `version` uses branded `MigrationVersion` (starts at 1, version 0 is reserved sentinel)
 - Migrations receive a `MigrationContext` with `storage()` accessor, return `MigrationResult`
 - Runner wraps each migration in try/catch — migrations don't need their own error handling

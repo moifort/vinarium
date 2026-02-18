@@ -1,6 +1,6 @@
-import { CellarCommand } from '~/cellar/command'
-import { WineCommand } from '~/wine/command'
-import { WineId } from '~/wine/primitives'
+import { CellarCommand } from '~/domain/cellar/command'
+import { WineCommand } from '~/domain/wine/command'
+import { WineId } from '~/domain/wine/primitives'
 
 export default defineEventHandler(async (event) => {
   const id = WineId(getRouterParam(event, 'id'))
