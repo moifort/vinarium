@@ -150,6 +150,7 @@ struct ScanReviewView: View {
                     TextField("0", text: $estimatedPrice)
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
+                        .accessibilityIdentifier("review-price-field")
                     Text("€")
                         .foregroundStyle(.secondary)
                 }

@@ -63,6 +63,12 @@ final class TestAPIClient: @unchecked Sendable {
         }
     }
 
+    // MARK: - Test Reset
+
+    func resetDatabase() throws {
+        _ = try performRequest("POST", path: "/test/reset")
+    }
+
     // MARK: - Cellar
 
     func placeWine(wineId: String, row: String, col: Int) throws {

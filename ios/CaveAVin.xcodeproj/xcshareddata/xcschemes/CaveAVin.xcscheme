@@ -28,6 +28,24 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Add test photo to simulator"
+               scriptText = "xcrun simctl addmedia booted &quot;$SRCROOT/CaveAVinUITests/Resources/etiquette.jpg&quot; 2>/dev/null || true">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "E10000060000000000000001"
+                     BuildableName = "CaveAVin.app"
+                     BlueprintName = "CaveAVin"
+                     ReferencedContainer = "container:CaveAVin.xcodeproj">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
       <TestPlans>
          <TestPlanReference
             reference = "container:CaveAVin.xctestplan"

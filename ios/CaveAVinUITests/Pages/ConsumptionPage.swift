@@ -18,7 +18,8 @@ struct ConsumptionPage {
     }
 
     func typeTastingNotes(_ notes: String) -> Self {
-        let notesField = app.textFields["Vos impressions..."]
+        // Multi-line TextField (axis: .vertical) is exposed as a textView
+        let notesField = app.textViews["Vos impressions..."]
         if notesField.waitForExistence(timeout: 3) {
             notesField.tap()
             notesField.typeText(notes)

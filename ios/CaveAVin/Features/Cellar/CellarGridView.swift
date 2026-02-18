@@ -88,7 +88,7 @@ struct CellarGridView: View {
                                         Text(item.wine.name)
                                             .font(.headline)
                                         if let vintage = item.wine.vintage {
-                                            Text("\(vintage)")
+                                            Text(verbatim: "\(vintage)")
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
                                         }

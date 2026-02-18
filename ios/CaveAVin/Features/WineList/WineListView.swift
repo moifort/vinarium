@@ -54,7 +54,7 @@ struct WineListView: View {
                                         .font(.headline)
                                     HStack(spacing: 4) {
                                         if let vintage = wine.vintage {
-                                            Text("\(vintage)")
+                                            Text(verbatim: "\(vintage)")
                                         }
                                         if let region = wine.region {
                                             Text("- \(region)")

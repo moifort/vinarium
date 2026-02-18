@@ -44,6 +44,18 @@ struct ScanReviewPage {
         return self
     }
 
+    func typePrice(_ price: String) -> Self {
+        let priceField = app.textFields["review-price-field"]
+        XCTAssertTrue(priceField.waitForExistence(timeout: 5))
+        priceField.tap()
+        priceField.press(forDuration: 1.0)
+        if app.menuItems["Tout sélectionner"].waitForExistence(timeout: 2) {
+            app.menuItems["Tout sélectionner"].tap()
+        }
+        priceField.typeText(price)
+        return self
+    }
+
     func tapSave() -> PlacementPage {
         let saveButton = app.buttons["review-save-button"]
         XCTAssertTrue(saveButton.waitForExistence(timeout: 5))

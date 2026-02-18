@@ -8,14 +8,14 @@ class BaseUITest: XCTestCase {
     override func setUp() async throws {
         continueAfterFailure = false
         api = TestAPIClient.shared
-        try api.deleteAllWines()
+        try api.resetDatabase()
         app = XCUIApplication()
         app.launchArguments = ["-serverURL", "http://localhost:3000"]
         app.launch()
     }
 
     override func tearDown() async throws {
-        try? api.deleteAllWines()
         app.terminate()
+        try? api.resetDatabase()
     }
 }

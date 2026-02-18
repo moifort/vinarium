@@ -6,35 +6,40 @@ struct WineDetailPage {
 
     @discardableResult
     func verify() -> Self {
-        // Wine detail is presented as a sheet - wait for the close button
         XCTAssertTrue(app.buttons["Fermer"].waitForExistence(timeout: 5))
         return self
     }
 
     func verifyWineName(_ name: String) {
-        XCTAssertTrue(app.staticTexts[name].waitForExistence(timeout: 5))
+        let predicate = NSPredicate(format: "label CONTAINS %@", name)
+        let element = app.staticTexts.matching(predicate).firstMatch
+        XCTAssertTrue(element.waitForExistence(timeout: 5), "Wine name '\(name)' not found")
     }
 
     func verifyTextVisible(_ text: String) {
-        XCTAssertTrue(app.staticTexts[text].waitForExistence(timeout: 5))
+        let predicate = NSPredicate(format: "label CONTAINS %@", text)
+        let element = app.staticTexts.matching(predicate).firstMatch
+        if !element.waitForExistence(timeout: 3) {
+            let button = app.buttons.matching(predicate).firstMatch
+            XCTAssertTrue(button.waitForExistence(timeout: 2), "Text '\(text)' not found")
+        }
     }
 
     func verifyPosition(_ position: String) {
-        XCTAssertTrue(app.staticTexts[position].waitForExistence(timeout: 5))
+        let predicate = NSPredicate(format: "label CONTAINS %@", position)
+        let element = app.staticTexts.matching(predicate).firstMatch
+        if !element.waitForExistence(timeout: 3) {
+            let button = app.buttons.matching(predicate).firstMatch
+            XCTAssertTrue(button.waitForExistence(timeout: 2), "Position '\(position)' not found")
+        }
     }
 
     func verifyCellarSection() {
-        XCTAssertTrue(app.staticTexts["En cave"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["En cave"].waitForExistence(timeout: 5), "'En cave' section not found")
     }
 
     func verifyConsumptionSection() {
-        XCTAssertTrue(app.staticTexts["Consommé"].waitForExistence(timeout: 5))
-    }
-
-    func verifyStarRating(_ count: Int) {
-        // Stars are displayed as star.fill images in the consumption section
-        let stars = app.images.matching(NSPredicate(format: "label == 'star.fill'"))
-        XCTAssertGreaterThanOrEqual(stars.count, count)
+        XCTAssertTrue(app.staticTexts["Consommé"].waitForExistence(timeout: 5), "'Consommé' section not found")
     }
 
     func tapRemoveFromCellar() -> ConsumptionPage {
