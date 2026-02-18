@@ -37,6 +37,7 @@ struct WineListView: View {
                         .pickerStyle(.segmented)
                         .padding(.horizontal)
                         .padding(.vertical, 8)
+                        .accessibilityIdentifier("winelist-segment")
 
                         if viewModel.displayedWines.isEmpty {
                             ContentUnavailableView("Aucun vin 5 étoiles", systemImage: "star", description: Text("Notez vos vins préférés 5 étoiles"))
@@ -114,6 +115,7 @@ struct WineListView: View {
                     } label: {
                         Image(systemName: "line.3.horizontal.decrease.circle")
                     }
+                    .accessibilityIdentifier("winelist-sort-menu")
                 }
             }
             .sheet(item: Binding(

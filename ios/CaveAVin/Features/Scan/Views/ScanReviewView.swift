@@ -193,6 +193,7 @@ struct ScanReviewView: View {
                     .fontWeight(.semibold)
             }
             .disabled(name.isEmpty || isSaving)
+            .accessibilityIdentifier("review-save-button")
         }
     }
 

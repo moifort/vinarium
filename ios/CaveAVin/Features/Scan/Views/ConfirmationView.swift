@@ -41,6 +41,7 @@ struct ConfirmationView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .padding(.horizontal)
+            .accessibilityIdentifier("done-button")
         }
         .padding()
         .navigationTitle("Confirmation")

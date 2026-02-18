@@ -35,6 +35,7 @@ struct ConsumptionSheet: View {
                                     .font(.title2)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("star-rating-\(star)")
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -55,6 +56,7 @@ struct ConsumptionSheet: View {
                         )
                     }
                     .frame(maxWidth: .infinity)
+                    .accessibilityIdentifier("confirm-consumption-button")
                 }
             }
             .navigationTitle("Consommation")

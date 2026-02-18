@@ -199,6 +199,7 @@ struct WineDetailSheet: View {
                     .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .center)
             }
+            .accessibilityIdentifier("remove-from-cellar-button")
         }
     }
 

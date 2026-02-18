@@ -51,6 +51,7 @@ struct DashboardView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("stat-bottles")
 
             Button { selectedTab = .cellar } label: {
                 GradientWidget(
@@ -63,6 +64,7 @@ struct DashboardView: View {
                 )
             }
             .buttonStyle(.plain)
+            .accessibilityIdentifier("stat-value")
         }
     }
 

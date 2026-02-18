@@ -123,6 +123,7 @@ struct PlacementView: View {
         .controlSize(.large)
         .disabled(isPlacing || activePosition.isEmpty)
         .padding()
+        .accessibilityIdentifier("place-button")
     }
 
     private func loadData() async {

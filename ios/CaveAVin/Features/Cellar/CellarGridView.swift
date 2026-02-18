@@ -16,6 +16,7 @@ struct CellarGridView: View {
                 }
                 .pickerStyle(.segmented)
                 .padding()
+                .accessibilityIdentifier("cellar-segment")
 
                 Group {
                     if viewModel.isLoading && viewModel.bottles.isEmpty {

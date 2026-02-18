@@ -32,17 +32,21 @@ struct ContentView: View {
             Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
                 DashboardView(selectedTab: $selectedTab)
             }
+            .accessibilityIdentifier("tab-home")
             Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
                 CellarGridView(refreshTrigger: cellarRefreshTrigger)
             }
+            .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
                 WineListView()
             }
+            .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: .search) {
                 Color.clear
             } label: {
                 Label(TabSelection.scan.label, systemImage: TabSelection.scan.icon)
             }
+            .accessibilityIdentifier("tab-scan")
         }
         .onChange(of: selectedTab) { oldValue, newValue in
             if newValue == .scan {
@@ -91,6 +95,7 @@ struct ScanFlowView: View {
                                     .frame(width: 44, height: 44)
                                     .background(.ultraThinMaterial, in: .circle)
                             }
+                            .accessibilityIdentifier("scan-close-button")
                             Spacer()
                         }
                         .padding()
@@ -110,6 +115,7 @@ struct ScanFlowView: View {
                                     .frame(width: 56, height: 56)
                                     .background(.ultraThinMaterial, in: .circle)
                             }
+                            .accessibilityIdentifier("scan-photo-picker")
                             Spacer()
                             Button {
                                 shouldCapture = true
@@ -123,6 +129,7 @@ struct ScanFlowView: View {
                                             .frame(width: 60, height: 60)
                                     )
                             }
+                            .accessibilityIdentifier("scan-capture-button")
                             Spacer()
                             Color.clear.frame(width: 56, height: 56)
                         }
