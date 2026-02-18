@@ -190,7 +190,7 @@ struct ScanFlowView: View {
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data),
-                   let jpeg = image.jpegData(compressionQuality: 0.8) {
+                   let jpeg = image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) {
                     viewModel.capturePhoto(jpeg)
                 } else {
                     viewModel.step = .camera
@@ -211,7 +211,7 @@ struct ScanFlowView: View {
         guard let url = Bundle.main.url(forResource: "etiquette", withExtension: "jpg"),
               let data = try? Data(contentsOf: url),
               let image = UIImage(data: data),
-              let jpeg = image.jpegData(compressionQuality: 0.8) else { return }
+              let jpeg = image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) else { return }
         viewModel.step = .scanning
         viewModel.capturePhoto(jpeg)
     }
