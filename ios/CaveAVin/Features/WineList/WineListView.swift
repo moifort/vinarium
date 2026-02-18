@@ -60,7 +60,10 @@ struct WineListView: View {
                                                                 Text(verbatim: "\(vintage)")
                                                             }
                                                             if let region = wine.region {
-                                                                Text("- \(region)")
+                                                                if wine.vintage != nil {
+                                                                    Text("\u{2022}")
+                                                                }
+                                                                Text(region)
                                                             }
                                                         }
                                                         .font(.subheadline)
