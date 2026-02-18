@@ -16,3 +16,7 @@ output
 xcuserdata/
 
 doc/
+firebase-debug.log
+
+# Claude Code
+.claude/
