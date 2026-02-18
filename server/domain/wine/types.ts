@@ -1,6 +1,6 @@
 import type { Brand } from 'ts-brand'
 import type { CellarCol, CellarColLabel, CellarRow, CellarRowLabel } from '~/domain/cellar/types'
-import type { CellarLogEventView } from '~/domain/cellar-log/types'
+import type { JournalEventView } from '~/domain/journal/types'
 import type { Country, Eur, Region, Year } from '~/domain/shared/types'
 import type { Rating } from '~/domain/tasting/types'
 
@@ -45,7 +45,7 @@ export type WineView = Wine & {
     colLabel: CellarColLabel
     createdAt: Date
   }
-  history: CellarLogEventView[]
+  history: JournalEventView[]
   consumption?: {
     consumedDate?: Date
     rating?: Rating

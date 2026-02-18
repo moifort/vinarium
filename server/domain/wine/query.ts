@@ -1,6 +1,6 @@
 import { keyBy, orderBy } from 'lodash-es'
 import { CellarQuery } from '~/domain/cellar/query'
-import { CellarLogQuery } from '~/domain/cellar-log/query'
+import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import * as repository from '~/domain/wine/repository'
 import type {
@@ -47,7 +47,7 @@ export namespace WineQuery {
 
   const toView = async (wine: Wine): Promise<WineView> => {
     const bottle = await CellarQuery.getBottleByWineId(wine.id)
-    const history = await CellarLogQuery.getAllByWineId(wine.id)
+    const history = await JournalQuery.getAllByWineId(wine.id)
     const tasting = await TastingQuery.getByWineId(wine.id)
 
     return {

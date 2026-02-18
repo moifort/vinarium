@@ -1,7 +1,7 @@
 import type { CellarColLabel, CellarRowLabel } from '~/domain/cellar/types'
 import type { WineColor, WineId, WineName } from '~/domain/wine/types'
 
-export type CellarLogEntryIn = {
+export type JournalEntryIn = {
   type: 'in'
   wineId: WineId
   rowLabel: CellarRowLabel
@@ -9,7 +9,7 @@ export type CellarLogEntryIn = {
   dateIn: Date
 }
 
-export type CellarLogEntryOut = {
+export type JournalEntryOut = {
   type: 'out'
   wineId: WineId
   rowLabel: CellarRowLabel
@@ -17,9 +17,9 @@ export type CellarLogEntryOut = {
   dateOut: Date
 }
 
-export type CellarLogEntry = CellarLogEntryIn | CellarLogEntryOut
+export type JournalEntry = JournalEntryIn | JournalEntryOut
 
-export type CellarLogEventView = {
+export type JournalEventView = {
   type: 'in' | 'out'
   date: Date
   wineId: WineId

@@ -1,4 +1,4 @@
-import type { CellarLogEventView } from '~/domain/cellar-log/types'
+import type { JournalEventView } from '~/domain/journal/types'
 import type { Year } from '~/domain/shared/types'
 import type { WineColor, WineId, WineName } from '~/domain/wine/types'
 
@@ -7,8 +7,8 @@ export type DashboardView = {
   totalValue: number
   readyToDrink: ReadyToDrinkWine[]
   lastBottle?: LastBottle
-  lastExit?: CellarLogEventView
-  history: CellarLogEventView[]
+  lastExit?: JournalEventView
+  history: JournalEventView[]
 }
 
 export type ReadyToDrinkWine = {

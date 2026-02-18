@@ -1,7 +1,7 @@
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import * as repository from '~/domain/cellar/repository'
 import type { CellarCol as CellarColType, CellarRow as CellarRowType } from '~/domain/cellar/types'
-import { CellarLogCommand } from '~/domain/cellar-log/command'
+import { JournalCommand } from '~/domain/journal/command'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace CellarCommand {
@@ -13,7 +13,7 @@ export namespace CellarCommand {
       createdAt: new Date(),
       updatedAt: new Date(),
     })
-    await CellarLogCommand.bottleIn({
+    await JournalCommand.bottleIn({
       type: 'in',
       wineId,
       rowLabel: CellarRow.toLabel(row),
@@ -26,7 +26,7 @@ export namespace CellarCommand {
   export const removeWine = async (wineId: WineId) => {
     const existing = await repository.findBy(wineId)
     if (!existing) return 'not-in-cellar' as const
-    await CellarLogCommand.bottleOut({
+    await JournalCommand.bottleOut({
       type: 'out',
       wineId: existing.wineId,
       rowLabel: CellarRow.toLabel(existing.row),
