@@ -1,6 +1,6 @@
 import { match } from 'ts-pattern'
-import { migrations } from '~/migration/migrations/index'
-import { runMigrations } from '~/migration/runner'
+import { migrations } from '~/system/migration/migrations/index'
+import { runMigrations } from '~/system/migration/runner'
 
 export default defineNitroPlugin(async () => {
   const result = await runMigrations(migrations)

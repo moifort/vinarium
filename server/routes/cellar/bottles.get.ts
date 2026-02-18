@@ -1,4 +1,4 @@
-import { CellarQuery } from '~/cellar/query'
+import { CellarQuery } from '~/domain/cellar/query'
 
 export default defineEventHandler(async () => {
   const bottles = await CellarQuery.getAllBottles()
