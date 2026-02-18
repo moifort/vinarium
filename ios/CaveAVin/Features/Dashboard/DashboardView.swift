@@ -104,7 +104,7 @@ struct DashboardView: View {
                                     .font(.subheadline)
                                     .lineLimit(1)
                                 if wine.urgent, let year = wine.drinkUntil {
-                                    Text("Avant \(year)")
+                                    Text(verbatim: "Avant \(year)")
                                         .font(.caption)
                                         .fontWeight(.medium)
                                         .foregroundStyle(.white)
