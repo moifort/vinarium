@@ -43,47 +43,53 @@ struct WineListView: View {
                             ContentUnavailableView("Aucun vin 5 étoiles", systemImage: "star", description: Text("Notez vos vins préférés 5 étoiles"))
                                 .frame(maxHeight: .infinity)
                         } else {
-                    List(viewModel.displayedWines) { wine in
-                        Button {
-                            selectedWineId = wine.id
-                        } label: {
-                            HStack {
-                                WineColorBadge(color: wine.color)
-                                VStack(alignment: .leading) {
-                                    Text(wine.name)
-                                        .font(.headline)
-                                    HStack(spacing: 4) {
-                                        if let vintage = wine.vintage {
-                                            Text(verbatim: "\(vintage)")
-                                        }
-                                        if let region = wine.region {
-                                            Text("- \(region)")
-                                        }
-                                    }
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                VStack(alignment: .trailing) {
-                                    if let price = wine.purchasePrice {
-                                        Text(String(format: "%.0f €", price))
-                                            .font(.subheadline)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                    if let rating = wine.rating {
-                                        HStack(spacing: 1) {
-                                            ForEach(1...5, id: \.self) { star in
-                                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                                    .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
-                                                    .font(.caption2)
+                            List {
+                                ForEach(viewModel.groupedWines, id: \.0) { section, wines in
+                                    Section(section) {
+                                        ForEach(wines) { wine in
+                                            Button {
+                                                selectedWineId = wine.id
+                                            } label: {
+                                                HStack {
+                                                    WineColorBadge(color: wine.color)
+                                                    VStack(alignment: .leading) {
+                                                        Text(wine.name)
+                                                            .font(.headline)
+                                                        HStack(spacing: 4) {
+                                                            if let vintage = wine.vintage {
+                                                                Text(verbatim: "\(vintage)")
+                                                            }
+                                                            if let region = wine.region {
+                                                                Text("- \(region)")
+                                                            }
+                                                        }
+                                                        .font(.subheadline)
+                                                        .foregroundStyle(.secondary)
+                                                    }
+                                                    Spacer()
+                                                    VStack(alignment: .trailing) {
+                                                        if let price = wine.purchasePrice {
+                                                            Text(String(format: "%.0f €", price))
+                                                                .font(.subheadline)
+                                                                .foregroundStyle(.secondary)
+                                                        }
+                                                        if let rating = wine.rating {
+                                                            HStack(spacing: 1) {
+                                                                ForEach(1...5, id: \.self) { star in
+                                                                    Image(systemName: star <= rating ? "star.fill" : "star")
+                                                                        .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
+                                                                        .font(.caption2)
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
+                                            .tint(.primary)
                                         }
                                     }
                                 }
                             }
-                        }
-                        .tint(.primary)
-                    }
                         }
                     }
                 }
