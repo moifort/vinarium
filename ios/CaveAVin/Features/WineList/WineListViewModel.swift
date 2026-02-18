@@ -53,6 +53,52 @@ final class WineListViewModel {
         }
     }
 
+    var groupedWines: [(String, [Wine])] {
+        let keyed = displayedWines.map { wine -> (sortKey: Int, label: String, wine: Wine) in
+            switch sort {
+            case .vintage:
+                let label = wine.vintage.map { "\($0)" } ?? "Sans millésime"
+                return (wine.vintage ?? 0, label, wine)
+            case .region:
+                let label = wine.region ?? "Sans région"
+                return (0, label, wine)
+            case .color:
+                return (0, wine.color.label, wine)
+            case .price:
+                let (order, label) = priceRange(wine.purchasePrice)
+                return (order, label, wine)
+            }
+        }
+        let grouped = Dictionary(grouping: keyed, by: \.label)
+        let sorted: [(String, [Wine])]
+        if sort == .region || sort == .color {
+            let result = grouped.sorted { first, second in
+                sortDescending ? first.key > second.key : first.key < second.key
+            }
+            sorted = result.map { ($0.key, $0.value.map(\.wine)) }
+        } else {
+            let representative = grouped.mapValues { entries in entries.first!.sortKey }
+            let result = grouped.sorted { first, second in
+                let a = representative[first.key]!
+                let b = representative[second.key]!
+                return sortDescending ? a > b : a < b
+            }
+            sorted = result.map { ($0.key, $0.value.map(\.wine)) }
+        }
+        return sorted
+    }
+
+    private func priceRange(_ price: Double?) -> (order: Int, label: String) {
+        guard let price else { return (999, "Sans prix") }
+        switch price {
+        case ..<10: return (0, "0-10 €")
+        case ..<20: return (1, "10-20 €")
+        case ..<50: return (2, "20-50 €")
+        case ..<100: return (3, "50-100 €")
+        default: return (4, "100+ €")
+        }
+    }
+
     var filterKey: String {
         "\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
     }

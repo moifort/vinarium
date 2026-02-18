@@ -171,6 +171,17 @@ struct WineDetailSheet: View {
                 }
                 if let until = detail.drinkUntil {
                     labeledRow("Jusqu'à", value: "\(until)", icon: "hourglass.tophalf.filled")
+                    if until <= Calendar.current.component(.year, from: Date()) + 1 {
+                        Label {
+                            Text("À déguster avant \(until)")
+                                .font(.subheadline)
+                                .foregroundStyle(.orange)
+                                .fontWeight(.medium)
+                        } icon: {
+                            Image(systemName: "exclamationmark.circle.fill")
+                                .foregroundStyle(.orange)
+                        }
+                    }
                 }
             }
         }
@@ -180,7 +191,17 @@ struct WineDetailSheet: View {
     private func cellarSection(_ cellar: CellarInfo) -> some View {
         Section("En cave") {
             Label {
-                LabeledContent("Position", value: "\(cellar.row)\(cellar.col)")
+                HStack {
+                    Text("Position")
+                    Spacer()
+                    Text("\(cellar.row)\(cellar.col)")
+                        .font(.subheadline.monospaced())
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color(.systemGray5))
+                        .clipShape(.rect(cornerRadius: 6))
+                }
             } icon: {
                 Image(systemName: "mappin.circle")
                     .foregroundStyle(.blue)

@@ -99,19 +99,27 @@ struct DashboardView: View {
                             selectedWineId = wine.id
                         } label: {
                             HStack(spacing: 10) {
-                                if wine.urgent {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .font(.caption)
-                                        .foregroundStyle(.orange)
-                                }
                                 WineColorBadge(color: wine.color)
                                 Text(wine.name)
                                     .font(.subheadline)
                                     .lineLimit(1)
+                                if wine.urgent, let year = wine.drinkUntil {
+                                    Text("Avant \(year)")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(.orange, in: .capsule)
+                                }
                                 Spacer()
                                 Text(wine.position)
                                     .font(.subheadline.monospaced())
                                     .foregroundStyle(.secondary)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(Color(.systemGray5))
+                                    .clipShape(.rect(cornerRadius: 6))
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 14)
@@ -180,7 +188,7 @@ struct DashboardView: View {
                     Text(event.wineName)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    Text(event.isEntry ? "Entrée" : "Sortie")
+                    Text(event.isEntry ? "Dernière entrée" : "Dernière sortie")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
