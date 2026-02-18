@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct DashboardPage {
     let app: XCUIApplication
 

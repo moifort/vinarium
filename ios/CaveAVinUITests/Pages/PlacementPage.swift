@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct PlacementPage {
     let app: XCUIApplication
 

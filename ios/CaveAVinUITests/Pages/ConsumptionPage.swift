@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct ConsumptionPage {
     let app: XCUIApplication
 

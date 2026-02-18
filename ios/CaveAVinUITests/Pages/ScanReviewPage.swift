@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct ScanReviewPage {
     let app: XCUIApplication
 

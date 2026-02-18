@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct WineDetailPage {
     let app: XCUIApplication
 

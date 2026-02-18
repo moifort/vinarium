@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct CellarPage {
     let app: XCUIApplication
 

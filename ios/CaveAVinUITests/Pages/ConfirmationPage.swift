@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct ConfirmationPage {
     let app: XCUIApplication
 

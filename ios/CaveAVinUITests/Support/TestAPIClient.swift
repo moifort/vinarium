@@ -11,7 +11,7 @@ struct TestAPIResponse<T: Decodable>: Decodable {
     let data: T
 }
 
-final class TestAPIClient {
+final class TestAPIClient: @unchecked Sendable {
     static let shared = TestAPIClient()
 
     private let baseURL: URL

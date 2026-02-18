@@ -1,5 +1,6 @@
 import XCTest
 
+@MainActor
 struct TabBarPage {
     let app: XCUIApplication
 
