@@ -173,7 +173,7 @@ struct WineDetailSheet: View {
                     labeledRow("Jusqu'à", value: "\(until)", icon: "hourglass.tophalf.filled")
                     if until <= Calendar.current.component(.year, from: Date()) + 1 {
                         Label {
-                            Text("À déguster avant \(until)")
+                            Text(verbatim: "À déguster avant \(until)")
                                 .font(.subheadline)
                                 .foregroundStyle(.orange)
                                 .fontWeight(.medium)
@@ -191,9 +191,7 @@ struct WineDetailSheet: View {
     private func cellarSection(_ cellar: CellarInfo) -> some View {
         Section("En cave") {
             Label {
-                HStack {
-                    Text("Position")
-                    Spacer()
+                LabeledContent("Position") {
                     Text("\(cellar.row)\(cellar.col)")
                         .font(.subheadline.monospaced())
                         .foregroundStyle(.secondary)
