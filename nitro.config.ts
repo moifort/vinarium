@@ -9,5 +9,8 @@ export default defineNitroConfig({
   storage: {
     wines: { driver: 'fs', base: './.data/db/wines' },
     cellar: { driver: 'fs', base: './.data/db/cellar' },
+    'cellar-log': { driver: 'fs', base: './.data/db/cellar-log' },
+    tasting: { driver: 'fs', base: './.data/db/tasting' },
+    'migration-meta': { driver: 'fs', base: './.data/db/migration-meta' },
   },
 })
