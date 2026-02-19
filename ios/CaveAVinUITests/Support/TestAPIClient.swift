@@ -15,7 +15,7 @@ final class TestAPIClient: @unchecked Sendable {
     static let shared = TestAPIClient()
 
     private let baseURL: URL
-    private let token = "801B91EB-9D7E-4AAA-B944-DB7E500BD3A7"
+    private let token = TestSecrets.apiToken
     private let session = URLSession.shared
 
     private let decoder: JSONDecoder = {

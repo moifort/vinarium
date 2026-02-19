@@ -44,6 +44,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
+      NITRO_API_TOKEN: "your-secret-token"
       ANTHROPIC_API_KEY: "sk-ant-..."
       GEMINI_API_KEY: "..."
     ports:
@@ -59,10 +60,17 @@ docker compose up -d
 Or run locally with Bun:
 
 ```bash
+cp .env.example .env  # then fill in your API keys
 bun install
 bun run dev
 ```
 
 ### iOS App
 
-Open `ios/CaveAVin.xcodeproj` in Xcode, set the server URL in settings, and run on your device or simulator.
+1. Copy the Secrets templates:
+   ```bash
+   cp ios/CaveAVin/Shared/Secrets.swift.example ios/CaveAVin/Shared/Secrets.swift
+   cp ios/CaveAVinUITests/Support/TestSecrets.swift.example ios/CaveAVinUITests/Support/TestSecrets.swift
+   ```
+2. Replace `YOUR-API-TOKEN-HERE` with your `NITRO_API_TOKEN` value in both files
+3. Open `ios/CaveAVin.xcodeproj` in Xcode, set the server URL in settings, and run on your device or simulator
