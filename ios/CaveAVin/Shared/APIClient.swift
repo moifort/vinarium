@@ -4,7 +4,7 @@ final class APIClient: Sendable {
     static let shared = APIClient()
 
     private static let defaultURL = "http://192.168.0.160:3000"
-    private static let apiToken = "801B91EB-9D7E-4AAA-B944-DB7E500BD3A7"
+    private static let apiToken = Secrets.apiToken
 
     var baseURL: URL {
         get {

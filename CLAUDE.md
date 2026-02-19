@@ -26,7 +26,6 @@
 
 - Use the `swiftui-expert-skill` skill for all SwiftUI code
 - Use the `nitro-backend` skill for all backend Nitro/H3 code
-- Use the `typescript-expert-skill` skill for all TypeScript code
 - Use the `superpowers:requesting-code-review` skill for all code reviews
 
 ## Backend Patterns (TypeScript/Nitro)
@@ -58,6 +57,15 @@
 - Feature structure: `ios/CaveAVin/Features/{Feature}/`
 - Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files)
 - `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools
+
+## API Token
+
+The API token is used for authentication when `NITRO_API_TOKEN` is set. To rotate the token, update it in:
+- `.env` (`NITRO_API_TOKEN=...`)
+- `ios/CaveAVin/Shared/Secrets.swift` (gitignored)
+- `ios/CaveAVinUITests/Support/TestSecrets.swift` (gitignored)
+
+See `.example` files next to the Secrets files for the expected format.
 
 ## iOS Simulator
 
