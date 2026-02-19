@@ -1,7 +1,13 @@
-import { z } from 'zod'
 import { Country, Eur, Region, Year } from '~/domain/shared/primitives'
 import { WineCommand } from '~/domain/wine/command'
-import { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/primitives'
+import {
+  Appellation,
+  Classification,
+  WineColor,
+  WineDomain,
+  WineId,
+  WineName,
+} from '~/domain/wine/primitives'
 import type { Wine } from '~/domain/wine/types'
 
 export default defineEventHandler(async (event) => {
@@ -17,8 +23,7 @@ export default defineEventHandler(async (event) => {
   if (body.appellation !== undefined) data.appellation = Appellation(body.appellation)
   if (body.region !== undefined) data.region = Region(body.region)
   if (body.country !== undefined) data.country = Country(body.country)
-  if (body.color !== undefined)
-    data.color = z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(body.color)
+  if (body.color !== undefined) data.color = WineColor(body.color)
   if (body.grapeVarieties !== undefined) data.grapeVarieties = body.grapeVarieties
   if (body.classification !== undefined) data.classification = Classification(body.classification)
   if (body.purchasePrice !== undefined) data.purchasePrice = Eur(body.purchasePrice)

@@ -3,9 +3,13 @@ import { z } from 'zod'
 import type {
   Appellation as AppellationType,
   Classification as ClassificationType,
+  SortOrder as SortOrderType,
+  WineColor as WineColorType,
   WineDomain as WineDomainType,
   WineId as WineIdType,
   WineName as WineNameType,
+  WineSort as WineSortType,
+  WineStatus as WineStatusType,
 } from '~/domain/wine/types'
 
 export const WineId = (value: unknown) => {
@@ -34,3 +38,14 @@ export const Classification = (value: unknown) => {
   const v = z.string().min(1).parse(value)
   return make<ClassificationType>()(v)
 }
+
+export const WineColor = (value: unknown) =>
+  z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(value) as WineColorType
+
+export const WineSort = (value: unknown) =>
+  z.enum(['createdAt', 'vintage', 'region', 'color', 'price']).parse(value) as WineSortType
+
+export const SortOrder = (value: unknown) => z.enum(['asc', 'desc']).parse(value) as SortOrderType
+
+export const WineStatus = (value: unknown) =>
+  z.enum(['in-cellar', 'consumed', 'gifted']).parse(value) as WineStatusType

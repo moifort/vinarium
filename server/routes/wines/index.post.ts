@@ -1,9 +1,14 @@
-import { z } from 'zod'
 import { Country, Eur, Region, Year } from '~/domain/shared/primitives'
 import { TastingCommand } from '~/domain/tasting/command'
 import { Rating } from '~/domain/tasting/primitives'
 import { WineCommand } from '~/domain/wine/command'
-import { Appellation, Classification, WineDomain, WineName } from '~/domain/wine/primitives'
+import {
+  Appellation,
+  Classification,
+  WineColor,
+  WineDomain,
+  WineName,
+} from '~/domain/wine/primitives'
 import type { Wine } from '~/domain/wine/types'
 
 export default defineEventHandler(async (event) => {
@@ -11,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!body) throw createError({ statusCode: 400, statusMessage: 'Body is required' })
 
   const name = WineName(body.name)
-  const color = z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(body.color)
+  const color = WineColor(body.color)
 
   const data: Partial<Wine> = {}
   if (body.domain) data.domain = WineDomain(body.domain)
