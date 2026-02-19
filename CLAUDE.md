@@ -21,6 +21,10 @@
    ```
    DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project ios/CaveAVin.xcodeproj -scheme CaveAVin -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -only-testing:CaveAVinUITests
    ```
+6. After E2E tests finish: copy test data for reuse (snapshots, previews, etc.):
+   ```
+   rm -rf .data && cp -a .data-test .data
+   ```
 
 ## Skills
 
