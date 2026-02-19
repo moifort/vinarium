@@ -1,4 +1,4 @@
-import { DashboardQuery } from '~/dashboard/query'
+import { DashboardQuery } from '~/domain/dashboard/query'
 
 export default defineEventHandler(async () => {
   const dashboard = await DashboardQuery.get()

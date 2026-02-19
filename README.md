@@ -1,76 +1,68 @@
-# Canvas
+# Cave-a-Vin
 
-A self-hosted alternative to the official BLOOMIN8 app for managing images on your Canvas e-ink display.
+A purely functional approach to wine cellar management.
 
-## Why?
+<p align="center">
+  <img src="screenshots/dashboard.png" width="250" alt="Dashboard">
+  <img src="screenshots/cellar.png" width="250" alt="Cellar">
+  <img src="screenshots/wine-list.png" width="250" alt="Wine list">
+</p>
 
-The official BLOOMIN8 app has several limitations:
+## Features
 
-- Cannot upload iOS photo albums directly
-- Crashes when uploading more than ~30 photos
-- Uploads photos to an unknown third-party cloud
-- No widget or quick way to monitor device status
+- **AI scan** — photograph a label, get structured wine data + price estimate (Claude Sonnet 4.5 vision + Gemini 2.0 Flash web search)
+- **Cellar grid** — physical position tracking by row and column
+- **Journal** — entry/exit history with tasting notes and ratings
+- **Dashboard** — cellar stats, total value, ready-to-drink alerts, recent activity
+- **Wine catalog** — full metadata, grape varieties, appellations, drink windows
 
-Canvas solves all of these by running a lightweight server on your own network:
+<p align="center">
+  <img src="screenshots/wine-detail.png" width="250" alt="Wine detail">
+  <img src="screenshots/journal.png" width="250" alt="Journal">
+</p>
 
-- **Bulk upload** — Send your entire photo library without crashes
-- **Self-hosted** — Your photos stay on your server, never leave your network
-- **iOS app** — Simple SwiftUI app to upload photos and manage playlists
-- **Battery widget** — iOS lock screen widget showing battery level and days since last charge
+## Tech Stack
 
-## How It Works
+| Layer | Stack |
+|-------|-------|
+| iOS | SwiftUI, Swift 6, iOS 26 |
+| Backend | Nitro, TypeScript, Zod, file-based storage |
+| AI | Claude Sonnet 4.5 (vision), Gemini 2.0 Flash (web search) |
 
-1. Upload photos from the iOS app to your Canvas server
-2. Start a playlist — the server wakes the e-ink device
-3. The device periodically pulls a new image from the server and displays it
-4. The iOS widget shows the current battery level at a glance
+## Getting Started
 
-## Installation
+### Backend
 
-### Docker Compose
-
-Create a `docker-compose.yml`:
+The server is available on Docker Hub at [moifort/cave-a-vin](https://hub.docker.com/r/moifort/cave-a-vin).
 
 ```yaml
 services:
-  canvas-server:
-    image: moifort/bloomin8:latest
-    container_name: canvas-server
+  cave-a-vin:
+    image: moifort/cave-a-vin:latest
+    container_name: cave-a-vin
     restart: unless-stopped
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
-      NITRO_SERVER_URL: http://<YOUR_SERVER_IP>:3000
+      ANTHROPIC_API_KEY: "sk-ant-..."
+      GEMINI_API_KEY: "..."
     ports:
       - "3000:3000"
     volumes:
-      - ./data:/app/data
+      - ./data:/app/.data
 ```
-
-> Replace `<YOUR_SERVER_IP>` with the local IP address of the machine running the server (e.g. `192.168.0.165`). The BLOOMIN8 device uses this URL to pull images, so it must be reachable on your network.
-
-Then start the server:
 
 ```bash
 docker compose up -d
 ```
 
-### CasaOS
+Or run locally with Bun:
 
-A ready-to-use CasaOS configuration is available in `docker-compose.casaos.yml`. Import it directly from the CasaOS dashboard.
+```bash
+bun install
+bun run dev
+```
 
 ### iOS App
 
-Build and install the iOS app from `ios/Canvas/` using Xcode. On first launch, set the server URL to point to your Canvas server (e.g. `http://192.168.0.165:3000`).
-
-![iOS App](ios.PNG)
-
-### iOS Widget
-
-After installing the app, add the **Canvas Battery** widget to your lock screen or home screen. It refreshes every 15 minutes and displays the current battery percentage of your e-ink display.
-
-![iOS Widget](ios-widget.PNG)
-
-## Docker Hub
-
-The Docker image is available at [moifort/bloomin8](https://hub.docker.com/r/moifort/bloomin8).
+Open `ios/CaveAVin.xcodeproj` in Xcode, set the server URL in settings, and run on your device or simulator.

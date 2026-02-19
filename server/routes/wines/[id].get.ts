@@ -1,5 +1,5 @@
-import { WineId } from '~/wine/primitives'
-import { WineQuery } from '~/wine/query'
+import { WineId } from '~/domain/wine/primitives'
+import { WineQuery } from '~/domain/wine/query'
 
 export default defineEventHandler(async (event) => {
   const id = WineId(getRouterParam(event, 'id'))

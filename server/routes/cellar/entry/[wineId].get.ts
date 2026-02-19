@@ -1,5 +1,5 @@
-import { CellarQuery } from '~/cellar/query'
-import { WineId } from '~/wine/primitives'
+import { CellarQuery } from '~/domain/cellar/query'
+import { WineId } from '~/domain/wine/primitives'
 
 export default defineEventHandler(async (event) => {
   const wineId = WineId(getRouterParam(event, 'wineId'))

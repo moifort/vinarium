@@ -1,6 +1,6 @@
-import { CellarLogQuery } from '~/cellar-log/query'
+import { JournalQuery } from '~/domain/journal/query'
 
 export default defineEventHandler(async () => {
-  const history = await CellarLogQuery.getAll()
+  const history = await JournalQuery.getAll()
   return { status: 200, data: history }
 })
