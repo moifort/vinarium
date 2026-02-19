@@ -1,0 +1,52 @@
+import XCTest
+
+final class GiveAsGiftFlowTest: BaseUITest {
+
+    private let wineName = "Vin Test Cadeau"
+
+    func testGiveAsGiftFlow() async throws {
+        // 1. SCAN: open scanner, pick photo, save
+        let tabBar = TabBarPage(app: app)
+        let scanner = try tabBar.openScanner()
+        try scanner.verify()
+
+        let review = try scanner.selectPhotoFromPicker()
+        try review.verify()
+
+        _ = try review.clearAndTypeName(wineName)
+        let placement = try review.tapSave()
+
+        // 2. PLACEMENT: verify, place, confirm, done
+        try placement.verify()
+        let confirmation = try placement.tapPlace()
+        try confirmation.verify()
+        try confirmation.tapDone()
+
+        // 3. CAVE: open detail, remove and choose gift
+        let cellar = try CellarPage(app: app).verify()
+        let detail = try cellar.tapWine(named: wineName)
+        try detail.verify()
+        try detail.verifyWineName(wineName)
+
+        let giftPage = try detail.tapRemoveAndChooseGift()
+        try giftPage.verify()
+
+        // 4. Fill recipient name and confirm
+        _ = giftPage.typeRecipientName("Marie Dupont")
+        try giftPage.tapConfirm()
+
+        // Should return to cellar
+        try app.navigationBars["Ma Cave"].waitOrFail()
+
+        // 5. WINE LIST: go to Vins tab, switch to "Offerts", verify wine visible
+        _ = try tabBar.goToWineList().verify()
+        let wineList = try WineListPage(app: app).switchToGifted()
+        try wineList.verifyWineVisible(wineName)
+
+        // 6. Tap wine, verify gift section in detail
+        let listDetail = try wineList.tapWine(named: wineName)
+        try listDetail.verify()
+        try listDetail.verifyWineName(wineName)
+        try listDetail.verifyGiftSection()
+    }
+}

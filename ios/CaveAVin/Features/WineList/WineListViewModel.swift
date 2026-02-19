@@ -1,12 +1,13 @@
 import Foundation
 
 enum WineListMode: String, CaseIterable, Identifiable {
-    case all, favorites
+    case all, favorites, gifted
     var id: String { rawValue }
     var label: String {
         switch self {
         case .all: "Tous"
         case .favorites: "❤️ Favoris"
+        case .gifted: "🎁 Offerts"
         }
     }
 }
@@ -65,6 +66,7 @@ final class WineListViewModel {
         switch mode {
         case .all: wines
         case .favorites: wines.filter { $0.rating == 5 }
+        case .gifted: wines
         }
     }
 
@@ -115,17 +117,22 @@ final class WineListViewModel {
     }
 
     var filterKey: String {
-        "\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
+        "\(mode.rawValue)-\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
     }
 
     func load() async {
         isLoading = true
         error = nil
         do {
+            let status: String? = switch mode {
+            case .gifted: "gifted"
+            case .all, .favorites:
+                statusFilter == .all ? nil : statusFilter.rawValue
+            }
             wines = try await WineAPI.list(
                 sort: sort.rawValue,
                 order: sortDescending ? "desc" : "asc",
-                status: statusFilter.rawValue
+                status: status
             )
         } catch {
             self.error = error.localizedDescription

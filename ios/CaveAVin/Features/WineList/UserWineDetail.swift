@@ -21,6 +21,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let updatedAt: Date
     let cellar: CellarInfo?
     let consumption: ConsumptionInfo?
+    let gift: GiftInfo?
 }
 
 struct CellarInfo: Codable, Sendable {
@@ -35,6 +36,11 @@ struct CellarInfo: Codable, Sendable {
         case dateIn
         case dateOut
     }
+}
+
+struct GiftInfo: Codable, Sendable {
+    let giftedDate: Date
+    let recipientName: String?
 }
 
 struct ConsumptionInfo: Codable, Sendable {

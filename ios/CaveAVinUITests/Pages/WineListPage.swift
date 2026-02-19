@@ -24,6 +24,11 @@ struct WineListPage {
         return self
     }
 
+    func switchToGifted() throws -> Self {
+        try app.segmentedControls["winelist-segment"].buttons["🎁 Offerts"].tapOrFail()
+        return self
+    }
+
     func switchToAll() throws -> Self {
         try app.segmentedControls["winelist-segment"].buttons["Tous"].tapOrFail()
         return self

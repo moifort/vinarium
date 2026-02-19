@@ -41,8 +41,17 @@ struct WineListView: View {
                         .accessibilityIdentifier("winelist-segment")
 
                         if viewModel.displayedWines.isEmpty {
-                            ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos vins préférés en favoris"))
-                                .frame(maxHeight: .infinity)
+                            switch viewModel.mode {
+                            case .favorites:
+                                ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos vins préférés en favoris"))
+                                    .frame(maxHeight: .infinity)
+                            case .gifted:
+                                ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins offerts apparaîtront ici"))
+                                    .frame(maxHeight: .infinity)
+                            default:
+                                ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Aucun vin ne correspond à ce filtre"))
+                                    .frame(maxHeight: .infinity)
+                            }
                         } else {
                             List {
                                 ForEach(viewModel.groupedWines, id: \.0) { section, wines in
@@ -71,6 +80,9 @@ struct WineListView: View {
                                                                     Text("•")
                                                                 }
                                                                 Text(String(format: "%.0f €", price))
+                                                            }
+                                                            if wine.giftedTo != nil {
+                                                                Text("• Offert")
                                                             }
                                                         }
                                                         .font(.subheadline)

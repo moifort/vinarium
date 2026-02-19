@@ -1,6 +1,7 @@
 import { keyBy, orderBy } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CellarQuery } from '~/domain/cellar/query'
+import { GiftQuery } from '~/domain/gift/query'
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import * as repository from '~/domain/wine/repository'
@@ -27,16 +28,25 @@ export namespace WineQuery {
     order?: SortOrder
     status?: WineStatus
   }) => {
-    const [all, tastings] = await Promise.all([repository.findAll(), TastingQuery.getAll()])
+    const [all, tastings, gifts] = await Promise.all([
+      repository.findAll(),
+      TastingQuery.getAll(),
+      GiftQuery.getAll(),
+    ])
     const ratingMap = keyBy(tastings, 'wineId')
-    const withRating = all.map((w) => ({ ...w, rating: ratingMap[w.id]?.rating ?? null }))
+    const giftMap = keyBy(gifts, 'wineId')
+    const giftIds = new Set(gifts.map(({ wineId }) => wineId))
+    const withExtra = all.map((wine) => ({
+      ...wine,
+      rating: ratingMap[wine.id]?.rating ?? null,
+      giftedTo: giftMap[wine.id]?.recipientName ?? null,
+    }))
     const byColor = options?.color
-      ? withRating.filter((wine) => wine.color === options.color)
-      : withRating
-    const byStatus =
-      options?.status && options.status !== 'all'
-        ? await filterByStatus(byColor, options.status)
-        : byColor
+      ? withExtra.filter((wine) => wine.color === options.color)
+      : withExtra
+    const byStatus = options?.status
+      ? await filterByStatus(byColor, options.status, giftIds)
+      : byColor
     return options?.sort
       ? orderBy(byStatus, sortKey(options.sort), options.order === 'desc' ? 'desc' : 'asc')
       : byStatus
@@ -49,10 +59,11 @@ export namespace WineQuery {
   }
 
   const toView = async (wine: Wine): Promise<WineView> => {
-    const [bottle, history, tasting] = await Promise.all([
+    const [bottle, history, tasting, gift] = await Promise.all([
       CellarQuery.getBottleByWineId(wine.id),
       JournalQuery.getAllByWineId(wine.id),
       TastingQuery.getByWineId(wine.id),
+      GiftQuery.getByWineId(wine.id),
     ])
 
     const cellar =
@@ -78,6 +89,13 @@ export namespace WineQuery {
               tastingNotes: tasting.tastingNotes,
             }
           : undefined,
+      gift:
+        gift !== 'not-found'
+          ? {
+              giftedDate: gift.giftedDate,
+              recipientName: gift.recipientName,
+            }
+          : undefined,
     }
   }
 
@@ -94,11 +112,13 @@ export namespace WineQuery {
     }
   }
 
-  const filterByStatus = async (wines: Wine[], status: WineStatus) => {
+  const filterByStatus = async (wines: Wine[], status: WineStatus, giftIds: Set<string>) => {
     const bottles = await CellarQuery.getAllBottles()
-    const inCellarIds = bottles.map((bottle) => bottle.wineId)
-    if (status === 'in-cellar') return wines.filter((wine) => inCellarIds.includes(wine.id))
-    return wines.filter((wine) => !inCellarIds.includes(wine.id))
+    const inCellarIds = new Set(bottles.map(({ wineId }) => wineId))
+    if (status === 'in-cellar') return wines.filter((wine) => inCellarIds.has(wine.id))
+    if (status === 'gifted')
+      return wines.filter((wine) => !inCellarIds.has(wine.id) && giftIds.has(wine.id))
+    return wines.filter((wine) => !inCellarIds.has(wine.id) && !giftIds.has(wine.id))
   }
 
   const sortKey = (sort: WineSort) => (wine: Wine) => {

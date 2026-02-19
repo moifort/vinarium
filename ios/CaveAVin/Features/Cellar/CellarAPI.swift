@@ -38,6 +38,22 @@ enum CellarAPI {
         )
     }
 
+    static func gift(wineId: String, giftedDate: String, recipientName: String? = nil) async throws {
+        struct GiftBody: Encodable, Sendable {
+            let giftedDate: String
+            var recipientName: String?
+        }
+        struct Body: Encodable, Sendable {
+            let wineId: String
+            let gift: GiftBody
+        }
+        struct Ignored: Decodable, Sendable {}
+        let _: APIResponse<Ignored> = try await APIClient.shared.post(
+            "/cellar/remove",
+            body: Body(wineId: wineId, gift: GiftBody(giftedDate: giftedDate, recipientName: recipientName))
+        )
+    }
+
     static func getHistory() async throws -> [HistoryEvent] {
         let response: APIResponse<[HistoryEvent]> = try await APIClient.shared.get("/cellar/history")
         return response.data

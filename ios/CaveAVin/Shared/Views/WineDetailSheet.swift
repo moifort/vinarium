@@ -9,6 +9,8 @@ struct WineDetailSheet: View {
     @State private var isLoading = true
     @State private var error: String?
     @State private var showConsumption = false
+    @State private var showRemovalChoice = false
+    @State private var showGift = false
 
     var body: some View {
         NavigationStack {
@@ -52,6 +54,10 @@ struct WineDetailSheet: View {
                 consumptionSection(consumption)
             }
 
+            if let gift = detail.gift {
+                giftSection(gift)
+            }
+
             if let notes = detail.notes, !notes.isEmpty {
                 Section("Notes") {
                     Label {
@@ -62,6 +68,19 @@ struct WineDetailSheet: View {
                     }
                 }
             }
+        }
+        .sheet(isPresented: $showRemovalChoice) {
+            RemovalChoiceSheet(
+                onConsume: {
+                    showRemovalChoice = false
+                    showConsumption = true
+                },
+                onGift: {
+                    showRemovalChoice = false
+                    showGift = true
+                }
+            )
+            .presentationDetents([.height(220)])
         }
         .sheet(isPresented: $showConsumption) {
             ConsumptionSheet(
@@ -82,6 +101,29 @@ struct WineDetailSheet: View {
                         tastingNotes: notes
                     )
                     showConsumption = false
+                    dismiss()
+                    onRemoved?()
+                }
+            }
+        }
+        .sheet(isPresented: $showGift) {
+            GiftSheet(
+                wine: Wine(
+                    id: detail.id,
+                    name: detail.name,
+                    color: detail.color,
+                    createdAt: detail.createdAt,
+                    updatedAt: detail.updatedAt
+                )
+            ) { date, recipientName in
+                let formatter = ISO8601DateFormatter()
+                Task {
+                    _ = try? await CellarAPI.gift(
+                        wineId: detail.id,
+                        giftedDate: formatter.string(from: date),
+                        recipientName: recipientName
+                    )
+                    showGift = false
                     dismiss()
                     onRemoved?()
                 }
@@ -222,7 +264,7 @@ struct WineDetailSheet: View {
 
             if cellar.dateOut == nil {
                 Button(role: .destructive) {
-                    showConsumption = true
+                    showRemovalChoice = true
                 } label: {
                     Label("Retirer de la cave", systemImage: "arrow.up.circle")
                         .foregroundStyle(.red)
@@ -267,6 +309,26 @@ struct WineDetailSheet: View {
         }
     }
 
+    @ViewBuilder
+    private func giftSection(_ gift: GiftInfo) -> some View {
+        Section("Offert") {
+            Label {
+                LabeledContent("Offert le", value: formatted(gift.giftedDate))
+            } icon: {
+                Image(systemName: "gift")
+                    .foregroundStyle(.purple)
+            }
+            if let recipientName = gift.recipientName {
+                Label {
+                    LabeledContent("Destinataire", value: recipientName)
+                } icon: {
+                    Image(systemName: "person")
+                        .foregroundStyle(.purple)
+                }
+            }
+        }
+    }
+
     // MARK: - Helpers
 
     private func labeledRow(_ title: String, value: String, icon: String) -> some View {
@@ -298,6 +360,47 @@ struct WineDetailSheet: View {
 
     private func formatted(_ date: Date) -> String {
         date.formatted(date: .abbreviated, time: .omitted)
+    }
+}
+
+// MARK: - Removal Choice Sheet
+
+private struct RemovalChoiceSheet: View {
+    let onConsume: () -> Void
+    let onGift: () -> Void
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Retirer de la cave")
+                .font(.headline)
+                .padding(.top, 24)
+
+            VStack(spacing: 12) {
+                Button {
+                    onConsume()
+                } label: {
+                    Label("A consommer", systemImage: "wineglass")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .accessibilityIdentifier("choice-consume")
+
+                Button {
+                    onGift()
+                } label: {
+                    Label("A offrir", systemImage: "gift")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .accessibilityIdentifier("choice-gift")
+            }
+            .padding(.horizontal, 24)
+
+            Button("Annuler", role: .cancel) { dismiss() }
+                .padding(.bottom, 16)
+        }
     }
 }
 
