@@ -1,4 +1,5 @@
 import { keyBy, orderBy } from 'lodash-es'
+import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CellarQuery } from '~/domain/cellar/query'
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -46,22 +47,26 @@ export namespace WineQuery {
   }
 
   const toView = async (wine: Wine): Promise<WineView> => {
-    const bottle = await CellarQuery.getBottleByWineId(wine.id)
-    const history = await JournalQuery.getAllByWineId(wine.id)
-    const tasting = await TastingQuery.getByWineId(wine.id)
+    const [bottle, history, tasting] = await Promise.all([
+      CellarQuery.getBottleByWineId(wine.id),
+      JournalQuery.getAllByWineId(wine.id),
+      TastingQuery.getByWineId(wine.id),
+    ])
+
+    const cellar =
+      bottle !== 'not-found'
+        ? {
+            row: bottle.row,
+            col: bottle.col,
+            rowLabel: bottle.rowLabel,
+            colLabel: bottle.colLabel,
+            dateIn: bottle.createdAt,
+          }
+        : await cellarFromJournal(wine.id)
 
     return {
       ...wine,
-      cellar:
-        bottle !== 'not-found'
-          ? {
-              row: bottle.row,
-              col: bottle.col,
-              rowLabel: bottle.rowLabel,
-              colLabel: bottle.colLabel,
-              createdAt: bottle.createdAt,
-            }
-          : undefined,
+      cellar,
       history,
       consumption:
         tasting !== 'not-found'
@@ -71,6 +76,19 @@ export namespace WineQuery {
               tastingNotes: tasting.tastingNotes,
             }
           : undefined,
+    }
+  }
+
+  const cellarFromJournal = async (wineId: WineId) => {
+    const dates = await JournalQuery.getCellarDates(wineId)
+    if (dates === 'not-found') return undefined
+    return {
+      row: CellarRow(dates.rowLabel.charCodeAt(0) - 65),
+      col: CellarCol(dates.colLabel - 1),
+      rowLabel: dates.rowLabel,
+      colLabel: dates.colLabel,
+      dateIn: dates.dateIn,
+      dateOut: dates.dateOut,
     }
   }
 

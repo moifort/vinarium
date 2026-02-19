@@ -43,7 +43,8 @@ export type WineView = Wine & {
     col: CellarCol
     rowLabel: CellarRowLabel
     colLabel: CellarColLabel
-    createdAt: Date
+    dateIn: Date
+    dateOut?: Date
   }
   history: JournalEventView[]
   consumption?: {

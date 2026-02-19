@@ -1,6 +1,11 @@
 import { sortBy } from 'lodash-es'
 import * as repository from '~/domain/journal/repository'
-import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
+import type {
+  JournalEntry,
+  JournalEntryIn,
+  JournalEntryOut,
+  JournalEventView,
+} from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
@@ -15,6 +20,20 @@ export namespace JournalQuery {
     const entries = await repository.findByWineId(wineId)
     const views = await Promise.all(entries.map(toView))
     return sortBy(views, ({ date }) => -new Date(date).getTime())
+  }
+
+  export const getCellarDates = async (wineId: WineId) => {
+    const entries = await repository.findByWineId(wineId)
+    const entryIn = entries.find((entry) => entry.type === 'in')
+    if (!entryIn) return 'not-found' as const
+    const entryOut = entries.find((entry) => entry.type === 'out')
+    return {
+      wineId,
+      dateIn: entryIn.dateIn,
+      dateOut: entryOut?.dateOut,
+      rowLabel: entryIn.rowLabel,
+      colLabel: entryIn.colLabel,
+    }
   }
 
   const toView = async (entry: JournalEntry): Promise<JournalEventView> => {

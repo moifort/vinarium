@@ -189,7 +189,7 @@ struct WineDetailSheet: View {
 
     @ViewBuilder
     private func cellarSection(_ cellar: CellarInfo) -> some View {
-        Section("En cave") {
+        Section("Cave") {
             Label {
                 LabeledContent("Position") {
                     Text("\(cellar.row)\(cellar.col)")
@@ -205,31 +205,44 @@ struct WineDetailSheet: View {
                     .foregroundStyle(.blue)
             }
             Label {
-                LabeledContent("Depuis", value: formatted(cellar.dateIn))
+                LabeledContent("Entrée le", value: formatted(cellar.dateIn))
             } icon: {
                 Image(systemName: "calendar.badge.plus")
                     .foregroundStyle(.green)
             }
 
-            Button(role: .destructive) {
-                showConsumption = true
-            } label: {
-                Label("Retirer de la cave", systemImage: "arrow.up.circle")
-                    .foregroundStyle(.red)
-                    .frame(maxWidth: .infinity, alignment: .center)
+            if let dateOut = cellar.dateOut {
+                Label {
+                    LabeledContent("Sortie le", value: formatted(dateOut))
+                } icon: {
+                    Image(systemName: "calendar.badge.minus")
+                        .foregroundStyle(.red)
+                }
             }
-            .accessibilityIdentifier("remove-from-cellar-button")
+
+            if cellar.dateOut == nil {
+                Button(role: .destructive) {
+                    showConsumption = true
+                } label: {
+                    Label("Retirer de la cave", systemImage: "arrow.up.circle")
+                        .foregroundStyle(.red)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                }
+                .accessibilityIdentifier("remove-from-cellar-button")
+            }
         }
     }
 
     @ViewBuilder
     private func consumptionSection(_ consumption: ConsumptionInfo) -> some View {
         Section("Consommé") {
-            Label {
-                LabeledContent("Retiré le", value: formatted(consumption.dateOut))
-            } icon: {
-                Image(systemName: "calendar.badge.minus")
-                    .foregroundStyle(.red)
+            if let consumedDate = consumption.consumedDate {
+                Label {
+                    LabeledContent("Consommé le", value: formatted(consumedDate))
+                } icon: {
+                    Image(systemName: "fork.knife.circle")
+                        .foregroundStyle(.orange)
+                }
             }
             if let rating = consumption.rating {
                 HStack {

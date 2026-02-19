@@ -17,7 +17,7 @@ struct WineDetailPage {
 
     func verifyCellarSection() throws {
         app.swipeUp()
-        try app.staticTexts["En cave"].waitOrFail(timeout: 4, "'En cave' section not found")
+        try app.staticTexts["Cave"].waitOrFail(timeout: 4, "'Cave' section not found")
     }
 
     func verifyConsumptionSection() throws {
