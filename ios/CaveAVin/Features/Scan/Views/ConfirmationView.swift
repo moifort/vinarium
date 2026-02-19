@@ -7,8 +7,6 @@ struct ConfirmationView: View {
 
     @State private var scale = 0.5
     @State private var opacity = 0.0
-    @State private var progress: CGFloat = 0.0
-    @State private var isDone = false
 
     var body: some View {
         VStack(spacing: 24) {
@@ -37,46 +35,26 @@ struct ConfirmationView: View {
 
             Spacer()
 
-            Button {
-                guard !isDone else { return }
-                isDone = true
-                onDone()
-            } label: {
-                Text("Terminé")
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background {
-                        GeometryReader { geometry in
-                            Capsule()
-                                .fill(.blue)
-                            Capsule()
-                                .fill(.white.opacity(0.25))
-                                .frame(width: geometry.size.width * progress)
-                        }
-                        .clipShape(Capsule())
-                    }
+            VStack(spacing: 12) {
+                Button {
+                    onDone()
+                } label: {
+                    Text("Terminé")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .accessibilityIdentifier("done-button")
             }
             .padding(.horizontal)
-            .accessibilityIdentifier("done-button")
         }
         .padding()
         .navigationBarBackButtonHidden()
         .onAppear {
-            withAnimation(.spring(duration: 0.6)) {
+            withAnimation(.spring(duration: 0.5, bounce: 0.3)) {
                 scale = 1.0
                 opacity = 1.0
             }
-        }
-        .task {
-            withAnimation(.linear(duration: 15)) {
-                progress = 1.0
-            }
-            try? await Task.sleep(for: .seconds(15))
-            guard !isDone else { return }
-            isDone = true
-            onDone()
         }
     }
 }

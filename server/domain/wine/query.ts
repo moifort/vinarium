@@ -33,8 +33,8 @@ export namespace WineQuery {
       TastingQuery.getAll(),
       GiftQuery.getAll(),
     ])
-    const ratingMap = keyBy(tastings, 'wineId')
-    const giftMap = keyBy(gifts, 'wineId')
+    const ratingMap = keyBy(tastings, ({ wineId }) => wineId)
+    const giftMap = keyBy(gifts, ({ wineId }) => wineId)
     const giftIds = new Set(gifts.map(({ wineId }) => wineId))
     const withExtra = all.map((wine) => ({
       ...wine,
@@ -123,6 +123,8 @@ export namespace WineQuery {
 
   const sortKey = (sort: WineSort) => (wine: Wine) => {
     switch (sort) {
+      case 'createdAt':
+        return wine.createdAt.getTime()
       case 'vintage':
         return wine.vintage ?? 0
       case 'region':

@@ -5,6 +5,10 @@ struct CellarGridView: View {
 
     @State private var viewModel = CellarGridViewModel()
     @State private var selectedWineId: String?
+    @State private var wineForRemovalChoice: Wine?
+    @State private var wineForConsumption: Wine?
+    @State private var wineForGift: Wine?
+    @State private var pendingRemoval: PendingRemoval?
 
     var body: some View {
         NavigationStack {
@@ -37,6 +41,7 @@ struct CellarGridView: View {
                 }
             }
             .navigationTitle("Ma Cave")
+            .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 await viewModel.load()
             }
@@ -49,6 +54,61 @@ struct CellarGridView: View {
             )) { wrapper in
                 WineDetailSheet(wineId: wrapper.id) {
                     Task { await viewModel.load() }
+                }
+            }
+            .sheet(item: $wineForRemovalChoice, onDismiss: {
+                switch pendingRemoval {
+                case .consumption(let wine):
+                    pendingRemoval = nil
+                    wineForConsumption = wine
+                case .gift(let wine):
+                    pendingRemoval = nil
+                    wineForGift = wine
+                case nil:
+                    break
+                }
+            }) { wine in
+                RemovalChoiceSheet(
+                    onConsume: {
+                        pendingRemoval = .consumption(wine)
+                        wineForRemovalChoice = nil
+                    },
+                    onGift: {
+                        pendingRemoval = .gift(wine)
+                        wineForRemovalChoice = nil
+                    }
+                )
+                .presentationDetents([.height(260)])
+            }
+            .sheet(item: $wineForConsumption, onDismiss: {
+                Task { await viewModel.load() }
+            }) { wine in
+                ConsumptionSheet(wine: wine) { date, rating, notes in
+                    let formatter = ISO8601DateFormatter()
+                    Task {
+                        _ = try? await CellarAPI.remove(
+                            wineId: wine.id,
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            tastingNotes: notes
+                        )
+                        wineForConsumption = nil
+                    }
+                }
+            }
+            .sheet(item: $wineForGift, onDismiss: {
+                Task { await viewModel.load() }
+            }) { wine in
+                GiftSheet(wine: wine) { date, recipientName in
+                    let formatter = ISO8601DateFormatter()
+                    Task {
+                        _ = try? await CellarAPI.gift(
+                            wineId: wine.id,
+                            giftedDate: formatter.string(from: date),
+                            recipientName: recipientName
+                        )
+                        wineForGift = nil
+                    }
                 }
             }
         }
@@ -65,6 +125,7 @@ struct CellarGridView: View {
                     .frame(maxWidth: 240)
                     .clipShape(.rect(cornerRadius: 16))
                     .opacity(0.85)
+                    .accessibilityHidden(true)
                 Text("Cave vide")
                     .font(.title2)
                     .fontWeight(.semibold)
@@ -105,11 +166,12 @@ struct CellarGridView: View {
                             }
                             .tint(.primary)
                             .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    selectedWineId = item.wine.id
+                                Button {
+                                    wineForRemovalChoice = item.wine
                                 } label: {
-                                    Label("Retirer", systemImage: "minus.circle")
+                                    Label("Sortir", systemImage: "arrow.up.circle")
                                 }
+                                .tint(.red)
                             }
                         }
                     } header: {
@@ -119,6 +181,11 @@ struct CellarGridView: View {
             }
         }
     }
+}
+
+private enum PendingRemoval {
+    case consumption(Wine)
+    case gift(Wine)
 }
 
 private struct WineIdWrapper: Identifiable {

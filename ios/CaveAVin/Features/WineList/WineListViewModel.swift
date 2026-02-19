@@ -13,10 +13,11 @@ enum WineListMode: String, CaseIterable, Identifiable {
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
-    case vintage, region, color, price
+    case createdAt, vintage, region, color, price
     var id: String { rawValue }
     var label: String {
         switch self {
+        case .createdAt: "Date d'ajout"
         case .vintage: "Millésime"
         case .region: "Région"
         case .color: "Couleur"
@@ -25,6 +26,7 @@ enum WineSort: String, CaseIterable, Identifiable {
     }
     var icon: String {
         switch self {
+        case .createdAt: "clock"
         case .vintage: "calendar"
         case .region: "map"
         case .color: "paintpalette"
@@ -54,10 +56,17 @@ enum WineStatusFilter: String, CaseIterable, Identifiable {
 
 @MainActor @Observable
 final class WineListViewModel {
+    private static let monthYearFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.dateFormat = "MMMM yyyy"
+        return formatter
+    }()
+
     var wines: [Wine] = []
     var isLoading = false
     var error: String?
-    var sort: WineSort = .vintage
+    var sort: WineSort = .createdAt
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
     var mode: WineListMode = .all
@@ -73,6 +82,14 @@ final class WineListViewModel {
     var groupedWines: [(String, [Wine])] {
         let keyed = displayedWines.map { wine -> (sortKey: Int, label: String, wine: Wine) in
             switch sort {
+            case .createdAt:
+                let date = wine.createdAt
+                let calendar = Calendar.current
+                let year = calendar.component(.year, from: date)
+                let month = calendar.component(.month, from: date)
+                let raw = Self.monthYearFormatter.string(from: date)
+                let label = raw.prefix(1).uppercased() + raw.dropFirst()
+                return (year * 100 + month, label, wine)
             case .vintage:
                 let label = wine.vintage.map { "\($0)" } ?? "Sans millésime"
                 return (wine.vintage ?? 0, label, wine)

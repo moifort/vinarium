@@ -19,6 +19,7 @@ struct WineListView: View {
                             .frame(maxWidth: 240)
                             .clipShape(.rect(cornerRadius: 16))
                             .opacity(0.85)
+                            .accessibilityHidden(true)
                         Text("Aucun vin")
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -98,6 +99,8 @@ struct WineListView: View {
                                                                         .font(.caption2)
                                                                 }
                                                             }
+                                                            .accessibilityElement(children: .ignore)
+                                                            .accessibilityLabel("Note : \(rating) sur 5")
                                                         }
                                                     }
                                                     if wine.rating == 5 {
@@ -118,6 +121,7 @@ struct WineListView: View {
                 }
             }
             .navigationTitle("Mes Vins")
+            .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 await viewModel.load()
             }

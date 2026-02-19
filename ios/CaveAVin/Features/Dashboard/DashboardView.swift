@@ -26,6 +26,7 @@ struct DashboardView: View {
                 }
             }
             .navigationTitle("Accueil")
+            .navigationBarTitleDisplayMode(.large)
             .refreshable { await viewModel.load() }
             .task { await viewModel.load() }
             .sheet(item: Binding(
@@ -255,6 +256,7 @@ struct DashboardView: View {
                 Image(systemName: event.isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                     .foregroundStyle(event.isEntry ? .green : .red)
                     .font(.title3)
+                    .accessibilityLabel(event.isEntry ? "Entrée" : "Sortie")
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(event.wineName)
@@ -302,7 +304,7 @@ private struct GradientWidget: View {
             Spacer()
 
             Text(value)
-                .font(.system(size: 34, weight: .bold))
+                .font(.largeTitle.bold())
                 .foregroundStyle(.white)
                 .minimumScaleFactor(0.5)
                 .lineLimit(1)
@@ -317,6 +319,7 @@ private struct GradientWidget: View {
                 Image(systemName: icon)
                     .font(.title3)
                     .foregroundStyle(.white.opacity(0.7))
+                    .accessibilityHidden(true)
             }
         }
         .padding(16)

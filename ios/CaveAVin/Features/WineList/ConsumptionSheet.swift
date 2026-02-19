@@ -12,50 +12,91 @@ struct ConsumptionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                // MARK: - Vin sélectionné
                 Section {
-                    HStack {
+                    HStack(spacing: 12) {
                         WineColorBadge(color: wine.color)
-                        Text(wine.name)
-                            .font(.headline)
-                    }
-                }
-
-                Section("Date de consommation") {
-                    DatePicker("Date", selection: $consumedDate, displayedComponents: .date)
-                }
-
-                Section("Note") {
-                    HStack(spacing: 8) {
-                        ForEach(1...5, id: \.self) { star in
-                            Button {
-                                rating = star == rating ? 0 : star
-                            } label: {
-                                Image(systemName: star <= rating ? "star.fill" : "star")
-                                    .foregroundStyle(star <= rating ? .yellow : .gray)
-                                    .font(.title2)
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityIdentifier("star-rating-\(star)")
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(wine.name)
+                                .font(.headline)
                         }
                     }
-                    .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 4)
                 }
 
-                Section("Notes de dégustation") {
-                    TextField("Vos impressions...", text: $tastingNotes, axis: .vertical)
-                        .lineLimit(3...6)
+                // MARK: - Date
+                Section {
+                    HStack {
+                        Label("Date", systemImage: "calendar")
+                        Spacer()
+                        DatePicker(
+                            "",
+                            selection: $consumedDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                    }
+ 
+                    VStack(alignment: .leading, spacing: 10) {
+                        Label("Note", systemImage: "star")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        HStack(spacing: 12) {
+                            ForEach(1...5, id: \.self) { star in
+                                Button {
+                                    rating = star == rating ? 0 : star
+                                } label: {
+                                    Image(systemName: star <= rating ? "star.fill" : "star")
+                                        .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.4))
+                                        .font(.title)
+                                        .scaleEffect(star == rating ? 1.15 : 1.0)
+                                        .animation(.spring(duration: 0.2), value: rating)
+                                }
+                                .buttonStyle(.plain)
+                                .accessibilityIdentifier("star-rating-\(star)")
+                            }
+                        }
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.vertical, 4)
+                    }
+                    .padding(.vertical, 4)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("Note : \(rating) sur 5")
+                    .accessibilityAdjustableAction { direction in
+                        switch direction {
+                        case .increment: if rating < 5 { rating += 1 }
+                        case .decrement: if rating > 0 { rating -= 1 }
+                        @unknown default: break
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Notes", systemImage: "note")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
+                            .lineLimit(3...6)
+                    }
+                    .padding(.vertical, 4)
                 }
 
+                // MARK: - Bouton de confirmation
                 Section {
-                    Button("Confirmer la consommation") {
+                    Button {
                         onConfirm(
                             consumedDate,
                             rating > 0 ? rating : nil,
                             tastingNotes.isEmpty ? nil : tastingNotes
                         )
+                    } label: {
+                        Label("Confirmer", systemImage: "checkmark.circle.fill")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .fontWeight(.semibold)
                     }
-                    .frame(maxWidth: .infinity)
+                    .controlSize(.large)
                     .accessibilityIdentifier("confirm-consumption-button")
                 }
             }
@@ -66,8 +107,10 @@ struct ConsumptionSheet: View {
                     Button("Annuler") { dismiss() }
                 }
             }
+            .animation(.default, value: rating)
         }
     }
+
 }
 
 #Preview {

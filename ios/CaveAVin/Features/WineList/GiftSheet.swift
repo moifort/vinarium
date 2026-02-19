@@ -20,13 +20,23 @@ struct GiftSheet: View {
                     }
                 }
 
-                Section("Date du cadeau") {
-                    DatePicker("Date", selection: $giftedDate, displayedComponents: .date)
-                }
-
-                Section("Destinataire") {
+                Section {
                     HStack {
-                        TextField("Nom du destinataire", text: $recipientName)
+                        Label("Date", systemImage: "calendar")
+                        Spacer()
+                        DatePicker(
+                            "",
+                            selection: $giftedDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                    }
+                    HStack {
+                        Label("Destinataire", systemImage: "person")
+                        TextField("Nom", text: $recipientName)
+                            .textInputAutocapitalization(.words)
+                            .multilineTextAlignment(.trailing)
                         Button {
                             showContactPicker = true
                         } label: {
@@ -39,13 +49,17 @@ struct GiftSheet: View {
                 }
 
                 Section {
-                    Button("Confirmer le cadeau") {
+                    Button {
                         onConfirm(
                             giftedDate,
                             recipientName.isEmpty ? nil : recipientName
                         )
+                    } label: {
+                        Label("Confirmer", systemImage: "checkmark.circle.fill")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .fontWeight(.semibold)
                     }
-                    .frame(maxWidth: .infinity)
+                    .controlSize(.large)
                     .accessibilityIdentifier("confirm-gift-button")
                 }
             }

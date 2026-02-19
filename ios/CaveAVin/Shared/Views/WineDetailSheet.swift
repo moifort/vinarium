@@ -266,7 +266,7 @@ struct WineDetailSheet: View {
                 Button(role: .destructive) {
                     showRemovalChoice = true
                 } label: {
-                    Label("Retirer de la cave", systemImage: "arrow.up.circle")
+                    Label("Sortir de la cave", systemImage: "arrow.up.circle")
                         .foregroundStyle(.red)
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
@@ -365,7 +365,7 @@ struct WineDetailSheet: View {
 
 // MARK: - Removal Choice Sheet
 
-private struct RemovalChoiceSheet: View {
+struct RemovalChoiceSheet: View {
     let onConsume: () -> Void
     let onGift: () -> Void
 
@@ -416,7 +416,7 @@ private struct RemovalChoiceSheet: View {
                     .accessibilityIdentifier("choice-gift")
                 }
             }
-            .navigationTitle("Retirer de la cave")
+            .navigationTitle("Sortir de la cave")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

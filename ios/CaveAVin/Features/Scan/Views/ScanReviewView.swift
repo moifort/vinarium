@@ -49,9 +49,38 @@ struct ScanReviewView: View {
             originSection
             detailsSection
             gardeSection
-            saveSection
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 8) {
+                Button {
+                    save()
+                } label: {
+                    Label("Ajouter à la cave", systemImage: "plus.circle.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .disabled(name.isEmpty || isSaving)
+                .accessibilityIdentifier("review-save-button")
+
+                Button {
+                    saveAsFavorite()
+                } label: {
+                    Label("Ajouter à mes favoris", systemImage: "heart.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .disabled(name.isEmpty || isSaving)
+                .accessibilityIdentifier("review-favorite-button")
+            }
+            .frame(maxWidth: .infinity)
+              .padding()
+              .background(.ultraThinMaterial)   // effet “glass”
+              .overlay(alignment: .top) { Divider() }
         }
         .navigationTitle("Vérifier le vin")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Annuler") { onCancel() }
@@ -107,7 +136,7 @@ struct ScanReviewView: View {
                 Label("Millésime", systemImage: "calendar")
             }
         } header: {
-            Label("Informations principales", systemImage: "info.circle")
+            Text("Informations principales")
         }
     }
 
@@ -141,7 +170,7 @@ struct ScanReviewView: View {
                 Label("Classification", systemImage: "rosette")
             }
         } header: {
-            Label("Origine", systemImage: "mappin.and.ellipse")
+            Text("Origine")
         }
     }
 
@@ -167,7 +196,7 @@ struct ScanReviewView: View {
                 Label("Prix", systemImage: "eurosign.circle")
             }
         } header: {
-            Label("Détails", systemImage: "list.bullet.rectangle")
+            Text("Détails")
         }
     }
 
@@ -189,23 +218,7 @@ struct ScanReviewView: View {
                 Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
             }
         } header: {
-            Label("Garde", systemImage: "clock.arrow.2.circlepath")
-        }
-    }
-
-    private var saveSection: some View {
-        Section {
-            Button("Ajouter à la cave", systemImage: "plus.circle.fill") {
-                save()
-            }
-            .disabled(name.isEmpty || isSaving)
-            .accessibilityIdentifier("review-save-button")
-
-            Button("Ajouter à mes favoris", systemImage: "heart.fill") {
-                saveAsFavorite()
-            }
-            .disabled(name.isEmpty || isSaving)
-            .accessibilityIdentifier("review-favorite-button")
+            Text("Garde")
         }
     }
 

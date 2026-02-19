@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PlacementView: View {
     let wine: Wine
+    var onCancel: () -> Void = {}
     let onPlaced: (String) -> Void
 
     @State private var bottles: [CellarBottle] = []
@@ -84,6 +85,12 @@ struct PlacementView: View {
             }
         }
         .navigationTitle("Placement")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Annuler") { onCancel() }
+            }
+        }
         .task {
             await loadData()
         }
