@@ -69,28 +69,20 @@ struct WineListView: View {
                                                     VStack(alignment: .leading) {
                                                         Text(wine.name)
                                                             .font(.headline)
-                                                        HStack(spacing: 4) {
-                                                            if let vintage = wine.vintage {
-                                                                Text(verbatim: "\(vintage)")
-                                                            }
-                                                            if wine.vintage != nil, wine.region != nil {
-                                                                Text("•")
-                                                            }
-                                                            if let region = wine.region {
-                                                                Text(region)
-                                                            }
-                                                            if let price = wine.purchasePrice {
-                                                                if wine.vintage != nil || wine.region != nil {
-                                                                    Text("•")
-                                                                }
-                                                                Text(String(format: "%.0f €", price))
-                                                            }
-                                                            if wine.giftedTo != nil {
-                                                                Text("• Offert")
+                                                        Group {
+                                                            let parts: [String] = [
+                                                                wine.vintage.map { "\($0)" },
+                                                                wine.region,
+                                                                wine.purchasePrice.map { String(format: "%.0f €", $0) },
+                                                                wine.giftedTo.map { "Offert à \(abbreviatedName($0))" },
+                                                            ].compactMap { $0 }
+
+                                                            if !parts.isEmpty {
+                                                                Text(parts.joined(separator: " • "))
+                                                                    .font(.subheadline)
+                                                                    .foregroundStyle(.secondary)
                                                             }
                                                         }
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.secondary)
                                                     }
                                                     Spacer()
                                                     VStack(alignment: .trailing) {
@@ -168,6 +160,14 @@ struct WineListView: View {
             }
         }
     }
+}
+
+private func abbreviatedName(_ fullName: String) -> String {
+    let components = fullName.split(separator: " ")
+    if components.count >= 2, let lastInitial = components.last?.first {
+        return "\(components.first!) \(lastInitial)."
+    }
+    return fullName
 }
 
 private struct WineIdWrapper: Identifiable {
