@@ -20,3 +20,5 @@ firebase-debug.log
 
 # Claude Code
 .claude/
+/ios/CaveAVin/Shared/Secrets.swift
+/ios/CaveAVinUITests/Support/TestSecrets.swift

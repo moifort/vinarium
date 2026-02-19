@@ -44,8 +44,8 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: "3000"
-      ANTHROPIC_API_KEY: "sk-ant-..."
-      GEMINI_API_KEY: "..."
+      NITRO_ANTHROPIC_API_KEY: "sk-ant-..."
+      NITRO_GOOGLE_API_KEY: "..."
     ports:
       - "3000:3000"
     volumes:
