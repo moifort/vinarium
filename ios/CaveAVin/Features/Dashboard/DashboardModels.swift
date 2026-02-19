@@ -4,9 +4,19 @@ struct DashboardData: Codable, Sendable {
     let bottleCount: Int
     let totalValue: Double
     let readyToDrink: [DashboardWine]
+    let favorites: [DashboardFavorite]
     let lastBottle: DashboardEntry?
     let lastExit: DashboardHistoryEvent?
     let history: [DashboardHistoryEvent]
+}
+
+struct DashboardFavorite: Codable, Identifiable, Sendable {
+    let id: String
+    let name: String
+    let color: WineColor
+    let vintage: Int?
+    let estimatedPrice: Double?
+    let tastingDate: Date?
 }
 
 struct DashboardWine: Codable, Identifiable, Sendable {

@@ -1,12 +1,12 @@
 import XCTest
 
-final class NominalFlowTest: BaseUITest {
+final class ScanFlowTest: BaseUITest {
 
     private let wineName = "Vin Test Nominal"
 
-    // MARK: - Nominal E2E Flow
+    // MARK: - Scan E2E Flow
 
-    func testNominalFlow() async throws {
+    func testScanFlow() async throws {
         // 1. SCAN: open scanner, pick photo, save
         let tabBar = TabBarPage(app: app)
         let scanner = try tabBar.openScanner()
@@ -70,7 +70,7 @@ final class NominalFlowTest: BaseUITest {
         // Should return to cellar
         try app.navigationBars["Ma Cave"].waitOrFail()
 
-        // 7. FAVORITES: go to Vins tab, switch to "5 ⭐", verify wine visible
+        // 7. FAVORITES: go to Vins tab, switch to "❤️ Favoris", verify wine visible
         _ = try tabBar.goToWineList().verify()
         let favorites = try WineListPage(app: app).switchToFavorites()
         try favorites.verifyWineVisible(wineName)

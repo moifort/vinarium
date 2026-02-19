@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct WineListView: View {
+    @Binding var showFavorites: Bool
     @State private var viewModel = WineListViewModel()
     @State private var selectedWineId: String?
 
@@ -40,7 +41,7 @@ struct WineListView: View {
                         .accessibilityIdentifier("winelist-segment")
 
                         if viewModel.displayedWines.isEmpty {
-                            ContentUnavailableView("Aucun vin 5 étoiles", systemImage: "star", description: Text("Notez vos vins préférés 5 étoiles"))
+                            ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos vins préférés en favoris"))
                                 .frame(maxHeight: .infinity)
                         } else {
                             List {
@@ -52,6 +53,14 @@ struct WineListView: View {
                                             } label: {
                                                 HStack {
                                                     WineColorBadge(color: wine.color)
+                                                        .overlay(alignment: .topTrailing) {
+                                                            if wine.rating == 5 {
+                                                                Image(systemName: "heart.fill")
+                                                                    .font(.system(size: 7))
+                                                                    .foregroundStyle(.red)
+                                                                    .offset(x: 3, y: -3)
+                                                            }
+                                                        }
                                                     VStack(alignment: .leading) {
                                                         Text(wine.name)
                                                             .font(.headline)
@@ -76,12 +85,18 @@ struct WineListView: View {
                                                                 .font(.subheadline)
                                                                 .foregroundStyle(.secondary)
                                                         }
-                                                        if let rating = wine.rating {
-                                                            HStack(spacing: 1) {
-                                                                ForEach(1...5, id: \.self) { star in
-                                                                    Image(systemName: star <= rating ? "star.fill" : "star")
-                                                                        .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
-                                                                        .font(.caption2)
+                                                        if let rating = wine.rating, rating != 5 {
+                                                            if rating == 5 {
+                                                                Image(systemName: "heart.fill")
+                                                                    .foregroundStyle(.red)
+                                                                    .font(.subheadline)
+                                                            } else {
+                                                                HStack(spacing: 1) {
+                                                                    ForEach(1...5, id: \.self) { star in
+                                                                        Image(systemName: star <= rating ? "star.fill" : "star")
+                                                                            .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
+                                                                            .font(.caption2)
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -132,6 +147,12 @@ struct WineListView: View {
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
                 WineDetailSheet(wineId: wrapper.id)
+            }
+            .onChange(of: showFavorites) {
+                if showFavorites {
+                    viewModel.mode = .favorites
+                    showFavorites = false
+                }
             }
         }
     }

@@ -7,6 +7,7 @@ enum ScanStep {
     case review(ScanResult, Data)
     case placing(Wine)
     case confirmed(Wine, String)
+    case favoriteSaved
 }
 
 @MainActor @Observable
@@ -46,6 +47,22 @@ final class ScanViewModel {
         }
     }
 
+    func saveAsFavorite(_ request: CreateWineRequest) {
+        guard !isSaving else { return }
+        isSaving = true
+        error = nil
+
+        Task {
+            do {
+                _ = try await WineAPI.create(request)
+                self.step = .favoriteSaved
+            } catch {
+                self.error = error.localizedDescription
+            }
+            self.isSaving = false
+        }
+    }
+
     func reset() {
         step = .camera
         error = nil
@@ -55,7 +72,7 @@ final class ScanViewModel {
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning): return true
+        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved): return true
         case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }

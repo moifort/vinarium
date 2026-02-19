@@ -14,6 +14,7 @@ struct DashboardView: View {
                         VStack(spacing: 20) {
                             statsRow(data)
                             readyToDrinkSection(data)
+                            favoritesSection(data)
                             journalSection(data)
                         }
                         .padding()
@@ -131,6 +132,79 @@ struct DashboardView: View {
                 .clipShape(.rect(cornerRadius: 12))
             }
         }
+    }
+
+    // MARK: - Favorites
+
+    private func favoritesSection(_ data: DashboardData) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label("Mes favoris", systemImage: "heart.fill")
+                    .font(.headline)
+                    .foregroundStyle(.primary)
+                Spacer()
+                if !data.favorites.isEmpty {
+                    Text("\(data.favorites.count)")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if data.favorites.isEmpty {
+                Text("Aucun favori")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 14)
+                    .background(Color(.systemGray6))
+                    .clipShape(.rect(cornerRadius: 12))
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(data.favorites) { favorite in
+                        Button {
+                            selectedWineId = favorite.id
+                        } label: {
+                            HStack(spacing: 10) {
+                                WineColorBadge(color: favorite.color)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(favorite.name)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                    HStack(spacing: 4) {
+                                        if let vintage = favorite.vintage {
+                                            Text(verbatim: "\(vintage)")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        if let date = favorite.tastingDate {
+                                            Text(date, format: .dateTime.day().month(.abbreviated))
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+                                }
+                                Spacer()
+                                if let price = favorite.estimatedPrice {
+                                    Text(String(format: "%.0f €", price))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Image(systemName: "heart.fill")
+                                    .foregroundStyle(.red)
+                                    .font(.caption)
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 14)
+                        }
+                        .tint(.primary)
+                    }
+                }
+                .background(Color(.systemGray6))
+                .clipShape(.rect(cornerRadius: 12))
+            }
+        }
+        .accessibilityIdentifier("dashboard-favorites-section")
     }
 
     // MARK: - Journal

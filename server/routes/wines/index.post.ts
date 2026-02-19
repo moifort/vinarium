@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import { Country, Eur, Region, Year } from '~/domain/shared/primitives'
+import { TastingCommand } from '~/domain/tasting/command'
+import { Rating } from '~/domain/tasting/primitives'
 import { WineCommand } from '~/domain/wine/command'
 import { Appellation, Classification, WineDomain, WineName } from '~/domain/wine/primitives'
 import type { Wine } from '~/domain/wine/types'
@@ -27,5 +29,14 @@ export default defineEventHandler(async (event) => {
   if (body.notes) data.notes = body.notes
 
   const wine = await WineCommand.add(name, color, data)
+
+  if (body.rating != null) {
+    await TastingCommand.create({
+      wineId: wine.id,
+      rating: Rating(body.rating),
+      consumedDate: new Date(),
+    })
+  }
+
   return { status: 201, data: wine }
 })
