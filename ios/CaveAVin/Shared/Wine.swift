@@ -86,6 +86,7 @@ struct CreateWineRequest: Encodable, Sendable {
     var drinkUntil: Int?
     var imageBase64: String?
     var notes: String?
+    var rating: Int?
 }
 
 struct APIResponse<T: Decodable & Sendable>: Decodable, Sendable {

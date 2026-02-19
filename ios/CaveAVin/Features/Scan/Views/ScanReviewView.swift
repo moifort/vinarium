@@ -5,6 +5,7 @@ struct ScanReviewView: View {
     let imageData: Data
     let isSaving: Bool
     let onSave: (CreateWineRequest) -> Void
+    let onFavorite: (CreateWineRequest) -> Void
 
     @State private var name: String
     @State private var color: WineColor
@@ -19,11 +20,12 @@ struct ScanReviewView: View {
     @State private var drinkFrom: String
     @State private var drinkUntil: String
 
-    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void) {
+    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.isSaving = isSaving
         self.onSave = onSave
+        self.onFavorite = onFavorite
         _name = State(initialValue: scanResult.name)
         _color = State(initialValue: scanResult.color)
         _domain = State(initialValue: scanResult.domain ?? "")
@@ -189,24 +191,53 @@ struct ScanReviewView: View {
             Button {
                 save()
             } label: {
-                Label("Ajouter à la cave", systemImage: "plus.circle.fill")
-                    .frame(maxWidth: .infinity)
-                    .fontWeight(.semibold)
+                HStack {
+                    Image(systemName: "plus.circle.fill")
+                    Text("Ajouter à la cave")
+                        .frame(maxWidth: .infinity)
+                }
+                .fontWeight(.semibold)
             }
             .disabled(name.isEmpty || isSaving)
             .accessibilityIdentifier("review-save-button")
+
+            Divider()
+
+            Button {
+                saveAsFavorite()
+            } label: {
+                HStack {
+                    Image(systemName: "heart.fill")
+                    Text("Ajouter à mes favoris")
+                        .frame(maxWidth: .infinity)
+                }
+                .fontWeight(.semibold)
+            }
+            .disabled(name.isEmpty || isSaving)
+            .accessibilityIdentifier("review-favorite-button")
         }
+        .tint(.blue)
     }
 
     // MARK: - Actions
 
     private func save() {
+        onSave(buildRequest())
+    }
+
+    private func saveAsFavorite() {
+        var request = buildRequest()
+        request.rating = 5
+        onFavorite(request)
+    }
+
+    private func buildRequest() -> CreateWineRequest {
         let varieties = grapeVarieties
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
-        let request = CreateWineRequest(
+        return CreateWineRequest(
             name: name,
             color: color,
             domain: domain.isEmpty ? nil : domain,
@@ -221,6 +252,5 @@ struct ScanReviewView: View {
             drinkUntil: Int(drinkUntil),
             imageBase64: imageData.base64EncodedString()
         )
-        onSave(request)
     }
 }

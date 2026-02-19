@@ -44,4 +44,9 @@ struct ScanReviewPage {
         try app.buttons["review-save-button"].tapOrFail()
         return PlacementPage(app: app)
     }
+
+    func tapFavorite() throws {
+        app.swipeUp()
+        try app.buttons["review-favorite-button"].tapOrFail()
+    }
 }

@@ -6,7 +6,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
     var label: String {
         switch self {
         case .all: "Tous"
-        case .favorites: "5 ⭐"
+        case .favorites: "❤️ Favoris"
         }
     }
 }

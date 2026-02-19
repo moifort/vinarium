@@ -15,6 +15,10 @@ output
 *.xcworkspace
 xcuserdata/
 
+# iOS secrets (contains API tokens)
+ios/CaveAVin/Shared/Secrets.swift
+ios/CaveAVinUITests/Support/TestSecrets.swift
+
 doc/
 firebase-debug.log
 

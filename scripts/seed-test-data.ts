@@ -1,5 +1,9 @@
 const BASE_URL = process.env.TEST_SERVER_URL ?? 'http://localhost:3000'
-const TOKEN = process.env.NITRO_API_TOKEN ?? '374CACE6-5E4E-456A-8BF7-93E689382C3C'
+const TOKEN = process.env.NITRO_API_TOKEN
+if (!TOKEN) {
+  console.error('Error: NITRO_API_TOKEN is not set. Export it before running this script.')
+  process.exit(1)
+}
 
 interface WineResponse {
   status: number
