@@ -80,7 +80,7 @@ struct WineDetailSheet: View {
                     showGift = true
                 }
             )
-            .presentationDetents([.height(220)])
+            .presentationDetents([.height(260)])
         }
         .sheet(isPresented: $showConsumption) {
             ConsumptionSheet(
@@ -372,34 +372,57 @@ private struct RemovalChoiceSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text("Retirer de la cave")
-                .font(.headline)
-                .padding(.top, 24)
+        NavigationStack {
+            List {
+                Section {
+                    Button {
+                        onConsume()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Consommer")
+                                    .font(.body)
+                                Text("Enregistrer une dégustation")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "wineglass")
+                                .foregroundStyle(.orange)
+                                .font(.title2)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .accessibilityIdentifier("choice-consume")
 
-            VStack(spacing: 12) {
-                Button {
-                    onConsume()
-                } label: {
-                    Label("A consommer", systemImage: "wineglass")
-                        .frame(maxWidth: .infinity)
+                    Button {
+                        onGift()
+                    } label: {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Offrir")
+                                    .font(.body)
+                                Text("Offrir cette bouteille à quelqu'un")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "gift")
+                                .foregroundStyle(.purple)
+                                .font(.title2)
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .accessibilityIdentifier("choice-gift")
                 }
-                .buttonStyle(.borderedProminent)
-                .accessibilityIdentifier("choice-consume")
-
-                Button {
-                    onGift()
-                } label: {
-                    Label("A offrir", systemImage: "gift")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .accessibilityIdentifier("choice-gift")
             }
-            .padding(.horizontal, 24)
-
-            Button("Annuler", role: .cancel) { dismiss() }
-                .padding(.bottom, 16)
+            .navigationTitle("Retirer de la cave")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Annuler") { dismiss() }
+                }
+            }
         }
     }
 }
