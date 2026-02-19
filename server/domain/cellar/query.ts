@@ -2,8 +2,8 @@ import { keyBy, range } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import * as repository from '~/domain/cellar/repository'
 import type { CellarBottle, CellarBottleView } from '~/domain/cellar/types'
-import type { WineId } from '~/domain/wine/types'
 import * as wineRepository from '~/domain/wine/repository'
+import type { WineId } from '~/domain/wine/types'
 
 const CELLAR_SIZE = { rows: 6, cols: 8 }
 
@@ -13,7 +13,8 @@ export namespace CellarQuery {
     const wineMap = keyBy(await wineRepository.findAll(), 'id')
     return bottles.map((bottle) => {
       const wine = wineMap[bottle.wineId]
-      if (!wine) throw new Error(`Wine ${bottle.wineId} not found for bottle at ${bottle.row},${bottle.col}`)
+      if (!wine)
+        throw new Error(`Wine ${bottle.wineId} not found for bottle at ${bottle.row},${bottle.col}`)
       return { ...toView(bottle), wine }
     })
   }

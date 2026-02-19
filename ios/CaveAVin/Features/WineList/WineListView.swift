@@ -51,16 +51,8 @@ struct WineListView: View {
                                             Button {
                                                 selectedWineId = wine.id
                                             } label: {
-                                                HStack {
+                                                HStack(alignment: .firstTextBaseline) {
                                                     WineColorBadge(color: wine.color)
-                                                        .overlay(alignment: .topTrailing) {
-                                                            if wine.rating == 5 {
-                                                                Image(systemName: "heart.fill")
-                                                                    .font(.system(size: 7))
-                                                                    .foregroundStyle(.red)
-                                                                    .offset(x: 3, y: -3)
-                                                            }
-                                                        }
                                                     VStack(alignment: .leading) {
                                                         Text(wine.name)
                                                             .font(.headline)
@@ -68,11 +60,17 @@ struct WineListView: View {
                                                             if let vintage = wine.vintage {
                                                                 Text(verbatim: "\(vintage)")
                                                             }
+                                                            if wine.vintage != nil, wine.region != nil {
+                                                                Text("•")
+                                                            }
                                                             if let region = wine.region {
-                                                                if wine.vintage != nil {
-                                                                    Text("\u{2022}")
-                                                                }
                                                                 Text(region)
+                                                            }
+                                                            if let price = wine.purchasePrice {
+                                                                if wine.vintage != nil || wine.region != nil {
+                                                                    Text("•")
+                                                                }
+                                                                Text(String(format: "%.0f €", price))
                                                             }
                                                         }
                                                         .font(.subheadline)
@@ -80,26 +78,21 @@ struct WineListView: View {
                                                     }
                                                     Spacer()
                                                     VStack(alignment: .trailing) {
-                                                        if let price = wine.purchasePrice {
-                                                            Text(String(format: "%.0f €", price))
-                                                                .font(.subheadline)
-                                                                .foregroundStyle(.secondary)
-                                                        }
                                                         if let rating = wine.rating, rating != 5 {
-                                                            if rating == 5 {
-                                                                Image(systemName: "heart.fill")
-                                                                    .foregroundStyle(.red)
-                                                                    .font(.subheadline)
-                                                            } else {
-                                                                HStack(spacing: 1) {
-                                                                    ForEach(1...5, id: \.self) { star in
-                                                                        Image(systemName: star <= rating ? "star.fill" : "star")
-                                                                            .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
-                                                                            .font(.caption2)
-                                                                    }
+                                                            HStack(spacing: 1) {
+                                                                ForEach(1...5, id: \.self) { star in
+                                                                    Image(systemName: star <= rating ? "star.fill" : "star")
+                                                                        .foregroundStyle(star <= rating ? .yellow : .gray.opacity(0.3))
+                                                                        .font(.caption2)
                                                                 }
                                                             }
                                                         }
+                                                    }
+                                                    if wine.rating == 5 {
+                                                        Image(systemName: "heart.fill")
+                                                            .foregroundStyle(.red)
+                                                            .font(.default)
+                                                            .frame(maxHeight: .infinity, alignment: .center)
                                                     }
                                                 }
                                             }
@@ -124,7 +117,7 @@ struct WineListView: View {
                     Menu {
                         Picker("Tri", selection: $viewModel.sort) {
                             ForEach(WineSort.allCases) { s in
-                                Text(s.label).tag(s)
+                                Label(s.label, systemImage: s.icon).tag(s)
                             }
                         }
                         Toggle(viewModel.sortDescending ? "Décroissant" : "Croissant", isOn: $viewModel.sortDescending)
@@ -133,7 +126,7 @@ struct WineListView: View {
 
                         Picker("Statut", selection: $viewModel.statusFilter) {
                             ForEach(WineStatusFilter.allCases) { f in
-                                Text(f.label).tag(f)
+                                Label(f.label, systemImage: f.icon).tag(f)
                             }
                         }
                     } label: {
@@ -160,4 +153,9 @@ struct WineListView: View {
 
 private struct WineIdWrapper: Identifiable {
     let id: String
+}
+
+#Preview("Liste de vins") {
+    @Previewable @State var showFavorites = false
+    WineListView(showFavorites: $showFavorites)
 }

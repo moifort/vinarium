@@ -30,7 +30,9 @@ export namespace WineQuery {
     const [all, tastings] = await Promise.all([repository.findAll(), TastingQuery.getAll()])
     const ratingMap = keyBy(tastings, 'wineId')
     const withRating = all.map((w) => ({ ...w, rating: ratingMap[w.id]?.rating ?? null }))
-    const byColor = options?.color ? withRating.filter((wine) => wine.color === options.color) : withRating
+    const byColor = options?.color
+      ? withRating.filter((wine) => wine.color === options.color)
+      : withRating
     const byStatus =
       options?.status && options.status !== 'all'
         ? await filterByStatus(byColor, options.status)

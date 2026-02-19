@@ -177,6 +177,8 @@ struct ScanFlowView: View {
                         viewModel.saveWine(request)
                     }, onFavorite: { request in
                         viewModel.saveAsFavorite(request)
+                    }, onCancel: {
+                        viewModel.reset()
                     })
                 }
 

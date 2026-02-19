@@ -1,11 +1,6 @@
 import { sortBy } from 'lodash-es'
 import * as repository from '~/domain/journal/repository'
-import type {
-  JournalEntry,
-  JournalEntryIn,
-  JournalEntryOut,
-  JournalEventView,
-} from '~/domain/journal/types'
+import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 

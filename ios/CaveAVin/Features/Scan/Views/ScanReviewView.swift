@@ -6,6 +6,7 @@ struct ScanReviewView: View {
     let isSaving: Bool
     let onSave: (CreateWineRequest) -> Void
     let onFavorite: (CreateWineRequest) -> Void
+    let onCancel: () -> Void
 
     @State private var name: String
     @State private var color: WineColor
@@ -20,12 +21,13 @@ struct ScanReviewView: View {
     @State private var drinkFrom: String
     @State private var drinkUntil: String
 
-    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }) {
+    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.isSaving = isSaving
         self.onSave = onSave
         self.onFavorite = onFavorite
+        self.onCancel = onCancel
         _name = State(initialValue: scanResult.name)
         _color = State(initialValue: scanResult.color)
         _domain = State(initialValue: scanResult.domain ?? "")
@@ -50,6 +52,11 @@ struct ScanReviewView: View {
             saveSection
         }
         .navigationTitle("Vérifier le vin")
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Annuler") { onCancel() }
+            }
+        }
     }
 
     // MARK: - Sections
@@ -188,35 +195,18 @@ struct ScanReviewView: View {
 
     private var saveSection: some View {
         Section {
-            Button {
+            Button("Ajouter à la cave", systemImage: "plus.circle.fill") {
                 save()
-            } label: {
-                HStack {
-                    Image(systemName: "plus.circle.fill")
-                    Text("Ajouter à la cave")
-                        .frame(maxWidth: .infinity)
-                }
-                .fontWeight(.semibold)
             }
             .disabled(name.isEmpty || isSaving)
             .accessibilityIdentifier("review-save-button")
 
-            Divider()
-
-            Button {
+            Button("Ajouter à mes favoris", systemImage: "heart.fill") {
                 saveAsFavorite()
-            } label: {
-                HStack {
-                    Image(systemName: "heart.fill")
-                    Text("Ajouter à mes favoris")
-                        .frame(maxWidth: .infinity)
-                }
-                .fontWeight(.semibold)
             }
             .disabled(name.isEmpty || isSaving)
             .accessibilityIdentifier("review-favorite-button")
         }
-        .tint(.blue)
     }
 
     // MARK: - Actions
@@ -254,3 +244,79 @@ struct ScanReviewView: View {
         )
     }
 }
+// MARK: - Preview
+
+#Preview("Scan Review") {
+    let mockScanResult = ScanResult(
+        name: "Château Margaux",
+        domain: "Château Margaux",
+        vintage: 2018,
+        appellation: "Margaux",
+        region: "Bordeaux",
+        country: "France",
+        color: .red,
+        grapeVarieties: ["Cabernet Sauvignon", "Merlot", "Petit Verdot"],
+        alcoholContent: 13.5,
+        classification: "1er Grand Cru Classé",
+        drinkFrom: 2025,
+        drinkUntil: 2045,
+        estimatedPrice: 650
+    )
+
+    // Petite image de placeholder en dégradé rouge/bordeaux
+    let mockImageData: Data = {
+        let renderer = UIGraphicsImageRenderer(size: CGSize(width: 400, height: 300))
+        let image = renderer.image { ctx in
+            let colors = [UIColor(red: 0.5, green: 0.05, blue: 0.1, alpha: 1).cgColor,
+                          UIColor(red: 0.3, green: 0.02, blue: 0.05, alpha: 1).cgColor]
+            let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(),
+                                      colors: colors as CFArray,
+                                      locations: [0, 1])!
+            ctx.cgContext.drawLinearGradient(gradient,
+                                            start: .zero,
+                                            end: CGPoint(x: 0, y: 300),
+                                            options: [])
+        }
+        return image.jpegData(compressionQuality: 0.8) ?? Data()
+    }()
+
+    NavigationStack {
+        ScanReviewView(
+            scanResult: mockScanResult,
+            imageData: mockImageData,
+            onSave: { _ in },
+            onFavorite: { _ in },
+            onCancel: {}
+        )
+    }
+}
+
+#Preview("Saving in progress") {
+    let mockScanResult = ScanResult(
+        name: "Pouilly-Fumé",
+        domain: "Domaine Didier Dagueneau",
+        vintage: 2021,
+        appellation: "Pouilly-Fumé",
+        region: "Loire",
+        country: "France",
+        color: .white,
+        grapeVarieties: ["Sauvignon Blanc"],
+        alcoholContent: 12.5,
+        classification: nil,
+        drinkFrom: 2022,
+        drinkUntil: 2028,
+        estimatedPrice: 45
+    )
+
+    NavigationStack {
+        ScanReviewView(
+            scanResult: mockScanResult,
+            imageData: Data(),
+            isSaving: true,
+            onSave: { _ in },
+            onFavorite: { _ in },
+            onCancel: {}
+        )
+    }
+}
+

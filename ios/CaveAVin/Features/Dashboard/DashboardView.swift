@@ -174,15 +174,16 @@ struct DashboardView: View {
                                     HStack(spacing: 4) {
                                         if let vintage = favorite.vintage {
                                             Text(verbatim: "\(vintage)")
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                        }
+                                        if favorite.vintage != nil, favorite.tastingDate != nil {
+                                            Text("•")
                                         }
                                         if let date = favorite.tastingDate {
-                                            Text(date, format: .dateTime.day().month(.abbreviated))
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
+                                            Text("Consommé le \(date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year(.twoDigits)))")
                                         }
                                     }
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                                 }
                                 Spacer()
                                 if let price = favorite.estimatedPrice {
@@ -190,9 +191,6 @@ struct DashboardView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }
-                                Image(systemName: "heart.fill")
-                                    .foregroundStyle(.red)
-                                    .font(.caption)
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 14)

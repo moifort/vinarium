@@ -62,7 +62,9 @@ export namespace DashboardQuery {
     drinkUntil: bottle.wine.drinkUntil,
   })
 
-  const toLastBottle = (bottle?: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number]): LastBottle | undefined => {
+  const toLastBottle = (
+    bottle?: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number],
+  ): LastBottle | undefined => {
     if (!bottle) return undefined
     return {
       wine: {

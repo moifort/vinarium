@@ -22,6 +22,14 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .price: "Prix"
         }
     }
+    var icon: String {
+        switch self {
+        case .vintage: "calendar"
+        case .region: "map"
+        case .color: "paintpalette"
+        case .price: "eurosign.circle"
+        }
+    }
 }
 
 enum WineStatusFilter: String, CaseIterable, Identifiable {
@@ -32,6 +40,13 @@ enum WineStatusFilter: String, CaseIterable, Identifiable {
         case .all: "Tous"
         case .inCellar: "En cave"
         case .consumed: "Consommés"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .all: "tray.full"
+        case .inCellar: "cabinet"
+        case .consumed: "wineglass"
         }
     }
 }
