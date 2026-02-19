@@ -1,5 +1,5 @@
 const BASE_URL = process.env.TEST_SERVER_URL ?? 'http://localhost:3000'
-const TOKEN = process.env.NITRO_API_TOKEN ?? '801B91EB-9D7E-4AAA-B944-DB7E500BD3A7'
+const TOKEN = process.env.NITRO_API_TOKEN ?? '374CACE6-5E4E-456A-8BF7-93E689382C3C'
 
 interface WineResponse {
   status: number

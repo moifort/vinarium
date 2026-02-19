@@ -46,6 +46,7 @@ services:
       PORT: "3000"
       NITRO_ANTHROPIC_API_KEY: "sk-ant-..."
       NITRO_GOOGLE_API_KEY: "..."
+      NITRO_API_TOKEN: "your-secret-token"
     ports:
       - "3000:3000"
     volumes:

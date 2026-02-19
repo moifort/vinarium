@@ -6,7 +6,7 @@ set -euo pipefail
 
 export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 PROJ_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-API_TOKEN="${NITRO_API_TOKEN:-801B91EB-9D7E-4AAA-B944-DB7E500BD3A7}"
+API_TOKEN="${NITRO_API_TOKEN:-374CACE6-5E4E-456A-8BF7-93E689382C3C}"
 OUTPUT_DIR="$PROJ_DIR/generated/screenshots"
 SCHEME="CaveAVin"
 DEVICE="iPhone 17"
