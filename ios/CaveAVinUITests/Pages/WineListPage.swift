@@ -20,7 +20,7 @@ struct WineListPage {
     }
 
     func switchToFavorites() throws -> Self {
-        try app.segmentedControls["winelist-segment"].buttons["5 ⭐"].tapOrFail()
+        try app.segmentedControls["winelist-segment"].buttons["❤️ Favoris"].tapOrFail()
         return self
     }
 

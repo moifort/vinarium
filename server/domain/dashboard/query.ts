@@ -1,11 +1,14 @@
 import { sortBy } from 'lodash-es'
 import { CellarQuery } from '~/domain/cellar/query'
+import type { FavoriteWine, LastBottle, ReadyToDrinkWine } from '~/domain/dashboard/types'
 import { JournalQuery } from '~/domain/journal/query'
-import type { DashboardView, LastBottle, ReadyToDrinkWine } from '~/domain/dashboard/types'
+import { TastingQuery } from '~/domain/tasting/query'
+import type { TastingNote } from '~/domain/tasting/types'
+import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
 
 export namespace DashboardQuery {
-  export const get = async (): Promise<DashboardView> => {
+  export const get = async () => {
     const allBottles = await CellarQuery.getAllBottles()
     const currentYear = new Date().getFullYear()
 
@@ -25,10 +28,14 @@ export namespace DashboardQuery {
     const history = await JournalQuery.getAll()
     const lastExit = history.find((event) => event.type === 'out')
 
+    const allTastings = await TastingQuery.getAll()
+    const favorites = await loadFavorites(allTastings.filter(({ rating }) => rating === 5))
+
     return {
       bottleCount,
       totalValue,
       readyToDrink,
+      favorites,
       lastBottle,
       lastExit,
       history: history.slice(0, 10),
@@ -67,5 +74,24 @@ export namespace DashboardQuery {
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       date: bottle.createdAt,
     }
+  }
+
+  const loadFavorites = async (tastings: TastingNote[]) => {
+    const results = await Promise.all(
+      tastings.map(async (tasting) => {
+        const wine = await WineQuery.getById(tasting.wineId)
+        if (wine === 'not-found') return undefined
+        const favorite: FavoriteWine = {
+          id: wine.id,
+          name: wine.name,
+          color: wine.color,
+          vintage: wine.vintage,
+          estimatedPrice: wine.purchasePrice,
+          tastingDate: tasting.consumedDate,
+        }
+        return favorite
+      }),
+    )
+    return results.filter((favorite): favorite is FavoriteWine => favorite !== undefined)
   }
 }

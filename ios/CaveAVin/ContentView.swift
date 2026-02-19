@@ -22,10 +22,16 @@ enum TabSelection: Int, CaseIterable, Identifiable {
     }
 }
 
+enum ScanFlowResult {
+    case addedToCellar
+    case addedToFavorites
+}
+
 struct ContentView: View {
     @State private var selectedTab: TabSelection = .home
     @State private var showScanner = false
     @State private var cellarRefreshTrigger = UUID()
+    @State private var showFavorites = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -38,7 +44,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
-                WineListView()
+                WineListView(showFavorites: $showFavorites)
             }
             .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: .search) {
@@ -55,17 +61,23 @@ struct ContentView: View {
             }
         }
         .fullScreenCover(isPresented: $showScanner) {
-            ScanFlowView {
+            ScanFlowView { result in
                 showScanner = false
-                selectedTab = .cellar
-                cellarRefreshTrigger = UUID()
+                switch result {
+                case .addedToCellar:
+                    selectedTab = .cellar
+                    cellarRefreshTrigger = UUID()
+                case .addedToFavorites:
+                    selectedTab = .wines
+                    showFavorites = true
+                }
             }
         }
     }
 }
 
 struct ScanFlowView: View {
-    var onFlowCompleted: () -> Void = {}
+    var onFlowCompleted: (ScanFlowResult) -> Void = { _ in }
 
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel = ScanViewModel()
@@ -161,9 +173,11 @@ struct ScanFlowView: View {
 
             case .review(let result, let imageData):
                 NavigationStack {
-                    ScanReviewView(scanResult: result, imageData: imageData, isSaving: viewModel.isSaving) { request in
+                    ScanReviewView(scanResult: result, imageData: imageData, isSaving: viewModel.isSaving, onSave: { request in
                         viewModel.saveWine(request)
-                    }
+                    }, onFavorite: { request in
+                        viewModel.saveAsFavorite(request)
+                    })
                 }
 
             case .placing(let wine):
@@ -177,9 +191,16 @@ struct ScanFlowView: View {
                 NavigationStack {
                     ConfirmationView(wine: wine, position: position) {
                         viewModel.reset()
-                        onFlowCompleted()
+                        onFlowCompleted(.addedToCellar)
                     }
                 }
+
+            case .favoriteSaved:
+                Color.clear
+                    .onAppear {
+                        viewModel.reset()
+                        onFlowCompleted(.addedToFavorites)
+                    }
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.step)
