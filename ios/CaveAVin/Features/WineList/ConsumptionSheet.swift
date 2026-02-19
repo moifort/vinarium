@@ -69,3 +69,13 @@ struct ConsumptionSheet: View {
         }
     }
 }
+
+#Preview {
+    ConsumptionSheet(
+        wine: Wine(
+            id: "1", name: "Château Margaux 2018", color: .red,
+            createdAt: Date(), updatedAt: Date()
+        ),
+        onConfirm: { _, _, _ in }
+    )
+}

@@ -80,3 +80,16 @@ struct ConfirmationView: View {
         }
     }
 }
+
+#Preview {
+    NavigationStack {
+        ConfirmationView(
+            wine: Wine(
+                id: "1", name: "Château Margaux 2018", color: .red,
+                createdAt: Date(), updatedAt: Date()
+            ),
+            position: "B3",
+            onDone: {}
+        )
+    }
+}

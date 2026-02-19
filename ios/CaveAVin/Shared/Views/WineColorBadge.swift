@@ -10,3 +10,16 @@ struct WineColorBadge: View {
             .frame(width: 14, height: 14)
     }
 }
+
+#Preview("Toutes les couleurs") {
+    HStack(spacing: 12) {
+        ForEach(WineColor.allCases) { color in
+            VStack {
+                WineColorBadge(color: color)
+                Text(color.label)
+                    .font(.caption2)
+            }
+        }
+    }
+    .padding()
+}

@@ -67,3 +67,15 @@ struct CellarJournalView: View {
         .padding(.vertical, 2)
     }
 }
+
+#Preview("Avec événements") {
+    CellarJournalView(events: [
+        HistoryEvent(type: .entry, date: Date(), wineId: "1", wineName: "Château Margaux 2018", wineColor: .red, position: "A1"),
+        HistoryEvent(type: .entry, date: Date(), wineId: "2", wineName: "Pouilly-Fumé 2021", wineColor: .white, position: "B3"),
+        HistoryEvent(type: .exit, date: Date().addingTimeInterval(-86400), wineId: "3", wineName: "Côtes de Provence 2022", wineColor: .rosé, position: "C5"),
+    ])
+}
+
+#Preview("Vide") {
+    CellarJournalView(events: [])
+}

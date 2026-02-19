@@ -342,3 +342,8 @@ private struct GradientWidget: View {
 private struct WineIdWrapper: Identifiable {
     let id: String
 }
+
+#Preview {
+    @Previewable @State var selectedTab: TabSelection = .home
+    DashboardView(selectedTab: $selectedTab)
+}

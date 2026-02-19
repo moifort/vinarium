@@ -33,3 +33,10 @@ struct ViewfinderOverlay: View {
         .ignoresSafeArea()
     }
 }
+
+#Preview {
+    ZStack {
+        Color.gray
+        ViewfinderOverlay()
+    }
+}

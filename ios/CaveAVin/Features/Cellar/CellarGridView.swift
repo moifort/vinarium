@@ -124,3 +124,7 @@ struct CellarGridView: View {
 private struct WineIdWrapper: Identifiable {
     let id: String
 }
+
+#Preview {
+    CellarGridView()
+}

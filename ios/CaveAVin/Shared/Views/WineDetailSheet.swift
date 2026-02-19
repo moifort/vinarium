@@ -300,3 +300,7 @@ struct WineDetailSheet: View {
         date.formatted(date: .abbreviated, time: .omitted)
     }
 }
+
+#Preview {
+    WineDetailSheet(wineId: "preview-id")
+}

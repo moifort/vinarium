@@ -48,3 +48,7 @@ struct AnalyzingView: View {
         }
     }
 }
+
+#Preview {
+    AnalyzingView()
+}

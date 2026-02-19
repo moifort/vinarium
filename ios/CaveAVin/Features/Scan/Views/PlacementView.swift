@@ -160,3 +160,15 @@ struct PlacementView: View {
         }
     }
 }
+
+#Preview {
+    NavigationStack {
+        PlacementView(
+            wine: Wine(
+                id: "1", name: "Château Margaux", color: .red,
+                vintage: 2018, createdAt: Date(), updatedAt: Date()
+            ),
+            onPlaced: { _ in }
+        )
+    }
+}
