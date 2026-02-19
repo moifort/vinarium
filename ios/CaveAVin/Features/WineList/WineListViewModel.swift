@@ -65,6 +65,7 @@ final class WineListViewModel {
 
     var wines: [Wine] = []
     var isLoading = false
+    var hasWines = false
     var error: String?
     var sort: WineSort = .createdAt
     var sortDescending = true
@@ -139,6 +140,7 @@ final class WineListViewModel {
 
     func load() async {
         isLoading = true
+        wines = []
         error = nil
         do {
             let status: String? = switch mode {
@@ -151,6 +153,7 @@ final class WineListViewModel {
                 order: sortDescending ? "desc" : "asc",
                 status: status
             )
+            if !wines.isEmpty { hasWines = true }
         } catch {
             self.error = error.localizedDescription
         }

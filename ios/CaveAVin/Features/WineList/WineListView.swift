@@ -10,7 +10,7 @@ struct WineListView: View {
             Group {
                 if viewModel.isLoading && viewModel.wines.isEmpty {
                     ProgressView("Chargement...")
-                } else if viewModel.wines.isEmpty {
+                } else if viewModel.wines.isEmpty && !viewModel.hasWines {
                     VStack(spacing: 16) {
                         Spacer()
                         Image("empty-no-wines")

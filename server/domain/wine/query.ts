@@ -124,7 +124,7 @@ export namespace WineQuery {
   const sortKey = (sort: WineSort) => (wine: Wine) => {
     switch (sort) {
       case 'createdAt':
-        return wine.createdAt.getTime()
+        return new Date(wine.createdAt).getTime()
       case 'vintage':
         return wine.vintage ?? 0
       case 'region':
