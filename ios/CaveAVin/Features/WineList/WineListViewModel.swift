@@ -66,11 +66,14 @@ final class WineListViewModel {
     var wines: [Wine] = []
     var isLoading = false
     var hasWines = false
+    private(set) var loadedFilterKey: String?
     var error: String?
     var sort: WineSort = .createdAt
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
     var mode: WineListMode = .all
+
+    var isDataStale: Bool { filterKey != loadedFilterKey }
 
     var displayedWines: [Wine] {
         switch mode {
@@ -157,6 +160,7 @@ final class WineListViewModel {
         } catch {
             self.error = error.localizedDescription
         }
+        loadedFilterKey = filterKey
         isLoading = false
     }
 }

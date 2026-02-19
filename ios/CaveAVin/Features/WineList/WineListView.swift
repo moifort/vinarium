@@ -8,7 +8,7 @@ struct WineListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if viewModel.isLoading && viewModel.wines.isEmpty {
+                if !viewModel.hasWines && (viewModel.isLoading || viewModel.isDataStale) {
                     ProgressView("Chargement...")
                 } else if viewModel.wines.isEmpty && !viewModel.hasWines {
                     VStack(spacing: 16) {
@@ -41,7 +41,10 @@ struct WineListView: View {
                         .padding(.vertical, 8)
                         .accessibilityIdentifier("winelist-segment")
 
-                        if viewModel.displayedWines.isEmpty {
+                        if viewModel.isLoading || viewModel.isDataStale {
+                            ProgressView()
+                                .frame(maxHeight: .infinity)
+                        } else if viewModel.displayedWines.isEmpty {
                             switch viewModel.mode {
                             case .favorites:
                                 ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos vins préférés en favoris"))
