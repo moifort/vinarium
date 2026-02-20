@@ -75,7 +75,9 @@ struct WineListPage: View {
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
-                WineDetailSheet(wineId: wrapper.id)
+                WineDetailSheet(wineId: wrapper.id) {
+                    Task { await viewModel.load() }
+                }
             }
             .onChange(of: showFavorites) {
                 if showFavorites {

@@ -44,6 +44,11 @@ struct WineDetailPage {
         try app.staticTexts["Offert"].waitOrFail(timeout: 4, "'Offert' section not found")
     }
 
+    func tapDelete() throws {
+        try app.buttons["delete-wine-button"].tapOrFail()
+        try app.buttons["Supprimer"].tapOrFail()
+    }
+
     func close() throws {
         try app.buttons["Fermer"].tapOrFail()
     }

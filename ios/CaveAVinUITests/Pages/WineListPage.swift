@@ -19,6 +19,12 @@ struct WineListPage {
         }
     }
 
+    func verifyWineNotVisible(_ name: String) {
+        let predicate = NSPredicate(format: "label CONTAINS %@", name)
+        let element = app.staticTexts.matching(predicate).firstMatch
+        XCTAssertFalse(element.waitForExistence(timeout: 2), "Wine '\(name)' should not be visible")
+    }
+
     func switchToFavorites() throws -> Self {
         try app.segmentedControls["winelist-segment"].buttons["❤️ Favoris"].tapOrFail()
         return self
