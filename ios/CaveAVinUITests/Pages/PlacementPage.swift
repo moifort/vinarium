@@ -14,13 +14,9 @@ struct PlacementPage {
         try app.staticTexts[name].waitOrFail()
     }
 
-    func selectPosition(_ position: String) throws -> Self {
+    func selectPosition(_ position: String) throws -> ConfirmationPage {
         try app.buttons[position].tapOrFail()
-        return self
-    }
-
-    func tapPlace() throws -> ConfirmationPage {
-        try app.buttons["place-button"].tapOrFail()
+        try app.buttons["confirm-place"].tapOrFail()
         return ConfirmationPage(app: app)
     }
 }

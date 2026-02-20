@@ -16,9 +16,9 @@ final class GiveAsGiftFlowTest: BaseUITest {
         _ = try review.clearAndTypeName(wineName)
         let placement = try review.tapSave()
 
-        // 2. PLACEMENT: verify, place, confirm, done
+        // 2. PLACEMENT: verify, select position, done
         try placement.verify()
-        let confirmation = try placement.tapPlace()
+        let confirmation = try placement.selectPosition("A1")
         try confirmation.verify()
         try confirmation.tapDone()
 

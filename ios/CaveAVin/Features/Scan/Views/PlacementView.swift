@@ -8,7 +8,7 @@ struct PlacementView: View {
     @State private var bottles: [CellarBottle] = []
     @State private var suggestedRow: String?
     @State private var suggestedCol: Int?
-    @State private var selectedPosition: String?
+    @State private var positionToConfirm: String?
     @State private var isLoading = true
     @State private var error: String?
     @State private var isPlacing = false
@@ -25,10 +25,6 @@ struct PlacementView: View {
             guard !free.isEmpty else { return nil }
             return (row: rowLetter, positions: free)
         }
-    }
-
-    private var activePosition: String {
-        selectedPosition ?? suggestedPosition ?? ""
     }
 
     private var suggestedPosition: String? {
@@ -51,7 +47,7 @@ struct PlacementView: View {
                         Section {
                             ForEach(group.positions, id: \.label) { pos in
                                 Button {
-                                    selectedPosition = pos.label
+                                    positionToConfirm = pos.label
                                 } label: {
                                     HStack {
                                         Text(pos.label)
@@ -67,28 +63,38 @@ struct PlacementView: View {
                                                 .background(.blue)
                                                 .clipShape(Capsule())
                                         }
-                                        if pos.label == activePosition {
-                                            Image(systemName: "checkmark.circle.fill")
-                                                .foregroundStyle(.green)
-                                        }
                                     }
                                 }
                                 .tint(.primary)
+                                .disabled(isPlacing)
                             }
                         } header: {
                             Label("Rangée \(group.row)", systemImage: "cabinet")
                         }
                     }
                 }
-
-                placeButton
+                .alert(
+                    "Placer en \(positionToConfirm ?? "") ?",
+                    isPresented: Binding(
+                        get: { positionToConfirm != nil },
+                        set: { if !$0 { positionToConfirm = nil } }
+                    )
+                ) {
+                    Button("Confirmer") {
+                        if let position = positionToConfirm {
+                            placeWine(position: position)
+                        }
+                    }
+                    .accessibilityIdentifier("confirm-place")
+                    Button("Annuler", role: .cancel) {}
+                }
             }
         }
         .navigationTitle("Placement")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Annuler") { onCancel() }
+                Button("Annuler", systemImage: "xmark") { onCancel() }
             }
         }
         .task {
@@ -103,7 +109,7 @@ struct PlacementView: View {
                 Text(wine.name)
                     .font(.headline)
                 if let vintage = wine.vintage {
-                    Text("\(vintage)")
+                    Text(verbatim: "\(vintage)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -114,25 +120,6 @@ struct PlacementView: View {
         .background(Color(.systemGray6))
     }
 
-    private var placeButton: some View {
-        Button {
-            placeWine()
-        } label: {
-            if isPlacing {
-                ProgressView()
-                    .frame(maxWidth: .infinity)
-            } else {
-                Label("Placer en \(activePosition)", systemImage: "arrow.down.to.line")
-                    .frame(maxWidth: .infinity)
-            }
-        }
-        .buttonStyle(.borderedProminent)
-        .controlSize(.large)
-        .disabled(isPlacing || activePosition.isEmpty)
-        .padding()
-        .accessibilityIdentifier("place-button")
-    }
-
     private func loadData() async {
         do {
             async let bottlesData = CellarAPI.getBottles()
@@ -141,7 +128,6 @@ struct PlacementView: View {
             bottles = b
             suggestedRow = s.row
             suggestedCol = s.col
-            selectedPosition = "\(s.row)\(s.col)"
             isLoading = false
         } catch {
             self.error = error.localizedDescription
@@ -149,17 +135,15 @@ struct PlacementView: View {
         }
     }
 
-    private func placeWine() {
-        let pos = activePosition
-        guard !pos.isEmpty else { return }
-        let rowStr = String(pos.prefix(1))
-        let col = Int(pos.dropFirst()) ?? 0
+    private func placeWine(position: String) {
+        let rowStr = String(position.prefix(1))
+        let col = Int(position.dropFirst()) ?? 0
         isPlacing = true
 
         Task {
             do {
                 try await CellarAPI.place(wineId: wine.id, row: rowStr, col: col)
-                onPlaced(pos)
+                onPlaced(position)
             } catch {
                 self.error = error.localizedDescription
             }
