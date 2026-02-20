@@ -62,7 +62,6 @@ struct Wine: Codable, Identifiable, Sendable {
     var purchaseDate: String?
     var drinkFrom: Int?
     var drinkUntil: Int?
-    var imageBase64: String?
     var notes: String?
     var rating: Int?
     var giftedTo: String?

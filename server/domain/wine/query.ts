@@ -29,11 +29,14 @@ export namespace WineQuery {
     ])
     const ratingMap = keyBy(tastings, ({ wineId }) => wineId)
     const giftMap = keyBy(gifts, ({ wineId }) => wineId)
-    const withExtra = all.map((wine) => ({
-      ...wine,
-      rating: ratingMap[wine.id]?.rating ?? null,
-      giftedTo: giftMap[wine.id]?.recipientName ?? null,
-    }))
+    const withExtra = all.map((wine) => {
+      const { imageBase64, ...rest } = wine
+      return {
+        ...rest,
+        rating: ratingMap[wine.id]?.rating ?? null,
+        giftedTo: giftMap[wine.id]?.recipientName ?? null,
+      }
+    })
     const byColor = options?.color
       ? withExtra.filter((wine) => wine.color === options.color)
       : withExtra
@@ -66,8 +69,9 @@ export namespace WineQuery {
           }
         : await cellarFromJournal(wine.id)
 
+    const { imageBase64, ...wineWithoutImage } = wine
     return {
-      ...wine,
+      ...wineWithoutImage,
       cellar,
       history,
       consumption:
