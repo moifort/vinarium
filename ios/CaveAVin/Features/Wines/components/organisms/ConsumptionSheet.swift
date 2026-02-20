@@ -28,6 +28,7 @@ struct ConsumptionSheet: View {
                 Section {
                     HStack {
                         Label("Date", systemImage: "calendar")
+                            .foregroundStyle(.secondary)
                         Spacer()
                         DatePicker(
                             "",
@@ -58,28 +59,22 @@ struct ConsumptionSheet: View {
                     .padding(.vertical, 4)
                 }
 
-                // MARK: - Bouton de confirmation
-                Section {
-                    Button {
-                        onConfirm(
-                            consumedDate,
-                            rating > 0 ? rating : nil,
-                            tastingNotes.isEmpty ? nil : tastingNotes
-                        )
-                    } label: {
-                        Label("Confirmer", systemImage: "checkmark.circle.fill")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .fontWeight(.semibold)
-                    }
-                    .controlSize(.large)
-                    .accessibilityIdentifier("confirm-consumption-button")
-                }
             }
             .navigationTitle("Consommation")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { dismiss() }
+                    Button("Annuler", systemImage: "xmark") { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Confirmer", systemImage: "checkmark") {
+                        onConfirm(
+                            consumedDate,
+                            rating > 0 ? rating : nil,
+                            tastingNotes.isEmpty ? nil : tastingNotes
+                        )
+                    }
+                    .accessibilityIdentifier("confirm-consumption-button")
                 }
             }
             .animation(.default, value: rating)

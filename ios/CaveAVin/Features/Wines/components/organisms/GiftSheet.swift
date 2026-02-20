@@ -23,6 +23,7 @@ struct GiftSheet: View {
                 Section {
                     HStack {
                         Label("Date", systemImage: "calendar")
+                            .foregroundStyle(.secondary)
                         Spacer()
                         DatePicker(
                             "",
@@ -34,6 +35,7 @@ struct GiftSheet: View {
                     }
                     HStack {
                         Label("Destinataire", systemImage: "person")
+                            .foregroundStyle(.secondary)
                         TextField("Nom", text: $recipientName)
                             .textInputAutocapitalization(.words)
                             .multilineTextAlignment(.trailing)
@@ -42,32 +44,28 @@ struct GiftSheet: View {
                         } label: {
                             Image(systemName: "person.crop.circle")
                                 .font(.title2)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.blue)
                         }
                         .buttonStyle(.plain)
                     }
-                }
-
-                Section {
-                    Button {
-                        onConfirm(
-                            giftedDate,
-                            recipientName.isEmpty ? nil : recipientName
-                        )
-                    } label: {
-                        Label("Confirmer", systemImage: "checkmark.circle.fill")
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .fontWeight(.semibold)
-                    }
-                    .controlSize(.large)
-                    .accessibilityIdentifier("confirm-gift-button")
                 }
             }
             .navigationTitle("Offrir")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler") { dismiss() }
+                    Button("Annuler", systemImage: "xmark") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Confirmer", systemImage: "checkmark") {
+                        onConfirm(
+                            giftedDate,
+                            recipientName.isEmpty ? nil : recipientName
+                        )
+                    }
+                    .accessibilityIdentifier("confirm-gift-button")
                 }
             }
             .sheet(isPresented: $showContactPicker) {

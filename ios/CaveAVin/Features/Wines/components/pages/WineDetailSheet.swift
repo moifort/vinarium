@@ -31,7 +31,7 @@ struct WineDetailSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer") { dismiss() }
+                    Button("Fermer", systemImage: "xmark") { dismiss() }
                 }
             }
             .task { await loadData() }
