@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct GiftSheet: View {
-    let wine: Wine
     let onConfirm: (Date, String?) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -12,14 +11,6 @@ struct GiftSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    HStack {
-                        WineColorBadge(color: wine.color)
-                        Text(wine.name)
-                            .font(.headline)
-                    }
-                }
-
                 Section {
                     HStack {
                         Label("Date", systemImage: "calendar")
@@ -78,11 +69,5 @@ struct GiftSheet: View {
 }
 
 #Preview {
-    GiftSheet(
-        wine: Wine(
-            id: "1", name: "Château Margaux 2018", color: .red,
-            createdAt: Date(), updatedAt: Date()
-        ),
-        onConfirm: { _, _ in }
-    )
+    GiftSheet(onConfirm: { _, _ in })
 }

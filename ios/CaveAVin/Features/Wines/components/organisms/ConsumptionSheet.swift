@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct ConsumptionSheet: View {
-    let wine: Wine
     let onConfirm: (Date, Int?, String?) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -12,20 +11,15 @@ struct ConsumptionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                // MARK: - Vin sélectionné
                 Section {
-                    HStack(spacing: 12) {
-                        WineColorBadge(color: wine.color)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(wine.name)
-                                .font(.headline)
-                        }
+                    VStack(alignment: .leading, spacing: 10) {
+                        InteractiveStarRating(rating: $rating)
                     }
                     .padding(.vertical, 4)
+                   
                 }
-
-                // MARK: - Date
                 Section {
+ 
                     HStack {
                         Label("Date", systemImage: "calendar")
                             .foregroundStyle(.secondary)
@@ -38,15 +32,6 @@ struct ConsumptionSheet: View {
                         )
                         .labelsHidden()
                     }
- 
-                    VStack(alignment: .leading, spacing: 10) {
-                        Label("Note", systemImage: "star")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        InteractiveStarRating(rating: $rating)
-                    }
-                    .padding(.vertical, 4)
 
                     VStack(alignment: .leading, spacing: 8) {
                         Label("Notes", systemImage: "note")
@@ -84,11 +69,5 @@ struct ConsumptionSheet: View {
 }
 
 #Preview {
-    ConsumptionSheet(
-        wine: Wine(
-            id: "1", name: "Château Margaux 2018", color: .red,
-            createdAt: Date(), updatedAt: Date()
-        ),
-        onConfirm: { _, _, _ in }
-    )
+    ConsumptionSheet(onConfirm: { _, _, _ in })
 }

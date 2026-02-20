@@ -146,15 +146,7 @@ struct WineDetailSheet: View {
             .presentationDetents([.height(260)])
         }
         .sheet(isPresented: $showConsumption) {
-            ConsumptionSheet(
-                wine: Wine(
-                    id: detail.id,
-                    name: detail.name,
-                    color: detail.color,
-                    createdAt: detail.createdAt,
-                    updatedAt: detail.updatedAt
-                )
-            ) { date, rating, notes in
+            ConsumptionSheet { date, rating, notes in
                 let formatter = ISO8601DateFormatter()
                 Task {
                     _ = try? await CellarAPI.remove(
@@ -171,15 +163,7 @@ struct WineDetailSheet: View {
             .presentationDetents([.medium])
         }
         .sheet(isPresented: $showGift) {
-            GiftSheet(
-                wine: Wine(
-                    id: detail.id,
-                    name: detail.name,
-                    color: detail.color,
-                    createdAt: detail.createdAt,
-                    updatedAt: detail.updatedAt
-                )
-            ) { date, recipientName in
+            GiftSheet { date, recipientName in
                 let formatter = ISO8601DateFormatter()
                 Task {
                     _ = try? await CellarAPI.gift(
