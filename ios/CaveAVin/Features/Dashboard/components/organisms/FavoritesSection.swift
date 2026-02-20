@@ -19,14 +19,7 @@ struct FavoritesSection: View {
             }
 
             if items.isEmpty {
-                Text("Aucun favori")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 14)
-                    .background(Color(.systemGray6))
-                    .clipShape(.rect(cornerRadius: 12))
+                ContentUnavailableView("Aucun favori", systemImage: "heart", description: nil)
             } else {
                 VStack(spacing: 0) {
                     ForEach(items) { item in
@@ -47,7 +40,7 @@ struct FavoritesSection: View {
                                             Text("\u{2022}")
                                         }
                                         if let date = item.tastingDate {
-                                            Text("Consomm\u{00E9} le \(date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year(.twoDigits)))")
+                                            Text("Consomm\u{00E9} le \(date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))")
                                         }
                                     }
                                     .font(.caption)

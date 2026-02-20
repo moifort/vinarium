@@ -33,7 +33,7 @@ struct DashboardPage: View {
 
                             JournalSection(
                                 events: data.history.map { event in
-                                    .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId)
+                                    .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId, date: event.date)
                                 },
                                 onEventTapped: { selectedWineId = $0 }
                             )

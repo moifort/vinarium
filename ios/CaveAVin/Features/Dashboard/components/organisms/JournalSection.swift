@@ -21,14 +21,7 @@ struct JournalSection: View {
             }
 
             if events.isEmpty {
-                Text("Aucun \u{00E9}v\u{00E9}nement r\u{00E9}cent")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 14)
-                    .background(Color(.systemGray6))
-                    .clipShape(.rect(cornerRadius: 12))
+                ContentUnavailableView("Aucun événement récent", systemImage: "book", description: nil)
             } else {
                 VStack(spacing: 0) {
                     if let entry = lastEntry {
@@ -36,7 +29,7 @@ struct JournalSection: View {
                             DashboardEventRow(
                                 isEntry: true,
                                 wineName: entry.wineName,
-                                label: "Derni\u{00E8}re entr\u{00E9}e",
+                                label: "Dernière entrée le \(entry.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
                                 position: entry.position
                             )
                         }
@@ -47,7 +40,7 @@ struct JournalSection: View {
                             DashboardEventRow(
                                 isEntry: false,
                                 wineName: exit.wineName,
-                                label: "Derni\u{00E8}re sortie",
+                                label: "Dernière sortie le \(exit.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
                                 position: exit.position
                             )
                         }
@@ -67,14 +60,15 @@ extension JournalSection {
         let wineName: String
         let position: String
         let wineId: String
+        let date: Date
     }
 }
 
 #Preview("Avec \u{00E9}v\u{00E9}nements") {
     JournalSection(
         events: [
-            .init(isEntry: true, wineName: "Ch\u{00E2}teau Margaux 2018", position: "A3", wineId: "1"),
-            .init(isEntry: false, wineName: "Pouilly-Fum\u{00E9} 2021", position: "B1", wineId: "2"),
+            .init(isEntry: true, wineName: "Château Margaux 2018", position: "A3", wineId: "1", date: Date()),
+            .init(isEntry: false, wineName: "Pouilly-Fumé 2021", position: "B1", wineId: "2", date: Date()),
         ],
         onEventTapped: { _ in }
     )

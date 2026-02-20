@@ -11,24 +11,7 @@ struct WineListPage: View {
                 if !viewModel.hasWines && (viewModel.isLoading || viewModel.isDataStale) {
                     ProgressView("Chargement...")
                 } else if viewModel.wines.isEmpty && !viewModel.hasWines {
-                    VStack(spacing: 16) {
-                        Spacer()
-                        Image("empty-no-wines")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 240)
-                            .clipShape(.rect(cornerRadius: 16))
-                            .opacity(0.85)
-                            .accessibilityHidden(true)
-                        Text("Aucun vin")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Text("Ajoutez des vins en scannant une \u{00E9}tiquette")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                    .frame(maxWidth: .infinity)
+                    ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Ajoutez des vins en scannant une étiquette"))
                 } else {
                     VStack(spacing: 0) {
                         Picker("Mode", selection: $viewModel.mode) {
