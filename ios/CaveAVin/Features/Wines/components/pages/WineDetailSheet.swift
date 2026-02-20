@@ -173,7 +173,7 @@ struct WineDetailSheet: View {
                     onRemoved?()
                 }
             }
-            .presentationDetents([.medium])
+            .presentationDetents([.height(250)])
         }
     }
 
