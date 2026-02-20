@@ -33,6 +33,13 @@ struct WineDetailSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Fermer", systemImage: "xmark") { dismiss() }
                 }
+                if let cellar = detail?.cellar, cellar.dateOut == nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button("Sortir", systemImage: "arrow.up") {
+                            showRemovalChoice = true
+                        }
+                    }
+                }
             }
             .task { await loadData() }
         }
@@ -185,6 +192,10 @@ struct WineDetailSheet: View {
     }
 }
 
-#Preview {
-    WineDetailSheet(wineId: "preview-id")
+#Preview("Bouteille sortie") {
+    WineDetailSheet(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
+}
+
+#Preview("En cave") {
+    WineDetailSheet(wineId: "b1e1fe66-5aa8-4d64-80e0-8f2338838b23")
 }
