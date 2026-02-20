@@ -60,11 +60,13 @@ struct ScanReviewView: View {
                 Button("Ajouter à mes favoris", systemImage: "heart") {
                     saveAsFavorite()
                 }
+                .accessibilityIdentifier("review-favorite-button")
             }
             ToolbarItem(placement: .primaryAction) {
                 Button("Ajouter à la vave", systemImage: "plus") {
                     save()
                 }
+                .accessibilityIdentifier("review-save-button")
             }
         }
     }

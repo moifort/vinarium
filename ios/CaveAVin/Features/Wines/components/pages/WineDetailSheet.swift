@@ -45,7 +45,9 @@ struct WineDetailSheet: View {
                             titleVisibility: .visible
                         ) {
                             Button("Consommer") { showConsumption = true }
+                                .accessibilityIdentifier("choice-consume")
                             Button("Offrir") { showGift = true }
+                                .accessibilityIdentifier("choice-gift")
                         } message: {
                             Text("Comment souhaitez-vous sortir ce vin ?")
                         }
