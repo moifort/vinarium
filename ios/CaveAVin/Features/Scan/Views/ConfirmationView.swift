@@ -43,11 +43,12 @@ struct ConfirmationView: View {
                 Button {
                     onDone()
                 } label: {
-                    Text("Terminé")
+                    Image(systemName: "checkmark")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .accessibilityLabel("Terminé")
                 .accessibilityIdentifier("done-button")
             }
             .padding(.horizontal)

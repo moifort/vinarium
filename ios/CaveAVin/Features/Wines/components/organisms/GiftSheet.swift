@@ -42,7 +42,7 @@ struct GiftSheet: View {
                         } label: {
                             Image(systemName: "person.crop.circle")
                                 .font(.title2)
-                                .foregroundStyle(.blue)
+                                .foregroundStyle(.secondary)
                         }
                         .buttonStyle(.plain)
                     }

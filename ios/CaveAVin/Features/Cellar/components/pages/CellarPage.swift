@@ -151,10 +151,6 @@ private enum PendingRemoval {
     case gift(Wine)
 }
 
-private struct WineIdWrapper: Identifiable {
-    let id: String
-}
-
 #Preview {
     CellarPage()
 }
