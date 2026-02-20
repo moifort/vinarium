@@ -50,40 +50,21 @@ struct ScanReviewView: View {
             detailsSection
             gardeSection
         }
-        .safeAreaInset(edge: .bottom) {
-            VStack(spacing: 8) {
-                Button {
-                    save()
-                } label: {
-                    Label("Ajouter à la cave", systemImage: "plus.circle.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .disabled(name.isEmpty || isSaving)
-                .accessibilityIdentifier("review-save-button")
-
-                Button {
-                    saveAsFavorite()
-                } label: {
-                    Label("Ajouter à mes favoris", systemImage: "heart.fill")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .disabled(name.isEmpty || isSaving)
-                .accessibilityIdentifier("review-favorite-button")
-            }
-            .frame(maxWidth: .infinity)
-              .padding()
-              .background(.ultraThinMaterial)   // effet “glass”
-              .overlay(alignment: .top) { Divider() }
-        }
         .navigationTitle("Vérifier le vin")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Annuler") { onCancel() }
+                Button("Fermer", systemImage: "xmark") { onCancel() }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button("Ajouter à mes favoris", systemImage: "heart") {
+                    saveAsFavorite()
+                }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button("Ajouter à la vave", systemImage: "plus") {
+                    save()
+                }
             }
         }
     }

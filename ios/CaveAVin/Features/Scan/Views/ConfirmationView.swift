@@ -21,7 +21,7 @@ struct ConfirmationView: View {
             Text("Succès !")
                 .font(.title)
                 .fontWeight(.bold)
-            
+
             Text("Bouteille ajoutée avec succès")
                 .font(.headline)
                 .foregroundStyle(.secondary)
@@ -43,7 +43,7 @@ struct ConfirmationView: View {
                 Button {
                     onDone()
                 } label: {
-                    Image(systemName: "checkmark")
+                    Text("Terminé")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
