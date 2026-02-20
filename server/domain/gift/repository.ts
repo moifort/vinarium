@@ -15,3 +15,7 @@ export const save = async (gift: Gift) => {
   await storage().setItem<Gift>(`${gift.wineId}`, gift)
   return gift
 }
+
+export const remove = async (wineId: WineId) => {
+  await storage().removeItem(`${wineId}`)
+}

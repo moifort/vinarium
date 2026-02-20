@@ -15,3 +15,7 @@ export const save = async (note: TastingNote) => {
   await storage().setItem<TastingNote>(`entries:${note.wineId}`, note)
   return note
 }
+
+export const remove = async (wineId: WineId) => {
+  await storage().removeItem(`entries:${wineId}`)
+}
