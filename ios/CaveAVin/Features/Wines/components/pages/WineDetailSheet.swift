@@ -11,6 +11,7 @@ struct WineDetailSheet: View {
     @State private var showConsumption = false
     @State private var showRemovalChoice = false
     @State private var showGift = false
+    @State private var showDeleteConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -38,6 +39,32 @@ struct WineDetailSheet: View {
                         Button("Sortir", systemImage: "arrow.up") {
                             showRemovalChoice = true
                         }
+                    }
+                }
+                if detail != nil {
+                    ToolbarItem(placement: .destructiveAction) {
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .confirmationDialog(
+                            "Supprimer ce vin ?",
+                            isPresented: $showDeleteConfirmation,
+                            titleVisibility: .visible,
+                            presenting: detail
+                        ) { detail in
+                            Button("Supprimer", role: .destructive) {
+                                Task {
+                                    try? await WineAPI.delete(id: detail.id)
+                                    dismiss()
+                                    onRemoved?()
+                                }
+                            }
+                        } message: { _ in
+                            Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
+                        }
+                        .accessibilityIdentifier("delete-wine-button")
                     }
                 }
             }
@@ -141,6 +168,7 @@ struct WineDetailSheet: View {
                     onRemoved?()
                 }
             }
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showGift) {
             GiftSheet(
@@ -164,6 +192,7 @@ struct WineDetailSheet: View {
                     onRemoved?()
                 }
             }
+            .presentationDetents([.medium])
         }
     }
 
