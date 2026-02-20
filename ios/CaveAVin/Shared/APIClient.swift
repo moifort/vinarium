@@ -3,16 +3,17 @@ import Foundation
 final class APIClient: Sendable {
     static let shared = APIClient()
 
-    private static let defaultURL = "http://192.168.0.160:3000"
+    static let defaultURL = "http://192.168.0.160:3000"
+    static let serverURLKey = "serverURL"
     private static let apiToken = Secrets.apiToken
 
     var baseURL: URL {
         get {
-            let stored = UserDefaults.standard.string(forKey: "serverURL") ?? Self.defaultURL
+            let stored = UserDefaults.standard.string(forKey: Self.serverURLKey) ?? Self.defaultURL
             return URL(string: stored) ?? URL(string: Self.defaultURL)!
         }
         set {
-            UserDefaults.standard.set(newValue.absoluteString, forKey: "serverURL")
+            UserDefaults.standard.set(newValue.absoluteString, forKey: Self.serverURLKey)
         }
     }
 
