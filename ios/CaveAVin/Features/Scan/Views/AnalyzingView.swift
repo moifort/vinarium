@@ -8,22 +8,8 @@ struct AnalyzingView: View {
             Spacer()
 
             ZStack {
-                Circle()
-                    .fill(.purple.opacity(0.15))
-                    .frame(width: 140, height: 140)
-                    .scaleEffect(isPulsing ? 1.4 : 0.8)
-                    .opacity(isPulsing ? 0.0 : 0.5)
-
-                Circle()
-                    .fill(.purple.opacity(0.1))
-                    .frame(width: 100, height: 100)
-                    .scaleEffect(isPulsing ? 1.2 : 0.9)
-                    .opacity(isPulsing ? 0.0 : 0.4)
-
-                Image(systemName: "wineglass")
-                    .font(.system(size: 52))
-                    .foregroundStyle(.purple)
-                    .symbolEffect(.breathe, options: .repeating)
+                ProgressView()
+                    .scaleEffect(2)
             }
 
             VStack(spacing: 12) {
