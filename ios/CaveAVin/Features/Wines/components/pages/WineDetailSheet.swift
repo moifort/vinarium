@@ -39,6 +39,16 @@ struct WineDetailSheet: View {
                         Button("Sortir", systemImage: "arrow.up") {
                             showRemovalChoice = true
                         }
+                        .confirmationDialog(
+                            "Sortir de la cave",
+                            isPresented: $showRemovalChoice,
+                            titleVisibility: .visible
+                        ) {
+                            Button("Consommer") { showConsumption = true }
+                            Button("Offrir") { showGift = true }
+                        } message: {
+                            Text("Comment souhaitez-vous sortir ce vin ?")
+                        }
                     }
                 }
                 if detail != nil {
@@ -132,19 +142,6 @@ struct WineDetailSheet: View {
                 }
             }
         }
-        .sheet(isPresented: $showRemovalChoice) {
-            RemovalChoiceSheet(
-                onConsume: {
-                    showRemovalChoice = false
-                    showConsumption = true
-                },
-                onGift: {
-                    showRemovalChoice = false
-                    showGift = true
-                }
-            )
-            .presentationDetents([.height(260)])
-        }
         .sheet(isPresented: $showConsumption) {
             ConsumptionSheet { date, rating, notes in
                 let formatter = ISO8601DateFormatter()
@@ -210,5 +207,5 @@ struct WineDetailSheet: View {
 }
 
 #Preview("En cave") {
-    WineDetailSheet(wineId: "b1e1fe66-5aa8-4d64-80e0-8f2338838b23")
+    WineDetailSheet(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
 }
