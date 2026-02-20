@@ -234,13 +234,7 @@ struct WineDetailSheet: View {
         Section("Cave") {
             Label {
                 LabeledContent("Position") {
-                    Text("\(cellar.row)\(cellar.col)")
-                        .font(.subheadline.monospaced())
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color(.systemGray5))
-                        .clipShape(.rect(cornerRadius: 6))
+                    PositionBadge(position: "\(cellar.row)\(cellar.col)")
                 }
             } icon: {
                 Image(systemName: "mappin.circle")

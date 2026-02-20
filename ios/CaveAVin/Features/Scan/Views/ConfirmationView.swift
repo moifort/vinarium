@@ -18,9 +18,13 @@ struct ConfirmationView: View {
                 .scaleEffect(scale)
                 .opacity(opacity)
 
-            Text("Bouteille ajoutée !")
+            Text("Succès !")
                 .font(.title)
                 .fontWeight(.bold)
+            
+            Text("Bouteille ajoutée avec succès")
+                .font(.headline)
+                .foregroundStyle(.secondary)
 
             VStack(spacing: 8) {
                 HStack {

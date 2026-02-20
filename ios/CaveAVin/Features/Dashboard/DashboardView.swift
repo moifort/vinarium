@@ -115,13 +115,7 @@ struct DashboardView: View {
                                         .background(.orange, in: .capsule)
                                 }
                                 Spacer()
-                                Text(wine.position)
-                                    .font(.subheadline.monospaced())
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 4)
-                                    .background(Color(.systemGray5))
-                                    .clipShape(.rect(cornerRadius: 6))
+                                PositionBadge(position: wine.position)
                             }
                             .padding(.vertical, 8)
                             .padding(.horizontal, 14)
@@ -269,13 +263,7 @@ struct DashboardView: View {
 
                 Spacer()
 
-                Text(event.position)
-                    .font(.subheadline.monospaced())
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(Color(.systemGray5))
-                    .clipShape(.rect(cornerRadius: 6))
+                PositionBadge(position: event.position)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 14)

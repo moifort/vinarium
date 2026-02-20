@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct CellarGridView: View {
+struct CellarPage: View {
     var refreshTrigger: UUID = UUID()
 
     @State private var viewModel = CellarGridViewModel()
@@ -31,11 +31,42 @@ struct CellarGridView: View {
                     } else {
                         switch viewModel.displayMode {
                         case .cave:
-                            caveListContent
+                            CaveBottleList(
+                                groups: viewModel.groupedRows.map { group in
+                                    .init(
+                                        label: group.row,
+                                        items: group.items.map { item in
+                                            .init(
+                                                id: item.wine.id,
+                                                color: item.wine.color,
+                                                title: item.wine.name,
+                                                subtitle: item.wine.vintage.map { "\($0)" },
+                                                position: item.position
+                                            )
+                                        }
+                                    )
+                                },
+                                onBottleTapped: { wineId in selectedWineId = wineId },
+                                onRemoveRequested: { wineId in
+                                    wineForRemovalChoice = viewModel.groupedRows
+                                        .flatMap(\.items)
+                                        .first { $0.wine.id == wineId }?.wine
+                                }
+                            )
                         case .journal:
-                            CellarJournalView(events: viewModel.history) { wineId in
-                                selectedWineId = wineId
-                            }
+                            JournalEventList(
+                                events: viewModel.history.map { event in
+                                    .init(
+                                        id: event.id,
+                                        date: event.date,
+                                        isEntry: event.type == .entry,
+                                        wineId: event.wineId,
+                                        title: event.wineName,
+                                        position: event.position
+                                    )
+                                },
+                                onEventTapped: { wineId in selectedWineId = wineId }
+                            )
                         }
                     }
                 }
@@ -113,74 +144,6 @@ struct CellarGridView: View {
             }
         }
     }
-
-    @ViewBuilder
-    private var caveListContent: some View {
-        if viewModel.groupedRows.isEmpty {
-            VStack(spacing: 16) {
-                Spacer()
-                Image("empty-no-cellar")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxWidth: 240)
-                    .clipShape(.rect(cornerRadius: 16))
-                    .opacity(0.85)
-                    .accessibilityHidden(true)
-                Text("Cave vide")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                Text("Ajoutez des bouteilles via le scanner")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-        } else {
-            List {
-                ForEach(viewModel.groupedRows) { group in
-                    Section {
-                        ForEach(group.items) { item in
-                            Button {
-                                selectedWineId = item.wine.id
-                            } label: {
-                                HStack {
-                                    WineColorBadge(color: item.wine.color)
-                                    VStack(alignment: .leading) {
-                                        Text(item.wine.name)
-                                            .font(.headline)
-                                        if let vintage = item.wine.vintage {
-                                            Text(verbatim: "\(vintage)")
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                    Spacer()
-                                    Text(item.position)
-                                        .font(.subheadline.monospaced())
-                                        .foregroundStyle(.secondary)
-                                        .padding(.horizontal, 8)
-                                        .padding(.vertical, 4)
-                                        .background(Color(.systemGray5))
-                                        .clipShape(.rect(cornerRadius: 6))
-                                }
-                            }
-                            .tint(.primary)
-                            .swipeActions(edge: .trailing) {
-                                Button {
-                                    wineForRemovalChoice = item.wine
-                                } label: {
-                                    Label("Sortir", systemImage: "arrow.up.circle")
-                                }
-                                .tint(.red)
-                            }
-                        }
-                    } header: {
-                        Label("Rangée \(group.row)", systemImage: "cabinet")
-                    }
-                }
-            }
-        }
-    }
 }
 
 private enum PendingRemoval {
@@ -193,5 +156,5 @@ private struct WineIdWrapper: Identifiable {
 }
 
 #Preview {
-    CellarGridView()
+    CellarPage()
 }

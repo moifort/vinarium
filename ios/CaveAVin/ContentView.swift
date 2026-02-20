@@ -40,7 +40,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-home")
             Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
-                CellarGridView(refreshTrigger: cellarRefreshTrigger)
+                CellarPage(refreshTrigger: cellarRefreshTrigger)
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
