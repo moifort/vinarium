@@ -18,7 +18,14 @@ struct ReadyToDrinkSection: View {
             }
 
             if items.isEmpty {
-                ContentUnavailableView("Aucun vin prêt à déguster", systemImage: "wineglass", description: nil)
+                Text("Aucun vin prêt à déguster")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 14)
+                    .background(Color(.systemGray6))
+                    .clipShape(.rect(cornerRadius: 12))
             } else {
                 VStack(spacing: 0) {
                     ForEach(items) { item in

@@ -21,7 +21,14 @@ struct JournalSection: View {
             }
 
             if events.isEmpty {
-                ContentUnavailableView("Aucun événement récent", systemImage: "book", description: nil)
+                Text("Aucun événement récent")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 14)
+                    .background(Color(.systemGray6))
+                    .clipShape(.rect(cornerRadius: 12))
             } else {
                 VStack(spacing: 0) {
                     if let entry = lastEntry {
