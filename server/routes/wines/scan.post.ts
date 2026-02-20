@@ -4,8 +4,7 @@ export default defineEventHandler(async (event) => {
   const body = await readRawBody(event, false)
   if (!body) throw createError({ statusCode: 400, statusMessage: 'No image provided' })
 
-  const scanResult = await Scan.scanLabel(Buffer.from(body))
-  const enriched = await Scan.enrichWithSearch(scanResult)
+  const result = await Scan.scanWithCache(Buffer.from(body))
 
-  return { status: 200, data: enriched }
+  return { status: 200, data: result }
 })

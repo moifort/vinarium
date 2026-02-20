@@ -1,10 +1,23 @@
-import type { ScanResult } from '~/domain/scan/types'
+import { createHash } from 'node:crypto'
+import { ImageHash } from '~/domain/scan/primitives'
+import * as repository from '~/domain/scan/repository'
+import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
 export namespace Scan {
-  export const scanLabel = async (imageBuffer: Buffer) => {
+  export const scanWithCache = async (imageBuffer: Buffer) => {
+    const imageHash = hashImage(imageBuffer)
+    const cached = await repository.findBy(imageHash)
+    if (cached) return cached.result
+    const scanResult = await scanLabel(imageBuffer)
+    const enriched = await enrichWithSearch(scanResult)
+    repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
+    return enriched
+  }
+
+  const scanLabel = async (imageBuffer: Buffer) => {
     const { anthropicApiKey } = config()
     const base64 = imageBuffer.toString('base64')
 
@@ -103,7 +116,7 @@ export namespace Scan {
   const GEMINI_API_URL =
     'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
-  export const enrichWithSearch = async (scanResult: ScanResult) => {
+  const enrichWithSearch = async (scanResult: ScanResult) => {
     const { googleApiKey } = config()
 
     const wineDescription = [
@@ -168,4 +181,7 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
       return scanResult
     }
   }
+
+  const hashImage = (imageBuffer: Buffer): ImageHashType =>
+    ImageHash(createHash('sha256').update(imageBuffer).digest('hex'))
 }

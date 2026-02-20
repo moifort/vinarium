@@ -6,6 +6,4 @@
 - [ ] i18n
 - [ ] rajouter cache coté IA
 
-## IOS
-- Refaire les empty retirer les images et utiliser les icones
-- Dashboard > JournalSection "Dernière entrée le DD/MM/YYYY"
+

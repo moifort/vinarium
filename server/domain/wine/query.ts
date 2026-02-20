@@ -3,10 +3,10 @@ import { match } from 'ts-pattern'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CellarQuery } from '~/domain/cellar/query'
 import { GiftQuery } from '~/domain/gift/query'
+import type { Gift } from '~/domain/gift/types'
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import * as repository from '~/domain/wine/repository'
-import type { Gift } from '~/domain/gift/types'
 import type { SortOrder, Wine, WineColor, WineId, WineSort, WineStatus } from '~/domain/wine/types'
 
 export namespace WineQuery {

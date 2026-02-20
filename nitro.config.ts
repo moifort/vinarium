@@ -12,6 +12,7 @@ export default defineNitroConfig({
     'cellar-log': { driver: 'fs', base: './.data/db/cellar-log' }, // kept for migration 0002
     journal: { driver: 'fs', base: './.data/db/journal' },
     tasting: { driver: 'fs', base: './.data/db/tasting' },
+    'scan-cache': { driver: 'fs', base: './.data/db/scan-cache' },
     'migration-meta': { driver: 'fs', base: './.data/db/migration-meta' },
   },
 })
