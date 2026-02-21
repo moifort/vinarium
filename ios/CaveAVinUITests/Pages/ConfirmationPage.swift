@@ -6,7 +6,7 @@ struct ConfirmationPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.staticTexts["Bouteille ajoutée !"].waitOrFail()
+        try app.alerts.buttons["Confirmer"].tapOrFail()
         return self
     }
 

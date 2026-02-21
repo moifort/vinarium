@@ -28,14 +28,14 @@ struct WineDetailPage {
     func tapRemoveFromCellar() throws -> ConsumptionPage {
         app.swipeUp()
         try app.buttons["remove-from-cellar-button"].tapOrFail()
-        try app.buttons["choice-consume"].tapOrFail()
+        try app.buttons["choice-consume"].firstMatch.tapOrFail()
         return ConsumptionPage(app: app)
     }
 
     func tapRemoveAndChooseGift() throws -> GiftPage {
         app.swipeUp()
         try app.buttons["remove-from-cellar-button"].tapOrFail()
-        try app.buttons["choice-gift"].tapOrFail()
+        try app.buttons["choice-gift"].firstMatch.tapOrFail()
         return GiftPage(app: app)
     }
 
@@ -46,7 +46,7 @@ struct WineDetailPage {
 
     func tapDelete() throws {
         try app.buttons["delete-wine-button"].tapOrFail()
-        try app.buttons["Supprimer"].tapOrFail()
+        try app.buttons["choice-delete"].firstMatch.tapOrFail()
     }
 
     func close() throws {

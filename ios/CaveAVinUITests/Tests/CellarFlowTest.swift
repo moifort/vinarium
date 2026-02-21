@@ -74,5 +74,14 @@ final class CellarFlowTest: BaseUITest {
         _ = try tabBar.goToWineList().verify()
         let favorites = try WineListPage(app: app).switchToFavorites()
         try favorites.verifyWineVisible(wineName)
+        
+        // 8. Open wine detail, delete and confirm
+        let detail = try wineList.tapWine(named: wineName)
+        try detail.verify()
+        try detail.tapDelete()
+
+        // 9. Verify wine no longer appears in the list
+        try wineList.verify()
+        wineList.verifyWineNotVisible(wineName)
     }
 }

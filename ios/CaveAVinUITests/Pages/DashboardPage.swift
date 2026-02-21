@@ -30,8 +30,6 @@ struct DashboardPage {
 
     func verifyJournalContains(_ wineName: String) throws {
         let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
-        // Scroll down to make journal visible (it may be below favorites section)
-        app.swipeUp()
         let element = app.staticTexts.matching(predicate).firstMatch
         if !element.waitForExistence(timeout: 3) {
             let button = app.buttons.matching(predicate).firstMatch

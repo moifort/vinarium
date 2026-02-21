@@ -67,6 +67,7 @@ struct PlacementView: View {
                                 }
                                 .tint(.primary)
                                 .disabled(isPlacing)
+                                .accessibilityIdentifier(pos.label)
                             }
                         } header: {
                             Label("Rangée \(group.row)", systemImage: "cabinet")
@@ -85,7 +86,6 @@ struct PlacementView: View {
                             placeWine(position: position)
                         }
                     }
-                    .accessibilityIdentifier("confirm-place")
                     Button("Annuler", role: .cancel) {}
                 }
             }

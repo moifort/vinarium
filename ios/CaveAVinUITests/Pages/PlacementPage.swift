@@ -16,7 +16,6 @@ struct PlacementPage {
 
     func selectPosition(_ position: String) throws -> ConfirmationPage {
         try app.buttons[position].tapOrFail()
-        try app.buttons["confirm-place"].tapOrFail()
         return ConfirmationPage(app: app)
     }
 }

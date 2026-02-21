@@ -73,6 +73,7 @@ struct WineDetailSheet: View {
                                     onRemoved?()
                                 }
                             }
+                            .accessibilityIdentifier("choice-delete")
                         } message: { _ in
                             Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
                         }

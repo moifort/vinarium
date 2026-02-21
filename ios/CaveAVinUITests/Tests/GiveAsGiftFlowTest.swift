@@ -22,13 +22,11 @@ final class GiveAsGiftFlowTest: BaseUITest {
         try confirmation.verify()
         try confirmation.tapDone()
 
-        // 3. CAVE: open detail, remove and choose gift
+        // 3. CAVE: verify wine visible, tap → detail, check "Cave", close
         let cellar = try CellarPage(app: app).verify()
-        let detail = try cellar.tapWine(named: wineName)
-        try detail.verify()
-        try detail.verifyWineName(wineName)
-
-        let giftPage = try detail.tapRemoveAndChooseGift()
+        let cellarDetail = try cellar.tapWine(named: wineName)
+        try cellarDetail.verify()
+        let giftPage = try cellarDetail.tapRemoveAndChooseGift()
         try giftPage.verify()
 
         // 4. Fill recipient name and confirm
@@ -48,5 +46,6 @@ final class GiveAsGiftFlowTest: BaseUITest {
         try listDetail.verify()
         try listDetail.verifyWineName(wineName)
         try listDetail.verifyGiftSection()
+        
     }
 }
