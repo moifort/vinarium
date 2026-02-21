@@ -21,6 +21,11 @@ A purely functional approach to wine cellar management.
   <img src="screenshots/journal.png" width="250" alt="Journal">
 </p>
 
+<p align="center">
+  <img src="screenshots/scan.png" width="250" alt="Scanner">
+  <img src="screenshots/scan-review.png" width="250" alt="AI scan review">
+</p>
+
 ## Tech Stack
 
 | Layer | Stack |
