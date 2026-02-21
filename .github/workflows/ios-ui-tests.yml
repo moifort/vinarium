@@ -40,6 +40,9 @@ jobs:
 
       - name: Start backend
         run: bun run dev > backend.log 2>&1 &
+        env:
+          NITRO_ANTHROPIC_API_KEY: unused-api-key
+          NITRO_GOOGLE_API_KEY: unused-api-key
 
       - name: Wait for backend
         run: |
