@@ -65,6 +65,7 @@ struct Wine: Codable, Identifiable, Sendable {
     var notes: String?
     var rating: Int?
     var giftedTo: String?
+    var recommendedBy: String?
     let createdAt: Date
     let updatedAt: Date
 }

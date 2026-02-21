@@ -38,4 +38,13 @@ enum WineAPI {
     static func delete(id: String) async throws {
         try await APIClient.shared.delete("/wines/\(id)")
     }
+
+    static func addToFavorites(id: String) async throws {
+        struct Empty: Encodable, Sendable {}
+        struct Ignored: Decodable, Sendable {}
+        let _: APIResponse<Ignored> = try await APIClient.shared.post(
+            "/wines/\(id)/favorite",
+            body: Empty()
+        )
+    }
 }

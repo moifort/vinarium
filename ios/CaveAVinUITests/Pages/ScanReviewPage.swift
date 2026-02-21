@@ -47,6 +47,13 @@ struct ScanReviewPage {
 
     func tapFavorite() throws {
         app.swipeUp()
+        try app.buttons["review-more-menu"].tapOrFail()
         try app.buttons["review-favorite-button"].tapOrFail()
+    }
+
+    func tapRecommend() throws {
+        app.swipeUp()
+        try app.buttons["review-more-menu"].tapOrFail()
+        try app.buttons["review-recommend-button"].tapOrFail()
     }
 }

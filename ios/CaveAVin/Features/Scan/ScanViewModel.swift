@@ -8,6 +8,7 @@ enum ScanStep {
     case placing(Wine)
     case confirmed(Wine, String)
     case favoriteSaved
+    case recommendationSaved
 }
 
 @MainActor @Observable
@@ -63,6 +64,23 @@ final class ScanViewModel {
         }
     }
 
+    func saveAsRecommendation(_ request: CreateWineRequest, recommenderName: String?, comment: String?) {
+        guard !isSaving else { return }
+        isSaving = true
+        error = nil
+
+        Task {
+            do {
+                let wine = try await WineAPI.create(request)
+                try await RecommendationAPI.create(wineId: wine.id, recommenderName: recommenderName, comment: comment)
+                self.step = .recommendationSaved
+            } catch {
+                self.error = error.localizedDescription
+            }
+            self.isSaving = false
+        }
+    }
+
     func reset() {
         step = .camera
         error = nil
@@ -72,7 +90,7 @@ final class ScanViewModel {
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved): return true
+        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved): return true
         case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }

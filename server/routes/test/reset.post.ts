@@ -1,5 +1,13 @@
 export default defineEventHandler(async () => {
-  for (const name of ['wines', 'cellar', 'journal', 'tasting', 'gift', 'migration-meta']) {
+  for (const name of [
+    'wines',
+    'cellar',
+    'journal',
+    'tasting',
+    'gift',
+    'recommendation',
+    'migration-meta',
+  ]) {
     const storage = useStorage(name)
     const keys = await storage.getKeys()
     for (const key of keys) await storage.removeItem(key)

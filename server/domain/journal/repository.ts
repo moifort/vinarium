@@ -19,9 +19,7 @@ export const removeByWineId = async (wineId: WineId) => {
   const entries = await Promise.all(
     keys.map(async (key) => ({ key, entry: await storage.getItem<JournalEntry>(key) })),
   )
-  const keysToRemove = entries
-    .filter(({ entry }) => entry?.wineId === wineId)
-    .map(({ key }) => key)
+  const keysToRemove = entries.filter(({ entry }) => entry?.wineId === wineId).map(({ key }) => key)
   await Promise.all(keysToRemove.map((key) => storage.removeItem(key)))
 }
 

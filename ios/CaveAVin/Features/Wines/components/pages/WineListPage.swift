@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WineListPage: View {
     @Binding var showFavorites: Bool
+    @Binding var showRecommended: Bool
     @State private var viewModel = WineListViewModel()
     @State private var selectedWineId: String?
 
@@ -85,6 +86,12 @@ struct WineListPage: View {
                     showFavorites = false
                 }
             }
+            .onChange(of: showRecommended) {
+                if showRecommended {
+                    viewModel.mode = .recommended
+                    showRecommended = false
+                }
+            }
         }
     }
 
@@ -94,6 +101,7 @@ struct WineListPage: View {
             wine.region,
             wine.purchasePrice.map { String(format: "%.0f \u{20AC}", $0) },
             wine.giftedTo.map { "Offert \u{00E0} \(abbreviatedName($0))" },
+            wine.recommendedBy.map { "Conseill\u{00E9} par \(abbreviatedName($0))" },
         ].compactMap { $0 }
         return parts.isEmpty ? nil : parts.joined(separator: " \u{2022} ")
     }
@@ -109,5 +117,6 @@ struct WineListPage: View {
 
 #Preview("Liste de vins") {
     @Previewable @State var showFavorites = false
-    WineListPage(showFavorites: $showFavorites)
+    @Previewable @State var showRecommended = false
+    WineListPage(showFavorites: $showFavorites, showRecommended: $showRecommended)
 }

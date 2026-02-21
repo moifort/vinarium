@@ -4,6 +4,7 @@ import SwiftUI
 enum ScanFlowResult {
     case addedToCellar
     case addedToFavorites
+    case addedToRecommendations
 }
 
 struct ScanFlowView: View {
@@ -107,6 +108,8 @@ struct ScanFlowView: View {
                         viewModel.saveWine(request)
                     }, onFavorite: { request in
                         viewModel.saveAsFavorite(request)
+                    }, onRecommend: { request, recommenderName, comment in
+                        viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
                     }, onCancel: {
                         viewModel.reset()
                     })
@@ -134,6 +137,13 @@ struct ScanFlowView: View {
                     .onAppear {
                         viewModel.reset()
                         onFlowCompleted(.addedToFavorites)
+                    }
+
+            case .recommendationSaved:
+                Color.clear
+                    .onAppear {
+                        viewModel.reset()
+                        onFlowCompleted(.addedToRecommendations)
                     }
             }
         }

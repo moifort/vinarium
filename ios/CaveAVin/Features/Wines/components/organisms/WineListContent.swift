@@ -45,6 +45,9 @@ struct WineListContent: View {
         case .gifted:
             ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins offerts appara\u{00EE}tront ici"))
                 .frame(maxHeight: .infinity)
+        case .recommended:
+            ContentUnavailableView("Aucun vin conseillé", systemImage: "person.2.badge", description: Text("Les vins conseillés par vos amis apparaîtront ici"))
+                .frame(maxHeight: .infinity)
         case .all:
             ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Aucun vin ne correspond \u{00E0} ce filtre"))
                 .frame(maxHeight: .infinity)
@@ -85,9 +88,36 @@ extension WineListContent {
     )
 }
 
+#Preview("Vide - All") {
+    WineListContent(
+        mode: .all,
+        isLoading: false,
+        groups: [],
+        onWineTapped: { _ in }
+    )
+}
+
 #Preview("Vide - Favoris") {
     WineListContent(
-        mode: .favorites,
+        mode: .recommended,
+        isLoading: false,
+        groups: [],
+        onWineTapped: { _ in }
+    )
+}
+
+#Preview("Vide - Favoris") {
+    WineListContent(
+        mode: .gifted,
+        isLoading: false,
+        groups: [],
+        onWineTapped: { _ in }
+    )
+}
+
+#Preview("Vide - Recommended") {
+    WineListContent(
+        mode: .recommended,
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }

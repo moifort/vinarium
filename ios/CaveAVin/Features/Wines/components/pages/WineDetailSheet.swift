@@ -12,6 +12,7 @@ struct WineDetailSheet: View {
     @State private var showRemovalChoice = false
     @State private var showGift = false
     @State private var showDeleteConfirmation = false
+    @State private var showPlacement = false
 
     var body: some View {
         NavigationStack {
@@ -50,6 +51,28 @@ struct WineDetailSheet: View {
                                 .accessibilityIdentifier("choice-gift")
                         } message: {
                             Text("Comment souhaitez-vous sortir ce vin ?")
+                        }
+                    }
+                }
+                if let detail, detail.cellar == nil, detail.recommendation != nil {
+                    ToolbarItem(placement: .primaryAction) {
+                        Menu {
+                            Button {
+                                showPlacement = true
+                            } label: {
+                                Label("Ajouter à la cave", systemImage: "plus")
+                            }
+                            Button {
+                                Task {
+                                    try? await WineAPI.addToFavorites(id: detail.id)
+                                    dismiss()
+                                    onRemoved?()
+                                }
+                            } label: {
+                                Label("Ajouter aux favoris", systemImage: "heart")
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
                         }
                     }
                 }
@@ -134,6 +157,13 @@ struct WineDetailSheet: View {
                 WineGiftSection(giftedDate: formatted(gift.giftedDate), recipientName: gift.recipientName)
             }
 
+            if let recommendation = detail.recommendation {
+                WineRecommendationSection(
+                    recommenderName: recommendation.recommenderName,
+                    comment: recommendation.comment
+                )
+            }
+
             if let notes = detail.notes, !notes.isEmpty {
                 Section("Notes") {
                     Label {
@@ -177,6 +207,24 @@ struct WineDetailSheet: View {
                 }
             }
             .presentationDetents([.height(250)])
+        }
+        .sheet(isPresented: $showPlacement) {
+            NavigationStack {
+                PlacementView(
+                    wine: Wine(
+                        id: detail.id,
+                        name: detail.name,
+                        color: detail.color,
+                        createdAt: detail.createdAt,
+                        updatedAt: detail.updatedAt
+                    ),
+                    onCancel: { showPlacement = false }
+                ) { _ in
+                    showPlacement = false
+                    dismiss()
+                    onRemoved?()
+                }
+            }
         }
     }
 

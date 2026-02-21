@@ -2,6 +2,7 @@ import type { Brand } from 'ts-brand'
 import type { CellarCol, CellarColLabel, CellarRow, CellarRowLabel } from '~/domain/cellar/types'
 import type { RecipientName } from '~/domain/gift/types'
 import type { JournalEventView } from '~/domain/journal/types'
+import type { RecommenderName } from '~/domain/recommendation/types'
 import type { Country, Eur, Region, Year } from '~/domain/shared/types'
 import type { Rating } from '~/domain/tasting/types'
 
@@ -14,7 +15,7 @@ export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'sweet'
 
 export type WineSort = 'createdAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'
-export type WineStatus = 'in-cellar' | 'consumed' | 'gifted'
+export type WineStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'
 
 export type Wine = {
   id: WineId
@@ -56,5 +57,9 @@ export type WineView = Wine & {
   gift?: {
     giftedDate: Date
     recipientName?: RecipientName
+  }
+  recommendation?: {
+    recommenderName?: RecommenderName
+    comment?: string
   }
 }

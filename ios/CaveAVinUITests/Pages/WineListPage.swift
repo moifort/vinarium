@@ -35,6 +35,11 @@ struct WineListPage {
         return self
     }
 
+    func switchToRecommended() throws -> Self {
+        try app.segmentedControls["winelist-segment"].buttons["💡 Conseillés"].tapOrFail()
+        return self
+    }
+
     func switchToAll() throws -> Self {
         try app.segmentedControls["winelist-segment"].buttons["Tous"].tapOrFail()
         return self

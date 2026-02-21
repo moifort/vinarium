@@ -6,8 +6,10 @@ struct ScanReviewView: View {
     let isSaving: Bool
     let onSave: (CreateWineRequest) -> Void
     let onFavorite: (CreateWineRequest) -> Void
+    let onRecommend: (CreateWineRequest, String?, String?) -> Void
     let onCancel: () -> Void
 
+    @State private var showRecommendation = false
     @State private var name: String
     @State private var color: WineColor
     @State private var domain: String
@@ -21,12 +23,13 @@ struct ScanReviewView: View {
     @State private var drinkFrom: String
     @State private var drinkUntil: String
 
-    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }, onCancel: @escaping () -> Void = {}) {
+    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.isSaving = isSaving
         self.onSave = onSave
         self.onFavorite = onFavorite
+        self.onRecommend = onRecommend
         self.onCancel = onCancel
         _name = State(initialValue: scanResult.name)
         _color = State(initialValue: scanResult.color)
@@ -57,18 +60,37 @@ struct ScanReviewView: View {
                 Button("Fermer", systemImage: "xmark") { onCancel() }
             }
             ToolbarItem(placement: .primaryAction) {
-                Button("Ajouter à mes favoris", systemImage: "heart") {
-                    saveAsFavorite()
-                }
-                .accessibilityIdentifier("review-favorite-button")
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Button("Ajouter à la vave", systemImage: "plus") {
+                Button("Ajouter à la cave", systemImage: "plus") {
                     save()
                 }
                 .accessibilityIdentifier("review-save-button")
             }
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        saveAsFavorite()
+                    } label: {
+                        Label("Ajouter aux favoris", systemImage: "heart")
+                    }
+                    .accessibilityIdentifier("review-favorite-button")
+                    Button {
+                        showRecommendation = true
+                    } label: {
+                        Label("Conseillé par un ami", systemImage: "person.badge.plus")
+                    }
+                    .accessibilityIdentifier("review-recommend-button")
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+                .accessibilityIdentifier("review-more-menu")
+            }
         }
+        .sheet(isPresented: $showRecommendation) {
+            RecommendationSheet { recommenderName, comment in
+                showRecommendation = false
+                onRecommend(buildRequest(), recommenderName, comment)
+            }
+        }.presentationDetents([.medium])
     }
 
     // MARK: - Sections
@@ -282,6 +304,7 @@ struct ScanReviewView: View {
             imageData: mockImageData,
             onSave: { _ in },
             onFavorite: { _ in },
+            onRecommend: { _, _, _ in },
             onCancel: {}
         )
     }
@@ -311,6 +334,7 @@ struct ScanReviewView: View {
             isSaving: true,
             onSave: { _ in },
             onFavorite: { _ in },
+            onRecommend: { _, _, _ in },
             onCancel: {}
         )
     }

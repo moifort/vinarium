@@ -22,6 +22,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let cellar: CellarInfo?
     let consumption: ConsumptionInfo?
     let gift: GiftInfo?
+    let recommendation: RecommendationInfo?
 }
 
 struct CellarInfo: Codable, Sendable {
@@ -47,4 +48,9 @@ struct ConsumptionInfo: Codable, Sendable {
     let consumedDate: Date?
     let rating: Int?
     let tastingNotes: String?
+}
+
+struct RecommendationInfo: Codable, Sendable {
+    let recommenderName: String?
+    let comment: String?
 }

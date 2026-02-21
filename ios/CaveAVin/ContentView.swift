@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var showScanner = false
     @State private var cellarRefreshTrigger = UUID()
     @State private var showFavorites = false
+    @State private var showRecommended = false
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -38,7 +39,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
-                WineListPage(showFavorites: $showFavorites)
+                WineListPage(showFavorites: $showFavorites, showRecommended: $showRecommended)
             }
             .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: .search) {
@@ -64,6 +65,9 @@ struct ContentView: View {
                 case .addedToFavorites:
                     selectedTab = .wines
                     showFavorites = true
+                case .addedToRecommendations:
+                    selectedTab = .wines
+                    showRecommended = true
                 }
             }
         }

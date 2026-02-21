@@ -1,13 +1,14 @@
 import Foundation
 
 enum WineListMode: String, CaseIterable, Identifiable {
-    case all, favorites, gifted
+    case all, favorites, gifted, recommended
     var id: String { rawValue }
     var label: String {
         switch self {
         case .all: "Tous"
         case .favorites: "❤️ Favoris"
         case .gifted: "🎁 Offerts"
+        case .recommended: "💡 Conseillés"
         }
     }
 }
@@ -80,6 +81,7 @@ final class WineListViewModel {
         case .all: wines
         case .favorites: wines.filter { $0.rating == 5 }
         case .gifted: wines
+        case .recommended: wines
         }
     }
 
@@ -148,6 +150,7 @@ final class WineListViewModel {
         do {
             let status: String? = switch mode {
             case .gifted: "gifted"
+            case .recommended: "recommended"
             case .all, .favorites:
                 statusFilter == .all ? nil : statusFilter.rawValue
             }

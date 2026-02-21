@@ -34,7 +34,7 @@ struct ConsumptionSheet: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Notes", systemImage: "note")
+                        Label("Commentaires", systemImage: "text.quote")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 
