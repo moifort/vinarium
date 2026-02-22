@@ -54,36 +54,35 @@ struct ScanReviewView: View {
             detailsSection
             gardeSection
         }
-        .navigationTitle("Vérifier le vin")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Fermer", systemImage: "xmark") { onCancel() }
             }
-            ToolbarItem(placement: .primaryAction) {
-                Button("Ajouter à la cave", systemImage: "plus") {
-                    save()
-                }
-                .accessibilityIdentifier("review-save-button")
-            }
-            ToolbarItem(placement: .primaryAction) {
-                Menu {
+           
+            ToolbarItemGroup {
                     Button {
                         showFavorite = true
                     } label: {
                         Label("Ajouter aux favoris", systemImage: "heart")
                     }
                     .accessibilityIdentifier("review-favorite-button")
+                
                     Button {
                         showRecommendation = true
                     } label: {
                         Label("Conseillé par un ami", systemImage: "person.badge.plus")
                     }
                     .accessibilityIdentifier("review-recommend-button")
-                } label: {
-                    Image(systemName: "ellipsis")
+               
+            }
+            ToolbarSpacer(.fixed)
+            
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button("Ajouter à la cave", systemImage: "plus") {
+                    save()
                 }
-                .accessibilityIdentifier("review-more-menu")
+                .accessibilityIdentifier("review-save-button")
             }
         }
         .sheet(isPresented: $showFavorite) {
