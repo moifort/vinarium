@@ -14,21 +14,20 @@ services:
       - NITRO_API_TOKEN=${NITRO_API_TOKEN}
       - NITRO_ANTHROPIC_API_KEY=${NITRO_ANTHROPIC_API_KEY}
       - NITRO_GOOGLE_API_KEY=${NITRO_GOOGLE_API_KEY}
-      - NITRO_API_TOKEN=${NITRO_API_TOKEN}
     hostname: cave-a-vin
     image: moifort/cave-a-vin:latest
     labels:
       icon: https://cdn-icons-png.flaticon.com/512/763/763048.png
     ports:
       - target: 3000
-        published: "3000"
+        published: "3001"
         protocol: tcp
     pull_policy: always
     restart: unless-stopped
     volumes:
       - type: bind
         source: /DATA/AppData/cave-a-vin
-        target: /app/data
+        target: /app/.data
     devices: []
     cap_add: []
     network_mode: bridge
@@ -40,7 +39,7 @@ x-casaos:
   icon: https://cdn-icons-png.flaticon.com/512/763/763048.png
   index: /
   is_uncontrolled: false
-  port_map: "3000"
+  port_map: "3001"
   scheme: http
   store_app_id: breathtaking_derek
   title:
