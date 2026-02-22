@@ -90,30 +90,6 @@ struct CellarPage: View {
                     Task { await viewModel.load() }
                 }
             }
-            .sheet(item: $wineForRemovalChoice, onDismiss: {
-                switch pendingRemoval {
-                case .consumption(let wine):
-                    pendingRemoval = nil
-                    wineForConsumption = wine
-                case .gift(let wine):
-                    pendingRemoval = nil
-                    wineForGift = wine
-                case nil:
-                    break
-                }
-            }) { wine in
-                RemovalChoiceSheet(
-                    onConsume: {
-                        pendingRemoval = .consumption(wine)
-                        wineForRemovalChoice = nil
-                    },
-                    onGift: {
-                        pendingRemoval = .gift(wine)
-                        wineForRemovalChoice = nil
-                    }
-                )
-                .presentationDetents([.height(260)])
-            }
             .sheet(item: $wineForConsumption, onDismiss: {
                 Task { await viewModel.load() }
             }) { wine in

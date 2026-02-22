@@ -188,7 +188,7 @@ struct WineDetailSheet: View {
                     onRemoved?()
                 }
             }
-            .presentationDetents([.medium])
+            .presentationDetents([.height(550)])
         }
         .sheet(isPresented: $showGift) {
             GiftSheet { date, recipientName in
