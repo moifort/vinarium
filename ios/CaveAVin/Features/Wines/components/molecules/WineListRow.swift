@@ -27,7 +27,7 @@ struct WineListRow: View {
                 Image(systemName: "heart.fill")
                     .foregroundStyle(.red)
                     .font(.default)
-                    .frame(maxHeight: .infinity, alignment: .center)
+                    .frame(alignment: .topLeading)
             }
         }
     }
@@ -44,7 +44,7 @@ struct WineListRow: View {
         )
         WineListRow(
             color: .white,
-            name: "Pouilly-Fum\u{00E9}",
+            name: "Château La Sauvageonne Cuvée Les Oliviers",
             subtitle: "2021",
             rating: 5,
             isFavorite: true

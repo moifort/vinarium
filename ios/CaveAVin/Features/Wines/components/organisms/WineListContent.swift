@@ -82,7 +82,7 @@ extension WineListContent {
         isLoading: false,
         groups: [
             .init(label: "2018", items: [
-                .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: false),
+                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true),
                 .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false),
             ]),
             .init(label: "2021", items: [
