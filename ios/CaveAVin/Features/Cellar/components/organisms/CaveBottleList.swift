@@ -61,6 +61,7 @@ extension CaveBottleList {
 
 #Preview("Avec bouteilles") {
     CaveBottleList(
+
         groups: [
             .init(label: "A", items: [
                 .init(id: "1", color: .red, title: "Chateau Margaux", subtitle: "2018", position: "A1"),
@@ -77,6 +78,7 @@ extension CaveBottleList {
 
 #Preview("Vide") {
     CaveBottleList(
+
         groups: [],
         onBottleTapped: { _ in },
         onRemoveRequested: { _ in }

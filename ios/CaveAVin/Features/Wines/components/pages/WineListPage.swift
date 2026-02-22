@@ -33,7 +33,8 @@ struct WineListPage: View {
                     )
                 }
             }
-            .navigationTitle("Mes Vins")
+            .navigationTitle(viewModel.mode.title)
+            .navigationSubtitle(viewModel.mode.subtitle)
             .navigationBarTitleDisplayMode(.large)
             .refreshable { await viewModel.load() }
             .task(id: viewModel.filterKey) { await viewModel.load() }

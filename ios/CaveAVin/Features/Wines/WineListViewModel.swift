@@ -19,6 +19,24 @@ enum WineListMode: String, CaseIterable, Identifiable {
         case .recommended: "lightbulb"
         }
     }
+
+    var title: String {
+        switch self {
+        case .all: "Mes Vins"
+        case .favorites: "Favoris"
+        case .gifted: "Offerts"
+        case .recommended: "Conseillés"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .all: "Tous vos vins ajoutés"
+        case .favorites: "Vos vins notés 5 étoiles"
+        case .gifted: "Vins offerts à vos proches"
+        case .recommended: "Vins recommandés par vos proches"
+        }
+    }
 }
 
 enum WineSort: String, CaseIterable, Identifiable {

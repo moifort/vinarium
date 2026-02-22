@@ -78,6 +78,7 @@ extension WineListContent {
 #Preview("Avec vins") {
     WineListContent(
         mode: .all,
+
         isLoading: false,
         groups: [
             .init(label: "2018", items: [
@@ -95,6 +96,7 @@ extension WineListContent {
 #Preview("Vide - All") {
     WineListContent(
         mode: .all,
+
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }
@@ -104,6 +106,7 @@ extension WineListContent {
 #Preview("Vide - Favoris") {
     WineListContent(
         mode: .favorites,
+
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }
@@ -113,6 +116,7 @@ extension WineListContent {
 #Preview("Vide - Offerts") {
     WineListContent(
         mode: .gifted,
+
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }
@@ -122,6 +126,7 @@ extension WineListContent {
 #Preview("Vide - Recommended") {
     WineListContent(
         mode: .recommended,
+
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }

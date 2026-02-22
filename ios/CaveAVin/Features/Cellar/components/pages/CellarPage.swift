@@ -73,7 +73,8 @@ struct CellarPage: View {
                     }
                 }
             }
-            .navigationTitle("Ma Cave")
+            .navigationTitle(viewModel.displayMode.title)
+            .navigationSubtitle(viewModel.displayMode.subtitle)
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 await viewModel.load()
