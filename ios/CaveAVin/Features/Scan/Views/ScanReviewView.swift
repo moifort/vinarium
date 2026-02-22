@@ -57,6 +57,7 @@ struct ScanReviewView: View {
             gardeSection
             giftedBySection
         }
+        .navigationTitle("Vérifier le vin")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

@@ -39,6 +39,7 @@ struct WineDetailSheet: View {
                         Button("Sortir", systemImage: "arrow.up") {
                             showRemovalChoice = true
                         }
+                        .accessibilityIdentifier("remove-from-cellar-button")
                         .confirmationDialog(
                             "Sortir de la cave",
                             isPresented: $showRemovalChoice,
