@@ -1,12 +1,14 @@
 import SwiftUI
 
 struct ConsumptionSheet: View {
-    let onConfirm: (Date, Int?, String?) -> Void
+    let onConfirm: (Date, Int?, String?, [String]) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var consumedDate = Date()
     @State private var rating: Int = 0
     @State private var tastingNotes = ""
+    @State private var contacts: [String] = []
+    @State private var showContactPicker = false
 
     var body: some View {
         NavigationStack {
@@ -16,10 +18,10 @@ struct ConsumptionSheet: View {
                         InteractiveStarRating(rating: $rating)
                     }
                     .padding(.vertical, 4)
-                   
+
                 }
                 Section {
- 
+
                     HStack {
                         Label("Date", systemImage: "calendar")
                             .foregroundStyle(.secondary)
@@ -44,6 +46,32 @@ struct ConsumptionSheet: View {
                     .padding(.vertical, 4)
                 }
 
+                Section {
+                    HStack {
+                        Label("Avec", systemImage: "person.2")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button {
+                            showContactPicker = true
+                        } label: {
+                            Label("Ajouter", systemImage: "plus.circle")
+                                .font(.subheadline)
+                        }
+                    }
+                    ForEach(contacts, id: \.self) { contact in
+                        HStack {
+                            Text(contact)
+                            Spacer()
+                            Button {
+                                contacts.removeAll { $0 == contact }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
             }
             .navigationTitle("Consommation")
             .navigationBarTitleDisplayMode(.inline)
@@ -56,18 +84,26 @@ struct ConsumptionSheet: View {
                         onConfirm(
                             consumedDate,
                             rating > 0 ? rating : nil,
-                            tastingNotes.isEmpty ? nil : tastingNotes
+                            tastingNotes.isEmpty ? nil : tastingNotes,
+                            contacts
                         )
                     }
                     .accessibilityIdentifier("confirm-consumption-button")
                 }
             }
             .animation(.default, value: rating)
+            .sheet(isPresented: $showContactPicker) {
+                ContactPicker { name in
+                    if !contacts.contains(name) {
+                        contacts.append(name)
+                    }
+                }
+            }
         }
     }
 
 }
 
 #Preview {
-    ConsumptionSheet(onConfirm: { _, _, _ in })
+    ConsumptionSheet(onConfirm: { _, _, _, _ in })
 }

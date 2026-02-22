@@ -4,12 +4,13 @@ struct WineConsumptionSection: View {
     let consumedDate: String?
     let rating: Int?
     let tastingNotes: String?
+    let contacts: [String]?
 
     var body: some View {
-        Section("Consomm\u{00E9}") {
+        Section("Consommé") {
             if let consumedDate {
                 Label {
-                    LabeledContent("Consomm\u{00E9} le", value: consumedDate)
+                    LabeledContent("Consommé le", value: consumedDate)
                 } icon: {
                     Image(systemName: "fork.knife")
                         .foregroundStyle(.secondary)
@@ -31,6 +32,14 @@ struct WineConsumptionSection: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            if let contacts, !contacts.isEmpty {
+                Label {
+                    Text(contacts.joined(separator: ", "))
+                } icon: {
+                    Image(systemName: "person.2")
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 }
@@ -38,9 +47,10 @@ struct WineConsumptionSection: View {
 #Preview {
     List {
         WineConsumptionSection(
-            consumedDate: "20 f\u{00E9}vr. 2026",
+            consumedDate: "20 févr. 2026",
             rating: 4,
-            tastingNotes: "Tr\u{00E8}s bon, tanins souples"
+            tastingNotes: "Très bon, tanins souples",
+            contacts: ["Jean Dupont", "Marie Martin"]
         )
     }
 }

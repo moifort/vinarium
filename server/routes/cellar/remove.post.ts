@@ -25,7 +25,8 @@ export default defineEventHandler(async (event) => {
       wineId,
       consumedDate: body.consumedDate ? new Date(body.consumedDate) : undefined,
       rating: body.rating != null ? Rating(body.rating) : undefined,
-      tastingNotes: body.tastingNotes as string | undefined,
+      tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
+      contacts: body.contacts?.length ? body.contacts : undefined,
     })
   }
 

@@ -145,7 +145,8 @@ struct WineDetailSheet: View {
                 WineConsumptionSection(
                     consumedDate: consumption.consumedDate.map { formatted($0) },
                     rating: consumption.rating,
-                    tastingNotes: consumption.tastingNotes
+                    tastingNotes: consumption.tastingNotes,
+                    contacts: consumption.contacts
                 )
             }
 
@@ -172,14 +173,15 @@ struct WineDetailSheet: View {
             }
         }
         .sheet(isPresented: $showConsumption) {
-            ConsumptionSheet { date, rating, notes in
+            ConsumptionSheet { date, rating, notes, contacts in
                 let formatter = ISO8601DateFormatter()
                 Task {
                     _ = try? await CellarAPI.remove(
                         wineId: detail.id,
                         consumedDate: formatter.string(from: date),
                         rating: rating,
-                        tastingNotes: notes
+                        tastingNotes: notes,
+                        contacts: contacts.isEmpty ? nil : contacts
                     )
                     showConsumption = false
                     dismiss()

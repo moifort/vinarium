@@ -117,14 +117,15 @@ struct CellarPage: View {
             .sheet(item: $wineForConsumption, onDismiss: {
                 Task { await viewModel.load() }
             }) { wine in
-                ConsumptionSheet { date, rating, notes in
+                ConsumptionSheet { date, rating, notes, contacts in
                     let formatter = ISO8601DateFormatter()
                     Task {
                         _ = try? await CellarAPI.remove(
                             wineId: wine.id,
                             consumedDate: formatter.string(from: date),
                             rating: rating,
-                            tastingNotes: notes
+                            tastingNotes: notes,
+                            contacts: contacts.isEmpty ? nil : contacts
                         )
                         wineForConsumption = nil
                     }

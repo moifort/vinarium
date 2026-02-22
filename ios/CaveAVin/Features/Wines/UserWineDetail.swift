@@ -48,6 +48,7 @@ struct ConsumptionInfo: Codable, Sendable {
     let consumedDate: Date?
     let rating: Int?
     let tastingNotes: String?
+    let contacts: [String]?
 }
 
 struct RecommendationInfo: Codable, Sendable {

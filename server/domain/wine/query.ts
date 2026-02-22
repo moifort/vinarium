@@ -86,6 +86,7 @@ export namespace WineQuery {
               consumedDate: tasting.consumedDate,
               rating: tasting.rating,
               tastingNotes: tasting.tastingNotes,
+              contacts: tasting.contacts,
             }
           : undefined,
       gift:

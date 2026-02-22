@@ -85,12 +85,14 @@ struct WineListPage: View {
                 if showFavorites {
                     viewModel.mode = .favorites
                     showFavorites = false
+                    Task { await viewModel.load() }
                 }
             }
             .onChange(of: showRecommended) {
                 if showRecommended {
                     viewModel.mode = .recommended
                     showRecommended = false
+                    Task { await viewModel.load() }
                 }
             }
         }
