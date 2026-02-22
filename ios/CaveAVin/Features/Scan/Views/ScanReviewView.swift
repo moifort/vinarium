@@ -63,7 +63,7 @@ struct ScanReviewView: View {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Fermer", systemImage: "xmark") { onCancel() }
             }
-           
+
             ToolbarItemGroup {
                     Button {
                         showFavorite = true
@@ -71,17 +71,17 @@ struct ScanReviewView: View {
                         Label("Ajouter aux favoris", systemImage: "heart")
                     }
                     .accessibilityIdentifier("review-favorite-button")
-                
+
                     Button {
                         showRecommendation = true
                     } label: {
                         Label("Conseillé par un ami", systemImage: "person.badge.plus")
                     }
                     .accessibilityIdentifier("review-recommend-button")
-               
+
             }
             ToolbarSpacer(.fixed)
-            
+
             ToolbarItemGroup(placement: .primaryAction) {
                 Button("Ajouter à la cave", systemImage: "plus") {
                     save()
