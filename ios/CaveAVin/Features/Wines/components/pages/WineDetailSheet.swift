@@ -29,14 +29,13 @@ struct WineDetailSheet: View {
                     )
                 }
             }
-            .navigationTitle(detail?.name ?? "D\u{00E9}tail")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Fermer", systemImage: "xmark") { dismiss() }
                 }
                 if let cellar = detail?.cellar, cellar.dateOut == nil {
-                    ToolbarItem(placement: .primaryAction) {
+                    ToolbarItemGroup {
                         Button("Sortir", systemImage: "arrow.up") {
                             showRemovalChoice = true
                         }
@@ -55,54 +54,51 @@ struct WineDetailSheet: View {
                     }
                 }
                 if let detail, detail.cellar == nil, detail.recommendation != nil {
-                    ToolbarItem(placement: .primaryAction) {
-                        Menu {
-                            Button {
-                                showPlacement = true
-                            } label: {
-                                Label("Ajouter à la cave", systemImage: "plus")
-                            }
-                            Button {
-                                Task {
-                                    try? await WineAPI.addToFavorites(id: detail.id)
-                                    dismiss()
-                                    onRemoved?()
-                                }
-                            } label: {
-                                Label("Ajouter aux favoris", systemImage: "heart")
+                    ToolbarItemGroup {
+                        Button {
+                            showPlacement = true
+                        } label: {
+                            Label("Ajouter à la cave", systemImage: "plus")
+                        }
+                        
+                        Button {
+                            Task {
+                                try? await WineAPI.addToFavorites(id: detail.id)
+                                dismiss()
+                                onRemoved?()
                             }
                         } label: {
-                            Image(systemName: "ellipsis.circle")
+                            Label("Ajouter aux favoris", systemImage: "heart")
                         }
                     }
                 }
-                if detail != nil {
-                    ToolbarItem(placement: .destructiveAction) {
-                        Button(role: .destructive) {
-                            showDeleteConfirmation = true
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-                        .confirmationDialog(
-                            "Supprimer ce vin ?",
-                            isPresented: $showDeleteConfirmation,
-                            titleVisibility: .visible,
-                            presenting: detail
-                        ) { detail in
-                            Button("Supprimer", role: .destructive) {
-                                Task {
-                                    try? await WineAPI.delete(id: detail.id)
-                                    dismiss()
-                                    onRemoved?()
-                                }
-                            }
-                            .accessibilityIdentifier("choice-delete")
-                        } message: { _ in
-                            Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
-                        }
-                        .accessibilityIdentifier("delete-wine-button")
+                ToolbarSpacer(.fixed)
+                ToolbarItem(placement: .destructiveAction) {
+                    Button(role: .destructive) {
+                        showDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
                     }
+                    .confirmationDialog(
+                        "Supprimer ce vin ?",
+                        isPresented: $showDeleteConfirmation,
+                        titleVisibility: .visible,
+                        presenting: detail
+                    ) { detail in
+                        Button("Supprimer", role: .destructive) {
+                            Task {
+                                try? await WineAPI.delete(id: detail.id)
+                                dismiss()
+                                onRemoved?()
+                            }
+                        }
+                        .accessibilityIdentifier("choice-delete")
+                    } message: { _ in
+                        Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
+                    }
+                    .accessibilityIdentifier("delete-wine-button")
                 }
+                
             }
             .task { await loadData() }
         }
@@ -259,4 +255,8 @@ struct WineDetailSheet: View {
 
 #Preview("En cave") {
     WineDetailSheet(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
+}
+
+#Preview("Conseiller") {
+    WineDetailSheet(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
 }
