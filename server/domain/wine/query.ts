@@ -144,6 +144,7 @@ export namespace WineQuery {
   const sortKey = (sort: WineSort) => (wine: Wine) =>
     match(sort)
       .with('createdAt', () => new Date(wine.createdAt).getTime())
+      .with('updatedAt', () => new Date(wine.updatedAt).getTime())
       .with('vintage', () => wine.vintage ?? 0)
       .with('region', () => wine.region ?? '')
       .with('color', () => wine.color)

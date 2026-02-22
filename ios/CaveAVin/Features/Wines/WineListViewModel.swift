@@ -40,11 +40,11 @@ enum WineListMode: String, CaseIterable, Identifiable {
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
-    case createdAt, vintage, region, color, price
+    case updatedAt, vintage, region, color, price
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .createdAt: "Date d'ajout"
+        case .updatedAt: "Date de modification"
         case .vintage: "Millésime"
         case .region: "Région"
         case .color: "Couleur"
@@ -53,7 +53,7 @@ enum WineSort: String, CaseIterable, Identifiable {
     }
     var icon: String {
         switch self {
-        case .createdAt: "clock"
+        case .updatedAt: "clock"
         case .vintage: "calendar"
         case .region: "map"
         case .color: "paintpalette"
@@ -95,7 +95,7 @@ final class WineListViewModel {
     var hasWines = false
     private(set) var loadedFilterKey: String?
     var error: String?
-    var sort: WineSort = .createdAt
+    var sort: WineSort = .updatedAt
     var sortDescending = true
     var statusFilter: WineStatusFilter = .all
     var mode: WineListMode = .all
@@ -114,8 +114,8 @@ final class WineListViewModel {
     var groupedWines: [(String, [Wine])] {
         let keyed = displayedWines.map { wine -> (sortKey: Int, label: String, wine: Wine) in
             switch sort {
-            case .createdAt:
-                let date = wine.createdAt
+            case .updatedAt:
+                let date = wine.updatedAt
                 let calendar = Calendar.current
                 let year = calendar.component(.year, from: date)
                 let month = calendar.component(.month, from: date)
@@ -171,7 +171,6 @@ final class WineListViewModel {
 
     func load() async {
         isLoading = true
-        wines = []
         error = nil
         do {
             let status: String? = switch mode {

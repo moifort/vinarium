@@ -13,7 +13,7 @@ export type Appellation = Brand<string, 'Appellation'>
 export type Classification = Brand<string, 'Classification'>
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'sweet'
 
-export type WineSort = 'createdAt' | 'vintage' | 'region' | 'color' | 'price'
+export type WineSort = 'createdAt' | 'updatedAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'
 export type WineStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'
 

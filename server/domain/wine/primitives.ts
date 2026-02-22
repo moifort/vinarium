@@ -43,7 +43,7 @@ export const WineColor = (value: unknown) =>
   z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(value) as WineColorType
 
 export const WineSort = (value: unknown) =>
-  z.enum(['createdAt', 'vintage', 'region', 'color', 'price']).parse(value) as WineSortType
+  z.enum(['createdAt', 'updatedAt', 'vintage', 'region', 'color', 'price']).parse(value) as WineSortType
 
 export const SortOrder = (value: unknown) => z.enum(['asc', 'desc']).parse(value) as SortOrderType
 
