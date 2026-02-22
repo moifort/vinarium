@@ -5,5 +5,6 @@
 - [ ] i18n
 - [ ] Partager le vin a un ami
 - [ ] generer une bouteille a partir de l'etiquette
+- [ ] rechercher partout avec filtre intellige
 
 
