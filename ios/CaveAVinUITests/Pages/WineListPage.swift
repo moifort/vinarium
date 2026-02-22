@@ -26,22 +26,22 @@ struct WineListPage {
     }
 
     func switchToFavorites() throws -> Self {
-        try app.segmentedControls["winelist-segment"].buttons["❤️ Favoris"].tapOrFail()
+        try app.buttons["winelist-mode-favorites"].tapOrFail()
         return self
     }
 
     func switchToGifted() throws -> Self {
-        try app.segmentedControls["winelist-segment"].buttons["🎁 Offerts"].tapOrFail()
+        try app.buttons["winelist-mode-gifted"].tapOrFail()
         return self
     }
 
     func switchToRecommended() throws -> Self {
-        try app.segmentedControls["winelist-segment"].buttons["💡 Conseillés"].tapOrFail()
+        try app.buttons["winelist-mode-recommended"].tapOrFail()
         return self
     }
 
     func switchToAll() throws -> Self {
-        try app.segmentedControls["winelist-segment"].buttons["Tous"].tapOrFail()
+        try app.buttons["winelist-mode-all"].tapOrFail()
         return self
     }
 

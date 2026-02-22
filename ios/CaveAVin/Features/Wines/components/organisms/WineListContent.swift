@@ -15,7 +15,7 @@ struct WineListContent: View {
         } else {
             List {
                 ForEach(groups) { group in
-                    Section(group.label) {
+                    Section {
                         ForEach(group.items) { item in
                             Button {
                                 onWineTapped(item.id)
@@ -30,9 +30,12 @@ struct WineListContent: View {
                             }
                             .tint(.primary)
                         }
+                    } header: {
+                        Text(group.label)
                     }
                 }
             }
+            .listStyle(.insetGrouped)
         }
     }
 
@@ -79,6 +82,7 @@ extension WineListContent {
         groups: [
             .init(label: "2018", items: [
                 .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: false),
+                .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false),
             ]),
             .init(label: "2021", items: [
                 .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
@@ -99,14 +103,14 @@ extension WineListContent {
 
 #Preview("Vide - Favoris") {
     WineListContent(
-        mode: .recommended,
+        mode: .favorites,
         isLoading: false,
         groups: [],
         onWineTapped: { _ in }
     )
 }
 
-#Preview("Vide - Favoris") {
+#Preview("Vide - Offerts") {
     WineListContent(
         mode: .gifted,
         isLoading: false,

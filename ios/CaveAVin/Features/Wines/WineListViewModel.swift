@@ -6,9 +6,17 @@ enum WineListMode: String, CaseIterable, Identifiable {
     var label: String {
         switch self {
         case .all: "Tous"
-        case .favorites: "❤️ Favoris"
-        case .gifted: "🎁 Offerts"
-        case .recommended: "💡 Conseillés"
+        case .favorites: "Favoris"
+        case .gifted: "Offerts"
+        case .recommended: "Conseillés"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .all: "wineglass"
+        case .favorites: "heart.fill"
+        case .gifted: "gift"
+        case .recommended: "lightbulb"
         }
     }
 }

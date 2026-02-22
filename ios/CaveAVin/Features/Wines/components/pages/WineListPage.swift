@@ -14,35 +14,23 @@ struct WineListPage: View {
                 } else if viewModel.wines.isEmpty && !viewModel.hasWines {
                     ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Ajoutez des vins en scannant une étiquette"))
                 } else {
-                    VStack(spacing: 0) {
-                        Picker("Mode", selection: $viewModel.mode) {
-                            ForEach(WineListMode.allCases) { mode in
-                                Text(mode.label).tag(mode)
-                            }
-                        }
-                        .pickerStyle(.segmented)
-                        .padding(.horizontal)
-                        .padding(.vertical, 8)
-                        .accessibilityIdentifier("winelist-segment")
-
-                        WineListContent(
-                            mode: viewModel.mode,
-                            isLoading: viewModel.isLoading || viewModel.isDataStale,
-                            groups: viewModel.groupedWines.map { label, wines in
-                                .init(label: label, items: wines.map { wine in
-                                    .init(
-                                        id: wine.id,
-                                        color: wine.color,
-                                        name: wine.name,
-                                        subtitle: wineSubtitle(wine),
-                                        rating: wine.rating,
-                                        isFavorite: wine.rating == 5
-                                    )
-                                })
-                            },
-                            onWineTapped: { selectedWineId = $0 }
-                        )
-                    }
+                    WineListContent(
+                        mode: viewModel.mode,
+                        isLoading: viewModel.isLoading || viewModel.isDataStale,
+                        groups: viewModel.groupedWines.map { label, wines in
+                            .init(label: label, items: wines.map { wine in
+                                .init(
+                                    id: wine.id,
+                                    color: wine.color,
+                                    name: wine.name,
+                                    subtitle: wineSubtitle(wine),
+                                    rating: wine.rating,
+                                    isFavorite: wine.rating == 5
+                                )
+                            })
+                        },
+                        onWineTapped: { selectedWineId = $0 }
+                    )
                 }
             }
             .navigationTitle("Mes Vins")
@@ -50,7 +38,19 @@ struct WineListPage: View {
             .refreshable { await viewModel.load() }
             .task(id: viewModel.filterKey) { await viewModel.load() }
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup {
+                    ForEach(WineListMode.allCases) { mode in
+                        Button {
+                            viewModel.mode = mode
+                        } label: {
+                            Label(mode.label, systemImage: mode.icon)
+                        }
+                        .tint(viewModel.mode == mode ? .accentColor : .primary)
+                        .accessibilityIdentifier("winelist-mode-\(mode.rawValue)")
+                    }
+                }
+                ToolbarSpacer(.fixed)
+                ToolbarItemGroup {
                     Menu {
                         Picker("Tri", selection: $viewModel.sort) {
                             ForEach(WineSort.allCases) { sort in
