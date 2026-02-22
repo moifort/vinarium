@@ -40,7 +40,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
-    case updatedAt, vintage, region, color, price
+    case updatedAt, vintage, region, color, price, contact
     var id: String { rawValue }
     var label: String {
         switch self {
@@ -49,6 +49,7 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "Région"
         case .color: "Couleur"
         case .price: "Prix"
+        case .contact: "Contact"
         }
     }
     var icon: String {
@@ -58,6 +59,7 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "map"
         case .color: "paintpalette"
         case .price: "eurosign.circle"
+        case .contact: "person.2"
         }
     }
 }
@@ -112,6 +114,7 @@ final class WineListViewModel {
     }
 
     var groupedWines: [(String, [Wine])] {
+        if sort == .contact { return contactGroupedWines }
         let keyed = displayedWines.map { wine -> (sortKey: Int, label: String, wine: Wine) in
             switch sort {
             case .updatedAt:
@@ -133,6 +136,8 @@ final class WineListViewModel {
             case .price:
                 let (order, label) = priceRange(wine.purchasePrice)
                 return (order, label, wine)
+            case .contact:
+                return (0, "", wine) // unreachable: handled by early return above
             }
         }
         let grouped = Dictionary(grouping: keyed, by: \.label)
@@ -152,6 +157,28 @@ final class WineListViewModel {
             sorted = result.map { ($0.key, $0.value.map(\.wine)) }
         }
         return sorted
+    }
+
+    private var contactGroupedWines: [(String, [Wine])] {
+        var groups: [String: [Wine]] = [:]
+        var noContact: [Wine] = []
+        for wine in displayedWines {
+            let contacts = wine.contacts ?? []
+            if contacts.isEmpty {
+                noContact.append(wine)
+            } else {
+                for contact in contacts {
+                    groups[contact, default: []].append(wine)
+                }
+            }
+        }
+        var result = groups.sorted { first, second in
+            sortDescending ? first.key > second.key : first.key < second.key
+        }
+        if !noContact.isEmpty {
+            result.append(("Sans contact", noContact))
+        }
+        return result
     }
 
     private func priceRange(_ price: Double?) -> (order: Int, label: String) {
@@ -179,8 +206,9 @@ final class WineListViewModel {
             case .all, .favorites:
                 statusFilter == .all ? nil : statusFilter.rawValue
             }
+            let apiSort = sort == .contact ? "updatedAt" : sort.rawValue
             wines = try await WineAPI.list(
-                sort: sort.rawValue,
+                sort: apiSort,
                 order: sortDescending ? "desc" : "asc",
                 status: status
             )

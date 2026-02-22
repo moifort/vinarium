@@ -1,4 +1,4 @@
-import { keyBy, orderBy } from 'lodash-es'
+import { keyBy, orderBy, uniq } from 'lodash-es'
 import { match } from 'ts-pattern'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CellarQuery } from '~/domain/cellar/query'
@@ -35,11 +35,20 @@ export namespace WineQuery {
     const recommendationMap = keyBy(recommendations, ({ wineId }) => wineId)
     const withExtra = all.map((wine) => {
       const { imageBase64, ...rest } = wine
+      const tasting = ratingMap[wine.id]
+      const gift = giftMap[wine.id]
+      const recommendation = recommendationMap[wine.id]
       return {
         ...rest,
-        rating: ratingMap[wine.id]?.rating ?? null,
-        giftedTo: giftMap[wine.id]?.recipientName ?? null,
-        recommendedBy: recommendationMap[wine.id]?.recommenderName ?? null,
+        rating: tasting?.rating ?? null,
+        giftedTo: gift?.recipientName ?? null,
+        recommendedBy: recommendation?.recommenderName ?? null,
+        contacts: uniq([
+          ...(tasting?.contacts ?? []),
+          ...(wine.giftedBy ? [wine.giftedBy] : []),
+          ...(gift?.recipientName ? [gift.recipientName] : []),
+          ...(recommendation?.recommenderName ? [recommendation.recommenderName] : []),
+        ]),
       }
     })
     const byColor = options?.color
