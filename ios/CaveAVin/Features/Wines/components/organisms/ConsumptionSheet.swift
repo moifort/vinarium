@@ -14,39 +14,6 @@ struct ConsumptionSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    VStack(alignment: .leading, spacing: 10) {
-                        InteractiveStarRating(rating: $rating)
-                    }
-                    .padding(.vertical, 4)
-
-                }
-                Section {
-
-                    HStack {
-                        Label("Date", systemImage: "calendar")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        DatePicker(
-                            "",
-                            selection: $consumedDate,
-                            in: ...Date(),
-                            displayedComponents: .date
-                        )
-                        .labelsHidden()
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Commentaires", systemImage: "text.quote")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
-                            .lineLimit(3...6)
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Section {
                     HStack {
                         Label("Avec", systemImage: "person.2")
                             .foregroundStyle(.secondary)
@@ -55,7 +22,6 @@ struct ConsumptionSheet: View {
                             showContactPicker = true
                         } label: {
                             Label("Ajouter", systemImage: "plus.circle")
-                                .font(.subheadline)
                         }
                     }
                     ForEach(contacts, id: \.self) { contact in
@@ -72,6 +38,35 @@ struct ConsumptionSheet: View {
                         }
                     }
                 }
+                Section {
+                    VStack(alignment: .leading, spacing: 10) {
+                        InteractiveStarRating(rating: $rating)
+                    }
+                    .padding(.vertical, 4)
+                    HStack {
+                        Label("Date", systemImage: "calendar")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        DatePicker(
+                            "",
+                            selection: $consumedDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                    }
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Commentaires", systemImage: "text.quote")
+                            .foregroundStyle(.secondary)
+
+                        TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
+                            .lineLimit(3...6)
+                    }
+                    .padding(.vertical, 4)
+                }
+
+                
             }
             .navigationTitle("Consommation")
             .navigationBarTitleDisplayMode(.inline)

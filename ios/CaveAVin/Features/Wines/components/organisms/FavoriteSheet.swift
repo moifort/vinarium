@@ -14,21 +14,6 @@ struct FavoriteSheet: View {
             Form {
                 Section {
                     HStack {
-                        Label("Date", systemImage: "calendar")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                        DatePicker(
-                            "",
-                            selection: $consumedDate,
-                            in: ...Date(),
-                            displayedComponents: .date
-                        )
-                        .labelsHidden()
-                    }
-                }
-
-                Section {
-                    HStack {
                         Label("Avec", systemImage: "person.2")
                             .foregroundStyle(.secondary)
                         Spacer()
@@ -53,15 +38,28 @@ struct FavoriteSheet: View {
                         }
                     }
                 }
-
                 Section {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Notes", systemImage: "note")
-                            .font(.subheadline)
+                    HStack {
+                        Label("Date", systemImage: "calendar")
                             .foregroundStyle(.secondary)
+                        Spacer()
+                        DatePicker(
+                            "",
+                            selection: $consumedDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .labelsHidden()
+                    }
+            
+                    VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Label("Commentaires", systemImage: "text.quote")
+                                .foregroundStyle(.secondary)
 
-                        TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
-                            .lineLimit(3...6)
+                            TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
+                                .lineLimit(3...6)
+                        }
                     }
                     .padding(.vertical, 4)
                 }
