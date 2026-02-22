@@ -8,4 +8,5 @@ export type TastingNote = {
   consumedDate?: Date
   rating?: Rating
   tastingNotes?: string
+  contacts?: string[]
 }

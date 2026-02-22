@@ -39,7 +39,9 @@ export default defineEventHandler(async (event) => {
     await TastingCommand.create({
       wineId: wine.id,
       rating: Rating(body.rating),
-      consumedDate: new Date(),
+      consumedDate: body.consumedDate ? new Date(body.consumedDate) : new Date(),
+      tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
+      contacts: body.contacts?.length ? body.contacts : undefined,
     })
   }
 

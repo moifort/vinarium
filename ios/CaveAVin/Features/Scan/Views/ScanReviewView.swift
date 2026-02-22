@@ -5,10 +5,11 @@ struct ScanReviewView: View {
     let imageData: Data
     let isSaving: Bool
     let onSave: (CreateWineRequest) -> Void
-    let onFavorite: (CreateWineRequest) -> Void
+    let onFavorite: (CreateWineRequest, Date, [String], String?) -> Void
     let onRecommend: (CreateWineRequest, String?, String?) -> Void
     let onCancel: () -> Void
 
+    @State private var showFavorite = false
     @State private var showRecommendation = false
     @State private var name: String
     @State private var color: WineColor
@@ -23,7 +24,7 @@ struct ScanReviewView: View {
     @State private var drinkFrom: String
     @State private var drinkUntil: String
 
-    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest) -> Void = { _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
+    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) -> Void = { _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.isSaving = isSaving
@@ -68,7 +69,7 @@ struct ScanReviewView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button {
-                        saveAsFavorite()
+                        showFavorite = true
                     } label: {
                         Label("Ajouter aux favoris", systemImage: "heart")
                     }
@@ -85,12 +86,22 @@ struct ScanReviewView: View {
                 .accessibilityIdentifier("review-more-menu")
             }
         }
+        .sheet(isPresented: $showFavorite) {
+            FavoriteSheet { date, contacts, notes in
+                showFavorite = false
+                var request = buildRequest()
+                request.rating = 5
+                onFavorite(request, date, contacts, notes)
+            }
+            .presentationDetents([.medium])
+        }
         .sheet(isPresented: $showRecommendation) {
             RecommendationSheet { recommenderName, comment in
                 showRecommendation = false
                 onRecommend(buildRequest(), recommenderName, comment)
             }
-        }.presentationDetents([.medium])
+            .presentationDetents([.medium])
+        }
     }
 
     // MARK: - Sections
@@ -233,12 +244,6 @@ struct ScanReviewView: View {
         onSave(buildRequest())
     }
 
-    private func saveAsFavorite() {
-        var request = buildRequest()
-        request.rating = 5
-        onFavorite(request)
-    }
-
     private func buildRequest() -> CreateWineRequest {
         let varieties = grapeVarieties
             .split(separator: ",")
@@ -303,7 +308,7 @@ struct ScanReviewView: View {
             scanResult: mockScanResult,
             imageData: mockImageData,
             onSave: { _ in },
-            onFavorite: { _ in },
+            onFavorite: { _, _, _, _ in },
             onRecommend: { _, _, _ in },
             onCancel: {}
         )
@@ -333,7 +338,7 @@ struct ScanReviewView: View {
             imageData: Data(),
             isSaving: true,
             onSave: { _ in },
-            onFavorite: { _ in },
+            onFavorite: { _, _, _, _ in },
             onRecommend: { _, _, _ in },
             onCancel: {}
         )

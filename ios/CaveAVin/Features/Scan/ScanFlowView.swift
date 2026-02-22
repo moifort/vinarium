@@ -106,8 +106,8 @@ struct ScanFlowView: View {
                 NavigationStack {
                     ScanReviewView(scanResult: result, imageData: imageData, isSaving: viewModel.isSaving, onSave: { request in
                         viewModel.saveWine(request)
-                    }, onFavorite: { request in
-                        viewModel.saveAsFavorite(request)
+                    }, onFavorite: { request, date, contacts, notes in
+                        viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
                     }, onRecommend: { request, recommenderName, comment in
                         viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
                     }, onCancel: {

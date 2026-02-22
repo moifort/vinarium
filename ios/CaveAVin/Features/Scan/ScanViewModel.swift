@@ -48,14 +48,19 @@ final class ScanViewModel {
         }
     }
 
-    func saveAsFavorite(_ request: CreateWineRequest) {
+    func saveAsFavorite(_ request: CreateWineRequest, consumedDate: Date, contacts: [String], tastingNotes: String?) {
         guard !isSaving else { return }
         isSaving = true
         error = nil
 
         Task {
             do {
-                _ = try await WineAPI.create(request)
+                var enrichedRequest = request
+                let formatter = ISO8601DateFormatter()
+                enrichedRequest.consumedDate = formatter.string(from: consumedDate)
+                enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
+                enrichedRequest.tastingNotes = tastingNotes
+                _ = try await WineAPI.create(enrichedRequest)
                 self.step = .favoriteSaved
             } catch {
                 self.error = error.localizedDescription
