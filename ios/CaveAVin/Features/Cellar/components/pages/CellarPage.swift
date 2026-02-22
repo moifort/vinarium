@@ -12,62 +12,64 @@ struct CellarPage: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                Picker("Vue", selection: $viewModel.displayMode) {
-                    ForEach(CellarDisplayMode.allCases, id: \.self) { mode in
-                        Text(mode.rawValue).tag(mode)
+            Group {
+                if viewModel.isLoading && viewModel.bottles.isEmpty {
+                    ProgressView("Chargement...")
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let error = viewModel.error, viewModel.bottles.isEmpty {
+                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+                } else {
+                    switch viewModel.displayMode {
+                    case .cave:
+                        CaveBottleList(
+                            groups: viewModel.groupedRows.map { group in
+                                .init(
+                                    label: group.row,
+                                    items: group.items.map { item in
+                                        .init(
+                                            id: item.wine.id,
+                                            color: item.wine.color,
+                                            title: item.wine.name,
+                                            subtitle: item.wine.vintage.map { "\($0)" },
+                                            position: item.position
+                                        )
+                                    }
+                                )
+                            },
+                            onBottleTapped: { wineId in selectedWineId = wineId },
+                            onRemoveRequested: { wineId in
+                                wineForRemovalChoice = viewModel.groupedRows
+                                    .flatMap(\.items)
+                                    .first { $0.wine.id == wineId }?.wine
+                            }
+                        )
+                    case .journal:
+                        JournalEventList(
+                            events: viewModel.history.map { event in
+                                .init(
+                                    id: event.id,
+                                    date: event.date,
+                                    isEntry: event.type == .entry,
+                                    wineId: event.wineId,
+                                    title: event.wineName,
+                                    position: event.position
+                                )
+                            },
+                            onEventTapped: { wineId in selectedWineId = wineId }
+                        )
                     }
                 }
-                .pickerStyle(.segmented)
-                .padding()
-                .accessibilityIdentifier("cellar-segment")
-
-                Group {
-                    if viewModel.isLoading && viewModel.bottles.isEmpty {
-                        ProgressView("Chargement...")
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } else if let error = viewModel.error, viewModel.bottles.isEmpty {
-                        ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
-                    } else {
-                        switch viewModel.displayMode {
-                        case .cave:
-                            CaveBottleList(
-                                groups: viewModel.groupedRows.map { group in
-                                    .init(
-                                        label: group.row,
-                                        items: group.items.map { item in
-                                            .init(
-                                                id: item.wine.id,
-                                                color: item.wine.color,
-                                                title: item.wine.name,
-                                                subtitle: item.wine.vintage.map { "\($0)" },
-                                                position: item.position
-                                            )
-                                        }
-                                    )
-                                },
-                                onBottleTapped: { wineId in selectedWineId = wineId },
-                                onRemoveRequested: { wineId in
-                                    wineForRemovalChoice = viewModel.groupedRows
-                                        .flatMap(\.items)
-                                        .first { $0.wine.id == wineId }?.wine
-                                }
-                            )
-                        case .journal:
-                            JournalEventList(
-                                events: viewModel.history.map { event in
-                                    .init(
-                                        id: event.id,
-                                        date: event.date,
-                                        isEntry: event.type == .entry,
-                                        wineId: event.wineId,
-                                        title: event.wineName,
-                                        position: event.position
-                                    )
-                                },
-                                onEventTapped: { wineId in selectedWineId = wineId }
-                            )
+            }
+            .toolbar {
+                ToolbarItemGroup {
+                    ForEach(CellarDisplayMode.allCases) { mode in
+                        Button {
+                            viewModel.displayMode = mode
+                        } label: {
+                            Label(mode.label, systemImage: mode.icon)
                         }
+                        .tint(viewModel.displayMode == mode ? .accentColor : .primary)
+                        .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
                     }
                 }
             }

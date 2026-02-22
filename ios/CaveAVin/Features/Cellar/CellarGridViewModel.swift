@@ -1,8 +1,19 @@
 import Foundation
 
-enum CellarDisplayMode: String, CaseIterable {
+enum CellarDisplayMode: String, CaseIterable, Identifiable {
     case cave = "Cave"
     case journal = "Journal"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .cave: "cabinet"
+        case .journal: "clock"
+        }
+    }
+
+    var label: String { rawValue }
 }
 
 @MainActor @Observable

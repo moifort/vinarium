@@ -11,12 +11,12 @@ struct CellarPage {
     }
 
     func switchToCave() throws -> Self {
-        try app.segmentedControls["cellar-segment"].buttons["Cave"].tapOrFail()
+        try app.buttons["cellar-mode-Cave"].tapOrFail()
         return self
     }
 
     func switchToJournal() throws -> Self {
-        try app.segmentedControls["cellar-segment"].buttons["Journal"].tapOrFail()
+        try app.buttons["cellar-mode-Journal"].tapOrFail()
         return self
     }
 
