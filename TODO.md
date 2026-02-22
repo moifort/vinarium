@@ -12,5 +12,5 @@
 - [ ] ajouter la possibilité de gerer plusieurs cave
 - [ ] partager la cave a ces amis
 - [ ] filtrer par personne
-- [ ] Offert par apres un scan
+- [x] Offert par apres un scan
 

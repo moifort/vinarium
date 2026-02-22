@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { RecommendationCommand } from '~/domain/recommendation/command'
-import { RecommenderName } from '~/domain/recommendation/primitives'
+import { PersonName } from '~/domain/shared/primitives'
 import { WineId } from '~/domain/wine/primitives'
 import { WineQuery } from '~/domain/wine/query'
 
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const comment = body.comment ? z.string().max(1000).parse(body.comment) : undefined
   const recommendation = await RecommendationCommand.create({
     wineId: id,
-    recommenderName: body.recommenderName ? RecommenderName(body.recommenderName) : undefined,
+    recommenderName: body.recommenderName ? PersonName(body.recommenderName) : undefined,
     comment,
   })
   return { status: 200, data: recommendation }

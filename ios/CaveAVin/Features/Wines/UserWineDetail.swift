@@ -17,6 +17,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let drinkFrom: Int?
     let drinkUntil: Int?
     let notes: String?
+    let giftedBy: String?
     let createdAt: Date
     let updatedAt: Date
     let cellar: CellarInfo?

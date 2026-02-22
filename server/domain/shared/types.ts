@@ -6,3 +6,4 @@ export type Country = Brand<string, 'Country'>
 export type Region = Brand<string, 'Region'>
 export type Month = Brand<string, 'Month'>
 export type Count = Brand<number, 'Count'>
+export type PersonName = Brand<string, 'PersonName'>

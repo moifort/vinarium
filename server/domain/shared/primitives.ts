@@ -5,6 +5,7 @@ import type {
   Count as CountType,
   Eur as EurType,
   Month as MonthType,
+  PersonName as PersonNameType,
   Region as RegionType,
   Year as YearType,
 } from '~/domain/shared/types'
@@ -41,3 +42,8 @@ export const Month = (value: unknown) => {
 }
 
 export const Count = (value: number) => make<CountType>()(value)
+
+export const PersonName = (value: unknown) => {
+  const v = z.string().min(1).max(200).parse(value)
+  return make<PersonNameType>()(v)
+}

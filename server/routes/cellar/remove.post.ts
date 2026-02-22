@@ -1,6 +1,6 @@
 import { CellarCommand } from '~/domain/cellar/command'
 import { GiftCommand } from '~/domain/gift/command'
-import { RecipientName } from '~/domain/gift/primitives'
+import { PersonName } from '~/domain/shared/primitives'
 import { TastingCommand } from '~/domain/tasting/command'
 import { Rating } from '~/domain/tasting/primitives'
 import { WineId } from '~/domain/wine/primitives'
@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     await GiftCommand.giveTo({
       wineId,
       giftedDate: body.gift.giftedDate ? new Date(body.gift.giftedDate) : new Date(),
-      recipientName: body.gift.recipientName ? RecipientName(body.gift.recipientName) : undefined,
+      recipientName: body.gift.recipientName ? PersonName(body.gift.recipientName) : undefined,
     })
   } else if (body.consumedDate || body.rating != null || body.tastingNotes) {
     await TastingCommand.create({

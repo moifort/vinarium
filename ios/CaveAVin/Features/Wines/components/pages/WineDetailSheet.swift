@@ -154,6 +154,17 @@ struct WineDetailSheet: View {
                 WineGiftSection(giftedDate: formatted(gift.giftedDate), recipientName: gift.recipientName)
             }
 
+            if let giftedBy = detail.giftedBy {
+                Section("Offert par") {
+                    Label {
+                        Text(giftedBy)
+                    } icon: {
+                        Image(systemName: "gift")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+
             if let recommendation = detail.recommendation {
                 WineRecommendationSection(
                     recommenderName: recommendation.recommenderName,

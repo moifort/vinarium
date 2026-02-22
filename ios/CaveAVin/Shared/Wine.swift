@@ -63,6 +63,7 @@ struct Wine: Codable, Identifiable, Sendable {
     var drinkFrom: Int?
     var drinkUntil: Int?
     var notes: String?
+    var giftedBy: String?
     var rating: Int?
     var giftedTo: String?
     var recommendedBy: String?
@@ -87,6 +88,7 @@ struct CreateWineRequest: Encodable, Sendable {
     var drinkUntil: Int?
     var imageBase64: String?
     var notes: String?
+    var giftedBy: String?
     var rating: Int?
     var consumedDate: String?
     var tastingNotes: String?

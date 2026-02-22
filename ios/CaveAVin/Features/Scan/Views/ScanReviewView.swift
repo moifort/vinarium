@@ -23,6 +23,8 @@ struct ScanReviewView: View {
     @State private var estimatedPrice: String
     @State private var drinkFrom: String
     @State private var drinkUntil: String
+    @State private var giftedBy = ""
+    @State private var showGiftedByPicker = false
 
     init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) -> Void = { _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
@@ -53,6 +55,7 @@ struct ScanReviewView: View {
             originSection
             detailsSection
             gardeSection
+            giftedBySection
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -83,6 +86,11 @@ struct ScanReviewView: View {
                     save()
                 }
                 .accessibilityIdentifier("review-save-button")
+            }
+        }
+        .sheet(isPresented: $showGiftedByPicker) {
+            ContactPicker { name in
+                giftedBy = name
             }
         }
         .sheet(isPresented: $showFavorite) {
@@ -237,6 +245,27 @@ struct ScanReviewView: View {
         }
     }
 
+    private var giftedBySection: some View {
+        Section {
+            HStack {
+                Label("Offert par", systemImage: "gift")
+                TextField("Nom", text: $giftedBy)
+                    .textInputAutocapitalization(.words)
+                    .multilineTextAlignment(.trailing)
+                Button {
+                    showGiftedByPicker = true
+                } label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                }
+                .buttonStyle(.plain)
+            }
+        } header: {
+            Text("Cadeau")
+        }
+    }
+
     // MARK: - Actions
 
     private func save() {
@@ -262,7 +291,8 @@ struct ScanReviewView: View {
             purchasePrice: Double(estimatedPrice),
             drinkFrom: Int(drinkFrom),
             drinkUntil: Int(drinkUntil),
-            imageBase64: imageData.base64EncodedString()
+            imageBase64: imageData.base64EncodedString(),
+            giftedBy: giftedBy.isEmpty ? nil : giftedBy
         )
     }
 }

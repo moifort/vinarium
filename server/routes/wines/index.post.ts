@@ -1,4 +1,4 @@
-import { Country, Eur, Region, Year } from '~/domain/shared/primitives'
+import { Country, Eur, PersonName, Region, Year } from '~/domain/shared/primitives'
 import { TastingCommand } from '~/domain/tasting/command'
 import { Rating } from '~/domain/tasting/primitives'
 import { WineCommand } from '~/domain/wine/command'
@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
   if (body.drinkUntil != null) data.drinkUntil = Year(body.drinkUntil)
   if (body.imageBase64) data.imageBase64 = body.imageBase64
   if (body.notes) data.notes = body.notes
+  if (body.giftedBy) data.giftedBy = PersonName(body.giftedBy)
 
   const wine = await WineCommand.add(name, color, data)
 
