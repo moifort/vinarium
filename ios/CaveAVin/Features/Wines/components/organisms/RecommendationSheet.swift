@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct RecommendationSheet: View {
-    let onConfirm: (String?, String?) -> Void
+    let onConfirm: (String?, String?) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var recommenderName = ""
@@ -50,8 +50,8 @@ struct RecommendationSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Confirmer", systemImage: "checkmark") {
-                        onConfirm(
+                    AsyncToolbarButton(title: "Confirmer", systemImage: "checkmark") {
+                        await onConfirm(
                             recommenderName.isEmpty ? nil : recommenderName,
                             comment.isEmpty ? nil : comment
                         )
@@ -69,5 +69,5 @@ struct RecommendationSheet: View {
 }
 
 #Preview {
-    RecommendationSheet(onConfirm: { _, _ in })
+    RecommendationSheet { _, _ in }
 }

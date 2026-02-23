@@ -62,14 +62,10 @@ struct WineDetailSheet: View {
                             Label("Ajouter à la cave", systemImage: "plus")
                         }
                         
-                        Button {
-                            Task {
-                                try? await WineAPI.addToFavorites(id: detail.id)
-                                dismiss()
-                                onRemoved?()
-                            }
-                        } label: {
-                            Label("Ajouter aux favoris", systemImage: "heart")
+                        AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {
+                            try? await WineAPI.addToFavorites(id: detail.id)
+                            dismiss()
+                            onRemoved?()
                         }
                     }
                 }
@@ -187,34 +183,30 @@ struct WineDetailSheet: View {
         .sheet(isPresented: $showConsumption) {
             ConsumptionSheet { date, rating, notes, contacts in
                 let formatter = ISO8601DateFormatter()
-                Task {
-                    _ = try? await CellarAPI.remove(
-                        wineId: detail.id,
-                        consumedDate: formatter.string(from: date),
-                        rating: rating,
-                        tastingNotes: notes,
-                        contacts: contacts.isEmpty ? nil : contacts
-                    )
-                    showConsumption = false
-                    dismiss()
-                    onRemoved?()
-                }
+                _ = try? await CellarAPI.remove(
+                    wineId: detail.id,
+                    consumedDate: formatter.string(from: date),
+                    rating: rating,
+                    tastingNotes: notes,
+                    contacts: contacts.isEmpty ? nil : contacts
+                )
+                showConsumption = false
+                dismiss()
+                onRemoved?()
             }
             .presentationDetents([.height(550)])
         }
         .sheet(isPresented: $showGift) {
             GiftSheet { date, recipientName in
                 let formatter = ISO8601DateFormatter()
-                Task {
-                    _ = try? await CellarAPI.gift(
-                        wineId: detail.id,
-                        giftedDate: formatter.string(from: date),
-                        recipientName: recipientName
-                    )
-                    showGift = false
-                    dismiss()
-                    onRemoved?()
-                }
+                _ = try? await CellarAPI.gift(
+                    wineId: detail.id,
+                    giftedDate: formatter.string(from: date),
+                    recipientName: recipientName
+                )
+                showGift = false
+                dismiss()
+                onRemoved?()
             }
             .presentationDetents([.height(250)])
         }

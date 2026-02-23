@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ConsumptionSheet: View {
-    let onConfirm: (Date, Int?, String?, [String]) -> Void
+    let onConfirm: (Date, Int?, String?, [String]) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var consumedDate = Date()
@@ -75,8 +75,8 @@ struct ConsumptionSheet: View {
                     Button("Annuler", systemImage: "xmark") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Confirmer", systemImage: "checkmark") {
-                        onConfirm(
+                    AsyncToolbarButton(title: "Confirmer", systemImage: "checkmark") {
+                        await onConfirm(
                             consumedDate,
                             rating > 0 ? rating : nil,
                             tastingNotes.isEmpty ? nil : tastingNotes,
@@ -100,5 +100,5 @@ struct ConsumptionSheet: View {
 }
 
 #Preview {
-    ConsumptionSheet(onConfirm: { _, _, _, _ in })
+    ConsumptionSheet { _, _, _, _ in }
 }

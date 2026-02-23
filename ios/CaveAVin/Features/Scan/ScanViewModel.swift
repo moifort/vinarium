@@ -32,57 +32,48 @@ final class ScanViewModel {
         }
     }
 
-    func saveWine(_ request: CreateWineRequest) {
+    func saveWine(_ request: CreateWineRequest) async {
         guard !isSaving else { return }
         isSaving = true
         error = nil
-
-        Task {
-            do {
-                let wine = try await WineAPI.create(request)
-                self.step = .placing(wine)
-            } catch {
-                self.error = error.localizedDescription
-            }
-            self.isSaving = false
+        defer { isSaving = false }
+        do {
+            let wine = try await WineAPI.create(request)
+            step = .placing(wine)
+        } catch {
+            self.error = error.localizedDescription
         }
     }
 
-    func saveAsFavorite(_ request: CreateWineRequest, consumedDate: Date, contacts: [String], tastingNotes: String?) {
+    func saveAsFavorite(_ request: CreateWineRequest, consumedDate: Date, contacts: [String], tastingNotes: String?) async {
         guard !isSaving else { return }
         isSaving = true
         error = nil
-
-        Task {
-            do {
-                var enrichedRequest = request
-                let formatter = ISO8601DateFormatter()
-                enrichedRequest.consumedDate = formatter.string(from: consumedDate)
-                enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
-                enrichedRequest.tastingNotes = tastingNotes
-                _ = try await WineAPI.create(enrichedRequest)
-                self.step = .favoriteSaved
-            } catch {
-                self.error = error.localizedDescription
-            }
-            self.isSaving = false
+        defer { isSaving = false }
+        do {
+            var enrichedRequest = request
+            let formatter = ISO8601DateFormatter()
+            enrichedRequest.consumedDate = formatter.string(from: consumedDate)
+            enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
+            enrichedRequest.tastingNotes = tastingNotes
+            _ = try await WineAPI.create(enrichedRequest)
+            step = .favoriteSaved
+        } catch {
+            self.error = error.localizedDescription
         }
     }
 
-    func saveAsRecommendation(_ request: CreateWineRequest, recommenderName: String?, comment: String?) {
+    func saveAsRecommendation(_ request: CreateWineRequest, recommenderName: String?, comment: String?) async {
         guard !isSaving else { return }
         isSaving = true
         error = nil
-
-        Task {
-            do {
-                let wine = try await WineAPI.create(request)
-                try await RecommendationAPI.create(wineId: wine.id, recommenderName: recommenderName, comment: comment)
-                self.step = .recommendationSaved
-            } catch {
-                self.error = error.localizedDescription
-            }
-            self.isSaving = false
+        defer { isSaving = false }
+        do {
+            let wine = try await WineAPI.create(request)
+            try await RecommendationAPI.create(wineId: wine.id, recommenderName: recommenderName, comment: comment)
+            step = .recommendationSaved
+        } catch {
+            self.error = error.localizedDescription
         }
     }
 

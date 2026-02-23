@@ -3,10 +3,9 @@ import SwiftUI
 struct ScanReviewView: View {
     let scanResult: ScanResult
     let imageData: Data
-    let isSaving: Bool
-    let onSave: (CreateWineRequest) -> Void
-    let onFavorite: (CreateWineRequest, Date, [String], String?) -> Void
-    let onRecommend: (CreateWineRequest, String?, String?) -> Void
+    let onSave: (CreateWineRequest) async -> Void
+    let onFavorite: (CreateWineRequest, Date, [String], String?) async -> Void
+    let onRecommend: (CreateWineRequest, String?, String?) async -> Void
     let onCancel: () -> Void
 
     @State private var showFavorite = false
@@ -26,10 +25,9 @@ struct ScanReviewView: View {
     @State private var giftedBy = ""
     @State private var showGiftedByPicker = false
 
-    init(scanResult: ScanResult, imageData: Data, isSaving: Bool = false, onSave: @escaping (CreateWineRequest) -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) -> Void = { _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
+    init(scanResult: ScanResult, imageData: Data, onSave: @escaping (CreateWineRequest) async -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
-        self.isSaving = isSaving
         self.onSave = onSave
         self.onFavorite = onFavorite
         self.onRecommend = onRecommend
@@ -83,8 +81,8 @@ struct ScanReviewView: View {
             ToolbarSpacer(.fixed)
 
             ToolbarItemGroup(placement: .primaryAction) {
-                Button("Ajouter à la cave", systemImage: "plus") {
-                    save()
+                AsyncToolbarButton(title: "Ajouter à la cave", systemImage: "plus") {
+                    await onSave(buildRequest())
                 }
                 .accessibilityIdentifier("review-save-button")
             }
@@ -96,17 +94,17 @@ struct ScanReviewView: View {
         }
         .sheet(isPresented: $showFavorite) {
             FavoriteSheet { date, contacts, notes in
-                showFavorite = false
                 var request = buildRequest()
                 request.rating = 5
-                onFavorite(request, date, contacts, notes)
+                await onFavorite(request, date, contacts, notes)
+                showFavorite = false
             }
             .presentationDetents([.medium])
         }
         .sheet(isPresented: $showRecommendation) {
             RecommendationSheet { recommenderName, comment in
+                await onRecommend(buildRequest(), recommenderName, comment)
                 showRecommendation = false
-                onRecommend(buildRequest(), recommenderName, comment)
             }
             .presentationDetents([.medium])
         }
@@ -269,10 +267,6 @@ struct ScanReviewView: View {
 
     // MARK: - Actions
 
-    private func save() {
-        onSave(buildRequest())
-    }
-
     private func buildRequest() -> CreateWineRequest {
         let varieties = grapeVarieties
             .split(separator: ",")
@@ -337,36 +331,6 @@ struct ScanReviewView: View {
         ScanReviewView(
             scanResult: mockScanResult,
             imageData: mockImageData,
-            onSave: { _ in },
-            onFavorite: { _, _, _, _ in },
-            onRecommend: { _, _, _ in },
-            onCancel: {}
-        )
-    }
-}
-
-#Preview("Saving in progress") {
-    let mockScanResult = ScanResult(
-        name: "Pouilly-Fumé",
-        domain: "Domaine Didier Dagueneau",
-        vintage: 2021,
-        appellation: "Pouilly-Fumé",
-        region: "Loire",
-        country: "France",
-        color: .white,
-        grapeVarieties: ["Sauvignon Blanc"],
-        alcoholContent: 12.5,
-        classification: nil,
-        drinkFrom: 2022,
-        drinkUntil: 2028,
-        estimatedPrice: 45
-    )
-
-    NavigationStack {
-        ScanReviewView(
-            scanResult: mockScanResult,
-            imageData: Data(),
-            isSaving: true,
             onSave: { _ in },
             onFavorite: { _, _, _, _ in },
             onRecommend: { _, _, _ in },

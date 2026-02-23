@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct FavoriteSheet: View {
-    let onConfirm: (Date, [String], String?) -> Void
+    let onConfirm: (Date, [String], String?) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var consumedDate = Date()
@@ -73,8 +73,8 @@ struct FavoriteSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Confirmer", systemImage: "checkmark") {
-                        onConfirm(
+                    AsyncToolbarButton(title: "Confirmer", systemImage: "checkmark") {
+                        await onConfirm(
                             consumedDate,
                             contacts,
                             tastingNotes.isEmpty ? nil : tastingNotes
@@ -95,5 +95,5 @@ struct FavoriteSheet: View {
 }
 
 #Preview {
-    FavoriteSheet(onConfirm: { _, _, _ in })
+    FavoriteSheet { _, _, _ in }
 }

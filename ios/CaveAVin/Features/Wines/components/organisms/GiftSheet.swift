@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct GiftSheet: View {
-    let onConfirm: (Date, String?) -> Void
+    let onConfirm: (Date, String?) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var giftedDate = Date()
@@ -50,8 +50,8 @@ struct GiftSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Confirmer", systemImage: "checkmark") {
-                        onConfirm(
+                    AsyncToolbarButton(title: "Confirmer", systemImage: "checkmark") {
+                        await onConfirm(
                             giftedDate,
                             recipientName.isEmpty ? nil : recipientName
                         )
@@ -69,5 +69,5 @@ struct GiftSheet: View {
 }
 
 #Preview {
-    GiftSheet(onConfirm: { _, _ in })
+    GiftSheet { _, _ in }
 }

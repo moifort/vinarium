@@ -104,15 +104,18 @@ struct ScanFlowView: View {
 
             case .review(let result, let imageData):
                 NavigationStack {
-                    ScanReviewView(scanResult: result, imageData: imageData, isSaving: viewModel.isSaving, onSave: { request in
-                        viewModel.saveWine(request)
-                    }, onFavorite: { request, date, contacts, notes in
-                        viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
-                    }, onRecommend: { request, recommenderName, comment in
-                        viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
-                    }, onCancel: {
-                        viewModel.reset()
-                    })
+                    ScanReviewView(
+                        scanResult: result,
+                        imageData: imageData,
+                        onSave: { request in await viewModel.saveWine(request) },
+                        onFavorite: { request, date, contacts, notes in
+                            await viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
+                        },
+                        onRecommend: { request, recommenderName, comment in
+                            await viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
+                        },
+                        onCancel: { viewModel.reset() }
+                    )
                 }
 
             case .placing(let wine):
