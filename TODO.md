@@ -1,16 +1,13 @@
 # Feature Ideas
 
-- [ ] est ce qu'on peut utiliser l'ia native d'ios pour scanner les bouteilles ? et pour faire des propositions de plats ?
+- [ ] changer de place une bouteille
 - [ ] design widgets
-- [ ] i18n
 - [ ] Partager le vin a un ami
 - [ ] generer une bouteille a partir de l'etiquette
-- [ ] rechercher partout avec filtre intellige
 - [ ] migrer sur Firebase
 - [ ] ajouter le login apple
 - [ ] ajouter la configuration de la cave avec
+- [ ] rechercher partout avec filtre intellige
 - [ ] ajouter la possibilité de gerer plusieurs cave
+- [ ] i18n
 - [ ] partager la cave a ces amis
-- [ ] filtrer par personne
-- [x] Offert par apres un scan
-
