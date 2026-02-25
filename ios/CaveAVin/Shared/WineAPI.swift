@@ -35,6 +35,11 @@ enum WineAPI {
         return response.data
     }
 
+    static func update(id: String, _ request: UpdateWineRequest) async throws -> Wine {
+        let response: APIResponse<Wine> = try await APIClient.shared.put("/wines/\(id)", body: request)
+        return response.data
+    }
+
     static func delete(id: String) async throws {
         try await APIClient.shared.delete("/wines/\(id)")
     }

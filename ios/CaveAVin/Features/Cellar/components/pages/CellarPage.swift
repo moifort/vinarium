@@ -86,9 +86,11 @@ struct CellarPage: View {
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
-                WineDetailSheet(wineId: wrapper.id) {
-                    Task { await viewModel.load() }
-                }
+                WineDetailSheet(
+                    wineId: wrapper.id,
+                    onRemoved: { Task { await viewModel.load() } },
+                    onUpdated: { Task { await viewModel.load() } }
+                )
             }
             .sheet(item: $wineForConsumption, onDismiss: {
                 Task { await viewModel.load() }

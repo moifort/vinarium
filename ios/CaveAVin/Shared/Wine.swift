@@ -96,6 +96,23 @@ struct CreateWineRequest: Encodable, Sendable {
     var contacts: [String]?
 }
 
+struct UpdateWineRequest: Encodable, Sendable {
+    var name: String?
+    var color: WineColor?
+    var domain: String?
+    var vintage: Int?
+    var appellation: String?
+    var region: String?
+    var country: String?
+    var grapeVarieties: [String]?
+    var classification: String?
+    var purchasePrice: Double?
+    var purchaseDate: String?
+    var drinkFrom: Int?
+    var drinkUntil: Int?
+    var notes: String?
+}
+
 struct APIResponse<T: Decodable & Sendable>: Decodable, Sendable {
     let status: Int
     let data: T

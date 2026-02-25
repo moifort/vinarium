@@ -3,6 +3,7 @@ import SwiftUI
 struct WineDetailSheet: View {
     let wineId: String
     var onRemoved: (() -> Void)?
+    var onUpdated: (() -> Void)?
 
     @Environment(\.dismiss) private var dismiss
     @State private var detail: UserWineDetail?
@@ -14,13 +15,37 @@ struct WineDetailSheet: View {
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
 
+    // MARK: - Edit state
+
+    @State private var isEditing = false
+    @State private var isSaving = false
+    @State private var saveError: String?
+    @State private var editName = ""
+    @State private var editColor: WineColor = .red
+    @State private var editDomain = ""
+    @State private var editVintage = ""
+    @State private var editAppellation = ""
+    @State private var editRegion = ""
+    @State private var editCountry = ""
+    @State private var editClassification = ""
+    @State private var editGrapeVarieties = ""
+    @State private var editPurchasePrice = ""
+    @State private var editPurchaseDate = ""
+    @State private var editDrinkFrom = ""
+    @State private var editDrinkUntil = ""
+    @State private var editNotes = ""
+
     var body: some View {
         NavigationStack {
             Group {
                 if isLoading {
                     ProgressView()
                 } else if let detail {
-                    wineContent(detail)
+                    if isEditing {
+                        editContent
+                    } else {
+                        wineContent(detail)
+                    }
                 } else if let error {
                     ContentUnavailableView(
                         "Erreur",
@@ -31,75 +56,254 @@ struct WineDetailSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Fermer", systemImage: "xmark") { dismiss() }
+                if isEditing {
+                    editToolbar
+                } else {
+                    readToolbar
                 }
-                if let cellar = detail?.cellar, cellar.dateOut == nil {
-                    ToolbarItemGroup {
-                        Button("Sortir", systemImage: "arrow.up") {
-                            showRemovalChoice = true
-                        }
-                        .accessibilityIdentifier("remove-from-cellar-button")
-                        .confirmationDialog(
-                            "Sortir de la cave",
-                            isPresented: $showRemovalChoice,
-                            titleVisibility: .visible
-                        ) {
-                            Button("Consommer") { showConsumption = true }
-                                .accessibilityIdentifier("choice-consume")
-                            Button("Offrir") { showGift = true }
-                                .accessibilityIdentifier("choice-gift")
-                        } message: {
-                            Text("Comment souhaitez-vous sortir ce vin ?")
-                        }
-                    }
-                }
-                if let detail, detail.cellar == nil, detail.recommendation != nil {
-                    ToolbarItemGroup {
-                        Button {
-                            showPlacement = true
-                        } label: {
-                            Label("Ajouter à la cave", systemImage: "plus")
-                        }
-                        
-                        AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {
-                            try? await WineAPI.addToFavorites(id: detail.id)
-                            dismiss()
-                            onRemoved?()
-                        }
-                    }
-                }
-                ToolbarSpacer(.fixed)
-                ToolbarItem(placement: .destructiveAction) {
-                    Button(role: .destructive) {
-                        showDeleteConfirmation = true
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .confirmationDialog(
-                        "Supprimer ce vin ?",
-                        isPresented: $showDeleteConfirmation,
-                        titleVisibility: .visible,
-                        presenting: detail
-                    ) { detail in
-                        Button("Supprimer", role: .destructive) {
-                            Task {
-                                try? await WineAPI.delete(id: detail.id)
-                                dismiss()
-                                onRemoved?()
-                            }
-                        }
-                        .accessibilityIdentifier("choice-delete")
-                    } message: { _ in
-                        Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
-                    }
-                    .accessibilityIdentifier("delete-wine-button")
-                }
-                
             }
             .task { await loadData() }
         }
     }
+
+    // MARK: - Toolbars
+
+    @ToolbarContentBuilder
+    private var editToolbar: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button("Annuler", systemImage: "xmark") {
+                isEditing = false
+            }
+            .disabled(isSaving)
+        }
+        ToolbarItem(placement: .confirmationAction) {
+            if isSaving {
+                ProgressView()
+            } else {
+                Button("Enregistrer", systemImage: "checkmark") {
+                    Task { await saveChanges() }
+                }
+                .disabled(editName.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var readToolbar: some ToolbarContent {
+        ToolbarItem(placement: .cancellationAction) {
+            Button("Fermer", systemImage: "xmark") { dismiss() }
+        }
+        if detail != nil {
+            ToolbarItemGroup {
+                Button("Modifier", systemImage: "pencil") {
+                    if let detail {
+                        populateEditFields(from: detail)
+                        isEditing = true
+                    }
+                }
+            }
+        }
+        if let cellar = detail?.cellar, cellar.dateOut == nil {
+            ToolbarItemGroup {
+                Button("Sortir", systemImage: "arrow.up") {
+                    showRemovalChoice = true
+                }
+                .accessibilityIdentifier("remove-from-cellar-button")
+                .confirmationDialog(
+                    "Sortir de la cave",
+                    isPresented: $showRemovalChoice,
+                    titleVisibility: .visible
+                ) {
+                    Button("Consommer") { showConsumption = true }
+                        .accessibilityIdentifier("choice-consume")
+                    Button("Offrir") { showGift = true }
+                        .accessibilityIdentifier("choice-gift")
+                } message: {
+                    Text("Comment souhaitez-vous sortir ce vin ?")
+                }
+            }
+        }
+        if let detail, detail.cellar == nil, detail.recommendation != nil {
+            ToolbarItemGroup {
+                Button {
+                    showPlacement = true
+                } label: {
+                    Label("Ajouter à la cave", systemImage: "plus")
+                }
+
+                AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {
+                    try? await WineAPI.addToFavorites(id: detail.id)
+                    dismiss()
+                    onRemoved?()
+                }
+            }
+        }
+        ToolbarSpacer(.fixed)
+        ToolbarItem(placement: .destructiveAction) {
+            Button(role: .destructive) {
+                showDeleteConfirmation = true
+            } label: {
+                Image(systemName: "trash")
+            }
+            .confirmationDialog(
+                "Supprimer ce vin ?",
+                isPresented: $showDeleteConfirmation,
+                titleVisibility: .visible,
+                presenting: detail
+            ) { detail in
+                Button("Supprimer", role: .destructive) {
+                    Task {
+                        try? await WineAPI.delete(id: detail.id)
+                        dismiss()
+                        onRemoved?()
+                    }
+                }
+                .accessibilityIdentifier("choice-delete")
+            } message: { _ in
+                Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
+            }
+            .accessibilityIdentifier("delete-wine-button")
+        }
+    }
+
+    // MARK: - Edit content
+
+    private var editContent: some View {
+        Form {
+            Section {
+                LabeledContent {
+                    TextField("Nom du vin", text: $editName)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Nom", systemImage: "wineglass")
+                }
+
+                Picker(selection: $editColor) {
+                    ForEach(WineColor.allCases) { c in
+                        Text(c.label).tag(c)
+                    }
+                } label: {
+                    Label("Couleur", systemImage: "paintpalette")
+                }
+
+                LabeledContent {
+                    TextField("Domaine", text: $editDomain)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Domaine", systemImage: "building.2")
+                }
+
+                LabeledContent {
+                    TextField("Année", text: $editVintage)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Millésime", systemImage: "calendar")
+                }
+            } header: {
+                Text("Informations principales")
+            }
+
+            Section {
+                LabeledContent {
+                    TextField("Appellation", text: $editAppellation)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Appellation", systemImage: "seal")
+                }
+
+                LabeledContent {
+                    TextField("Région", text: $editRegion)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Région", systemImage: "map")
+                }
+
+                LabeledContent {
+                    TextField("Pays", text: $editCountry)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Pays", systemImage: "globe.europe.africa")
+                }
+
+                LabeledContent {
+                    TextField("Classification", text: $editClassification)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Classification", systemImage: "rosette")
+                }
+            } header: {
+                Text("Origine")
+            }
+
+            Section {
+                LabeledContent {
+                    TextField("Cépages", text: $editGrapeVarieties)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Cépages", systemImage: "leaf")
+                }
+
+                LabeledContent {
+                    HStack(spacing: 4) {
+                        TextField("0", text: $editPurchasePrice)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                        Text("€")
+                            .foregroundStyle(.secondary)
+                    }
+                } label: {
+                    Label("Prix", systemImage: "eurosign.circle")
+                }
+
+                LabeledContent {
+                    TextField("Date d'achat", text: $editPurchaseDate)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Date d'achat", systemImage: "cart")
+                }
+            } header: {
+                Text("Détails")
+            }
+
+            Section {
+                LabeledContent {
+                    TextField("Année", text: $editDrinkFrom)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("À partir de", systemImage: "hourglass.bottomhalf.filled")
+                }
+
+                LabeledContent {
+                    TextField("Année", text: $editDrinkUntil)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
+                }
+            } header: {
+                Text("Garde")
+            }
+
+            Section {
+                TextField("Notes", text: $editNotes, axis: .vertical)
+                    .lineLimit(3...8)
+            } header: {
+                Text("Notes")
+            }
+        }
+        .alert("Erreur", isPresented: Binding(
+            get: { saveError != nil },
+            set: { if !$0 { saveError = nil } }
+        )) {
+            Button("OK") { saveError = nil }
+        } message: {
+            Text(saveError ?? "")
+        }
+    }
+
+    // MARK: - Read content
 
     @ViewBuilder
     private func wineContent(_ detail: UserWineDetail) -> some View {
@@ -252,6 +456,60 @@ struct WineDetailSheet: View {
             self.error = error.localizedDescription
             isLoading = false
         }
+    }
+
+    private func populateEditFields(from detail: UserWineDetail) {
+        editName = detail.name
+        editColor = detail.color
+        editDomain = detail.domain ?? ""
+        editVintage = detail.vintage.map(String.init) ?? ""
+        editAppellation = detail.appellation ?? ""
+        editRegion = detail.region ?? ""
+        editCountry = detail.country ?? ""
+        editClassification = detail.classification ?? ""
+        editGrapeVarieties = detail.grapeVarieties.joined(separator: ", ")
+        editPurchasePrice = detail.purchasePrice.map { String(format: "%.0f", $0) } ?? ""
+        editPurchaseDate = detail.purchaseDate ?? ""
+        editDrinkFrom = detail.drinkFrom.map(String.init) ?? ""
+        editDrinkUntil = detail.drinkUntil.map(String.init) ?? ""
+        editNotes = detail.notes ?? ""
+    }
+
+    private func buildUpdateRequest() -> UpdateWineRequest {
+        let varieties = editGrapeVarieties
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        return UpdateWineRequest(
+            name: editName,
+            color: editColor,
+            domain: editDomain.isEmpty ? nil : editDomain,
+            vintage: Int(editVintage),
+            appellation: editAppellation.isEmpty ? nil : editAppellation,
+            region: editRegion.isEmpty ? nil : editRegion,
+            country: editCountry.isEmpty ? nil : editCountry,
+            grapeVarieties: varieties.isEmpty ? nil : varieties,
+            classification: editClassification.isEmpty ? nil : editClassification,
+            purchasePrice: Double(editPurchasePrice),
+            purchaseDate: editPurchaseDate.isEmpty ? nil : editPurchaseDate,
+            drinkFrom: Int(editDrinkFrom),
+            drinkUntil: Int(editDrinkUntil),
+            notes: editNotes.isEmpty ? nil : editNotes
+        )
+    }
+
+    private func saveChanges() async {
+        isSaving = true
+        do {
+            _ = try await WineAPI.update(id: wineId, buildUpdateRequest())
+            detail = try await WineAPI.getDetail(id: wineId)
+            isEditing = false
+            onUpdated?()
+        } catch {
+            saveError = error.localizedDescription
+        }
+        isSaving = false
     }
 }
 
