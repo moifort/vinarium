@@ -110,6 +110,7 @@ struct UpdateWineRequest: Encodable, Sendable {
     var purchaseDate: String?
     var drinkFrom: Int?
     var drinkUntil: Int?
+    var giftedBy: String?
     var notes: String?
 }
 

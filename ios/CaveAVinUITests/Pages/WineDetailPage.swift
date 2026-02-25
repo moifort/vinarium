@@ -50,6 +50,7 @@ struct WineDetailPage {
     }
 
     func tapDelete() throws {
+        try app.buttons["wine-detail-menu"].tapOrFail()
         try app.buttons["delete-wine-button"].tapOrFail()
         try app.buttons["choice-delete"].firstMatch.tapOrFail()
     }

@@ -30,9 +30,11 @@ struct WineDetailSheet: View {
     @State private var editClassification = ""
     @State private var editGrapeVarieties = ""
     @State private var editPurchasePrice = ""
-    @State private var editPurchaseDate = ""
+    @State private var editPurchaseDate: Date?
     @State private var editDrinkFrom = ""
     @State private var editDrinkUntil = ""
+    @State private var editGiftedBy = ""
+    @State private var showGiftedByPicker = false
     @State private var editNotes = ""
 
     var body: some View {
@@ -93,16 +95,6 @@ struct WineDetailSheet: View {
         ToolbarItem(placement: .cancellationAction) {
             Button("Fermer", systemImage: "xmark") { dismiss() }
         }
-        if detail != nil {
-            ToolbarItemGroup {
-                Button("Modifier", systemImage: "pencil") {
-                    if let detail {
-                        populateEditFields(from: detail)
-                        isEditing = true
-                    }
-                }
-            }
-        }
         if let cellar = detail?.cellar, cellar.dateOut == nil {
             ToolbarItemGroup {
                 Button("Sortir", systemImage: "arrow.up") {
@@ -138,31 +130,41 @@ struct WineDetailSheet: View {
                 }
             }
         }
-        ToolbarSpacer(.fixed)
-        ToolbarItem(placement: .destructiveAction) {
-            Button(role: .destructive) {
-                showDeleteConfirmation = true
-            } label: {
-                Image(systemName: "trash")
-            }
-            .confirmationDialog(
-                "Supprimer ce vin ?",
-                isPresented: $showDeleteConfirmation,
-                titleVisibility: .visible,
-                presenting: detail
-            ) { detail in
-                Button("Supprimer", role: .destructive) {
-                    Task {
-                        try? await WineAPI.delete(id: detail.id)
-                        dismiss()
-                        onRemoved?()
+        if detail != nil {
+            ToolbarItemGroup {
+                Menu {
+                    Button("Modifier", systemImage: "pencil") {
+                        if let detail {
+                            populateEditFields(from: detail)
+                            isEditing = true
+                        }
                     }
+                    Button("Supprimer", systemImage: "trash", role: .destructive) {
+                        showDeleteConfirmation = true
+                    }
+                    .accessibilityIdentifier("delete-wine-button")
+                } label: {
+                    Image(systemName: "ellipsis")
                 }
-                .accessibilityIdentifier("choice-delete")
-            } message: { _ in
-                Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
+                .accessibilityIdentifier("wine-detail-menu")
+                .confirmationDialog(
+                    "Supprimer ce vin ?",
+                    isPresented: $showDeleteConfirmation,
+                    titleVisibility: .visible,
+                    presenting: detail
+                ) { detail in
+                    Button("Supprimer", role: .destructive) {
+                        Task {
+                            try? await WineAPI.delete(id: detail.id)
+                            dismiss()
+                            onRemoved?()
+                        }
+                    }
+                    .accessibilityIdentifier("choice-delete")
+                } message: { _ in
+                    Text("Cette action est irréversible. Le vin sera supprimé de votre collection, de la cave et de toutes les données associées.")
+                }
             }
-            .accessibilityIdentifier("delete-wine-button")
         }
     }
 
@@ -257,8 +259,23 @@ struct WineDetailSheet: View {
                 }
 
                 LabeledContent {
-                    TextField("Date d'achat", text: $editPurchaseDate)
-                        .multilineTextAlignment(.trailing)
+                    if let date = Binding($editPurchaseDate) {
+                        HStack {
+                            DatePicker("", selection: date, in: ...Date(), displayedComponents: .date)
+                                .labelsHidden()
+                            Button {
+                                editPurchaseDate = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    } else {
+                        Button("Ajouter") {
+                            editPurchaseDate = Date()
+                        }
+                    }
                 } label: {
                     Label("Date d'achat", systemImage: "cart")
                 }
@@ -287,6 +304,25 @@ struct WineDetailSheet: View {
             }
 
             Section {
+                HStack {
+                    Label("Offert par", systemImage: "gift")
+                    TextField("Nom", text: $editGiftedBy)
+                        .textInputAutocapitalization(.words)
+                        .multilineTextAlignment(.trailing)
+                    Button {
+                        showGiftedByPicker = true
+                    } label: {
+                        Image(systemName: "person.crop.circle")
+                            .font(.title2)
+                            .foregroundStyle(.blue)
+                    }
+                    .buttonStyle(.plain)
+                }
+            } header: {
+                Text("Cadeau")
+            }
+
+            Section {
                 TextField("Notes", text: $editNotes, axis: .vertical)
                     .lineLimit(3...8)
             } header: {
@@ -300,6 +336,9 @@ struct WineDetailSheet: View {
             Button("OK") { saveError = nil }
         } message: {
             Text(saveError ?? "")
+        }
+        .sheet(isPresented: $showGiftedByPicker) {
+            ContactPicker { editGiftedBy = $0 }
         }
     }
 
@@ -469,9 +508,15 @@ struct WineDetailSheet: View {
         editClassification = detail.classification ?? ""
         editGrapeVarieties = detail.grapeVarieties.joined(separator: ", ")
         editPurchasePrice = detail.purchasePrice.map { String(format: "%.0f", $0) } ?? ""
-        editPurchaseDate = detail.purchaseDate ?? ""
+        if let dateString = detail.purchaseDate {
+            let formatter = ISO8601DateFormatter()
+            editPurchaseDate = formatter.date(from: dateString)
+        } else {
+            editPurchaseDate = nil
+        }
         editDrinkFrom = detail.drinkFrom.map(String.init) ?? ""
         editDrinkUntil = detail.drinkUntil.map(String.init) ?? ""
+        editGiftedBy = detail.giftedBy ?? ""
         editNotes = detail.notes ?? ""
     }
 
@@ -492,9 +537,10 @@ struct WineDetailSheet: View {
             grapeVarieties: varieties.isEmpty ? nil : varieties,
             classification: editClassification.isEmpty ? nil : editClassification,
             purchasePrice: Double(editPurchasePrice),
-            purchaseDate: editPurchaseDate.isEmpty ? nil : editPurchaseDate,
+            purchaseDate: editPurchaseDate.map { ISO8601DateFormatter().string(from: $0) },
             drinkFrom: Int(editDrinkFrom),
             drinkUntil: Int(editDrinkUntil),
+            giftedBy: editGiftedBy.isEmpty ? nil : editGiftedBy,
             notes: editNotes.isEmpty ? nil : editNotes
         )
     }
