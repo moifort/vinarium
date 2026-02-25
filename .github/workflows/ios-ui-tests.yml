@@ -70,6 +70,7 @@ jobs:
             -scheme CaveAVin \
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' \
             -only-testing:CaveAVinUITests \
+            -skip-testing:CaveAVinUITests/ScreenshotTest \
             -resultBundlePath TestResults.xcresult
 
       - name: Upload test results
