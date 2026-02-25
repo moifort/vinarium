@@ -38,48 +38,54 @@ export namespace Scan {
           {
             name: 'extract_wine_info',
             description:
-              'Extract structured wine information from a wine label image. Estimate drinkFrom/drinkUntil and market price based on wine type, vintage, appellation, and classification.',
+              "Extraire les informations structurées d'une étiquette de vin. Estimer drinkFrom/drinkUntil et le prix du marché. Toutes les valeurs textuelles doivent être en français.",
             input_schema: {
               type: 'object',
               properties: {
-                name: { type: 'string', description: 'Wine name as shown on label' },
+                name: { type: 'string', description: "Nom du vin tel qu'indiqué sur l'étiquette" },
                 domain: {
                   type: ['string', 'null'],
-                  description: 'Wine domain/producer/château',
+                  description: 'Domaine/producteur/château',
                 },
-                vintage: { type: ['integer', 'null'], description: 'Vintage year' },
+                vintage: { type: ['integer', 'null'], description: 'Année du millésime' },
                 appellation: {
                   type: ['string', 'null'],
-                  description: 'Wine appellation (e.g. Bordeaux, Bourgogne)',
+                  description: 'Appellation (ex : Bordeaux, Bourgogne)',
                 },
-                region: { type: ['string', 'null'], description: 'Wine region' },
-                country: { type: ['string', 'null'], description: 'Country of origin' },
+                region: {
+                  type: ['string', 'null'],
+                  description: 'Région viticole (en français)',
+                },
+                country: {
+                  type: ['string', 'null'],
+                  description: "Pays d'origine (en français, ex : France, Espagne, Italie)",
+                },
                 color: {
                   type: 'string',
                   enum: ['red', 'white', 'rosé', 'sparkling', 'sweet'],
-                  description: 'Wine color/type',
+                  description: 'Couleur/type du vin',
                 },
                 grapeVarieties: {
                   type: 'array',
                   items: { type: 'string' },
-                  description: 'Grape varieties if mentioned',
+                  description: 'Cépages mentionnés (en français)',
                 },
                 classification: {
                   type: ['string', 'null'],
-                  description: 'Classification (e.g. Grand Cru, Premier Cru, AOC, AOP, IGP)',
+                  description: 'Classification (ex : Grand Cru, Premier Cru, AOC, AOP, IGP)',
                 },
                 drinkFrom: {
                   type: ['integer', 'null'],
-                  description: 'Estimated year from which the wine can be enjoyed',
+                  description: 'Année estimée à partir de laquelle le vin peut être apprécié',
                 },
                 drinkUntil: {
                   type: ['integer', 'null'],
-                  description: 'Estimated year until which the wine should be consumed',
+                  description: "Année estimée jusqu'à laquelle le vin devrait être consommé",
                 },
                 estimatedPrice: {
                   type: ['number', 'null'],
                   description:
-                    'Estimated market price in euros based on wine characteristics, vintage, appellation, classification, and producer reputation',
+                    "Prix estimé en euros basé sur les caractéristiques, le millésime, l'appellation, la classification et la réputation du producteur",
                 },
               },
               required: ['name', 'color'],
@@ -97,7 +103,7 @@ export namespace Scan {
               },
               {
                 type: 'text',
-                text: "Analyze this wine label image and extract all visible information. For drinkFrom/drinkUntil, estimate based on the wine's type, vintage, region, and classification. For estimatedPrice, estimate the current market price in euros based on the producer, appellation, classification, and vintage. Use the extract_wine_info tool to return structured data.",
+                text: "Analyse cette image d'étiquette de vin et extrais toutes les informations visibles. Pour drinkFrom/drinkUntil, estime en fonction du type de vin, du millésime, de la région et de la classification. Pour estimatedPrice, estime le prix actuel du marché en euros en fonction du producteur, de l'appellation, de la classification et du millésime. Toutes les valeurs textuelles (nom, domaine, région, pays, cépages, appellation, classification) doivent être en français. Utilise l'outil extract_wine_info pour retourner les données structurées.",
               },
             ],
           },
@@ -144,6 +150,7 @@ Donne-moi les informations suivantes au format JSON strict (sans markdown, juste
   "appellation": string ou null (appellation)
 }
 
+Toutes les valeurs textuelles doivent être en français (noms de pays, régions, cépages, etc.).
 Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves pas une information, mets null.`
 
     const response = await $fetch<{
