@@ -5,6 +5,7 @@ export default defineNitroConfig({
     anthropicApiKey: '',
     googleApiKey: '',
     apiToken: '',
+    sentryDsn: '',
   },
   storage: {
     wines: { driver: 'fs', base: './.data/db/wines' },

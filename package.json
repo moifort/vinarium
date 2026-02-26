@@ -17,6 +17,7 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
+    "@sentry/bun": "10.40.0",
     "lodash-es": "4.17.23",
     "ts-pattern": "5.9.0",
     "zod": "4.3.6"
