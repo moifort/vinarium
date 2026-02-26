@@ -214,7 +214,7 @@ final class WineListViewModel {
             )
             if !wines.isEmpty { hasWines = true }
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
         loadedFilterKey = filterKey
         isLoading = false

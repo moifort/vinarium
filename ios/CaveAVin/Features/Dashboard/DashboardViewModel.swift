@@ -12,7 +12,7 @@ final class DashboardViewModel {
         do {
             data = try await DashboardAPI.getData()
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
         isLoading = false
     }

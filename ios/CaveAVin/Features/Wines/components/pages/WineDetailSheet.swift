@@ -492,7 +492,7 @@ struct WineDetailSheet: View {
             detail = try await WineAPI.getDetail(id: wineId)
             isLoading = false
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
             isLoading = false
         }
     }
@@ -553,7 +553,7 @@ struct WineDetailSheet: View {
             isEditing = false
             onUpdated?()
         } catch {
-            saveError = error.localizedDescription
+            saveError = reportError(error)
         }
         isSaving = false
     }

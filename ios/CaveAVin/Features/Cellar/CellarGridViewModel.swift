@@ -61,7 +61,7 @@ final class CellarGridViewModel {
             bottles = b
             history = h
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
         isLoading = false
     }

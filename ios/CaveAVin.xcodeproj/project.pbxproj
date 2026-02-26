@@ -6,6 +6,10 @@
 	objectVersion = 71;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BF0E01212F5072C10074B393 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01222F5072C10074B393 /* Sentry */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E20000010000000000000001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -15,10 +19,6 @@
 			remoteInfo = CaveAVin;
 		};
 /* End PBXContainerItemProxy section */
-
-/* Begin PBXBuildFile section */
-		BF0E01212F5072C10074B393 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01222F5072C10074B393 /* Sentry */; };
-/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CaveAVin.xctestplan; sourceTree = "<group>"; };

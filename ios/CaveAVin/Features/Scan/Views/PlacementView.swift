@@ -130,7 +130,7 @@ struct PlacementView: View {
             suggestedCol = s.col
             isLoading = false
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
             isLoading = false
         }
     }
@@ -145,7 +145,7 @@ struct PlacementView: View {
                 try await CellarAPI.place(wineId: wine.id, row: rowStr, col: col)
                 onPlaced(position)
             } catch {
-                self.error = error.localizedDescription
+                self.error = reportError(error)
             }
             isPlacing = false
         }

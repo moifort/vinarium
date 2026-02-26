@@ -26,7 +26,7 @@ final class ScanViewModel {
                 let result = try await WineAPI.scan(imageData: imageData)
                 self.step = .review(result, imageData)
             } catch {
-                self.error = error.localizedDescription
+                self.error = reportError(error)
                 self.step = .camera
             }
         }
@@ -41,7 +41,7 @@ final class ScanViewModel {
             let wine = try await WineAPI.create(request)
             step = .placing(wine)
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
     }
 
@@ -59,7 +59,7 @@ final class ScanViewModel {
             _ = try await WineAPI.create(enrichedRequest)
             step = .favoriteSaved
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
     }
 
@@ -73,7 +73,7 @@ final class ScanViewModel {
             try await RecommendationAPI.create(wineId: wine.id, recommenderName: recommenderName, comment: comment)
             step = .recommendationSaved
         } catch {
-            self.error = error.localizedDescription
+            self.error = reportError(error)
         }
     }
 
