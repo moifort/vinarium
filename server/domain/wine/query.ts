@@ -84,9 +84,10 @@ export namespace WineQuery {
           }
         : await cellarFromJournal(wine.id)
 
-    const { imageBase64, ...wineWithoutImage } = wine
+    const { imageBase64, grapeVarieties, ...wineWithoutImage } = wine
     return {
       ...wineWithoutImage,
+      grapeVarieties: grapeVarieties ?? [],
       cellar,
       history,
       consumption:
