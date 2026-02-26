@@ -1,4 +1,5 @@
 import Foundation
+import Sentry
 
 final class APIClient: Sendable {
     static let shared = APIClient()
@@ -45,9 +46,14 @@ final class APIClient: Sendable {
             components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) }
         }
         let request = authenticatedRequest(url: components.url!)
-        let (data, response) = try await session.data(for: request)
-        try validateResponse(response)
-        return try decoder.decode(T.self, from: data)
+        do {
+            let (data, response) = try await session.data(for: request)
+            try validateResponse(response, for: request)
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            if isNetworkError(error) { captureNetworkError(error, request: request) }
+            throw error
+        }
     }
 
     func post<T: Decodable & Sendable>(_ path: String, body: some Encodable & Sendable) async throws -> T {
@@ -55,9 +61,14 @@ final class APIClient: Sendable {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
-        let (data, response) = try await session.data(for: request)
-        try validateResponse(response)
-        return try decoder.decode(T.self, from: data)
+        do {
+            let (data, response) = try await session.data(for: request)
+            try validateResponse(response, for: request)
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            if isNetworkError(error) { captureNetworkError(error, request: request) }
+            throw error
+        }
     }
 
     func postRaw<T: Decodable & Sendable>(_ path: String, data bodyData: Data, contentType: String) async throws -> T {
@@ -65,9 +76,14 @@ final class APIClient: Sendable {
         request.httpMethod = "POST"
         request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         request.httpBody = bodyData
-        let (data, response) = try await session.data(for: request)
-        try validateResponse(response)
-        return try decoder.decode(T.self, from: data)
+        do {
+            let (data, response) = try await session.data(for: request)
+            try validateResponse(response, for: request)
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            if isNetworkError(error) { captureNetworkError(error, request: request) }
+            throw error
+        }
     }
 
     func put<T: Decodable & Sendable>(_ path: String, body: some Encodable & Sendable) async throws -> T {
@@ -75,25 +91,62 @@ final class APIClient: Sendable {
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try encoder.encode(body)
-        let (data, response) = try await session.data(for: request)
-        try validateResponse(response)
-        return try decoder.decode(T.self, from: data)
+        do {
+            let (data, response) = try await session.data(for: request)
+            try validateResponse(response, for: request)
+            return try decoder.decode(T.self, from: data)
+        } catch {
+            if isNetworkError(error) { captureNetworkError(error, request: request) }
+            throw error
+        }
     }
 
     func delete(_ path: String) async throws {
         var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "DELETE"
-        let (_, response) = try await session.data(for: request)
-        try validateResponse(response)
+        do {
+            let (_, response) = try await session.data(for: request)
+            try validateResponse(response, for: request)
+        } catch {
+            if isNetworkError(error) { captureNetworkError(error, request: request) }
+            throw error
+        }
     }
 
-    private func validateResponse(_ response: URLResponse) throws {
+    private func validateResponse(_ response: URLResponse, for request: URLRequest) throws {
         guard let http = response as? HTTPURLResponse else {
             throw APIError.invalidResponse
         }
+
+        let breadcrumb = Breadcrumb(level: http.statusCode >= 400 ? .error : .info, category: "http")
+        breadcrumb.type = "http"
+        breadcrumb.data = [
+            "method": request.httpMethod ?? "GET",
+            "url": request.url?.path ?? "",
+            "status_code": http.statusCode,
+        ]
+        SentrySDK.addBreadcrumb(breadcrumb)
+
         guard (200...299).contains(http.statusCode) else {
             throw APIError.httpError(http.statusCode)
         }
+    }
+
+    private func isNetworkError(_ error: Error) -> Bool {
+        if let apiError = error as? APIError {
+            switch apiError {
+            case .invalidResponse: return true
+            case .httpError(let code): return code >= 500
+            }
+        }
+        return error is URLError
+    }
+
+    private func captureNetworkError(_ error: Error, request: URLRequest) {
+        let event = Event(error: error)
+        event.tags = ["api.method": request.httpMethod ?? "GET"]
+        event.extra = ["path": request.url?.path ?? ""]
+        SentrySDK.capture(event: event)
     }
 }
 

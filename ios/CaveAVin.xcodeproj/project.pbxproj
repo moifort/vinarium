@@ -16,6 +16,10 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXBuildFile section */
+		BF0E01212F5072C10074B393 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01222F5072C10074B393 /* Sentry */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CaveAVin.xctestplan; sourceTree = "<group>"; };
 		E10000030000000000000001 /* CaveAVin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaveAVin.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -32,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF0E01212F5072C10074B393 /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -83,6 +88,9 @@
 				E10000050000000000000002 /* CaveAVin */,
 			);
 			name = CaveAVin;
+			packageProductDependencies = (
+				BF0E01222F5072C10074B393 /* Sentry */,
+			);
 			productName = CaveAVin;
 			productReference = E10000030000000000000001 /* CaveAVin.app */;
 			productType = "com.apple.product-type.application";
@@ -137,6 +145,9 @@
 				fr,
 			);
 			mainGroup = E10000050000000000000001;
+			packageReferences = (
+				BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+			);
 			productRefGroup = E10000050000000000000009 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -450,6 +461,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BF0E01222F5072C10074B393 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E10000090000000000000001 /* Project object */;
 }
