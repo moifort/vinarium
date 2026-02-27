@@ -52,7 +52,6 @@ jobs:
 
             Si tu ne peux pas determiner un fix avec confiance, cree quand meme la PR
             avec ton analyse et une piste d'investigation.
-          model: "claude-gene-4-6"
           claude_args: "--max-turns 30 --thinking-budget high"
           branch_prefix: "sentry-fix/"
           allowed_tools: |
