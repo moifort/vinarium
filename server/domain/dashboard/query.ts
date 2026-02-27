@@ -1,17 +1,26 @@
-import { sortBy } from 'lodash-es'
+import { keyBy, sortBy } from 'lodash-es'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { FavoriteWine, LastBottle, ReadyToDrinkWine } from '~/domain/dashboard/types'
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
-import { WineQuery } from '~/domain/wine/query'
+import * as _wineRepository from '~/domain/wine/repository'
 import type { Wine } from '~/domain/wine/types'
-import { traced } from '~/system/sentry/tracing'
+import { traced, tracedModule } from '~/system/sentry/tracing'
+
+const wineRepository = tracedModule('wine', 'db', _wineRepository)
 
 export namespace DashboardQuery {
   export const get = traced('DashboardQuery.get', 'domain.query', async () => {
-    const allBottles = await CellarQuery.getAllBottles()
+    const [allBottles, history, allTastings, wines] = await Promise.all([
+      CellarQuery.getAllBottles(),
+      JournalQuery.getAll(),
+      TastingQuery.getAll(),
+      wineRepository.findAll(),
+    ])
+
     const currentYear = new Date().getFullYear()
+    const wineMap = keyBy(wines, 'id')
 
     const bottleCount = allBottles.length
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchasePrice ?? 0), 0)
@@ -26,11 +35,12 @@ export namespace DashboardQuery {
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
 
-    const history = await JournalQuery.getAll()
     const lastExit = history.find((event) => event.type === 'out')
 
-    const allTastings = await TastingQuery.getAll()
-    const favorites = await loadFavorites(allTastings.filter(({ rating }) => rating === 5))
+    const favorites = loadFavorites(
+      allTastings.filter(({ rating }) => rating === 5),
+      wineMap,
+    )
 
     return {
       bottleCount,
@@ -79,11 +89,11 @@ export namespace DashboardQuery {
     }
   }
 
-  const loadFavorites = async (tastings: TastingNote[]) => {
-    const results = await Promise.all(
-      tastings.map(async (tasting) => {
-        const wine = await WineQuery.getById(tasting.wineId)
-        if (wine === 'not-found') return undefined
+  const loadFavorites = (tastings: TastingNote[], wineMap: Record<string, Wine>) =>
+    tastings
+      .map((tasting) => {
+        const wine = wineMap[tasting.wineId]
+        if (!wine) return undefined
         const favorite: FavoriteWine = {
           id: wine.id,
           name: wine.name,
@@ -93,8 +103,6 @@ export namespace DashboardQuery {
           tastingDate: tasting.consumedDate,
         }
         return favorite
-      }),
-    )
-    return results.filter((favorite): favorite is FavoriteWine => favorite !== undefined)
-  }
+      })
+      .filter((favorite): favorite is FavoriteWine => favorite !== undefined)
 }

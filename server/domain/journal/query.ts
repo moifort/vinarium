@@ -1,17 +1,22 @@
-import { sortBy } from 'lodash-es'
+import { keyBy, sortBy } from 'lodash-es'
 import * as _repository from '~/domain/journal/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
-import type { WineId } from '~/domain/wine/types'
+import * as _wineRepository from '~/domain/wine/repository'
+import type { Wine, WineId } from '~/domain/wine/types'
 import { traced, tracedModule } from '~/system/sentry/tracing'
 
 const repository = tracedModule('journal', 'db', _repository)
+const wineRepository = tracedModule('wine', 'db', _wineRepository)
 
 export namespace JournalQuery {
   export const getAll = traced('JournalQuery.getAll', 'domain.query', async () => {
-    const entries = await repository.findAll()
-    const views = await Promise.all(entries.map(toView))
-    return sortBy(views, ({ date }) => -new Date(date).getTime())
+    const [entries, wines] = await Promise.all([repository.findAll(), wineRepository.findAll()])
+    const wineMap = keyBy(wines, 'id')
+    return sortBy(
+      entries.map((entry) => toView(entry, wineMap)),
+      ({ date }) => -new Date(date).getTime(),
+    )
   })
 
   export const getAllByWineId = traced(
@@ -19,8 +24,13 @@ export namespace JournalQuery {
     'domain.query',
     async (wineId: WineId) => {
       const entries = await repository.findByWineId(wineId)
-      const views = await Promise.all(entries.map(toView))
-      return sortBy(views, ({ date }) => -new Date(date).getTime())
+      const wine = await WineQuery.getById(wineId)
+      if (wine === 'not-found') throw new Error(`Wine not found: ${wineId}`)
+      const wineMap = keyBy([wine], 'id')
+      return sortBy(
+        entries.map((entry) => toView(entry, wineMap)),
+        ({ date }) => -new Date(date).getTime(),
+      )
     },
   )
 
@@ -42,9 +52,9 @@ export namespace JournalQuery {
     },
   )
 
-  const toView = async (entry: JournalEntry): Promise<JournalEventView> => {
-    const wine = await WineQuery.getById(entry.wineId)
-    if (wine === 'not-found') throw new Error(`Wine not found: ${entry.wineId}`)
+  const toView = (entry: JournalEntry, wineMap: Record<string, Wine>): JournalEventView => {
+    const wine = wineMap[entry.wineId]
+    if (!wine) throw new Error(`Wine not found: ${entry.wineId}`)
     return {
       type: entry.type,
       date: entry.type === 'in' ? entry.dateIn : entry.dateOut,
