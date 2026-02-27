@@ -1,35 +1,46 @@
 import { sortBy } from 'lodash-es'
-import * as repository from '~/domain/journal/repository'
+import * as _repository from '~/domain/journal/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
+import { traced, tracedModule } from '~/system/sentry/tracing'
+
+const repository = tracedModule('journal', 'db', _repository)
 
 export namespace JournalQuery {
-  export const getAll = async () => {
+  export const getAll = traced('JournalQuery.getAll', 'domain.query', async () => {
     const entries = await repository.findAll()
     const views = await Promise.all(entries.map(toView))
     return sortBy(views, ({ date }) => -new Date(date).getTime())
-  }
+  })
 
-  export const getAllByWineId = async (wineId: WineId) => {
-    const entries = await repository.findByWineId(wineId)
-    const views = await Promise.all(entries.map(toView))
-    return sortBy(views, ({ date }) => -new Date(date).getTime())
-  }
+  export const getAllByWineId = traced(
+    'JournalQuery.getAllByWineId',
+    'domain.query',
+    async (wineId: WineId) => {
+      const entries = await repository.findByWineId(wineId)
+      const views = await Promise.all(entries.map(toView))
+      return sortBy(views, ({ date }) => -new Date(date).getTime())
+    },
+  )
 
-  export const getCellarDates = async (wineId: WineId) => {
-    const entries = await repository.findByWineId(wineId)
-    const entryIn = entries.find((entry) => entry.type === 'in')
-    if (!entryIn) return 'not-found' as const
-    const entryOut = entries.find((entry) => entry.type === 'out')
-    return {
-      wineId,
-      dateIn: entryIn.dateIn,
-      dateOut: entryOut?.dateOut,
-      rowLabel: entryIn.rowLabel,
-      colLabel: entryIn.colLabel,
-    }
-  }
+  export const getCellarDates = traced(
+    'JournalQuery.getCellarDates',
+    'domain.query',
+    async (wineId: WineId) => {
+      const entries = await repository.findByWineId(wineId)
+      const entryIn = entries.find((entry) => entry.type === 'in')
+      if (!entryIn) return 'not-found' as const
+      const entryOut = entries.find((entry) => entry.type === 'out')
+      return {
+        wineId,
+        dateIn: entryIn.dateIn,
+        dateOut: entryOut?.dateOut,
+        rowLabel: entryIn.rowLabel,
+        colLabel: entryIn.colLabel,
+      }
+    },
+  )
 
   const toView = async (entry: JournalEntry): Promise<JournalEventView> => {
     const wine = await WineQuery.getById(entry.wineId)

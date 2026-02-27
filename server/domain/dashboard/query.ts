@@ -6,9 +6,10 @@ import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
+import { traced } from '~/system/sentry/tracing'
 
 export namespace DashboardQuery {
-  export const get = async () => {
+  export const get = traced('DashboardQuery.get', 'domain.query', async () => {
     const allBottles = await CellarQuery.getAllBottles()
     const currentYear = new Date().getFullYear()
 
@@ -40,7 +41,7 @@ export namespace DashboardQuery {
       lastExit,
       history: history.slice(0, 10),
     }
-  }
+  })
 
   const isReadyToDrink = (wine: Wine, currentYear: number) => {
     if (!wine.drinkFrom && !wine.drinkUntil) return false
