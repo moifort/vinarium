@@ -4,8 +4,8 @@ const storage = () => useStorage('wines')
 
 export const findAll = async () => {
   const keys = await storage().getKeys()
-  // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-  return Promise.all(keys.map(async (key) => (await storage().getItem<Wine>(key))!))
+  const items = await Promise.all(keys.map((key) => storage().getItem<Wine>(key)))
+  return items.filter((item): item is Wine => item !== null)
 }
 
 export const findBy = (id: WineId) => storage().getItem<Wine>(id)
