@@ -52,5 +52,5 @@ jobs:
 
             Si tu ne peux pas determiner un fix avec confiance, cree quand meme la PR
             avec ton analyse et une piste d'investigation.
-          claude_args: "--model claude-opus-4-6 --max-turns 30 --allowedTools 'Edit,Write,Bash(bun *),Bash(bunx *),Bash(git *),Bash(gh *),Bash(ls *),Bash(mkdir *)'"
+          claude_args: "--model claude-sonnet-4-6 --max-turns 30 --allowedTools 'Edit,Write,Bash(*)'"
           branch_prefix: "sentry-fix/"
