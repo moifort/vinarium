@@ -1,0 +1,54 @@
+name: Sentry Autofix
+
+on:
+  repository_dispatch:
+    types: [sentry-bug]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: sentry-autofix-${{ github.event.client_payload.title }}
+  cancel-in-progress: true
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Tu es un developpeur expert qui corrige un bug de production detecte par Sentry.
+
+            ## Erreur Sentry
+            - **Titre**: ${{ github.event.client_payload.title }}
+            - **Culprit**: ${{ github.event.client_payload.culprit }}
+            - **Level**: ${{ github.event.client_payload.level }}
+            - **Event**: ${{ github.event.client_payload.action }}
+            - **URL Sentry**: ${{ github.event.client_payload.url }}
+            - **Platform**: ${{ github.event.client_payload.platform }}
+            - **Metadata**: ${{ toJson(github.event.client_payload.metadata) }}
+
+            ## Instructions
+            1. Lis le CLAUDE.md du repo pour comprendre les conventions du projet
+            2. Analyse l'erreur et trouve le code responsable
+            3. Propose un fix minimal et cible
+            4. Verifie ton fix (typecheck, lint selon les commandes du CLAUDE.md)
+            5. Cree une PR avec :
+               - Branche : sentry-fix/<description-courte>
+               - Titre : fix: <description concise>
+               - Body : sections Sentry Error (lien), Root Cause, Fix, Verification
+               - Labels : sentry-autofix, bug
+
+            Si tu ne peux pas determiner un fix avec confiance, cree quand meme la PR
+            avec ton analyse et une piste d'investigation.
+          claude_args: "--max-turns 30"
+          branch_prefix: "sentry-fix/"
