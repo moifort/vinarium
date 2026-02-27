@@ -22,6 +22,7 @@ struct CaveAVinApp: App {
             options.dsn = dsn
             options.tracesSampleRate = 1.0
             options.enableAutoSessionTracking = true
+            options.enableTimeToFullDisplayTracing = true
         }
     }
 }

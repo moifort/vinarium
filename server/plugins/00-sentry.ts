@@ -8,6 +8,7 @@ export default defineNitroPlugin((nitroApp) => {
   Sentry.init({
     dsn: sentryDsn,
     tracesSampleRate: 1.0,
+    integrations: [Sentry.fsIntegration({ recordFilePaths: true })],
   })
 
   nitroApp.hooks.hook('error', (error, { event }) => {

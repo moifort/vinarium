@@ -1,3 +1,5 @@
+import Sentry
+import SentrySwiftUI
 import SwiftUI
 
 struct WineListPage: View {
@@ -36,8 +38,12 @@ struct WineListPage: View {
             .navigationTitle(viewModel.mode.title)
             .navigationSubtitle(viewModel.mode.subtitle)
             .navigationBarTitleDisplayMode(.large)
+            .sentryTrace("Wine List", waitForFullDisplay: true)
             .refreshable { await viewModel.load() }
-            .task(id: viewModel.filterKey) { await viewModel.load() }
+            .task(id: viewModel.filterKey) {
+                await viewModel.load()
+                SentrySDK.reportFullyDisplayed()
+            }
             .toolbar {
                 ToolbarItemGroup {
                     ForEach(WineListMode.allCases) { mode in

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		BF0E01212F5072C10074B393 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01222F5072C10074B393 /* Sentry */; };
+		BF0E01232F5072C10074B393 /* SentrySwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01242F5072C10074B393 /* SentrySwiftUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +38,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF0E01212F5072C10074B393 /* Sentry in Frameworks */,
+				BF0E01232F5072C10074B393 /* SentrySwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +92,7 @@
 			name = CaveAVin;
 			packageProductDependencies = (
 				BF0E01222F5072C10074B393 /* Sentry */,
+				BF0E01242F5072C10074B393 /* SentrySwiftUI */,
 			);
 			productName = CaveAVin;
 			productReference = E10000030000000000000001 /* CaveAVin.app */;
@@ -478,6 +481,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
+		};
+		BF0E01242F5072C10074B393 /* SentrySwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = SentrySwiftUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

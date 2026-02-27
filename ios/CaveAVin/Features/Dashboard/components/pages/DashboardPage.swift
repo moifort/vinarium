@@ -1,3 +1,5 @@
+import Sentry
+import SentrySwiftUI
 import SwiftUI
 
 struct DashboardPage: View {
@@ -48,8 +50,12 @@ struct DashboardPage: View {
             }
             .navigationTitle("Accueil")
             .navigationBarTitleDisplayMode(.large)
+            .sentryTrace("Dashboard", waitForFullDisplay: true)
             .refreshable { await viewModel.load() }
-            .task { await viewModel.load() }
+            .task {
+                await viewModel.load()
+                SentrySDK.reportFullyDisplayed()
+            }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }

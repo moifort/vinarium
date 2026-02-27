@@ -1,3 +1,5 @@
+import Sentry
+import SentrySwiftUI
 import SwiftUI
 
 struct CellarPage: View {
@@ -76,11 +78,13 @@ struct CellarPage: View {
             .navigationTitle(viewModel.displayMode.title)
             .navigationSubtitle(viewModel.displayMode.subtitle)
             .navigationBarTitleDisplayMode(.large)
+            .sentryTrace("Cellar", waitForFullDisplay: true)
             .refreshable {
                 await viewModel.load()
             }
             .task(id: refreshTrigger) {
                 await viewModel.load()
+                SentrySDK.reportFullyDisplayed()
             }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },

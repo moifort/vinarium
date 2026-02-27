@@ -1,3 +1,5 @@
+import Sentry
+import SentrySwiftUI
 import SwiftUI
 
 struct PlacementView: View {
@@ -90,6 +92,7 @@ struct PlacementView: View {
                 }
             }
         }
+        .sentryTrace("Placement", waitForFullDisplay: true)
         .navigationTitle("Placement")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -99,6 +102,7 @@ struct PlacementView: View {
         }
         .task {
             await loadData()
+            SentrySDK.reportFullyDisplayed()
         }
     }
 
