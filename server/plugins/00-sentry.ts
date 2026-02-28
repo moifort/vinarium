@@ -8,8 +8,25 @@ export default defineNitroPlugin((nitroApp) => {
   Sentry.init({
     dsn: sentryDsn,
     tracesSampleRate: 1.0,
-    integrations: (defaults) => defaults.concat(Sentry.fsIntegration({ recordFilePaths: true })),
+    integrations: (defaults) =>
+      defaults
+        // BunServer integration is incompatible with Nitro's localFetch pattern
+        .filter((integration) => integration.name !== 'BunServer')
+        .concat(Sentry.fsIntegration({ recordFilePaths: true })),
   })
+
+  const originalHandler = nitroApp.h3App.handler
+  nitroApp.h3App.handler = ((event) =>
+    Sentry.continueTrace(
+      {
+        sentryTrace: getHeader(event, 'sentry-trace') ?? '',
+        baggage: getHeader(event, 'baggage') ?? '',
+      },
+      () =>
+        Sentry.startSpan({ name: `${event.method} ${event.path}`, op: 'http.server' }, () =>
+          originalHandler(event),
+        ),
+    )) as typeof originalHandler
 
   nitroApp.hooks.hook('error', (error, { event }) => {
     const statusCode = (error as { statusCode?: number }).statusCode
