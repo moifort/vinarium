@@ -3,26 +3,22 @@ import { ImageHash } from '~/domain/scan/primitives'
 import * as _repository from '~/domain/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
-import { traced, tracedModule } from '~/system/sentry/tracing'
+import { tracedModule } from '~/system/sentry/tracing'
 
 const repository = tracedModule('scan', 'db', _repository)
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
 export namespace Scan {
-  export const scanWithCache = traced(
-    'Scan.scanWithCache',
-    'domain.command',
-    async (imageBuffer: Buffer) => {
-      const imageHash = hashImage(imageBuffer)
-      const cached = await repository.findBy(imageHash)
-      if (cached) return cached.result
-      const scanResult = await scanLabel(imageBuffer)
-      const enriched = await enrichWithSearch(scanResult)
-      repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
-      return enriched
-    },
-  )
+  export const scanWithCache = async (imageBuffer: Buffer) => {
+    const imageHash = hashImage(imageBuffer)
+    const cached = await repository.findBy(imageHash)
+    if (cached) return cached.result
+    const scanResult = await scanLabel(imageBuffer)
+    const enriched = await enrichWithSearch(scanResult)
+    repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
+    return enriched
+  }
 
   const scanLabel = async (imageBuffer: Buffer) => {
     const { anthropicApiKey } = config()

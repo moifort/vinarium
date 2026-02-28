@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/bun'
 
-export const traced =
+const traced =
   <TArgs extends unknown[], TReturn>(name: string, op: string, fn: (...args: TArgs) => TReturn) =>
   (...args: TArgs) =>
     Sentry.startSpan({ name, op }, () => fn(...args))

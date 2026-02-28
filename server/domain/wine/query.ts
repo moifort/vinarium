@@ -10,66 +10,66 @@ import type { Recommendation } from '~/domain/recommendation/types'
 import { TastingQuery } from '~/domain/tasting/query'
 import * as _repository from '~/domain/wine/repository'
 import type { SortOrder, Wine, WineColor, WineId, WineSort, WineStatus } from '~/domain/wine/types'
-import { traced, tracedModule } from '~/system/sentry/tracing'
+import { tracedModule } from '~/system/sentry/tracing'
 
 const repository = tracedModule('wine', 'db', _repository)
 
 export namespace WineQuery {
-  export const getById = traced('WineQuery.getById', 'domain.query', async (id: WineId) => {
+  export const findAll = async () => {
+    return repository.findAll()
+  }
+
+  export const getById = async (id: WineId) => {
     const wine = await repository.findBy(id)
     if (!wine) return 'not-found' as const
     return wine
-  })
+  }
 
-  export const getAll = traced(
-    'WineQuery.getAll',
-    'domain.query',
-    async (options?: {
-      color?: WineColor
-      sort?: WineSort
-      order?: SortOrder
-      status?: WineStatus
-    }) => {
-      const [all, tastings, gifts, recommendations] = await Promise.all([
-        repository.findAll(),
-        TastingQuery.getAll(),
-        GiftQuery.getAll(),
-        RecommendationQuery.getAll(),
-      ])
-      const ratingMap = keyBy(tastings, ({ wineId }) => wineId)
-      const giftMap = keyBy(gifts, ({ wineId }) => wineId)
-      const recommendationMap = keyBy(recommendations, ({ wineId }) => wineId)
-      const withExtra = all.map((wine) => {
-        const { imageBase64, ...rest } = wine
-        const tasting = ratingMap[wine.id]
-        const gift = giftMap[wine.id]
-        const recommendation = recommendationMap[wine.id]
-        return {
-          ...rest,
-          rating: tasting?.rating ?? null,
-          giftedTo: gift?.recipientName ?? null,
-          recommendedBy: recommendation?.recommenderName ?? null,
-          contacts: uniq([
-            ...(tasting?.contacts ?? []),
-            ...(wine.giftedBy ? [wine.giftedBy] : []),
-            ...(gift?.recipientName ? [gift.recipientName] : []),
-            ...(recommendation?.recommenderName ? [recommendation.recommenderName] : []),
-          ]),
-        }
-      })
-      const byColor = options?.color
-        ? withExtra.filter((wine) => wine.color === options.color)
-        : withExtra
-      const byStatus = options?.status
-        ? await filterByStatus(byColor, options.status, giftMap, recommendationMap)
-        : byColor
-      return options?.sort
-        ? orderBy(byStatus, sortKey(options.sort), options?.order ?? 'asc')
-        : byStatus
-    },
-  )
+  export const getAll = async (options?: {
+    color?: WineColor
+    sort?: WineSort
+    order?: SortOrder
+    status?: WineStatus
+  }) => {
+    const [all, tastings, gifts, recommendations] = await Promise.all([
+      repository.findAll(),
+      TastingQuery.getAll(),
+      GiftQuery.getAll(),
+      RecommendationQuery.getAll(),
+    ])
+    const ratingMap = keyBy(tastings, ({ wineId }) => wineId)
+    const giftMap = keyBy(gifts, ({ wineId }) => wineId)
+    const recommendationMap = keyBy(recommendations, ({ wineId }) => wineId)
+    const withExtra = all.map((wine) => {
+      const { imageBase64, ...rest } = wine
+      const tasting = ratingMap[wine.id]
+      const gift = giftMap[wine.id]
+      const recommendation = recommendationMap[wine.id]
+      return {
+        ...rest,
+        rating: tasting?.rating ?? null,
+        giftedTo: gift?.recipientName ?? null,
+        recommendedBy: recommendation?.recommenderName ?? null,
+        contacts: uniq([
+          ...(tasting?.contacts ?? []),
+          ...(wine.giftedBy ? [wine.giftedBy] : []),
+          ...(gift?.recipientName ? [gift.recipientName] : []),
+          ...(recommendation?.recommenderName ? [recommendation.recommenderName] : []),
+        ]),
+      }
+    })
+    const byColor = options?.color
+      ? withExtra.filter((wine) => wine.color === options.color)
+      : withExtra
+    const byStatus = options?.status
+      ? await filterByStatus(byColor, options.status, giftMap, recommendationMap)
+      : byColor
+    return options?.sort
+      ? orderBy(byStatus, sortKey(options.sort), options?.order ?? 'asc')
+      : byStatus
+  }
 
-  export const getDetail = traced('WineQuery.getDetail', 'domain.query', async (wineId: WineId) => {
+  export const getDetail = async (wineId: WineId) => {
     const wine = await repository.findBy(wineId)
     if (!wine) return 'not-found' as const
     const [bottle, history, tasting, gift, recommendation] = await Promise.all([
@@ -121,7 +121,7 @@ export namespace WineQuery {
             }
           : undefined,
     }
-  })
+  }
 
   const cellarFromJournal = async (wineId: WineId) => {
     const dates = await JournalQuery.getCellarDates(wineId)

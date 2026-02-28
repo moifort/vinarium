@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/bun'
+import { instrumentDomains } from '#domain-instrumentation'
 import { config } from '~/system/config/index'
 
 export default defineNitroPlugin((nitroApp) => {
@@ -14,6 +15,8 @@ export default defineNitroPlugin((nitroApp) => {
         .filter((integration) => integration.name !== 'BunServer')
         .concat(Sentry.fsIntegration({ recordFilePaths: true })),
   })
+
+  instrumentDomains()
 
   const originalHandler = nitroApp.h3App.handler
   nitroApp.h3App.handler = ((event) =>

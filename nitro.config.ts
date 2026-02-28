@@ -1,6 +1,11 @@
+import { generateDomainInstrumentation } from './server/system/sentry/generate-domain-instrumentation'
+
 export default defineNitroConfig({
   compatibilityDate: '2026-02-06',
   srcDir: 'server',
+  virtual: {
+    '#domain-instrumentation': generateDomainInstrumentation,
+  },
   runtimeConfig: {
     anthropicApiKey: '',
     googleApiKey: '',

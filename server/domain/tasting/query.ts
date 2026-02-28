@@ -1,21 +1,17 @@
 import * as _repository from '~/domain/tasting/repository'
 import type { WineId } from '~/domain/wine/types'
-import { traced, tracedModule } from '~/system/sentry/tracing'
+import { tracedModule } from '~/system/sentry/tracing'
 
 const repository = tracedModule('tasting', 'db', _repository)
 
 export namespace TastingQuery {
-  export const getAll = traced('TastingQuery.getAll', 'domain.query', async () => {
+  export const getAll = async () => {
     return await repository.findAll()
-  })
+  }
 
-  export const getByWineId = traced(
-    'TastingQuery.getByWineId',
-    'domain.query',
-    async (wineId: WineId) => {
-      const note = await repository.findBy(wineId)
-      if (!note) return 'not-found' as const
-      return note
-    },
-  )
+  export const getByWineId = async (wineId: WineId) => {
+    const note = await repository.findBy(wineId)
+    if (!note) return 'not-found' as const
+    return note
+  }
 }
