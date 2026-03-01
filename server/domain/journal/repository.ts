@@ -4,10 +4,8 @@ import type { WineId } from '~/domain/wine/types'
 export const findAll = async () => {
   const storage = useStorage('journal')
   const keys = await storage.getKeys('by-wine')
-  const groups = await Promise.all(
-    keys.map(async (key) => (await storage.getItem<JournalEntry[]>(key)) ?? []),
-  )
-  return groups.flat()
+  const items = await storage.getItems<JournalEntry[]>(keys)
+  return items.flatMap(({ value }) => value ?? [])
 }
 
 export const findByWineId = async (wineId: WineId) => {

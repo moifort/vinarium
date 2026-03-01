@@ -4,8 +4,8 @@ import type { WineId } from '~/domain/wine/types'
 export const findAll = async () => {
   const storage = useStorage('cellar')
   const keys = await storage.getKeys('entries')
-  // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-  return Promise.all(keys.map(async (key) => (await storage.getItem<CellarBottle>(key))!))
+  const items = await storage.getItems<CellarBottle>(keys)
+  return items.map(({ value }) => value)
 }
 
 export const findBy = (wineId: WineId) =>

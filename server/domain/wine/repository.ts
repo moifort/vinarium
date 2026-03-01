@@ -5,8 +5,8 @@ const imageStorage = () => useStorage('wine-images')
 
 export const findAll = async () => {
   const keys = await storage().getKeys()
-  // biome-ignore lint/style/noNonNullAssertion: keys from storage always exist
-  return Promise.all(keys.map(async (key) => (await storage().getItem<Wine>(key))!))
+  const items = await storage().getItems<Wine>(keys)
+  return items.map(({ value }) => value)
 }
 
 export const findBy = (id: WineId) => storage().getItem<Wine>(id)
