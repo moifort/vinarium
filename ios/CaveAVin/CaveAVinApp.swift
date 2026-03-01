@@ -23,6 +23,7 @@ struct CaveAVinApp: App {
             options.tracesSampleRate = 1.0
             options.enableAutoSessionTracking = true
             options.enableTimeToFullDisplayTracing = true
+            options.tracePropagationTargets = []
         }
     }
 }

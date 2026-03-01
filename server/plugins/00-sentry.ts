@@ -21,22 +21,12 @@ export default defineNitroPlugin((nitroApp) => {
 
   const originalHandler = nitroApp.h3App.handler
   nitroApp.h3App.handler = ((event) =>
-    Sentry.continueTrace(
-      {
-        sentryTrace: getHeader(event, 'sentry-trace') ?? '',
-        baggage: getHeader(event, 'baggage') ?? '',
-      },
-      () =>
-        Sentry.startSpan(
-          { name: `${event.method} ${event.path}`, op: 'http.server' },
-          async (span) => {
-            const result = await originalHandler(event)
-            const route = event.context.matchedRoute?.path
-            if (route) span.updateName(`${event.method} ${route}`)
-            return result
-          },
-        ),
-    )) as typeof originalHandler
+    Sentry.startSpan({ name: `${event.method} ${event.path}`, op: 'http.server' }, async (span) => {
+      const result = await originalHandler(event)
+      const route = event.context.matchedRoute?.path
+      if (route) span.updateName(`${event.method} ${route}`)
+      return result
+    })) as typeof originalHandler
 
   nitroApp.hooks.hook('error', (error, { event }) => {
     const statusCode = (error as { statusCode?: number }).statusCode
