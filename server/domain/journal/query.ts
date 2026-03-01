@@ -7,18 +7,16 @@ import type { Wine, WineId } from '~/domain/wine/types'
 export namespace JournalQuery {
   export const getAll = async () => {
     const [entries, wines] = await Promise.all([repository.findAll(), WineQuery.findAll()])
-    const wineMap = keyBy(wines, 'id')
+    const wineMap = keyBy(wines, ({ id }) => id)
     return sortBy(
       entries.map((entry) => toView(entry, wineMap)),
       ({ date }) => -new Date(date).getTime(),
     )
   }
 
-  export const getAllByWineId = async (wineId: WineId) => {
-    const entries = await repository.findByWineId(wineId)
-    const wine = await WineQuery.getById(wineId)
-    if (wine === 'not-found') throw new Error(`Wine not found: ${wineId}`)
-    const wineMap = keyBy([wine], 'id')
+  export const getAllByWineId = async (wine: Pick<Wine, 'id' | 'name' | 'color'>) => {
+    const entries = await repository.findByWineId(wine.id)
+    const wineMap = keyBy([wine], ({ id }) => id)
     return sortBy(
       entries.map((entry) => toView(entry, wineMap)),
       ({ date }) => -new Date(date).getTime(),
@@ -39,7 +37,10 @@ export namespace JournalQuery {
     }
   }
 
-  const toView = (entry: JournalEntry, wineMap: Record<string, Wine>): JournalEventView => {
+  const toView = (
+    entry: JournalEntry,
+    wineMap: Record<string, Pick<Wine, 'name' | 'color'>>,
+  ): JournalEventView => {
     const wine = wineMap[entry.wineId]
     if (!wine) throw new Error(`Wine not found: ${entry.wineId}`)
     return {

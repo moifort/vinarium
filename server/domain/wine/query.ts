@@ -71,7 +71,7 @@ export namespace WineQuery {
     if (!wine) return 'not-found' as const
     const [bottle, history, tasting, gift, recommendation] = await Promise.all([
       CellarQuery.getBottleByWineId(wine.id),
-      JournalQuery.getAllByWineId(wine.id),
+      JournalQuery.getAllByWineId(wine),
       TastingQuery.getByWineId(wine.id),
       GiftQuery.getByWineId(wine.id),
       RecommendationQuery.getByWineId(wine.id),
