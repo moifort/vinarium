@@ -9,8 +9,8 @@ const CELLAR_SIZE = { rows: 6, cols: 8 }
 
 export namespace CellarQuery {
   export const getAllBottles = async () => {
-    const bottles = await repository.findAll()
-    const wineMap = keyBy(await WineQuery.findAll(), 'id')
+    const [bottles, wines] = await Promise.all([repository.findAll(), WineQuery.findAll()])
+    const wineMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {
       const wine = wineMap[bottle.wineId]
       if (!wine)
