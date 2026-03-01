@@ -1,9 +1,6 @@
 import { randomWineId } from '~/domain/wine/primitives'
-import * as _repository from '~/domain/wine/repository'
+import * as repository from '~/domain/wine/repository'
 import type { Wine, WineColor, WineId, WineName } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('wine', 'db', _repository)
 
 export namespace WineCommand {
   export const add = async (name: WineName, color: WineColor, data: Partial<Wine>) => {

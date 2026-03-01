@@ -17,6 +17,7 @@ export default defineNitroPlugin((nitroApp) => {
   })
 
   instrumentDomains()
+  instrumentStorage()
 
   const originalHandler = nitroApp.h3App.handler
   nitroApp.h3App.handler = ((event) =>
@@ -26,8 +27,14 @@ export default defineNitroPlugin((nitroApp) => {
         baggage: getHeader(event, 'baggage') ?? '',
       },
       () =>
-        Sentry.startSpan({ name: `${event.method} ${event.path}`, op: 'http.server' }, () =>
-          originalHandler(event),
+        Sentry.startSpan(
+          { name: `${event.method} ${event.path}`, op: 'http.server' },
+          async (span) => {
+            const result = await originalHandler(event)
+            const route = event.context.matchedRoute?.path
+            if (route) span.updateName(`${event.method} ${route}`)
+            return result
+          },
         ),
     )) as typeof originalHandler
 
@@ -43,3 +50,16 @@ export default defineNitroPlugin((nitroApp) => {
     })
   })
 })
+
+const instrumentStorage = () => {
+  const rootStorage = useStorage()
+  const methods = ['getItem', 'setItem', 'removeItem', 'getKeys', 'hasItem'] as const
+  methods.forEach((method) => {
+    const original = rootStorage[method].bind(rootStorage) as (...args: any[]) => any
+    ;(rootStorage as any)[method] = (...args: any[]) => {
+      const key = typeof args[0] === 'string' ? args[0] : ''
+      const namespace = key.split(':')[0] || 'storage'
+      return Sentry.startSpan({ name: `${namespace}.${method}`, op: 'db' }, () => original(...args))
+    }
+  })
+}

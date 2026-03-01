@@ -1,8 +1,5 @@
-import * as _repository from '~/domain/tasting/repository'
+import * as repository from '~/domain/tasting/repository'
 import type { WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('tasting', 'db', _repository)
 
 export namespace TastingQuery {
   export const getAll = async () => {

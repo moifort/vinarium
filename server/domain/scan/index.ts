@@ -1,11 +1,8 @@
 import { createHash } from 'node:crypto'
 import { ImageHash } from '~/domain/scan/primitives'
-import * as _repository from '~/domain/scan/repository'
+import * as repository from '~/domain/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('scan', 'db', _repository)
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 

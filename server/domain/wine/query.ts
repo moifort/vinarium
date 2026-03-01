@@ -8,11 +8,8 @@ import { JournalQuery } from '~/domain/journal/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { Recommendation } from '~/domain/recommendation/types'
 import { TastingQuery } from '~/domain/tasting/query'
-import * as _repository from '~/domain/wine/repository'
+import * as repository from '~/domain/wine/repository'
 import type { SortOrder, Wine, WineColor, WineId, WineSort, WineStatus } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('wine', 'db', _repository)
 
 export namespace WineQuery {
   export const findAll = async () => {

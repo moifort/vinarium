@@ -1,9 +1,6 @@
-import * as _repository from '~/domain/gift/repository'
+import * as repository from '~/domain/gift/repository'
 import type { Gift } from '~/domain/gift/types'
 import type { WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('gift', 'db', _repository)
 
 export namespace GiftCommand {
   export const giveTo = async (gift: Gift) => {

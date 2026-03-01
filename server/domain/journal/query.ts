@@ -1,11 +1,8 @@
 import { keyBy, sortBy } from 'lodash-es'
-import * as _repository from '~/domain/journal/repository'
+import * as repository from '~/domain/journal/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine, WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('journal', 'db', _repository)
 
 export namespace JournalQuery {
   export const getAll = async () => {

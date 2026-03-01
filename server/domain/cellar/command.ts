@@ -1,11 +1,8 @@
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import * as _repository from '~/domain/cellar/repository'
+import * as repository from '~/domain/cellar/repository'
 import type { CellarCol as CellarColType, CellarRow as CellarRowType } from '~/domain/cellar/types'
 import { JournalCommand } from '~/domain/journal/command'
 import type { WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('cellar', 'db', _repository)
 
 export namespace CellarCommand {
   export const placeWine = async (wineId: WineId, row: CellarRowType, col: CellarColType) => {

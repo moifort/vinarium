@@ -1,8 +1,5 @@
-import * as _repository from '~/domain/recommendation/repository'
+import * as repository from '~/domain/recommendation/repository'
 import type { WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('recommendation', 'db', _repository)
 
 export namespace RecommendationQuery {
   export const getAll = async () => {

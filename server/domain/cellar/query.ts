@@ -1,12 +1,9 @@
 import { keyBy, range } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import * as _repository from '~/domain/cellar/repository'
+import * as repository from '~/domain/cellar/repository'
 import type { CellarBottle, CellarBottleView } from '~/domain/cellar/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
-import { tracedModule } from '~/system/sentry/tracing'
-
-const repository = tracedModule('cellar', 'db', _repository)
 
 const CELLAR_SIZE = { rows: 6, cols: 8 }
 
