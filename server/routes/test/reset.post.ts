@@ -1,6 +1,7 @@
 export default defineEventHandler(async () => {
   for (const name of [
     'wines',
+    'wine-images',
     'cellar',
     'journal',
     'tasting',
