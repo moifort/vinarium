@@ -4,28 +4,23 @@ export const cacheKeys = {
   getKeys: (args: unknown[]) => `getKeys:${JSON.stringify(args)}`,
 }
 
+let _lastHit = false
+
 export const memoizedPerRequest = <T>(key: string, fn: () => T): T => {
   try {
     const event = useEvent()
     if (!event.context._queryCache) event.context._queryCache = {}
     const cache = event.context._queryCache as Record<string, T>
-    if (!(key in cache)) cache[key] = fn()
+    _lastHit = key in cache
+    if (!_lastHit) cache[key] = fn()
     return cache[key]
   } catch {
+    _lastHit = false
     return fn()
   }
 }
 
-export const isInRequestCache = (key: string): boolean => {
-  try {
-    const event = useEvent()
-    return Boolean(
-      event.context._queryCache && key in (event.context._queryCache as Record<string, unknown>),
-    )
-  } catch {
-    return false
-  }
-}
+export const wasLastCacheHit = () => _lastHit
 
 export const evictFromRequestCache = (key: string) => {
   try {
