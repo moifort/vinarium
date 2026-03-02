@@ -43,7 +43,7 @@ export default defineNitroPlugin((nitroApp) => {
 
 const instrumentStorage = () => {
   const rootStorage = useStorage()
-  const methods = ['getItem', 'setItem', 'removeItem', 'getKeys', 'hasItem'] as const
+  const methods = ['getItem', 'getItems', 'setItem', 'removeItem', 'getKeys', 'hasItem'] as const
   methods.forEach((method) => {
     const original = rootStorage[method].bind(rootStorage) as (...args: any[]) => any
     ;(rootStorage as any)[method] = (...args: any[]) => {

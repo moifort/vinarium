@@ -12,6 +12,10 @@ export default defineNitroPlugin(() => {
   ;(rootStorage as any).getKeys = (...args: unknown[]) =>
     memoizedPerRequest(`getKeys:${JSON.stringify(args)}`, () => originalGetKeys(...args))
 
+  const originalGetItems = rootStorage.getItems.bind(rootStorage) as (...args: unknown[]) => unknown
+  ;(rootStorage as any).getItems = (...args: unknown[]) =>
+    memoizedPerRequest(`getItems:${JSON.stringify(args)}`, () => originalGetItems(...args))
+
   const originalSetItem = rootStorage.setItem.bind(rootStorage) as (...args: unknown[]) => unknown
   ;(rootStorage as any).setItem = (...args: unknown[]) => {
     evictFromRequestCache(`getItem:${args[0]}`)
