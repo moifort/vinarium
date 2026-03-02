@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/bun'
 import { instrumentDomains } from '#domain-instrumentation'
 import { config } from '~/system/config/index'
+import { cacheKeys, isInRequestCache } from '~/system/request-cache'
 
 export default defineNitroPlugin((nitroApp) => {
   const { sentryDsn } = config()
@@ -41,6 +42,12 @@ export default defineNitroPlugin((nitroApp) => {
   })
 })
 
+const cachedMethods: Record<string, (args: any[]) => string> = {
+  getItem: cacheKeys.getItem,
+  getItems: cacheKeys.getItems,
+  getKeys: cacheKeys.getKeys,
+}
+
 const instrumentStorage = () => {
   const rootStorage = useStorage()
   const methods = ['getItem', 'getItems', 'setItem', 'removeItem', 'getKeys', 'hasItem'] as const
@@ -49,7 +56,13 @@ const instrumentStorage = () => {
     ;(rootStorage as any)[method] = (...args: any[]) => {
       const key = typeof args[0] === 'string' ? args[0] : ''
       const namespace = key.split(':')[0] || 'storage'
-      return Sentry.startSpan({ name: `${namespace}.${method}`, op: 'db' }, () => original(...args))
+      const cacheKeyBuilder = cachedMethods[method]
+      const attributes = cacheKeyBuilder
+        ? { 'cache.hit': isInRequestCache(cacheKeyBuilder(args)) }
+        : {}
+      return Sentry.startSpan({ name: `${namespace}.${method}`, op: 'db', attributes }, () =>
+        original(...args),
+      )
     }
   })
 }

@@ -1,3 +1,9 @@
+export const cacheKeys = {
+  getItem: (args: unknown[]) => `getItem:${args[0]}`,
+  getItems: (args: unknown[]) => `getItems:${JSON.stringify(args)}`,
+  getKeys: (args: unknown[]) => `getKeys:${JSON.stringify(args)}`,
+}
+
 export const memoizedPerRequest = <T>(key: string, fn: () => T): T => {
   try {
     const event = useEvent()
@@ -7,6 +13,17 @@ export const memoizedPerRequest = <T>(key: string, fn: () => T): T => {
     return cache[key]
   } catch {
     return fn()
+  }
+}
+
+export const isInRequestCache = (key: string): boolean => {
+  try {
+    const event = useEvent()
+    return Boolean(
+      event.context._queryCache && key in (event.context._queryCache as Record<string, unknown>),
+    )
+  } catch {
+    return false
   }
 }
 
