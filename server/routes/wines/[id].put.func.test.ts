@@ -24,11 +24,6 @@ describe('PUT /wines/:id', () => {
       params: { id: crypto.randomUUID() },
       body: { name: 'Test' },
     })
-    try {
-      await handler(event as any)
-      expect(true).toBe(false)
-    } catch (e: any) {
-      expect(e.statusCode).toBe(404)
-    }
+    await expect(handler(event as any)).rejects.toMatchObject({ statusCode: 404 })
   })
 })

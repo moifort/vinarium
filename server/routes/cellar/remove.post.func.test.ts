@@ -52,11 +52,6 @@ describe('POST /cellar/remove', () => {
   test('throws 404 when not in cellar', async () => {
     const wine = aWine()
     const event = mockEvent({ body: { wineId: wine.id } })
-    try {
-      await handler(event as any)
-      expect(true).toBe(false)
-    } catch (e: any) {
-      expect(e.statusCode).toBe(404)
-    }
+    await expect(handler(event as any)).rejects.toMatchObject({ statusCode: 404 })
   })
 })

@@ -5,7 +5,8 @@ import type { JournalEntryIn, JournalEntryOut } from '~/domain/journal/types'
 import type { Recommendation } from '~/domain/recommendation/types'
 import type { PersonName } from '~/domain/shared/types'
 import type { Rating, TastingNote } from '~/domain/tasting/types'
-import type { Wine, WineColor, WineId, WineName } from '~/domain/wine/types'
+import { WineColor as makeWineColor } from '~/domain/wine/primitives'
+import type { Wine, WineId, WineName } from '~/domain/wine/types'
 
 const wineId = (id?: string) => make<WineId>()(id ?? crypto.randomUUID())
 const wineName = (name?: string) => make<WineName>()(name ?? 'Château Margaux')
@@ -13,7 +14,7 @@ const wineName = (name?: string) => make<WineName>()(name ?? 'Château Margaux')
 export const aWine = (overrides?: Partial<Wine>): Wine => ({
   id: wineId(),
   name: wineName(),
-  color: 'red' as WineColor,
+  color: makeWineColor('red'),
   createdAt: new Date('2024-01-01'),
   updatedAt: new Date('2024-01-01'),
   ...overrides,

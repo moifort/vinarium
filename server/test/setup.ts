@@ -29,11 +29,13 @@ const createMockStorage = (namespace: string) => {
       return base ? keys.filter((k) => k.startsWith(`${base}:`)) : keys
     },
     getItems: async <T>(keys: string[]) =>
-      keys.map((key) => ({
-        base: namespace,
-        key,
-        value: store.get(key) as T,
-      })) as StorageItem[],
+      keys
+        .filter((key) => store.has(key))
+        .map((key) => ({
+          base: namespace,
+          key,
+          value: store.get(key) as T,
+        })) as StorageItem[],
   }
 }
 
@@ -41,7 +43,7 @@ const createMockStorage = (namespace: string) => {
 globalThis.useStorage = (namespace: string) => createMockStorage(namespace)
 
 // @ts-expect-error — global mock for Nitro's defineEventHandler
-globalThis.defineEventHandler = (handler: Function) => handler
+globalThis.defineEventHandler = (handler: (...args: never[]) => unknown) => handler
 
 // @ts-expect-error — global mock for Nitro's createError
 globalThis.createError = (opts: { statusCode: number; statusMessage: string }) =>
