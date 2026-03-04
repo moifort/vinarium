@@ -11,11 +11,19 @@ final class APIClient: Sendable {
     var baseURL: URL {
         get {
             let stored = UserDefaults.standard.string(forKey: Self.serverURLKey) ?? Self.defaultURL
-            return URL(string: stored) ?? URL(string: Self.defaultURL)!
+            if let url = URL(string: stored), !Self.isLoopbackURL(url) {
+                return url
+            }
+            return URL(string: Self.defaultURL)!
         }
         set {
             UserDefaults.standard.set(newValue.absoluteString, forKey: Self.serverURLKey)
         }
+    }
+
+    private static func isLoopbackURL(_ url: URL) -> Bool {
+        guard let host = url.host else { return false }
+        return host == "localhost" || host == "127.0.0.1" || host == "::1"
     }
 
     private let session = URLSession.shared
