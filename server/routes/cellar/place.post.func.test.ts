@@ -15,8 +15,8 @@ describe('POST /cellar/place', () => {
     const result = await handler(event as any)
     expect(result.status).toBe(201)
     expect(result.data.wineId).toBe(wine.id)
-    expect(result.data.row).toBe(0)
-    expect(result.data.col).toBe(0)
+    expect(result.data.row as number).toBe(0)
+    expect(result.data.col as number).toBe(0)
 
     const cellarEntry = await cellarRepo.findBy(wine.id)
     expect(cellarEntry).not.toBeNull()

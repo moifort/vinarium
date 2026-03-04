@@ -20,8 +20,8 @@ describe('POST /wines', () => {
 
     const result = await handler(event as any)
     expect(result.status).toBe(201)
-    expect(result.data.name).toBe('Château Margaux')
-    expect(result.data.color).toBe('red')
+    expect(result.data.name as string).toBe('Château Margaux')
+    expect(result.data.color as string).toBe('red')
     expect(result.data.id).toBeDefined()
 
     const saved = await wineRepo.findBy(result.data.id)
@@ -43,8 +43,8 @@ describe('POST /wines', () => {
 
     const tasting = await tastingRepo.findBy(result.data.id)
     expect(tasting).not.toBeNull()
-    expect(tasting?.rating).toBe(5)
-    expect(tasting?.tastingNotes).toBe('Exceptionnel')
+    expect(tasting?.rating as number).toBe(5)
+    expect(tasting?.tastingNotes as string).toBe('Exceptionnel')
   })
 
   test('rejects missing body', async () => {

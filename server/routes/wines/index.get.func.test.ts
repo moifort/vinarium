@@ -23,7 +23,7 @@ describe('GET /wines', () => {
     const event = mockEvent({ query: { color: 'white' } })
     const result = await handler(event as any)
     expect(result.data).toHaveLength(1)
-    expect(result.data[0].color).toBe('white')
+    expect((result.data as any[])[0].color).toBe('white')
   })
 
   test('filters by status', async () => {
@@ -36,6 +36,6 @@ describe('GET /wines', () => {
     const event = mockEvent({ query: { status: 'in-cellar' } })
     const result = await handler(event as any)
     expect(result.data).toHaveLength(1)
-    expect(result.data[0].id).toBe(inCellar.id)
+    expect((result.data as any[])[0].id).toBe(inCellar.id)
   })
 })

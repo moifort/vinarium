@@ -5,8 +5,9 @@ import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import * as giftRepo from '~/domain/gift/repository'
 import * as journalRepo from '~/domain/journal/repository'
 import * as recommendationRepo from '~/domain/recommendation/repository'
-import type { Eur, Year } from '~/domain/shared/types'
+import type { Eur, PersonName, Year } from '~/domain/shared/types'
 import * as tastingRepo from '~/domain/tasting/repository'
+import type { Rating } from '~/domain/tasting/types'
 import { WineQuery } from '~/domain/wine/query'
 import * as wineRepo from '~/domain/wine/repository'
 import {
@@ -18,6 +19,10 @@ import {
   aTastingNote,
   aWine,
 } from '~/test/fixtures'
+
+// Helper to access getAll results without lodash union type issues
+const getAll = async (...args: Parameters<typeof WineQuery.getAll>) =>
+  (await WineQuery.getAll(...args)) as any[]
 
 describe('WineQuery', () => {
   describe('getById', () => {
@@ -45,7 +50,7 @@ describe('WineQuery', () => {
       await wineRepo.save(notInCellar)
       await cellarRepo.save(aCellarBottle({ wineId: inCellar.id }))
 
-      const result = await WineQuery.getAll({ status: 'in-cellar' })
+      const result = await getAll({ status: 'in-cellar' })
       expect(result).toHaveLength(1)
       expect(result[0].id).toBe(inCellar.id)
     })
@@ -58,7 +63,7 @@ describe('WineQuery', () => {
       await giftRepo.save(aGift({ wineId: gifted.id }))
       await cellarRepo.save(aCellarBottle({ wineId: inCellar.id }))
 
-      const result = await WineQuery.getAll({ status: 'gifted' })
+      const result = await getAll({ status: 'gifted' })
       expect(result).toHaveLength(1)
       expect(result[0].id).toBe(gifted.id)
     })
@@ -68,7 +73,7 @@ describe('WineQuery', () => {
       await wineRepo.save(recommended)
       await recommendationRepo.save(aRecommendation({ wineId: recommended.id }))
 
-      const result = await WineQuery.getAll({ status: 'recommended' })
+      const result = await getAll({ status: 'recommended' })
       expect(result).toHaveLength(1)
       expect(result[0].id).toBe(recommended.id)
     })
@@ -77,7 +82,7 @@ describe('WineQuery', () => {
       const consumed = aWine()
       await wineRepo.save(consumed)
 
-      const result = await WineQuery.getAll({ status: 'consumed' })
+      const result = await getAll({ status: 'consumed' })
       expect(result).toHaveLength(1)
       expect(result[0].id).toBe(consumed.id)
     })
@@ -85,7 +90,7 @@ describe('WineQuery', () => {
     test('no status filter returns all', async () => {
       await wineRepo.save(aWine())
       await wineRepo.save(aWine())
-      const result = await WineQuery.getAll()
+      const result = await getAll()
       expect(result).toHaveLength(2)
     })
   })
@@ -95,7 +100,7 @@ describe('WineQuery', () => {
       await wineRepo.save(aWine({ color: 'red' }))
       await wineRepo.save(aWine({ color: 'white' }))
 
-      const result = await WineQuery.getAll({ color: 'white' })
+      const result = await getAll({ color: 'white' })
       expect(result).toHaveLength(1)
       expect(result[0].color).toBe('white')
     })
@@ -106,7 +111,7 @@ describe('WineQuery', () => {
       await wineRepo.save(aWine({ vintage: make<Year>()(2020) }))
       await wineRepo.save(aWine({ vintage: make<Year>()(2018) }))
 
-      const result = await WineQuery.getAll({ sort: 'vintage', order: 'asc' })
+      const result = await getAll({ sort: 'vintage', order: 'asc' })
       expect(result[0].vintage).toBe(2018)
       expect(result[1].vintage).toBe(2020)
     })
@@ -115,7 +120,7 @@ describe('WineQuery', () => {
       await wineRepo.save(aWine({ purchasePrice: make<Eur>()(10) }))
       await wineRepo.save(aWine({ purchasePrice: make<Eur>()(50) }))
 
-      const result = await WineQuery.getAll({ sort: 'price', order: 'desc' })
+      const result = await getAll({ sort: 'price', order: 'desc' })
       expect(result[0].purchasePrice).toBe(50)
       expect(result[1].purchasePrice).toBe(10)
     })
@@ -127,7 +132,7 @@ describe('WineQuery', () => {
       await wineRepo.save(wine)
       await tastingRepo.save(aTastingNote({ wineId: wine.id, rating: make<Rating>()(5) }))
 
-      const result = await WineQuery.getAll()
+      const result = await getAll()
       expect(result[0].rating).toBe(5)
     })
 
@@ -136,7 +141,7 @@ describe('WineQuery', () => {
       await wineRepo.save(wine)
       await giftRepo.save(aGift({ wineId: wine.id }))
 
-      const result = await WineQuery.getAll()
+      const result = await getAll()
       expect(result[0].giftedTo).toBe('Jean Dupont')
     })
 
@@ -145,7 +150,7 @@ describe('WineQuery', () => {
       await wineRepo.save(wine)
       await recommendationRepo.save(aRecommendation({ wineId: wine.id }))
 
-      const result = await WineQuery.getAll()
+      const result = await getAll()
       expect(result[0].recommendedBy).toBe('Marie Martin')
     })
 
@@ -154,7 +159,7 @@ describe('WineQuery', () => {
       await wineRepo.save(wine)
       await giftRepo.save(aGift({ wineId: wine.id }))
 
-      const result = await WineQuery.getAll()
+      const result = await getAll()
       const jeanCount = result[0].contacts.filter((c: string) => c === 'Jean Dupont').length
       expect(jeanCount).toBe(1)
     })
@@ -177,8 +182,8 @@ describe('WineQuery', () => {
       const result = await WineQuery.getDetail(wine.id)
       expect(result).not.toBe('not-found')
       if (result === 'not-found') return
-      expect(result.cellar?.rowLabel).toBe('B')
-      expect(result.cellar?.colLabel).toBe(3)
+      expect(result.cellar?.rowLabel as string).toBe('B')
+      expect(result.cellar?.colLabel as number).toBe(3)
     })
 
     test('reconstructs position from journal when not in cellar', async () => {
@@ -191,7 +196,7 @@ describe('WineQuery', () => {
       expect(result).not.toBe('not-found')
       if (result === 'not-found') return
       expect(result.cellar).toBeDefined()
-      expect(result.cellar?.dateOut).toBeDefined()
+      expect((result.cellar as any)?.dateOut).toBeDefined()
     })
 
     test('aggregates tasting, gift, recommendation', async () => {

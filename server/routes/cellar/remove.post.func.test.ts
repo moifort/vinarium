@@ -32,7 +32,7 @@ describe('POST /cellar/remove', () => {
 
     const gift = await giftRepo.findBy(wine.id)
     expect(gift).not.toBeNull()
-    expect(gift?.recipientName).toBe('Jean')
+    expect(gift?.recipientName as string).toBe('Jean')
   })
 
   test('creates tasting note when tasting data provided', async () => {
@@ -46,7 +46,7 @@ describe('POST /cellar/remove', () => {
 
     const tasting = await tastingRepo.findBy(wine.id)
     expect(tasting).not.toBeNull()
-    expect(tasting?.rating).toBe(4)
+    expect(tasting?.rating as number).toBe(4)
   })
 
   test('throws 404 when not in cellar', async () => {

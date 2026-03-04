@@ -56,8 +56,8 @@ describe('runMigrations', () => {
     expect(result.outcome).toBe('migrated')
     expect(applied).toEqual([1, 2])
     if (result.outcome === 'migrated') {
-      expect(result.from).toBe(0)
-      expect(result.to).toBe(2)
+      expect(result.from as number).toBe(0)
+      expect(result.to as number).toBe(2)
       expect(result.applied).toBe(2)
     }
   })
@@ -72,7 +72,7 @@ describe('runMigrations', () => {
     const result = await runMigrations(migrations)
     expect(result.outcome).toBe('failed')
     if (result.outcome === 'failed') {
-      expect(result.version).toBe(2)
+      expect(result.version as number).toBe(2)
       expect(result.error).toBe('bad data')
     }
   })
@@ -97,7 +97,7 @@ describe('runMigrations', () => {
 
     const meta = await useStorage('migration-meta').getItem<MigrationMeta>('state')
     expect(meta).not.toBeNull()
-    expect(meta?.version).toBe(2)
+    expect(meta?.version as number).toBe(2)
   })
 
   test('skips already applied migrations', async () => {

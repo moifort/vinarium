@@ -16,8 +16,8 @@ describe('CellarCommand', () => {
       const entry = await CellarCommand.placeWine(wine.id, row, col)
 
       expect(entry.wineId).toBe(wine.id)
-      expect(entry.row).toBe(1)
-      expect(entry.col).toBe(2)
+      expect(entry.row as number).toBe(1)
+      expect(entry.col as number).toBe(2)
 
       const cellarEntry = await cellarRepo.findBy(wine.id)
       expect(cellarEntry).not.toBeNull()

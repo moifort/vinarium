@@ -11,19 +11,19 @@ import {
 describe('WineId', () => {
   test('accepts valid UUID', () => {
     const uuid = crypto.randomUUID()
-    expect(WineId(uuid)).toBe(uuid)
+    expect(WineId(uuid) as string).toBe(uuid)
   })
   test('rejects random string', () => expect(() => WineId('not-a-uuid')).toThrow())
 })
 
 describe('WineName', () => {
-  test('accepts non-empty string', () => expect(WineName('Margaux')).toBe('Margaux'))
+  test('accepts non-empty string', () => expect(WineName('Margaux') as string).toBe('Margaux'))
   test('rejects empty string', () => expect(() => WineName('')).toThrow())
 })
 
 describe('WineColor', () => {
   test.each(['red', 'white', 'rosé', 'sparkling', 'sweet'] as const)('accepts "%s"', (color) =>
-    expect(WineColor(color)).toBe(color))
+    expect(WineColor(color) as string).toBe(color))
   test('rejects invalid color', () => expect(() => WineColor('blue')).toThrow())
 })
 
@@ -35,18 +35,18 @@ describe('WineSort', () => {
     'region',
     'color',
     'price',
-  ] as const)('accepts "%s"', (sort) => expect(WineSort(sort)).toBe(sort))
+  ] as const)('accepts "%s"', (sort) => expect(WineSort(sort) as string).toBe(sort))
   test('rejects invalid sort', () => expect(() => WineSort('invalid')).toThrow())
 })
 
 describe('SortOrder', () => {
-  test('accepts "asc"', () => expect(SortOrder('asc')).toBe('asc'))
-  test('accepts "desc"', () => expect(SortOrder('desc')).toBe('desc'))
+  test('accepts "asc"', () => expect(SortOrder('asc') as string).toBe('asc'))
+  test('accepts "desc"', () => expect(SortOrder('desc') as string).toBe('desc'))
   test('rejects invalid order', () => expect(() => SortOrder('up')).toThrow())
 })
 
 describe('WineStatus', () => {
   test.each(['in-cellar', 'consumed', 'gifted', 'recommended'] as const)('accepts "%s"', (status) =>
-    expect(WineStatus(status)).toBe(status))
+    expect(WineStatus(status) as string).toBe(status))
   test('rejects invalid status', () => expect(() => WineStatus('invalid')).toThrow())
 })

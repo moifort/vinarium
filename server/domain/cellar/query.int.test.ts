@@ -12,10 +12,10 @@ describe('CellarQuery', () => {
       const result = await CellarQuery.suggestPosition()
       expect(result).not.toBe('cellar-full')
       if (result === 'cellar-full') return
-      expect(result.row).toBe(0)
-      expect(result.col).toBe(0)
-      expect(result.rowLabel).toBe('A')
-      expect(result.colLabel).toBe(1)
+      expect(result.row as number).toBe(0)
+      expect(result.col as number).toBe(0)
+      expect(result.rowLabel as string).toBe('A')
+      expect(result.colLabel as number).toBe(1)
     })
 
     test('skips occupied slots (row-major order)', async () => {
@@ -28,8 +28,8 @@ describe('CellarQuery', () => {
       const result = await CellarQuery.suggestPosition()
       expect(result).not.toBe('cellar-full')
       if (result === 'cellar-full') return
-      expect(result.row).toBe(0)
-      expect(result.col).toBe(1)
+      expect(result.row as number).toBe(0)
+      expect(result.col as number).toBe(1)
     })
 
     test('returns cellar-full when 48 slots occupied', async () => {
@@ -81,8 +81,8 @@ describe('CellarQuery', () => {
       const result = await CellarQuery.getBottleByWineId(wine.id)
       expect(result).not.toBe('not-found')
       if (result === 'not-found') return
-      expect(result.rowLabel).toBe('C')
-      expect(result.colLabel).toBe(4)
+      expect(result.rowLabel as string).toBe('C')
+      expect(result.colLabel as number).toBe(4)
     })
 
     test('returns not-found when absent', async () => {

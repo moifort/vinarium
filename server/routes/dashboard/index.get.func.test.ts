@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import { make } from 'ts-brand'
 import * as cellarRepo from '~/domain/cellar/repository'
+import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { Eur } from '~/domain/shared/types'
 import * as tastingRepo from '~/domain/tasting/repository'
 import type { Rating } from '~/domain/tasting/types'
@@ -19,8 +20,8 @@ describe('GET /dashboard', () => {
     await cellarRepo.save(
       aCellarBottle({
         wineId: wine2.id,
-        row: make<import('~/domain/cellar/types').CellarRow>()(0),
-        col: make<import('~/domain/cellar/types').CellarCol>()(1),
+        row: make<CellarRow>()(0),
+        col: make<CellarCol>()(1),
       }),
     )
 

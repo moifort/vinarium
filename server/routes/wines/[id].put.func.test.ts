@@ -15,8 +15,8 @@ describe('PUT /wines/:id', () => {
     })
     const result = await handler(event as any)
     expect(result.status).toBe(200)
-    expect(result.data.name).toBe('Updated Name')
-    expect(result.data.vintage).toBe(2020)
+    expect(result.data.name as string).toBe('Updated Name')
+    expect(result.data.vintage as number).toBe(2020)
   })
 
   test('throws 404 for missing wine', async () => {
