@@ -8,6 +8,8 @@
   ```
   DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project ios/CaveAVin.xcodeproj -scheme CaveAVin -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' build
   ```
+- **Unit tests**: `bun test`
+- **Test coverage**: `bun test --coverage`
 - **Linter**: `bunx biome check`
 - **Runtime**: always use `bun`/`bunx`, never `npm`/`npx`
 
