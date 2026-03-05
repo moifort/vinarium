@@ -19,14 +19,6 @@
 2. Run `bunx nitro prepare` before `bun tsc` if routes were added/modified
 3. After each completed task: run an expert code review (`superpowers:requesting-code-review`) before proposing the commit
 4. After each completed task: request user validation BEFORE committing
-5. Before any `git push`: run the iOS E2E test and only push if it passes:
-   ```
-   DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild test -project ios/CaveAVin.xcodeproj -scheme CaveAVin -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' -only-testing:CaveAVinUITests
-   ```
-6. After E2E tests finish: copy test data for reuse (snapshots, previews, etc.):
-   ```
-   rm -rf .data && cp -a .data-test .data
-   ```
 
 ## Skills
 
