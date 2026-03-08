@@ -1,4 +1,5 @@
 import { keyBy, sortBy } from 'lodash-es'
+import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import * as repository from '~/domain/journal/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
 import { WineQuery } from '~/domain/wine/query'
@@ -32,8 +33,8 @@ export namespace JournalQuery {
       wineId,
       dateIn: entryIn.dateIn,
       dateOut: entryOut?.dateOut,
-      rowLabel: entryIn.rowLabel,
-      colLabel: entryIn.colLabel,
+      row: entryIn.row,
+      col: entryIn.col,
     }
   }
 
@@ -49,7 +50,7 @@ export namespace JournalQuery {
       wineId: entry.wineId,
       wineName: wine.name,
       wineColor: wine.color,
-      position: `${entry.rowLabel}${entry.colLabel}`,
+      position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     }
   }
 }

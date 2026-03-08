@@ -1,19 +1,19 @@
-import type { CellarColLabel, CellarRowLabel } from '~/domain/cellar/types'
+import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { WineColor, WineId, WineName } from '~/domain/wine/types'
 
 export type JournalEntryIn = {
   type: 'in'
   wineId: WineId
-  rowLabel: CellarRowLabel
-  colLabel: CellarColLabel
+  row: CellarRow
+  col: CellarCol
   dateIn: Date
 }
 
 export type JournalEntryOut = {
   type: 'out'
   wineId: WineId
-  rowLabel: CellarRowLabel
-  colLabel: CellarColLabel
+  row: CellarRow
+  col: CellarCol
   dateOut: Date
 }
 

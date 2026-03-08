@@ -22,8 +22,8 @@ describe('JournalQuery', () => {
       if (result === 'not-found') return
       expect(result.dateIn).toEqual(entry.dateIn)
       expect(result.dateOut).toBeUndefined()
-      expect(result.rowLabel).toBe(entry.rowLabel)
-      expect(result.colLabel).toBe(entry.colLabel)
+      expect(result.row).toBe(entry.row)
+      expect(result.col).toBe(entry.col)
     })
 
     test('returns both dates when entry in + out', async () => {
@@ -65,7 +65,7 @@ describe('JournalQuery', () => {
       const result = await JournalQuery.getAll()
       expect(result[0].wineName).toBe(wine.name)
       expect(result[0].wineColor).toBe(wine.color)
-      expect(result[0].position).toBe(`${entry.rowLabel}${entry.colLabel}`)
+      expect(result[0].position).toBe('A1')
     })
   })
 })

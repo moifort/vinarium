@@ -32,8 +32,8 @@ export const aCellarBottle = (overrides?: Partial<CellarBottle>): CellarBottle =
 export const aJournalEntryIn = (overrides?: Partial<JournalEntryIn>): JournalEntryIn => ({
   type: 'in',
   wineId: wineId(),
-  rowLabel: make<JournalEntryIn['rowLabel']>()('A'),
-  colLabel: make<JournalEntryIn['colLabel']>()(1),
+  row: make<CellarRow>()(0),
+  col: make<CellarCol>()(0),
   dateIn: new Date('2024-01-01'),
   ...overrides,
 })
@@ -41,8 +41,8 @@ export const aJournalEntryIn = (overrides?: Partial<JournalEntryIn>): JournalEnt
 export const aJournalEntryOut = (overrides?: Partial<JournalEntryOut>): JournalEntryOut => ({
   type: 'out',
   wineId: wineId(),
-  rowLabel: make<JournalEntryOut['rowLabel']>()('A'),
-  colLabel: make<JournalEntryOut['colLabel']>()(1),
+  row: make<CellarRow>()(0),
+  col: make<CellarCol>()(0),
   dateOut: new Date('2024-06-01'),
   ...overrides,
 })

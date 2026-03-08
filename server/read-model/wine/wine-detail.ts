@@ -66,10 +66,10 @@ export namespace WineDetailReadModel {
     const dates = await JournalQuery.getCellarDates(wineId)
     if (dates === 'not-found') return undefined
     return {
-      row: CellarRow(dates.rowLabel.charCodeAt(0) - 65),
-      col: CellarCol(dates.colLabel - 1),
-      rowLabel: dates.rowLabel,
-      colLabel: dates.colLabel,
+      row: dates.row,
+      col: dates.col,
+      rowLabel: CellarRow.toLabel(dates.row),
+      colLabel: CellarCol.toLabel(dates.col),
       dateIn: dates.dateIn,
       dateOut: dates.dateOut,
     }
