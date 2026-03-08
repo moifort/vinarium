@@ -20,3 +20,5 @@ export type CellarBottleView = CellarBottle & {
   rowLabel: CellarRowLabel
   colLabel: CellarColLabel
 }
+
+export const CELLAR_SIZE = { rows: 6, cols: 8 } as const

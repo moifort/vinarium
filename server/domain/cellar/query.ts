@@ -1,11 +1,9 @@
 import { keyBy, range } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import * as repository from '~/domain/cellar/repository'
-import type { CellarBottle, CellarBottleView } from '~/domain/cellar/types'
+import { CELLAR_SIZE, type CellarBottle, type CellarBottleView } from '~/domain/cellar/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
-
-const CELLAR_SIZE = { rows: 6, cols: 8 }
 
 export namespace CellarQuery {
   export const getAllBottles = async () => {
