@@ -1,4 +1,4 @@
-import { Scan } from '~/domain/scan/index'
+import { Scan } from '~/system/scan/index'
 
 export default defineEventHandler(async (event) => {
   const body = await readRawBody(event, false)

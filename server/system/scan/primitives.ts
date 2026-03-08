@@ -1,6 +1,6 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
-import type { ImageHash as ImageHashType } from '~/domain/scan/types'
+import type { ImageHash as ImageHashType } from '~/system/scan/types'
 
 export const ImageHash = (value: unknown) => {
   const v = z

@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
-import { ImageHash } from '~/domain/scan/primitives'
-import * as repository from '~/domain/scan/repository'
-import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
+import { ImageHash } from '~/system/scan/primitives'
+import * as repository from '~/system/scan/repository'
+import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
 
