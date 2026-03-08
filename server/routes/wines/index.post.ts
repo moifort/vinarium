@@ -1,7 +1,5 @@
 import { Country, Eur, PersonName, Region, Year } from '~/domain/shared/primitives'
-import { TastingCommand } from '~/domain/tasting/command'
 import { Rating } from '~/domain/tasting/primitives'
-import { WineCommand } from '~/domain/wine/command'
 import {
   Appellation,
   Classification,
@@ -10,6 +8,7 @@ import {
   WineName,
 } from '~/domain/wine/primitives'
 import type { Wine } from '~/domain/wine/types'
+import { WineUseCase } from '~/domain/wine/use-case'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -34,17 +33,16 @@ export default defineEventHandler(async (event) => {
   if (body.notes) data.notes = body.notes
   if (body.giftedBy) data.giftedBy = PersonName(body.giftedBy)
 
-  const wine = await WineCommand.add(name, color, data)
+  const tasting =
+    body.rating != null
+      ? {
+          rating: Rating(body.rating),
+          consumedDate: body.consumedDate ? new Date(body.consumedDate) : new Date(),
+          tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
+          contacts: body.contacts?.length ? body.contacts : undefined,
+        }
+      : undefined
 
-  if (body.rating != null) {
-    await TastingCommand.create({
-      wineId: wine.id,
-      rating: Rating(body.rating),
-      consumedDate: body.consumedDate ? new Date(body.consumedDate) : new Date(),
-      tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
-      contacts: body.contacts?.length ? body.contacts : undefined,
-    })
-  }
-
+  const wine = await WineUseCase.addWithTasting(name, color, data, tasting)
   return { status: 201, data: wine }
 })
