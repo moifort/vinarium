@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'bun:test'
-import { readyToDrink, urgentToDrink, wineStatus } from '~/domain/wine/business-rules'
+import {
+  FAVORITE_RATING,
+  isFavorite,
+  readyToDrink,
+  urgentToDrink,
+  wineStatus,
+} from '~/domain/wine/business-rules'
 
 describe('wineStatus', () => {
   test('in-cellar when bottle present', () => {
@@ -68,5 +74,19 @@ describe('urgentToDrink', () => {
 
   test('false when drinkUntil is 2+ years away', () => {
     expect(urgentToDrink({ until: 2030 }, 2026)).toBe(false)
+  })
+})
+
+describe('isFavorite', () => {
+  test('true when rating equals FAVORITE_RATING', () => {
+    expect(isFavorite(FAVORITE_RATING)).toBe(true)
+  })
+
+  test('false when rating is lower', () => {
+    expect(isFavorite(4)).toBe(false)
+  })
+
+  test('false when undefined', () => {
+    expect(isFavorite(undefined)).toBe(false)
   })
 })

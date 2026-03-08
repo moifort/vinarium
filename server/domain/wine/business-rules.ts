@@ -22,3 +22,7 @@ export const urgentToDrink = (window: DrinkWindow, year: number) => {
   if (!window.until) return false
   return window.until <= year + 1
 }
+
+export const FAVORITE_RATING = 5
+
+export const isFavorite = (rating?: number) => rating === FAVORITE_RATING

@@ -3,7 +3,11 @@ import { CellarQuery } from '~/domain/cellar/query'
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
-import { readyToDrink as isReadyToDrink, urgentToDrink } from '~/domain/wine/business-rules'
+import {
+  isFavorite,
+  readyToDrink as isReadyToDrink,
+  urgentToDrink,
+} from '~/domain/wine/business-rules'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
 import type { FavoriteWine, LastBottle, ReadyToDrinkWine } from '~/read-model/dashboard/types'
@@ -38,7 +42,7 @@ export namespace DashboardReadModel {
     const lastExit = history.find((event) => event.type === 'out')
 
     const favorites = loadFavorites(
-      allTastings.filter(({ rating }) => rating === 5),
+      allTastings.filter(({ rating }) => isFavorite(rating)),
       wineMap,
     )
 
