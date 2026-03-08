@@ -4,6 +4,7 @@ import type { FavoriteWine, LastBottle, ReadyToDrinkWine } from '~/domain/dashbo
 import { JournalQuery } from '~/domain/journal/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
+import { readyToDrink as isReadyToDrink, urgentToDrink } from '~/domain/wine/business-rules'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
 
@@ -23,7 +24,9 @@ export namespace DashboardQuery {
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchasePrice ?? 0), 0)
     const readyToDrink = sortBy(
       allBottles
-        .filter((b) => isReadyToDrink(b.wine, currentYear))
+        .filter((b) =>
+          isReadyToDrink({ from: b.wine.drinkFrom, until: b.wine.drinkUntil }, currentYear),
+        )
         .map((b) => toReadyToDrinkWine(b, currentYear)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Infinity,
@@ -50,14 +53,6 @@ export namespace DashboardQuery {
     }
   }
 
-  const isReadyToDrink = (wine: Wine, currentYear: number) => {
-    if (!wine.drinkFrom && !wine.drinkUntil) return false
-    return (
-      (!wine.drinkFrom || wine.drinkFrom <= currentYear) &&
-      (!wine.drinkUntil || wine.drinkUntil >= currentYear)
-    )
-  }
-
   const toReadyToDrinkWine = (
     bottle: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number],
     currentYear: number,
@@ -66,7 +61,7 @@ export namespace DashboardQuery {
     name: bottle.wine.name,
     color: bottle.wine.color,
     position: `${bottle.rowLabel}${bottle.colLabel}`,
-    urgent: !!bottle.wine.drinkUntil && bottle.wine.drinkUntil <= currentYear + 1,
+    urgent: urgentToDrink({ until: bottle.wine.drinkUntil }, currentYear),
     drinkUntil: bottle.wine.drinkUntil,
   })
 
