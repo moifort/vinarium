@@ -36,6 +36,7 @@
 - Discriminated unions for errors (no exceptions)
 - File-based storage: `useStorage('wines')`, `useStorage('cellar')`, etc.
 - **Naming**: function names carry the business concept, not the technical pattern. The name IS the rule or action.
+- **BDD DSL**: `server/test/bdd.ts` — `feature()`, `scenario()`, `given()`, `when()`, `then()`, `and()` over `bun:test`. Feature tests use `.feat.test.ts` suffix.
 - Formatter: Biome (spaces, single quotes, no semicolons, line width 100)
 
 ## Database Migrations

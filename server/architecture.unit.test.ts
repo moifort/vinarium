@@ -91,7 +91,7 @@ describe('architecture', () => {
     const testFiles = glob('server/**/*.test.ts').filter(
       (f) => f !== 'server/architecture.unit.test.ts',
     )
-    const validSuffixes = ['.unit.test.ts', '.int.test.ts', '.func.test.ts']
+    const validSuffixes = ['.unit.test.ts', '.int.test.ts', '.feat.test.ts']
 
     test('each test file uses a valid suffix', () => {
       const violations = testFiles.filter(
