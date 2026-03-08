@@ -2,12 +2,12 @@ import { describe, expect, test } from 'bun:test'
 import { make } from 'ts-brand'
 import * as cellarRepo from '~/domain/cellar/repository'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
-import { DashboardQuery } from '~/domain/dashboard/query'
 import * as journalRepo from '~/domain/journal/repository'
 import type { Eur, Year } from '~/domain/shared/types'
 import * as tastingRepo from '~/domain/tasting/repository'
 import type { Rating } from '~/domain/tasting/types'
 import * as wineRepo from '~/domain/wine/repository'
+import { DashboardReadModel } from '~/read-model/dashboard/overview'
 import {
   aCellarBottle,
   aJournalEntryIn,
@@ -16,10 +16,10 @@ import {
   aWine,
 } from '~/test/fixtures'
 
-describe('DashboardQuery', () => {
+describe('DashboardReadModel', () => {
   describe('get', () => {
     test('empty cellar returns zero counts', async () => {
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.bottleCount).toBe(0)
       expect(result.totalValue).toBe(0)
       expect(result.readyToDrink).toHaveLength(0)
@@ -39,7 +39,7 @@ describe('DashboardQuery', () => {
         aCellarBottle({ wineId: wine2.id, row: make<CellarRow>()(0), col: make<CellarCol>()(1) }),
       )
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.bottleCount).toBe(2)
     })
 
@@ -53,7 +53,7 @@ describe('DashboardQuery', () => {
         aCellarBottle({ wineId: wine2.id, row: make<CellarRow>()(0), col: make<CellarCol>()(1) }),
       )
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.totalValue).toBe(40)
     })
 
@@ -66,7 +66,7 @@ describe('DashboardQuery', () => {
       await wineRepo.save(wine)
       await cellarRepo.save(aCellarBottle({ wineId: wine.id }))
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.readyToDrink).toHaveLength(1)
       expect(result.readyToDrink[0].id).toBe(wine.id)
       expect(result.readyToDrink[0].urgent).toBe(false)
@@ -81,7 +81,7 @@ describe('DashboardQuery', () => {
       await wineRepo.save(wine)
       await cellarRepo.save(aCellarBottle({ wineId: wine.id }))
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.readyToDrink).toHaveLength(1)
       expect(result.readyToDrink[0].urgent).toBe(true)
     })
@@ -91,7 +91,7 @@ describe('DashboardQuery', () => {
       await wineRepo.save(wine)
       await cellarRepo.save(aCellarBottle({ wineId: wine.id }))
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.readyToDrink).toHaveLength(0)
     })
 
@@ -100,7 +100,7 @@ describe('DashboardQuery', () => {
       await wineRepo.save(wine)
       await tastingRepo.save(aTastingNote({ wineId: wine.id, rating: make<Rating>()(5) }))
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.favorites).toHaveLength(1)
       expect(result.favorites[0].id).toBe(wine.id)
     })
@@ -120,7 +120,7 @@ describe('DashboardQuery', () => {
         }),
       )
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.lastBottle).toBeDefined()
       expect(result.lastBottle?.wine.id).toBe(wine2.id)
     })
@@ -131,7 +131,7 @@ describe('DashboardQuery', () => {
       await journalRepo.save(aJournalEntryIn({ wineId: wine.id }))
       await journalRepo.save(aJournalEntryOut({ wineId: wine.id }))
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.lastExit).toBeDefined()
       expect(result.lastExit?.type).toBe('out')
     })
@@ -148,7 +148,7 @@ describe('DashboardQuery', () => {
         )
       }
 
-      const result = await DashboardQuery.get()
+      const result = await DashboardReadModel.get()
       expect(result.history).toHaveLength(10)
     })
   })
