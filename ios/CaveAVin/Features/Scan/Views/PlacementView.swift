@@ -3,7 +3,10 @@ import SentrySwiftUI
 import SwiftUI
 
 struct PlacementView: View {
-    let wine: Wine
+    let wineId: String
+    let wineName: String
+    let wineColor: WineColor
+    let wineVintage: Int?
     var onCancel: () -> Void = {}
     let onPlaced: (String) -> Void
 
@@ -108,11 +111,11 @@ struct PlacementView: View {
 
     private var wineHeader: some View {
         HStack(spacing: 12) {
-            WineColorBadge(color: wine.color)
+            WineColorBadge(color: wineColor)
             VStack(alignment: .leading) {
-                Text(wine.name)
+                Text(wineName)
                     .font(.headline)
-                if let vintage = wine.vintage {
+                if let vintage = wineVintage {
                     Text(verbatim: "\(vintage)")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -127,7 +130,7 @@ struct PlacementView: View {
     private func loadData() async {
         do {
             async let bottlesData = CellarAPI.getBottles()
-            async let suggestion = CellarAPI.suggest(wineId: wine.id)
+            async let suggestion = CellarAPI.suggest(wineId: wineId)
             let (b, s) = try await (bottlesData, suggestion)
             bottles = b
             suggestedRow = s.row
@@ -146,7 +149,7 @@ struct PlacementView: View {
 
         Task {
             do {
-                try await CellarAPI.place(wineId: wine.id, row: rowStr, col: col)
+                try await CellarAPI.place(wineId: wineId, row: rowStr, col: col)
                 onPlaced(position)
             } catch {
                 self.error = reportError(error)
@@ -159,10 +162,10 @@ struct PlacementView: View {
 #Preview {
     NavigationStack {
         PlacementView(
-            wine: Wine(
-                id: "1", name: "Château Margaux", color: .red,
-                vintage: 2018, createdAt: Date(), updatedAt: Date()
-            ),
+            wineId: "1",
+            wineName: "Château Margaux",
+            wineColor: .red,
+            wineVintage: 2018,
             onPlaced: { _ in }
         )
     }

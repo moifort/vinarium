@@ -56,7 +56,12 @@
 
 - Target: iOS 26.0, Swift 6 (strict concurrency)
 - `@MainActor` on ViewModels, `Sendable` on model types
-- Feature structure: `ios/CaveAVin/Features/{Feature}/`
+- Feature structure: `ios/CaveAVin/Features/{Feature}/` with `pages/`, `organisms/`, `molecules/` subdirectories
+- Shared atoms: `ios/CaveAVin/Shared/Components/` — cross-feature reusable views (badges, ratings, labeled rows)
+- **Primitive-first views**: leaf views receive only primitives (`String`, `Int`, `Bool`, `Date?`, `WineColor`, closures) — never domain structs (`Wine`, `UserWineDetail`, `CellarBottle`). Use nested `Item` structs for 5+ parameters
+- **Previews as Storybook**: every component below page level must be previewable without a running server
+- **Pages = coordinators**: handle loading, error, sheets, toolbar, API calls. Map domain models to primitives for children
+- **Organisms as mapping boundaries**: can accept domain structs when they break them down into primitives for child sections
 - Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files)
 - `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools
 

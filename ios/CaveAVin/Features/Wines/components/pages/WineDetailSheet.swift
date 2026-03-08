@@ -16,28 +16,7 @@ struct WineDetailSheet: View {
     @State private var showGift = false
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
-
-    // MARK: - Edit state
-
     @State private var isEditing = false
-    @State private var isSaving = false
-    @State private var saveError: String?
-    @State private var editName = ""
-    @State private var editColor: WineColor = .red
-    @State private var editDomain = ""
-    @State private var editVintage = ""
-    @State private var editAppellation = ""
-    @State private var editRegion = ""
-    @State private var editCountry = ""
-    @State private var editClassification = ""
-    @State private var editGrapeVarieties = ""
-    @State private var editPurchasePrice = ""
-    @State private var editPurchaseDate: Date?
-    @State private var editDrinkFrom = ""
-    @State private var editDrinkUntil = ""
-    @State private var editGiftedBy = ""
-    @State private var showGiftedByPicker = false
-    @State private var editNotes = ""
 
     var body: some View {
         NavigationStack {
@@ -46,9 +25,21 @@ struct WineDetailSheet: View {
                     ProgressView()
                 } else if let detail {
                     if isEditing {
-                        editContent
+                        WineEditForm(
+                            initial: editFields(from: detail),
+                            onSave: { request in
+                                _ = try await WineAPI.update(id: wineId, request)
+                                self.detail = try await WineAPI.getDetail(id: wineId)
+                                isEditing = false
+                                onUpdated?()
+                            },
+                            onCancel: { isEditing = false }
+                        )
                     } else {
-                        wineContent(detail)
+                        WineDetailContent(
+                            detail: detail,
+                            onRemoveRequested: { showRemovalChoice = true }
+                        )
                     }
                 } else if let error {
                     ContentUnavailableView(
@@ -61,9 +52,7 @@ struct WineDetailSheet: View {
             .sentryTrace("Wine Detail", waitForFullDisplay: true)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                if isEditing {
-                    editToolbar
-                } else {
+                if !isEditing {
                     readToolbar
                 }
             }
@@ -71,30 +60,61 @@ struct WineDetailSheet: View {
                 await loadData()
                 SentrySDK.reportFullyDisplayed()
             }
-        }
-    }
-
-    // MARK: - Toolbars
-
-    @ToolbarContentBuilder
-    private var editToolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            Button("Annuler", systemImage: "xmark") {
-                isEditing = false
-            }
-            .disabled(isSaving)
-        }
-        ToolbarItem(placement: .confirmationAction) {
-            if isSaving {
-                ProgressView()
-            } else {
-                Button("Enregistrer", systemImage: "checkmark") {
-                    Task { await saveChanges() }
+            .sheet(isPresented: $showConsumption) {
+                if let detail {
+                    ConsumptionSheet { date, rating, notes, contacts in
+                        let formatter = ISO8601DateFormatter()
+                        _ = try? await CellarAPI.remove(
+                            wineId: detail.id,
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            tastingNotes: notes,
+                            contacts: contacts.isEmpty ? nil : contacts
+                        )
+                        showConsumption = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                    .presentationDetents([.height(550)])
                 }
-                .disabled(editName.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .sheet(isPresented: $showGift) {
+                if let detail {
+                    GiftSheet { date, recipientName in
+                        let formatter = ISO8601DateFormatter()
+                        _ = try? await CellarAPI.gift(
+                            wineId: detail.id,
+                            giftedDate: formatter.string(from: date),
+                            recipientName: recipientName
+                        )
+                        showGift = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                    .presentationDetents([.height(250)])
+                }
+            }
+            .sheet(isPresented: $showPlacement) {
+                if let detail {
+                    NavigationStack {
+                        PlacementView(
+                            wineId: detail.id,
+                            wineName: detail.name,
+                            wineColor: detail.color,
+                            wineVintage: detail.vintage,
+                            onCancel: { showPlacement = false }
+                        ) { _ in
+                            showPlacement = false
+                            dismiss()
+                            onRemoved?()
+                        }
+                    }
+                }
             }
         }
     }
+
+    // MARK: - Toolbar
 
     @ToolbarContentBuilder
     private var readToolbar: some ToolbarContent {
@@ -140,10 +160,7 @@ struct WineDetailSheet: View {
             ToolbarItemGroup {
                 Menu {
                     Button("Modifier", systemImage: "pencil") {
-                        if let detail {
-                            populateEditFields(from: detail)
-                            isEditing = true
-                        }
+                        isEditing = true
                     }
                     Button("Supprimer", systemImage: "trash", role: .destructive) {
                         showDeleteConfirmation = true
@@ -174,324 +191,7 @@ struct WineDetailSheet: View {
         }
     }
 
-    // MARK: - Edit content
-
-    private var editContent: some View {
-        Form {
-            Section {
-                LabeledContent {
-                    TextField("Nom du vin", text: $editName)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Nom", systemImage: "wineglass")
-                }
-
-                Picker(selection: $editColor) {
-                    ForEach(WineColor.allCases) { c in
-                        Text(c.label).tag(c)
-                    }
-                } label: {
-                    Label("Couleur", systemImage: "paintpalette")
-                }
-
-                LabeledContent {
-                    TextField("Domaine", text: $editDomain)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Domaine", systemImage: "building.2")
-                }
-
-                LabeledContent {
-                    TextField("Année", text: $editVintage)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Millésime", systemImage: "calendar")
-                }
-            } header: {
-                Text("Informations principales")
-            }
-
-            Section {
-                LabeledContent {
-                    TextField("Appellation", text: $editAppellation)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Appellation", systemImage: "seal")
-                }
-
-                LabeledContent {
-                    TextField("Région", text: $editRegion)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Région", systemImage: "map")
-                }
-
-                LabeledContent {
-                    TextField("Pays", text: $editCountry)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Pays", systemImage: "globe.europe.africa")
-                }
-
-                LabeledContent {
-                    TextField("Classification", text: $editClassification)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Classification", systemImage: "rosette")
-                }
-            } header: {
-                Text("Origine")
-            }
-
-            Section {
-                LabeledContent {
-                    TextField("Cépages", text: $editGrapeVarieties)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Cépages", systemImage: "leaf")
-                }
-
-                LabeledContent {
-                    HStack(spacing: 4) {
-                        TextField("0", text: $editPurchasePrice)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
-                        Text("€")
-                            .foregroundStyle(.secondary)
-                    }
-                } label: {
-                    Label("Prix", systemImage: "eurosign.circle")
-                }
-
-                LabeledContent {
-                    if let date = Binding($editPurchaseDate) {
-                        HStack {
-                            DatePicker("", selection: date, in: ...Date(), displayedComponents: .date)
-                                .labelsHidden()
-                            Button {
-                                editPurchaseDate = nil
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    } else {
-                        Button("Ajouter") {
-                            editPurchaseDate = Date()
-                        }
-                    }
-                } label: {
-                    Label("Date d'achat", systemImage: "cart")
-                }
-            } header: {
-                Text("Détails")
-            }
-
-            Section {
-                LabeledContent {
-                    TextField("Année", text: $editDrinkFrom)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("À partir de", systemImage: "hourglass.bottomhalf.filled")
-                }
-
-                LabeledContent {
-                    TextField("Année", text: $editDrinkUntil)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
-                }
-            } header: {
-                Text("Garde")
-            }
-
-            Section {
-                HStack {
-                    Label("Offert par", systemImage: "gift")
-                    TextField("Nom", text: $editGiftedBy)
-                        .textInputAutocapitalization(.words)
-                        .multilineTextAlignment(.trailing)
-                    Button {
-                        showGiftedByPicker = true
-                    } label: {
-                        Image(systemName: "person.crop.circle")
-                            .font(.title2)
-                            .foregroundStyle(.blue)
-                    }
-                    .buttonStyle(.plain)
-                }
-            } header: {
-                Text("Cadeau")
-            }
-
-            Section {
-                TextField("Notes", text: $editNotes, axis: .vertical)
-                    .lineLimit(3...8)
-            } header: {
-                Text("Notes")
-            }
-        }
-        .alert("Erreur", isPresented: Binding(
-            get: { saveError != nil },
-            set: { if !$0 { saveError = nil } }
-        )) {
-            Button("OK") { saveError = nil }
-        } message: {
-            Text(saveError ?? "")
-        }
-        .sheet(isPresented: $showGiftedByPicker) {
-            ContactPicker { editGiftedBy = $0 }
-        }
-    }
-
-    // MARK: - Read content
-
-    @ViewBuilder
-    private func wineContent(_ detail: UserWineDetail) -> some View {
-        List {
-            WineDetailHeader(
-                color: detail.color,
-                name: detail.name,
-                subtitle: headerSubtitle(detail),
-                domain: detail.domain,
-                vintage: detail.vintage
-            )
-
-            WineOriginSection(
-                appellation: detail.appellation,
-                region: detail.region,
-                country: detail.country,
-                classification: detail.classification
-            )
-
-            WineDetailsSection(
-                alcoholContent: detail.alcoholContent,
-                purchasePrice: detail.purchasePrice,
-                purchaseDate: detail.purchaseDate,
-                grapeVarieties: detail.grapeVarieties
-            )
-
-            WineAgingSection(drinkFrom: detail.drinkFrom, drinkUntil: detail.drinkUntil)
-
-            if let cellar = detail.cellar {
-                WineCellarSection(
-                    position: "\(cellar.row)\(cellar.col)",
-                    dateIn: formatted(cellar.dateIn),
-                    dateOut: cellar.dateOut.map { formatted($0) },
-                    isInCellar: cellar.dateOut == nil,
-                    onRemoveRequested: { showRemovalChoice = true }
-                )
-            }
-
-            if let consumption = detail.consumption {
-                WineConsumptionSection(
-                    consumedDate: consumption.consumedDate.map { formatted($0) },
-                    rating: consumption.rating,
-                    tastingNotes: consumption.tastingNotes,
-                    contacts: consumption.contacts
-                )
-            }
-
-            if let gift = detail.gift {
-                WineGiftSection(giftedDate: formatted(gift.giftedDate), recipientName: gift.recipientName)
-            }
-
-            if let giftedBy = detail.giftedBy {
-                Section("Offert par") {
-                    Label {
-                        Text(giftedBy)
-                    } icon: {
-                        Image(systemName: "gift")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            if let recommendation = detail.recommendation {
-                WineRecommendationSection(
-                    recommenderName: recommendation.recommenderName,
-                    comment: recommendation.comment
-                )
-            }
-
-            if let notes = detail.notes, !notes.isEmpty {
-                Section("Notes") {
-                    Label {
-                        Text(notes)
-                    } icon: {
-                        Image(systemName: "note.text")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
-        .sheet(isPresented: $showConsumption) {
-            ConsumptionSheet { date, rating, notes, contacts in
-                let formatter = ISO8601DateFormatter()
-                _ = try? await CellarAPI.remove(
-                    wineId: detail.id,
-                    consumedDate: formatter.string(from: date),
-                    rating: rating,
-                    tastingNotes: notes,
-                    contacts: contacts.isEmpty ? nil : contacts
-                )
-                showConsumption = false
-                dismiss()
-                onRemoved?()
-            }
-            .presentationDetents([.height(550)])
-        }
-        .sheet(isPresented: $showGift) {
-            GiftSheet { date, recipientName in
-                let formatter = ISO8601DateFormatter()
-                _ = try? await CellarAPI.gift(
-                    wineId: detail.id,
-                    giftedDate: formatter.string(from: date),
-                    recipientName: recipientName
-                )
-                showGift = false
-                dismiss()
-                onRemoved?()
-            }
-            .presentationDetents([.height(250)])
-        }
-        .sheet(isPresented: $showPlacement) {
-            NavigationStack {
-                PlacementView(
-                    wine: Wine(
-                        id: detail.id,
-                        name: detail.name,
-                        color: detail.color,
-                        createdAt: detail.createdAt,
-                        updatedAt: detail.updatedAt
-                    ),
-                    onCancel: { showPlacement = false }
-                ) { _ in
-                    showPlacement = false
-                    dismiss()
-                    onRemoved?()
-                }
-            }
-        }
-    }
-
     // MARK: - Helpers
-
-    private func headerSubtitle(_ detail: UserWineDetail) -> String {
-        [detail.color.label,
-         detail.domain,
-         detail.vintage.map { "\($0)" }]
-            .compactMap { $0 }
-            .joined(separator: " \u{2022} ")
-    }
-
-    private func formatted(_ date: Date) -> String {
-        date.formatted(date: .abbreviated, time: .omitted)
-    }
 
     private func loadData() async {
         do {
@@ -503,65 +203,28 @@ struct WineDetailSheet: View {
         }
     }
 
-    private func populateEditFields(from detail: UserWineDetail) {
-        editName = detail.name
-        editColor = detail.color
-        editDomain = detail.domain ?? ""
-        editVintage = detail.vintage.map(String.init) ?? ""
-        editAppellation = detail.appellation ?? ""
-        editRegion = detail.region ?? ""
-        editCountry = detail.country ?? ""
-        editClassification = detail.classification ?? ""
-        editGrapeVarieties = detail.grapeVarieties.joined(separator: ", ")
-        editPurchasePrice = detail.purchasePrice.map { String(format: "%.0f", $0) } ?? ""
+    private func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {
+        var parsedPurchaseDate: Date?
         if let dateString = detail.purchaseDate {
-            let formatter = ISO8601DateFormatter()
-            editPurchaseDate = formatter.date(from: dateString)
-        } else {
-            editPurchaseDate = nil
+            parsedPurchaseDate = ISO8601DateFormatter().date(from: dateString)
         }
-        editDrinkFrom = detail.drinkFrom.map(String.init) ?? ""
-        editDrinkUntil = detail.drinkUntil.map(String.init) ?? ""
-        editGiftedBy = detail.giftedBy ?? ""
-        editNotes = detail.notes ?? ""
-    }
-
-    private func buildUpdateRequest() -> UpdateWineRequest {
-        let varieties = editGrapeVarieties
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty }
-
-        return UpdateWineRequest(
-            name: editName,
-            color: editColor,
-            domain: editDomain.isEmpty ? nil : editDomain,
-            vintage: Int(editVintage),
-            appellation: editAppellation.isEmpty ? nil : editAppellation,
-            region: editRegion.isEmpty ? nil : editRegion,
-            country: editCountry.isEmpty ? nil : editCountry,
-            grapeVarieties: varieties.isEmpty ? nil : varieties,
-            classification: editClassification.isEmpty ? nil : editClassification,
-            purchasePrice: Double(editPurchasePrice),
-            purchaseDate: editPurchaseDate.map { ISO8601DateFormatter().string(from: $0) },
-            drinkFrom: Int(editDrinkFrom),
-            drinkUntil: Int(editDrinkUntil),
-            giftedBy: editGiftedBy.isEmpty ? nil : editGiftedBy,
-            notes: editNotes.isEmpty ? nil : editNotes
+        return WineEditForm.Fields(
+            name: detail.name,
+            color: detail.color,
+            domain: detail.domain ?? "",
+            vintage: detail.vintage.map(String.init) ?? "",
+            appellation: detail.appellation ?? "",
+            region: detail.region ?? "",
+            country: detail.country ?? "",
+            classification: detail.classification ?? "",
+            grapeVarieties: detail.grapeVarieties.joined(separator: ", "),
+            purchasePrice: detail.purchasePrice.map { String(format: "%.0f", $0) } ?? "",
+            purchaseDate: parsedPurchaseDate,
+            drinkFrom: detail.drinkFrom.map(String.init) ?? "",
+            drinkUntil: detail.drinkUntil.map(String.init) ?? "",
+            giftedBy: detail.giftedBy ?? "",
+            notes: detail.notes ?? ""
         )
-    }
-
-    private func saveChanges() async {
-        isSaving = true
-        do {
-            _ = try await WineAPI.update(id: wineId, buildUpdateRequest())
-            detail = try await WineAPI.getDetail(id: wineId)
-            isEditing = false
-            onUpdated?()
-        } catch {
-            saveError = reportError(error)
-        }
-        isSaving = false
     }
 }
 

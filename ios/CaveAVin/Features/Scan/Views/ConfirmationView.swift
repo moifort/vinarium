@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct ConfirmationView: View {
-    let wine: Wine
+    let wineName: String
+    let wineColor: WineColor
     let position: String
     let onDone: () -> Void
 
@@ -28,8 +29,8 @@ struct ConfirmationView: View {
 
             VStack(spacing: 8) {
                 HStack {
-                    WineColorBadge(color: wine.color)
-                    Text(wine.name)
+                    WineColorBadge(color: wineColor)
+                    Text(wineName)
                         .font(.headline)
                 }
 
@@ -67,10 +68,8 @@ struct ConfirmationView: View {
 #Preview {
     NavigationStack {
         ConfirmationView(
-            wine: Wine(
-                id: "1", name: "Château Margaux 2018", color: .red,
-                createdAt: Date(), updatedAt: Date()
-            ),
+            wineName: "Château Margaux 2018",
+            wineColor: .red,
             position: "B3",
             onDone: {}
         )

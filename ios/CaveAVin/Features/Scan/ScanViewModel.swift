@@ -5,8 +5,8 @@ enum ScanStep {
     case camera
     case scanning
     case review(ScanResult, Data)
-    case placing(Wine)
-    case confirmed(Wine, String)
+    case placing(id: String, name: String, color: WineColor, vintage: Int?)
+    case confirmed(name: String, color: WineColor, position: String)
     case favoriteSaved
     case recommendationSaved
 }
@@ -39,7 +39,7 @@ final class ScanViewModel {
         defer { isSaving = false }
         do {
             let wine = try await WineAPI.create(request)
-            step = .placing(wine)
+            step = .placing(id: wine.id, name: wine.name, color: wine.color, vintage: wine.vintage)
         } catch {
             self.error = reportError(error)
         }

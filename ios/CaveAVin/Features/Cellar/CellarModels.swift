@@ -44,9 +44,9 @@ struct CellarRowGroup: Identifiable, Sendable {
 }
 
 struct CellarRowItem: Identifiable, Sendable {
+    let id: String
+    let name: String
+    let color: WineColor
+    let vintage: Int?
     let position: String
-    let wine: Wine
-    let rowIndex: Int
-    let colIndex: Int
-    var id: String { wine.id }
 }

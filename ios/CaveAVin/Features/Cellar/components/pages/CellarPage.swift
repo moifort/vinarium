@@ -7,10 +7,9 @@ struct CellarPage: View {
 
     @State private var viewModel = CellarGridViewModel()
     @State private var selectedWineId: String?
-    @State private var wineForRemovalChoice: Wine?
-    @State private var wineForConsumption: Wine?
-    @State private var wineForGift: Wine?
-    @State private var pendingRemoval: PendingRemoval?
+    @State private var wineForRemovalChoice: CellarRowItem?
+    @State private var wineForConsumption: CellarRowItem?
+    @State private var wineForGift: CellarRowItem?
 
     var body: some View {
         NavigationStack {
@@ -29,10 +28,10 @@ struct CellarPage: View {
                                     label: group.row,
                                     items: group.items.map { item in
                                         .init(
-                                            id: item.wine.id,
-                                            color: item.wine.color,
-                                            title: item.wine.name,
-                                            subtitle: item.wine.vintage.map { "\($0)" },
+                                            id: item.id,
+                                            color: item.color,
+                                            title: item.name,
+                                            subtitle: item.vintage.map { "\($0)" },
                                             position: item.position
                                         )
                                     }
@@ -42,7 +41,7 @@ struct CellarPage: View {
                             onRemoveRequested: { wineId in
                                 wineForRemovalChoice = viewModel.groupedRows
                                     .flatMap(\.items)
-                                    .first { $0.wine.id == wineId }?.wine
+                                    .first { $0.id == wineId }
                             }
                         )
                     case .journal:
@@ -98,12 +97,12 @@ struct CellarPage: View {
             }
             .sheet(item: $wineForConsumption, onDismiss: {
                 Task { await viewModel.load() }
-            }) { wine in
+            }) { item in
                 ConsumptionSheet { date, rating, notes, contacts in
                     let formatter = ISO8601DateFormatter()
                     Task {
                         _ = try? await CellarAPI.remove(
-                            wineId: wine.id,
+                            wineId: item.id,
                             consumedDate: formatter.string(from: date),
                             rating: rating,
                             tastingNotes: notes,
@@ -115,12 +114,12 @@ struct CellarPage: View {
             }
             .sheet(item: $wineForGift, onDismiss: {
                 Task { await viewModel.load() }
-            }) { wine in
+            }) { item in
                 GiftSheet { date, recipientName in
                     let formatter = ISO8601DateFormatter()
                     Task {
                         _ = try? await CellarAPI.gift(
-                            wineId: wine.id,
+                            wineId: item.id,
                             giftedDate: formatter.string(from: date),
                             recipientName: recipientName
                         )
@@ -130,11 +129,6 @@ struct CellarPage: View {
             }
         }
     }
-}
-
-private enum PendingRemoval {
-    case consumption(Wine)
-    case gift(Wine)
 }
 
 #Preview {

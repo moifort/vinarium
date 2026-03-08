@@ -45,7 +45,13 @@ final class CellarGridViewModel {
                 CellarRowGroup(
                     row: row,
                     items: items.sorted(by: { $0.colLabel < $1.colLabel }).map {
-                        CellarRowItem(position: $0.position, wine: $0.wine, rowIndex: 0, colIndex: 0)
+                        CellarRowItem(
+                            id: $0.wine.id,
+                            name: $0.wine.name,
+                            color: $0.wine.color,
+                            vintage: $0.wine.vintage,
+                            position: $0.position
+                        )
                     }
                 )
             }
