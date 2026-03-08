@@ -1,8 +1,5 @@
 import type { Brand } from 'ts-brand'
-import type { CellarCol, CellarColLabel, CellarRow, CellarRowLabel } from '~/domain/cellar/types'
-import type { JournalEventView } from '~/domain/journal/types'
 import type { Country, Eur, PersonName, Region, Year } from '~/domain/shared/types'
-import type { Rating } from '~/domain/tasting/types'
 
 export type WineId = Brand<string, 'WineId'>
 export type WineName = Brand<string, 'WineName'>
@@ -36,29 +33,4 @@ export type Wine = {
   servingTemperature?: number
   createdAt: Date
   updatedAt: Date
-}
-
-export type WineView = Wine & {
-  cellar?: {
-    row: CellarRow
-    col: CellarCol
-    rowLabel: CellarRowLabel
-    colLabel: CellarColLabel
-    dateIn: Date
-    dateOut?: Date
-  }
-  history: JournalEventView[]
-  consumption?: {
-    consumedDate?: Date
-    rating?: Rating
-    tastingNotes?: string
-  }
-  gift?: {
-    giftedDate: Date
-    recipientName?: PersonName
-  }
-  recommendation?: {
-    recommenderName?: PersonName
-    comment?: string
-  }
 }
