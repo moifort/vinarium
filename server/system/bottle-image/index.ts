@@ -29,23 +29,37 @@ export namespace BottleImage {
   }
 
   const buildPrompt = (wine: Wine) => {
-    const glassType = {
-      red: 'dark green glass for red wine',
-      white: 'clear glass for white wine',
-      rosé: 'pink tint glass for rosé wine',
-      sparkling: 'champagne-shaped bottle',
-      sweet: 'amber glass for sweet wine',
-    }[wine.color]
-
     const labelParts = [`"${wine.name}"`, wine.vintage, wine.domain, wine.appellation]
       .filter(Boolean)
       .join(' ')
 
     const region = wine.region ?? 'French'
+    const appellation = wine.appellation ?? 'unknown'
+    const classification = wine.classification ?? 'unknown'
+    const grapeVarieties =
+      wine.grapeVarieties && wine.grapeVarieties.length > 0
+        ? wine.grapeVarieties.join(', ')
+        : 'unknown'
 
     return `Generate a photorealistic image of a single wine bottle on a solid bright green background (#00FF00).
+
+Wine details:
+- Color: ${wine.color}
+- Region: ${region}
+- Appellation: ${appellation}
+- Classification: ${classification}
+- Grape varieties: ${grapeVarieties}
+
+Based on your knowledge of wine traditions, choose the correct bottle shape for this wine. For example:
+- Bordeaux wines: high-shouldered straight bottle
+- Burgundy/Rhône wines: sloped-shoulder bottle
+- Alsace/German wines: tall flute bottle
+- Champagne/sparkling: thick heavy bottle with deep punt
+- Provence rosé: curved hourglass bottle
+- Use the traditional bottle shape that matches the region and appellation.
+
 The bottle should be:
-- A ${wine.color} wine bottle (${glassType})
+- ${wine.color} wine: appropriate glass color (dark green for red, clear/light green for white, pink tint for rosé, dark green for sparkling, amber for sweet)
 - Centered, elegant, slight angle, professional product photography
 - With a realistic label showing: ${labelParts}
 - Label style matching ${region} wine tradition
