@@ -1,4 +1,10 @@
-import { AnthropicApiKey, ApiToken, GoogleApiKey, SentryDsn } from '~/system/config/primitives'
+import {
+  AnthropicApiKey,
+  ApiToken,
+  GoogleApiKey,
+  SentryDsn,
+  TransparentUrl,
+} from '~/system/config/primitives'
 
 export const config = () => {
   const runtimeConfig = useRuntimeConfig()
@@ -7,5 +13,8 @@ export const config = () => {
     anthropicApiKey: AnthropicApiKey(runtimeConfig.anthropicApiKey),
     googleApiKey: GoogleApiKey(runtimeConfig.googleApiKey),
     sentryDsn: runtimeConfig.sentryDsn ? SentryDsn(runtimeConfig.sentryDsn) : undefined,
+    transparentUrl: runtimeConfig.transparentUrl
+      ? TransparentUrl(runtimeConfig.transparentUrl)
+      : undefined,
   }
 }

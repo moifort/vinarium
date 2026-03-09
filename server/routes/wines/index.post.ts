@@ -9,6 +9,7 @@ import {
 } from '~/domain/wine/primitives'
 import type { Wine } from '~/domain/wine/types'
 import { WineUseCase } from '~/domain/wine/use-case'
+import { BottleImage } from '~/system/bottle-image/index'
 
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
@@ -44,5 +45,10 @@ export default defineEventHandler(async (event) => {
       : undefined
 
   const wine = await WineUseCase.addWithTasting(name, color, data, tasting)
+
+  if (body.imageBase64) {
+    BottleImage.generateForWine(wine).catch(() => {})
+  }
+
   return { status: 201, data: wine }
 })

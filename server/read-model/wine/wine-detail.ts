@@ -6,17 +6,19 @@ import { RecommendationQuery } from '~/domain/recommendation/query'
 import { TastingQuery } from '~/domain/tasting/query'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
+import { exists as bottleImageExists } from '~/system/bottle-image/repository'
 
 export namespace WineDetailReadModel {
   export const byId = async (wineId: WineId) => {
     const wine = await WineQuery.getById(wineId)
     if (wine === 'not-found') return 'not-found' as const
-    const [bottle, history, tasting, gift, recommendation] = await Promise.all([
+    const [bottle, history, tasting, gift, recommendation, hasBottleImage] = await Promise.all([
       CellarQuery.getBottleByWineId(wine.id),
       JournalQuery.getAllByWineId(wine),
       TastingQuery.getByWineId(wine.id),
       GiftQuery.getByWineId(wine.id),
       RecommendationQuery.getByWineId(wine.id),
+      bottleImageExists(wine.id),
     ])
 
     const cellar =
@@ -34,6 +36,7 @@ export namespace WineDetailReadModel {
     return {
       ...wineWithoutImage,
       grapeVarieties: grapeVarieties ?? [],
+      hasBottleImage,
       cellar,
       history,
       consumption:

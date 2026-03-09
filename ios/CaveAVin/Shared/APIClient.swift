@@ -89,6 +89,13 @@ final class APIClient: Sendable {
         return try decoder.decode(T.self, from: data)
     }
 
+    func getRawData(_ path: String) async throws -> Data {
+        let request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
+        let (data, response) = try await session.data(for: request)
+        try validateResponse(response, for: request)
+        return data
+    }
+
     func delete(_ path: String) async throws {
         var request = authenticatedRequest(url: baseURL.appendingPathComponent(path))
         request.httpMethod = "DELETE"

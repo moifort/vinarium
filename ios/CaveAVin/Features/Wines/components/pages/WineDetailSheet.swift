@@ -17,6 +17,7 @@ struct WineDetailSheet: View {
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
     @State private var isEditing = false
+    @State private var bottleImage: UIImage?
 
     var body: some View {
         NavigationStack {
@@ -38,8 +39,10 @@ struct WineDetailSheet: View {
                     } else {
                         WineDetailContent(
                             detail: detail,
+                            bottleImage: bottleImage,
                             onRemoveRequested: { showRemovalChoice = true }
                         )
+                        .refreshable { await loadData() }
                     }
                 } else if let error {
                     ContentUnavailableView(
@@ -195,8 +198,16 @@ struct WineDetailSheet: View {
 
     private func loadData() async {
         do {
-            detail = try await WineAPI.getDetail(id: wineId)
+            let loadedDetail = try await WineAPI.getDetail(id: wineId)
+            detail = loadedDetail
             isLoading = false
+
+            if loadedDetail.hasBottleImage {
+                let imageData = try? await WineAPI.getBottleImage(id: wineId)
+                if let imageData {
+                    bottleImage = UIImage(data: imageData)
+                }
+            }
         } catch {
             self.error = reportError(error)
             isLoading = false

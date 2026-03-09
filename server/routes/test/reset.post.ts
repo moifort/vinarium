@@ -7,6 +7,7 @@ export default defineEventHandler(async () => {
     'tasting',
     'gift',
     'recommendation',
+    'bottle-images',
     'migration-meta',
   ]) {
     const storage = useStorage(name)

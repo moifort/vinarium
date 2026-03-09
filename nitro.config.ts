@@ -13,6 +13,7 @@ export default defineNitroConfig({
     googleApiKey: '',
     apiToken: '',
     sentryDsn: '',
+    transparentUrl: '',
   },
   storage: {
     wines: { driver: 'fs', base: './.data/db/wines' },
@@ -22,6 +23,7 @@ export default defineNitroConfig({
     journal: { driver: 'fs', base: './.data/db/journal' },
     tasting: { driver: 'fs', base: './.data/db/tasting' },
     'scan-cache': { driver: 'fs', base: './.data/db/scan-cache' },
+    'bottle-images': { driver: 'fs', base: './.data/db/bottle-images' },
     'migration-meta': { driver: 'fs', base: './.data/db/migration-meta' },
   },
 })
