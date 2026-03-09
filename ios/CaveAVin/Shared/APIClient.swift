@@ -4,21 +4,21 @@ import Sentry
 final class APIClient: Sendable {
     static let shared = APIClient()
 
-    static let defaultURL = "http://192.168.0.160:3000"
-    static let serverURLKey = "serverURL"
     private static let apiToken = Secrets.apiToken
 
+    private static let defaultDevURL = "http://192.168.0.16:3000"
+    private static let defaultProdURL = "https://cave.mottet.me"
+
     var baseURL: URL {
-        get {
-            let stored = UserDefaults.standard.string(forKey: Self.serverURLKey) ?? Self.defaultURL
-            if let url = URL(string: stored), !Self.isLoopbackURL(url) {
-                return url
-            }
-            return URL(string: Self.defaultURL)!
+        let defaults = UserDefaults.standard
+        let mode = defaults.string(forKey: "serverMode") ?? "dev"
+        let key = mode == "prod" ? "serverURLProd" : "serverURLDev"
+        let fallback = mode == "prod" ? Self.defaultProdURL : Self.defaultDevURL
+        let stored = defaults.string(forKey: key) ?? fallback
+        if let url = URL(string: stored), !Self.isLoopbackURL(url) {
+            return url
         }
-        set {
-            UserDefaults.standard.set(newValue.absoluteString, forKey: Self.serverURLKey)
-        }
+        return URL(string: fallback)!
     }
 
     private static func isLoopbackURL(_ url: URL) -> Bool {

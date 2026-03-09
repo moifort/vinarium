@@ -31,7 +31,7 @@ class BaseUITest: XCTestCase {
         api = TestAPIClient.shared
         try api.resetDatabase()
         app = XCUIApplication()
-        app.launchArguments = ["-serverURL", "http://localhost:3000", "-UITestPhoto"]
+        app.launchArguments = ["-serverURLDev", "http://localhost:3000", "-serverMode", "dev", "-UITestPhoto"]
         app.launch()
     }
 

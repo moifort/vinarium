@@ -4,7 +4,11 @@ import SwiftUI
 @main
 struct CaveAVinApp: App {
     init() {
-        UserDefaults.standard.register(defaults: [APIClient.serverURLKey: APIClient.defaultURL])
+        UserDefaults.standard.register(defaults: [
+            "serverMode": "dev",
+            "serverURLDev": "http://192.168.0.16:3000",
+            "serverURLProd": "https://cave.mottet.me",
+        ])
         startSentry()
     }
 
