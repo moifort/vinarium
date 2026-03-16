@@ -26,7 +26,11 @@ final class APIClient: Sendable {
         return host == "localhost" || host == "127.0.0.1" || host == "::1"
     }
 
-    private let session = URLSession.shared
+    private let session: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 15
+        return URLSession(configuration: config)
+    }()
     private let decoder: JSONDecoder = {
         let d = JSONDecoder()
         let withFraction = ISO8601DateFormatter()
