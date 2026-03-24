@@ -158,9 +158,14 @@ struct ScanFlowView: View {
             selectedPhoto = nil
             viewModel.step = .scanning
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data),
-                   let jpeg = image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) {
+                guard let data = try? await item.loadTransferable(type: Data.self) else {
+                    viewModel.step = .camera
+                    return
+                }
+                let jpeg = await Task.detached(priority: .userInitiated) {
+                    UIImage(data: data).flatMap { $0.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) }
+                }.value
+                if let jpeg {
                     viewModel.capturePhoto(jpeg)
                 } else {
                     viewModel.step = .camera
@@ -178,11 +183,16 @@ struct ScanFlowView: View {
     }
 
     private func loadTestImage() {
-        guard let url = Bundle.main.url(forResource: "etiquette", withExtension: "jpg"),
-              let data = try? Data(contentsOf: url),
-              let image = UIImage(data: data),
-              let jpeg = image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) else { return }
-        viewModel.step = .scanning
-        viewModel.capturePhoto(jpeg)
+        Task {
+            let jpeg = await Task.detached(priority: .userInitiated) {
+                guard let url = Bundle.main.url(forResource: "etiquette", withExtension: "jpg"),
+                      let data = try? Data(contentsOf: url),
+                      let image = UIImage(data: data) else { return nil as Data? }
+                return image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6)
+            }.value
+            guard let jpeg else { return }
+            viewModel.step = .scanning
+            viewModel.capturePhoto(jpeg)
+        }
     }
 }
