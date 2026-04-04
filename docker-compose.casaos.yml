@@ -16,7 +16,7 @@ services:
       - NITRO_GOOGLE_API_KEY=${NITRO_GOOGLE_API_KEY}
       - NITRO_SENTRY_DSN=${NITRO_SENTRY_DSN}
     hostname: cave-a-vin
-    image: moifort/cave-a-vin:latest
+    image: moifort/cave-a-vin:latest@sha256:35e43feb729f976c03ea230211893aa3276d486da6469ddc118a4c552d6a7d7f
     labels:
       icon: https://cdn-icons-png.flaticon.com/512/763/763048.png
     ports:
