@@ -6,6 +6,11 @@
   "labels": ["dependencies"],
   "packageRules": [
     {
+      "description": "Use version tags instead of pinned digests for GitHub Actions",
+      "matchManagers": ["github-actions"],
+      "pinDigests": false
+    },
+    {
       "description": "Automerge non-major updates in a single grouped PR",
       "matchUpdateTypes": ["minor", "patch", "digest"],
       "groupName": "non-major dependencies",
