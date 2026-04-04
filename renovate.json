@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:best-practices"],
+  "extends": ["config:recommended"],
   "pinDigests": false,
   "gitAuthor": "Renovate Bot <moifort@users.noreply.github.com>",
   "labels": ["dependencies"],
