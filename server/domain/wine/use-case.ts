@@ -5,6 +5,7 @@ import { RecommendationCommand } from '~/domain/recommendation/command'
 import { TastingCommand } from '~/domain/tasting/command'
 import { WineCommand } from '~/domain/wine/command'
 import type { Wine, WineColor, WineId, WineName } from '~/domain/wine/types'
+import { BottleImage } from '~/system/bottle-image/index'
 
 export namespace WineUseCase {
   export const addWithTasting = async (
@@ -16,6 +17,9 @@ export namespace WineUseCase {
     const wine = await WineCommand.add(name, color, data)
     if (tasting) {
       await TastingCommand.create({ wineId: wine.id, ...tasting })
+    }
+    if (data.imageBase64) {
+      void BottleImage.generateForWine(wine)
     }
     return wine
   }

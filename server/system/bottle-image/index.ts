@@ -6,26 +6,33 @@ import { createLogger } from '~/system/logger'
 const logger = createLogger('bottle-image')
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent'
 
 export namespace BottleImage {
   export const generateForWine = async (wine: Wine) => {
-    const { googleApiKey, transparentUrl } = config()
-    if (!transparentUrl) {
-      logger.warn('transparentUrl not configured, skipping bottle image generation')
-      return
+    try {
+      const { googleApiKey, transparentUrl } = config()
+      if (!transparentUrl) {
+        logger.warn('transparentUrl not configured, skipping bottle image generation')
+        return
+      }
+
+      if (await repository.exists(wine.id)) {
+        logger.debug(`Bottle image already exists for wine ${wine.id}, skipping`)
+        return
+      }
+
+      logger.info(`Generating bottle image for wine ${wine.id} (${wine.name})`)
+
+      const prompt = buildPrompt(wine)
+      const imageBase64 = await generateImage(prompt, googleApiKey)
+      const transparentBase64 = await removeBackground(imageBase64, transparentUrl)
+      await repository.save(wine.id, transparentBase64)
+
+      logger.success(`Bottle image saved for wine ${wine.id}`)
+    } catch (error) {
+      logger.error(`Failed to generate bottle image for wine ${wine.id}:`, error)
     }
-
-    if (await repository.exists(wine.id)) return
-
-    logger.info(`Generating bottle image for wine ${wine.id} (${wine.name})`)
-
-    const prompt = buildPrompt(wine)
-    const imageBase64 = await generateImage(prompt, googleApiKey)
-    const transparentBase64 = await removeBackground(imageBase64, transparentUrl)
-    await repository.save(wine.id, transparentBase64)
-
-    logger.success(`Bottle image saved for wine ${wine.id}`)
   }
 
   const buildPrompt = (wine: Wine) => {
@@ -97,7 +104,7 @@ The bottle should be:
     const response = await fetch(`${transparentUrl}/remove-background`, {
       method: 'POST',
       body: formData,
-      signal: AbortSignal.timeout(120_000),
+      signal: AbortSignal.timeout(1200_000),
     })
 
     if (!response.ok) {
