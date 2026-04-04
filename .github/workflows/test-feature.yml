@@ -1,4 +1,4 @@
-name: Functional Tests
+name: Feature Tests
 
 on:
   push:
@@ -10,10 +10,10 @@ permissions:
   contents: read
 
 jobs:
-  functional:
+  feature:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
-      - run: bun test func
+      - run: bun test feat
