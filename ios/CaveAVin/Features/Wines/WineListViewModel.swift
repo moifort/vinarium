@@ -151,7 +151,7 @@ final class WineListViewModel {
         let sortDescending: Bool
     }
 
-    private static func buildGroupedWines(_ inputs: GroupingInputs) -> [(String, [Wine])] {
+    nonisolated private static func buildGroupedWines(_ inputs: GroupingInputs) -> [(String, [Wine])] {
         let displayed: [Wine] = switch inputs.mode {
         case .all, .gifted, .recommended: inputs.wines
         case .favorites: inputs.wines.filter { $0.rating == 5 }
@@ -206,7 +206,7 @@ final class WineListViewModel {
         return sorted
     }
 
-    private static func buildContactGroupedWines(
+    nonisolated private static func buildContactGroupedWines(
         displayed: [Wine], sortDescending: Bool
     ) -> [(String, [Wine])] {
         var groups: [String: [Wine]] = [:]
@@ -230,7 +230,7 @@ final class WineListViewModel {
         return result
     }
 
-    private static func priceRange(_ price: Double?) -> (order: Int, label: String) {
+    nonisolated private static func priceRange(_ price: Double?) -> (order: Int, label: String) {
         guard let price else { return (999, "Sans prix") }
         switch price {
         case ..<10: return (0, "0-10 €")
