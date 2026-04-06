@@ -17,7 +17,7 @@
     "h3": "1.15.5",
     "nitropack": "2.12.4",
     "ts-brand": "0.2.0",
-    "typescript": "5.5.4"
+    "typescript": "6.0.2"
   },
   "dependencies": {
     "@sentry/bun": "10.40.0",
