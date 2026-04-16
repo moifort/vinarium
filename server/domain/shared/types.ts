@@ -7,3 +7,6 @@ export type Region = Brand<string, 'Region'>
 export type Month = Brand<string, 'Month'>
 export type Count = Brand<number, 'Count'>
 export type PersonName = Brand<string, 'PersonName'>
+export type Latitude = Brand<number, 'Latitude'>
+export type Longitude = Brand<number, 'Longitude'>
+export type PlaceName = Brand<string, 'PlaceName'>

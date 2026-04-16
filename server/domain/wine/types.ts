@@ -1,5 +1,14 @@
 import type { Brand } from 'ts-brand'
-import type { Country, Eur, PersonName, Region, Year } from '~/domain/shared/types'
+import type {
+  Country,
+  Eur,
+  Latitude,
+  Longitude,
+  PersonName,
+  PlaceName,
+  Region,
+  Year,
+} from '~/domain/shared/types'
 
 export type WineId = Brand<string, 'WineId'>
 export type WineName = Brand<string, 'WineName'>
@@ -31,6 +40,9 @@ export type Wine = {
   notes?: string
   giftedBy?: PersonName
   servingTemperature?: number
+  latitude?: Latitude
+  longitude?: Longitude
+  placeName?: PlaceName
   createdAt: Date
   updatedAt: Date
 }

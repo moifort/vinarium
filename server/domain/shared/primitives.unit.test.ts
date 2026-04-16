@@ -1,5 +1,15 @@
 import { describe, expect, test } from 'bun:test'
-import { Country, Eur, Month, PersonName, Region, Year } from '~/domain/shared/primitives'
+import {
+  Country,
+  Eur,
+  Latitude,
+  Longitude,
+  Month,
+  PersonName,
+  PlaceName,
+  Region,
+  Year,
+} from '~/domain/shared/primitives'
 
 describe('Eur', () => {
   test('accepts 0', () => expect(Eur(0) as number).toBe(0))
@@ -7,6 +17,34 @@ describe('Eur', () => {
   test('coerces string to number', () => expect(Eur('10') as number).toBe(10))
   test('rejects negative', () => expect(() => Eur(-1)).toThrow())
   test('rejects non-numeric string', () => expect(() => Eur('abc')).toThrow())
+})
+
+describe('Latitude', () => {
+  test('accepts valid latitude', () => expect(Latitude(44.84) as number).toBe(44.84))
+  test('coerces string to number', () => expect(Latitude('44.84') as number).toBe(44.84))
+  test('accepts boundary -90', () => expect(Latitude(-90) as number).toBe(-90))
+  test('accepts boundary 90', () => expect(Latitude(90) as number).toBe(90))
+  test('rejects below -90', () => expect(() => Latitude(-90.1)).toThrow())
+  test('rejects above 90', () => expect(() => Latitude(90.1)).toThrow())
+  test('rejects non-numeric string', () => expect(() => Latitude('abc')).toThrow())
+})
+
+describe('Longitude', () => {
+  test('accepts valid longitude', () => expect(Longitude(-0.58) as number).toBe(-0.58))
+  test('coerces string to number', () => expect(Longitude('-0.58') as number).toBe(-0.58))
+  test('accepts boundary -180', () => expect(Longitude(-180) as number).toBe(-180))
+  test('accepts boundary 180', () => expect(Longitude(180) as number).toBe(180))
+  test('rejects below -180', () => expect(() => Longitude(-180.1)).toThrow())
+  test('rejects above 180', () => expect(() => Longitude(180.1)).toThrow())
+})
+
+describe('PlaceName', () => {
+  test('accepts non-empty string', () =>
+    expect(PlaceName('Bordeaux, France') as string).toBe('Bordeaux, France'))
+  test('accepts 200 chars', () =>
+    expect(PlaceName('a'.repeat(200)) as string).toBe('a'.repeat(200)))
+  test('rejects empty string', () => expect(() => PlaceName('')).toThrow())
+  test('rejects over 200 chars', () => expect(() => PlaceName('a'.repeat(201))).toThrow())
 })
 
 describe('Year', () => {
