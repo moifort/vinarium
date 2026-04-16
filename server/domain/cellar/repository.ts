@@ -18,6 +18,11 @@ export const save = async (entry: CellarBottle) => {
   return entry
 }
 
+export const update = async (entry: CellarBottle) => {
+  await useStorage('cellar').setItem<CellarBottle>(`entries:${entry.wineId}`, entry)
+  return entry
+}
+
 export const remove = async (wineId: WineId) => {
   await useStorage('cellar').removeItem(`entries:${wineId}`)
 }
