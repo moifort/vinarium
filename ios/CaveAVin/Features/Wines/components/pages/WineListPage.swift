@@ -4,6 +4,7 @@ import SwiftUI
 
 struct WineListPage: View {
     @Binding var showFavorites: Bool
+    @Binding var showShortlist: Bool
     @Binding var showRecommended: Bool
     @State private var viewModel = WineListViewModel()
     @State private var selectedWineId: String?
@@ -128,6 +129,7 @@ struct WineListPage: View {
 
 #Preview("Liste de vins") {
     @Previewable @State var showFavorites = false
+    @Previewable @State var showShortlist = false
     @Previewable @State var showRecommended = false
-    WineListPage(showFavorites: $showFavorites, showRecommended: $showRecommended)
+    WineListPage(showFavorites: $showFavorites, showShortlist: $showShortlist, showRecommended: $showRecommended)
 }

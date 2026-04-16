@@ -5,10 +5,12 @@ struct ScanReviewView: View {
     let imageData: Data
     let onSave: (CreateWineRequest) async -> Void
     let onFavorite: (CreateWineRequest, Date, [String], String?) async -> Void
+    let onShortlist: (CreateWineRequest, Date, Int?, [String], String?) async -> Void
     let onRecommend: (CreateWineRequest, String?, String?) async -> Void
     let onCancel: () -> Void
 
     @State private var showFavorite = false
+    @State private var showShortlist = false
     @State private var showRecommendation = false
     @State private var name: String
     @State private var color: WineColor
@@ -25,11 +27,12 @@ struct ScanReviewView: View {
     @State private var giftedBy = ""
     @State private var showGiftedByPicker = false
 
-    init(scanResult: ScanResult, imageData: Data, onSave: @escaping (CreateWineRequest) async -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
+    init(scanResult: ScanResult, imageData: Data, onSave: @escaping (CreateWineRequest) async -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in }, onShortlist: @escaping (CreateWineRequest, Date, Int?, [String], String?) async -> Void = { _, _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.onSave = onSave
         self.onFavorite = onFavorite
+        self.onShortlist = onShortlist
         self.onRecommend = onRecommend
         self.onCancel = onCancel
         _name = State(initialValue: scanResult.name)
@@ -71,6 +74,13 @@ struct ScanReviewView: View {
                     .accessibilityIdentifier("review-favorite-button")
 
                     Button {
+                        showShortlist = true
+                    } label: {
+                        Label("À retenir", systemImage: "bookmark")
+                    }
+                    .accessibilityIdentifier("review-shortlist-button")
+
+                    Button {
                         showRecommendation = true
                     } label: {
                         Label("Conseillé par un ami", systemImage: "person.badge.plus")
@@ -98,6 +108,16 @@ struct ScanReviewView: View {
                 request.rating = 5
                 await onFavorite(request, date, contacts, notes)
                 showFavorite = false
+            }
+            .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showShortlist) {
+            ShortlistSheet { date, contacts, notes, rating in
+                var request = buildRequest()
+                request.shortlist = true
+                request.rating = rating
+                await onShortlist(request, date, rating, contacts, notes)
+                showShortlist = false
             }
             .presentationDetents([.medium])
         }
@@ -333,6 +353,7 @@ struct ScanReviewView: View {
             imageData: mockImageData,
             onSave: { _ in },
             onFavorite: { _, _, _, _ in },
+            onShortlist: { _, _, _, _, _ in },
             onRecommend: { _, _, _ in },
             onCancel: {}
         )

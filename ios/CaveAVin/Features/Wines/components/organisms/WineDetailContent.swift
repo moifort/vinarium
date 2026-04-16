@@ -161,7 +161,7 @@ struct WineDetailContent: View {
             createdAt: Date(),
             updatedAt: Date(),
             cellar: CellarInfo(row: "B", col: 1, dateIn: Date().addingTimeInterval(-86400 * 30), dateOut: Date()),
-            consumption: ConsumptionInfo(consumedDate: Date(), rating: 4, tastingNotes: "Très frais, belle minéralité", contacts: ["Jean", "Marie"]),
+            consumption: ConsumptionInfo(consumedDate: Date(), rating: 4, tastingNotes: "Très frais, belle minéralité", contacts: ["Jean", "Marie"], shortlist: nil),
             gift: nil,
             recommendation: nil
         ),

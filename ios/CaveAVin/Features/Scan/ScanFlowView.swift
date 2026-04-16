@@ -5,6 +5,7 @@ import SwiftUI
 enum ScanFlowResult {
     case addedToCellar
     case addedToFavorites
+    case addedToShortlist
     case addedToRecommendations
 }
 
@@ -112,6 +113,9 @@ struct ScanFlowView: View {
                         onFavorite: { request, date, contacts, notes in
                             await viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
                         },
+                        onShortlist: { request, date, rating, contacts, notes in
+                            await viewModel.saveAsShortlist(request, consumedDate: date, rating: rating, contacts: contacts, tastingNotes: notes)
+                        },
                         onRecommend: { request, recommenderName, comment in
                             await viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
                         },
@@ -141,6 +145,13 @@ struct ScanFlowView: View {
                     .onAppear {
                         viewModel.reset()
                         onFlowCompleted(.addedToFavorites)
+                    }
+
+            case .shortlistSaved:
+                Color.clear
+                    .onAppear {
+                        viewModel.reset()
+                        onFlowCompleted(.addedToShortlist)
                     }
 
             case .recommendationSaved:

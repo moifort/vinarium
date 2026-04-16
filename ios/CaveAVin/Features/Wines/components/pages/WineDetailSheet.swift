@@ -17,6 +17,7 @@ struct WineDetailSheet: View {
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
     @State private var showMove = false
+    @State private var showShortlist = false
     @State private var isEditing = false
     @State private var bottleImage: UIImage?
 
@@ -134,6 +135,24 @@ struct WineDetailSheet: View {
                     }
                 }
             }
+            .sheet(isPresented: $showShortlist) {
+                if let detail {
+                    ShortlistSheet { date, contacts, notes, rating in
+                        let formatter = ISO8601DateFormatter()
+                        try? await WineAPI.addToShortlist(
+                            id: detail.id,
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            contacts: contacts.isEmpty ? nil : contacts,
+                            tastingNotes: notes
+                        )
+                        showShortlist = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                    .presentationDetents([.medium])
+                }
+            }
         }
     }
 
@@ -182,6 +201,13 @@ struct WineDetailSheet: View {
                     dismiss()
                     onRemoved?()
                 }
+
+                Button {
+                    showShortlist = true
+                } label: {
+                    Label("À retenir", systemImage: "bookmark")
+                }
+                .accessibilityIdentifier("detail-shortlist-button")
             }
         }
         if detail != nil {

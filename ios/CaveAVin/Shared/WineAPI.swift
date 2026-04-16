@@ -56,4 +56,30 @@ enum WineAPI {
             body: Empty()
         )
     }
+
+    static func addToShortlist(
+        id: String,
+        consumedDate: String,
+        rating: Int?,
+        contacts: [String]?,
+        tastingNotes: String?
+    ) async throws {
+        struct Body: Encodable, Sendable {
+            let consumedDate: String
+            let rating: Int?
+            let contacts: [String]?
+            let tastingNotes: String?
+        }
+        struct Ignored: Decodable, Sendable {}
+        let body = Body(
+            consumedDate: consumedDate,
+            rating: rating,
+            contacts: contacts,
+            tastingNotes: tastingNotes
+        )
+        let _: APIResponse<Ignored> = try await APIClient.shared.post(
+            "/wines/\(id)/shortlist",
+            body: body
+        )
+    }
 }

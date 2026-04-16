@@ -8,6 +8,7 @@ enum ScanStep {
     case placing(id: String, name: String, color: WineColor, vintage: Int?)
     case confirmed(name: String, color: WineColor, position: String)
     case favoriteSaved
+    case shortlistSaved
     case recommendationSaved
 }
 
@@ -63,6 +64,26 @@ final class ScanViewModel {
         }
     }
 
+    func saveAsShortlist(_ request: CreateWineRequest, consumedDate: Date, rating: Int?, contacts: [String], tastingNotes: String?) async {
+        guard !isSaving else { return }
+        isSaving = true
+        error = nil
+        defer { isSaving = false }
+        do {
+            var enrichedRequest = request
+            let formatter = ISO8601DateFormatter()
+            enrichedRequest.consumedDate = formatter.string(from: consumedDate)
+            enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
+            enrichedRequest.tastingNotes = tastingNotes
+            enrichedRequest.rating = rating
+            enrichedRequest.shortlist = true
+            _ = try await WineAPI.create(enrichedRequest)
+            step = .shortlistSaved
+        } catch {
+            self.error = reportError(error)
+        }
+    }
+
     func saveAsRecommendation(_ request: CreateWineRequest, recommenderName: String?, comment: String?) async {
         guard !isSaving else { return }
         isSaving = true
@@ -86,7 +107,7 @@ final class ScanViewModel {
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved): return true
+        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.shortlistSaved, .shortlistSaved), (.recommendationSaved, .recommendationSaved): return true
         case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }

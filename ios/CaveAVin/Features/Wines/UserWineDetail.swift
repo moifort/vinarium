@@ -114,6 +114,7 @@ struct ConsumptionInfo: Codable, Sendable {
     let rating: Int?
     let tastingNotes: String?
     let contacts: [String]?
+    let shortlist: Bool?
 }
 
 struct RecommendationInfo: Codable, Sendable {
