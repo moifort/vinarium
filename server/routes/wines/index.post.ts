@@ -1,4 +1,13 @@
-import { Country, Eur, PersonName, Region, Year } from '~/domain/shared/primitives'
+import {
+  Country,
+  Eur,
+  Latitude,
+  Longitude,
+  PersonName,
+  PlaceName,
+  Region,
+  Year,
+} from '~/domain/shared/primitives'
 import { Rating } from '~/domain/tasting/primitives'
 import {
   Appellation,
@@ -32,6 +41,14 @@ export default defineEventHandler(async (event) => {
   if (body.imageBase64) data.imageBase64 = body.imageBase64
   if (body.notes) data.notes = body.notes
   if (body.giftedBy) data.giftedBy = PersonName(body.giftedBy)
+  if (body.latitude != null) data.latitude = Latitude(body.latitude)
+  if (body.longitude != null) data.longitude = Longitude(body.longitude)
+  if (body.placeName) data.placeName = PlaceName(body.placeName)
+  if ((data.latitude == null) !== (data.longitude == null))
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'latitude and longitude must be provided together',
+    })
 
   const hasTasting = body.rating != null || body.shortlist === true
   const tasting = hasTasting

@@ -67,4 +67,43 @@ feature('Adding a wine to the catalog', () => {
     then('the request is rejected')
     await expect(handler(event as any)).rejects.toThrow()
   })
+
+  scenario('adding a wine with a discovery location', async () => {
+    given('wine information including coordinates and place name')
+    const event = mockEvent({
+      body: {
+        name: 'Château Latour',
+        color: 'red',
+        latitude: 45.115,
+        longitude: -0.748,
+        placeName: 'Pauillac, France',
+      },
+    })
+
+    when('the wine is added')
+    const result = await handler(event as any)
+
+    then('the location is persisted with the wine')
+    expect(result.status).toBe(201)
+    const saved = await wineRepo.findBy(result.data.id)
+    expect(saved?.latitude as number).toBe(45.115)
+    expect(saved?.longitude as number).toBe(-0.748)
+    expect(saved?.placeName as string).toBe('Pauillac, France')
+  })
+
+  scenario('rejecting a partial coordinate pair', async () => {
+    given('wine information with latitude only')
+    const event = mockEvent({
+      body: {
+        name: 'Château Lafite',
+        color: 'red',
+        latitude: 45.18,
+      },
+    })
+
+    when('the wine is submitted')
+
+    then('the request is rejected because longitude is missing')
+    await expect(handler(event as any)).rejects.toThrow(/together/)
+  })
 })

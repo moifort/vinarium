@@ -1,4 +1,13 @@
-import { Country, Eur, PersonName, Region, Year } from '~/domain/shared/primitives'
+import {
+  Country,
+  Eur,
+  Latitude,
+  Longitude,
+  PersonName,
+  PlaceName,
+  Region,
+  Year,
+} from '~/domain/shared/primitives'
 import { WineCommand } from '~/domain/wine/command'
 import {
   Appellation,
@@ -33,6 +42,17 @@ export default defineEventHandler(async (event) => {
   if (body.imageBase64 !== undefined) data.imageBase64 = body.imageBase64
   if (body.giftedBy !== undefined) data.giftedBy = PersonName(body.giftedBy)
   if (body.notes !== undefined) data.notes = body.notes
+  if (body.latitude !== undefined) data.latitude = Latitude(body.latitude)
+  if (body.longitude !== undefined) data.longitude = Longitude(body.longitude)
+  if (body.placeName !== undefined) data.placeName = PlaceName(body.placeName)
+  if (
+    (body.latitude !== undefined || body.longitude !== undefined) &&
+    (data.latitude == null) !== (data.longitude == null)
+  )
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'latitude and longitude must be provided together',
+    })
 
   const wine = await WineCommand.update(id, data)
   if (wine === 'not-found') throw createError({ statusCode: 404, statusMessage: 'Wine not found' })
