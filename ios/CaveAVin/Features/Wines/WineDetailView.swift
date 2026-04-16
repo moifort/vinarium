@@ -106,7 +106,7 @@ struct WineDetailView: View {
             .sheet(isPresented: $showPlacement) {
                 if let detail {
                     NavigationStack {
-                        PlacementView(
+                        CellarPlacementView(
                             wineId: detail.id,
                             wineName: detail.name,
                             wineColor: detail.color,

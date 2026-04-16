@@ -128,7 +128,7 @@ struct ScanFlowView: View {
 
             case .placing(let id, let name, let color, let vintage):
                 NavigationStack {
-                    PlacementView(wineId: id, wineName: name, wineColor: color, wineVintage: vintage, onCancel: {
+                    CellarPlacementView(wineId: id, wineName: name, wineColor: color, wineVintage: vintage, onCancel: {
                         viewModel.reset()
                     }) { position in
                         viewModel.step = .confirmed(name: name, color: color, position: position)
