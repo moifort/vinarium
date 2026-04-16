@@ -334,6 +334,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Cave a ";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Cave u00e0 Vin a besoin du2019accu00e9der u00e0 votre camu00e9ra pour scanner les u00e9tiquettes de vin.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave \U00e0 Vin utilise votre position pour enregistrer le lieu o\U00f9 vous avez d\U00e9couvert un vin.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -369,6 +370,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Cave a ";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Cave u00e0 Vin a besoin du2019accu00e9der u00e0 votre camu00e9ra pour scanner les u00e9tiquettes de vin.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave \U00e0 Vin utilise votre position pour enregistrer le lieu o\U00f9 vous avez d\U00e9couvert un vin.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
