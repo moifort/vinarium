@@ -122,7 +122,7 @@ struct WineDetailView: View {
             }
             .sheet(isPresented: $showMove) {
                 if let detail, let cellar = detail.cellar {
-                    BottleMoveSheet(
+                    BottleMoveView(
                         wineId: detail.id,
                         wineName: detail.name,
                         wineColor: detail.color,
