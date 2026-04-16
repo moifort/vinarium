@@ -30,6 +30,11 @@ struct WineListPage {
         return self
     }
 
+    func switchToShortlist() throws -> Self {
+        try app.buttons["winelist-mode-shortlist"].tapOrFail()
+        return self
+    }
+
     func switchToGifted() throws -> Self {
         try app.buttons["winelist-mode-gifted"].tapOrFail()
         return self

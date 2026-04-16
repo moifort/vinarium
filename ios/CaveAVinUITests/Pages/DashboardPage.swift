@@ -55,6 +55,13 @@ struct DashboardPage {
         }
     }
 
+    func verifyShortlistContains(_ wineName: String) throws {
+        let section = try app.otherElements["dashboard-shortlist-section"].waitOrFail()
+        let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
+        let element = section.descendants(matching: .any).matching(predicate).firstMatch
+        try element.waitOrFail(timeout: 4, "'\(wineName)' not found in shortlist section")
+    }
+
     func tapWine(named name: String) throws -> WineDetailPage {
         let predicate = NSPredicate(format: "label CONTAINS %@", name)
         try app.buttons.matching(predicate).firstMatch.tapOrFail()

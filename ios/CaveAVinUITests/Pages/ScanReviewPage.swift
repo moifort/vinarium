@@ -49,7 +49,21 @@ struct ScanReviewPage {
         try app.buttons["review-favorite-button"].tapOrFail()
     }
 
+    func tapShortlist() throws -> ShortlistSheetPage {
+        try app.buttons["review-shortlist-button"].tapOrFail()
+        return ShortlistSheetPage(app: app)
+    }
+
     func tapRecommend() throws {
         try app.buttons["review-recommend-button"].tapOrFail()
+    }
+}
+
+@MainActor
+struct ShortlistSheetPage {
+    let app: XCUIApplication
+
+    func confirm() throws {
+        try app.buttons["confirm-shortlist-button"].tapOrFail()
     }
 }
