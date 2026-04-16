@@ -44,7 +44,7 @@ struct CellarView: View {
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
-                WineDetailSheet(
+                WineDetailView(
                     wineId: wrapper.id,
                     onRemoved: { Task { await viewModel.load() } },
                     onUpdated: { Task { await viewModel.load() } }

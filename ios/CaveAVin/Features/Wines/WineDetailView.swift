@@ -2,7 +2,7 @@ import Sentry
 import SentrySwiftUI
 import SwiftUI
 
-struct WineDetailSheet: View {
+struct WineDetailView: View {
     let wineId: String
     var onRemoved: (() -> Void)?
     var onUpdated: (() -> Void)?
@@ -42,13 +42,13 @@ struct WineDetailSheet: View {
                             onCancel: { isEditing = false }
                         )
                     } else {
-                        WineDetailContent(
+                        WineDetailPage(
                             content: Self.mapContent(detail),
                             bottleImage: bottleImage,
                             onRemoveRequested: { showRemovalChoice = true },
-                            onEditLocation: { showLocationEditor = true }
+                            onEditLocation: { showLocationEditor = true },
+                            onRefresh: { await loadData() }
                         )
-                        .refreshable { await loadData() }
                     }
                 } else if let error {
                     ContentUnavailableView(
@@ -439,13 +439,13 @@ struct WineDetailSheet: View {
 }
 
 #Preview("Bouteille sortie") {
-    WineDetailSheet(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
+    WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
 }
 
 #Preview("En cave") {
-    WineDetailSheet(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
+    WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
 }
 
 #Preview("Conseiller") {
-    WineDetailSheet(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
+    WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
 }
