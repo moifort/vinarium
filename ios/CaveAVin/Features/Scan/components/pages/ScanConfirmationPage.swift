@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ConfirmationView: View {
+struct ScanConfirmationPage: View {
     let wineName: String
     let wineColor: WineColor
     let position: String
@@ -67,7 +67,7 @@ struct ConfirmationView: View {
 
 #Preview {
     NavigationStack {
-        ConfirmationView(
+        ScanConfirmationPage(
             wineName: "Château Margaux 2018",
             wineColor: .red,
             position: "B3",

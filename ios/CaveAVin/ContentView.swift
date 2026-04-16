@@ -57,7 +57,7 @@ struct ContentView: View {
             }
         }
         .fullScreenCover(isPresented: $showScanner) {
-            ScanFlowView { result in
+            ScanView { result in
                 showScanner = false
                 switch result {
                 case .addedToCellar:

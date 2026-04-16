@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct AnalyzingView: View {
+struct ScanAnalyzingPage: View {
     @State private var isPulsing = false
 
     var body: some View {
@@ -36,5 +36,5 @@ struct AnalyzingView: View {
 }
 
 #Preview {
-    AnalyzingView()
+    ScanAnalyzingPage()
 }

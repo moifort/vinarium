@@ -10,7 +10,7 @@ enum ScanFlowResult {
     case addedToRecommendations
 }
 
-struct ScanFlowView: View {
+struct ScanView: View {
     var onFlowCompleted: (ScanFlowResult) -> Void = { _ in }
 
     @Environment(\.dismiss) private var dismiss
@@ -103,12 +103,12 @@ struct ScanFlowView: View {
                 }
 
             case .scanning:
-                AnalyzingView()
+                ScanAnalyzingPage()
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
             case .review(let result, let imageData):
                 NavigationStack {
-                    ScanReviewView(
+                    ScanReviewPage(
                         scanResult: result,
                         imageData: imageData,
                         initialLocation: viewModel.pendingLocation,
@@ -137,7 +137,7 @@ struct ScanFlowView: View {
 
             case .confirmed(let name, let color, let position):
                 NavigationStack {
-                    ConfirmationView(wineName: name, wineColor: color, position: position) {
+                    ScanConfirmationPage(wineName: name, wineColor: color, position: position) {
                         viewModel.reset()
                         onFlowCompleted(.addedToCellar)
                     }

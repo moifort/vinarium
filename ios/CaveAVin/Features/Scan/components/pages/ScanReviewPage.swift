@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ScanReviewView: View {
+struct ScanReviewPage: View {
     let scanResult: ScanResult
     let imageData: Data
     let onSave: (CreateWineRequest) async -> Void
@@ -370,7 +370,7 @@ struct ScanReviewView: View {
     }()
 
     NavigationStack {
-        ScanReviewView(
+        ScanReviewPage(
             scanResult: mockScanResult,
             imageData: mockImageData,
             onSave: { _ in },
