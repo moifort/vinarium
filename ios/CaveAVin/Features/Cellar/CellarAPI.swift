@@ -24,6 +24,15 @@ enum CellarAPI {
         )
     }
 
+    static func move(wineId: String, row: String, col: Int) async throws {
+        struct Body: Encodable, Sendable { let wineId: String; let row: String; let col: Int }
+        struct Ignored: Decodable, Sendable {}
+        let _: APIResponse<Ignored> = try await APIClient.shared.post(
+            "/cellar/move",
+            body: Body(wineId: wineId, row: row, col: col)
+        )
+    }
+
     static func remove(wineId: String, consumedDate: String? = nil, rating: Int? = nil, tastingNotes: String? = nil, contacts: [String]? = nil) async throws {
         struct Body: Encodable, Sendable {
             let wineId: String

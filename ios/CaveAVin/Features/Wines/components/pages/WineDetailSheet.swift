@@ -16,6 +16,7 @@ struct WineDetailSheet: View {
     @State private var showGift = false
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
+    @State private var showMove = false
     @State private var isEditing = false
     @State private var bottleImage: UIImage?
 
@@ -114,6 +115,25 @@ struct WineDetailSheet: View {
                     }
                 }
             }
+            .sheet(isPresented: $showMove) {
+                if let detail, let cellar = detail.cellar {
+                    BottleMoveSheet(
+                        wineId: detail.id,
+                        wineName: detail.name,
+                        wineColor: detail.color,
+                        wineVintage: detail.vintage,
+                        currentRow: cellar.row,
+                        currentCol: cellar.col,
+                        onCancel: { showMove = false }
+                    ) {
+                        showMove = false
+                        Task {
+                            await loadData()
+                            onUpdated?()
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -126,6 +146,11 @@ struct WineDetailSheet: View {
         }
         if let cellar = detail?.cellar, cellar.dateOut == nil {
             ToolbarItemGroup {
+                Button("Déplacer", systemImage: "arrow.left.arrow.right") {
+                    showMove = true
+                }
+                .accessibilityIdentifier("move-bottle-button")
+
                 Button("Sortir", systemImage: "arrow.up") {
                     showRemovalChoice = true
                 }
