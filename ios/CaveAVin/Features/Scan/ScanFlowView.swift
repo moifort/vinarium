@@ -1,3 +1,4 @@
+import CoreLocation
 import PhotosUI
 import SentrySwiftUI
 import SwiftUI
@@ -28,6 +29,7 @@ struct ScanFlowView: View {
                 ZStack {
                     CameraView(onCapture: { data in
                         viewModel.capturePhoto(data)
+                        captureCurrentLocation()
                     }, shouldCapture: $shouldCapture)
                         .ignoresSafeArea()
 
@@ -109,6 +111,7 @@ struct ScanFlowView: View {
                     ScanReviewView(
                         scanResult: result,
                         imageData: imageData,
+                        initialLocation: viewModel.pendingLocation,
                         onSave: { request in await viewModel.saveWine(request) },
                         onFavorite: { request, date, contacts, notes in
                             await viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
@@ -173,6 +176,7 @@ struct ScanFlowView: View {
                     viewModel.step = .camera
                     return
                 }
+                attachLocationFromExif(in: data)
                 let jpeg = await Task.detached(priority: .userInitiated) {
                     UIImage(data: data).flatMap { $0.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) }
                 }.value
@@ -191,6 +195,29 @@ struct ScanFlowView: View {
         } message: {
             Text(viewModel.error ?? "")
         }
+    }
+
+    private func captureCurrentLocation() {
+        Task {
+            guard let coordinate = await LocationService.shared.requestCurrentCoordinate() else { return }
+            attachLocation(coordinate)
+        }
+    }
+
+    private func attachLocationFromExif(in data: Data) {
+        guard let coordinate = PhotoLocationExtractor.extract(from: data) else { return }
+        attachLocation(coordinate)
+    }
+
+    private func attachLocation(_ coordinate: CLLocationCoordinate2D) {
+        viewModel.attachLocation(
+            DiscoveryLocationDraft(
+                latitude: coordinate.latitude,
+                longitude: coordinate.longitude,
+                placeName: nil
+            )
+        )
+        Task { await viewModel.resolvePendingPlaceName() }
     }
 
     private func loadTestImage() {

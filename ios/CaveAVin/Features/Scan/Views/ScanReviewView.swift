@@ -12,6 +12,7 @@ struct ScanReviewView: View {
     @State private var showFavorite = false
     @State private var showShortlist = false
     @State private var showRecommendation = false
+    @State private var showLocationEditor = false
     @State private var name: String
     @State private var color: WineColor
     @State private var domain: String
@@ -26,8 +27,9 @@ struct ScanReviewView: View {
     @State private var drinkUntil: String
     @State private var giftedBy = ""
     @State private var showGiftedByPicker = false
+    @State private var location: DiscoveryLocationDraft?
 
-    init(scanResult: ScanResult, imageData: Data, onSave: @escaping (CreateWineRequest) async -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in }, onShortlist: @escaping (CreateWineRequest, Date, Int?, [String], String?) async -> Void = { _, _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
+    init(scanResult: ScanResult, imageData: Data, initialLocation: DiscoveryLocationDraft? = nil, onSave: @escaping (CreateWineRequest) async -> Void, onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in }, onShortlist: @escaping (CreateWineRequest, Date, Int?, [String], String?) async -> Void = { _, _, _, _, _ in }, onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in }, onCancel: @escaping () -> Void = {}) {
         self.scanResult = scanResult
         self.imageData = imageData
         self.onSave = onSave
@@ -47,6 +49,7 @@ struct ScanReviewView: View {
         _estimatedPrice = State(initialValue: scanResult.estimatedPrice.map { String(format: "%.0f", $0) } ?? "")
         _drinkFrom = State(initialValue: scanResult.drinkFrom.map(String.init) ?? "")
         _drinkUntil = State(initialValue: scanResult.drinkUntil.map(String.init) ?? "")
+        _location = State(initialValue: initialLocation)
     }
 
     var body: some View {
@@ -54,6 +57,7 @@ struct ScanReviewView: View {
             photoSection
             mainInfoSection
             originSection
+            locationSection
             detailsSection
             gardeSection
             giftedBySection
@@ -127,6 +131,12 @@ struct ScanReviewView: View {
                 showRecommendation = false
             }
             .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showLocationEditor) {
+            LocationEditorSheet(initial: location) { draft in
+                location = draft
+                showLocationEditor = false
+            }
         }
     }
 
@@ -214,6 +224,15 @@ struct ScanReviewView: View {
         } header: {
             Text("Origine")
         }
+    }
+
+    private var locationSection: some View {
+        LocationSection(
+            placeName: location?.placeName,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            onTap: { showLocationEditor = true }
+        )
     }
 
     private var detailsSection: some View {
@@ -307,7 +326,10 @@ struct ScanReviewView: View {
             drinkFrom: Int(drinkFrom),
             drinkUntil: Int(drinkUntil),
             imageBase64: imageData.base64EncodedString(),
-            giftedBy: giftedBy.isEmpty ? nil : giftedBy
+            giftedBy: giftedBy.isEmpty ? nil : giftedBy,
+            latitude: location?.latitude,
+            longitude: location?.longitude,
+            placeName: location?.placeName
         )
     }
 }

@@ -17,6 +17,7 @@ final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
     var isSaving = false
+    var pendingLocation: DiscoveryLocationDraft?
 
     func capturePhoto(_ imageData: Data) {
         step = .scanning
@@ -30,6 +31,20 @@ final class ScanViewModel {
                 self.error = reportError(error)
                 self.step = .camera
             }
+        }
+    }
+
+    func attachLocation(_ draft: DiscoveryLocationDraft?) {
+        pendingLocation = draft
+    }
+
+    func resolvePendingPlaceName() async {
+        guard let location = pendingLocation, location.placeName == nil else { return }
+        let name = await PlaceNameResolver.resolve(location.coordinate)
+        if name != nil, var current = pendingLocation,
+           current.latitude == location.latitude, current.longitude == location.longitude {
+            current.placeName = name
+            pendingLocation = current
         }
     }
 
@@ -101,6 +116,7 @@ final class ScanViewModel {
     func reset() {
         step = .camera
         error = nil
+        pendingLocation = nil
     }
 }
 

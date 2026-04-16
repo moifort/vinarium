@@ -69,6 +69,9 @@ struct Wine: Codable, Identifiable, Sendable {
     var giftedTo: String?
     var recommendedBy: String?
     var contacts: [String]?
+    var latitude: Double?
+    var longitude: Double?
+    var placeName: String?
     let createdAt: Date
     let updatedAt: Date
 }
@@ -96,6 +99,9 @@ struct CreateWineRequest: Encodable, Sendable {
     var tastingNotes: String?
     var contacts: [String]?
     var shortlist: Bool?
+    var latitude: Double?
+    var longitude: Double?
+    var placeName: String?
 }
 
 struct UpdateWineRequest: Encodable, Sendable {
@@ -114,6 +120,9 @@ struct UpdateWineRequest: Encodable, Sendable {
     var drinkUntil: Int?
     var giftedBy: String?
     var notes: String?
+    var latitude: Double?
+    var longitude: Double?
+    var placeName: String?
 }
 
 struct APIResponse<T: Decodable & Sendable>: Decodable, Sendable {
