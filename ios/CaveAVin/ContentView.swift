@@ -36,7 +36,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-home")
             Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
-                CellarPage(refreshTrigger: cellarRefreshTrigger)
+                CellarView(refreshTrigger: cellarRefreshTrigger)
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {

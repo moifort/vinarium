@@ -1,136 +1,102 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct CellarPage: View {
-    var refreshTrigger: UUID = UUID()
-
-    @State private var viewModel = CellarGridViewModel()
-    @State private var selectedWineId: String?
-    @State private var wineForRemovalChoice: CellarRowItem?
-    @State private var wineForConsumption: CellarRowItem?
-    @State private var wineForGift: CellarRowItem?
+    @Binding var displayMode: CellarDisplayMode
+    let groups: [CaveBottleList.Group]
+    let events: [JournalEventList.Event]
+    var onBottleTapped: (String) -> Void
+    var onRemoveRequested: (String) -> Void
+    var onEventTapped: (String) -> Void
+    var onRefresh: () async -> Void
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.bottles.isEmpty {
-                    ProgressView("Chargement...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                } else if let error = viewModel.error, viewModel.bottles.isEmpty {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
-                } else {
-                    switch viewModel.displayMode {
-                    case .cave:
-                        CaveBottleList(
-                            groups: viewModel.groupedRows.map { group in
-                                .init(
-                                    label: group.row,
-                                    items: group.items.map { item in
-                                        .init(
-                                            id: item.id,
-                                            color: item.color,
-                                            title: item.name,
-                                            subtitle: item.vintage.map { "\($0)" },
-                                            position: item.position
-                                        )
-                                    }
-                                )
-                            },
-                            onBottleTapped: { wineId in selectedWineId = wineId },
-                            onRemoveRequested: { wineId in
-                                wineForRemovalChoice = viewModel.groupedRows
-                                    .flatMap(\.items)
-                                    .first { $0.id == wineId }
-                            }
-                        )
-                    case .journal:
-                        JournalEventList(
-                            events: viewModel.history.map { event in
-                                .init(
-                                    id: event.id,
-                                    date: event.date,
-                                    isEntry: event.type == .entry,
-                                    wineId: event.wineId,
-                                    title: event.wineName,
-                                    position: event.position
-                                )
-                            },
-                            onEventTapped: { wineId in selectedWineId = wineId }
-                        )
-                    }
-                }
-            }
-            .toolbar {
-                ToolbarItemGroup {
-                    ForEach(CellarDisplayMode.allCases) { mode in
-                        Button {
-                            viewModel.displayMode = mode
-                        } label: {
-                            Label(mode.label, systemImage: mode.icon)
-                        }
-                        .tint(viewModel.displayMode == mode ? .accentColor : .primary)
-                        .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
-                    }
-                }
-            }
-            .navigationTitle(viewModel.displayMode.title)
-            .navigationSubtitle(viewModel.displayMode.subtitle)
-            .navigationBarTitleDisplayMode(.large)
-            .sentryTrace("Cellar", waitForFullDisplay: true)
-            .refreshable {
-                await viewModel.load()
-            }
-            .task(id: refreshTrigger) {
-                await viewModel.load()
-                SentrySDK.reportFullyDisplayed()
-            }
-            .sheet(item: Binding(
-                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
-                set: { selectedWineId = $0?.id }
-            )) { wrapper in
-                WineDetailSheet(
-                    wineId: wrapper.id,
-                    onRemoved: { Task { await viewModel.load() } },
-                    onUpdated: { Task { await viewModel.load() } }
+        Group {
+            switch displayMode {
+            case .cave:
+                CaveBottleList(
+                    groups: groups,
+                    onBottleTapped: onBottleTapped,
+                    onRemoveRequested: onRemoveRequested
+                )
+            case .journal:
+                JournalEventList(
+                    events: events,
+                    onEventTapped: onEventTapped
                 )
             }
-            .sheet(item: $wineForConsumption, onDismiss: {
-                Task { await viewModel.load() }
-            }) { item in
-                ConsumptionSheet { date, rating, notes, contacts in
-                    let formatter = ISO8601DateFormatter()
-                    Task {
-                        _ = try? await CellarAPI.remove(
-                            wineId: item.id,
-                            consumedDate: formatter.string(from: date),
-                            rating: rating,
-                            tastingNotes: notes,
-                            contacts: contacts.isEmpty ? nil : contacts
-                        )
-                        wineForConsumption = nil
+        }
+        .toolbar {
+            ToolbarItemGroup {
+                ForEach(CellarDisplayMode.allCases) { mode in
+                    Button {
+                        displayMode = mode
+                    } label: {
+                        Label(mode.label, systemImage: mode.icon)
                     }
-                }
-            }
-            .sheet(item: $wineForGift, onDismiss: {
-                Task { await viewModel.load() }
-            }) { item in
-                GiftSheet { date, recipientName in
-                    let formatter = ISO8601DateFormatter()
-                    Task {
-                        _ = try? await CellarAPI.gift(
-                            wineId: item.id,
-                            giftedDate: formatter.string(from: date),
-                            recipientName: recipientName
-                        )
-                        wineForGift = nil
-                    }
+                    .tint(displayMode == mode ? .accentColor : .primary)
+                    .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
                 }
             }
         }
+        .navigationTitle(displayMode.title)
+        .navigationSubtitle(displayMode.subtitle)
+        .navigationBarTitleDisplayMode(.large)
+        .refreshable { await onRefresh() }
     }
 }
 
-#Preview {
-    CellarPage()
+#Preview("Cave avec bouteilles") {
+    @Previewable @State var mode: CellarDisplayMode = .cave
+    NavigationStack {
+        CellarPage(
+            displayMode: $mode,
+            groups: [
+                .init(label: "A", items: [
+                    .init(id: "1", color: .red, title: "Château Margaux", subtitle: "2018", position: "A1"),
+                    .init(id: "2", color: .white, title: "Pouilly-Fumé", subtitle: nil, position: "A2"),
+                ]),
+                .init(label: "B", items: [
+                    .init(id: "3", color: .rosé, title: "Côtes de Provence", subtitle: "2022", position: "B1"),
+                ]),
+            ],
+            events: [],
+            onBottleTapped: { _ in },
+            onRemoveRequested: { _ in },
+            onEventTapped: { _ in },
+            onRefresh: {}
+        )
+    }
+}
+
+#Preview("Journal") {
+    @Previewable @State var mode: CellarDisplayMode = .journal
+    NavigationStack {
+        CellarPage(
+            displayMode: $mode,
+            groups: [],
+            events: [
+                .init(id: "1-in", date: .now, isEntry: true, wineId: "1", title: "Château Margaux 2018", position: "A1"),
+                .init(id: "2-out", date: .now.addingTimeInterval(-86400), isEntry: false, wineId: "2", title: "Pouilly-Fumé 2021", position: "B3"),
+            ],
+            onBottleTapped: { _ in },
+            onRemoveRequested: { _ in },
+            onEventTapped: { _ in },
+            onRefresh: {}
+        )
+    }
+}
+
+#Preview("Cave vide") {
+    @Previewable @State var mode: CellarDisplayMode = .cave
+    NavigationStack {
+        CellarPage(
+            displayMode: $mode,
+            groups: [],
+            events: [],
+            onBottleTapped: { _ in },
+            onRemoveRequested: { _ in },
+            onEventTapped: { _ in },
+            onRefresh: {}
+        )
+    }
 }
