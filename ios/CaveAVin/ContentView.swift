@@ -40,7 +40,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
-                WineListPage(showFavorites: $showFavorites, showShortlist: $showShortlist, showRecommended: $showRecommended)
+                WineListView(showFavorites: $showFavorites, showShortlist: $showShortlist, showRecommended: $showRecommended)
             }
             .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: .search) {
