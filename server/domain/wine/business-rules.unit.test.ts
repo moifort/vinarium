@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test'
 import {
   FAVORITE_RATING,
   isFavorite,
+  isShortlisted,
   readyToDrink,
   urgentToDrink,
   wineStatus,
@@ -88,5 +89,23 @@ describe('isFavorite', () => {
 
   test('false when undefined', () => {
     expect(isFavorite(undefined)).toBe(false)
+  })
+})
+
+describe('isShortlisted', () => {
+  test('true when shortlist flag is true', () => {
+    expect(isShortlisted({ shortlist: true })).toBe(true)
+  })
+
+  test('false when shortlist flag is false', () => {
+    expect(isShortlisted({ shortlist: false })).toBe(false)
+  })
+
+  test('false when shortlist flag is missing', () => {
+    expect(isShortlisted({})).toBe(false)
+  })
+
+  test('false when tasting is undefined', () => {
+    expect(isShortlisted(undefined)).toBe(false)
   })
 })

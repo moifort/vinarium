@@ -26,3 +26,5 @@ export const urgentToDrink = (window: DrinkWindow, year: number) => {
 export const FAVORITE_RATING = 5
 
 export const isFavorite = (rating?: number) => rating === FAVORITE_RATING
+
+export const isShortlisted = (tasting?: { shortlist?: boolean }) => tasting?.shortlist === true
