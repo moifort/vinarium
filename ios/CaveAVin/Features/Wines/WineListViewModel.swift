@@ -1,12 +1,13 @@
 import Foundation
 
 enum WineListMode: String, CaseIterable, Identifiable {
-    case all, favorites, gifted, recommended
+    case all, favorites, shortlist, gifted, recommended
     var id: String { rawValue }
     var label: String {
         switch self {
         case .all: "Tous"
         case .favorites: "Favoris"
+        case .shortlist: "À retenir"
         case .gifted: "Offerts"
         case .recommended: "Conseillés"
         }
@@ -15,6 +16,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "wineglass"
         case .favorites: "heart.fill"
+        case .shortlist: "bookmark.fill"
         case .gifted: "gift"
         case .recommended: "lightbulb"
         }
@@ -24,6 +26,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "Mes Vins"
         case .favorites: "Favoris"
+        case .shortlist: "À retenir"
         case .gifted: "Offerts"
         case .recommended: "Conseillés"
         }
@@ -33,6 +36,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "Tous vos vins ajoutés"
         case .favorites: "Vos vins notés 5 étoiles"
+        case .shortlist: "Vos vins à essayer encore"
         case .gifted: "Vins offerts à vos proches"
         case .recommended: "Vins recommandés par vos proches"
         }
@@ -118,7 +122,7 @@ final class WineListViewModel {
             let status: String? = switch mode {
             case .gifted: "gifted"
             case .recommended: "recommended"
-            case .all, .favorites:
+            case .all, .favorites, .shortlist:
                 statusFilter == .all ? nil : statusFilter.rawValue
             }
             let apiSort = sort == .contact ? "updatedAt" : sort.rawValue
@@ -155,6 +159,7 @@ final class WineListViewModel {
         let displayed: [Wine] = switch inputs.mode {
         case .all, .gifted, .recommended: inputs.wines
         case .favorites: inputs.wines.filter { $0.rating == 5 }
+        case .shortlist: inputs.wines.filter { $0.shortlist == true && $0.rating != 5 }
         }
 
         if inputs.sort == .contact {

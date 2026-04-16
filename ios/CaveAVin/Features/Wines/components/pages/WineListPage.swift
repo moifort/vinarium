@@ -28,7 +28,8 @@ struct WineListPage: View {
                                     name: wine.name,
                                     subtitle: wineSubtitle(wine),
                                     rating: wine.rating,
-                                    isFavorite: wine.rating == 5
+                                    isFavorite: wine.rating == 5,
+                                    isShortlist: wine.shortlist == true && wine.rating != 5
                                 )
                             })
                         },
@@ -94,6 +95,13 @@ struct WineListPage: View {
                 if showFavorites {
                     viewModel.mode = .favorites
                     showFavorites = false
+                    Task { await viewModel.load() }
+                }
+            }
+            .onChange(of: showShortlist) {
+                if showShortlist {
+                    viewModel.mode = .shortlist
+                    showShortlist = false
                     Task { await viewModel.load() }
                 }
             }
