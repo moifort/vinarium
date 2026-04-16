@@ -32,7 +32,7 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
-                DashboardPage(selectedTab: $selectedTab)
+                DashboardView(selectedTab: $selectedTab)
             }
             .accessibilityIdentifier("tab-home")
             Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {

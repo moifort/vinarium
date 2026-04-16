@@ -1,83 +1,77 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct DashboardPage: View {
-    @Binding var selectedTab: TabSelection
-
-    @State private var viewModel = DashboardViewModel()
-    @State private var selectedWineId: String?
+    let content: Content
+    var onStatsTapped: () -> Void
+    var onWineTapped: (String) -> Void
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if let data = viewModel.data {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            DashboardStatsRow(
-                                stats: .init(bottleCount: data.bottleCount, totalValue: data.totalValue),
-                                onTapped: { selectedTab = .cellar }
-                            )
+        ScrollView {
+            VStack(spacing: 20) {
+                DashboardStatsRow(stats: content.stats, onTapped: onStatsTapped)
 
-                            ReadyToDrinkSection(
-                                items: data.readyToDrink.map { wine in
-                                    .init(id: wine.id, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position)
-                                },
-                                onWineTapped: { selectedWineId = $0 }
-                            )
+                ReadyToDrinkSection(items: content.readyToDrink, onWineTapped: onWineTapped)
 
-                            FavoritesSection(
-                                items: data.favorites.map { favorite in
-                                    .init(id: favorite.id, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice)
-                                },
-                                onWineTapped: { selectedWineId = $0 }
-                            )
+                FavoritesSection(items: content.favorites, onWineTapped: onWineTapped)
 
-                            ShortlistSection(
-                                items: data.shortlist.map { entry in
-                                    .init(id: entry.id, color: entry.color, name: entry.name, vintage: entry.vintage, tastingDate: entry.tastingDate, rating: entry.rating)
-                                },
-                                onWineTapped: { selectedWineId = $0 }
-                            )
+                ShortlistSection(items: content.shortlist, onWineTapped: onWineTapped)
 
-                            JournalSection(
-                                events: data.history.map { event in
-                                    .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId, date: event.date)
-                                },
-                                onEventTapped: { selectedWineId = $0 }
-                            )
-                        }
-                        .padding()
-                    }
-                } else if let error = viewModel.error {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
-                } else {
-                    ProgressView("Chargement...")
-                }
+                JournalSection(events: content.events, onEventTapped: onWineTapped)
             }
-            .navigationTitle("Accueil")
-            .navigationBarTitleDisplayMode(.large)
-            .sentryTrace("Dashboard", waitForFullDisplay: true)
-            .refreshable { await viewModel.load() }
-            .task {
-                await viewModel.load()
-                SentrySDK.reportFullyDisplayed()
-            }
-            .sheet(item: Binding(
-                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
-                set: { selectedWineId = $0?.id }
-            )) { wrapper in
-                WineDetailSheet(
-                    wineId: wrapper.id,
-                    onRemoved: { Task { await viewModel.load() } },
-                    onUpdated: { Task { await viewModel.load() } }
-                )
-            }
+            .padding()
         }
+        .navigationTitle("Accueil")
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 
-#Preview {
-    @Previewable @State var selectedTab: TabSelection = .home
-    DashboardPage(selectedTab: $selectedTab)
+extension DashboardPage {
+    struct Content {
+        let stats: DashboardStatsRow.Stats
+        let readyToDrink: [ReadyToDrinkSection.Item]
+        let favorites: [FavoritesSection.Item]
+        let shortlist: [ShortlistSection.Item]
+        let events: [JournalSection.Event]
+    }
+}
+
+#Preview("Avec données") {
+    NavigationStack {
+        DashboardPage(
+            content: .init(
+                stats: .init(bottleCount: 42, totalValue: 1850),
+                readyToDrink: [
+                    .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
+                    .init(id: "2", color: .white, name: "Pouilly-Fumé 2021", urgent: false, drinkUntil: nil, position: "B1"),
+                ],
+                favorites: [
+                    .init(id: "3", color: .red, name: "Romanée-Conti 2015", vintage: 2015, tastingDate: Date(), estimatedPrice: 3500),
+                ],
+                shortlist: [
+                    .init(id: "4", color: .white, name: "Chablis Grand Cru", vintage: 2019, tastingDate: nil, rating: 4),
+                ],
+                events: [
+                    .init(isEntry: true, wineName: "Pétrus 2012", position: "C2", wineId: "5", date: Date()),
+                ]
+            ),
+            onStatsTapped: {},
+            onWineTapped: { _ in }
+        )
+    }
+}
+
+#Preview("Vide") {
+    NavigationStack {
+        DashboardPage(
+            content: .init(
+                stats: .init(bottleCount: 0, totalValue: 0),
+                readyToDrink: [],
+                favorites: [],
+                shortlist: [],
+                events: []
+            ),
+            onStatsTapped: {},
+            onWineTapped: { _ in }
+        )
+    }
 }
