@@ -4,6 +4,7 @@ struct WineDetailContent: View {
     let detail: UserWineDetail
     let bottleImage: UIImage?
     var onRemoveRequested: () -> Void = {}
+    var onEditLocation: () -> Void = {}
 
     var body: some View {
         List {
@@ -28,6 +29,13 @@ struct WineDetailContent: View {
                 region: detail.region,
                 country: detail.country,
                 classification: detail.classification
+            )
+
+            LocationSection(
+                placeName: detail.placeName,
+                latitude: detail.latitude,
+                longitude: detail.longitude,
+                onTap: onEditLocation
             )
 
             WineDetailsSection(

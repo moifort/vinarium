@@ -22,6 +22,7 @@ struct WineDetailSheet: View {
     @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var bottleImage: UIImage?
+    @State private var showLocationEditor = false
 
     var body: some View {
         NavigationStack {
@@ -44,7 +45,8 @@ struct WineDetailSheet: View {
                         WineDetailContent(
                             detail: detail,
                             bottleImage: bottleImage,
-                            onRemoveRequested: { showRemovalChoice = true }
+                            onRemoveRequested: { showRemovalChoice = true },
+                            onEditLocation: { showLocationEditor = true }
                         )
                         .refreshable { await loadData() }
                     }
@@ -185,6 +187,23 @@ struct WineDetailSheet: View {
                         }
                     }
                     .presentationDetents([.medium])
+                }
+            }
+            .sheet(isPresented: $showLocationEditor) {
+                if let detail {
+                    LocationEditorSheet(initial: locationDraft(from: detail)) { draft in
+                        let request = UpdateWineRequest(
+                            latitude: draft?.latitude,
+                            longitude: draft?.longitude,
+                            placeName: draft?.placeName
+                        )
+                        _ = try? await WineAPI.update(id: detail.id, request)
+                        showLocationEditor = false
+                        Task {
+                            await loadData()
+                            onUpdated?()
+                        }
+                    }
                 }
             }
         }
@@ -336,6 +355,15 @@ struct WineDetailSheet: View {
             self.error = reportError(error)
             isLoading = false
         }
+    }
+
+    private func locationDraft(from detail: UserWineDetail) -> DiscoveryLocationDraft? {
+        guard let latitude = detail.latitude, let longitude = detail.longitude else { return nil }
+        return DiscoveryLocationDraft(
+            latitude: latitude,
+            longitude: longitude,
+            placeName: detail.placeName
+        )
     }
 
     private func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {

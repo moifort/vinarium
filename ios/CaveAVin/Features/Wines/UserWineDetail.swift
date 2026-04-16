@@ -25,6 +25,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let consumption: ConsumptionInfo?
     let gift: GiftInfo?
     let recommendation: RecommendationInfo?
+    let latitude: Double?
+    let longitude: Double?
+    let placeName: String?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -52,6 +55,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         consumption = try container.decodeIfPresent(ConsumptionInfo.self, forKey: .consumption)
         gift = try container.decodeIfPresent(GiftInfo.self, forKey: .gift)
         recommendation = try container.decodeIfPresent(RecommendationInfo.self, forKey: .recommendation)
+        latitude = try container.decodeIfPresent(Double.self, forKey: .latitude)
+        longitude = try container.decodeIfPresent(Double.self, forKey: .longitude)
+        placeName = try container.decodeIfPresent(String.self, forKey: .placeName)
     }
 
     init(
@@ -61,7 +67,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         purchaseDate: String?, drinkFrom: Int?, drinkUntil: Int?, notes: String?,
         giftedBy: String?, createdAt: Date, updatedAt: Date, hasBottleImage: Bool = false,
         cellar: CellarInfo?, consumption: ConsumptionInfo?, gift: GiftInfo?,
-        recommendation: RecommendationInfo?
+        recommendation: RecommendationInfo?,
+        latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -87,6 +94,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.consumption = consumption
         self.gift = gift
         self.recommendation = recommendation
+        self.latitude = latitude
+        self.longitude = longitude
+        self.placeName = placeName
     }
 }
 
