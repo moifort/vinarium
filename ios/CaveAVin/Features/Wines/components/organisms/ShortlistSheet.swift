@@ -54,7 +54,7 @@ struct ShortlistSheet: View {
                     }
 
                     Picker(selection: $rating) {
-                        ForEach(1...5, id: \.self) { value in
+                        ForEach(1...4, id: \.self) { value in
                             Text("\(value) / 5").tag(value)
                         }
                     } label: {

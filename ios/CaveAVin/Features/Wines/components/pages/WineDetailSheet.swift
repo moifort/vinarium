@@ -18,6 +18,8 @@ struct WineDetailSheet: View {
     @State private var showPlacement = false
     @State private var showMove = false
     @State private var showShortlist = false
+    @State private var showFavorite = false
+    @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var bottleImage: UIImage?
 
@@ -147,8 +149,40 @@ struct WineDetailSheet: View {
                             tastingNotes: notes
                         )
                         showShortlist = false
-                        dismiss()
-                        onRemoved?()
+                        Task {
+                            await loadData()
+                            onUpdated?()
+                        }
+                    }
+                    .presentationDetents([.medium])
+                }
+            }
+            .sheet(isPresented: $showFavorite) {
+                if let detail {
+                    FavoriteSheet { _, _, _ in
+                        try? await WineAPI.addToFavorites(id: detail.id)
+                        showFavorite = false
+                        Task {
+                            await loadData()
+                            onUpdated?()
+                        }
+                    }
+                    .presentationDetents([.medium])
+                }
+            }
+            .sheet(isPresented: $showRecommendation) {
+                if let detail {
+                    RecommendationSheet { recommenderName, comment in
+                        try? await RecommendationAPI.create(
+                            wineId: detail.id,
+                            recommenderName: recommenderName,
+                            comment: comment
+                        )
+                        showRecommendation = false
+                        Task {
+                            await loadData()
+                            onUpdated?()
+                        }
                     }
                     .presentationDetents([.medium])
                 }
@@ -210,12 +244,51 @@ struct WineDetailSheet: View {
                 .accessibilityIdentifier("detail-shortlist-button")
             }
         }
-        if detail != nil {
+        if let detail {
+            let isFavorite = detail.consumption?.rating == 5
+            let isShortlisted = detail.consumption?.shortlist == true && !isFavorite
+            let canOfferFromCellar = detail.cellar != nil && detail.cellar?.dateOut == nil
+
             ToolbarItemGroup {
                 Menu {
                     Button("Modifier", systemImage: "pencil") {
                         isEditing = true
                     }
+
+                    Section {
+                        Button {
+                            showFavorite = true
+                        } label: {
+                            Label(isFavorite ? "Déjà en favoris" : "Ajouter aux favoris", systemImage: isFavorite ? "heart.fill" : "heart")
+                        }
+                        .disabled(isFavorite)
+                        .accessibilityIdentifier("menu-favorite-button")
+
+                        Button {
+                            showShortlist = true
+                        } label: {
+                            Label(isShortlisted ? "Déjà à retenir" : "À retenir", systemImage: isShortlisted ? "bookmark.fill" : "bookmark")
+                        }
+                        .disabled(isShortlisted)
+                        .accessibilityIdentifier("menu-shortlist-button")
+
+                        Button {
+                            showRecommendation = true
+                        } label: {
+                            Label("Conseillé par un ami", systemImage: "person.badge.plus")
+                        }
+                        .accessibilityIdentifier("menu-recommendation-button")
+
+                        if canOfferFromCellar {
+                            Button {
+                                showGift = true
+                            } label: {
+                                Label("Offrir", systemImage: "gift")
+                            }
+                            .accessibilityIdentifier("menu-gift-button")
+                        }
+                    }
+
                     Button("Supprimer", systemImage: "trash", role: .destructive) {
                         showDeleteConfirmation = true
                     }
