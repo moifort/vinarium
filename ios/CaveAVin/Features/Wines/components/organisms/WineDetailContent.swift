@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct WineDetailContent: View {
-    let detail: UserWineDetail
+    let content: Content
     let bottleImage: UIImage?
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
@@ -17,60 +17,60 @@ struct WineDetailContent: View {
             }
 
             WineDetailHeader(
-                color: detail.color,
-                name: detail.name,
+                color: content.color,
+                name: content.name,
                 subtitle: headerSubtitle,
-                domain: detail.domain,
-                vintage: detail.vintage
+                domain: content.domain,
+                vintage: content.vintage
             )
 
             WineOriginSection(
-                appellation: detail.appellation,
-                region: detail.region,
-                country: detail.country,
-                classification: detail.classification
+                appellation: content.appellation,
+                region: content.region,
+                country: content.country,
+                classification: content.classification
             )
 
             LocationSection(
-                placeName: detail.placeName,
-                latitude: detail.latitude,
-                longitude: detail.longitude,
+                placeName: content.placeName,
+                latitude: content.latitude,
+                longitude: content.longitude,
                 onTap: onEditLocation
             )
 
             WineDetailsSection(
-                alcoholContent: detail.alcoholContent,
-                purchasePrice: detail.purchasePrice,
-                purchaseDate: detail.purchaseDate,
-                grapeVarieties: detail.grapeVarieties
+                alcoholContent: content.alcoholContent,
+                purchasePrice: content.purchasePrice,
+                purchaseDate: content.purchaseDate,
+                grapeVarieties: content.grapeVarieties
             )
 
-            WineAgingSection(drinkFrom: detail.drinkFrom, drinkUntil: detail.drinkUntil)
+            WineAgingSection(drinkFrom: content.drinkFrom, drinkUntil: content.drinkUntil)
 
-            if let cellar = detail.cellar {
+            if let cellar = content.cellar {
                 WineCellarSection(
-                    position: "\(cellar.row)\(cellar.col)",
-                    dateIn: formatted(cellar.dateIn),
-                    dateOut: cellar.dateOut.map { formatted($0) },
-                    isInCellar: cellar.dateOut == nil,
+                    position: cellar.position,
+                    dateIn: cellar.dateIn,
+                    dateOut: cellar.dateOut,
+                    isInCellar: cellar.isInCellar,
                     onRemoveRequested: onRemoveRequested
                 )
             }
 
-            if let consumption = detail.consumption {
+            if let consumption = content.consumption {
                 WineConsumptionSection(
-                    consumedDate: consumption.consumedDate.map { formatted($0) },
+                    consumedDate: consumption.consumedDate,
                     rating: consumption.rating,
                     tastingNotes: consumption.tastingNotes,
                     contacts: consumption.contacts
                 )
             }
 
-            if let gift = detail.gift {
-                WineGiftSection(giftedDate: formatted(gift.giftedDate), recipientName: gift.recipientName)
+            if let gift = content.gift {
+                WineGiftSection(giftedDate: gift.giftedDate, recipientName: gift.recipientName)
             }
 
-            if let giftedBy = detail.giftedBy {
+            if let giftedBy = content.giftedBy {
                 Section("Offert par") {
                     Label {
                         Text(giftedBy)
@@ -81,14 +81,14 @@ struct WineDetailContent: View {
                 }
             }
 
-            if let recommendation = detail.recommendation {
+            if let recommendation = content.recommendation {
                 WineRecommendationSection(
                     recommenderName: recommendation.recommenderName,
                     comment: recommendation.comment
                 )
             }
 
-            if let notes = detail.notes, !notes.isEmpty {
+            if let notes = content.notes, !notes.isEmpty {
                 Section("Notes") {
                     Label {
                         Text(notes)
@@ -102,41 +102,89 @@ struct WineDetailContent: View {
     }
 
     private var headerSubtitle: String {
-        [detail.color.label,
-         detail.domain,
-         detail.vintage.map { "\($0)" }]
+        [content.color.label,
+         content.domain,
+         content.vintage.map { "\($0)" }]
             .compactMap { $0 }
             .joined(separator: " \u{2022} ")
     }
+}
 
-    private func formatted(_ date: Date) -> String {
-        date.formatted(date: .abbreviated, time: .omitted)
+extension WineDetailContent {
+    struct Content {
+        let color: WineColor
+        let name: String
+        let domain: String?
+        let vintage: Int?
+        let appellation: String?
+        let region: String?
+        let country: String?
+        let classification: String?
+        let placeName: String?
+        let latitude: Double?
+        let longitude: Double?
+        let alcoholContent: Double?
+        let purchasePrice: Double?
+        let purchaseDate: String?
+        let grapeVarieties: [String]
+        let drinkFrom: Int?
+        let drinkUntil: Int?
+        let giftedBy: String?
+        let notes: String?
+        let cellar: CellarSection?
+        let consumption: ConsumptionSection?
+        let gift: GiftSection?
+        let recommendation: RecommendationSection?
+    }
+
+    struct CellarSection {
+        let position: String
+        let dateIn: String
+        let dateOut: String?
+        let isInCellar: Bool
+    }
+
+    struct ConsumptionSection {
+        let consumedDate: String?
+        let rating: Int?
+        let tastingNotes: String?
+        let contacts: [String]?
+    }
+
+    struct GiftSection {
+        let giftedDate: String
+        let recipientName: String?
+    }
+
+    struct RecommendationSection {
+        let recommenderName: String?
+        let comment: String?
     }
 }
 
 #Preview("En cave") {
     WineDetailContent(
-        detail: UserWineDetail(
-            id: "1",
-            name: "Château Margaux",
+        content: .init(
             color: .red,
+            name: "Château Margaux",
             domain: "Château Margaux",
             vintage: 2018,
             appellation: "Margaux",
             region: "Bordeaux",
             country: "France",
-            grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
-            alcoholContent: 13.5,
             classification: "Premier Grand Cru Classé",
+            placeName: nil,
+            latitude: nil,
+            longitude: nil,
+            alcoholContent: 13.5,
             purchasePrice: 350,
             purchaseDate: nil,
+            grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
             drinkFrom: 2025,
             drinkUntil: 2045,
-            notes: "Superbe millésime",
             giftedBy: nil,
-            createdAt: Date(),
-            updatedAt: Date(),
-            cellar: CellarInfo(row: "A", col: 3, dateIn: Date(), dateOut: nil),
+            notes: "Superbe millésime",
+            cellar: .init(position: "A3", dateIn: "01/01/2024", dateOut: nil, isInCellar: true),
             consumption: nil,
             gift: nil,
             recommendation: nil
@@ -148,28 +196,28 @@ struct WineDetailContent: View {
 
 #Preview("Consommé") {
     WineDetailContent(
-        detail: UserWineDetail(
-            id: "2",
-            name: "Pouilly-Fumé",
+        content: .init(
             color: .white,
+            name: "Pouilly-Fumé",
             domain: nil,
             vintage: 2022,
             appellation: "Pouilly-Fumé",
             region: "Loire",
             country: "France",
-            grapeVarieties: ["Sauvignon Blanc"],
-            alcoholContent: nil,
             classification: nil,
+            placeName: nil,
+            latitude: nil,
+            longitude: nil,
+            alcoholContent: nil,
             purchasePrice: nil,
             purchaseDate: nil,
+            grapeVarieties: ["Sauvignon Blanc"],
             drinkFrom: nil,
             drinkUntil: nil,
-            notes: nil,
             giftedBy: nil,
-            createdAt: Date(),
-            updatedAt: Date(),
-            cellar: CellarInfo(row: "B", col: 1, dateIn: Date().addingTimeInterval(-86400 * 30), dateOut: Date()),
-            consumption: ConsumptionInfo(consumedDate: Date(), rating: 4, tastingNotes: "Très frais, belle minéralité", contacts: ["Jean", "Marie"], shortlist: nil),
+            notes: nil,
+            cellar: .init(position: "B1", dateIn: "15/03/2024", dateOut: "14/04/2024", isInCellar: false),
+            consumption: .init(consumedDate: "14/04/2024", rating: 4, tastingNotes: "Très frais, belle minéralité", contacts: ["Jean", "Marie"]),
             gift: nil,
             recommendation: nil
         ),

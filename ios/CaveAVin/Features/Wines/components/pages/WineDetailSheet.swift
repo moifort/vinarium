@@ -43,7 +43,7 @@ struct WineDetailSheet: View {
                         )
                     } else {
                         WineDetailContent(
-                            detail: detail,
+                            content: Self.mapContent(detail),
                             bottleImage: bottleImage,
                             onRemoveRequested: { showRemovalChoice = true },
                             onEditLocation: { showLocationEditor = true }
@@ -363,6 +363,53 @@ struct WineDetailSheet: View {
             latitude: latitude,
             longitude: longitude,
             placeName: detail.placeName
+        )
+    }
+
+    private static func mapContent(_ detail: UserWineDetail) -> WineDetailContent.Content {
+        let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
+        return WineDetailContent.Content(
+            color: detail.color,
+            name: detail.name,
+            domain: detail.domain,
+            vintage: detail.vintage,
+            appellation: detail.appellation,
+            region: detail.region,
+            country: detail.country,
+            classification: detail.classification,
+            placeName: detail.placeName,
+            latitude: detail.latitude,
+            longitude: detail.longitude,
+            alcoholContent: detail.alcoholContent,
+            purchasePrice: detail.purchasePrice,
+            purchaseDate: detail.purchaseDate,
+            grapeVarieties: detail.grapeVarieties,
+            drinkFrom: detail.drinkFrom,
+            drinkUntil: detail.drinkUntil,
+            giftedBy: detail.giftedBy,
+            notes: detail.notes,
+            cellar: detail.cellar.map { cellar in
+                .init(
+                    position: "\(cellar.row)\(cellar.col)",
+                    dateIn: formatter(cellar.dateIn),
+                    dateOut: cellar.dateOut.map(formatter),
+                    isInCellar: cellar.dateOut == nil
+                )
+            },
+            consumption: detail.consumption.map { consumption in
+                .init(
+                    consumedDate: consumption.consumedDate.map(formatter),
+                    rating: consumption.rating,
+                    tastingNotes: consumption.tastingNotes,
+                    contacts: consumption.contacts
+                )
+            },
+            gift: detail.gift.map { gift in
+                .init(giftedDate: formatter(gift.giftedDate), recipientName: gift.recipientName)
+            },
+            recommendation: detail.recommendation.map { reco in
+                .init(recommenderName: reco.recommenderName, comment: reco.comment)
+            }
         )
     }
 
