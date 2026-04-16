@@ -24,6 +24,7 @@ describe('DashboardReadModel', () => {
       expect(result.totalValue).toBe(0)
       expect(result.readyToDrink).toHaveLength(0)
       expect(result.favorites).toHaveLength(0)
+      expect(result.shortlist).toHaveLength(0)
       expect(result.lastBottle).toBeUndefined()
       expect(result.lastExit).toBeUndefined()
       expect(result.history).toHaveLength(0)
@@ -103,6 +104,40 @@ describe('DashboardReadModel', () => {
       const result = await DashboardReadModel.get()
       expect(result.favorites).toHaveLength(1)
       expect(result.favorites[0].id).toBe(wine.id)
+    })
+
+    test('shortlist contains tastings flagged shortlist when rating is not 5', async () => {
+      const wine = aWine()
+      await wineRepo.save(wine)
+      await tastingRepo.save(
+        aTastingNote({ wineId: wine.id, rating: make<Rating>()(3), shortlist: true }),
+      )
+
+      const result = await DashboardReadModel.get()
+      expect(result.shortlist).toHaveLength(1)
+      expect(result.shortlist[0].id).toBe(wine.id)
+      expect(result.shortlist[0].rating).toBe(3)
+    })
+
+    test('wine rated 5 with shortlist=true appears only in favorites, not shortlist', async () => {
+      const wine = aWine()
+      await wineRepo.save(wine)
+      await tastingRepo.save(
+        aTastingNote({ wineId: wine.id, rating: make<Rating>()(5), shortlist: true }),
+      )
+
+      const result = await DashboardReadModel.get()
+      expect(result.favorites).toHaveLength(1)
+      expect(result.shortlist).toHaveLength(0)
+    })
+
+    test('tasting without shortlist flag is excluded from shortlist', async () => {
+      const wine = aWine()
+      await wineRepo.save(wine)
+      await tastingRepo.save(aTastingNote({ wineId: wine.id, rating: make<Rating>()(4) }))
+
+      const result = await DashboardReadModel.get()
+      expect(result.shortlist).toHaveLength(0)
     })
 
     test('lastBottle is the most recently placed bottle', async () => {

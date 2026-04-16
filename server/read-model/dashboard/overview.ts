@@ -6,11 +6,17 @@ import type { TastingNote } from '~/domain/tasting/types'
 import {
   isFavorite,
   readyToDrink as isReadyToDrink,
+  isShortlisted,
   urgentToDrink,
 } from '~/domain/wine/business-rules'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
-import type { FavoriteWine, LastBottle, ReadyToDrinkWine } from '~/read-model/dashboard/types'
+import type {
+  FavoriteWine,
+  LastBottle,
+  ReadyToDrinkWine,
+  ShortlistWine,
+} from '~/read-model/dashboard/types'
 
 export namespace DashboardReadModel {
   export const get = async () => {
@@ -46,11 +52,17 @@ export namespace DashboardReadModel {
       wineMap,
     )
 
+    const shortlist = loadShortlist(
+      allTastings.filter((t) => isShortlisted(t) && !isFavorite(t.rating)),
+      wineMap,
+    )
+
     return {
       bottleCount,
       totalValue,
       readyToDrink,
       favorites,
+      shortlist,
       lastBottle,
       lastExit,
       history: history.slice(0, 10),
@@ -101,4 +113,22 @@ export namespace DashboardReadModel {
         return favorite
       })
       .filter((favorite): favorite is FavoriteWine => favorite !== undefined)
+
+  const loadShortlist = (tastings: TastingNote[], wineMap: Record<string, Wine>) =>
+    tastings
+      .map((tasting) => {
+        const wine = wineMap[tasting.wineId]
+        if (!wine) return undefined
+        const entry: ShortlistWine = {
+          id: wine.id,
+          name: wine.name,
+          color: wine.color,
+          vintage: wine.vintage,
+          estimatedPrice: wine.purchasePrice,
+          tastingDate: tasting.consumedDate,
+          rating: tasting.rating,
+        }
+        return entry
+      })
+      .filter((entry): entry is ShortlistWine => entry !== undefined)
 }

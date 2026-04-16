@@ -7,6 +7,7 @@ export type DashboardView = {
   totalValue: number
   readyToDrink: ReadyToDrinkWine[]
   favorites: FavoriteWine[]
+  shortlist: ShortlistWine[]
   lastBottle?: LastBottle
   lastExit?: JournalEventView
   history: JournalEventView[]
@@ -19,6 +20,16 @@ export type FavoriteWine = {
   vintage?: Year
   estimatedPrice?: Eur
   tastingDate?: Date
+}
+
+export type ShortlistWine = {
+  id: WineId
+  name: WineName
+  color: WineColor
+  vintage?: Year
+  estimatedPrice?: Eur
+  tastingDate?: Date
+  rating?: number
 }
 
 export type ReadyToDrinkWine = {

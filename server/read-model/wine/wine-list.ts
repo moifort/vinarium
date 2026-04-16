@@ -34,6 +34,7 @@ export namespace WineListReadModel {
       return {
         ...rest,
         rating: tasting?.rating ?? null,
+        shortlist: tasting?.shortlist === true,
         giftedTo: gift?.recipientName ?? null,
         recommendedBy: recommendation?.recommenderName ?? null,
         contacts: uniq([

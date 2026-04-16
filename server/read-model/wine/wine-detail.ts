@@ -46,6 +46,7 @@ export namespace WineDetailReadModel {
               rating: tasting.rating,
               tastingNotes: tasting.tastingNotes,
               contacts: tasting.contacts,
+              shortlist: tasting.shortlist === true,
             }
           : undefined,
       gift:

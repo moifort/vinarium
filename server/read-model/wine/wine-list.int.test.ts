@@ -109,6 +109,26 @@ describe('WineListReadModel', () => {
       expect(result[0].rating).toBe(5)
     })
 
+    test('adds shortlist flag from tasting', async () => {
+      const wine = aWine()
+      await wineRepo.save(wine)
+      await tastingRepo.save(
+        aTastingNote({ wineId: wine.id, rating: make<Rating>()(3), shortlist: true }),
+      )
+
+      const result = await all()
+      expect(result[0].shortlist).toBe(true)
+    })
+
+    test('shortlist defaults to false when tasting has no flag', async () => {
+      const wine = aWine()
+      await wineRepo.save(wine)
+      await tastingRepo.save(aTastingNote({ wineId: wine.id, rating: make<Rating>()(4) }))
+
+      const result = await all()
+      expect(result[0].shortlist).toBe(false)
+    })
+
     test('adds giftedTo from gift', async () => {
       const wine = aWine()
       await wineRepo.save(wine)
