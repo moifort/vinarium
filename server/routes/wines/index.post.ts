@@ -33,15 +33,16 @@ export default defineEventHandler(async (event) => {
   if (body.notes) data.notes = body.notes
   if (body.giftedBy) data.giftedBy = PersonName(body.giftedBy)
 
-  const tasting =
-    body.rating != null
-      ? {
-          rating: Rating(body.rating),
-          consumedDate: body.consumedDate ? new Date(body.consumedDate) : new Date(),
-          tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
-          contacts: body.contacts?.length ? body.contacts : undefined,
-        }
-      : undefined
+  const hasTasting = body.rating != null || body.shortlist === true
+  const tasting = hasTasting
+    ? {
+        rating: body.rating != null ? Rating(body.rating) : undefined,
+        consumedDate: body.consumedDate ? new Date(body.consumedDate) : new Date(),
+        tastingNotes: body.tastingNotes ? body.tastingNotes : undefined,
+        contacts: body.contacts?.length ? body.contacts : undefined,
+        shortlist: body.shortlist === true ? true : undefined,
+      }
+    : undefined
 
   const wine = await WineUseCase.addWithTasting(name, color, data, tasting)
 
