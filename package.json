@@ -17,10 +17,10 @@
     "h3": "1.15.11",
     "nitropack": "2.13.3",
     "ts-brand": "0.2.0",
-    "typescript": "6.0.2"
+    "typescript": "6.0.3"
   },
   "dependencies": {
-    "@sentry/bun": "10.48.0",
+    "@sentry/bun": "10.49.0",
     "lodash-es": "4.18.1",
     "ts-pattern": "5.9.0",
     "zod": "4.3.6"
