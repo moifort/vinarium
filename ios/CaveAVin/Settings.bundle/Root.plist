@@ -6,51 +6,13 @@
 	<array>
 		<dict>
 			<key>Type</key>
-			<string>PSMultiValueSpecifier</string>
-			<key>Title</key>
-			<string>Environnement</string>
-			<key>Key</key>
-			<string>serverMode</string>
-			<key>DefaultValue</key>
-			<string>dev</string>
-			<key>Titles</key>
-			<array>
-				<string>Développement (local)</string>
-				<string>Production</string>
-			</array>
-			<key>Values</key>
-			<array>
-				<string>dev</string>
-				<string>prod</string>
-			</array>
-		</dict>
-		<dict>
-			<key>Type</key>
 			<string>PSTextFieldSpecifier</string>
 			<key>Title</key>
-			<string>URL Dev</string>
+			<string>URL serveur</string>
 			<key>Key</key>
-			<string>serverURLDev</string>
+			<string>serverURL</string>
 			<key>DefaultValue</key>
-			<string>http://192.168.0.16:3000</string>
-			<key>IsSecure</key>
-			<false/>
-			<key>KeyboardType</key>
-			<string>URL</string>
-			<key>AutocapitalizationType</key>
-			<string>None</string>
-			<key>AutocorrectionType</key>
-			<string>No</string>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSTextFieldSpecifier</string>
-			<key>Title</key>
-			<string>URL Prod</string>
-			<key>Key</key>
-			<string>serverURLProd</string>
-			<key>DefaultValue</key>
-			<string>https://cave.mottet.me</string>
+			<string>https://cave-a-vin.example.com</string>
 			<key>IsSecure</key>
 			<false/>
 			<key>KeyboardType</key>
