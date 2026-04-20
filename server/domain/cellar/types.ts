@@ -1,4 +1,5 @@
 import type { Brand } from 'ts-brand'
+import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 
 export type CellarRows = Brand<number, 'CellarRows'>
@@ -9,6 +10,7 @@ export type CellarRowLabel = Brand<string, 'CellarRowLabel'>
 export type CellarColLabel = Brand<number, 'CellarColLabel'>
 
 export type CellarBottle = {
+  userId: UserId
   wineId: WineId
   row: CellarRow
   col: CellarCol

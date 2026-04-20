@@ -1,6 +1,9 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
 import { createLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
+import { createLogger } from '~/system/logger'
+
+const log = createLogger('graphql')
 
 type GraphQLBody = { operationName?: string | null }
 
@@ -42,7 +45,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
   const operation = extractOperationName(body)
-  console.log(`graphql → ${operation} (user ${userId})`)
+  log.info(`→ ${operation} (user ${userId})`)
 
   const response = await apollo.executeHTTPGraphQLRequest({
     httpGraphQLRequest: { method: 'POST', headers: headerMap, body, search: '' },

@@ -1,0 +1,28 @@
+import type { UserId } from '~/domain/shared/types'
+import type { TastingNote } from '~/domain/tasting/types'
+import type { WineId } from '~/domain/wine/types'
+import { db } from '~/system/firebase'
+import { genericDataConverter } from '~/utils/firestore'
+
+const tasting = () => db().collection('tasting').withConverter(genericDataConverter<TastingNote>())
+
+const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
+
+export const findAllByUser = async (userId: UserId): Promise<TastingNote[]> => {
+  const snap = await tasting().where('userId', '==', userId).get()
+  return snap.docs.map((doc) => doc.data())
+}
+
+export const findBy = async (userId: UserId, wineId: WineId): Promise<TastingNote | null> => {
+  const doc = await tasting().doc(docId(userId, wineId)).get()
+  return doc.data() ?? null
+}
+
+export const save = async (note: TastingNote): Promise<TastingNote> => {
+  await tasting().doc(docId(note.userId, note.wineId)).set(note)
+  return note
+}
+
+export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
+  await tasting().doc(docId(userId, wineId)).delete()
+}

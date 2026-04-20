@@ -1,20 +1,23 @@
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
+import type { UserId } from '~/domain/shared/types'
 import type { WineColor, WineId, WineName } from '~/domain/wine/types'
 
 export type JournalEntryIn = {
   type: 'in'
+  userId: UserId
   wineId: WineId
   row: CellarRow
   col: CellarCol
-  dateIn: Date
+  date: Date
 }
 
 export type JournalEntryOut = {
   type: 'out'
+  userId: UserId
   wineId: WineId
   row: CellarRow
   col: CellarCol
-  dateOut: Date
+  date: Date
 }
 
 export type JournalEntry = JournalEntryIn | JournalEntryOut

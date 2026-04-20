@@ -1,13 +1,17 @@
 import { keyBy, range } from 'lodash-es'
+import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import * as repository from '~/domain/cellar/repository'
 import { CELLAR_SIZE, type CellarBottle, type CellarBottleView } from '~/domain/cellar/types'
+import type { UserId } from '~/domain/shared/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace CellarQuery {
-  export const getAllBottles = async () => {
-    const [bottles, wines] = await Promise.all([repository.findAll(), WineQuery.findAll()])
+  export const getAllBottles = async (userId: UserId) => {
+    const [bottles, wines] = await Promise.all([
+      repository.findAllByUser(userId),
+      WineQuery.findAll(userId),
+    ])
     const wineMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {
       const wine = wineMap[bottle.wineId]
@@ -17,14 +21,14 @@ export namespace CellarQuery {
     })
   }
 
-  export const getBottleByWineId = async (wineId: WineId) => {
-    const bottle = await repository.findBy(wineId)
+  export const getBottleByWineId = async (userId: UserId, wineId: WineId) => {
+    const bottle = await repository.findBy(userId, wineId)
     if (!bottle) return 'not-found' as const
     return toView(bottle)
   }
 
-  export const suggestPosition = async () => {
-    const allBottles = await repository.findAll()
+  export const suggestPosition = async (userId: UserId) => {
+    const allBottles = await repository.findAllByUser(userId)
     const result = suggest(allBottles)
     if (typeof result === 'string') return result
     return {

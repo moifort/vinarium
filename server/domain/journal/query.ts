@@ -1,13 +1,17 @@
 import { keyBy, sortBy } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import * as repository from '~/domain/journal/repository'
+import * as repository from '~/domain/journal/infrastructure/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
+import type { UserId } from '~/domain/shared/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine, WineId } from '~/domain/wine/types'
 
 export namespace JournalQuery {
-  export const getAll = async () => {
-    const [entries, wines] = await Promise.all([repository.findAll(), WineQuery.findAll()])
+  export const getAll = async (userId: UserId) => {
+    const [entries, wines] = await Promise.all([
+      repository.findAllByUser(userId),
+      WineQuery.findAll(userId),
+    ])
     const wineMap = keyBy(wines, ({ id }) => id)
     return sortBy(
       entries.map((entry) => toView(entry, wineMap)),
@@ -15,8 +19,11 @@ export namespace JournalQuery {
     )
   }
 
-  export const getAllByWineId = async (wine: Pick<Wine, 'id' | 'name' | 'color'>) => {
-    const entries = await repository.findByWineId(wine.id)
+  export const getAllByWineId = async (
+    userId: UserId,
+    wine: Pick<Wine, 'id' | 'name' | 'color'>,
+  ) => {
+    const entries = await repository.findByWineId(userId, wine.id)
     const wineMap = keyBy([wine], ({ id }) => id)
     return sortBy(
       entries.map((entry) => toView(entry, wineMap)),
@@ -24,15 +31,15 @@ export namespace JournalQuery {
     )
   }
 
-  export const getCellarDates = async (wineId: WineId) => {
-    const entries = await repository.findByWineId(wineId)
+  export const getCellarDates = async (userId: UserId, wineId: WineId) => {
+    const entries = await repository.findByWineId(userId, wineId)
     const entryIn = entries.find((entry) => entry.type === 'in')
     if (!entryIn) return 'not-found' as const
     const entryOut = entries.find((entry) => entry.type === 'out')
     return {
       wineId,
-      dateIn: entryIn.dateIn,
-      dateOut: entryOut?.dateOut,
+      dateIn: entryIn.date,
+      dateOut: entryOut?.date,
       row: entryIn.row,
       col: entryIn.col,
     }
@@ -46,7 +53,7 @@ export namespace JournalQuery {
     if (!wine) throw new Error(`Wine not found: ${entry.wineId}`)
     return {
       type: entry.type,
-      date: entry.type === 'in' ? entry.dateIn : entry.dateOut,
+      date: entry.date,
       wineId: entry.wineId,
       wineName: wine.name,
       wineColor: wine.color,

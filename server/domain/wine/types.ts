@@ -7,6 +7,7 @@ import type {
   PersonName,
   PlaceName,
   Region,
+  UserId,
   Year,
 } from '~/domain/shared/types'
 
@@ -23,6 +24,7 @@ export type WineStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'
 
 export type Wine = {
   id: WineId
+  userId: UserId
   name: WineName
   color: WineColor
   domain?: WineDomain

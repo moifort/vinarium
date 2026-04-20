@@ -1,14 +1,13 @@
-import * as repository from '~/domain/recommendation/repository'
+import * as repository from '~/domain/recommendation/infrastructure/repository'
+import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace RecommendationQuery {
-  export const getAll = async () => {
-    return await repository.findAll()
-  }
+  export const getAll = async (userId: UserId) => repository.findAllByUser(userId)
 
-  export const getByWineId = async (wineId: WineId) => {
-    const recommendation = await repository.findBy(wineId)
-    if (!recommendation) return 'not-found' as const
-    return recommendation
+  export const getByWineId = async (userId: UserId, wineId: WineId) => {
+    const rec = await repository.findBy(userId, wineId)
+    if (!rec) return 'not-found' as const
+    return rec
   }
 }
