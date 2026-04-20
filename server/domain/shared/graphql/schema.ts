@@ -41,4 +41,8 @@ import '~/domain/recommendation/infrastructure/graphql/mutations'
 import '~/domain/dashboard/infrastructure/graphql/types'
 import '~/domain/dashboard/infrastructure/graphql/queries'
 
+// Scan IA (label OCR via Claude + Gemini)
+import '~/system/scan/graphql/types'
+import '~/system/scan/graphql/mutations'
+
 export const schema = builder.toSchema()
