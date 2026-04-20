@@ -29,4 +29,12 @@ import '~/domain/tasting/infrastructure/graphql/types'
 import '~/domain/tasting/infrastructure/graphql/inputs'
 import '~/domain/tasting/infrastructure/graphql/mutations'
 
+// Gift domain (extends WineType with .gift field)
+import '~/domain/gift/infrastructure/graphql/types'
+
+// Recommendation domain (extends WineType with .recommendation field)
+import '~/domain/recommendation/infrastructure/graphql/types'
+import '~/domain/recommendation/infrastructure/graphql/inputs'
+import '~/domain/recommendation/infrastructure/graphql/mutations'
+
 export const schema = builder.toSchema()
