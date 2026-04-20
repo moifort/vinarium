@@ -14,4 +14,10 @@ import '~/domain/wine/infrastructure/graphql/inputs'
 import '~/domain/wine/infrastructure/graphql/queries'
 import '~/domain/wine/infrastructure/graphql/mutations'
 
+// Cellar domain (extends WineType with .cellar field)
+import '~/domain/cellar/infrastructure/graphql/types'
+import '~/domain/cellar/infrastructure/graphql/inputs'
+import '~/domain/cellar/infrastructure/graphql/queries'
+import '~/domain/cellar/infrastructure/graphql/mutations'
+
 export const schema = builder.toSchema()
