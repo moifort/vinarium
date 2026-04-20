@@ -37,4 +37,8 @@ import '~/domain/recommendation/infrastructure/graphql/types'
 import '~/domain/recommendation/infrastructure/graphql/inputs'
 import '~/domain/recommendation/infrastructure/graphql/mutations'
 
+// Dashboard domain (read-only aggregation)
+import '~/domain/dashboard/infrastructure/graphql/types'
+import '~/domain/dashboard/infrastructure/graphql/queries'
+
 export const schema = builder.toSchema()
