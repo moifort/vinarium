@@ -20,4 +20,8 @@ import '~/domain/cellar/infrastructure/graphql/inputs'
 import '~/domain/cellar/infrastructure/graphql/queries'
 import '~/domain/cellar/infrastructure/graphql/mutations'
 
+// Journal domain (extends WineType with .history field)
+import '~/domain/journal/infrastructure/graphql/types'
+import '~/domain/journal/infrastructure/graphql/queries'
+
 export const schema = builder.toSchema()
