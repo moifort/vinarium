@@ -91,7 +91,6 @@ struct CreateWineRequest: Encodable, Sendable {
     var purchaseDate: String?
     var drinkFrom: Int?
     var drinkUntil: Int?
-    var imageBase64: String?
     var notes: String?
     var giftedBy: String?
     var rating: Int?

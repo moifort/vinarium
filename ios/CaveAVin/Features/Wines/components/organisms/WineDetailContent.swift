@@ -2,20 +2,11 @@ import SwiftUI
 
 struct WineDetailContent: View {
     let content: Content
-    let bottleImage: UIImage?
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
 
     var body: some View {
         List {
-            if let bottleImage {
-                Section {
-                    BottleImageView(image: bottleImage)
-                        .frame(maxWidth: .infinity)
-                        .listRowBackground(Color.clear)
-                }
-            }
-
             WineDetailHeader(
                 color: content.color,
                 name: content.name,
@@ -189,7 +180,6 @@ extension WineDetailContent {
             gift: nil,
             recommendation: nil
         ),
-        bottleImage: nil,
         onRemoveRequested: {}
     )
 }
@@ -221,7 +211,6 @@ extension WineDetailContent {
             gift: nil,
             recommendation: nil
         ),
-        bottleImage: nil,
         onRemoveRequested: {}
     )
 }

@@ -2,7 +2,6 @@ import SwiftUI
 
 struct WineDetailPage: View {
     let content: WineDetailContent.Content
-    let bottleImage: UIImage?
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
     var onRefresh: () async -> Void = {}
@@ -10,7 +9,6 @@ struct WineDetailPage: View {
     var body: some View {
         WineDetailContent(
             content: content,
-            bottleImage: bottleImage,
             onRemoveRequested: onRemoveRequested,
             onEditLocation: onEditLocation
         )
@@ -45,8 +43,7 @@ struct WineDetailPage: View {
                 consumption: nil,
                 gift: nil,
                 recommendation: nil
-            ),
-            bottleImage: nil
+            )
         )
     }
 }

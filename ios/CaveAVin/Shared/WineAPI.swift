@@ -44,10 +44,6 @@ enum WineAPI {
         try await APIClient.shared.delete("/wines/\(id)")
     }
 
-    static func getBottleImage(id: String) async throws -> Data {
-        try await APIClient.shared.getRawData("/wines/\(id)/bottle-image")
-    }
-
     static func addToFavorites(id: String) async throws {
         struct Empty: Encodable, Sendable {}
         struct Ignored: Decodable, Sendable {}

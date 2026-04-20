@@ -1,13 +1,11 @@
 export default defineEventHandler(async () => {
   for (const name of [
     'wines',
-    'wine-images',
     'cellar',
     'journal',
     'tasting',
     'gift',
     'recommendation',
-    'bottle-images',
     'migration-meta',
   ]) {
     const storage = useStorage(name)

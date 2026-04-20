@@ -1,8 +1,6 @@
 import type { Wine, WineId } from '~/domain/wine/types'
-import * as bottleImageRepo from '~/system/bottle-image/repository'
 
 const storage = () => useStorage('wines')
-const imageStorage = () => useStorage('wine-images')
 
 export const findAll = async () => {
   const keys = await storage().getKeys()
@@ -12,17 +10,11 @@ export const findAll = async () => {
 
 export const findBy = (id: WineId) => storage().getItem<Wine>(id)
 
-export const findImageBy = (id: WineId) => imageStorage().getItem<string>(id)
-
 export const save = async (wine: Wine) => {
-  const { imageBase64, ...data } = wine
-  if (imageBase64) await imageStorage().setItem(wine.id, imageBase64)
-  await storage().setItem(wine.id, data)
+  await storage().setItem(wine.id, wine)
   return wine
 }
 
 export const remove = async (id: WineId) => {
   await storage().removeItem(id)
-  await imageStorage().removeItem(id)
-  await bottleImageRepo.remove(id)
 }

@@ -21,7 +21,6 @@ struct WineDetailView: View {
     @State private var showFavorite = false
     @State private var showRecommendation = false
     @State private var isEditing = false
-    @State private var bottleImage: UIImage?
     @State private var showLocationEditor = false
 
     var body: some View {
@@ -44,7 +43,6 @@ struct WineDetailView: View {
                     } else {
                         WineDetailPage(
                             content: Self.mapContent(detail),
-                            bottleImage: bottleImage,
                             onRemoveRequested: { showRemovalChoice = true },
                             onEditLocation: { showLocationEditor = true },
                             onRefresh: { await loadData() }
@@ -344,13 +342,6 @@ struct WineDetailView: View {
             let loadedDetail = try await WineAPI.getDetail(id: wineId)
             detail = loadedDetail
             isLoading = false
-
-            if loadedDetail.hasBottleImage {
-                let imageData = try? await WineAPI.getBottleImage(id: wineId)
-                if let imageData {
-                    bottleImage = UIImage(data: imageData)
-                }
-            }
         } catch {
             self.error = reportError(error)
             isLoading = false

@@ -20,7 +20,6 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let giftedBy: String?
     let createdAt: Date
     let updatedAt: Date
-    let hasBottleImage: Bool
     let cellar: CellarInfo?
     let consumption: ConsumptionInfo?
     let gift: GiftInfo?
@@ -50,7 +49,6 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         giftedBy = try container.decodeIfPresent(String.self, forKey: .giftedBy)
         createdAt = try container.decode(Date.self, forKey: .createdAt)
         updatedAt = try container.decode(Date.self, forKey: .updatedAt)
-        hasBottleImage = try container.decodeIfPresent(Bool.self, forKey: .hasBottleImage) ?? false
         cellar = try container.decodeIfPresent(CellarInfo.self, forKey: .cellar)
         consumption = try container.decodeIfPresent(ConsumptionInfo.self, forKey: .consumption)
         gift = try container.decodeIfPresent(GiftInfo.self, forKey: .gift)
@@ -65,7 +63,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         appellation: String?, region: String?, country: String?, grapeVarieties: [String],
         alcoholContent: Double?, classification: String?, purchasePrice: Double?,
         purchaseDate: String?, drinkFrom: Int?, drinkUntil: Int?, notes: String?,
-        giftedBy: String?, createdAt: Date, updatedAt: Date, hasBottleImage: Bool = false,
+        giftedBy: String?, createdAt: Date, updatedAt: Date,
         cellar: CellarInfo?, consumption: ConsumptionInfo?, gift: GiftInfo?,
         recommendation: RecommendationInfo?,
         latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil
@@ -89,7 +87,6 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.giftedBy = giftedBy
         self.createdAt = createdAt
         self.updatedAt = updatedAt
-        self.hasBottleImage = hasBottleImage
         self.cellar = cellar
         self.consumption = consumption
         self.gift = gift

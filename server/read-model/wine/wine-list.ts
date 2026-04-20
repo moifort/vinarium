@@ -27,12 +27,11 @@ export namespace WineListReadModel {
     const giftMap = keyBy(gifts, ({ wineId }) => wineId)
     const recommendationMap = keyBy(recommendations, ({ wineId }) => wineId)
     const withExtra = wines.map((wine) => {
-      const { imageBase64, ...rest } = wine
       const tasting = ratingMap[wine.id]
       const gift = giftMap[wine.id]
       const recommendation = recommendationMap[wine.id]
       return {
-        ...rest,
+        ...wine,
         rating: tasting?.rating ?? null,
         shortlist: tasting?.shortlist === true,
         giftedTo: gift?.recipientName ?? null,

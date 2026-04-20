@@ -38,7 +38,6 @@ export default defineEventHandler(async (event) => {
   if (body.purchaseDate) data.purchaseDate = body.purchaseDate
   if (body.drinkFrom != null) data.drinkFrom = Year(body.drinkFrom)
   if (body.drinkUntil != null) data.drinkUntil = Year(body.drinkUntil)
-  if (body.imageBase64) data.imageBase64 = body.imageBase64
   if (body.notes) data.notes = body.notes
   if (body.giftedBy) data.giftedBy = PersonName(body.giftedBy)
   if (body.latitude != null) data.latitude = Latitude(body.latitude)

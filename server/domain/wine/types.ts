@@ -36,7 +36,6 @@ export type Wine = {
   purchaseDate?: string
   drinkFrom?: Year
   drinkUntil?: Year
-  imageBase64?: string
   notes?: string
   giftedBy?: PersonName
   servingTemperature?: number

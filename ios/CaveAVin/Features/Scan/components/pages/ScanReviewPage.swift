@@ -325,7 +325,6 @@ struct ScanReviewPage: View {
             purchasePrice: Double(estimatedPrice),
             drinkFrom: Int(drinkFrom),
             drinkUntil: Int(drinkUntil),
-            imageBase64: imageData.base64EncodedString(),
             giftedBy: giftedBy.isEmpty ? nil : giftedBy,
             latitude: location?.latitude,
             longitude: location?.longitude,

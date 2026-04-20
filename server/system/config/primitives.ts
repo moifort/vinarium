@@ -5,7 +5,6 @@ import type {
   ApiToken as ApiTokenType,
   GoogleApiKey as GoogleApiKeyType,
   SentryDsn as SentryDsnType,
-  TransparentUrl as TransparentUrlType,
 } from '~/system/config/types'
 
 export const ApiToken = (value: unknown) => {
@@ -26,9 +25,4 @@ export const GoogleApiKey = (value: unknown) => {
 export const SentryDsn = (value: unknown) => {
   const v = z.string().min(1).parse(value)
   return make<SentryDsnType>()(v)
-}
-
-export const TransparentUrl = (value: unknown) => {
-  const v = z.string().url().parse(value)
-  return make<TransparentUrlType>()(v)
 }
