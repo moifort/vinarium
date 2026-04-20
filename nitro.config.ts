@@ -12,6 +12,7 @@ export default defineNitroConfig({
     anthropicApiKey: '',
     googleApiKey: '',
     apiToken: '',
+    adminToken: '',
     sentryDsn: '',
   },
   storage: {
