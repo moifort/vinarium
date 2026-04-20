@@ -1,0 +1,44 @@
+query CellarBottles {
+  cellarBottles {
+    wineId
+    row
+    col
+    rowLabel
+    colLabel
+    createdAt
+    wine {
+      id
+      name
+      color
+      vintage
+      domain
+      appellation
+      region
+      country
+      classification
+      purchasePrice
+      drinkFrom
+      drinkUntil
+    }
+  }
+}
+
+query CellarHistory {
+  journalEvents {
+    type
+    date
+    wineId
+    wineName
+    wineColor
+    position
+  }
+}
+
+query SuggestCellarPosition {
+  suggestCellarPosition {
+    row
+    col
+    rowLabel
+    colLabel
+  }
+}

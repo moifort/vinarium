@@ -1,0 +1,16 @@
+mutation ScanWine($imageBase64: String!) {
+  scanWine(imageBase64: $imageBase64) {
+    name
+    color
+    domain
+    vintage
+    appellation
+    region
+    country
+    classification
+    grapeVarieties
+    drinkFrom
+    drinkUntil
+    estimatedPrice
+  }
+}

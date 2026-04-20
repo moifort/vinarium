@@ -1,0 +1,36 @@
+mutation AddWine($input: AddWineInput!) {
+  addWine(input: $input) {
+    id
+    name
+    color
+    vintage
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateWine($id: WineId!, $input: UpdateWineInput!) {
+  updateWine(id: $id, input: $input) {
+    id
+    name
+    color
+    vintage
+    updatedAt
+  }
+}
+
+mutation DeleteWine($id: WineId!) {
+  deleteWine(id: $id)
+}
+
+mutation MarkFavorite($wineId: WineId!) {
+  markFavorite(wineId: $wineId)
+}
+
+mutation AddToShortlist($wineId: WineId!, $input: ShortlistInput!) {
+  addToShortlist(wineId: $wineId, input: $input)
+}
+
+mutation AddRecommendation($wineId: WineId!, $input: RecommendationInput!) {
+  addRecommendation(wineId: $wineId, input: $input)
+}

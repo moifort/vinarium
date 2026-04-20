@@ -1,0 +1,57 @@
+query WineDetail($id: WineId!) {
+  wine(id: $id) {
+    id
+    name
+    color
+    vintage
+    domain
+    appellation
+    region
+    country
+    classification
+    purchasePrice
+    purchaseDate
+    drinkFrom
+    drinkUntil
+    notes
+    giftedBy
+    grapeVarieties
+    servingTemperature
+    latitude
+    longitude
+    placeName
+    createdAt
+    updatedAt
+    cellar {
+      row
+      col
+      rowLabel
+      colLabel
+      createdAt
+      updatedAt
+    }
+    consumption {
+      rating
+      shortlist
+      consumedDate
+      tastingNotes
+      contacts
+    }
+    gift {
+      recipientName
+      giftedDate
+    }
+    recommendation {
+      recommenderName
+      comment
+    }
+    history {
+      type
+      date
+      wineId
+      wineName
+      wineColor
+      position
+    }
+  }
+}

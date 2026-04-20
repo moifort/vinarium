@@ -1,0 +1,57 @@
+query Dashboard {
+  dashboard {
+    bottleCount
+    totalValue
+    readyToDrink {
+      id
+      name
+      color
+      position
+      urgent
+      drinkUntil
+    }
+    favorites {
+      id
+      name
+      color
+      vintage
+      estimatedPrice
+      tastingDate
+    }
+    shortlist {
+      id
+      name
+      color
+      vintage
+      estimatedPrice
+      tastingDate
+      rating
+    }
+    lastBottle {
+      wine {
+        id
+        name
+        color
+        vintage
+      }
+      position
+      date
+    }
+    lastExit {
+      type
+      date
+      wineId
+      wineName
+      wineColor
+      position
+    }
+    history {
+      type
+      date
+      wineId
+      wineName
+      wineColor
+      position
+    }
+  }
+}

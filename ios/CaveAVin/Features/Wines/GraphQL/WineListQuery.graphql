@@ -1,0 +1,45 @@
+query WineList {
+  wines {
+    id
+    name
+    color
+    vintage
+    domain
+    appellation
+    region
+    country
+    classification
+    purchasePrice
+    purchaseDate
+    drinkFrom
+    drinkUntil
+    notes
+    giftedBy
+    grapeVarieties
+    latitude
+    longitude
+    placeName
+    createdAt
+    updatedAt
+    cellar {
+      row
+      col
+      rowLabel
+      colLabel
+    }
+    consumption {
+      rating
+      shortlist
+      consumedDate
+      contacts
+    }
+    gift {
+      recipientName
+      giftedDate
+    }
+    recommendation {
+      recommenderName
+      comment
+    }
+  }
+}

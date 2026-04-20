@@ -1,0 +1,31 @@
+mutation PlaceBottle($wineId: WineId!, $row: Int!, $col: Int!) {
+  placeBottle(wineId: $wineId, row: $row, col: $col) {
+    wineId
+    row
+    col
+    rowLabel
+    colLabel
+  }
+}
+
+mutation MoveBottle($wineId: WineId!, $row: Int!, $col: Int!) {
+  moveBottle(wineId: $wineId, row: $row, col: $col) {
+    wineId
+    row
+    col
+    rowLabel
+    colLabel
+  }
+}
+
+mutation ConsumeBottle($wineId: WineId!, $input: ConsumptionInput!) {
+  consumeBottle(wineId: $wineId, input: $input)
+}
+
+mutation GiftBottle($wineId: WineId!, $input: GiftInput!) {
+  giftBottle(wineId: $wineId, input: $input)
+}
+
+mutation RemoveBottle($wineId: WineId!) {
+  removeBottle(wineId: $wineId)
+}
