@@ -6,7 +6,11 @@
     "build": "nitro build",
     "dev": "nitro dev --host 0.0.0.0",
     "test": "bun test",
-    "test:coverage": "bun test --coverage"
+    "test:coverage": "bun test --coverage",
+    "lint": "bunx biome check",
+    "lint:fix": "bunx biome check --write",
+    "generate:graphql": "bun scripts/export-graphql-schema.ts",
+    "generate": "bun run generate:graphql"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.12",
@@ -20,7 +24,13 @@
     "typescript": "6.0.3"
   },
   "dependencies": {
+    "@apollo/server": "5.5.0",
+    "@pothos/core": "4.12.0",
     "@sentry/bun": "10.49.0",
+    "consola": "3.4.2",
+    "dataloader": "2.2.3",
+    "firebase-admin": "13.4.0",
+    "graphql": "16.13.2",
     "lodash-es": "4.18.1",
     "ts-pattern": "5.9.0",
     "zod": "4.3.6"
