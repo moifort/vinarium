@@ -1,0 +1,520 @@
+"""
+Manually add a wine to the catalog
+"""
+input AddWineInput {
+  appellation: Appellation
+  classification: Classification
+  color: WineColor!
+  country: Country
+  domain: WineDomain
+  drinkFrom: Year
+  drinkUntil: Year
+  giftedBy: PersonName
+  grapeVarieties: [String!]
+  latitude: Latitude
+  longitude: Longitude
+  name: WineName!
+  notes: String
+  placeName: PlaceName
+
+  """
+  ISO date string
+  """
+  purchaseDate: String
+  purchasePrice: Eur
+  region: Region
+  servingTemperature: Float
+  vintage: Year
+}
+
+"""
+Wine appellation (AOC / AOP / DOC ...)
+"""
+scalar Appellation
+
+"""
+A bottle physically placed in the cellar grid
+"""
+type CellarBottle {
+  col: Int!
+  colLabel: Int!
+  createdAt: DateTime!
+  row: Int!
+  rowLabel: String!
+  updatedAt: DateTime!
+  wineId: WineId!
+}
+
+"""
+A cellar bottle joined with the corresponding wine
+"""
+type CellarBottleWithWine {
+  col: Int!
+  colLabel: Int!
+  createdAt: DateTime!
+  row: Int!
+  rowLabel: String!
+  wine: Wine!
+  wineId: WineId!
+}
+
+"""
+A free cellar position suggestion
+"""
+type CellarPosition {
+  col: Int!
+  colLabel: Int!
+  row: Int!
+  rowLabel: String!
+}
+
+"""
+Wine classification (Grand Cru, Premier Cru ...)
+"""
+scalar Classification
+
+"""
+Tasting note / consumption record for a wine
+"""
+type Consumption {
+  consumedDate: DateTime
+  contacts: [String!]
+  rating: Rating
+  shortlist: Boolean
+  tastingNotes: String
+}
+
+"""
+Details captured when consuming a bottle
+"""
+input ConsumptionInput {
+  consumedDate: DateTime
+  contacts: [String!]
+  rating: Rating
+  shortlist: Boolean
+  tastingNotes: String
+}
+
+"""
+Country name
+"""
+scalar Country
+
+"""
+Aggregated dashboard view for the current user
+"""
+type Dashboard {
+  bottleCount: Int!
+  favorites: [FavoriteWine!]!
+  history: [JournalEvent!]!
+  lastBottle: LastBottle
+  lastExit: JournalEvent
+  readyToDrink: [ReadyToDrinkWine!]!
+  shortlist: [ShortlistWine!]!
+  totalValue: Float!
+}
+
+"""
+ISO 8601 date-time string
+"""
+scalar DateTime
+
+"""
+Euro amount (non-negative)
+"""
+scalar Eur
+
+type FavoriteWine {
+  color: WineColor!
+  estimatedPrice: Eur
+  id: WineId!
+  name: WineName!
+  tastingDate: DateTime
+  vintage: Year
+}
+
+"""
+Record of a wine that was gifted away
+"""
+type Gift {
+  giftedDate: DateTime!
+  recipientName: PersonName
+}
+
+"""
+Details captured when gifting a bottle
+"""
+input GiftInput {
+  giftedDate: DateTime!
+  recipientName: PersonName
+}
+
+"""
+A timestamped cellar entry/exit event for a wine
+"""
+type JournalEvent {
+  date: DateTime!
+  position: String!
+  type: JournalEventType!
+  wineColor: String!
+  wineId: WineId!
+  wineName: WineName!
+}
+
+"""
+Whether a journal entry records a bottle entering or leaving the cellar
+"""
+enum JournalEventType {
+  IN
+  OUT
+}
+
+type LastBottle {
+  date: DateTime!
+  position: String!
+  wine: LastBottleWine!
+}
+
+type LastBottleWine {
+  color: WineColor!
+  id: WineId!
+  name: WineName!
+  vintage: Year
+}
+
+"""
+Latitude (-90..90)
+"""
+scalar Latitude
+
+"""
+Longitude (-180..180)
+"""
+scalar Longitude
+
+type Mutation {
+  """
+  Record a recommendation for a wine
+  """
+  addRecommendation(input: RecommendationInput!, wineId: WineId!): Boolean!
+
+  """
+  Add a wine to the shortlist with optional tasting details
+  """
+  addToShortlist(input: ShortlistInput!, wineId: WineId!): Boolean!
+
+  """
+  Add a new wine to the catalog
+  """
+  addWine(input: AddWineInput!): Wine!
+
+  """
+  Remove a bottle from the cellar and record consumption (tasting note)
+  """
+  consumeBottle(input: ConsumptionInput!, wineId: WineId!): Boolean!
+
+  """
+  Delete a wine and all related data (cellar, tasting, gift, recommendation, journal)
+  """
+  deleteWine(id: WineId!): Boolean!
+
+  """
+  Remove a bottle from the cellar and record it as a gift
+  """
+  giftBottle(input: GiftInput!, wineId: WineId!): Boolean!
+
+  """
+  Mark a wine as favorite (creates / overwrites a tasting note with rating 5)
+  """
+  markFavorite(wineId: WineId!): Boolean!
+
+  """
+  Move a bottle to a different position in the cellar
+  """
+  moveBottle(col: Int!, row: Int!, wineId: WineId!): CellarBottle!
+
+  """
+  Place a wine in the cellar grid
+  """
+  placeBottle(col: Int!, row: Int!, wineId: WineId!): CellarBottle!
+
+  """
+  Remove a bottle from the cellar without recording why
+  """
+  removeBottle(wineId: WineId!): Boolean!
+
+  """
+  Analyze a wine label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.
+  """
+  scanWine(
+    """
+    JPEG image, base64-encoded (no data URL prefix)
+    """
+    imageBase64: String!
+  ): ScanResult!
+
+  """
+  Update an existing wine
+  """
+  updateWine(id: WineId!, input: UpdateWineInput!): Wine!
+}
+
+"""
+Person name (1-200 chars)
+"""
+scalar PersonName
+
+"""
+Place name (1-200 chars)
+"""
+scalar PlaceName
+
+type Query {
+  """
+  All bottles currently in the cellar, with the joined wine
+  """
+  cellarBottles: [CellarBottleWithWine!]!
+
+  """
+  Aggregated dashboard view for the current user
+  """
+  dashboard: Dashboard!
+
+  """
+  All cellar entry/exit events for the current user, most recent first
+  """
+  journalEvents: [JournalEvent!]!
+
+  """
+  Suggest the next free cellar position (null if cellar is full)
+  """
+  suggestCellarPosition: CellarPosition
+
+  """
+  Get a single wine by ID
+  """
+  wine(id: WineId!): Wine
+
+  """
+  List all wines belonging to the current user
+  """
+  wines: [Wine!]!
+}
+
+"""
+Rating (1-5)
+"""
+scalar Rating
+
+type ReadyToDrinkWine {
+  color: WineColor!
+  drinkUntil: Year
+  id: WineId!
+  name: WineName!
+  position: String!
+  urgent: Boolean!
+}
+
+"""
+Record of a wine that was recommended by someone
+"""
+type Recommendation {
+  comment: String
+  recommenderName: PersonName
+}
+
+"""
+Details captured when recording a recommendation for a wine
+"""
+input RecommendationInput {
+  comment: String
+  recommenderName: PersonName
+}
+
+"""
+Wine region (e.g. Bordeaux, Bourgogne)
+"""
+scalar Region
+
+"""
+Structured wine info extracted from a label image (Claude + Gemini).
+"""
+type ScanResult {
+  appellation: String
+  classification: String
+  color: WineColor!
+  country: String
+  domain: String
+  drinkFrom: Int
+  drinkUntil: Int
+  estimatedPrice: Float
+  grapeVarieties: [String!]
+  name: String!
+  region: String
+  vintage: Int
+}
+
+"""
+Tasting fields captured when adding a wine to the shortlist
+"""
+input ShortlistInput {
+  consumedDate: DateTime
+  contacts: [String!]
+  rating: Rating
+  tastingNotes: String
+}
+
+type ShortlistWine {
+  color: WineColor!
+  estimatedPrice: Eur
+  id: WineId!
+  name: WineName!
+  rating: Float
+  tastingDate: DateTime
+  vintage: Year
+}
+
+"""
+Sort direction
+"""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""
+Update an existing wine. Absent fields keep their current value.
+"""
+input UpdateWineInput {
+  appellation: Appellation
+  classification: Classification
+  color: WineColor
+  country: Country
+  domain: WineDomain
+  drinkFrom: Year
+  drinkUntil: Year
+  giftedBy: PersonName
+  grapeVarieties: [String!]
+  latitude: Latitude
+  longitude: Longitude
+  name: WineName
+  notes: String
+  placeName: PlaceName
+  purchaseDate: String
+  purchasePrice: Eur
+  region: Region
+  servingTemperature: Float
+  vintage: Year
+}
+
+"""
+Firebase Auth user identifier
+"""
+scalar UserId
+
+"""
+A wine in the user’s collection
+"""
+type Wine {
+  appellation: Appellation
+
+  """
+  Position in the cellar grid (null if the wine is not in cellar)
+  """
+  cellar: CellarBottle
+  classification: Classification
+  color: WineColor!
+
+  """
+  Tasting / consumption details for this wine (null if never recorded)
+  """
+  consumption: Consumption
+  country: Country
+  createdAt: DateTime!
+  domain: WineDomain
+  drinkFrom: Year
+  drinkUntil: Year
+
+  """
+  Gift details for this wine (null if never gifted)
+  """
+  gift: Gift
+  giftedBy: PersonName
+  grapeVarieties: [String!]
+
+  """
+  Cellar entry/exit history for this wine, most recent first
+  """
+  history: [JournalEvent!]!
+  id: WineId!
+  latitude: Latitude
+  longitude: Longitude
+  name: WineName!
+  notes: String
+  placeName: PlaceName
+  purchaseDate: String
+  purchasePrice: Eur
+
+  """
+  Recommendation details for this wine (null if never recommended)
+  """
+  recommendation: Recommendation
+  region: Region
+  servingTemperature: Float
+  updatedAt: DateTime!
+  userId: UserId!
+  vintage: Year
+}
+
+"""
+Wine color category
+"""
+enum WineColor {
+  RED
+  ROSE
+  SPARKLING
+  SWEET
+  WHITE
+}
+
+"""
+Wine producer / château / domain
+"""
+scalar WineDomain
+
+"""
+Wine unique identifier (UUID v4)
+"""
+scalar WineId
+
+"""
+Wine display name (non-empty)
+"""
+scalar WineName
+
+"""
+Field used to sort the wine list
+"""
+enum WineSort {
+  COLOR
+  CREATED_AT
+  PRICE
+  REGION
+  UPDATED_AT
+  VINTAGE
+}
+
+"""
+Lifecycle status of a wine
+"""
+enum WineStatus {
+  CONSUMED
+  GIFTED
+  IN_CELLAR
+  RECOMMENDED
+}
+
+"""
+Calendar year (>= 1800)
+"""
+scalar Year

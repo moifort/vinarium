@@ -1,0 +1,28 @@
+{
+  "schemaNamespace": "CaveAVinGraphQL",
+  "input": {
+    "schemaSearchPaths": ["../shared/schema.graphql"],
+    "operationSearchPaths": [
+      "CaveAVin/Features/Wines/GraphQL/*.graphql",
+      "CaveAVin/Features/Cellar/GraphQL/*.graphql",
+      "CaveAVin/Features/Dashboard/GraphQL/*.graphql",
+      "CaveAVin/Features/Scan/GraphQL/*.graphql"
+    ]
+  },
+  "output": {
+    "schemaTypes": {
+      "path": "CaveAVin/Generated/GraphQL",
+      "moduleType": {
+        "embeddedInTarget": {
+          "name": "CaveAVin"
+        }
+      }
+    },
+    "operations": {
+      "inSchemaModule": {}
+    },
+    "testMocks": {
+      "none": {}
+    }
+  }
+}
