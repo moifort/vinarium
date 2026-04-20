@@ -10,8 +10,15 @@ import type {
   PersonName as PersonNameType,
   PlaceName as PlaceNameType,
   Region as RegionType,
+  UserId as UserIdType,
   Year as YearType,
 } from '~/domain/shared/types'
+
+export const UserId = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<UserIdType>()(v)
+}
+
 export const Eur = (value: unknown) => {
   const v = z
     .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().nonnegative())
