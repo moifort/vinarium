@@ -7,37 +7,67 @@ on:
 
 permissions:
   contents: read
+  id-token: write   # required for Workload Identity Federation
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.0
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Build (Nitro firebase preset)
-        run: bun run build
-        env:
-          NITRO_PRESET: firebase
-
-      - name: Authenticate to Google Cloud
+      - name: Authenticate to Google Cloud (workload identity)
         uses: google-github-actions/auth@v3
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOY_SA }}
 
-      - name: Deploy Firestore rules / indexes / functions
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only firestore:rules,firestore:indexes,functions
-        env:
-          GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+      - name: Build the Nitro bundle (firebase preset)
+        run: |
+          bun install --frozen-lockfile
+          bunx nitro prepare
+          bun run generate:graphql
+          bun run build
+
+      - name: Materialize terraform.tfvars from GitHub secrets
+        run: |
+          set -euo pipefail
+          mkdir -p infra
+          # Apple .p8 — multiline, must be quoted properly
+          printf '%s' "${{ secrets.APPLE_PRIVATE_KEY_P8 }}" > infra/apple.p8
+          chmod 600 infra/apple.p8
+
+          cat > infra/terraform.tfvars <<EOF
+          project_id             = "${{ vars.GCP_PROJECT_ID }}"
+          billing_account_id     = "${{ secrets.GCP_BILLING_ACCOUNT }}"
+          org_id                 = "${{ vars.GCP_ORG_ID }}"
+          region                 = "europe-west3"
+          firestore_location     = "eur3"
+          ios_bundle_id          = "${{ vars.IOS_BUNDLE_ID }}"
+          apple_team_id          = "${{ secrets.APPLE_TEAM_ID }}"
+          apple_services_id      = "${{ secrets.APPLE_SERVICES_ID }}"
+          apple_key_id           = "${{ secrets.APPLE_KEY_ID }}"
+          apple_private_key_path = "./apple.p8"
+          anthropic_api_key      = "${{ secrets.ANTHROPIC_API_KEY }}"
+          google_api_key         = "${{ secrets.GEMINI_API_KEY }}"
+          sentry_dsn             = "${{ secrets.SENTRY_DSN }}"
+          admin_token            = "${{ secrets.ADMIN_TOKEN }}"
+          EOF
+
+      - name: Terraform init + apply
+        working-directory: infra
+        run: |
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
 
       - name: Run Firestore migrations
+        working-directory: infra
         run: |
+          URL=$(terraform output -raw function_url)
           curl -fsS -X POST \
             -H "Authorization: Bearer ${{ secrets.ADMIN_TOKEN }}" \
-            "https://${{ vars.SERVER_HOST }}/admin/migrate"
+            "${URL}/admin/migrate"
