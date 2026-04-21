@@ -38,3 +38,19 @@ ios/shared/
 .claude/
 /ios/CaveAVin/Shared/Secrets.swift
 /ios/CaveAVinUITests/Support/TestSecrets.swift
+
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/crash.log
+infra/crash.*.log
+infra/terraform.tfvars
+infra/*.auto.tfvars
+infra/*.auto.tfvars.json
+infra/AuthKey_*.p8
+infra/apple.p8
+
+# Build artifact uploaded to GCS by Terraform
+.output/server-source.zip

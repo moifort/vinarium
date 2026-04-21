@@ -23,3 +23,9 @@ output "ios_plist_path" {
   value       = local_file.google_service_info_plist.filename
   description = "Local path of the generated GoogleService-Info.plist"
 }
+
+output "tfstate_bucket" {
+  value       = google_storage_bucket.tfstate.name
+  description = "GCS bucket holding the Terraform state. Referenced by infra/backend.tf."
+}
+
