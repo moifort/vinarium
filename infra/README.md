@@ -37,7 +37,7 @@ The `bootstrap.sh` driver:
 5. prints the Cloud Function URL and the iOS plist path.
 
 End state after a fresh bootstrap: backend operational, Firestore ready,
-Apple Sign-In configured, `ios/CaveAVin/GoogleService-Info.plist` written.
+Apple Sign-In configured, `ios/Vinarium/GoogleService-Info.plist` written.
 
 ## Subsequent deploys (CI)
 

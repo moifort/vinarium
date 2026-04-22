@@ -16,8 +16,8 @@ output
 xcuserdata/
 
 # iOS secrets (contains API tokens)
-ios/CaveAVin/Shared/Secrets.swift
-ios/CaveAVinUITests/Support/TestSecrets.swift
+ios/Vinarium/Shared/Secrets.swift
+ios/VinariumUITests/Support/TestSecrets.swift
 
 doc/
 firebase-debug.log
@@ -26,8 +26,8 @@ ui-debug.log
 .emulators/
 
 # iOS Firebase + Apollo
-ios/CaveAVin/GoogleService-Info.plist
-ios/CaveAVin/Generated/GraphQL/
+ios/Vinarium/GoogleService-Info.plist
+ios/Vinarium/Generated/GraphQL/
 ios/shared/
 
 # Note: shared/schema.graphql IS committed — it's the source of truth for
@@ -36,8 +36,8 @@ ios/shared/
 
 # Claude Code
 .claude/
-/ios/CaveAVin/Shared/Secrets.swift
-/ios/CaveAVinUITests/Support/TestSecrets.swift
+/ios/Vinarium/Shared/Secrets.swift
+/ios/VinariumUITests/Support/TestSecrets.swift
 
 # Terraform auto-installed binary (pinned version, managed by scripts/install-terraform.sh)
 infra/.bin/

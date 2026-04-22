@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		BF0E01212F5072C10074B393 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01222F5072C10074B393 /* Sentry */; };
 		BF0E01232F5072C10074B393 /* SentrySwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = BF0E01242F5072C10074B393 /* SentrySwiftUI */; };
+		BF85BBEE2F990504004F8A34 /* Apollo in Frameworks */ = {isa = PBXBuildFile; productRef = AA0E01222F5072C10074B393 /* Apollo */; };
+		BF85BBEF2F990504004F8A34 /* ApolloAPI in Frameworks */ = {isa = PBXBuildFile; productRef = AA0E01242F5072C10074B393 /* ApolloAPI */; };
+		BF85BBF02F990504004F8A34 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = FB0E01222F5072C10074B393 /* FirebaseCore */; };
+		BF85BBF12F990504004F8A34 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = FB0E01242F5072C10074B393 /* FirebaseAuth */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -17,19 +21,19 @@
 			containerPortal = E10000090000000000000001 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E10000060000000000000001;
-			remoteInfo = CaveAVin;
+			remoteInfo = Vinarium;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = CaveAVin.xctestplan; sourceTree = "<group>"; };
-		E10000030000000000000001 /* CaveAVin.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CaveAVin.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E20000030000000000000001 /* CaveAVinUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaveAVinUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF9400C32F45AA6500EDF17A /* Vinarium.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = Vinarium.xctestplan; sourceTree = "<group>"; };
+		E10000030000000000000001 /* Vinarium.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Vinarium.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E20000030000000000000001 /* VinariumUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VinariumUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E10000050000000000000002 /* CaveAVin */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CaveAVin; sourceTree = "<group>"; };
-		E20000050000000000000001 /* CaveAVinUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CaveAVinUITests; sourceTree = "<group>"; };
+		E10000050000000000000002 /* Vinarium */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Vinarium; sourceTree = "<group>"; };
+		E20000050000000000000001 /* VinariumUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VinariumUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -37,6 +41,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BF85BBF12F990504004F8A34 /* FirebaseAuth in Frameworks */,
+				BF85BBF02F990504004F8A34 /* FirebaseCore in Frameworks */,
+				BF85BBEF2F990504004F8A34 /* ApolloAPI in Frameworks */,
+				BF85BBEE2F990504004F8A34 /* Apollo in Frameworks */,
 				BF0E01212F5072C10074B393 /* Sentry in Frameworks */,
 				BF0E01232F5072C10074B393 /* SentrySwiftUI in Frameworks */,
 			);
@@ -55,9 +63,9 @@
 		E10000050000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				BF9400C32F45AA6500EDF17A /* CaveAVin.xctestplan */,
-				E10000050000000000000002 /* CaveAVin */,
-				E20000050000000000000001 /* CaveAVinUITests */,
+				BF9400C32F45AA6500EDF17A /* Vinarium.xctestplan */,
+				E10000050000000000000002 /* Vinarium */,
+				E20000050000000000000001 /* VinariumUITests */,
 				E10000050000000000000009 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -65,8 +73,8 @@
 		E10000050000000000000009 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E10000030000000000000001 /* CaveAVin.app */,
-				E20000030000000000000001 /* CaveAVinUITests.xctest */,
+				E10000030000000000000001 /* Vinarium.app */,
+				E20000030000000000000001 /* VinariumUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,9 +82,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E10000060000000000000001 /* CaveAVin */ = {
+		E10000060000000000000001 /* Vinarium */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E10000080000000000000001 /* Build configuration list for PBXNativeTarget "CaveAVin" */;
+			buildConfigurationList = E10000080000000000000001 /* Build configuration list for PBXNativeTarget "Vinarium" */;
 			buildPhases = (
 				E10000070000000000000001 /* Sources */,
 				E10000040000000000000001 /* Frameworks */,
@@ -87,20 +95,24 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				E10000050000000000000002 /* CaveAVin */,
+				E10000050000000000000002 /* Vinarium */,
 			);
-			name = CaveAVin;
+			name = Vinarium;
 			packageProductDependencies = (
 				BF0E01222F5072C10074B393 /* Sentry */,
 				BF0E01242F5072C10074B393 /* SentrySwiftUI */,
+				AA0E01222F5072C10074B393 /* Apollo */,
+				AA0E01242F5072C10074B393 /* ApolloAPI */,
+				FB0E01222F5072C10074B393 /* FirebaseCore */,
+				FB0E01242F5072C10074B393 /* FirebaseAuth */,
 			);
-			productName = CaveAVin;
-			productReference = E10000030000000000000001 /* CaveAVin.app */;
+			productName = Vinarium;
+			productReference = E10000030000000000000001 /* Vinarium.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E20000060000000000000001 /* CaveAVinUITests */ = {
+		E20000060000000000000001 /* VinariumUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E20000080000000000000001 /* Build configuration list for PBXNativeTarget "CaveAVinUITests" */;
+			buildConfigurationList = E20000080000000000000001 /* Build configuration list for PBXNativeTarget "VinariumUITests" */;
 			buildPhases = (
 				E20000070000000000000001 /* Sources */,
 				E20000040000000000000001 /* Frameworks */,
@@ -112,11 +124,11 @@
 				E20000090000000000000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E20000050000000000000001 /* CaveAVinUITests */,
+				E20000050000000000000001 /* VinariumUITests */,
 			);
-			name = CaveAVinUITests;
-			productName = CaveAVinUITests;
-			productReference = E20000030000000000000001 /* CaveAVinUITests.xctest */;
+			name = VinariumUITests;
+			productName = VinariumUITests;
+			productReference = E20000030000000000000001 /* VinariumUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -138,7 +150,7 @@
 					};
 				};
 			};
-			buildConfigurationList = E10000080000000000000002 /* Build configuration list for PBXProject "CaveAVin" */;
+			buildConfigurationList = E10000080000000000000002 /* Build configuration list for PBXProject "Vinarium" */;
 			compatibilityVersion = "Xcode 16.0";
 			developmentRegion = fr;
 			hasScannedForEncodings = 0;
@@ -150,13 +162,15 @@
 			mainGroup = E10000050000000000000001;
 			packageReferences = (
 				BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
+				AA0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "apollo-ios" */,
+				FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = E10000050000000000000009 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E10000060000000000000001 /* CaveAVin */,
-				E20000060000000000000001 /* CaveAVinUITests */,
+				E10000060000000000000001 /* Vinarium */,
+				E20000060000000000000001 /* VinariumUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -198,7 +212,7 @@
 /* Begin PBXTargetDependency section */
 		E20000090000000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E10000060000000000000001 /* CaveAVin */;
+			target = E10000060000000000000001 /* Vinarium */;
 			targetProxy = E20000010000000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -326,15 +340,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Vinarium/Vinarium.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cave a ";
+				INFOPLIST_KEY_CFBundleDisplayName = "Vinarium";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Cave u00e0 Vin a besoin du2019accu00e9der u00e0 votre camu00e9ra pour scanner les u00e9tiquettes de vin.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave \U00e0 Vin utilise votre position pour enregistrer le lieu o\U00f9 vous avez d\U00e9couvert un vin.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "L'application a besoin de votre camera afin de scanner les étiquettes de vos bouteilles";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave à Vin utilise votre position pour enregistrer le lieu où vous avez découvert un vin.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -345,7 +360,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.polyforms.cavevin.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.polyforms.vinarium.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -362,15 +377,16 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Vinarium/Vinarium.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Cave a ";
+				INFOPLIST_KEY_CFBundleDisplayName = "Vinarium";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Cave u00e0 Vin a besoin du2019accu00e9der u00e0 votre camu00e9ra pour scanner les u00e9tiquettes de vin.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave \U00e0 Vin utilise votre position pour enregistrer le lieu o\U00f9 vous avez d\U00e9couvert un vin.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "L'application a besoin de votre camera afin de scanner les étiquettes de vos bouteilles";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave à Vin utilise votre position pour enregistrer le lieu où vous avez découvert un vin.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -381,7 +397,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.polyforms.cavevin.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.polyforms.vinarium.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -401,7 +417,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cavevin.app.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vinarium.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -410,7 +426,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = CaveAVin;
+				TEST_TARGET_NAME = Vinarium;
 			};
 			name = Debug;
 		};
@@ -422,7 +438,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.cavevin.app.uitests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vinarium.app.uitests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
@@ -431,14 +447,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = CaveAVin;
+				TEST_TARGET_NAME = Vinarium;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E10000080000000000000001 /* Build configuration list for PBXNativeTarget "CaveAVin" */ = {
+		E10000080000000000000001 /* Build configuration list for PBXNativeTarget "Vinarium" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1000000A000000000000003 /* Debug */,
@@ -447,7 +463,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E10000080000000000000002 /* Build configuration list for PBXProject "CaveAVin" */ = {
+		E10000080000000000000002 /* Build configuration list for PBXProject "Vinarium" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1000000A000000000000001 /* Debug */,
@@ -456,7 +472,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E20000080000000000000001 /* Build configuration list for PBXNativeTarget "CaveAVinUITests" */ = {
+		E20000080000000000000001 /* Build configuration list for PBXNativeTarget "VinariumUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E2000000A000000000000001 /* Debug */,
@@ -468,6 +484,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		AA0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "apollo-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apollographql/apollo-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.0;
+			};
+		};
 		BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
@@ -476,9 +500,27 @@
 				minimumVersion = 9.5.1;
 			};
 		};
+		FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		AA0E01222F5072C10074B393 /* Apollo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "apollo-ios" */;
+			productName = Apollo;
+		};
+		AA0E01242F5072C10074B393 /* ApolloAPI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "apollo-ios" */;
+			productName = ApolloAPI;
+		};
 		BF0E01222F5072C10074B393 /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
@@ -488,6 +530,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = BF0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = SentrySwiftUI;
+		};
+		FB0E01222F5072C10074B393 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		FB0E01242F5072C10074B393 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FB0E01202F5072C10074B393 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -50,28 +50,28 @@ struct Wine: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let color: WineColor
-    var domain: String?
-    var vintage: Int?
-    var appellation: String?
-    var region: String?
-    var country: String?
-    var grapeVarieties: [String]?
-    var alcoholContent: Double?
-    var classification: String?
-    var purchasePrice: Double?
-    var purchaseDate: String?
-    var drinkFrom: Int?
-    var drinkUntil: Int?
-    var notes: String?
-    var giftedBy: String?
-    var rating: Int?
-    var shortlist: Bool?
-    var giftedTo: String?
-    var recommendedBy: String?
-    var contacts: [String]?
-    var latitude: Double?
-    var longitude: Double?
-    var placeName: String?
+    var domain: String? = nil
+    var vintage: Int? = nil
+    var appellation: String? = nil
+    var region: String? = nil
+    var country: String? = nil
+    var grapeVarieties: [String]? = nil
+    var alcoholContent: Double? = nil
+    var classification: String? = nil
+    var purchasePrice: Double? = nil
+    var purchaseDate: String? = nil
+    var drinkFrom: Int? = nil
+    var drinkUntil: Int? = nil
+    var notes: String? = nil
+    var giftedBy: String? = nil
+    var rating: Int? = nil
+    var shortlist: Bool? = nil
+    var giftedTo: String? = nil
+    var recommendedBy: String? = nil
+    var contacts: [String]? = nil
+    var latitude: Double? = nil
+    var longitude: Double? = nil
+    var placeName: String? = nil
     let createdAt: Date
     let updatedAt: Date
 }

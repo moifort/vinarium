@@ -13,22 +13,22 @@ else (Auth flow, GraphQL client, codegen, feature refactors) is in code.
 | `https://github.com/apollographql/apollo-ios.git` | `Apollo`, `ApolloAPI` | 1.18.0 |
 | `https://github.com/firebase/firebase-ios-sdk.git` | `FirebaseCore`, `FirebaseAuth` | 11.0.0 |
 
-Both attached to the `CaveAVin` target (Sentry stays on the same target).
+Both attached to the `Vinarium` target (Sentry stays on the same target).
 
 ## 2. Capabilities
 
-`Target CaveAVin → Signing & Capabilities → + Capability`
+`Target Vinarium → Signing & Capabilities → + Capability`
 
 - **Sign in with Apple** — required for Apple Sign-In to work with Firebase Auth.
 
 ## 3. GoogleService-Info.plist
 
 1. In the Firebase console, register the iOS app (bundle id
-   `com.polyforms.cavevin.app`) and download `GoogleService-Info.plist`.
-2. Place it at `ios/CaveAVin/GoogleService-Info.plist`. The file is
+   `com.polyforms.vinarium.app`) and download `GoogleService-Info.plist`.
+2. Place it at `ios/Vinarium/GoogleService-Info.plist`. The file is
    gitignored — every developer downloads their own copy.
-3. In Xcode, drag-and-drop the file into the `CaveAVin` group so it gets
-   added to the bundle (`Copy items if needed: yes`, `Targets: CaveAVin`).
+3. In Xcode, drag-and-drop the file into the `Vinarium` group so it gets
+   added to the bundle (`Copy items if needed: yes`, `Targets: Vinarium`).
 
 ## 4. Apollo iOS codegen
 

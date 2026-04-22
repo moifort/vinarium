@@ -3,7 +3,7 @@ import ApolloAPI
 import Foundation
 import OSLog
 
-private let log = Logger(subsystem: "com.polyforms.cavevin.app", category: "graphql")
+private let log = Logger(subsystem: "com.polyforms.vinarium.app", category: "graphql")
 
 struct GraphQLLoggingInterceptor: ApolloInterceptor {
     let id = UUID().uuidString

@@ -3,7 +3,7 @@ import Sentry
 import SwiftUI
 
 @main
-struct CaveAVinApp: App {
+struct VinariumApp: App {
     init() {
         FirebaseApp.configure()
         startSentry()

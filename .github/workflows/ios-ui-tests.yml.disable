@@ -30,8 +30,8 @@ jobs:
 
       - name: Create iOS secret files (dummy tokens, auth is disabled)
         run: |
-          echo 'enum Secrets { static let apiToken = "ci" }' > ios/CaveAVin/Shared/Secrets.swift
-          echo 'enum TestSecrets { static let apiToken = "ci" }' > ios/CaveAVinUITests/Support/TestSecrets.swift
+          echo 'enum Secrets { static let apiToken = "ci" }' > ios/Vinarium/Shared/Secrets.swift
+          echo 'enum TestSecrets { static let apiToken = "ci" }' > ios/VinariumUITests/Support/TestSecrets.swift
 
       - name: Seed scan-cache (avoid AI API calls)
         run: |
@@ -61,16 +61,16 @@ jobs:
         run: |
           xcrun simctl boot "iPhone 17" 2>/dev/null || true
           xcrun simctl bootstatus "iPhone 17" -b
-          xcrun simctl addmedia booted ios/CaveAVinUITests/Resources/etiquette.jpg
+          xcrun simctl addmedia booted ios/VinariumUITests/Resources/etiquette.jpg
 
       - name: Run UI tests
         run: |
           xcodebuild test \
-            -project ios/CaveAVin.xcodeproj \
-            -scheme CaveAVin \
+            -project ios/Vinarium.xcodeproj \
+            -scheme Vinarium \
             -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' \
-            -only-testing:CaveAVinUITests \
-            -skip-testing:CaveAVinUITests/ScreenshotTest \
+            -only-testing:VinariumUITests \
+            -skip-testing:VinariumUITests/ScreenshotTest \
             -resultBundlePath TestResults.xcresult
 
       - name: Upload test results

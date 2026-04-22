@@ -6,7 +6,7 @@
 - **Regenerate types** (if routes changed): `bunx nitro prepare` (run before `bun tsc`)
 - **iOS build**:
   ```
-  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project ios/CaveAVin.xcodeproj -scheme CaveAVin -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' build
+  DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' build
   ```
 - **Unit tests**: `bun test`
 - **Test coverage**: `bun test --coverage`
@@ -57,8 +57,8 @@
 
 - Target: iOS 26.0, Swift 6 (strict concurrency)
 - `@MainActor` on ViewModels, `Sendable` on model types
-- Feature structure: `ios/CaveAVin/Features/{Feature}/` with `pages/`, `organisms/`, `molecules/` subdirectories
-- Shared atoms: `ios/CaveAVin/Shared/Components/` — cross-feature reusable views (badges, ratings, labeled rows)
+- Feature structure: `ios/Vinarium/Features/{Feature}/` with `pages/`, `organisms/`, `molecules/` subdirectories
+- Shared atoms: `ios/Vinarium/Shared/Components/` — cross-feature reusable views (badges, ratings, labeled rows)
 - **Primitive-first views**: leaf views receive only primitives (`String`, `Int`, `Bool`, `Date?`, `WineColor`, closures) — never domain structs (`Wine`, `UserWineDetail`, `CellarBottle`). Use nested `Item` structs for 5+ parameters
 - **Previews as Storybook**: every component below page level must be previewable without a running server
 - **Pages = coordinators**: handle loading, error, sheets, toolbar, API calls. Map domain models to primitives for children
@@ -70,8 +70,8 @@
 
 The API token is used for authentication when `NITRO_API_TOKEN` is set. To rotate the token, update it in:
 - `.env` (`NITRO_API_TOKEN=...`)
-- `ios/CaveAVin/Shared/Secrets.swift` (gitignored)
-- `ios/CaveAVinUITests/Support/TestSecrets.swift` (gitignored)
+- `ios/Vinarium/Shared/Secrets.swift` (gitignored)
+- `ios/VinariumUITests/Support/TestSecrets.swift` (gitignored)
 
 See `.example` files next to the Secrets files for the expected format.
 

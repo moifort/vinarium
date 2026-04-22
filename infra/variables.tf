@@ -41,7 +41,7 @@ variable "firestore_location" {
 variable "ios_bundle_id" {
   description = "iOS app bundle identifier"
   type        = string
-  default     = "com.polyforms.cavevin.app"
+  default     = "com.polyforms.vinarium.app"
 }
 
 # Apple Sign-In — all required, comes from Apple Developer

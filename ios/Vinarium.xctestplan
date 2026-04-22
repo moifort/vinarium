@@ -11,18 +11,18 @@
   "defaultOptions" : {
     "performanceAntipatternCheckerEnabled" : true,
     "targetForVariableExpansion" : {
-      "containerPath" : "container:CaveAVin.xcodeproj",
+      "containerPath" : "container:Vinarium.xcodeproj",
       "identifier" : "E10000060000000000000001",
-      "name" : "CaveAVin"
+      "name" : "Vinarium"
     }
   },
   "testTargets" : [
     {
       "parallelizable" : false,
       "target" : {
-        "containerPath" : "container:CaveAVin.xcodeproj",
+        "containerPath" : "container:Vinarium.xcodeproj",
         "identifier" : "E20000060000000000000001",
-        "name" : "CaveAVinUITests"
+        "name" : "VinariumUITests"
       }
     }
   ],

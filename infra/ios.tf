@@ -1,7 +1,7 @@
 resource "google_firebase_apple_app" "ios" {
   provider     = google-beta
   project      = google_project.this.project_id
-  display_name = "Cave-a-Vin iOS"
+  display_name = "Vinarium iOS"
   bundle_id    = var.ios_bundle_id
   team_id      = var.apple_team_id
 
@@ -15,7 +15,7 @@ data "google_firebase_apple_app_config" "ios" {
 }
 
 resource "local_file" "google_service_info_plist" {
-  filename        = "${path.root}/../ios/CaveAVin/GoogleService-Info.plist"
+  filename        = "${path.root}/../ios/Vinarium/GoogleService-Info.plist"
   content_base64  = data.google_firebase_apple_app_config.ios.config_file_contents
   file_permission = "0644"
 }

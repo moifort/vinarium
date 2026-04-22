@@ -118,9 +118,9 @@ NITRO_SENTRY_DSN=...    # optional
 
 ## iOS App
 
-1. Open `ios/CaveAVin.xcodeproj` in Xcode.
+1. Open `ios/Vinarium.xcodeproj` in Xcode.
 2. After `make bootstrap`, `GoogleService-Info.plist` is already at
-   `ios/CaveAVin/`. Drag it into the `CaveAVin` target in Xcode.
+   `ios/Vinarium/`. Drag it into the `Vinarium` target in Xcode.
 3. Add the SPM packages and the Sign in with Apple capability — see
    [`ios/FIREBASE_SETUP.md`](ios/FIREBASE_SETUP.md).
 4. Run `apollo-ios-cli generate` (from `ios/`) to regenerate typed

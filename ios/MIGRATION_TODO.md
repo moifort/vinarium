@@ -13,7 +13,7 @@ source until Apollo's Swift codegen has run.
 See `ios/FIREBASE_SETUP.md` first:
 1. Add Apollo iOS + Firebase iOS SDK packages (SPM).
 2. Add Sign in with Apple capability.
-3. Drop `GoogleService-Info.plist` into `ios/CaveAVin/`.
+3. Drop `GoogleService-Info.plist` into `ios/Vinarium/`.
 4. Install `apollo-ios-cli` (`brew install apollo-ios-cli`).
 
 ## 2. Generate the Apollo Swift types
@@ -26,17 +26,17 @@ bun run generate:graphql        # writes shared/schema.graphql
 cd ios && apollo-ios-cli generate
 ```
 
-This populates `ios/CaveAVin/Generated/GraphQL/` with one Swift file per
-operation declared under `ios/CaveAVin/Features/{Feature}/GraphQL/*.graphql`,
-all in a `CaveAVinGraphQL` namespace.
+This populates `ios/Vinarium/Generated/GraphQL/` with one Swift file per
+operation declared under `ios/Vinarium/Features/{Feature}/GraphQL/*.graphql`,
+all in a `VinariumGraphQL` namespace.
 
 ## 3. Recreate the per-feature APIs as GraphQL
 
 The old REST API files have been removed:
-- `ios/CaveAVin/Shared/WineAPI.swift`
-- `ios/CaveAVin/Features/Cellar/CellarAPI.swift`
-- `ios/CaveAVin/Features/Dashboard/DashboardAPI.swift`
-- `ios/CaveAVin/Features/Wines/RecommendationAPI.swift`
+- `ios/Vinarium/Shared/WineAPI.swift`
+- `ios/Vinarium/Features/Cellar/CellarAPI.swift`
+- `ios/Vinarium/Features/Dashboard/DashboardAPI.swift`
+- `ios/Vinarium/Features/Wines/RecommendationAPI.swift`
 
 ViewModels still call them by name; recreate each enum with the same surface
 so the views don't change. Each method becomes a one-liner against
@@ -59,7 +59,7 @@ enum WineAPI {
     ) async throws -> [Wine] {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: CaveAVinGraphQL.WineListQuery()
+            query: VinariumGraphQL.WineListQuery()
         )
         return data.wines.map(mapWine)
     }
@@ -67,14 +67,14 @@ enum WineAPI {
     static func getDetail(id: String) async throws -> UserWineDetail {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: CaveAVinGraphQL.WineDetailQuery(id: id)
+            query: VinariumGraphQL.WineDetailQuery(id: id)
         )
         guard let wine = data.wine else { throw APIError.invalidResponse }
         return mapDetail(wine)
     }
 
     static func create(_ request: CreateWineRequest) async throws -> Wine {
-        let input = CaveAVinGraphQL.AddWineInput(
+        let input = VinariumGraphQL.AddWineInput(
             color: .case(.init(rawValue: request.color.rawValue.uppercased()) ?? .red),
             name: request.name,
             vintage: GraphQLHelpers.graphQLNullable(request.vintage),
@@ -82,7 +82,7 @@ enum WineAPI {
         )
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: CaveAVinGraphQL.AddWineMutation(input: input)
+            mutation: VinariumGraphQL.AddWineMutation(input: input)
         )
         return Wine(
             id: data.addWine.id,
@@ -133,7 +133,7 @@ static func scan(imageData: Data) async throws -> ScanResult {
     let base64 = imageData.base64EncodedString()
     let data = try await GraphQLHelpers.perform(
         GraphQLClient.shared.apollo,
-        mutation: CaveAVinGraphQL.ScanWineMutation(imageBase64: base64)
+        mutation: VinariumGraphQL.ScanWineMutation(imageBase64: base64)
     )
     return ScanResult(/* map data.scanWine */)
 }
@@ -144,7 +144,7 @@ across users is preserved.
 
 ## 5. UI tests
 
-`CaveAVinUITests/` currently uses `TestAPIClient` with the old REST
+`VinariumUITests/` currently uses `TestAPIClient` with the old REST
 endpoints (`/test/reset`, `/wines`, `/cellar/...`) and the static apiToken.
 Adapt:
 - Point the app at the Firebase Auth + Firestore emulators in launch

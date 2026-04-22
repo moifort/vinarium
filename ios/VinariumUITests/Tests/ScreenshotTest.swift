@@ -59,7 +59,7 @@ final class ScreenshotTest: XCTestCase {
         let screenshot = XCUIScreen.main.screenshot()
         let projectRoot = URL(fileURLWithPath: #filePath)
             .deletingLastPathComponent() // Tests/
-            .deletingLastPathComponent() // CaveAVinUITests/
+            .deletingLastPathComponent() // VinariumUITests/
             .deletingLastPathComponent() // ios/
             .deletingLastPathComponent() // project root
         let url = projectRoot.appendingPathComponent("screenshots/\(name).png")

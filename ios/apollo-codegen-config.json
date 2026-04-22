@@ -1,20 +1,20 @@
 {
-  "schemaNamespace": "CaveAVinGraphQL",
+  "schemaNamespace": "VinariumGraphQL",
   "input": {
     "schemaSearchPaths": ["../shared/schema.graphql"],
     "operationSearchPaths": [
-      "CaveAVin/Features/Wines/GraphQL/*.graphql",
-      "CaveAVin/Features/Cellar/GraphQL/*.graphql",
-      "CaveAVin/Features/Dashboard/GraphQL/*.graphql",
-      "CaveAVin/Features/Scan/GraphQL/*.graphql"
+      "Vinarium/Features/Wines/GraphQL/*.graphql",
+      "Vinarium/Features/Cellar/GraphQL/*.graphql",
+      "Vinarium/Features/Dashboard/GraphQL/*.graphql",
+      "Vinarium/Features/Scan/GraphQL/*.graphql"
     ]
   },
   "output": {
     "schemaTypes": {
-      "path": "CaveAVin/Generated/GraphQL",
+      "path": "Vinarium/Generated/GraphQL",
       "moduleType": {
         "embeddedInTarget": {
-          "name": "CaveAVin"
+          "name": "Vinarium"
         }
       }
     },
