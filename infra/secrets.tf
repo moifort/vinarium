@@ -8,10 +8,9 @@ locals {
   admin_token_value = var.admin_token != null ? var.admin_token : random_password.admin_token[0].result
 
   secrets = {
-    anthropic-api-key = var.anthropic_api_key
-    google-api-key    = var.google_api_key
-    admin-token       = local.admin_token_value
-    sentry-dsn        = var.sentry_dsn
+    google-api-key = var.google_api_key
+    admin-token    = local.admin_token_value
+    sentry-dsn     = var.sentry_dsn
   }
 }
 

@@ -4,7 +4,8 @@ import { ImageHash } from '~/system/scan/primitives'
 import * as repository from '~/system/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
 
-const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages'
+const GEMINI_API_URL =
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
 
 export namespace Scan {
   export const scanWithCache = async (imageBuffer: Buffer) => {
@@ -17,110 +18,106 @@ export namespace Scan {
     return enriched
   }
 
-  const scanLabel = async (imageBuffer: Buffer) => {
-    const { anthropicApiKey } = config()
+  const scanLabel = async (imageBuffer: Buffer): Promise<ScanResult> => {
+    const { googleApiKey } = config()
     const base64 = imageBuffer.toString('base64')
 
     const response = await $fetch<{
-      content: { type: string; id?: string; name?: string; input?: ScanResult }[]
-      stop_reason: string
-    }>(ANTHROPIC_API_URL, {
+      candidates: { content: { parts: { text?: string }[] } }[]
+    }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
       method: 'POST',
-      headers: {
-        'x-api-key': anthropicApiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
+      headers: { 'content-type': 'application/json' },
       body: {
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        tools: [
+        contents: [
           {
-            name: 'extract_wine_info',
-            description:
-              "Extraire les informations structurées d'une étiquette de vin. Estimer drinkFrom/drinkUntil et le prix du marché. Toutes les valeurs textuelles doivent être en français.",
-            input_schema: {
-              type: 'object',
-              properties: {
-                name: { type: 'string', description: "Nom du vin tel qu'indiqué sur l'étiquette" },
-                domain: {
-                  type: ['string', 'null'],
-                  description: 'Domaine/producteur/château',
-                },
-                vintage: { type: ['integer', 'null'], description: 'Année du millésime' },
-                appellation: {
-                  type: ['string', 'null'],
-                  description: 'Appellation (ex : Bordeaux, Bourgogne)',
-                },
-                region: {
-                  type: ['string', 'null'],
-                  description: 'Région viticole (en français)',
-                },
-                country: {
-                  type: ['string', 'null'],
-                  description: "Pays d'origine (en français, ex : France, Espagne, Italie)",
-                },
-                color: {
-                  type: 'string',
-                  enum: ['red', 'white', 'rosé', 'sparkling', 'sweet'],
-                  description: 'Couleur/type du vin',
-                },
-                grapeVarieties: {
-                  type: 'array',
-                  items: { type: 'string' },
-                  description: 'Cépages mentionnés (en français)',
-                },
-                classification: {
-                  type: ['string', 'null'],
-                  description: 'Classification (ex : Grand Cru, Premier Cru, AOC, AOP, IGP)',
-                },
-                drinkFrom: {
-                  type: ['integer', 'null'],
-                  description: 'Année estimée à partir de laquelle le vin peut être apprécié',
-                },
-                drinkUntil: {
-                  type: ['integer', 'null'],
-                  description: "Année estimée jusqu'à laquelle le vin devrait être consommé",
-                },
-                estimatedPrice: {
-                  type: ['number', 'null'],
-                  description:
-                    "Prix estimé en euros basé sur les caractéristiques, le millésime, l'appellation, la classification et la réputation du producteur",
-                },
-              },
-              required: ['name', 'color'],
-            },
-          },
-        ],
-        tool_choice: { type: 'tool', name: 'extract_wine_info' },
-        messages: [
-          {
-            role: 'user',
-            content: [
+            parts: [
+              { inline_data: { mime_type: 'image/jpeg', data: base64 } },
               {
-                type: 'image',
-                source: { type: 'base64', media_type: 'image/jpeg', data: base64 },
-              },
-              {
-                type: 'text',
-                text: "Analyse cette image d'étiquette de vin et extrais toutes les informations visibles. Pour drinkFrom/drinkUntil, estime en fonction du type de vin, du millésime, de la région et de la classification. Pour estimatedPrice, estime le prix actuel du marché en euros en fonction du producteur, de l'appellation, de la classification et du millésime. Toutes les valeurs textuelles (nom, domaine, région, pays, cépages, appellation, classification) doivent être en français. Utilise l'outil extract_wine_info pour retourner les données structurées.",
+                text: "Analyse cette image d'étiquette de vin et extrais toutes les informations visibles. Pour drinkFrom/drinkUntil, estime en fonction du type de vin, du millésime, de la région et de la classification. Pour estimatedPrice, estime le prix actuel du marché en euros en fonction du producteur, de l'appellation, de la classification et du millésime. Toutes les valeurs textuelles (nom, domaine, région, pays, cépages, appellation, classification) doivent être en français. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).",
               },
             ],
           },
         ],
+        generationConfig: {
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: "Nom du vin tel qu'indiqué sur l'étiquette" },
+              domain: { type: 'string', nullable: true, description: 'Domaine/producteur/château' },
+              vintage: { type: 'integer', nullable: true, description: 'Année du millésime' },
+              appellation: {
+                type: 'string',
+                nullable: true,
+                description: 'Appellation (ex : Bordeaux, Bourgogne)',
+              },
+              region: {
+                type: 'string',
+                nullable: true,
+                description: 'Région viticole (en français)',
+              },
+              country: {
+                type: 'string',
+                nullable: true,
+                description: "Pays d'origine (en français, ex : France, Espagne, Italie)",
+              },
+              color: {
+                type: 'string',
+                enum: ['red', 'white', 'rosé', 'sparkling', 'sweet'],
+                description: 'Couleur/type du vin',
+              },
+              grapeVarieties: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'Cépages mentionnés (en français)',
+              },
+              classification: {
+                type: 'string',
+                nullable: true,
+                description: 'Classification (ex : Grand Cru, Premier Cru, AOC, AOP, IGP)',
+              },
+              drinkFrom: {
+                type: 'integer',
+                nullable: true,
+                description: 'Année estimée à partir de laquelle le vin peut être apprécié',
+              },
+              drinkUntil: {
+                type: 'integer',
+                nullable: true,
+                description: "Année estimée jusqu'à laquelle le vin devrait être consommé",
+              },
+              estimatedPrice: {
+                type: 'number',
+                nullable: true,
+                description:
+                  "Prix estimé en euros basé sur les caractéristiques, le millésime, l'appellation, la classification et la réputation du producteur",
+              },
+            },
+            required: ['name', 'color'],
+            propertyOrdering: [
+              'name',
+              'domain',
+              'vintage',
+              'appellation',
+              'region',
+              'country',
+              'color',
+              'grapeVarieties',
+              'classification',
+              'drinkFrom',
+              'drinkUntil',
+              'estimatedPrice',
+            ],
+          },
+        },
       },
     })
 
-    const toolUse = response.content.find((block) => block.type === 'tool_use')
-    if (!toolUse?.input) {
-      throw new Error('Claude did not return structured wine data')
-    }
+    const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
+    if (!text) throw new Error('Gemini did not return structured wine data')
 
-    return toolUse.input
+    return JSON.parse(text) as ScanResult
   }
-
-  const GEMINI_API_URL =
-    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
   const enrichWithSearch = async (scanResult: ScanResult) => {
     const { googleApiKey } = config()

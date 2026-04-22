@@ -121,7 +121,7 @@ cat <<EOF
   2. Add the following GitHub secrets / variables:
        Secrets : GCP_BILLING_ACCOUNT, GCP_WIF_PROVIDER, GCP_DEPLOY_SA,
                  APPLE_TEAM_ID, APPLE_SERVICES_ID, APPLE_KEY_ID,
-                 APPLE_PRIVATE_KEY_P8, ANTHROPIC_API_KEY, GEMINI_API_KEY,
+                 APPLE_PRIVATE_KEY_P8, GEMINI_API_KEY,
                  SENTRY_DSN, ADMIN_TOKEN
        Vars    : GCP_PROJECT_ID (= ${PROJECT_ID}), GCP_ORG_ID
   3. In Xcode, follow ios/FIREBASE_SETUP.md to add the SPM packages

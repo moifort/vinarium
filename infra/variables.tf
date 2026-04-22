@@ -66,14 +66,8 @@ variable "apple_private_key_path" {
 }
 
 # Backend secrets
-variable "anthropic_api_key" {
-  description = "Anthropic API key for the wine label scan (Claude Sonnet 4.6)"
-  type        = string
-  sensitive   = true
-}
-
 variable "google_api_key" {
-  description = "Google AI API key for scan enrichment (Gemini 2.0 Flash)"
+  description = "Google AI API key for the wine label scan (Gemini 2.5 Flash: multimodal extraction + web-grounded enrichment)"
   type        = string
   sensitive   = true
 }

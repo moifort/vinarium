@@ -52,7 +52,6 @@ jobs:
           apple_services_id      = "${{ secrets.APPLE_SERVICES_ID }}"
           apple_key_id           = "${{ secrets.APPLE_KEY_ID }}"
           apple_private_key_path = "./apple.p8"
-          anthropic_api_key      = "${{ secrets.ANTHROPIC_API_KEY }}"
           google_api_key         = "${{ secrets.GEMINI_API_KEY }}"
           sentry_dsn             = "${{ secrets.SENTRY_DSN }}"
           admin_token            = "${{ secrets.ADMIN_TOKEN }}"

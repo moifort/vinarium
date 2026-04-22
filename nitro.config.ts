@@ -25,7 +25,6 @@ export default defineNitroConfig({
     '#domain-instrumentation': generateDomainInstrumentation,
   },
   runtimeConfig: {
-    anthropicApiKey: '',
     googleApiKey: '',
     adminToken: '',
     sentryDsn: '',

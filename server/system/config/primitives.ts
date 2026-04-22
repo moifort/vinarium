@@ -2,7 +2,6 @@ import { make } from 'ts-brand'
 import { z } from 'zod'
 import type {
   AdminToken as AdminTokenType,
-  AnthropicApiKey as AnthropicApiKeyType,
   ApiToken as ApiTokenType,
   GoogleApiKey as GoogleApiKeyType,
   SentryDsn as SentryDsnType,
@@ -16,11 +15,6 @@ export const ApiToken = (value: unknown) => {
 export const AdminToken = (value: unknown) => {
   const v = z.string().min(1).parse(value)
   return make<AdminTokenType>()(v)
-}
-
-export const AnthropicApiKey = (value: unknown) => {
-  const v = z.string().min(1).parse(value)
-  return make<AnthropicApiKeyType>()(v)
 }
 
 export const GoogleApiKey = (value: unknown) => {
