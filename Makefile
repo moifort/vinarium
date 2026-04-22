@@ -19,13 +19,13 @@ build:
 	bun run build
 
 infra-init:
-	cd infra && terraform init
+	cd infra && ../scripts/tf init
 
 plan: build
-	cd infra && terraform plan
+	cd infra && ../scripts/tf plan
 
 apply: build
-	cd infra && terraform apply
+	cd infra && ../scripts/tf apply
 
 destroy:
 	./scripts/teardown.sh

@@ -39,6 +39,9 @@ ios/shared/
 /ios/CaveAVin/Shared/Secrets.swift
 /ios/CaveAVinUITests/Support/TestSecrets.swift
 
+# Terraform auto-installed binary (pinned version, managed by scripts/install-terraform.sh)
+infra/.bin/
+
 # Terraform
 infra/.terraform/
 infra/.terraform.lock.hcl

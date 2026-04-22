@@ -6,7 +6,8 @@
 # Actions (.github/workflows/deploy.yml) which talks to the same Terraform
 # state stored in GCS.
 #
-# Required CLIs: gcloud, terraform (>= 1.6), bun, curl, jq.
+# Required CLIs: gcloud, bun, curl. terraform is auto-installed into
+# infra/.bin/ (pinned + checksum-verified). jq is replaced by bunx node-jq.
 # Required files: infra/terraform.tfvars (copy from terraform.tfvars.example
 # and fill in), and the Apple .p8 file at the path declared in tfvars.
 
@@ -15,6 +16,7 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INFRA_DIR="${REPO_ROOT}/infra"
 TFVARS="${INFRA_DIR}/terraform.tfvars"
+TF="${INFRA_DIR}/.bin/terraform"
 
 step() { printf "\n\033[1;34m▸ %s\033[0m\n" "$*"; }
 ok()   { printf "\033[1;32m✓\033[0m %s\n" "$*"; }
@@ -23,10 +25,13 @@ fail() { printf "\033[1;31m✗\033[0m %s\n" "$*" >&2; exit 1; }
 # --------------------------------------------------------------------------- 1
 step "Checking prerequisites"
 
-for cmd in gcloud terraform bun curl jq; do
+for cmd in gcloud bun curl; do
   command -v "$cmd" >/dev/null 2>&1 || fail "Missing required CLI: $cmd"
 done
 ok "All required CLIs present"
+
+"$REPO_ROOT/scripts/install-terraform.sh"
+ok "terraform available at $TF"
 
 [[ -f "$TFVARS" ]] || fail "$TFVARS missing — copy from terraform.tfvars.example"
 ok "terraform.tfvars present"
@@ -58,18 +63,18 @@ cd "$INFRA_DIR"
 
 # First-time init uses local state (no backend.tf yet).
 if [[ ! -f backend.tf ]]; then
-  terraform init -input=false
+  "$TF" init -input=false
 else
-  terraform init -input=false -reconfigure
+  "$TF" init -input=false -reconfigure
 fi
 
-terraform apply -auto-approve -input=false
+"$TF" apply -auto-approve -input=false
 ok "terraform apply succeeded"
 
 # --------------------------------------------------------------------------- 4
 step "Migrating Terraform state to GCS"
 
-TFSTATE_BUCKET=$(terraform output -raw tfstate_bucket)
+TFSTATE_BUCKET=$("$TF" output -raw tfstate_bucket)
 
 if [[ ! -f backend.tf ]]; then
   cat > backend.tf <<EOF
@@ -80,7 +85,7 @@ terraform {
   }
 }
 EOF
-  terraform init -migrate-state -force-copy -input=false
+  "$TF" init -migrate-state -force-copy -input=false
   ok "State migrated to gs://${TFSTATE_BUCKET}/cave-a-vin"
   echo "   Commit infra/backend.tf so the CI can read the same state."
 else
@@ -90,20 +95,20 @@ fi
 # --------------------------------------------------------------------------- 5
 step "Running Firestore migrations against the freshly deployed function"
 
-FN_URL=$(terraform output -raw function_url)
-ADMIN_TOKEN=$(terraform output -raw admin_token)
+FN_URL=$("$TF" output -raw function_url)
+ADMIN_TOKEN=$("$TF" output -raw admin_token)
 
 curl -fsS -X POST \
   -H "Authorization: Bearer ${ADMIN_TOKEN}" \
   "${FN_URL}/admin/migrate" \
-  | jq .
+  | bunx node-jq .
 ok "Migrations applied"
 
 # --------------------------------------------------------------------------- 6
 step "Summary"
 
-PROJECT_ID=$(terraform output -raw project_id)
-IOS_PLIST=$(terraform output -raw ios_plist_path)
+PROJECT_ID=$("$TF" output -raw project_id)
+IOS_PLIST=$("$TF" output -raw ios_plist_path)
 
 cat <<EOF
 

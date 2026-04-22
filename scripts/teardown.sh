@@ -8,13 +8,16 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 INFRA_DIR="${REPO_ROOT}/infra"
+TF="${INFRA_DIR}/.bin/terraform"
+
+"$REPO_ROOT/scripts/install-terraform.sh"
 
 cd "$INFRA_DIR"
 
 read -rp "This will destroy the GCP project and all Firebase resources. Continue? (y/N) " confirm
 [[ "$confirm" =~ ^[yY]$ ]] || { echo "Aborted."; exit 1; }
 
-terraform destroy -auto-approve
+"$TF" destroy -auto-approve
 
 cat <<EOF
 

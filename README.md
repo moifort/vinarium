@@ -47,12 +47,14 @@ is provisioned by `make bootstrap`.
 
 - `gcloud` CLI authenticated with Application Default Credentials :
   `gcloud auth application-default login`
-- `terraform >= 1.6`
 - `bun`
-- `jq`
 - An Apple Developer account with a Service ID + Sign in with Apple enabled
   + a `.p8` private key (see [`ios/FIREBASE_SETUP.md`](ios/FIREBASE_SETUP.md))
 - A GCP billing account id and either an `org_id` or `folder_id`
+
+> `terraform` is auto-downloaded (pinned version, checksum-verified) into
+> `infra/.bin/` on first `make bootstrap` / `make plan|apply|destroy`.
+> `jq` is replaced by `bunx node-jq` (pulled in by `bun install`).
 
 ### Run
 
