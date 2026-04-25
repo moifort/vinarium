@@ -1,6 +1,6 @@
 resource "google_service_account" "function" {
   project      = google_project.this.project_id
-  account_id   = "cave-a-vin-runtime"
+  account_id   = "vinarium-runtime"
   display_name = "Vinarium runtime"
 }
 
@@ -58,7 +58,7 @@ resource "google_storage_bucket_object" "source" {
 resource "google_cloudfunctions2_function" "server" {
   provider = google-beta
   project  = google_project.this.project_id
-  name     = "cave-a-vin-server"
+  name     = "vinarium-server"
   location = var.region
 
   build_config {
