@@ -1,12 +1,12 @@
 variable "project_id" {
-  description = "Globally unique GCP project id (e.g. cave-a-vin-prod)"
+  description = "Globally unique GCP project id (e.g. vinarium-prod)"
   type        = string
 }
 
 variable "project_name" {
   description = "Human-readable project name shown in the GCP console"
   type        = string
-  default     = "Cave-a-Vin"
+  default     = "Vinarium"
 }
 
 variable "org_id" {

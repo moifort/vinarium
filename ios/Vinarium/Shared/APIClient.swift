@@ -6,7 +6,7 @@ struct APIClient: Sendable {
     static let shared = APIClient()
 
     private static let serverURLKey = "serverURL"
-    private static let defaultServerURL = "https://cave-a-vin.example.com"
+    private static let defaultServerURL = "https://vinarium.example.com"
 
     var baseURL: URL {
         let stored = UserDefaults.standard.string(forKey: Self.serverURLKey)

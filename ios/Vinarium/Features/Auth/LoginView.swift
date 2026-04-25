@@ -14,7 +14,7 @@ struct LoginView: View {
                 Image(systemName: "wineglass.fill")
                     .font(.system(size: 64))
                     .foregroundStyle(Color(red: 0.55, green: 0.07, blue: 0.16))
-                Text("Cave-a-Vin")
+                Text("Vinarium")
                     .font(.largeTitle.bold())
                 Text("Connecte-toi pour accéder à ta cave.")
                     .font(.subheadline)

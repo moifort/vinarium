@@ -1,4 +1,4 @@
-# Cave-a-Vin
+# Vinarium
 
 A purely functional approach to wine cellar management.
 

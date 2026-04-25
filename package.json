@@ -1,5 +1,5 @@
 {
-  "name": "cave-a-vin",
+  "name": "vinarium",
   "private": true,
   "scripts": {
     "prepare": "nitro prepare",

@@ -1,7 +1,7 @@
 .PHONY: help bootstrap build infra-init plan apply destroy
 
 help:
-	@echo "Cave-a-Vin — common targets"
+	@echo "Vinarium — common targets"
 	@echo ""
 	@echo "  make bootstrap   One-shot local provisioning (run once on a fresh project)"
 	@echo "  make build       Build the Nitro bundle for the Cloud Function"

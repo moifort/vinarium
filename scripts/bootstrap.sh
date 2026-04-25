@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# bootstrap.sh — one-shot local provisioning of the Cave-a-Vin Firebase stack.
+# bootstrap.sh — one-shot local provisioning of the Vinarium Firebase stack.
 #
 # Run this ONCE on a clean machine. Subsequent deploys go through GitHub
 # Actions (.github/workflows/deploy.yml) which talks to the same Terraform

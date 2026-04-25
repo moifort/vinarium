@@ -1,5 +1,5 @@
-project_id         = "cave-a-vin-prod"
-project_name       = "Cave-a-Vin"
+project_id         = "vinarium-prod"
+project_name       = "Vinarium"
 org_id             = "123456789012"          # OR set folder_id instead
 billing_account_id = "AAAA-BBBB-CCCC-DDDD"
 region             = "europe-west3"

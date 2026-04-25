@@ -1,6 +1,6 @@
-# Cave-a-Vin — Terraform infrastructure
+# Vinarium — Terraform infrastructure
 
-This module provisions the entire Firebase stack for Cave-a-Vin from a
+This module provisions the entire Firebase stack for Vinarium from a
 greenfield GCP project: project itself, Firebase enablement, Firestore
 (Native), security rules + indexes, Identity Platform with Apple OAuth,
 the iOS Firebase app (and downloads `GoogleService-Info.plist`), the

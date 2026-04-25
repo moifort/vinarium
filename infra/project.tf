@@ -6,7 +6,7 @@ resource "google_project" "this" {
   billing_account = var.billing_account_id
 
   labels = {
-    app = "cave-a-vin"
+    app = "vinarium"
   }
 }
 

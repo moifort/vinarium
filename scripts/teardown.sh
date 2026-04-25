@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# teardown.sh — destroys the entire Cave-a-Vin GCP/Firebase infrastructure.
+# teardown.sh — destroys the entire Vinarium GCP/Firebase infrastructure.
 # This is a destructive operation: project, Firestore data, secrets, and
 # every other resource managed by Terraform are removed.
 

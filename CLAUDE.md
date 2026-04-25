@@ -1,4 +1,4 @@
-# Cave-a-Vin - Project Directives
+# Vinarium - Project Directives
 
 ## Build & Verification Commands
 

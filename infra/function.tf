@@ -1,7 +1,7 @@
 resource "google_service_account" "function" {
   project      = google_project.this.project_id
   account_id   = "cave-a-vin-runtime"
-  display_name = "Cave-a-Vin runtime"
+  display_name = "Vinarium runtime"
 }
 
 resource "google_project_iam_member" "function_firestore" {
