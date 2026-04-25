@@ -37,7 +37,7 @@ ok "terraform available at $TF"
 ok "terraform.tfvars present"
 
 # Read the Apple .p8 path from tfvars and resolve it relative to infra/
-APPLE_P8_REL=$(grep -E '^\s*apple_private_key_path\s*=' "$TFVARS" | sed -E 's/.*=\s*"(.*)"/\1/')
+APPLE_P8_REL=$(grep -E '^[[:space:]]*apple_private_key_path[[:space:]]*=' "$TFVARS" | sed -E 's/.*=[[:space:]]*"(.*)"/\1/')
 APPLE_P8_ABS="$INFRA_DIR/$(echo "$APPLE_P8_REL" | sed 's|^\./||')"
 [[ -f "$APPLE_P8_ABS" ]] || fail "Apple private key not found at $APPLE_P8_ABS"
 ok "Apple .p8 found"
