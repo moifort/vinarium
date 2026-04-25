@@ -10,6 +10,21 @@ resource "google_project_iam_member" "function_firestore" {
   member  = "serviceAccount:${google_service_account.function.email}"
 }
 
+# Cloud Functions Gen 2 builds run in Cloud Build under the default Compute
+# service account. In a fresh project that role binding is not granted by
+# default, so the first deploy fails with "missing permission on the build
+# service account". We bind it explicitly to make bootstrap deterministic.
+data "google_compute_default_service_account" "default" {
+  project    = google_project.this.project_id
+  depends_on = [google_project_service.apis]
+}
+
+resource "google_project_iam_member" "compute_default_builder" {
+  project = google_project.this.project_id
+  role    = "roles/cloudbuild.builds.builder"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+}
+
 resource "google_secret_manager_secret_iam_member" "function" {
   for_each  = google_secret_manager_secret.this
   project   = google_project.this.project_id
@@ -21,7 +36,7 @@ resource "google_secret_manager_secret_iam_member" "function" {
 resource "google_storage_bucket" "source" {
   project                     = google_project.this.project_id
   name                        = "${google_project.this.project_id}-fn-source"
-  location                    = var.firestore_location
+  location                    = local.bucket_location
   force_destroy               = true
   uniform_bucket_level_access = true
 
@@ -82,6 +97,7 @@ resource "google_cloudfunctions2_function" "server" {
 
   depends_on = [
     google_project_iam_member.function_firestore,
+    google_project_iam_member.compute_default_builder,
     google_secret_manager_secret_iam_member.function,
   ]
 }
@@ -95,4 +111,6 @@ resource "google_cloud_run_service_iam_member" "invoker" {
   service  = google_cloudfunctions2_function.server.name
   role     = "roles/run.invoker"
   member   = "allUsers"
+
+  depends_on = [google_org_policy_policy.allow_public_iam]
 }

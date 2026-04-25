@@ -1,7 +1,7 @@
 resource "google_storage_bucket" "tfstate" {
   project                     = google_project.this.project_id
   name                        = "${google_project.this.project_id}-tfstate"
-  location                    = var.firestore_location
+  location                    = local.bucket_location
   force_destroy               = false
   uniform_bucket_level_access = true
 

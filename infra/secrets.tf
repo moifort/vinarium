@@ -7,17 +7,27 @@ resource "random_password" "admin_token" {
 locals {
   admin_token_value = var.admin_token != null ? var.admin_token : random_password.admin_token[0].result
 
-  secrets = {
+  secret_values = {
     google-api-key = var.google_api_key
     admin-token    = local.admin_token_value
     sentry-dsn     = var.sentry_dsn
   }
+
+  # Secret Manager rejects empty payloads, so we drive iteration off a
+  # non-sensitive set of secret IDs and skip optional ones (sentry-dsn) when
+  # their value is empty. Iterating a map of sensitive values would propagate
+  # sensitivity into for_each keys, which Terraform forbids — hence nonsensitive().
+  secret_ids = toset(compact([
+    "google-api-key",
+    "admin-token",
+    nonsensitive(var.sentry_dsn) != "" ? "sentry-dsn" : "",
+  ]))
 }
 
 resource "google_secret_manager_secret" "this" {
-  for_each  = local.secrets
+  for_each  = local.secret_ids
   project   = google_project.this.project_id
-  secret_id = each.key
+  secret_id = each.value
 
   replication {
     auto {}
@@ -27,7 +37,7 @@ resource "google_secret_manager_secret" "this" {
 }
 
 resource "google_secret_manager_secret_version" "this" {
-  for_each    = local.secrets
-  secret      = google_secret_manager_secret.this[each.key].id
-  secret_data = each.value
+  for_each    = local.secret_ids
+  secret      = google_secret_manager_secret.this[each.value].id
+  secret_data = local.secret_values[each.value]
 }
