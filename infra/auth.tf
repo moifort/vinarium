@@ -19,14 +19,20 @@ resource "google_identity_platform_config" "this" {
   depends_on = [google_firebase_project.this]
 }
 
-resource "google_identity_platform_oauth_idp_config" "apple" {
-  provider     = google-beta
-  project      = google_project.this.project_id
-  name         = "oidc.apple.com"
-  display_name = "Apple"
-  enabled      = true
-  client_id    = var.apple_services_id
-  issuer       = "https://appleid.apple.com"
+# Apple Sign-In, configured as a built-in (default supported) provider.
+# The iOS SDK calls OAuthProvider.appleCredential(...) which targets the
+# provider id "apple.com", so a custom OIDC config (oidc.apple.com) would
+# never be matched and produces "identity provider configuration is not
+# found" at runtime.
+#
+# Identity Platform accepts the Apple key material as a JSON-encoded
+# client_secret; it generates the OAuth JWT internally on each sign-in.
+resource "google_identity_platform_default_supported_idp_config" "apple" {
+  provider  = google-beta
+  project   = google_project.this.project_id
+  enabled   = true
+  idp_id    = "apple.com"
+  client_id = var.apple_services_id
 
   client_secret = jsonencode({
     teamId     = var.apple_team_id
