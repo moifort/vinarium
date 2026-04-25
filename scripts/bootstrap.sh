@@ -81,12 +81,12 @@ if [[ ! -f backend.tf ]]; then
 terraform {
   backend "gcs" {
     bucket = "${TFSTATE_BUCKET}"
-    prefix = "cave-a-vin"
+    prefix = "vinarium"
   }
 }
 EOF
   "$TF" init -migrate-state -force-copy -input=false
-  ok "State migrated to gs://${TFSTATE_BUCKET}/cave-a-vin"
+  ok "State migrated to gs://${TFSTATE_BUCKET}/vinarium"
   echo "   Commit infra/backend.tf so the CI can read the same state."
 else
   ok "Remote state already configured"
@@ -115,7 +115,7 @@ cat <<EOF
   Project              : ${PROJECT_ID}
   Cloud Function URL   : ${FN_URL}
   iOS GoogleService    : ${IOS_PLIST}
-  Terraform state      : gs://${TFSTATE_BUCKET}/cave-a-vin
+  Terraform state      : gs://${TFSTATE_BUCKET}/vinarium
   Admin token (sensitive, store in GitHub secret ADMIN_TOKEN):
                          ${ADMIN_TOKEN}
 
