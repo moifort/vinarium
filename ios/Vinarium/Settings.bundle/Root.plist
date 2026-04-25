@@ -12,7 +12,7 @@
 			<key>Key</key>
 			<string>serverURL</string>
 			<key>DefaultValue</key>
-			<string>https://vinarium.example.com</string>
+			<string>https://vinarium-server-okw6e376wq-ey.a.run.app</string>
 			<key>IsSecure</key>
 			<false/>
 			<key>KeyboardType</key>
