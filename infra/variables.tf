@@ -89,5 +89,5 @@ variable "admin_token" {
 variable "github_repo" {
   description = "GitHub repository (owner/name) allowed to deploy via Workload Identity Federation"
   type        = string
-  default     = "moifort/cave-a-vin"
+  default     = "moifort/vinarium"
 }
