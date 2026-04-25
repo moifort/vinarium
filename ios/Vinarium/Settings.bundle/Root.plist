@@ -12,7 +12,7 @@
 			<key>Key</key>
 			<string>serverURL</string>
 			<key>DefaultValue</key>
-			<string>https://cave-a-vin.example.com</string>
+			<string>https://vinarium.example.com</string>
 			<key>IsSecure</key>
 			<false/>
 			<key>KeyboardType</key>
