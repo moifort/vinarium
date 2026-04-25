@@ -7,6 +7,7 @@ import Observation
 @Observable
 final class AuthSession {
     private(set) var user: User?
+    @ObservationIgnored
     nonisolated(unsafe) private var handle: AuthStateDidChangeListenerHandle?
 
     init() {

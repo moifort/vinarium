@@ -5,8 +5,8 @@ import Foundation
 
 // Firebase's getIDToken callback is not typed Sendable, but Firebase Auth is
 // thread-safe and Apollo's RequestChain expects completion on any queue.
-extension HTTPRequest: @unchecked Sendable {}
-extension HTTPResponse: @unchecked Sendable {}
+extension HTTPRequest: @retroactive @unchecked Sendable {}
+extension HTTPResponse: @retroactive @unchecked Sendable {}
 
 /// Injects the current Firebase user's ID token into every GraphQL request as
 /// `Authorization: Bearer <token>`. Firebase Auth refreshes the token under
