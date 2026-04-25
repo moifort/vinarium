@@ -47,9 +47,11 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.ref"        = "assertion.ref"
   }
 
-  # Mandatory since 2023: scope the provider to a single repository so that
-  # a leaked workflow on another repo cannot impersonate the deploy SA.
-  attribute_condition = "assertion.repository == '${var.github_repo}'"
+  # Mandatory since 2023: scope the provider so a leaked workflow on another
+  # repo cannot impersonate the deploy SA. Two repository names are accepted
+  # transiently while moifort/cave-a-vin is being renamed to moifort/vinarium.
+  # Narrow back to a single value (var.github_repo) once the rename is done.
+  attribute_condition = "assertion.repository == '${var.github_repo}' || assertion.repository == 'moifort/vinarium'"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
