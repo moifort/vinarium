@@ -29,3 +29,13 @@ output "tfstate_bucket" {
   description = "GCS bucket holding the Terraform state. Referenced by infra/backend.tf."
 }
 
+output "deploy_sa_email" {
+  value       = google_service_account.deploy.email
+  description = "Service account impersonated by the GitHub Actions deploy workflow (GitHub secret GCP_DEPLOY_SA)"
+}
+
+output "wif_provider" {
+  value       = google_iam_workload_identity_pool_provider.github.name
+  description = "Full resource name of the WIF provider (GitHub secret GCP_WIF_PROVIDER)"
+}
+

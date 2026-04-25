@@ -85,3 +85,9 @@ variable "admin_token" {
   sensitive   = true
   default     = null
 }
+
+variable "github_repo" {
+  description = "GitHub repository (owner/name) allowed to deploy via Workload Identity Federation"
+  type        = string
+  default     = "moifort/cave-a-vin"
+}
