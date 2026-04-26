@@ -59,6 +59,16 @@ type CellarBottleWithWine {
 }
 
 """
+Configuration and current usage of the cellar grid
+"""
+type CellarInfo {
+  capacity: Int!
+  cols: Int!
+  placedCount: Int!
+  rows: Int!
+}
+
+"""
 A free cellar position suggestion
 """
 type CellarPosition {
@@ -283,6 +293,11 @@ type Query {
   All bottles currently in the cellar, with the joined wine
   """
   cellarBottles: [CellarBottleWithWine!]!
+
+  """
+  Cellar grid dimensions and current placement count
+  """
+  cellarInfo: CellarInfo!
 
   """
   Application changelog, most recent versions first

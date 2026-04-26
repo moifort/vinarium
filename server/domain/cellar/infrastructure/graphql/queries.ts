@@ -1,6 +1,14 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { CellarQuery } from '../../query'
-import { CellarBottleWithWineType, CellarPositionType } from './types'
+import { CellarBottleWithWineType, CellarInfoType, CellarPositionType } from './types'
+
+builder.queryField('cellarInfo', (t) =>
+  t.field({
+    type: CellarInfoType,
+    description: 'Cellar grid dimensions and current placement count',
+    resolve: (_root, _args, { userId }) => CellarQuery.getCellarInfo(userId),
+  }),
+)
 
 builder.queryField('cellarBottles', (t) =>
   t.field({

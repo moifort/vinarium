@@ -7,6 +7,16 @@ import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace CellarQuery {
+  export const getCellarInfo = async (userId: UserId) => {
+    const bottles = await repository.findAllByUser(userId)
+    return {
+      rows: CELLAR_SIZE.rows,
+      cols: CELLAR_SIZE.cols,
+      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
+      placedCount: bottles.length,
+    }
+  }
+
   export const getAllBottles = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
       repository.findAllByUser(userId),

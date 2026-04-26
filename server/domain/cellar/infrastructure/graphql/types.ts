@@ -33,6 +33,18 @@ export const CellarBottleWithWineType = builder
     }),
   })
 
+export const CellarInfoType = builder
+  .objectRef<{ rows: number; cols: number; capacity: number; placedCount: number }>('CellarInfo')
+  .implement({
+    description: 'Configuration and current usage of the cellar grid',
+    fields: (t) => ({
+      rows: t.exposeInt('rows'),
+      cols: t.exposeInt('cols'),
+      capacity: t.exposeInt('capacity'),
+      placedCount: t.exposeInt('placedCount'),
+    }),
+  })
+
 export const CellarPositionType = builder
   .objectRef<{
     row: CellarBottle['row']
