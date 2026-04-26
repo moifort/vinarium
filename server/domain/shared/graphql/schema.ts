@@ -45,6 +45,11 @@ import '~/domain/dashboard/infrastructure/graphql/queries'
 import '~/domain/changelog/infrastructure/graphql/types'
 import '~/domain/changelog/infrastructure/graphql/queries'
 
+// Portability (export and import of user data)
+import '~/domain/portability/infrastructure/graphql/types'
+import '~/domain/portability/infrastructure/graphql/queries'
+import '~/domain/portability/infrastructure/graphql/mutations'
+
 // Scan IA (label OCR via Claude + Gemini)
 import '~/system/scan/graphql/types'
 import '~/system/scan/graphql/mutations'

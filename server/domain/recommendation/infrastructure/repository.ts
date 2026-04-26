@@ -2,7 +2,7 @@ import type { Recommendation } from '~/domain/recommendation/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { genericDataConverter } from '~/utils/firestore'
+import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const recommendations = () =>
   db().collection('recommendation').withConverter(genericDataConverter<Recommendation>())
@@ -26,4 +26,9 @@ export const save = async (rec: Recommendation): Promise<Recommendation> => {
 
 export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
   await recommendations().doc(docId(userId, wineId)).delete()
+}
+
+export const removeAllByUser = async (userId: UserId): Promise<void> => {
+  const snap = await recommendations().where('userId', '==', userId).get()
+  await deleteInBatches(snap.docs.map((doc) => doc.ref))
 }

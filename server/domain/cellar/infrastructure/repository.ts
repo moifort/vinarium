@@ -2,7 +2,7 @@ import type { CellarBottle } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { genericDataConverter } from '~/utils/firestore'
+import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const cellar = () => db().collection('cellar').withConverter(genericDataConverter<CellarBottle>())
 
@@ -25,4 +25,9 @@ export const save = async (entry: CellarBottle): Promise<CellarBottle> => {
 
 export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
   await cellar().doc(docId(userId, wineId)).delete()
+}
+
+export const removeAllByUser = async (userId: UserId): Promise<void> => {
+  const snap = await cellar().where('userId', '==', userId).get()
+  await deleteInBatches(snap.docs.map((doc) => doc.ref))
 }

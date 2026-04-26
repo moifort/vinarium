@@ -1,8 +1,11 @@
 import type {
   DocumentData,
+  DocumentReference,
   FirestoreDataConverter,
   QueryDocumentSnapshot,
 } from 'firebase-admin/firestore'
+import { chunk } from 'lodash-es'
+import { db } from '~/system/firebase'
 
 // Generic Firestore converter that preserves type information when reading
 // documents and recursively turns Timestamp instances back into JS Date.
@@ -24,4 +27,15 @@ const toDate = (value: unknown): unknown => {
     }
   }
   return obj
+}
+
+// Firestore batches accept at most 500 operations.
+const BATCH_LIMIT = 400
+
+export const deleteInBatches = async (refs: DocumentReference[]): Promise<void> => {
+  for (const slice of chunk(refs, BATCH_LIMIT)) {
+    const batch = db().batch()
+    for (const ref of slice) batch.delete(ref)
+    await batch.commit()
+  }
 }

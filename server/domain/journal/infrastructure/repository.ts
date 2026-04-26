@@ -2,7 +2,7 @@ import type { JournalEntry } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { genericDataConverter } from '~/utils/firestore'
+import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const journal = () => db().collection('journal').withConverter(genericDataConverter<JournalEntry>())
 
@@ -30,4 +30,9 @@ export const removeByWineId = async (userId: UserId, wineId: WineId): Promise<vo
 export const save = async (entry: JournalEntry): Promise<JournalEntry> => {
   await journal().add(entry)
   return entry
+}
+
+export const removeAllByUser = async (userId: UserId): Promise<void> => {
+  const snap = await journal().where('userId', '==', userId).get()
+  await deleteInBatches(snap.docs.map((doc) => doc.ref))
 }

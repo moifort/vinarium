@@ -2,7 +2,7 @@ import type { UserId } from '~/domain/shared/types'
 import type { TastingNote } from '~/domain/tasting/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { genericDataConverter } from '~/utils/firestore'
+import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const tasting = () => db().collection('tasting').withConverter(genericDataConverter<TastingNote>())
 
@@ -25,4 +25,9 @@ export const save = async (note: TastingNote): Promise<TastingNote> => {
 
 export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
   await tasting().doc(docId(userId, wineId)).delete()
+}
+
+export const removeAllByUser = async (userId: UserId): Promise<void> => {
+  const snap = await tasting().where('userId', '==', userId).get()
+  await deleteInBatches(snap.docs.map((doc) => doc.ref))
 }

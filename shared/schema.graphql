@@ -169,6 +169,18 @@ input GiftInput {
 }
 
 """
+Number of records imported per domain
+"""
+type ImportResult {
+  cellar: Int!
+  gift: Int!
+  journal: Int!
+  recommendation: Int!
+  tasting: Int!
+  wines: Int!
+}
+
+"""
 A timestamped cellar entry/exit event for a wine
 """
 type JournalEvent {
@@ -243,6 +255,11 @@ type Mutation {
   giftBottle(input: GiftInput!, wineId: WineId!): Boolean!
 
   """
+  Replace all the current user records with the contents of a JSON envelope
+  """
+  importData(payload: String!): ImportResult!
+
+  """
   Mark a wine as favorite (creates / overwrites a tasting note with rating 5)
   """
   markFavorite(wineId: WineId!): Boolean!
@@ -308,6 +325,11 @@ type Query {
   Aggregated dashboard view for the current user
   """
   dashboard: Dashboard!
+
+  """
+  JSON-encoded export of every record belonging to the current user
+  """
+  exportData: String!
 
   """
   All cellar entry/exit events for the current user, most recent first
