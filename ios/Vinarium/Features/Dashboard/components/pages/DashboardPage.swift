@@ -4,6 +4,7 @@ struct DashboardPage: View {
     let content: Content
     var onStatsTapped: () -> Void
     var onWineTapped: (String) -> Void
+    var onSettingsTapped: () -> Void
 
     var body: some View {
         ScrollView {
@@ -22,6 +23,15 @@ struct DashboardPage: View {
         }
         .navigationTitle("Accueil")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button(action: onSettingsTapped) {
+                    Image(systemName: "gearshape")
+                }
+                .accessibilityIdentifier("dashboard-settings-button")
+                .accessibilityLabel("Réglages")
+            }
+        }
     }
 }
 
@@ -55,7 +65,8 @@ extension DashboardPage {
                 ]
             ),
             onStatsTapped: {},
-            onWineTapped: { _ in }
+            onWineTapped: { _ in },
+            onSettingsTapped: {}
         )
     }
 }
@@ -71,7 +82,8 @@ extension DashboardPage {
                 events: []
             ),
             onStatsTapped: {},
-            onWineTapped: { _ in }
+            onWineTapped: { _ in },
+            onSettingsTapped: {}
         )
     }
 }

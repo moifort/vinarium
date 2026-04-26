@@ -7,6 +7,7 @@ struct DashboardView: View {
 
     @State private var viewModel = DashboardViewModel()
     @State private var selectedWineId: String?
+    @State private var showSettings = false
 
     var body: some View {
         NavigationStack {
@@ -15,7 +16,8 @@ struct DashboardView: View {
                     DashboardPage(
                         content: Self.map(data),
                         onStatsTapped: { selectedTab = .cellar },
-                        onWineTapped: { selectedWineId = $0 }
+                        onWineTapped: { selectedWineId = $0 },
+                        onSettingsTapped: { showSettings = true }
                     )
                 } else if let error = viewModel.error {
                     ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
@@ -38,6 +40,12 @@ struct DashboardView: View {
                     onRemoved: { Task { await viewModel.load() } },
                     onUpdated: { Task { await viewModel.load() } }
                 )
+            }
+            .sheet(isPresented: $showSettings) {
+                SettingsHomeView()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .vinariumDataDidReload)) { _ in
+                Task { await viewModel.load() }
             }
         }
     }

@@ -1,0 +1,31 @@
+query Changelog {
+  changelog {
+    version
+    date
+    notes
+  }
+}
+
+query CellarInfo {
+  cellarInfo {
+    rows
+    cols
+    capacity
+    placedCount
+  }
+}
+
+query ExportData {
+  exportData
+}
+
+mutation ImportData($payload: String!) {
+  importData(payload: $payload) {
+    wines
+    cellar
+    tasting
+    recommendation
+    gift
+    journal
+  }
+}
