@@ -2,15 +2,16 @@
   "name": "vinarium",
   "private": true,
   "scripts": {
-    "prepare": "nitro prepare",
-    "build": "nitro build",
-    "dev": "nitro dev --host 0.0.0.0",
-    "test": "bun test",
-    "test:coverage": "bun test --coverage",
+    "prepare": "bun run generate:assets && nitro prepare",
+    "build": "bun run generate:assets && nitro build",
+    "dev": "bun run generate:assets && nitro dev --host 0.0.0.0",
+    "test": "bun run generate:assets && bun test",
+    "test:coverage": "bun run generate:assets && bun test --coverage",
     "lint": "bunx biome check",
     "lint:fix": "bunx biome check --write",
+    "generate:assets": "bun scripts/generate-changelog-asset.ts",
     "generate:graphql": "bun scripts/export-graphql-schema.ts",
-    "generate": "bun run generate:graphql"
+    "generate": "bun run generate:assets && bun run generate:graphql"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.13",

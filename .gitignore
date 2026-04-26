@@ -57,3 +57,6 @@ infra/apple.p8
 
 # Build artifact uploaded to GCS by Terraform
 .output/server-source.zip
+
+# Generated server assets
+server/system/changelog-content.ts
