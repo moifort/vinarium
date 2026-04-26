@@ -41,6 +41,10 @@ import '~/domain/recommendation/infrastructure/graphql/mutations'
 import '~/domain/dashboard/infrastructure/graphql/types'
 import '~/domain/dashboard/infrastructure/graphql/queries'
 
+// Changelog (application release notes)
+import '~/domain/changelog/infrastructure/graphql/types'
+import '~/domain/changelog/infrastructure/graphql/queries'
+
 // Scan IA (label OCR via Claude + Gemini)
 import '~/system/scan/graphql/types'
 import '~/system/scan/graphql/mutations'

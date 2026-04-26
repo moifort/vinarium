@@ -69,6 +69,15 @@ type CellarPosition {
 }
 
 """
+A single version section of the application changelog
+"""
+type ChangelogEntry {
+  date: DateTime
+  notes: [String!]!
+  version: String!
+}
+
+"""
 Wine classification (Grand Cru, Premier Cru ...)
 """
 scalar Classification
@@ -274,6 +283,11 @@ type Query {
   All bottles currently in the cellar, with the joined wine
   """
   cellarBottles: [CellarBottleWithWine!]!
+
+  """
+  Application changelog, most recent versions first
+  """
+  changelog: [ChangelogEntry!]!
 
   """
   Aggregated dashboard view for the current user
