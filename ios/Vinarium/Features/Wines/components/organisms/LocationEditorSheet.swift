@@ -16,197 +16,260 @@ struct LocationEditorSheet: View {
     let onConfirm: (DiscoveryLocationDraft?) async -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var cameraPosition: MapCameraPosition
-    @State private var pinCoordinate: CLLocationCoordinate2D?
-    @State private var placeName: String?
+    @State private var searchModel = LocationSearchModel()
     @State private var searchQuery = ""
-    @State private var searchResults: [SearchSuggestion] = []
-    @State private var isResolving = false
-
-    init(initial: DiscoveryLocationDraft?, onConfirm: @escaping (DiscoveryLocationDraft?) async -> Void) {
-        self.initial = initial
-        self.onConfirm = onConfirm
-        let starting = initial?.coordinate
-            ?? CLLocationCoordinate2D(latitude: 46.6, longitude: 2.5) // France center fallback
-        let span = MKCoordinateSpan(
-            latitudeDelta: initial == nil ? 8 : 0.1,
-            longitudeDelta: initial == nil ? 8 : 0.1
-        )
-        _cameraPosition = State(initialValue: .region(MKCoordinateRegion(center: starting, span: span)))
-        _pinCoordinate = State(initialValue: initial?.coordinate)
-        _placeName = State(initialValue: initial?.placeName)
-    }
+    @State private var resolvingId: String?
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
-        NavigationStack {
-            ZStack {
-                MapReader { proxy in
-                    Map(position: $cameraPosition) {
-                        if let pinCoordinate {
-                            Marker(placeName ?? "S\u{00E9}lection", coordinate: pinCoordinate)
-                        }
-                    }
-                    .onTapGesture { screenPoint in
-                        if let coordinate = proxy.convert(screenPoint, from: .local) {
-                            updatePin(to: coordinate)
-                        }
-                    }
-                }
-
-                VStack {
-                    searchBar
-                    Spacer()
-                    actionsBar
-                }
-                .padding()
-            }
-            .navigationTitle("Lieu de d\u{00E9}couverte")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler", systemImage: "xmark") { dismiss() }
-                }
-                ToolbarItem(placement: .destructiveAction) {
-                    if initial != nil {
-                        Button("Effacer", systemImage: "trash", role: .destructive) {
-                            Task {
-                                await onConfirm(nil)
-                                dismiss()
-                            }
-                        }
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    AsyncToolbarButton(title: "Enregistrer", systemImage: "checkmark") {
-                        if let pinCoordinate {
-                            await onConfirm(
-                                DiscoveryLocationDraft(
-                                    latitude: pinCoordinate.latitude,
-                                    longitude: pinCoordinate.longitude,
-                                    placeName: placeName
-                                )
-                            )
-                        }
-                    }
-                    .disabled(pinCoordinate == nil)
-                }
-            }
+        VStack(spacing: 0) {
+            header
+            searchBar
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            resultsList
+        }
+        .background(Color(.systemBackground).ignoresSafeArea())
+        .task {
+            searchFocused = true
         }
     }
+
+    // MARK: - Header
+
+    private var header: some View {
+        ZStack {
+            Text("Ajuster le lieu")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            HStack {
+                Button {
+                    dismiss()
+                } label: {
+                    Image(systemName: "xmark")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .frame(width: 30, height: 30)
+                        .background(Circle().fill(Color(.tertiarySystemFill)))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Fermer")
+
+                Spacer()
+
+                Button("R\u{00E9}tablir") {
+                    reset()
+                }
+                .foregroundStyle(.red)
+                .disabled(!hasUserInput)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+        .padding(.bottom, 8)
+    }
+
+    // MARK: - Search bar
 
     private var searchBar: some View {
-        VStack(spacing: 0) {
-            TextField("Rechercher un lieu", text: $searchQuery)
-                .textFieldStyle(.roundedBorder)
-                .submitLabel(.search)
-                .onSubmit { Task { await runSearch() } }
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.secondary)
 
-            if !searchResults.isEmpty {
-                List(searchResults) { suggestion in
-                    Button {
-                        select(suggestion)
-                    } label: {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(suggestion.title).font(.subheadline)
-                            if !suggestion.subtitle.isEmpty {
-                                Text(suggestion.subtitle).font(.caption).foregroundStyle(.secondary)
-                            }
+            TextField("", text: $searchQuery, prompt: Text("Rechercher").foregroundStyle(.secondary))
+                .focused($searchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+
+            if !searchQuery.isEmpty {
+                Button {
+                    searchQuery = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Effacer la recherche")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Color(.tertiarySystemFill), in: .rect(cornerRadius: 12))
+        .onChange(of: searchQuery) { _, newValue in
+            searchModel.update(query: newValue)
+        }
+    }
+
+    // MARK: - Results list
+
+    private var resultsList: some View {
+        List {
+            Section {
+                Button {
+                    Task { await clearLocation() }
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "mappin.slash")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 28, height: 28)
+                            .background(Circle().fill(.red))
+
+                        Text("Aucun lieu")
+                            .foregroundStyle(.primary)
+
+                        Spacer()
+                    }
+                    .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+            }
+
+            if !searchModel.suggestions.isEmpty {
+                Section("Lieux sur le plan") {
+                    ForEach(searchModel.suggestions, id: \.id) { completion in
+                        SuggestionRow(
+                            title: completion.title,
+                            subtitle: completion.subtitle,
+                            isResolving: resolvingId == completion.id
+                        ) {
+                            Task { await select(completion) }
                         }
                     }
-                    .buttonStyle(.plain)
                 }
-                .listStyle(.plain)
-                .frame(maxHeight: 200)
-                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 8))
             }
         }
+        .listStyle(.plain)
     }
 
-    private var actionsBar: some View {
-        HStack {
-            Button {
-                Task { await useCurrentLocation() }
-            } label: {
-                Label("Ma position", systemImage: "location.fill")
-            }
-            .buttonStyle(.borderedProminent)
+    // MARK: - Actions
 
-            Spacer()
-
-            if isResolving {
-                ProgressView()
-            } else if let placeName {
-                Text(placeName)
-                    .font(.subheadline)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(.regularMaterial, in: Capsule())
-            }
-        }
+    private var hasUserInput: Bool {
+        !searchQuery.isEmpty || !searchModel.suggestions.isEmpty
     }
 
-    private func updatePin(to coordinate: CLLocationCoordinate2D) {
-        pinCoordinate = coordinate
-        cameraPosition = .region(
-            MKCoordinateRegion(
-                center: coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
-            )
+    private func reset() {
+        searchQuery = ""
+        searchModel.update(query: "")
+    }
+
+    private func clearLocation() async {
+        await onConfirm(nil)
+        dismiss()
+    }
+
+    private func select(_ completion: MKLocalSearchCompletion) async {
+        guard resolvingId == nil else { return }
+        resolvingId = completion.id
+        defer { resolvingId = nil }
+
+        guard let coordinate = await resolveCoordinate(for: completion) else { return }
+        let draft = DiscoveryLocationDraft(
+            latitude: coordinate.latitude,
+            longitude: coordinate.longitude,
+            placeName: composedPlaceName(for: completion)
         )
-        Task { await resolveName(for: coordinate) }
+        await onConfirm(draft)
+        dismiss()
     }
 
-    private func resolveName(for coordinate: CLLocationCoordinate2D) async {
-        isResolving = true
-        let name = await PlaceNameResolver.resolve(coordinate)
-        isResolving = false
-        if pinCoordinate?.latitude == coordinate.latitude
-            && pinCoordinate?.longitude == coordinate.longitude {
-            placeName = name
-        }
-    }
-
-    private func useCurrentLocation() async {
-        if let coordinate = await LocationService.shared.requestCurrentCoordinate() {
-            updatePin(to: coordinate)
-        }
-    }
-
-    private func runSearch() async {
-        let query = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else {
-            searchResults = []
-            return
-        }
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = query
+    private func resolveCoordinate(for completion: MKLocalSearchCompletion) async -> CLLocationCoordinate2D? {
+        let request = MKLocalSearch.Request(completion: completion)
         do {
             let response = try await MKLocalSearch(request: request).start()
-            searchResults = response.mapItems.prefix(8).map { item in
-                SearchSuggestion(
-                    id: UUID(),
-                    title: item.name ?? query,
-                    subtitle: item.address?.fullAddress ?? "",
-                    coordinate: item.location.coordinate
-                )
-            }
+            return response.mapItems.first?.location.coordinate
         } catch {
-            searchResults = []
+            return nil
         }
     }
 
-    private func select(_ suggestion: SearchSuggestion) {
-        searchResults = []
-        searchQuery = suggestion.title
-        updatePin(to: suggestion.coordinate)
+    private func composedPlaceName(for completion: MKLocalSearchCompletion) -> String {
+        if completion.subtitle.isEmpty { return completion.title }
+        return "\(completion.title), \(completion.subtitle)"
     }
 }
 
-private struct SearchSuggestion: Identifiable {
-    let id: UUID
+// MARK: - Suggestion row
+
+private struct SuggestionRow: View {
     let title: String
     let subtitle: String
-    let coordinate: CLLocationCoordinate2D
+    let isResolving: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 12) {
+                Image(systemName: "mappin")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 28, height: 28)
+                    .background(Circle().fill(.blue))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
+                        .lineLimit(1)
+                    if !subtitle.isEmpty {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                }
+
+                Spacer(minLength: 8)
+
+                if isResolving {
+                    ProgressView()
+                        .controlSize(.small)
+                }
+            }
+            .contentShape(.rect)
+        }
+        .buttonStyle(.plain)
+        .disabled(isResolving)
+    }
+}
+
+// MARK: - Search model
+
+@MainActor
+@Observable
+final class LocationSearchModel: NSObject, @preconcurrency MKLocalSearchCompleterDelegate {
+    private(set) var suggestions: [MKLocalSearchCompletion] = []
+    private let completer: MKLocalSearchCompleter
+
+    override init() {
+        completer = MKLocalSearchCompleter()
+        super.init()
+        completer.delegate = self
+        completer.resultTypes = [.address, .pointOfInterest]
+    }
+
+    func update(query: String) {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            suggestions = []
+            completer.queryFragment = ""
+            return
+        }
+        completer.queryFragment = trimmed
+    }
+
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        suggestions = completer.results
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        suggestions = []
+    }
+}
+
+extension MKLocalSearchCompletion {
+    var id: String { "\(title)|\(subtitle)" }
 }
 
 #Preview("Empty") {
@@ -216,9 +279,9 @@ private struct SearchSuggestion: Identifiable {
 #Preview("Pre-filled") {
     LocationEditorSheet(
         initial: DiscoveryLocationDraft(
-            latitude: 44.84,
-            longitude: -0.58,
-            placeName: "Bordeaux, France"
+            latitude: 48.8769,
+            longitude: 2.3370,
+            placeName: "Paris - 9e Arr."
         )
     ) { _ in }
 }
