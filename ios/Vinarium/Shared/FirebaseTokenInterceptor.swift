@@ -3,51 +3,28 @@ import ApolloAPI
 import FirebaseAuth
 import Foundation
 
-// Firebase's getIDToken callback is not typed Sendable, but Firebase Auth is
-// thread-safe and Apollo's RequestChain expects completion on any queue.
-extension HTTPRequest: @retroactive @unchecked Sendable {}
-extension HTTPResponse: @retroactive @unchecked Sendable {}
-
 /// Injects the current Firebase user's ID token into every GraphQL request as
 /// `Authorization: Bearer <token>`. Firebase Auth refreshes the token under
 /// the hood so this is always fresh.
-struct FirebaseTokenInterceptor: ApolloInterceptor {
-    let id = UUID().uuidString
-
-    func interceptAsync<Operation: GraphQLOperation>(
-        chain: any RequestChain,
-        request: HTTPRequest<Operation>,
-        response: HTTPResponse<Operation>?,
-        completion: @escaping (Result<GraphQLResult<Operation.Data>, any Error>) -> Void
-    ) {
+struct FirebaseTokenInterceptor: HTTPInterceptor {
+    func intercept(
+        request: URLRequest,
+        next: NextHTTPInterceptorFunction
+    ) async throws -> HTTPResponse {
         guard let currentUser = Auth.auth().currentUser else {
-            chain.proceedAsync(
-                request: request,
-                response: response,
-                interceptor: self,
-                completion: completion
-            )
-            return
+            return try await next(request)
         }
-        currentUser.getIDToken { token, error in
-            if let error {
-                chain.handleErrorAsync(
-                    error,
-                    request: request,
-                    response: response,
-                    completion: completion
-                )
-                return
+        let token: String = try await withCheckedThrowingContinuation { continuation in
+            currentUser.getIDToken { token, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: token ?? "")
+                }
             }
-            if let token {
-                request.addHeader(name: "Authorization", value: "Bearer \(token)")
-            }
-            chain.proceedAsync(
-                request: request,
-                response: response,
-                interceptor: self,
-                completion: completion
-            )
         }
+        var authorizedRequest = request
+        authorizedRequest.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return try await next(authorizedRequest)
     }
 }
