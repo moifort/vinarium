@@ -4,51 +4,26 @@ import Foundation
 
 enum GraphQLHelpers {
     static func fetch<Q: GraphQLQuery>(_ client: ApolloClient, query: Q) async throws -> Q.Data {
-        try await withCheckedThrowingContinuation { continuation in
-            client.fetch(query: query, cachePolicy: .fetchIgnoringCacheData) { result in
-                switch result {
-                case .success(let graphQLResult):
-                    if let errors = graphQLResult.errors, !errors.isEmpty {
-                        continuation.resume(
-                            throwing: APIError.graphQL(messages: errors.compactMap(\.message))
-                        )
-                        return
-                    }
-                    guard let data = graphQLResult.data else {
-                        continuation.resume(throwing: APIError.invalidResponse)
-                        return
-                    }
-                    nonisolated(unsafe) let sendableData = data
-                    continuation.resume(returning: sendableData)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
+        // .networkOnly maps to the 1.x .fetchIgnoringCacheData behaviour.
+        let response = try await client.fetch(query: query, cachePolicy: .networkOnly)
+        if let errors = response.errors, !errors.isEmpty {
+            throw APIError.graphQL(messages: errors.compactMap(\.message))
         }
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
     }
 
     static func perform<M: GraphQLMutation>(_ client: ApolloClient, mutation: M) async throws -> M.Data {
-        try await withCheckedThrowingContinuation { continuation in
-            client.perform(mutation: mutation) { result in
-                switch result {
-                case .success(let graphQLResult):
-                    if let errors = graphQLResult.errors, !errors.isEmpty {
-                        continuation.resume(
-                            throwing: APIError.graphQL(messages: errors.compactMap(\.message))
-                        )
-                        return
-                    }
-                    guard let data = graphQLResult.data else {
-                        continuation.resume(throwing: APIError.invalidResponse)
-                        return
-                    }
-                    nonisolated(unsafe) let sendableData = data
-                    continuation.resume(returning: sendableData)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                }
-            }
+        let response = try await client.perform(mutation: mutation)
+        if let errors = response.errors, !errors.isEmpty {
+            throw APIError.graphQL(messages: errors.compactMap(\.message))
         }
+        guard let data = response.data else {
+            throw APIError.invalidResponse
+        }
+        return data
     }
 
     /// Decode an ISO-8601 date string from a GraphQL DateTime scalar.
