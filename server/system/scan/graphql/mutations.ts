@@ -1,12 +1,8 @@
 import { GraphQLError } from 'graphql'
 import { builder } from '~/domain/shared/graphql/builder'
 import { Scan } from '~/system/scan'
+import { MAX_BASE64_LENGTH } from '~/system/scan/limits'
 import { ScanResultType } from './types'
-
-/** Maximum decoded image size accepted (10 MB). Base64 adds ~33 % overhead,
- *  so the corresponding base64 string limit is ~14 MB of characters. */
-const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024
-const MAX_BASE64_LENGTH = Math.ceil((MAX_IMAGE_SIZE_BYTES * 4) / 3)
 
 builder.mutationField('scanWine', (t) =>
   t.field({

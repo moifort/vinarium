@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { parseScanResponse } from '~/system/scan'
+import { imageWithinSizeLimit, MAX_BASE64_LENGTH, MAX_IMAGE_SIZE_BYTES } from '~/system/scan/limits'
 
 const validGeminiResponse = JSON.stringify({
   name: 'Château Margaux',
@@ -80,23 +81,19 @@ describe('parseScanResponse', () => {
 })
 
 describe('scanWine upload size guard', () => {
-  const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024
-  const MAX_BASE64_LENGTH = Math.ceil((MAX_IMAGE_SIZE_BYTES * 4) / 3)
-
-  test('a base64 string within the limit is not rejected by length check', () => {
-    const withinLimit = 'A'.repeat(MAX_BASE64_LENGTH)
-    expect(withinLimit.length).toBeLessThanOrEqual(MAX_BASE64_LENGTH)
+  test('accepts a payload exactly at the limit', () => {
+    expect(imageWithinSizeLimit(MAX_BASE64_LENGTH)).toBe(true)
   })
 
-  test('a base64 string exceeding the limit triggers the guard', () => {
-    const oversized = 'A'.repeat(MAX_BASE64_LENGTH + 1)
-    expect(oversized.length > MAX_BASE64_LENGTH).toBe(true)
+  test('rejects a payload one character over the limit', () => {
+    expect(imageWithinSizeLimit(MAX_BASE64_LENGTH + 1)).toBe(false)
   })
 
-  test('10 MB decoded image produces a base64 string above the threshold', () => {
-    // A 10 MB buffer base64-encoded is ~13.7 MB of characters
-    const tenMbBuffer = Buffer.alloc(MAX_IMAGE_SIZE_BYTES + 1)
-    const base64 = tenMbBuffer.toString('base64')
-    expect(base64.length > MAX_BASE64_LENGTH).toBe(true)
+  test('a 10 MB decoded image base64-encodes to a length that exceeds the limit', () => {
+    // MAX_IMAGE_SIZE_BYTES is the decoded ceiling; base64 adds ~33 % overhead,
+    // so a buffer of that size + 1 byte must produce a base64 string that fails the guard.
+    const tenMbPlusOneBuffer = Buffer.alloc(MAX_IMAGE_SIZE_BYTES + 1)
+    const base64 = tenMbPlusOneBuffer.toString('base64')
+    expect(imageWithinSizeLimit(base64.length)).toBe(false)
   })
 })
