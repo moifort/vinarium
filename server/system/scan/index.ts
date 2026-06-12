@@ -1,43 +1,11 @@
 import { createHash } from 'node:crypto'
-import { z } from 'zod'
 import { config } from '~/system/config/index'
 import { createLogger } from '~/system/logger'
-import { ImageHash } from '~/system/scan/primitives'
+import { EnrichSchema, ImageHash, parseScanResponse } from '~/system/scan/primitives'
 import * as repository from '~/system/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
 
 const log = createLogger('scan')
-
-const ScanResultSchema = z.object({
-  name: z.string(),
-  color: z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']),
-  domain: z.string().optional(),
-  vintage: z.number().int().optional(),
-  appellation: z.string().optional(),
-  region: z.string().optional(),
-  country: z.string().optional(),
-  grapeVarieties: z.array(z.string()).optional(),
-  classification: z.string().optional(),
-  drinkFrom: z.number().int().optional(),
-  drinkUntil: z.number().int().optional(),
-  estimatedPrice: z.number().optional(),
-})
-
-const EnrichSchema = z.object({
-  estimatedPrice: z.number().nullable().optional(),
-  drinkFrom: z.number().int().nullable().optional(),
-  drinkUntil: z.number().int().nullable().optional(),
-  grapeVarieties: z.array(z.string()).optional(),
-  region: z.string().nullable().optional(),
-  country: z.string().nullable().optional(),
-  classification: z.string().nullable().optional(),
-  appellation: z.string().nullable().optional(),
-})
-
-export const parseScanResponse = (text: string): ScanResult => {
-  const parsed = JSON.parse(text)
-  return ScanResultSchema.parse(parsed) as ScanResult
-}
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'

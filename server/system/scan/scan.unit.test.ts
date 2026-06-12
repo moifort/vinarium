@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
-import { parseScanResponse } from '~/system/scan'
 import { imageWithinSizeLimit, MAX_BASE64_LENGTH, MAX_IMAGE_SIZE_BYTES } from '~/system/scan/limits'
+import { parseScanResponse } from '~/system/scan/primitives'
 
 const validGeminiResponse = JSON.stringify({
   name: 'Château Margaux',
@@ -69,13 +69,7 @@ describe('parseScanResponse', () => {
     })
 
     test('does not crash — throws instead of returning corrupted data', () => {
-      let threw = false
-      try {
-        parseScanResponse('{"name": 42, "color": "red"}')
-      } catch {
-        threw = true
-      }
-      expect(threw).toBe(true)
+      expect(() => parseScanResponse('{"name": 42, "color": "red"}')).toThrow()
     })
   })
 })
