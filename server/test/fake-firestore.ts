@@ -77,12 +77,21 @@ export const createFakeFirestore = () => {
   const sortValue = (value: unknown) =>
     value instanceof Date ? value.getTime() : (value as number | string)
 
+  // The fake only implements equality filtering — fail loudly rather than
+  // silently return wrong results if production code starts using other operators.
+  const assertEqualityOperator = (op: string) => {
+    if (op !== '==') throw new Error(`fake-firestore only supports '==' queries, got '${op}'`)
+  }
+
   const makeQuery = (
     collection: string,
     filters: Array<[string, unknown]>,
     order?: { field: string; direction: 'asc' | 'desc' },
   ): FakeQuery => ({
-    where: (field, _op, value) => makeQuery(collection, [...filters, [field, value]], order),
+    where: (field, op, value) => {
+      assertEqualityOperator(op)
+      return makeQuery(collection, [...filters, [field, value]], order)
+    },
     orderBy: (field, direction = 'asc') => makeQuery(collection, filters, { field, direction }),
     get: async () => {
       const matching = [...docsOf(collection).entries()].filter(([, data]) =>
@@ -111,7 +120,10 @@ export const createFakeFirestore = () => {
       await ref.set(data)
       return ref
     },
-    where: (field, _op, value) => makeQuery(name, [[field, value]]),
+    where: (field, op, value) => {
+      assertEqualityOperator(op)
+      return makeQuery(name, [[field, value]])
+    },
   })
 
   const makeBatch = (): FakeBatch => {

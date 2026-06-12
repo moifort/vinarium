@@ -63,7 +63,9 @@ export namespace CellarCommand {
 
     // The swap (cellar saves) and its journal trail commit as one batch: a
     // partial failure can no longer leave the cellar half-moved or the journal
-    // out of sync with the bottle positions.
+    // out of sync with the bottle positions. This guards against partial
+    // writes, not concurrent moves — the occupant lookup above is not locked
+    // (a Firestore transaction would be needed for that).
     return await atomically(async (batch) => {
       await JournalCommand.bottleOut(
         userId,
