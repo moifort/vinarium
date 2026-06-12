@@ -10,6 +10,7 @@ struct CellarView: View {
     @State private var wineForConsumption: CellarRowItem?
     @State private var wineForGift: CellarRowItem?
     @State private var wineForRemovalChoice: CellarRowItem?
+    @State private var sheetError = ErrorPresenter()
 
     var body: some View {
         NavigationStack {
@@ -55,32 +56,36 @@ struct CellarView: View {
             }) { item in
                 ConsumptionSheet { date, rating, notes, contacts in
                     let formatter = ISO8601DateFormatter()
-                    Task {
-                        _ = try? await CellarAPI.remove(
+                    await sheetError.run {
+                        _ = try await CellarAPI.remove(
                             wineId: item.id,
                             consumedDate: formatter.string(from: date),
                             rating: rating,
                             tastingNotes: notes,
                             contacts: contacts.isEmpty ? nil : contacts
                         )
+                    } onSuccess: {
                         wineForConsumption = nil
                     }
                 }
+                .errorAlert(sheetError)
             }
             .sheet(item: $wineForGift, onDismiss: {
                 Task { await viewModel.load() }
             }) { item in
                 GiftSheet { date, recipientName in
                     let formatter = ISO8601DateFormatter()
-                    Task {
-                        _ = try? await CellarAPI.gift(
+                    await sheetError.run {
+                        _ = try await CellarAPI.gift(
                             wineId: item.id,
                             giftedDate: formatter.string(from: date),
                             recipientName: recipientName
                         )
+                    } onSuccess: {
                         wineForGift = nil
                     }
                 }
+                .errorAlert(sheetError)
             }
         }
     }
