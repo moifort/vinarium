@@ -1,3 +1,4 @@
+import type { WriteBatch } from 'firebase-admin/firestore'
 import type { JournalEntry } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
@@ -20,15 +21,22 @@ export const findByWineId = async (userId: UserId, wineId: WineId): Promise<Jour
   return snap.docs.map((doc) => doc.data())
 }
 
-export const removeByWineId = async (userId: UserId, wineId: WineId): Promise<void> => {
+export const removeByWineId = async (
+  userId: UserId,
+  wineId: WineId,
+  batch?: WriteBatch,
+): Promise<void> => {
   const snap = await journal().where('userId', '==', userId).where('wineId', '==', wineId).get()
-  const batch = db().batch()
-  for (const doc of snap.docs) batch.delete(doc.ref)
-  await batch.commit()
+  // A wine's journal holds a handful of in/out movements — far below the
+  // 500-writes Firestore batch cap, so enlisting them all in one batch is safe.
+  const target = batch ?? db().batch()
+  for (const doc of snap.docs) target.delete(doc.ref)
+  if (!batch) await target.commit()
 }
 
-export const save = async (entry: JournalEntry): Promise<JournalEntry> => {
-  await journal().add(entry)
+export const save = async (entry: JournalEntry, batch?: WriteBatch): Promise<JournalEntry> => {
+  if (batch) batch.set(journal().doc(), entry)
+  else await journal().add(entry)
   return entry
 }
 

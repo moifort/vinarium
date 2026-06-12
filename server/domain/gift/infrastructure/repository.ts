@@ -1,3 +1,4 @@
+import type { WriteBatch } from 'firebase-admin/firestore'
 import type { Gift } from '~/domain/gift/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
@@ -23,8 +24,10 @@ export const save = async (gift: Gift): Promise<Gift> => {
   return gift
 }
 
-export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
-  await gifts().doc(docId(userId, wineId)).delete()
+export const remove = async (userId: UserId, wineId: WineId, batch?: WriteBatch): Promise<void> => {
+  const ref = gifts().doc(docId(userId, wineId))
+  if (batch) batch.delete(ref)
+  else await ref.delete()
 }
 
 export const removeAllByUser = async (userId: UserId): Promise<void> => {

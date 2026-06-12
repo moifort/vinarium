@@ -6,6 +6,7 @@ import type { UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { WineCommand } from '~/domain/wine/command'
 import type { Wine, WineColor, WineId, WineName } from '~/domain/wine/types'
+import { atomically } from '~/utils/firestore'
 
 export namespace WineUseCase {
   export const addWithTasting = async (
@@ -20,17 +21,20 @@ export namespace WineUseCase {
     return wine
   }
 
-  export const removeCompletely = async (userId: UserId, id: WineId) => {
-    const error = await WineCommand.remove(userId, id)
-    if (error === 'not-found') return 'not-found' as const
-    await Promise.all([
-      CellarCommand.removeWine(userId, id),
-      TastingCommand.removeWine(userId, id),
-      GiftCommand.removeWine(userId, id),
-      RecommendationCommand.removeWine(userId, id),
-    ])
-    // Sequential: CellarCommand.removeWine creates a journal "out" entry that also needs cleanup
-    await JournalCommand.removeWine(userId, id)
-    return undefined
-  }
+  export const removeCompletely = async (userId: UserId, id: WineId) =>
+    await atomically(async (batch) => {
+      const error = await WineCommand.remove(userId, id, batch)
+      if (error === 'not-found') return 'not-found' as const
+      // Every domain enlists its deletions into the same batch: the wine and all
+      // related entries vanish together or not at all. CellarCommand.eraseWine
+      // skips bottle-out journaling because the wine's whole journal is wiped here.
+      await Promise.all([
+        CellarCommand.eraseWine(userId, id, batch),
+        TastingCommand.removeWine(userId, id, batch),
+        GiftCommand.removeWine(userId, id, batch),
+        RecommendationCommand.removeWine(userId, id, batch),
+        JournalCommand.removeWine(userId, id, batch),
+      ])
+      return undefined
+    })
 }

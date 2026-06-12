@@ -1,3 +1,4 @@
+import type { WriteBatch } from 'firebase-admin/firestore'
 import type { UserId } from '~/domain/shared/types'
 import * as repository from '~/domain/wine/infrastructure/repository'
 import { randomWineId } from '~/domain/wine/primitives'
@@ -36,10 +37,10 @@ export namespace WineCommand {
     })
   }
 
-  export const remove = async (userId: UserId, id: WineId) => {
+  export const remove = async (userId: UserId, id: WineId, batch?: WriteBatch) => {
     const existing = await repository.findBy(userId, id)
     if (!existing) return 'not-found' as const
-    await repository.remove(id)
+    await repository.remove(id, batch)
     return undefined
   }
 }
