@@ -1,6 +1,7 @@
 node_modules
 dist
 .data
+.data-test
 .nitro
 .cache
 .output
@@ -9,6 +10,9 @@ dist
 .derivedData
 data
 output
+
+# Terraform backup files (can appear at any nesting level)
+*.tfstate.backup
 
 # iOS / Xcode
 .DS_Store
@@ -36,8 +40,6 @@ ios/shared/
 
 # Claude Code
 .claude/
-/ios/Vinarium/Shared/Secrets.swift
-/ios/VinariumUITests/Support/TestSecrets.swift
 
 # Terraform auto-installed binary (pinned version, managed by scripts/install-terraform.sh)
 infra/.bin/
