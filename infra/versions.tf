@@ -4,11 +4,11 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = "~> 6.0"
+      version = "~> 7.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "~> 6.0"
+      version = "~> 7.0"
     }
     archive = {
       source  = "hashicorp/archive"
@@ -24,7 +24,7 @@ terraform {
     }
     time = {
       source  = "hashicorp/time"
-      version = "~> 0.13"
+      version = "~> 0.14"
     }
   }
 }
