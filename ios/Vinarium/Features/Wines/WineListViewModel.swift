@@ -41,6 +41,14 @@ enum WineListMode: String, CaseIterable, Identifiable {
         case .recommended: "Vins recommandés par vos proches"
         }
     }
+
+    /// Le Picker Statut n'a de sens que sur les modes non déjà filtrés par statut.
+    var supportsStatusFilter: Bool {
+        switch self {
+        case .all, .favorites, .shortlist: true
+        case .gifted, .recommended: false
+        }
+    }
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
@@ -96,122 +104,139 @@ private let wineMonthYearFormatter: DateFormatter = {
 
 @MainActor @Observable
 final class WineListViewModel {
-    var wines: [Wine] = []
-    var isLoading = false
+    /// Données brutes du serveur — remplies uniquement par `load()`.
+    private(set) var allWines: [Wine] = []
+    /// Démarre à true pour éviter un flash « Aucun vin » avant le premier load().
+    var isLoading = true
     var hasWines = false
-    private(set) var loadedFilterKey: String?
     var error: String?
-    var sort: WineSort = .updatedAt
-    var sortDescending = true
-    var statusFilter: WineStatusFilter = .all
-    var mode: WineListMode = .all
+    var sort: WineSort = .updatedAt { didSet { rebuildPresentation() } }
+    var sortDescending = true { didSet { rebuildPresentation() } }
+    var statusFilter: WineStatusFilter = .all { didSet { rebuildPresentation() } }
+    var colorFilter: WineColor? { didSet { rebuildPresentation() } }
+    var mode: WineListMode = .all { didSet { rebuildPresentation() } }
 
-    // Cached result — recomputed off the main thread after each load()
     private(set) var groupedWines: [(String, [Wine])] = []
 
-    var isDataStale: Bool { filterKey != loadedFilterKey }
-
-    var filterKey: String {
-        "\(mode.rawValue)-\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)"
-    }
-
+    /// Seul point de contact réseau : appelé à l'apparition, au pull-to-refresh
+    /// et après mutation. Les filtres/tris recalculent en mémoire.
     func load() async {
         isLoading = true
         error = nil
         do {
-            let status: String? = switch mode {
-            case .gifted: "gifted"
-            case .recommended: "recommended"
-            case .all, .favorites, .shortlist:
-                statusFilter == .all ? nil : statusFilter.rawValue
-            }
-            let apiSort = sort == .contact ? "updatedAt" : sort.rawValue
-            wines = try await WineAPI.list(
-                sort: apiSort,
-                order: sortDescending ? "desc" : "asc",
-                status: status
-            )
-            if !wines.isEmpty { hasWines = true }
-            // Capture value types before leaving the actor
-            let snapshot = GroupingInputs(
-                wines: wines, mode: mode, sort: sort, sortDescending: sortDescending
-            )
-            groupedWines = await Task.detached {
-                Self.buildGroupedWines(snapshot)
-            }.value
+            allWines = try await WineAPI.list()
+            if !allWines.isEmpty { hasWines = true }
         } catch {
             self.error = reportError(error)
         }
-        loadedFilterKey = filterKey
+        rebuildPresentation()
         isLoading = false
     }
 
-    // MARK: - Background grouping
+    // MARK: - Presentation pipeline: mode → statut → couleur → tri → groupage
 
-    private struct GroupingInputs: Sendable {
-        let wines: [Wine]
-        let mode: WineListMode
-        let sort: WineSort
-        let sortDescending: Bool
+    private func rebuildPresentation() {
+        groupedWines = Self.buildGroupedWines(
+            wines: filteredWines(),
+            sort: sort,
+            sortDescending: sortDescending
+        )
     }
 
-    nonisolated private static func buildGroupedWines(_ inputs: GroupingInputs) -> [(String, [Wine])] {
-        let displayed: [Wine] = switch inputs.mode {
-        case .all, .gifted, .recommended: inputs.wines
-        case .favorites: inputs.wines.filter { $0.rating == 5 }
-        case .shortlist: inputs.wines.filter { $0.shortlist == true && $0.rating != 5 }
+    private func filteredWines() -> [Wine] {
+        var wines: [Wine] = switch mode {
+        case .all: allWines
+        case .favorites: allWines.filter { $0.rating == 5 }
+        case .shortlist: allWines.filter { $0.shortlist == true && $0.rating != 5 }
+        case .gifted: allWines.filter(\.isGifted)
+        case .recommended: allWines.filter(\.isRecommended)
+        }
+        if mode.supportsStatusFilter {
+            switch statusFilter {
+            case .all: break
+            case .inCellar: wines = wines.filter(\.isInCellar)
+            case .consumed: wines = wines.filter { $0.consumedDate != nil }
+            }
+        }
+        if let colorFilter {
+            wines = wines.filter { $0.color == colorFilter }
+        }
+        return wines
+    }
+
+    private static func buildGroupedWines(
+        wines: [Wine],
+        sort: WineSort,
+        sortDescending: Bool
+    ) -> [(String, [Wine])] {
+        if sort == .contact {
+            return buildContactGroupedWines(displayed: wines, sortDescending: sortDescending)
         }
 
-        if inputs.sort == .contact {
-            return buildContactGroupedWines(displayed: displayed, sortDescending: inputs.sortDescending)
+        // Pre-sort so items inside each group follow the sort order too —
+        // Dictionary(grouping:) preserves element order within groups.
+        let sorted = wines.sorted {
+            sortDescending ? sortValue($0, by: sort) > sortValue($1, by: sort)
+                : sortValue($0, by: sort) < sortValue($1, by: sort)
         }
 
-        let keyed = displayed.map { wine -> (sortKey: Int, label: String, wine: Wine) in
-            switch inputs.sort {
+        let keyed = sorted.map { wine -> (sortKey: Double, label: String, wine: Wine) in
+            switch sort {
             case .updatedAt:
-                let date = wine.updatedAt
                 let calendar = Calendar.current
-                let year = calendar.component(.year, from: date)
-                let month = calendar.component(.month, from: date)
-                let raw = wineMonthYearFormatter.string(from: date)
+                let year = calendar.component(.year, from: wine.updatedAt)
+                let month = calendar.component(.month, from: wine.updatedAt)
+                let raw = wineMonthYearFormatter.string(from: wine.updatedAt)
                 let label = raw.prefix(1).uppercased() + raw.dropFirst()
-                return (year * 100 + month, label, wine)
+                return (Double(year * 100 + month), label, wine)
             case .vintage:
                 let label = wine.vintage.map { "\($0)" } ?? "Sans millésime"
-                return (wine.vintage ?? 0, label, wine)
+                return (Double(wine.vintage ?? 0), label, wine)
             case .region:
-                let label = wine.region ?? "Sans région"
-                return (0, label, wine)
+                return (0, wine.region ?? "Sans région", wine)
             case .color:
-                return (0, wine.color.label, wine)
+                let order = WineColor.allCases.firstIndex(of: wine.color) ?? 0
+                return (Double(order), wine.color.label, wine)
             case .price:
                 let (order, label) = priceRange(wine.purchasePrice)
-                return (order, label, wine)
+                return (Double(order), label, wine)
             case .contact:
                 return (0, "", wine) // unreachable: handled by early return above
             }
         }
 
         let grouped = Dictionary(grouping: keyed, by: \.label)
-        let sorted: [(String, [Wine])]
-        if inputs.sort == .region || inputs.sort == .color {
-            let result = grouped.sorted { first, second in
-                inputs.sortDescending ? first.key > second.key : first.key < second.key
+        let result: [(key: String, value: [(sortKey: Double, label: String, wine: Wine)])]
+        if sort == .region {
+            // Region groups have no numeric key — order them alphabetically (French-aware)
+            result = grouped.sorted { first, second in
+                let ascending = first.key.localizedCompare(second.key) == .orderedAscending
+                return sortDescending ? !ascending : ascending
             }
-            sorted = result.map { ($0.key, $0.value.map(\.wine)) }
         } else {
             let representative = grouped.mapValues { entries in entries.first!.sortKey }
-            let result = grouped.sorted { first, second in
+            result = grouped.sorted { first, second in
                 let a = representative[first.key]!
                 let b = representative[second.key]!
-                return inputs.sortDescending ? a > b : a < b
+                return sortDescending ? a > b : a < b
             }
-            sorted = result.map { ($0.key, $0.value.map(\.wine)) }
         }
-        return sorted
+        return result.map { ($0.key, $0.value.map(\.wine)) }
     }
 
-    nonisolated private static func buildContactGroupedWines(
+    /// Per-wine comparable for intra-group ordering, aligned with the group keys.
+    private static func sortValue(_ wine: Wine, by sort: WineSort) -> Double {
+        switch sort {
+        case .updatedAt: wine.updatedAt.timeIntervalSince1970
+        case .vintage: Double(wine.vintage ?? 0)
+        case .region: 0 // groups carry the ordering; keep server order inside
+        case .color: Double(WineColor.allCases.firstIndex(of: wine.color) ?? 0)
+        case .price: wine.purchasePrice ?? 0
+        case .contact: 0
+        }
+    }
+
+    private static func buildContactGroupedWines(
         displayed: [Wine], sortDescending: Bool
     ) -> [(String, [Wine])] {
         var groups: [String: [Wine]] = [:]
@@ -227,7 +252,8 @@ final class WineListViewModel {
             }
         }
         var result = groups.sorted { first, second in
-            sortDescending ? first.key > second.key : first.key < second.key
+            let ascending = first.key.localizedCompare(second.key) == .orderedAscending
+            return sortDescending ? !ascending : ascending
         }
         if !noContact.isEmpty {
             result.append(("Sans contact", noContact))
@@ -235,7 +261,7 @@ final class WineListViewModel {
         return result
     }
 
-    nonisolated private static func priceRange(_ price: Double?) -> (order: Int, label: String) {
+    private static func priceRange(_ price: Double?) -> (order: Int, label: String) {
         guard let price else { return (999, "Sans prix") }
         switch price {
         case ..<10: return (0, "0-10 €")

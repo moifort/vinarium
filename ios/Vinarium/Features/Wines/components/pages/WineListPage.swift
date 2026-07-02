@@ -5,7 +5,7 @@ struct WineListPage: View {
     @Binding var sort: WineSort
     @Binding var sortDescending: Bool
     @Binding var statusFilter: WineStatusFilter
-    let isLoading: Bool
+    @Binding var colorFilter: WineColor?
     let groups: [WineListContent.Group]
     var onWineTapped: (String) -> Void
     var onRefresh: () async -> Void
@@ -13,7 +13,6 @@ struct WineListPage: View {
     var body: some View {
         WineListContent(
             mode: mode,
-            isLoading: isLoading,
             groups: groups,
             onWineTapped: onWineTapped
         )
@@ -43,15 +42,30 @@ struct WineListPage: View {
                     }
                     Toggle(sortDescending ? "Décroissant" : "Croissant", isOn: $sortDescending)
 
+                    if mode.supportsStatusFilter {
+                        Divider()
+
+                        Picker("Statut", selection: $statusFilter) {
+                            ForEach(WineStatusFilter.allCases) { filter in
+                                Label(filter.label, systemImage: filter.icon).tag(filter)
+                            }
+                        }
+                    }
+
                     Divider()
 
-                    Picker("Statut", selection: $statusFilter) {
-                        ForEach(WineStatusFilter.allCases) { filter in
-                            Label(filter.label, systemImage: filter.icon).tag(filter)
+                    Picker("Couleur", selection: $colorFilter) {
+                        Label("Toutes", systemImage: "circle.dashed").tag(WineColor?.none)
+                        ForEach(WineColor.allCases) { color in
+                            Label(color.label, systemImage: "circle.fill").tag(WineColor?.some(color))
                         }
                     }
                 } label: {
                     Image(systemName: "line.3.horizontal.decrease")
+                        .symbolVariant(
+                            colorFilter != nil || (mode.supportsStatusFilter && statusFilter != .all)
+                                ? .fill : .none
+                        )
                 }
                 .accessibilityIdentifier("winelist-sort-menu")
             }
@@ -64,13 +78,14 @@ struct WineListPage: View {
     @Previewable @State var sort: WineSort = .updatedAt
     @Previewable @State var sortDesc = true
     @Previewable @State var filter: WineStatusFilter = .all
+    @Previewable @State var color: WineColor?
     NavigationStack {
         WineListPage(
             mode: $mode,
             sort: $sort,
             sortDescending: $sortDesc,
             statusFilter: $filter,
-            isLoading: false,
+            colorFilter: $color,
             groups: [
                 .init(label: "Mars 2026", items: [
                     .init(id: "1", color: .red, name: "Château Margaux", subtitle: "2018 • Bordeaux", rating: 5, isFavorite: true, isShortlist: false),
@@ -88,13 +103,14 @@ struct WineListPage: View {
     @Previewable @State var sort: WineSort = .updatedAt
     @Previewable @State var sortDesc = true
     @Previewable @State var filter: WineStatusFilter = .all
+    @Previewable @State var color: WineColor?
     NavigationStack {
         WineListPage(
             mode: $mode,
             sort: $sort,
             sortDescending: $sortDesc,
             statusFilter: $filter,
-            isLoading: false,
+            colorFilter: $color,
             groups: [],
             onWineTapped: { _ in },
             onRefresh: {}
