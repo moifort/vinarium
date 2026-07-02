@@ -6,6 +6,8 @@ import type {
   WriteBatch,
 } from 'firebase-admin/firestore'
 import { chunk } from 'lodash-es'
+import type { UserId } from '~/domain/shared/types'
+import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
 
 // Generic Firestore converter that preserves type information when reading
@@ -38,6 +40,40 @@ export const deleteInBatches = async (refs: DocumentReference[]): Promise<void> 
     const batch = db().batch()
     for (const ref of slice) batch.delete(ref)
     await batch.commit()
+  }
+}
+
+// Repository for collections holding one record per (user, wine) pair, stored
+// under the deterministic doc id `${userId}_${wineId}` — the shared shape of
+// the tasting/gift/recommendation satellite collections.
+export const userWineRecordRepository = <T extends { userId: UserId; wineId: WineId }>(
+  collectionName: string,
+) => {
+  const records = () => db().collection(collectionName).withConverter(genericDataConverter<T>())
+  const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
+
+  return {
+    findAllByUser: async (userId: UserId): Promise<T[]> => {
+      const snap = await records().where('userId', '==', userId).get()
+      return snap.docs.map((doc) => doc.data())
+    },
+    findBy: async (userId: UserId, wineId: WineId): Promise<T | null> => {
+      const doc = await records().doc(docId(userId, wineId)).get()
+      return doc.data() ?? null
+    },
+    save: async (record: T): Promise<T> => {
+      await records().doc(docId(record.userId, record.wineId)).set(record)
+      return record
+    },
+    remove: async (userId: UserId, wineId: WineId, batch?: WriteBatch): Promise<void> => {
+      const ref = records().doc(docId(userId, wineId))
+      if (batch) batch.delete(ref)
+      else await ref.delete()
+    },
+    removeAllByUser: async (userId: UserId): Promise<void> => {
+      const snap = await records().where('userId', '==', userId).get()
+      await deleteInBatches(snap.docs.map((doc) => doc.ref))
+    },
   }
 }
 
