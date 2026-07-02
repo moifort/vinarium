@@ -2,26 +2,12 @@ import Apollo
 import Foundation
 
 enum WineAPI {
-    static func list(
-        color: WineColor? = nil,
-        sort: String? = nil,
-        order: String? = nil,
-        status: String? = nil
-    ) async throws -> [Wine] {
+    static func list() async throws -> [Wine] {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.WineListQuery()
         )
-        var wines = data.wines.map(mapWine)
-
-        if let color {
-            wines = wines.filter { $0.color == color }
-        }
-        if let status {
-            wines = filter(wines: wines, status: status, list: data.wines)
-        }
-        wines = sortClientSide(wines: wines, field: sort, order: order)
-        return wines
+        return data.wines.map(mapWine)
     }
 
     static func getDetail(id: String) async throws -> UserWineDetail {
@@ -43,7 +29,7 @@ enum WineAPI {
         return Wine(
             id: created.id,
             name: created.name,
-            color: mapColor(created.color),
+            color: WineColor(graphql: created.color),
             vintage: created.vintage,
             createdAt: GraphQLHelpers.parseISO8601(created.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(created.updatedAt) ?? Date()
@@ -60,7 +46,7 @@ enum WineAPI {
         return Wine(
             id: updated.id,
             name: updated.name,
-            color: mapColor(updated.color),
+            color: WineColor(graphql: updated.color),
             vintage: updated.vintage,
             createdAt: Date(),
             updatedAt: GraphQLHelpers.parseISO8601(updated.updatedAt) ?? Date()
@@ -88,7 +74,7 @@ enum WineAPI {
             appellation: s.appellation,
             region: s.region,
             country: s.country,
-            color: mapColor(s.color),
+            color: WineColor(graphql: s.color),
             grapeVarieties: s.grapeVarieties ?? [],
             alcoholContent: nil,
             classification: s.classification,
@@ -127,21 +113,6 @@ enum WineAPI {
 
 // MARK: - Mapping helpers
 
-private func mapColor(_ graphql: GraphQLEnum<VinariumGraphQL.WineColor>) -> WineColor {
-    switch graphql {
-    case .case(let value):
-        switch value {
-        case .red: return .red
-        case .white: return .white
-        case .rose: return .rosé
-        case .sparkling: return .sparkling
-        case .sweet: return .sweet
-        }
-    case .unknown:
-        return .red
-    }
-}
-
 private func graphQLColor(_ color: WineColor) -> GraphQLEnum<VinariumGraphQL.WineColor> {
     switch color {
     case .red: return .case(.red)
@@ -156,7 +127,7 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
     Wine(
         id: w.id,
         name: w.name,
-        color: mapColor(w.color),
+        color: WineColor(graphql: w.color),
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
@@ -179,6 +150,10 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
         latitude: w.latitude,
         longitude: w.longitude,
         placeName: w.placeName,
+        isInCellar: w.cellar != nil,
+        consumedDate: w.consumption?.consumedDate.flatMap { GraphQLHelpers.parseISO8601($0) },
+        isGifted: w.gift != nil,
+        isRecommended: w.recommendation != nil,
         createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
         updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date()
     )
@@ -188,7 +163,7 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
     UserWineDetail(
         id: w.id,
         name: w.name,
-        color: mapColor(w.color),
+        color: WineColor(graphql: w.color),
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
@@ -284,53 +259,4 @@ private func updateWineInput(from r: UpdateWineRequest) -> VinariumGraphQL.Updat
         region: GraphQLHelpers.graphQLNullable(r.region),
         vintage: GraphQLHelpers.graphQLNullable(r.vintage)
     )
-}
-
-// MARK: - Client-side status filtering + sorting
-// The server WineList query has no filter/sort args, so we emulate the old REST
-// behavior client-side. If the list ever grows huge we'll push this back to the
-// server with query variables; for now it keeps the ViewModels unchanged.
-
-private func filter(
-    wines: [Wine],
-    status: String,
-    list: [VinariumGraphQL.WineListQuery.Data.Wine]
-) -> [Wine] {
-    let indexed = Dictionary(uniqueKeysWithValues: list.map { ($0.id, $0) })
-    return wines.filter { wine in
-        guard let graph = indexed[wine.id] else { return true }
-        switch status {
-        case "in-cellar":
-            return graph.cellar != nil
-        case "consumed":
-            return graph.consumption?.consumedDate != nil
-        case "gifted":
-            return graph.gift != nil
-        case "recommended":
-            return graph.recommendation != nil
-        default:
-            return true
-        }
-    }
-}
-
-private func sortClientSide(wines: [Wine], field: String?, order: String?) -> [Wine] {
-    guard let field else { return wines }
-    let descending = order != "asc"
-    let sorted: [Wine]
-    switch field {
-    case "vintage":
-        sorted = wines.sorted { ($0.vintage ?? 0) < ($1.vintage ?? 0) }
-    case "region":
-        sorted = wines.sorted { ($0.region ?? "") < ($1.region ?? "") }
-    case "color":
-        sorted = wines.sorted { $0.color.rawValue < $1.color.rawValue }
-    case "price":
-        sorted = wines.sorted { ($0.purchasePrice ?? 0) < ($1.purchasePrice ?? 0) }
-    case "createdAt":
-        sorted = wines.sorted { $0.createdAt < $1.createdAt }
-    default:
-        sorted = wines.sorted { $0.updatedAt < $1.updatedAt }
-    }
-    return descending ? sorted.reversed() : sorted
 }

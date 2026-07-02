@@ -1,6 +1,7 @@
 import { GraphQLError } from 'graphql'
 import { builder } from '~/domain/shared/graphql/builder'
 import { Scan } from '~/system/scan'
+import { imageWithinSizeLimit } from '~/system/scan/limits'
 import { ScanResultType } from './types'
 
 builder.mutationField('scanWine', (t) =>
@@ -15,6 +16,11 @@ builder.mutationField('scanWine', (t) =>
       }),
     },
     resolve: async (_root, { imageBase64 }) => {
+      if (!imageWithinSizeLimit(imageBase64.length)) {
+        throw new GraphQLError('Image exceeds the 10 MB size limit', {
+          extensions: { code: 'IMAGE_TOO_LARGE' },
+        })
+      }
       try {
         const buffer = Buffer.from(imageBase64, 'base64')
         return await Scan.scanWithCache(buffer)

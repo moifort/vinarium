@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
         body: undefined,
         search: search.toString(),
       },
-      context: async () => ({ event, loaders: createLoaders(), userId }),
+      context: async () => ({ event, loaders: createLoaders(userId), userId }),
     })
     return sendApolloResponse(event, response)
   }
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
 
   const response = await apollo.executeHTTPGraphQLRequest({
     httpGraphQLRequest: { method: 'POST', headers: headerMap, body, search: '' },
-    context: async () => ({ event, loaders: createLoaders(), userId }),
+    context: async () => ({ event, loaders: createLoaders(userId), userId }),
   })
   return sendApolloResponse(event, response)
 })

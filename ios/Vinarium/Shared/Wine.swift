@@ -72,6 +72,13 @@ struct Wine: Codable, Identifiable, Sendable {
     var latitude: Double? = nil
     var longitude: Double? = nil
     var placeName: String? = nil
+    // Status flags derived from the nested GraphQL fields — power the in-memory
+    // list filters. Explicit booleans because recipient/recommender names are
+    // optional: a gift without a name is still a gift.
+    var isInCellar: Bool = false
+    var consumedDate: Date? = nil
+    var isGifted: Bool = false
+    var isRecommended: Bool = false
     let createdAt: Date
     let updatedAt: Date
 }
@@ -122,9 +129,4 @@ struct UpdateWineRequest: Encodable, Sendable {
     var latitude: Double?
     var longitude: Double?
     var placeName: String?
-}
-
-struct APIResponse<T: Decodable & Sendable>: Decodable, Sendable {
-    let status: Int
-    let data: T
 }

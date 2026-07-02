@@ -1,8 +1,11 @@
 import { createHash } from 'node:crypto'
 import { config } from '~/system/config/index'
-import { ImageHash } from '~/system/scan/primitives'
+import { createLogger } from '~/system/logger'
+import { EnrichSchema, ImageHash, parseScanResponse } from '~/system/scan/primitives'
 import * as repository from '~/system/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
+
+const log = createLogger('scan')
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
@@ -14,7 +17,9 @@ export namespace Scan {
     if (cached) return cached.result
     const scanResult = await scanLabel(imageBuffer)
     const enriched = await enrichWithSearch(scanResult)
-    repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
+    repository
+      .save({ imageHash, result: enriched, cachedAt: new Date() })
+      .catch((err) => log.warn('Failed to write scan result to cache', err))
     return enriched
   }
 
@@ -116,7 +121,7 @@ export namespace Scan {
     const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
     if (!text) throw new Error('Gemini did not return structured wine data')
 
-    return JSON.parse(text) as ScanResult
+    return parseScanResponse(text)
   }
 
   const enrichWithSearch = async (scanResult: ScanResult) => {
@@ -167,7 +172,7 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/)
       if (!jsonMatch) return scanResult
-      const enriched = JSON.parse(jsonMatch[0])
+      const enriched = EnrichSchema.parse(JSON.parse(jsonMatch[0]))
 
       return {
         ...scanResult,
@@ -175,7 +180,9 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
         drinkFrom: enriched.drinkFrom ?? scanResult.drinkFrom,
         drinkUntil: enriched.drinkUntil ?? scanResult.drinkUntil,
         grapeVarieties:
-          enriched.grapeVarieties?.length > 0 ? enriched.grapeVarieties : scanResult.grapeVarieties,
+          enriched.grapeVarieties && enriched.grapeVarieties.length > 0
+            ? enriched.grapeVarieties
+            : scanResult.grapeVarieties,
         region: enriched.region ?? scanResult.region,
         country: enriched.country ?? scanResult.country,
         classification: enriched.classification ?? scanResult.classification,

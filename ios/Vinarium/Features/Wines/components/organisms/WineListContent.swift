@@ -2,15 +2,11 @@ import SwiftUI
 
 struct WineListContent: View {
     let mode: WineListMode
-    let isLoading: Bool
     let groups: [Group]
     var onWineTapped: (String) -> Void
 
     var body: some View {
-        if isLoading {
-            ProgressView()
-                .frame(maxHeight: .infinity)
-        } else if groups.allSatisfy({ $0.items.isEmpty }) {
+        if groups.allSatisfy({ $0.items.isEmpty }) {
             emptyState
         } else {
             List {
@@ -83,8 +79,6 @@ extension WineListContent {
 #Preview("Avec vins") {
     WineListContent(
         mode: .all,
-
-        isLoading: false,
         groups: [
             .init(label: "2018", items: [
                 .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isShortlist: false),
@@ -101,8 +95,6 @@ extension WineListContent {
 #Preview("Vide - All") {
     WineListContent(
         mode: .all,
-
-        isLoading: false,
         groups: [],
         onWineTapped: { _ in }
     )
@@ -111,8 +103,6 @@ extension WineListContent {
 #Preview("Vide - Favoris") {
     WineListContent(
         mode: .favorites,
-
-        isLoading: false,
         groups: [],
         onWineTapped: { _ in }
     )
@@ -121,8 +111,6 @@ extension WineListContent {
 #Preview("Vide - Offerts") {
     WineListContent(
         mode: .gifted,
-
-        isLoading: false,
         groups: [],
         onWineTapped: { _ in }
     )
@@ -131,8 +119,6 @@ extension WineListContent {
 #Preview("Vide - Recommended") {
     WineListContent(
         mode: .recommended,
-
-        isLoading: false,
         groups: [],
         onWineTapped: { _ in }
     )

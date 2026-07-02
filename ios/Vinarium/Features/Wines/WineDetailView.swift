@@ -22,6 +22,8 @@ struct WineDetailView: View {
     @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var showLocationEditor = false
+    @State private var sheetError = ErrorPresenter()
+    @State private var actionError = ErrorPresenter()
 
     var body: some View {
         NavigationStack {
@@ -63,6 +65,7 @@ struct WineDetailView: View {
                     readToolbar
                 }
             }
+            .errorAlert(actionError)
             .task {
                 await loadData()
                 SentrySDK.reportFullyDisplayed()
@@ -71,34 +74,42 @@ struct WineDetailView: View {
                 if let detail {
                     ConsumptionSheet { date, rating, notes, contacts in
                         let formatter = ISO8601DateFormatter()
-                        _ = try? await CellarAPI.remove(
-                            wineId: detail.id,
-                            consumedDate: formatter.string(from: date),
-                            rating: rating,
-                            tastingNotes: notes,
-                            contacts: contacts.isEmpty ? nil : contacts
-                        )
-                        showConsumption = false
-                        dismiss()
-                        onRemoved?()
+                        await sheetError.run {
+                            _ = try await CellarAPI.remove(
+                                wineId: detail.id,
+                                consumedDate: formatter.string(from: date),
+                                rating: rating,
+                                tastingNotes: notes,
+                                contacts: contacts.isEmpty ? nil : contacts
+                            )
+                        } onSuccess: {
+                            showConsumption = false
+                            dismiss()
+                            onRemoved?()
+                        }
                     }
                     .presentationDetents([.height(550)])
+                    .errorAlert(sheetError)
                 }
             }
             .sheet(isPresented: $showGift) {
                 if let detail {
                     GiftSheet { date, recipientName in
                         let formatter = ISO8601DateFormatter()
-                        _ = try? await CellarAPI.gift(
-                            wineId: detail.id,
-                            giftedDate: formatter.string(from: date),
-                            recipientName: recipientName
-                        )
-                        showGift = false
-                        dismiss()
-                        onRemoved?()
+                        await sheetError.run {
+                            _ = try await CellarAPI.gift(
+                                wineId: detail.id,
+                                giftedDate: formatter.string(from: date),
+                                recipientName: recipientName
+                            )
+                        } onSuccess: {
+                            showGift = false
+                            dismiss()
+                            onRemoved?()
+                        }
                     }
                     .presentationDetents([.height(250)])
+                    .errorAlert(sheetError)
                 }
             }
             .sheet(isPresented: $showPlacement) {
@@ -141,50 +152,62 @@ struct WineDetailView: View {
                 if let detail {
                     ShortlistSheet { date, contacts, notes, rating in
                         let formatter = ISO8601DateFormatter()
-                        try? await WineAPI.addToShortlist(
-                            id: detail.id,
-                            consumedDate: formatter.string(from: date),
-                            rating: rating,
-                            contacts: contacts.isEmpty ? nil : contacts,
-                            tastingNotes: notes
-                        )
-                        showShortlist = false
-                        Task {
-                            await loadData()
-                            onUpdated?()
+                        await sheetError.run {
+                            try await WineAPI.addToShortlist(
+                                id: detail.id,
+                                consumedDate: formatter.string(from: date),
+                                rating: rating,
+                                contacts: contacts.isEmpty ? nil : contacts,
+                                tastingNotes: notes
+                            )
+                        } onSuccess: {
+                            showShortlist = false
+                            Task {
+                                await loadData()
+                                onUpdated?()
+                            }
                         }
                     }
                     .presentationDetents([.medium])
+                    .errorAlert(sheetError)
                 }
             }
             .sheet(isPresented: $showFavorite) {
                 if let detail {
                     FavoriteSheet { _, _, _ in
-                        try? await WineAPI.addToFavorites(id: detail.id)
-                        showFavorite = false
-                        Task {
-                            await loadData()
-                            onUpdated?()
+                        await sheetError.run {
+                            try await WineAPI.addToFavorites(id: detail.id)
+                        } onSuccess: {
+                            showFavorite = false
+                            Task {
+                                await loadData()
+                                onUpdated?()
+                            }
                         }
                     }
                     .presentationDetents([.medium])
+                    .errorAlert(sheetError)
                 }
             }
             .sheet(isPresented: $showRecommendation) {
                 if let detail {
                     RecommendationSheet { recommenderName, comment in
-                        try? await RecommendationAPI.create(
-                            wineId: detail.id,
-                            recommenderName: recommenderName,
-                            comment: comment
-                        )
-                        showRecommendation = false
-                        Task {
-                            await loadData()
-                            onUpdated?()
+                        await sheetError.run {
+                            try await RecommendationAPI.create(
+                                wineId: detail.id,
+                                recommenderName: recommenderName,
+                                comment: comment
+                            )
+                        } onSuccess: {
+                            showRecommendation = false
+                            Task {
+                                await loadData()
+                                onUpdated?()
+                            }
                         }
                     }
                     .presentationDetents([.medium])
+                    .errorAlert(sheetError)
                 }
             }
             .sheet(isPresented: $showLocationEditor) {
@@ -195,13 +218,17 @@ struct WineDetailView: View {
                             longitude: draft?.longitude,
                             placeName: draft?.placeName
                         )
-                        _ = try? await WineAPI.update(id: detail.id, request)
-                        showLocationEditor = false
-                        Task {
-                            await loadData()
-                            onUpdated?()
+                        await sheetError.run {
+                            _ = try await WineAPI.update(id: detail.id, request)
+                        } onSuccess: {
+                            showLocationEditor = false
+                            Task {
+                                await loadData()
+                                onUpdated?()
+                            }
                         }
                     }
+                    .errorAlert(sheetError)
                 }
             }
         }
@@ -248,9 +275,12 @@ struct WineDetailView: View {
                 }
 
                 AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {
-                    try? await WineAPI.addToFavorites(id: detail.id)
-                    dismiss()
-                    onRemoved?()
+                    await actionError.run {
+                        try await WineAPI.addToFavorites(id: detail.id)
+                    } onSuccess: {
+                        dismiss()
+                        onRemoved?()
+                    }
                 }
 
                 Button {
@@ -322,9 +352,12 @@ struct WineDetailView: View {
                 ) { detail in
                     Button("Supprimer", role: .destructive) {
                         Task {
-                            try? await WineAPI.delete(id: detail.id)
-                            dismiss()
-                            onRemoved?()
+                            await actionError.run {
+                                try await WineAPI.delete(id: detail.id)
+                            } onSuccess: {
+                                dismiss()
+                                onRemoved?()
+                            }
                         }
                     }
                     .accessibilityIdentifier("choice-delete")

@@ -13,7 +13,7 @@ enum CellarAPI {
                 wine: Wine(
                     id: b.wine.id,
                     name: b.wine.name,
-                    color: mapCellarColor(b.wine.color),
+                    color: WineColor(graphql: b.wine.color),
                     domain: b.wine.domain,
                     vintage: b.wine.vintage,
                     appellation: b.wine.appellation,
@@ -44,13 +44,13 @@ enum CellarAPI {
                 date: GraphQLHelpers.parseISO8601(e.date) ?? Date(),
                 wineId: e.wineId,
                 wineName: e.wineName,
-                wineColor: WineColor(rawValue: e.wineColor.lowercased()) ?? .red,
+                wineColor: WineColor(journalString: e.wineColor),
                 position: e.position
             )
         }
     }
 
-    static func suggest(wineId: String) async throws -> CellarSuggestion {
+    static func suggest() async throws -> CellarSuggestion {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.SuggestCellarPositionQuery()
@@ -117,21 +117,6 @@ private func rowIndexFromLabel(_ label: String) -> Int {
     // Server mirrors rowLabel = String.fromCharCode(65 + row), so "A" -> 0, "B" -> 1, ...
     guard let scalar = label.unicodeScalars.first else { return 0 }
     return Int(scalar.value) - 65
-}
-
-private func mapCellarColor(_ graphql: GraphQLEnum<VinariumGraphQL.WineColor>) -> WineColor {
-    switch graphql {
-    case .case(let value):
-        switch value {
-        case .red: return .red
-        case .white: return .white
-        case .rose: return .rosé
-        case .sparkling: return .sparkling
-        case .sweet: return .sweet
-        }
-    case .unknown:
-        return .red
-    }
 }
 
 private func mapEventType(_ graphql: GraphQLEnum<VinariumGraphQL.JournalEventType>) -> HistoryEventType {

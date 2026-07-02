@@ -15,7 +15,7 @@ enum DashboardAPI {
                 DashboardWine(
                     id: $0.id,
                     name: $0.name,
-                    color: mapDashboardColor($0.color),
+                    color: WineColor(graphql: $0.color),
                     position: $0.position,
                     urgent: $0.urgent,
                     drinkUntil: $0.drinkUntil
@@ -25,7 +25,7 @@ enum DashboardAPI {
                 DashboardFavorite(
                     id: $0.id,
                     name: $0.name,
-                    color: mapDashboardColor($0.color),
+                    color: WineColor(graphql: $0.color),
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) }
@@ -35,7 +35,7 @@ enum DashboardAPI {
                 DashboardShortlistEntry(
                     id: $0.id,
                     name: $0.name,
-                    color: mapDashboardColor($0.color),
+                    color: WineColor(graphql: $0.color),
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) },
@@ -47,7 +47,7 @@ enum DashboardAPI {
                     wine: DashboardEntryWine(
                         id: $0.wine.id,
                         name: $0.wine.name,
-                        color: mapDashboardColor($0.wine.color),
+                        color: WineColor(graphql: $0.wine.color),
                         vintage: $0.wine.vintage
                     ),
                     position: $0.position,
@@ -61,28 +61,13 @@ enum DashboardAPI {
     }
 }
 
-private func mapDashboardColor(_ graphql: GraphQLEnum<VinariumGraphQL.WineColor>) -> WineColor {
-    switch graphql {
-    case .case(let value):
-        switch value {
-        case .red: return .red
-        case .white: return .white
-        case .rose: return .rosé
-        case .sparkling: return .sparkling
-        case .sweet: return .sweet
-        }
-    case .unknown:
-        return .red
-    }
-}
-
 private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEvent {
     DashboardHistoryEvent(
         type: e.eventType,
         date: GraphQLHelpers.parseISO8601(e.dateString) ?? Date(),
         wineId: e.wineIdString,
         wineName: e.wineNameString,
-        wineColor: WineColor(rawValue: e.wineColorString.lowercased()) ?? .red,
+        wineColor: WineColor(journalString: e.wineColorString),
         position: e.positionString,
         rating: nil
     )

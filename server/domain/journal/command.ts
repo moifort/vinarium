@@ -1,16 +1,23 @@
+import type { WriteBatch } from 'firebase-admin/firestore'
 import * as repository from '~/domain/journal/infrastructure/repository'
 import type { JournalEntryIn, JournalEntryOut } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace JournalCommand {
-  export const bottleIn = (userId: UserId, entry: Omit<JournalEntryIn, 'userId'>) =>
-    repository.save({ ...entry, userId })
+  export const bottleIn = (
+    userId: UserId,
+    entry: Omit<JournalEntryIn, 'userId'>,
+    batch?: WriteBatch,
+  ) => repository.save({ ...entry, userId }, batch)
 
-  export const bottleOut = (userId: UserId, entry: Omit<JournalEntryOut, 'userId'>) =>
-    repository.save({ ...entry, userId })
+  export const bottleOut = (
+    userId: UserId,
+    entry: Omit<JournalEntryOut, 'userId'>,
+    batch?: WriteBatch,
+  ) => repository.save({ ...entry, userId }, batch)
 
-  export const removeWine = async (userId: UserId, wineId: WineId) => {
-    await repository.removeByWineId(userId, wineId)
+  export const removeWine = async (userId: UserId, wineId: WineId, batch?: WriteBatch) => {
+    await repository.removeByWineId(userId, wineId, batch)
   }
 }
