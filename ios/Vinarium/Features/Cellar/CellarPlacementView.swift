@@ -66,7 +66,7 @@ struct CellarPlacementView: View {
     private func loadData() async {
         do {
             async let bottlesData = CellarAPI.getBottles()
-            async let suggestion = CellarAPI.suggest(wineId: wineId)
+            async let suggestion = CellarAPI.suggest()
             let (b, s) = try await (bottlesData, suggestion)
             bottles = b
             suggestedRow = s.row
