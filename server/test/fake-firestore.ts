@@ -51,6 +51,7 @@ export const createFakeFirestore = () => {
   const directWrites: DirectWrite[] = []
   let commitError: Error | undefined
   let generatedIds = 0
+  let reads = 0
 
   const docsOf = (collection: string) => {
     const existing = store.get(collection)
@@ -63,7 +64,10 @@ export const createFakeFirestore = () => {
   const makeRef = (collection: string, id: string): FakeRef => ({
     collection,
     id,
-    get: async () => ({ data: () => docsOf(collection).get(id) }),
+    get: async () => {
+      reads += 1
+      return { data: () => docsOf(collection).get(id) }
+    },
     set: async (data) => {
       directWrites.push({ type: 'set', collection, id })
       docsOf(collection).set(id, data)
@@ -94,6 +98,7 @@ export const createFakeFirestore = () => {
     },
     orderBy: (field, direction = 'asc') => makeQuery(collection, filters, { field, direction }),
     get: async () => {
+      reads += 1
       const matching = [...docsOf(collection).entries()].filter(([, data]) =>
         filters.every(([field, value]) => data[field] === value),
       )
@@ -160,6 +165,10 @@ export const createFakeFirestore = () => {
     snapshot: (collection: string) => new Map(docsOf(collection)),
     batches,
     directWrites,
+    // Firestore round-trips (document gets + query gets) — lets tests assert read budgets
+    get reads() {
+      return reads
+    },
     failCommitsWith: (error: Error) => {
       commitError = error
     },
