@@ -22,11 +22,13 @@ import type {
 
 export namespace DashboardQuery {
   export const get = async (userId: UserId): Promise<DashboardView> => {
+    // Fetch the wines collection once and share it with the sub-queries
+    const winesPromise = WineQuery.findAll(userId)
     const [allBottles, history, allTastings, wines] = await Promise.all([
-      CellarQuery.getAllBottles(userId),
-      JournalQuery.getAll(userId),
+      CellarQuery.getAllBottles(userId, winesPromise),
+      JournalQuery.getAll(userId, winesPromise),
       TastingQuery.getAll(userId),
-      WineQuery.findAll(userId),
+      winesPromise,
     ])
 
     const currentYear = new Date().getFullYear()

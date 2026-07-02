@@ -1,0 +1,94 @@
+import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { UserId } from '~/domain/shared/types'
+import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
+
+mock.module('~/system/firebase', () => ({ db: fakeDb }))
+
+const { DashboardQuery } = await import('~/domain/dashboard/query')
+
+const userId = 'user-1' as UserId
+const currentYear = new Date().getFullYear()
+
+let fake = resetFakeFirestore()
+
+beforeEach(() => {
+  fake = resetFakeFirestore()
+})
+
+const seedDashboardData = () => {
+  fake.seed('wines', 'w1', {
+    id: 'w1',
+    userId,
+    name: 'Château Cave',
+    color: 'red',
+    purchasePrice: 30,
+    drinkFrom: currentYear - 1,
+    drinkUntil: currentYear + 5,
+    createdAt: new Date('2026-01-10'),
+  })
+  fake.seed('wines', 'w2', {
+    id: 'w2',
+    userId,
+    name: 'Domaine Favori',
+    color: 'white',
+    vintage: 2019,
+    createdAt: new Date('2026-01-05'),
+  })
+  fake.seed('cellar', `${userId}_w1`, {
+    userId,
+    wineId: 'w1',
+    row: 0,
+    col: 0,
+    createdAt: new Date('2026-01-10'),
+    updatedAt: new Date('2026-01-10'),
+  })
+  fake.seed('tasting', `${userId}_w2`, {
+    userId,
+    wineId: 'w2',
+    rating: 5,
+    consumedDate: new Date('2026-02-01'),
+  })
+  fake.seed('journal', 'j1', {
+    userId,
+    wineId: 'w1',
+    type: 'in',
+    row: 0,
+    col: 0,
+    date: new Date('2026-01-10'),
+  })
+  fake.seed('journal', 'j2', {
+    userId,
+    wineId: 'w2',
+    type: 'out',
+    row: 1,
+    col: 1,
+    date: new Date('2026-02-01'),
+  })
+}
+
+describe('DashboardQuery.get', () => {
+  test('assembles the dashboard view', async () => {
+    seedDashboardData()
+
+    const view = await DashboardQuery.get(userId)
+
+    expect(view.bottleCount).toBe(1)
+    expect(view.totalValue).toBe(30)
+    expect(view.readyToDrink).toMatchObject([{ id: 'w1', position: 'A1', urgent: false }])
+    expect(view.favorites).toMatchObject([{ id: 'w2', name: 'Domaine Favori' }])
+    expect(view.shortlist).toEqual([])
+    expect(view.lastBottle).toMatchObject({ wine: { id: 'w1' }, position: 'A1' })
+    expect(view.lastExit).toMatchObject({ wineId: 'w2', type: 'out' })
+    expect(view.history).toHaveLength(2)
+  })
+
+  test('reads each collection exactly once (wines is shared, not re-fetched)', async () => {
+    seedDashboardData()
+
+    const before = fake.reads
+    await DashboardQuery.get(userId)
+
+    // wines + cellar + journal + tasting = 4 collection reads, no duplicates
+    expect(fake.reads - before).toBe(4)
+  })
+})
