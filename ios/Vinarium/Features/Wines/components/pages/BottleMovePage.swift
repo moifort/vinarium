@@ -2,7 +2,8 @@ import SwiftUI
 
 struct BottleMovePage: View {
     let wineName: String
-    let wineColor: WineColor
+    var wineBeverageType: BeverageType = .wine
+    let wineColor: WineColor?
     let wineVintage: Int?
     let currentPosition: String
     let groups: [Group]
@@ -88,18 +89,18 @@ struct BottleMovePage: View {
             .disabled(isMoving)
             .accessibilityIdentifier("move-\(cell.label)")
 
-        case let .occupied(name, color):
+        case let .occupied(name, beverageType, color):
             Button {
                 pending = Pending(
                     row: cell.row, col: cell.col,
-                    occupant: Pending.Occupant(name: name, color: color)
+                    occupant: Pending.Occupant(name: name)
                 )
             } label: {
                 HStack(spacing: 12) {
                     Text(cell.label)
                         .font(.body.monospaced())
                         .fontWeight(.medium)
-                    WineColorBadge(color: color)
+                    BeverageBadge(beverageType: beverageType, color: color)
                     Text(name)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -117,7 +118,7 @@ struct BottleMovePage: View {
 
     private var wineHeader: some View {
         HStack(spacing: 12) {
-            WineColorBadge(color: wineColor)
+            BeverageBadge(beverageType: wineBeverageType, color: wineColor)
             VStack(alignment: .leading) {
                 Text(wineName)
                     .font(.headline)
@@ -153,7 +154,7 @@ extension BottleMovePage {
 
         enum State {
             case empty
-            case occupied(name: String, color: WineColor)
+            case occupied(name: String, beverageType: BeverageType, color: WineColor?)
             case current
         }
     }
@@ -168,7 +169,6 @@ extension BottleMovePage {
 
         struct Occupant {
             let name: String
-            let color: WineColor
         }
     }
 }
@@ -188,7 +188,7 @@ extension BottleMovePage {
                         return .init(row: rowLetter, col: col, label: label, state: .current)
                     }
                     if label == "B2" {
-                        return .init(row: rowLetter, col: col, label: label, state: .occupied(name: "Pouilly-Fumé", color: .white))
+                        return .init(row: rowLetter, col: col, label: label, state: .occupied(name: "Pouilly-Fumé", beverageType: .wine, color: .white))
                     }
                     return .init(row: rowLetter, col: col, label: label, state: .empty)
                 }

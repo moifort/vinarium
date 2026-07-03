@@ -48,6 +48,7 @@ final class CellarGridViewModel {
                         CellarRowItem(
                             id: $0.wine.id,
                             name: $0.wine.name,
+                            beverageType: $0.wine.beverageType,
                             color: $0.wine.color,
                             vintage: $0.wine.vintage,
                             position: $0.position

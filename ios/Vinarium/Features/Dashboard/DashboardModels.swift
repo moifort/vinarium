@@ -14,7 +14,8 @@ struct DashboardData: Codable, Sendable {
 struct DashboardFavorite: Codable, Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let vintage: Int?
     let estimatedPrice: Double?
     let tastingDate: Date?
@@ -23,7 +24,8 @@ struct DashboardFavorite: Codable, Identifiable, Sendable {
 struct DashboardShortlistEntry: Codable, Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let vintage: Int?
     let estimatedPrice: Double?
     let tastingDate: Date?
@@ -33,7 +35,8 @@ struct DashboardShortlistEntry: Codable, Identifiable, Sendable {
 struct DashboardWine: Codable, Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let position: String
     let urgent: Bool
     let drinkUntil: Int?
@@ -49,7 +52,8 @@ struct DashboardEntry: Codable, Sendable {
 struct DashboardEntryWine: Codable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let vintage: Int?
 }
 
@@ -58,7 +62,8 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let date: Date
     let wineId: String
     let wineName: String
-    let wineColor: WineColor
+    let wineBeverageType: BeverageType
+    let wineColor: WineColor?
     let position: String
     let rating: Int?
 

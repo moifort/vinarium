@@ -5,7 +5,8 @@ import SwiftUI
 struct CellarPlacementView: View {
     let wineId: String
     let wineName: String
-    let wineColor: WineColor
+    var beverageType: BeverageType = .wine
+    let wineColor: WineColor?
     let wineVintage: Int?
     var onCancel: () -> Void = {}
     let onPlaced: (String) -> Void
@@ -32,6 +33,7 @@ struct CellarPlacementView: View {
             } else {
                 CellarPlacementPage(
                     wineName: wineName,
+                    beverageType: beverageType,
                     wineColor: wineColor,
                     wineVintage: wineVintage,
                     groups: availableGroups,

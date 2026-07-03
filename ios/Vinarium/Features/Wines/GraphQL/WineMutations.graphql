@@ -2,7 +2,9 @@ mutation AddWine($input: AddWineInput!) {
   addWine(input: $input) {
     id
     name
+    beverageType
     color
+    style
     vintage
     createdAt
     updatedAt
@@ -13,7 +15,9 @@ mutation UpdateWine($id: WineId!, $input: UpdateWineInput!) {
   updateWine(id: $id, input: $input) {
     id
     name
+    beverageType
     color
+    style
     vintage
     updatedAt
   }

@@ -12,13 +12,15 @@ final class ShortlistFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        let review = try scanner.selectPhotoFromPicker()
+        // 2. DESTINATION: choose "À retenir"
+        let destination = try scanner.selectPhotoFromPicker()
+        try destination.verify()
+        let review = try destination.chooseShortlist()
         try review.verify()
 
-        // 2. REVIEW: set name, tap "À retenir", confirm in sheet
+        // 3. REVIEW: set name, save (rating defaults to 3 in the inline section)
         _ = try review.clearAndTypeName(wineName)
-        let sheet = try review.tapShortlist()
-        try sheet.confirm()
+        try review.submit()
 
         // 3. WINE LIST: navigation lands on Vins tab with shortlist segment selected
         let wineList = try WineListPage(app: app).verify()

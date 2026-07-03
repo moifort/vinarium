@@ -34,7 +34,7 @@ struct FavoritesSection: View {
                             onWineTapped(item.id)
                         } label: {
                             HStack(spacing: 10) {
-                                WineColorBadge(color: item.color)
+                                BeverageBadge(beverageType: item.beverageType, color: item.color)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.name)
                                         .font(.subheadline)
@@ -77,7 +77,8 @@ struct FavoritesSection: View {
 extension FavoritesSection {
     struct Item: Identifiable {
         let id: String
-        let color: WineColor
+        var beverageType: BeverageType = .wine
+        let color: WineColor?
         let name: String
         let vintage: Int?
         let tastingDate: Date?

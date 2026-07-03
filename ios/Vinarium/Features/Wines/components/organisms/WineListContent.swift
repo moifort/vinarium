@@ -17,6 +17,7 @@ struct WineListContent: View {
                                 onWineTapped(item.id)
                             } label: {
                                 WineListRow(
+                                    beverageType: item.beverageType,
                                     color: item.color,
                                     name: item.name,
                                     subtitle: item.subtitle,
@@ -67,7 +68,8 @@ extension WineListContent {
 
     struct Item: Identifiable {
         let id: String
-        let color: WineColor
+        var beverageType: BeverageType = .wine
+        let color: WineColor?
         let name: String
         let subtitle: String?
         let rating: Int?

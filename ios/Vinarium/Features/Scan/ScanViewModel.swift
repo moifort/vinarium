@@ -4,9 +4,10 @@ import SwiftUI
 enum ScanStep {
     case camera
     case scanning
-    case review(ScanResult, Data)
-    case placing(id: String, name: String, color: WineColor, vintage: Int?)
-    case confirmed(name: String, color: WineColor, position: String)
+    case destination(ScanResult, Data)
+    case review(ScanResult, Data, ScanDestination)
+    case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
+    case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
     case favoriteSaved
     case shortlistSaved
     case recommendationSaved
@@ -26,7 +27,7 @@ final class ScanViewModel {
         Task {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
-                self.step = .review(result, imageData)
+                self.step = .destination(result, imageData)
             } catch {
                 self.error = reportError(error)
                 self.step = .camera
@@ -55,7 +56,13 @@ final class ScanViewModel {
         defer { isSaving = false }
         do {
             let wine = try await WineAPI.create(request)
-            step = .placing(id: wine.id, name: wine.name, color: wine.color, vintage: wine.vintage)
+            step = .placing(
+                id: wine.id,
+                name: wine.name,
+                beverageType: wine.beverageType,
+                color: wine.color,
+                vintage: wine.vintage
+            )
         } catch {
             self.error = reportError(error)
         }
@@ -124,7 +131,7 @@ extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
         case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.shortlistSaved, .shortlistSaved), (.recommendationSaved, .recommendationSaved): return true
-        case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
+        case (.destination, .destination), (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }
     }

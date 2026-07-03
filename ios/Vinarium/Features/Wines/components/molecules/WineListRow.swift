@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct WineListRow: View {
-    let color: WineColor
+    var beverageType: BeverageType = .wine
+    let color: WineColor?
     let name: String
     let subtitle: String?
     let rating: Int?
@@ -10,7 +11,7 @@ struct WineListRow: View {
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            WineColorBadge(color: color)
+            BeverageBadge(beverageType: beverageType, color: color)
             VStack(alignment: .leading) {
                 Text(name)
                     .font(.headline)
@@ -69,6 +70,15 @@ struct WineListRow: View {
             color: .rosé,
             name: "C\u{00F4}tes de Provence",
             subtitle: nil,
+            rating: nil,
+            isFavorite: false,
+            isShortlist: false
+        )
+        WineListRow(
+            beverageType: .beer,
+            color: nil,
+            name: "La Chouffe",
+            subtitle: "Blonde forte \u{2022} Belgique",
             rating: nil,
             isFavorite: false,
             isShortlist: false

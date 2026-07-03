@@ -54,13 +54,13 @@ struct DashboardView: View {
         .init(
             stats: .init(bottleCount: data.bottleCount, totalValue: data.totalValue),
             readyToDrink: data.readyToDrink.map { wine in
-                .init(id: wine.id, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position)
+                .init(id: wine.id, beverageType: wine.beverageType, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position)
             },
             favorites: data.favorites.map { favorite in
-                .init(id: favorite.id, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice)
+                .init(id: favorite.id, beverageType: favorite.beverageType, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice)
             },
             shortlist: data.shortlist.map { entry in
-                .init(id: entry.id, color: entry.color, name: entry.name, vintage: entry.vintage, tastingDate: entry.tastingDate, rating: entry.rating)
+                .init(id: entry.id, beverageType: entry.beverageType, color: entry.color, name: entry.name, vintage: entry.vintage, tastingDate: entry.tastingDate, rating: entry.rating)
             },
             events: data.history.map { event in
                 .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId, date: event.date)

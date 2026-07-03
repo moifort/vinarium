@@ -1,12 +1,20 @@
 import SwiftUI
 
 struct BottleRow<Title: View, Subtitle: View>: View {
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let position: String
     let title: Title
     let subtitle: Subtitle
 
-    init(color: WineColor, position: String, @ViewBuilder title: () -> Title, @ViewBuilder subtitle: () -> Subtitle) {
+    init(
+        beverageType: BeverageType = .wine,
+        color: WineColor?,
+        position: String,
+        @ViewBuilder title: () -> Title,
+        @ViewBuilder subtitle: () -> Subtitle
+    ) {
+        self.beverageType = beverageType
         self.color = color
         self.position = position
         self.title = title()
@@ -15,7 +23,7 @@ struct BottleRow<Title: View, Subtitle: View>: View {
 
     var body: some View {
         HStack {
-            WineColorBadge(color: color)
+            BeverageBadge(beverageType: beverageType, color: color)
             VStack(alignment: .leading) {
                 title
                     .font(.headline)
@@ -30,8 +38,8 @@ struct BottleRow<Title: View, Subtitle: View>: View {
 }
 
 extension BottleRow where Subtitle == EmptyView {
-    init(color: WineColor, position: String, @ViewBuilder title: () -> Title) {
-        self.init(color: color, position: position, title: title) {}
+    init(beverageType: BeverageType = .wine, color: WineColor?, position: String, @ViewBuilder title: () -> Title) {
+        self.init(beverageType: beverageType, color: color, position: position, title: title) {}
     }
 }
 

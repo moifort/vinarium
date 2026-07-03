@@ -12,18 +12,16 @@ final class RecommendationFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        let review = try scanner.selectPhotoFromPicker()
+        // 2. DESTINATION: choose "Conseillé"
+        let destination = try scanner.selectPhotoFromPicker()
+        try destination.verify()
+        let review = try destination.chooseRecommendation()
         try review.verify()
 
-        // 2. REVIEW: set name, tap "Conseillé par un ami" → fill sheet
+        // 3. REVIEW: set name, fill recommender inline, save
         _ = try review.clearAndTypeName(wineName)
-        try review.tapRecommend()
-
-        // 3. RECOMMENDATION SHEET: fill recommender name, confirm
-        let nameField = try app.textFields["Nom"].waitOrFail()
-        nameField.tap()
-        nameField.typeText("Jean")
-        try app.buttons["confirm-recommendation-button"].tapOrFail()
+        _ = try review.typeRecommenderName("Jean")
+        try review.submit()
 
         // 4. WINE LIST (CONSEILLÉS): verify navigation to Vins tab with recommended segment
         let wineList = try WineListPage(app: app).verify()

@@ -13,7 +13,9 @@ enum CellarAPI {
                 wine: Wine(
                     id: b.wine.id,
                     name: b.wine.name,
-                    color: WineColor(graphql: b.wine.color),
+                    beverageType: BeverageType(graphql: b.wine.beverageType),
+                    color: b.wine.color.map { WineColor(graphql: $0) },
+                    style: b.wine.style,
                     domain: b.wine.domain,
                     vintage: b.wine.vintage,
                     appellation: b.wine.appellation,
@@ -44,7 +46,8 @@ enum CellarAPI {
                 date: GraphQLHelpers.parseISO8601(e.date) ?? Date(),
                 wineId: e.wineId,
                 wineName: e.wineName,
-                wineColor: WineColor(journalString: e.wineColor),
+                wineBeverageType: BeverageType(graphql: e.wineBeverageType),
+                wineColor: e.wineColor.map { WineColor(graphql: $0) },
                 position: e.position
             )
         }

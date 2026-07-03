@@ -15,7 +15,8 @@ enum DashboardAPI {
                 DashboardWine(
                     id: $0.id,
                     name: $0.name,
-                    color: WineColor(graphql: $0.color),
+                    beverageType: BeverageType(graphql: $0.beverageType),
+                    color: $0.color.map { WineColor(graphql: $0) },
                     position: $0.position,
                     urgent: $0.urgent,
                     drinkUntil: $0.drinkUntil
@@ -25,7 +26,8 @@ enum DashboardAPI {
                 DashboardFavorite(
                     id: $0.id,
                     name: $0.name,
-                    color: WineColor(graphql: $0.color),
+                    beverageType: BeverageType(graphql: $0.beverageType),
+                    color: $0.color.map { WineColor(graphql: $0) },
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) }
@@ -35,7 +37,8 @@ enum DashboardAPI {
                 DashboardShortlistEntry(
                     id: $0.id,
                     name: $0.name,
-                    color: WineColor(graphql: $0.color),
+                    beverageType: BeverageType(graphql: $0.beverageType),
+                    color: $0.color.map { WineColor(graphql: $0) },
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) },
@@ -47,7 +50,8 @@ enum DashboardAPI {
                     wine: DashboardEntryWine(
                         id: $0.wine.id,
                         name: $0.wine.name,
-                        color: WineColor(graphql: $0.wine.color),
+                        beverageType: BeverageType(graphql: $0.wine.beverageType),
+                        color: $0.wine.color.map { WineColor(graphql: $0) },
                         vintage: $0.wine.vintage
                     ),
                     position: $0.position,
@@ -67,7 +71,8 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         date: GraphQLHelpers.parseISO8601(e.dateString) ?? Date(),
         wineId: e.wineIdString,
         wineName: e.wineNameString,
-        wineColor: WineColor(journalString: e.wineColorString),
+        wineBeverageType: e.wineBeverageTypeValue,
+        wineColor: e.wineColorValue,
         position: e.positionString,
         rating: nil
     )
@@ -78,7 +83,8 @@ protocol DashboardJournalEvent {
     var dateString: String { get }
     var wineIdString: String { get }
     var wineNameString: String { get }
-    var wineColorString: String { get }
+    var wineBeverageTypeValue: BeverageType { get }
+    var wineColorValue: WineColor? { get }
     var positionString: String { get }
 }
 
@@ -89,7 +95,8 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var dateString: String { date }
     var wineIdString: String { wineId }
     var wineNameString: String { wineName }
-    var wineColorString: String { wineColor }
+    var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
+    var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }
 }
 
@@ -100,6 +107,7 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var dateString: String { date }
     var wineIdString: String { wineId }
     var wineNameString: String { wineName }
-    var wineColorString: String { wineColor }
+    var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
+    var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }
 }

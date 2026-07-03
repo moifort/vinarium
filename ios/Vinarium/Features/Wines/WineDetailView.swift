@@ -134,6 +134,7 @@ struct WineDetailView: View {
                     BottleMoveView(
                         wineId: detail.id,
                         wineName: detail.name,
+                        wineBeverageType: detail.beverageType,
                         wineColor: detail.color,
                         wineVintage: detail.vintage,
                         currentRow: cellar.row,
@@ -393,7 +394,9 @@ struct WineDetailView: View {
     private static func mapContent(_ detail: UserWineDetail) -> WineDetailContent.Content {
         let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
         return WineDetailContent.Content(
+            beverageType: detail.beverageType,
             color: detail.color,
+            style: detail.style,
             name: detail.name,
             domain: detail.domain,
             vintage: detail.vintage,
@@ -444,7 +447,9 @@ struct WineDetailView: View {
         }
         return WineEditForm.Fields(
             name: detail.name,
-            color: detail.color,
+            beverageType: detail.beverageType,
+            color: detail.color ?? .red,
+            style: detail.style ?? "",
             domain: detail.domain ?? "",
             vintage: detail.vintage.map(String.init) ?? "",
             appellation: detail.appellation ?? "",

@@ -2,7 +2,10 @@ query WineList {
   wines {
     id
     name
+    beverageType
     color
+    style
+    alcoholContent
     vintage
     domain
     appellation

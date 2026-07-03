@@ -346,7 +346,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Vinarium";
+				INFOPLIST_KEY_CFBundleDisplayName = Vinarium;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "L'application a besoin de votre camera afin de scanner les étiquettes de vos bouteilles";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave à Vin utilise votre position pour enregistrer le lieu où vous avez découvert un vin.";
@@ -383,7 +383,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Vinarium";
+				INFOPLIST_KEY_CFBundleDisplayName = Vinarium;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
 				INFOPLIST_KEY_NSCameraUsageDescription = "L'application a besoin de votre camera afin de scanner les étiquettes de vos bouteilles";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Cave à Vin utilise votre position pour enregistrer le lieu où vous avez découvert un vin.";

@@ -1,7 +1,10 @@
 mutation ScanWine($imageBase64: String!) {
   scanWine(imageBase64: $imageBase64) {
     name
+    beverageType
     color
+    style
+    alcoholContent
     domain
     vintage
     appellation

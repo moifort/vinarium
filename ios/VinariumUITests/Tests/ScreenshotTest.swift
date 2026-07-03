@@ -49,8 +49,11 @@ final class ScreenshotTest: XCTestCase {
         try scanner.verify()
         saveScreenshot("scan")
 
-        // 7. Scan → review
-        let review = try scanner.selectPhotoFromPicker()
+        // 7. Scan → destination → review
+        let destination = try scanner.selectPhotoFromPicker()
+        try destination.verify()
+        saveScreenshot("scan-destination")
+        let review = try destination.chooseCellar()
         try review.verify()
         saveScreenshot("scan-review")
     }

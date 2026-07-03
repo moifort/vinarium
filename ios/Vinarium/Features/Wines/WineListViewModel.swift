@@ -195,8 +195,14 @@ final class WineListViewModel {
             case .region:
                 return (0, wine.region ?? "Sans région", wine)
             case .color:
-                let order = WineColor.allCases.firstIndex(of: wine.color) ?? 0
-                return (Double(order), wine.color.label, wine)
+                if let color = wine.color {
+                    let order = WineColor.allCases.firstIndex(of: color) ?? 0
+                    return (Double(order), color.label, wine)
+                }
+                // Boissons sans couleur (bière, spiritueux...) : groupées par type, après les vins
+                let order = WineColor.allCases.count
+                    + (BeverageType.allCases.firstIndex(of: wine.beverageType) ?? 0)
+                return (Double(order), wine.beverageType.label, wine)
             case .price:
                 let (order, label) = priceRange(wine.purchasePrice)
                 return (Double(order), label, wine)
@@ -230,7 +236,12 @@ final class WineListViewModel {
         case .updatedAt: wine.updatedAt.timeIntervalSince1970
         case .vintage: Double(wine.vintage ?? 0)
         case .region: 0 // groups carry the ordering; keep server order inside
-        case .color: Double(WineColor.allCases.firstIndex(of: wine.color) ?? 0)
+        case .color:
+            Double(
+                wine.color.map { WineColor.allCases.firstIndex(of: $0) ?? 0 }
+                    ?? WineColor.allCases.count
+                        + (BeverageType.allCases.firstIndex(of: wine.beverageType) ?? 0)
+            )
         case .price: wine.purchasePrice ?? 0
         case .contact: 0
         }

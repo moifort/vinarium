@@ -31,7 +31,8 @@ struct HistoryEvent: Codable, Identifiable, Sendable {
     let date: Date
     let wineId: String
     let wineName: String
-    let wineColor: WineColor
+    let wineBeverageType: BeverageType
+    let wineColor: WineColor?
     let position: String
 
     var id: String { "\(wineId)-\(type.rawValue)-\(date.timeIntervalSince1970)" }
@@ -46,7 +47,8 @@ struct CellarRowGroup: Identifiable, Sendable {
 struct CellarRowItem: Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
     let vintage: Int?
     let position: String
 }

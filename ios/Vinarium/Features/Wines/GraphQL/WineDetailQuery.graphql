@@ -2,7 +2,10 @@ query WineDetail($id: WineId!) {
   wine(id: $id) {
     id
     name
+    beverageType
     color
+    style
+    alcoholContent
     vintage
     domain
     appellation
@@ -50,6 +53,7 @@ query WineDetail($id: WineId!) {
       date
       wineId
       wineName
+      wineBeverageType
       wineColor
       position
     }

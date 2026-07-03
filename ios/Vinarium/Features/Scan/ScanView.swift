@@ -106,11 +106,27 @@ struct ScanView: View {
                 ScanAnalyzingPage()
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-            case .review(let result, let imageData):
+            case .destination(let result, let imageData):
+                NavigationStack {
+                    ScanDestinationPage(
+                        name: result.name,
+                        beverageType: result.beverageType,
+                        color: result.color,
+                        style: result.style,
+                        vintage: result.vintage,
+                        onSelect: { destination in
+                            viewModel.step = .review(result, imageData, destination)
+                        },
+                        onCancel: { viewModel.reset() }
+                    )
+                }
+
+            case .review(let result, let imageData, let destination):
                 NavigationStack {
                     ScanReviewPage(
                         scanResult: result,
                         imageData: imageData,
+                        destination: destination,
                         initialLocation: viewModel.pendingLocation,
                         onSave: { request in await viewModel.saveWine(request) },
                         onFavorite: { request, date, contacts, notes in
@@ -122,22 +138,42 @@ struct ScanView: View {
                         onRecommend: { request, recommenderName, comment in
                             await viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
                         },
+                        onChangeDestination: { editedResult in
+                            viewModel.step = .destination(editedResult, imageData)
+                        },
                         onCancel: { viewModel.reset() }
                     )
                 }
 
-            case .placing(let id, let name, let color, let vintage):
+            case .placing(let id, let name, let beverageType, let color, let vintage):
                 NavigationStack {
-                    CellarPlacementView(wineId: id, wineName: name, wineColor: color, wineVintage: vintage, onCancel: {
-                        viewModel.reset()
-                    }) { position in
-                        viewModel.step = .confirmed(name: name, color: color, position: position)
+                    CellarPlacementView(
+                        wineId: id,
+                        wineName: name,
+                        beverageType: beverageType,
+                        wineColor: color,
+                        wineVintage: vintage,
+                        onCancel: {
+                            viewModel.reset()
+                        }
+                    ) { position in
+                        viewModel.step = .confirmed(
+                            name: name,
+                            beverageType: beverageType,
+                            color: color,
+                            position: position
+                        )
                     }
                 }
 
-            case .confirmed(let name, let color, let position):
+            case .confirmed(let name, let beverageType, let color, let position):
                 NavigationStack {
-                    ScanConfirmationPage(wineName: name, wineColor: color, position: position) {
+                    ScanConfirmationPage(
+                        wineName: name,
+                        beverageType: beverageType,
+                        wineColor: color,
+                        position: position
+                    ) {
                         viewModel.reset()
                         onFlowCompleted(.addedToCellar)
                     }

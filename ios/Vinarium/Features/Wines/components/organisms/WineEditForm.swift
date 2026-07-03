@@ -6,7 +6,9 @@ struct WineEditForm: View {
     let onCancel: () -> Void
 
     @State private var name: String
+    @State private var beverageType: BeverageType
     @State private var color: WineColor
+    @State private var style: String
     @State private var domain: String
     @State private var vintage: String
     @State private var appellation: String
@@ -29,7 +31,9 @@ struct WineEditForm: View {
         self.onSave = onSave
         self.onCancel = onCancel
         _name = State(initialValue: initial.name)
+        _beverageType = State(initialValue: initial.beverageType)
         _color = State(initialValue: initial.color)
+        _style = State(initialValue: initial.style)
         _domain = State(initialValue: initial.domain)
         _vintage = State(initialValue: initial.vintage)
         _appellation = State(initialValue: initial.appellation)
@@ -49,25 +53,42 @@ struct WineEditForm: View {
         Form {
             Section {
                 LabeledContent {
-                    TextField("Nom du vin", text: $name)
+                    TextField("Nom", text: $name)
                         .multilineTextAlignment(.trailing)
                 } label: {
                     Label("Nom", systemImage: "wineglass")
                 }
 
-                Picker(selection: $color) {
-                    ForEach(WineColor.allCases) { c in
-                        Text(c.label).tag(c)
+                Picker(selection: $beverageType) {
+                    ForEach(BeverageType.allCases) { type in
+                        Text(type.label).tag(type)
                     }
                 } label: {
-                    Label("Couleur", systemImage: "paintpalette")
+                    Label("Type", systemImage: "square.grid.2x2")
+                }
+
+                if beverageType == .wine {
+                    Picker(selection: $color) {
+                        ForEach(WineColor.allCases) { c in
+                            Text(c.label).tag(c)
+                        }
+                    } label: {
+                        Label("Couleur", systemImage: "paintpalette")
+                    }
+                } else {
+                    LabeledContent {
+                        TextField("IPA, Single Malt, Junmai...", text: $style)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Style", systemImage: "tag")
+                    }
                 }
 
                 LabeledContent {
-                    TextField("Domaine", text: $domain)
+                    TextField(beverageType.producerLabel, text: $domain)
                         .multilineTextAlignment(.trailing)
                 } label: {
-                    Label("Domaine", systemImage: "building.2")
+                    Label(beverageType.producerLabel, systemImage: "building.2")
                 }
 
                 LabeledContent {
@@ -82,11 +103,13 @@ struct WineEditForm: View {
             }
 
             Section {
-                LabeledContent {
-                    TextField("Appellation", text: $appellation)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Appellation", systemImage: "seal")
+                if beverageType == .wine {
+                    LabeledContent {
+                        TextField("Appellation", text: $appellation)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Appellation", systemImage: "seal")
+                    }
                 }
 
                 LabeledContent {
@@ -103,22 +126,26 @@ struct WineEditForm: View {
                     Label("Pays", systemImage: "globe.europe.africa")
                 }
 
-                LabeledContent {
-                    TextField("Classification", text: $classification)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Classification", systemImage: "rosette")
+                if beverageType == .wine {
+                    LabeledContent {
+                        TextField("Classification", text: $classification)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Classification", systemImage: "rosette")
+                    }
                 }
             } header: {
                 Text("Origine")
             }
 
             Section {
-                LabeledContent {
-                    TextField("Cépages", text: $grapeVarieties)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Cépages", systemImage: "leaf")
+                if beverageType == .wine {
+                    LabeledContent {
+                        TextField("Cépages", text: $grapeVarieties)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Cépages", systemImage: "leaf")
+                    }
                 }
 
                 LabeledContent {
@@ -158,24 +185,26 @@ struct WineEditForm: View {
                 Text("Détails")
             }
 
-            Section {
-                LabeledContent {
-                    TextField("Année", text: $drinkFrom)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("À partir de", systemImage: "hourglass.bottomhalf.filled")
-                }
+            if beverageType == .wine {
+                Section {
+                    LabeledContent {
+                        TextField("Année", text: $drinkFrom)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("À partir de", systemImage: "hourglass.bottomhalf.filled")
+                    }
 
-                LabeledContent {
-                    TextField("Année", text: $drinkUntil)
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
+                    LabeledContent {
+                        TextField("Année", text: $drinkUntil)
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Jusqu'à", systemImage: "hourglass.tophalf.filled")
+                    }
+                } header: {
+                    Text("Garde")
                 }
-            } header: {
-                Text("Garde")
             }
 
             Section {
@@ -242,16 +271,19 @@ struct WineEditForm: View {
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
+        let isWine = beverageType == .wine
         let request = UpdateWineRequest(
             name: name,
-            color: color,
+            beverageType: beverageType,
+            color: isWine ? color : nil,
+            style: isWine || style.isEmpty ? nil : style,
             domain: domain.isEmpty ? nil : domain,
             vintage: Int(vintage),
-            appellation: appellation.isEmpty ? nil : appellation,
+            appellation: isWine && !appellation.isEmpty ? appellation : nil,
             region: region.isEmpty ? nil : region,
             country: country.isEmpty ? nil : country,
-            grapeVarieties: varieties.isEmpty ? nil : varieties,
-            classification: classification.isEmpty ? nil : classification,
+            grapeVarieties: isWine && !varieties.isEmpty ? varieties : nil,
+            classification: isWine && !classification.isEmpty ? classification : nil,
             purchasePrice: Double(purchasePrice),
             purchaseDate: purchaseDate.map { ISO8601DateFormatter().string(from: $0) },
             drinkFrom: Int(drinkFrom),
@@ -272,7 +304,9 @@ struct WineEditForm: View {
 extension WineEditForm {
     struct Fields {
         var name: String
+        var beverageType: BeverageType = .wine
         var color: WineColor
+        var style: String = ""
         var domain: String
         var vintage: String
         var appellation: String

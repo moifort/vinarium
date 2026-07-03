@@ -10,7 +10,9 @@ final class GiveAsGiftFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        let review = try scanner.selectPhotoFromPicker()
+        let destination = try scanner.selectPhotoFromPicker()
+        try destination.verify()
+        let review = try destination.chooseCellar()
         try review.verify()
 
         _ = try review.clearAndTypeName(wineName)

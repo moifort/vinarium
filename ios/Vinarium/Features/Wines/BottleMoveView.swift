@@ -5,7 +5,8 @@ import SwiftUI
 struct BottleMoveView: View {
     let wineId: String
     let wineName: String
-    let wineColor: WineColor
+    var wineBeverageType: BeverageType = .wine
+    let wineColor: WineColor?
     let wineVintage: Int?
     let currentRow: String
     let currentCol: Int
@@ -30,6 +31,7 @@ struct BottleMoveView: View {
                 } else {
                     BottleMovePage(
                         wineName: wineName,
+                        wineBeverageType: wineBeverageType,
                         wineColor: wineColor,
                         wineVintage: wineVintage,
                         currentPosition: currentPosition,
@@ -60,7 +62,11 @@ struct BottleMoveView: View {
                 if let occupant = occupantByPosition[label] {
                     return .init(
                         row: rowLetter, col: col, label: label,
-                        state: .occupied(name: occupant.wine.name, color: occupant.wine.color)
+                        state: .occupied(
+                            name: occupant.wine.name,
+                            beverageType: occupant.wine.beverageType,
+                            color: occupant.wine.color
+                        )
                     )
                 }
                 return .init(row: rowLetter, col: col, label: label, state: .empty)

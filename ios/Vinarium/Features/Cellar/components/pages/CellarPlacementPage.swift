@@ -2,7 +2,8 @@ import SwiftUI
 
 struct CellarPlacementPage: View {
     let wineName: String
-    let wineColor: WineColor
+    var beverageType: BeverageType = .wine
+    let wineColor: WineColor?
     let wineVintage: Int?
     let groups: [Group]
     let suggestedPosition: String?
@@ -74,7 +75,7 @@ struct CellarPlacementPage: View {
 
     private var wineHeader: some View {
         HStack(spacing: 12) {
-            WineColorBadge(color: wineColor)
+            BeverageBadge(beverageType: beverageType, color: wineColor)
             VStack(alignment: .leading) {
                 Text(wineName)
                     .font(.headline)

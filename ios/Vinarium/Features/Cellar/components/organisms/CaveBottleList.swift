@@ -16,7 +16,7 @@ struct CaveBottleList: View {
                             Button {
                                 onBottleTapped(item.id)
                             } label: {
-                                BottleRow(color: item.color, position: item.position) {
+                                BottleRow(beverageType: item.beverageType, color: item.color, position: item.position) {
                                     Text(item.title)
                                 } subtitle: {
                                     if let subtitle = item.subtitle {
@@ -52,7 +52,8 @@ extension CaveBottleList {
 
     struct Item: Identifiable {
         let id: String
-        let color: WineColor
+        var beverageType: BeverageType = .wine
+        let color: WineColor?
         let title: String
         let subtitle: String?
         let position: String

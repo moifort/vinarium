@@ -2,7 +2,8 @@ import SwiftUI
 
 struct ScanConfirmationPage: View {
     let wineName: String
-    let wineColor: WineColor
+    var beverageType: BeverageType = .wine
+    let wineColor: WineColor?
     let position: String
     let onDone: () -> Void
 
@@ -29,7 +30,7 @@ struct ScanConfirmationPage: View {
 
             VStack(spacing: 8) {
                 HStack {
-                    WineColorBadge(color: wineColor)
+                    BeverageBadge(beverageType: beverageType, color: wineColor)
                     Text(wineName)
                         .font(.headline)
                 }

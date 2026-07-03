@@ -3,7 +3,9 @@ import Foundation
 struct UserWineDetail: Codable, Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    let beverageType: BeverageType
+    let color: WineColor?
+    let style: String?
     let domain: String?
     let vintage: Int?
     let appellation: String?
@@ -32,7 +34,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(String.self, forKey: .id)
         name = try container.decode(String.self, forKey: .name)
-        color = try container.decode(WineColor.self, forKey: .color)
+        beverageType = try container.decodeIfPresent(BeverageType.self, forKey: .beverageType) ?? .wine
+        color = try container.decodeIfPresent(WineColor.self, forKey: .color)
+        style = try container.decodeIfPresent(String.self, forKey: .style)
         domain = try container.decodeIfPresent(String.self, forKey: .domain)
         vintage = try container.decodeIfPresent(Int.self, forKey: .vintage)
         appellation = try container.decodeIfPresent(String.self, forKey: .appellation)
@@ -59,7 +63,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     }
 
     init(
-        id: String, name: String, color: WineColor, domain: String?, vintage: Int?,
+        id: String, name: String, beverageType: BeverageType = .wine, color: WineColor?,
+        style: String? = nil, domain: String?, vintage: Int?,
         appellation: String?, region: String?, country: String?, grapeVarieties: [String],
         alcoholContent: Double?, classification: String?, purchasePrice: Double?,
         purchaseDate: String?, drinkFrom: Int?, drinkUntil: Int?, notes: String?,
@@ -70,7 +75,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     ) {
         self.id = id
         self.name = name
+        self.beverageType = beverageType
         self.color = color
+        self.style = style
         self.domain = domain
         self.vintage = vintage
         self.appellation = appellation

@@ -49,7 +49,9 @@ enum WineDisplayColor {
 struct Wine: Codable, Identifiable, Sendable {
     let id: String
     let name: String
-    let color: WineColor
+    var beverageType: BeverageType = .wine
+    var color: WineColor? = nil
+    var style: String? = nil
     var domain: String? = nil
     var vintage: Int? = nil
     var appellation: String? = nil
@@ -85,7 +87,9 @@ struct Wine: Codable, Identifiable, Sendable {
 
 struct CreateWineRequest: Encodable, Sendable {
     let name: String
-    let color: WineColor
+    var beverageType: BeverageType = .wine
+    var color: WineColor?
+    var style: String?
     var domain: String?
     var vintage: Int?
     var appellation: String?
@@ -112,7 +116,9 @@ struct CreateWineRequest: Encodable, Sendable {
 
 struct UpdateWineRequest: Encodable, Sendable {
     var name: String?
+    var beverageType: BeverageType?
     var color: WineColor?
+    var style: String?
     var domain: String?
     var vintage: Int?
     var appellation: String?

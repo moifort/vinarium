@@ -8,19 +8,23 @@ struct WineDetailContent: View {
     var body: some View {
         List {
             WineDetailHeader(
+                beverageType: content.beverageType,
                 color: content.color,
                 name: content.name,
                 subtitle: headerSubtitle,
+                producerLabel: content.beverageType.producerLabel,
                 domain: content.domain,
                 vintage: content.vintage
             )
 
-            WineOriginSection(
-                appellation: content.appellation,
-                region: content.region,
-                country: content.country,
-                classification: content.classification
-            )
+            if content.beverageType == .wine {
+                WineOriginSection(
+                    appellation: content.appellation,
+                    region: content.region,
+                    country: content.country,
+                    classification: content.classification
+                )
+            }
 
             LocationSection(
                 placeName: content.placeName,
@@ -36,7 +40,9 @@ struct WineDetailContent: View {
                 grapeVarieties: content.grapeVarieties
             )
 
-            WineAgingSection(drinkFrom: content.drinkFrom, drinkUntil: content.drinkUntil)
+            if content.beverageType == .wine {
+                WineAgingSection(drinkFrom: content.drinkFrom, drinkUntil: content.drinkUntil)
+            }
 
             if let cellar = content.cellar {
                 WineCellarSection(
@@ -93,17 +99,23 @@ struct WineDetailContent: View {
     }
 
     private var headerSubtitle: String {
-        [content.color.label,
-         content.domain,
-         content.vintage.map { "\($0)" }]
+        let kind = content.beverageType == .wine
+            ? content.color?.label
+            : [content.beverageType.label, content.style].compactMap { $0 }.joined(separator: " ")
+        return [kind,
+                content.domain,
+                content.vintage.map { "\($0)" }]
             .compactMap { $0 }
+            .filter { !$0.isEmpty }
             .joined(separator: " \u{2022} ")
     }
 }
 
 extension WineDetailContent {
     struct Content {
-        let color: WineColor
+        var beverageType: BeverageType = .wine
+        let color: WineColor?
+        var style: String? = nil
         let name: String
         let domain: String?
         let vintage: Int?

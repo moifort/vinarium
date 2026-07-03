@@ -12,12 +12,15 @@ final class FavoriteFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        let review = try scanner.selectPhotoFromPicker()
+        // 2. DESTINATION: choose "Favori"
+        let destination = try scanner.selectPhotoFromPicker()
+        try destination.verify()
+        let review = try destination.chooseFavorite()
         try review.verify()
 
-        // 2. REVIEW: set name, tap "Ajouter à mes favoris"
+        // 3. REVIEW: set name, save
         _ = try review.clearAndTypeName(wineName)
-        try review.tapFavorite()
+        try review.submit()
 
         // 3. WINE LIST (FAVORIS): verify navigation to Vins tab with favorites segment selected
         let wineList = try WineListPage(app: app).verify()

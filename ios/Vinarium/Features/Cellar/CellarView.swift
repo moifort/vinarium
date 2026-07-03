@@ -97,6 +97,7 @@ struct CellarView: View {
                 items: group.items.map { item in
                     .init(
                         id: item.id,
+                        beverageType: item.beverageType,
                         color: item.color,
                         title: item.name,
                         subtitle: item.vintage.map { "\($0)" },

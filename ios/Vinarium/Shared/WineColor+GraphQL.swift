@@ -19,9 +19,4 @@ extension WineColor {
             self = .red
         }
     }
-
-    /// Journal events expose the color as a raw string ('red', 'rosé', ...).
-    init(journalString: String) {
-        self = WineColor(rawValue: journalString.lowercased()) ?? .red
-    }
 }

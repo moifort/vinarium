@@ -9,7 +9,9 @@ query CellarBottles {
     wine {
       id
       name
+      beverageType
       color
+      style
       vintage
       domain
       appellation
@@ -29,6 +31,7 @@ query CellarHistory {
     date
     wineId
     wineName
+    wineBeverageType
     wineColor
     position
   }

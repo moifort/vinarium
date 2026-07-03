@@ -6,12 +6,12 @@ struct ScanReviewPage {
 
     @discardableResult
     func verify() throws -> Self {
-        try app.navigationBars["Vérifier le vin"].waitOrFail()
+        try app.navigationBars["Vérifier la bouteille"].waitOrFail()
         return self
     }
 
     func clearAndTypeName(_ name: String) throws -> Self {
-        let nameField = try app.textFields["Nom du vin"].waitOrFail()
+        let nameField = try app.textFields["review-name-field"].waitOrFail()
         // Triple-tap to select all text, then type to replace
         nameField.tap(withNumberOfTaps: 3, numberOfTouches: 1)
         nameField.typeText(name)
@@ -39,31 +39,23 @@ struct ScanReviewPage {
         return self
     }
 
+    func typeRecommenderName(_ name: String) throws -> Self {
+        let field = try app.textFields["review-recommender-field"].waitOrFail()
+        field.tap()
+        field.typeText(name)
+        return self
+    }
+
+    /// Ajout vers la cave : la sauvegarde enchaîne sur le placement.
     func tapSave() throws -> PlacementPage {
         app.swipeUp()
         try app.buttons["review-save-button"].tapOrFail()
         return PlacementPage(app: app)
     }
 
-    func tapFavorite() throws {
-        try app.buttons["review-favorite-button"].tapOrFail()
-    }
-
-    func tapShortlist() throws -> ShortlistSheetPage {
-        try app.buttons["review-shortlist-button"].tapOrFail()
-        return ShortlistSheetPage(app: app)
-    }
-
-    func tapRecommend() throws {
-        try app.buttons["review-recommend-button"].tapOrFail()
-    }
-}
-
-@MainActor
-struct ShortlistSheetPage {
-    let app: XCUIApplication
-
-    func confirm() throws {
-        try app.buttons["confirm-shortlist-button"].tapOrFail()
+    /// Ajout favori / à retenir / conseillé : la sauvegarde termine le flow.
+    func submit() throws {
+        app.swipeUp()
+        try app.buttons["review-save-button"].tapOrFail()
     }
 }

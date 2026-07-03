@@ -81,6 +81,7 @@ struct WineListView: View {
             .init(label: label, items: wines.map { wine in
                 .init(
                     id: wine.id,
+                    beverageType: wine.beverageType,
                     color: wine.color,
                     name: wine.name,
                     subtitle: Self.subtitle(for: wine),

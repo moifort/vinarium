@@ -33,7 +33,7 @@ struct ReadyToDrinkSection: View {
                             onWineTapped(item.id)
                         } label: {
                             HStack(spacing: 10) {
-                                WineColorBadge(color: item.color)
+                                BeverageBadge(beverageType: item.beverageType, color: item.color)
                                 Text(item.name)
                                     .font(.subheadline)
                                     .lineLimit(1)
@@ -65,7 +65,8 @@ struct ReadyToDrinkSection: View {
 extension ReadyToDrinkSection {
     struct Item: Identifiable {
         let id: String
-        let color: WineColor
+        var beverageType: BeverageType = .wine
+        let color: WineColor?
         let name: String
         let urgent: Bool
         let drinkUntil: Int?

@@ -5,6 +5,7 @@ query Dashboard {
     readyToDrink {
       id
       name
+      beverageType
       color
       position
       urgent
@@ -13,6 +14,7 @@ query Dashboard {
     favorites {
       id
       name
+      beverageType
       color
       vintage
       estimatedPrice
@@ -21,6 +23,7 @@ query Dashboard {
     shortlist {
       id
       name
+      beverageType
       color
       vintage
       estimatedPrice
@@ -31,6 +34,7 @@ query Dashboard {
       wine {
         id
         name
+        beverageType
         color
         vintage
       }
@@ -42,6 +46,7 @@ query Dashboard {
       date
       wineId
       wineName
+      wineBeverageType
       wineColor
       position
     }
@@ -50,6 +55,7 @@ query Dashboard {
       date
       wineId
       wineName
+      wineBeverageType
       wineColor
       position
     }

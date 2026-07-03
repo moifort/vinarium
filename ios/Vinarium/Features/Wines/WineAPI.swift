@@ -29,7 +29,9 @@ enum WineAPI {
         return Wine(
             id: created.id,
             name: created.name,
-            color: WineColor(graphql: created.color),
+            beverageType: BeverageType(graphql: created.beverageType),
+            color: created.color.map { WineColor(graphql: $0) },
+            style: created.style,
             vintage: created.vintage,
             createdAt: GraphQLHelpers.parseISO8601(created.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(created.updatedAt) ?? Date()
@@ -46,7 +48,9 @@ enum WineAPI {
         return Wine(
             id: updated.id,
             name: updated.name,
-            color: WineColor(graphql: updated.color),
+            beverageType: BeverageType(graphql: updated.beverageType),
+            color: updated.color.map { WineColor(graphql: $0) },
+            style: updated.style,
             vintage: updated.vintage,
             createdAt: Date(),
             updatedAt: GraphQLHelpers.parseISO8601(updated.updatedAt) ?? Date()
@@ -69,14 +73,16 @@ enum WineAPI {
         let s = data.scanWine
         return ScanResult(
             name: s.name,
+            beverageType: BeverageType(graphql: s.beverageType),
             domain: s.domain,
             vintage: s.vintage,
             appellation: s.appellation,
             region: s.region,
             country: s.country,
-            color: WineColor(graphql: s.color),
+            color: s.color.map { WineColor(graphql: $0) },
+            style: s.style,
             grapeVarieties: s.grapeVarieties ?? [],
-            alcoholContent: nil,
+            alcoholContent: s.alcoholContent,
             classification: s.classification,
             drinkFrom: s.drinkFrom,
             drinkUntil: s.drinkUntil,
@@ -127,14 +133,16 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
     Wine(
         id: w.id,
         name: w.name,
-        color: WineColor(graphql: w.color),
+        beverageType: BeverageType(graphql: w.beverageType),
+        color: w.color.map { WineColor(graphql: $0) },
+        style: w.style,
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
         region: w.region,
         country: w.country,
         grapeVarieties: w.grapeVarieties,
-        alcoholContent: nil,
+        alcoholContent: w.alcoholContent,
         classification: w.classification,
         purchasePrice: w.purchasePrice,
         purchaseDate: w.purchaseDate,
@@ -163,14 +171,16 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
     UserWineDetail(
         id: w.id,
         name: w.name,
-        color: WineColor(graphql: w.color),
+        beverageType: BeverageType(graphql: w.beverageType),
+        color: w.color.map { WineColor(graphql: $0) },
+        style: w.style,
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
         region: w.region,
         country: w.country,
         grapeVarieties: w.grapeVarieties ?? [],
-        alcoholContent: nil,
+        alcoholContent: w.alcoholContent,
         classification: w.classification,
         purchasePrice: w.purchasePrice,
         purchaseDate: w.purchaseDate,
@@ -217,9 +227,11 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
 
 private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddWineInput {
     VinariumGraphQL.AddWineInput(
+        alcoholContent: GraphQLHelpers.graphQLNullable(r.alcoholContent),
         appellation: GraphQLHelpers.graphQLNullable(r.appellation),
+        beverageType: .some(r.beverageType.graphQLValue),
         classification: GraphQLHelpers.graphQLNullable(r.classification),
-        color: graphQLColor(r.color),
+        color: r.color.map { .some(graphQLColor($0)) } ?? .none,
         country: GraphQLHelpers.graphQLNullable(r.country),
         domain: GraphQLHelpers.graphQLNullable(r.domain),
         drinkFrom: GraphQLHelpers.graphQLNullable(r.drinkFrom),
@@ -234,6 +246,7 @@ private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddWineI
         purchaseDate: GraphQLHelpers.graphQLNullable(r.purchaseDate),
         purchasePrice: GraphQLHelpers.graphQLNullable(r.purchasePrice),
         region: GraphQLHelpers.graphQLNullable(r.region),
+        style: GraphQLHelpers.graphQLNullable(r.style),
         vintage: GraphQLHelpers.graphQLNullable(r.vintage)
     )
 }
@@ -241,6 +254,7 @@ private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddWineI
 private func updateWineInput(from r: UpdateWineRequest) -> VinariumGraphQL.UpdateWineInput {
     VinariumGraphQL.UpdateWineInput(
         appellation: GraphQLHelpers.graphQLNullable(r.appellation),
+        beverageType: r.beverageType.map { .some($0.graphQLValue) } ?? .none,
         classification: GraphQLHelpers.graphQLNullable(r.classification),
         color: r.color.map { .some(graphQLColor($0)) } ?? .none,
         country: GraphQLHelpers.graphQLNullable(r.country),
@@ -257,6 +271,7 @@ private func updateWineInput(from r: UpdateWineRequest) -> VinariumGraphQL.Updat
         purchaseDate: GraphQLHelpers.graphQLNullable(r.purchaseDate),
         purchasePrice: GraphQLHelpers.graphQLNullable(r.purchasePrice),
         region: GraphQLHelpers.graphQLNullable(r.region),
+        style: GraphQLHelpers.graphQLNullable(r.style),
         vintage: GraphQLHelpers.graphQLNullable(r.vintage)
     )
 }
