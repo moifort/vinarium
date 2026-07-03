@@ -21,6 +21,11 @@
       "automerge": true,
       "automergeType": "pr",
       "automergeStrategy": "squash"
+    },
+    {
+      "description": "Pin graphql to 16.x: @apollo/server 5 requires peer graphql ^16.11.0 and npm (Cloud Function build) rejects 17",
+      "matchPackageNames": ["graphql"],
+      "allowedVersions": "<17"
     }
   ],
   "lockFileMaintenance": {

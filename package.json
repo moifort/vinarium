@@ -31,7 +31,7 @@
     "@sentry/bun": "10.63.0",
     "consola": "3.4.2",
     "firebase-admin": "14.1.0",
-    "graphql": "17.0.1",
+    "graphql": "16.14.2",
     "lodash-es": "4.18.1",
     "zod": "4.4.3"
   }
