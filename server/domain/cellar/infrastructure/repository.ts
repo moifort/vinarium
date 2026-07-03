@@ -1,3 +1,4 @@
+import type { WriteBatch } from 'firebase-admin/firestore'
 import type { CellarBottle } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
@@ -18,13 +19,17 @@ export const findBy = async (userId: UserId, wineId: WineId): Promise<CellarBott
   return doc.data() ?? null
 }
 
-export const save = async (entry: CellarBottle): Promise<CellarBottle> => {
-  await cellar().doc(docId(entry.userId, entry.wineId)).set(entry)
+export const save = async (entry: CellarBottle, batch?: WriteBatch): Promise<CellarBottle> => {
+  const ref = cellar().doc(docId(entry.userId, entry.wineId))
+  if (batch) batch.set(ref, entry)
+  else await ref.set(entry)
   return entry
 }
 
-export const remove = async (userId: UserId, wineId: WineId): Promise<void> => {
-  await cellar().doc(docId(userId, wineId)).delete()
+export const remove = async (userId: UserId, wineId: WineId, batch?: WriteBatch): Promise<void> => {
+  const ref = cellar().doc(docId(userId, wineId))
+  if (batch) batch.delete(ref)
+  else await ref.delete()
 }
 
 export const removeAllByUser = async (userId: UserId): Promise<void> => {

@@ -12,6 +12,7 @@
 - **Test coverage**: `bun test --coverage`
 - **Linter**: `bunx biome check`
 - **Runtime**: always use `bun`/`bunx`, never `npm`/`npx`
+- **GraphQL codegen** (if the schema changed): `bun run generate:graphql` (regenerates `shared/schema.graphql`), then `cd ios && apollo-ios-cli generate` (config `ios/apollo-codegen-config.json`)
 
 ## Development Workflow
 
@@ -28,30 +29,29 @@
 
 ## Backend Patterns (TypeScript/Nitro)
 
-- Domain architecture: `server/domain/{domain}/types.ts`, `primitives.ts`, `repository.ts`, `command.ts`, `query.ts`
+- Domain architecture: `server/domain/{domain}/types.ts`, `primitives.ts`, `command.ts`, `query.ts`, `infrastructure/repository.ts`, `infrastructure/graphql/`
 - **`business-rules.ts`** (optional): pure functions (no IO, no async) extracted from complex commands. Function names ARE the business concept (`wineStatus`, `readyToDrink` — never `computeX`, `getX`, `calculateX`). Must have 100% test coverage (`business-rules.unit.test.ts`)
 - **`use-case.ts`** (optional): multi-domain orchestrations when a route needs to coordinate several commands/queries. Names carry business intent (`addWithTasting`, `removeCompletely` — never `handleX`, `processX`). No direct storage access.
-- **Read models**: `server/read-model/{domain}/` — composite views assembling multiple domains for display needs. Mirror the `domain/` structure. Only import public Query/Command namespaces, never repositories.
 - Branded types with `ts-brand` + Zod validation constructors in `primitives.ts`
 - Discriminated unions for errors (no exceptions)
-- File-based storage: `useStorage('wines')`, `useStorage('cellar')`, etc.
+- **Storage: native Firestore** (`firebase-admin`) via `db()` from `server/system/firebase.ts`, only inside `infrastructure/repository.ts`. Helpers in `server/utils/firestore.ts`: `genericDataConverter<T>()` (Timestamp→Date), `atomically(batch => ...)` (single-batch commits), `deleteInBatches(refs)`, `userWineRecordRepository<T>(collection)` (satellite collections keyed `${userId}_${wineId}`: tasting/gift/recommendation)
+- **GraphQL** (Apollo Server + Pothos, single endpoint `POST /api/graphql`): nested fields on `WineType` must resolve through the per-request loaders (`server/domain/shared/graphql/loaders.ts`, available on the context) — never one Firestore read per parent row (N+1)
 - **Naming**: function names carry the business concept, not the technical pattern. The name IS the rule or action.
-- **BDD DSL**: `server/test/bdd.ts` — `feature()`, `scenario()`, `given()`, `when()`, `then()`, `and()` over `bun:test`. Feature tests use `.feat.test.ts` suffix.
+- **Tests**: `*.unit.test.ts` with `bun:test`. Firestore is mocked via `server/test/fake-firestore.ts` (`mock.module('~/system/firebase', () => ({ db: fakeDb }))`) — records batches, direct writes and read counts (`fake.reads`) to assert atomicity and read budgets
 - Formatter: Biome (spaces, single quotes, no semicolons, line width 100)
 
 ## Database Migrations
 
 - Location: `server/system/migration/`
 - Forward-only sequential migrations, no rollback
-- Meta tracked in `useStorage('migration-meta')` (key `state`)
-- Nitro plugin (`server/plugins/migration.ts`) runs migrations at boot, `process.exit(1)` on failure
+- Meta tracked in the Firestore collection `migration-meta` (doc `state`)
+- Triggered by `POST /admin/migrate` (`server/routes/admin/migrate.post.ts`), called by `scripts/bootstrap.sh` during provisioning — no boot-time plugin
 - To add a migration: create `server/system/migration/migrations/NNNN-name.ts`, register in `migrations/index.ts`
 - Migration `version` uses branded `MigrationVersion` (starts at 1, version 0 is reserved sentinel)
-- Migrations receive a `MigrationContext` with `storage()` accessor, return `MigrationResult`
+- Migrations receive a `MigrationContext` with the Firestore `db`, return `MigrationResult`
 - Runner wraps each migration in try/catch — migrations don't need their own error handling
-- Test reset (`server/routes/test/reset.post.ts`) clears `migration-meta` so migrations re-run
 - **When to migrate**: renaming a field, changing a field's structure, changing enum values, removing stale data
-- **No migration needed**: adding a new optional (`?`) field, adding a new storage namespace, changing query logic/routes
+- **No migration needed**: adding a new optional (`?`) field, adding a new collection, changing query logic/routes
 
 ## iOS Patterns (SwiftUI)
 

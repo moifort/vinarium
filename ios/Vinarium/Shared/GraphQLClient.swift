@@ -10,7 +10,12 @@ import Foundation
 final class GraphQLClient: @unchecked Sendable {
     static let shared = GraphQLClient()
 
-    var apollo: ApolloClient {
+    // Built once: recreating the store/transport per request would discard
+    // connection reuse. The base URL is read at init — changing the server URL
+    // in the debug settings requires an app restart.
+    let apollo: ApolloClient
+
+    private init() {
         let url = APIClient.shared.baseURL.appendingPathComponent("graphql")
         let store = ApolloStore()
         let interceptorProvider = AuthenticatedInterceptorProvider()
@@ -20,10 +25,8 @@ final class GraphQLClient: @unchecked Sendable {
             store: store,
             endpointURL: url
         )
-        return ApolloClient(networkTransport: transport, store: store)
+        apollo = ApolloClient(networkTransport: transport, store: store)
     }
-
-    private init() {}
 }
 
 /// In Apollo iOS 2.x, DefaultInterceptorProvider is final and cannot be subclassed.

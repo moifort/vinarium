@@ -7,10 +7,12 @@ import { WineQuery } from '~/domain/wine/query'
 import type { Wine, WineId } from '~/domain/wine/types'
 
 export namespace JournalQuery {
-  export const getAll = async (userId: UserId) => {
+  // preloadedWines lets callers that already fetched the user's wines (dashboard)
+  // skip the redundant collection read.
+  export const getAll = async (userId: UserId, preloadedWines?: Wine[] | Promise<Wine[]>) => {
     const [entries, wines] = await Promise.all([
       repository.findAllByUser(userId),
-      WineQuery.findAll(userId),
+      preloadedWines ?? WineQuery.findAll(userId),
     ])
     const wineMap = keyBy(wines, ({ id }) => id)
     return sortBy(

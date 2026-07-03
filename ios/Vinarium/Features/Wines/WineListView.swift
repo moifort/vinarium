@@ -13,9 +13,9 @@ struct WineListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if !viewModel.hasWines && (viewModel.isLoading || viewModel.isDataStale) {
+                if !viewModel.hasWines && viewModel.isLoading {
                     ProgressView("Chargement...")
-                } else if viewModel.wines.isEmpty && !viewModel.hasWines {
+                } else if !viewModel.hasWines {
                     ContentUnavailableView(
                         "Aucun vin",
                         systemImage: "wineglass",
@@ -27,7 +27,7 @@ struct WineListView: View {
                         sort: $viewModel.sort,
                         sortDescending: $viewModel.sortDescending,
                         statusFilter: $viewModel.statusFilter,
-                        isLoading: viewModel.isLoading || viewModel.isDataStale,
+                        colorFilter: $viewModel.colorFilter,
                         groups: mappedGroups,
                         onWineTapped: { selectedWineId = $0 },
                         onRefresh: { await viewModel.load() }
@@ -35,7 +35,7 @@ struct WineListView: View {
                 }
             }
             .sentryTrace("Wine List", waitForFullDisplay: true)
-            .task(id: viewModel.filterKey) {
+            .task {
                 await viewModel.load()
                 SentrySDK.reportFullyDisplayed()
             }
@@ -49,6 +49,9 @@ struct WineListView: View {
                     onUpdated: { Task { await viewModel.load() } }
                 )
             }
+            // Ces triggers arrivent après un scan (mutation) : le refetch est
+            // nécessaire pour voir le vin fraîchement créé, pas un simple
+            // changement de filtre.
             .onChange(of: showFavorites) {
                 if showFavorites {
                     viewModel.mode = .favorites
