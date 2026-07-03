@@ -38,4 +38,7 @@ jobs:
       - run: bun run build
       - name: Validate generated function deps under npm (strict peer deps)
         working-directory: .output/server
-        run: npm install --ignore-scripts
+        # --dry-run builds the full dependency tree (so ERESOLVE peer-dep
+        # conflicts still surface) without the reify/write step, which avoids
+        # an unrelated npm arborist crash ("fsTop") on the runner.
+        run: npm install --dry-run --ignore-scripts
