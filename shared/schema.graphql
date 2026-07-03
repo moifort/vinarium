@@ -1,10 +1,23 @@
 """
-Manually add a wine to the catalog
+Manually add a beverage to the catalog
 """
 input AddWineInput {
+  """
+  Alcohol by volume (% vol)
+  """
+  alcoholContent: Float
   appellation: Appellation
+
+  """
+  Kind of beverage — defaults to WINE when absent
+  """
+  beverageType: BeverageType
   classification: Classification
-  color: WineColor!
+
+  """
+  Wine color — required when the beverage is a wine
+  """
+  color: WineColor
   country: Country
   domain: WineDomain
   drinkFrom: Year
@@ -24,6 +37,7 @@ input AddWineInput {
   purchasePrice: Eur
   region: Region
   servingTemperature: Float
+  style: BeverageStyle
   vintage: Year
 }
 
@@ -31,6 +45,23 @@ input AddWineInput {
 Wine appellation (AOC / AOP / DOC ...)
 """
 scalar Appellation
+
+"""
+Beverage style for non-wine drinks (IPA, Single Malt, Junmai ...)
+"""
+scalar BeverageStyle
+
+"""
+Kind of beverage a bottle contains
+"""
+enum BeverageType {
+  BEER
+  CIDER
+  OTHER
+  SAKE
+  SPIRIT
+  WINE
+}
 
 """
 A bottle physically placed in the cellar grid
@@ -144,7 +175,8 @@ Euro amount (non-negative)
 scalar Eur
 
 type FavoriteWine {
-  color: WineColor!
+  beverageType: BeverageType!
+  color: WineColor
   estimatedPrice: Eur
   id: WineId!
   name: WineName!
@@ -187,7 +219,8 @@ type JournalEvent {
   date: DateTime!
   position: String!
   type: JournalEventType!
-  wineColor: String!
+  wineBeverageType: BeverageType!
+  wineColor: WineColor
   wineId: WineId!
   wineName: WineName!
 }
@@ -207,7 +240,8 @@ type LastBottle {
 }
 
 type LastBottleWine {
-  color: WineColor!
+  beverageType: BeverageType!
+  color: WineColor
   id: WineId!
   name: WineName!
   vintage: Year
@@ -235,7 +269,7 @@ type Mutation {
   addToShortlist(input: ShortlistInput!, wineId: WineId!): Boolean!
 
   """
-  Add a new wine to the catalog
+  Add a new beverage to the catalog
   """
   addWine(input: AddWineInput!): Wine!
 
@@ -358,7 +392,8 @@ Rating (1-5)
 scalar Rating
 
 type ReadyToDrinkWine {
-  color: WineColor!
+  beverageType: BeverageType!
+  color: WineColor
   drinkUntil: Year
   id: WineId!
   name: WineName!
@@ -388,12 +423,14 @@ Wine region (e.g. Bordeaux, Bourgogne)
 scalar Region
 
 """
-Structured wine info extracted from a label image (Claude + Gemini).
+Structured beverage info extracted from a label image (Gemini).
 """
 type ScanResult {
+  alcoholContent: Float
   appellation: String
+  beverageType: BeverageType!
   classification: String
-  color: WineColor!
+  color: WineColor
   country: String
   domain: String
   drinkFrom: Int
@@ -402,6 +439,7 @@ type ScanResult {
   grapeVarieties: [String!]
   name: String!
   region: String
+  style: String
   vintage: Int
 }
 
@@ -416,7 +454,8 @@ input ShortlistInput {
 }
 
 type ShortlistWine {
-  color: WineColor!
+  beverageType: BeverageType!
+  color: WineColor
   estimatedPrice: Eur
   id: WineId!
   name: WineName!
@@ -437,7 +476,12 @@ enum SortOrder {
 Update an existing wine. Absent fields keep their current value.
 """
 input UpdateWineInput {
+  """
+  Alcohol by volume (% vol)
+  """
+  alcoholContent: Float
   appellation: Appellation
+  beverageType: BeverageType
   classification: Classification
   color: WineColor
   country: Country
@@ -455,6 +499,7 @@ input UpdateWineInput {
   purchasePrice: Eur
   region: Region
   servingTemperature: Float
+  style: BeverageStyle
   vintage: Year
 }
 
@@ -464,17 +509,19 @@ Firebase Auth user identifier
 scalar UserId
 
 """
-A wine in the user’s collection
+A beverage in the user’s collection (wine, spirit, beer, sake ...)
 """
 type Wine {
+  alcoholContent: Float
   appellation: Appellation
+  beverageType: BeverageType!
 
   """
   Position in the cellar grid (null if the wine is not in cellar)
   """
   cellar: CellarBottle
   classification: Classification
-  color: WineColor!
+  color: WineColor
 
   """
   Tasting / consumption details for this wine (null if never recorded)
@@ -512,6 +559,7 @@ type Wine {
   recommendation: Recommendation
   region: Region
   servingTemperature: Float
+  style: BeverageStyle
   updatedAt: DateTime!
   userId: UserId!
   vintage: Year

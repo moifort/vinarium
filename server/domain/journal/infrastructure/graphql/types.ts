@@ -1,4 +1,5 @@
 import { builder } from '~/domain/shared/graphql/builder'
+import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
 import { JournalQuery } from '../../query'
 import type { JournalEventView } from '../../types'
@@ -15,7 +16,8 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
     date: t.expose('date', { type: 'DateTime' }),
     wineId: t.expose('wineId', { type: 'WineId' }),
     wineName: t.expose('wineName', { type: 'WineName' }),
-    wineColor: t.exposeString('wineColor'),
+    wineBeverageType: t.expose('wineBeverageType', { type: BeverageTypeEnum }),
+    wineColor: t.expose('wineColor', { type: WineColorEnum, nullable: true }),
     position: t.exposeString('position'),
   }),
 })
@@ -29,6 +31,7 @@ builder.objectField(WineType, 'history', (t) =>
       JournalQuery.getAllByWineId(userId, {
         id: wine.id,
         name: wine.name,
+        beverageType: wine.beverageType,
         color: wine.color,
       }),
   }),

@@ -1,6 +1,6 @@
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineColor, WineId, WineName } from '~/domain/wine/types'
+import type { BeverageType, WineColor, WineId, WineName } from '~/domain/wine/types'
 
 export type JournalEntryIn = {
   type: 'in'
@@ -27,6 +27,7 @@ export type JournalEventView = {
   date: Date
   wineId: WineId
   wineName: WineName
-  wineColor: WineColor
+  wineBeverageType: BeverageType
+  wineColor?: WineColor
   position: string
 }

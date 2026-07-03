@@ -1,12 +1,15 @@
 import { builder } from '~/domain/shared/graphql/builder'
-import { WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
+import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
 import type { ScanResult } from '../types'
 
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({
-  description: 'Structured wine info extracted from a label image (Claude + Gemini).',
+  description: 'Structured beverage info extracted from a label image (Gemini).',
   fields: (t) => ({
     name: t.exposeString('name'),
-    color: t.expose('color', { type: WineColorEnum }),
+    beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
+    color: t.expose('color', { type: WineColorEnum, nullable: true }),
+    style: t.exposeString('style', { nullable: true }),
+    alcoholContent: t.exposeFloat('alcoholContent', { nullable: true }),
     domain: t.exposeString('domain', { nullable: true }),
     vintage: t.exposeInt('vintage', { nullable: true }),
     appellation: t.exposeString('appellation', { nullable: true }),

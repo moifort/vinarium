@@ -1,5 +1,4 @@
 import type { Migration } from '~/system/migration/types'
+import { migration0001 } from './0001-backfill-beverage-type'
 
-// Firestore is provisioned from scratch as part of the Firebase migration.
-// Add new migration files here as the schema evolves.
-export const migrations: Migration[] = []
+export const migrations: Migration[] = [migration0001]

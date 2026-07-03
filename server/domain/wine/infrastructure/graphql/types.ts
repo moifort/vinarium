@@ -1,14 +1,17 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import type { Wine } from '../../types'
-import { WineColorEnum } from './enums'
+import { BeverageTypeEnum, WineColorEnum } from './enums'
 
 export const WineType = builder.objectRef<Wine>('Wine').implement({
-  description: 'A wine in the user’s collection',
+  description: 'A beverage in the user’s collection (wine, spirit, beer, sake ...)',
   fields: (t) => ({
     id: t.expose('id', { type: 'WineId' }),
     userId: t.expose('userId', { type: 'UserId' }),
     name: t.expose('name', { type: 'WineName' }),
-    color: t.expose('color', { type: WineColorEnum }),
+    beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
+    color: t.expose('color', { type: WineColorEnum, nullable: true }),
+    style: t.expose('style', { type: 'BeverageStyle', nullable: true }),
+    alcoholContent: t.exposeFloat('alcoholContent', { nullable: true }),
     vintage: t.expose('vintage', { type: 'Year', nullable: true }),
     domain: t.expose('domain', { type: 'WineDomain', nullable: true }),
     appellation: t.expose('appellation', { type: 'Appellation', nullable: true }),

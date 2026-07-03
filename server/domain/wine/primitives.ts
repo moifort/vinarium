@@ -2,6 +2,8 @@ import { make } from 'ts-brand'
 import { z } from 'zod'
 import type {
   Appellation as AppellationType,
+  BeverageStyle as BeverageStyleType,
+  BeverageType as BeverageTypeType,
   Classification as ClassificationType,
   SortOrder as SortOrderType,
   WineColor as WineColorType,
@@ -41,6 +43,14 @@ export const Classification = (value: unknown) => {
 
 export const WineColor = (value: unknown) =>
   z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(value) as WineColorType
+
+export const BeverageType = (value: unknown) =>
+  z.enum(['wine', 'spirit', 'beer', 'sake', 'cider', 'other']).parse(value) as BeverageTypeType
+
+export const BeverageStyle = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<BeverageStyleType>()(v)
+}
 
 export const WineSort = (value: unknown) =>
   z

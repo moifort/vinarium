@@ -1,11 +1,14 @@
 import type { Brand } from 'ts-brand'
-import type { WineColor } from '~/domain/wine/types'
+import type { BeverageType, WineColor } from '~/domain/wine/types'
 
 export type ImageHash = Brand<string, 'ImageHash'>
 
 export type ScanResult = {
   name: string
-  color: WineColor
+  beverageType: BeverageType
+  color?: WineColor
+  style?: string
+  alcoholContent?: number
   domain?: string
   vintage?: number
   appellation?: string

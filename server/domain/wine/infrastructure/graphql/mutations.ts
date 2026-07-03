@@ -9,11 +9,16 @@ import { WineType } from './types'
 builder.mutationField('addWine', (t) =>
   t.field({
     type: WineType,
-    description: 'Add a new wine to the catalog',
+    description: 'Add a new beverage to the catalog',
     args: { input: t.arg({ type: AddWineInput, required: true }) },
-    resolve: (_root, { input }, { userId }) => {
-      const { name, color, ...data } = stripNulls(input)
-      return WineCommand.add(userId, name, color, data)
+    resolve: async (_root, { input }, { userId }) => {
+      const { name, beverageType, ...data } = stripNulls(input)
+      const result = await WineCommand.add(userId, name, beverageType ?? 'wine', data)
+      if (result === 'color-required')
+        throw new GraphQLError('A wine requires a color', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        })
+      return result
     },
   }),
 )
@@ -30,6 +35,10 @@ builder.mutationField('updateWine', (t) =>
       const result = await WineCommand.update(userId, id, stripNulls(input))
       if (result === 'not-found')
         throw new GraphQLError('Wine not found', { extensions: { code: 'NOT_FOUND' } })
+      if (result === 'color-required')
+        throw new GraphQLError('A wine requires a color', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        })
       return result
     },
   }),

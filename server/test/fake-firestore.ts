@@ -43,6 +43,7 @@ type FakeCollection = {
   doc: (id?: string) => FakeRef
   add: (data: Doc) => Promise<FakeRef>
   where: FakeQuery['where']
+  get: FakeQuery['get']
 }
 
 export const createFakeFirestore = () => {
@@ -129,6 +130,7 @@ export const createFakeFirestore = () => {
       assertEqualityOperator(op)
       return makeQuery(name, [[field, value]])
     },
+    get: () => makeQuery(name, []).get(),
   })
 
   const makeBatch = (): FakeBatch => {

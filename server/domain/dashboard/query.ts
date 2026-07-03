@@ -80,6 +80,7 @@ export namespace DashboardQuery {
   ): ReadyToDrinkWine => ({
     id: bottle.wine.id,
     name: bottle.wine.name,
+    beverageType: bottle.wine.beverageType,
     color: bottle.wine.color,
     position: `${bottle.rowLabel}${bottle.colLabel}`,
     urgent: urgentToDrink({ until: bottle.wine.drinkUntil }, currentYear),
@@ -94,6 +95,7 @@ export namespace DashboardQuery {
       wine: {
         id: bottle.wine.id,
         name: bottle.wine.name,
+        beverageType: bottle.wine.beverageType,
         color: bottle.wine.color,
         vintage: bottle.wine.vintage,
       },
@@ -110,6 +112,7 @@ export namespace DashboardQuery {
         return {
           id: wine.id,
           name: wine.name,
+          beverageType: wine.beverageType,
           color: wine.color,
           vintage: wine.vintage,
           estimatedPrice: wine.purchasePrice,
@@ -126,6 +129,7 @@ export namespace DashboardQuery {
         return {
           id: wine.id,
           name: wine.name,
+          beverageType: wine.beverageType,
           color: wine.color,
           vintage: wine.vintage,
           estimatedPrice: wine.purchasePrice,

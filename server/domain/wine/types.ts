@@ -16,7 +16,9 @@ export type WineName = Brand<string, 'WineName'>
 export type WineDomain = Brand<string, 'WineDomain'>
 export type Appellation = Brand<string, 'Appellation'>
 export type Classification = Brand<string, 'Classification'>
+export type BeverageStyle = Brand<string, 'BeverageStyle'>
 export type WineColor = 'red' | 'white' | 'rosé' | 'sparkling' | 'sweet'
+export type BeverageType = 'wine' | 'spirit' | 'beer' | 'sake' | 'cider' | 'other'
 
 export type WineSort = 'createdAt' | 'updatedAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'
@@ -26,7 +28,10 @@ export type Wine = {
   id: WineId
   userId: UserId
   name: WineName
-  color: WineColor
+  beverageType: BeverageType
+  color?: WineColor
+  style?: BeverageStyle
+  alcoholContent?: number
   domain?: WineDomain
   vintage?: Year
   appellation?: Appellation

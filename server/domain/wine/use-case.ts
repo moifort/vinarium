@@ -5,22 +5,10 @@ import { RecommendationCommand } from '~/domain/recommendation/command'
 import type { UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { WineCommand } from '~/domain/wine/command'
-import type { Wine, WineColor, WineId, WineName } from '~/domain/wine/types'
+import type { WineId } from '~/domain/wine/types'
 import { atomically } from '~/utils/firestore'
 
 export namespace WineUseCase {
-  export const addWithTasting = async (
-    userId: UserId,
-    name: WineName,
-    color: WineColor,
-    data: Partial<Omit<Wine, 'id' | 'userId' | 'name' | 'color' | 'createdAt' | 'updatedAt'>>,
-    tasting?: Omit<Parameters<typeof TastingCommand.create>[0], 'wineId' | 'userId'>,
-  ) => {
-    const wine = await WineCommand.add(userId, name, color, data)
-    if (tasting) await TastingCommand.create({ userId, wineId: wine.id, ...tasting })
-    return wine
-  }
-
   export const removeCompletely = async (userId: UserId, id: WineId) =>
     await atomically(async (batch) => {
       const error = await WineCommand.remove(userId, id, batch)

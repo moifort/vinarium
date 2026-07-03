@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  BeverageStyle,
+  BeverageType,
   SortOrder,
   WineColor,
   WineId,
@@ -25,6 +27,17 @@ describe('WineColor', () => {
   test.each(['red', 'white', 'rosé', 'sparkling', 'sweet'] as const)('accepts "%s"', (color) =>
     expect(WineColor(color) as string).toBe(color))
   test('rejects invalid color', () => expect(() => WineColor('blue')).toThrow())
+})
+
+describe('BeverageType', () => {
+  test.each(['wine', 'spirit', 'beer', 'sake', 'cider', 'other'] as const)('accepts "%s"', (type) =>
+    expect(BeverageType(type) as string).toBe(type))
+  test('rejects invalid type', () => expect(() => BeverageType('juice')).toThrow())
+})
+
+describe('BeverageStyle', () => {
+  test('accepts non-empty string', () => expect(BeverageStyle('IPA') as string).toBe('IPA'))
+  test('rejects empty string', () => expect(() => BeverageStyle('')).toThrow())
 })
 
 describe('WineSort', () => {

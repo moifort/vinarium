@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'bun:test'
 import {
   FAVORITE_RATING,
+  irrelevantAttributes,
   isFavorite,
   isShortlisted,
   readyToDrink,
+  requiresColor,
   urgentToDrink,
   wineStatus,
 } from '~/domain/wine/business-rules'
@@ -89,6 +91,46 @@ describe('isFavorite', () => {
 
   test('false when undefined', () => {
     expect(isFavorite(undefined)).toBe(false)
+  })
+})
+
+describe('irrelevantAttributes', () => {
+  test('a wine has no style', () => {
+    expect(irrelevantAttributes('wine')).toEqual(['style'])
+  })
+
+  test.each([
+    'spirit',
+    'beer',
+    'sake',
+    'cider',
+    'other',
+  ] as const)('a %s has no wine-specific attributes', (beverageType) => {
+    expect(irrelevantAttributes(beverageType)).toEqual([
+      'color',
+      'grapeVarieties',
+      'appellation',
+      'classification',
+      'drinkFrom',
+      'drinkUntil',
+      'servingTemperature',
+    ])
+  })
+})
+
+describe('requiresColor', () => {
+  test('wine requires a color', () => {
+    expect(requiresColor('wine')).toBe(true)
+  })
+
+  test.each([
+    'spirit',
+    'beer',
+    'sake',
+    'cider',
+    'other',
+  ] as const)('%s does not require a color', (beverageType) => {
+    expect(requiresColor(beverageType)).toBe(false)
   })
 })
 

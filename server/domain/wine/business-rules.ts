@@ -1,4 +1,4 @@
-import type { WineStatus } from '~/domain/wine/types'
+import type { BeverageType, WineStatus } from '~/domain/wine/types'
 
 type DrinkWindow = { from?: number; until?: number }
 
@@ -22,6 +22,23 @@ export const urgentToDrink = (window: DrinkWindow, year: number) => {
   if (!window.until) return false
   return window.until <= year + 1
 }
+
+export const requiresColor = (beverageType: BeverageType) => beverageType === 'wine'
+
+const WINE_ONLY_ATTRIBUTES = [
+  'color',
+  'grapeVarieties',
+  'appellation',
+  'classification',
+  'drinkFrom',
+  'drinkUntil',
+  'servingTemperature',
+] as const
+
+// Attributes that carry no meaning for the given beverage type — cleared on save
+// so a wine turned into a beer does not keep a ghost color or grape varieties.
+export const irrelevantAttributes = (beverageType: BeverageType) =>
+  beverageType === 'wine' ? (['style'] as const) : WINE_ONLY_ATTRIBUTES
 
 export const FAVORITE_RATING = 5
 

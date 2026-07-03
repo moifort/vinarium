@@ -1,6 +1,6 @@
 import type { JournalEventView } from '~/domain/journal/types'
 import type { Eur, Year } from '~/domain/shared/types'
-import type { WineColor, WineId, WineName } from '~/domain/wine/types'
+import type { BeverageType, WineColor, WineId, WineName } from '~/domain/wine/types'
 
 export type DashboardView = {
   bottleCount: number
@@ -16,7 +16,8 @@ export type DashboardView = {
 export type FavoriteWine = {
   id: WineId
   name: WineName
-  color: WineColor
+  beverageType: BeverageType
+  color?: WineColor
   vintage?: Year
   estimatedPrice?: Eur
   tastingDate?: Date
@@ -25,7 +26,8 @@ export type FavoriteWine = {
 export type ShortlistWine = {
   id: WineId
   name: WineName
-  color: WineColor
+  beverageType: BeverageType
+  color?: WineColor
   vintage?: Year
   estimatedPrice?: Eur
   tastingDate?: Date
@@ -35,7 +37,8 @@ export type ShortlistWine = {
 export type ReadyToDrinkWine = {
   id: WineId
   name: WineName
-  color: WineColor
+  beverageType: BeverageType
+  color?: WineColor
   position: string
   urgent: boolean
   drinkUntil?: Year
@@ -45,7 +48,8 @@ export type LastBottle = {
   wine: {
     id: WineId
     name: WineName
-    color: WineColor
+    beverageType: BeverageType
+    color?: WineColor
     vintage?: Year
   }
   position: string

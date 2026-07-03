@@ -23,7 +23,7 @@ export namespace JournalQuery {
 
   export const getAllByWineId = async (
     userId: UserId,
-    wine: Pick<Wine, 'id' | 'name' | 'color'>,
+    wine: Pick<Wine, 'id' | 'name' | 'beverageType' | 'color'>,
   ) => {
     const entries = await repository.findByWineId(userId, wine.id)
     const wineMap = keyBy([wine], ({ id }) => id)
@@ -49,7 +49,7 @@ export namespace JournalQuery {
 
   const toView = (
     entry: JournalEntry,
-    wineMap: Record<string, Pick<Wine, 'name' | 'color'>>,
+    wineMap: Record<string, Pick<Wine, 'name' | 'beverageType' | 'color'>>,
   ): JournalEventView => {
     const wine = wineMap[entry.wineId]
     if (!wine) throw new Error(`Wine not found: ${entry.wineId}`)
@@ -58,6 +58,7 @@ export namespace JournalQuery {
       date: entry.date,
       wineId: entry.wineId,
       wineName: wine.name,
+      wineBeverageType: wine.beverageType,
       wineColor: wine.color,
       position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     }

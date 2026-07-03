@@ -11,6 +11,18 @@ export const WineColorEnum = builder.enumType('WineColor', {
   } as const,
 })
 
+export const BeverageTypeEnum = builder.enumType('BeverageType', {
+  description: 'Kind of beverage a bottle contains',
+  values: {
+    WINE: { value: 'wine' },
+    SPIRIT: { value: 'spirit' },
+    BEER: { value: 'beer' },
+    SAKE: { value: 'sake' },
+    CIDER: { value: 'cider' },
+    OTHER: { value: 'other' },
+  } as const,
+})
+
 export const WineSortEnum = builder.enumType('WineSort', {
   description: 'Field used to sort the wine list',
   values: {
