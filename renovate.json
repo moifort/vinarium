@@ -26,6 +26,11 @@
       "description": "Pin graphql to 16.x: @apollo/server 5 requires peer graphql ^16.11.0 and npm (Cloud Function build) rejects 17",
       "matchPackageNames": ["graphql"],
       "allowedVersions": "<17"
+    },
+    {
+      "description": "Pin firebase-admin to 13.x: the Nitro firebase preset injects firebase-functions@latest whose peer is firebase-admin ^11||^12||^13, so 14 breaks the Cloud Function build under npm",
+      "matchPackageNames": ["firebase-admin"],
+      "allowedVersions": "<14"
     }
   ],
   "lockFileMaintenance": {
