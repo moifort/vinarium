@@ -32,6 +32,10 @@ describe('wineStatus', () => {
   test('gifted takes priority over recommended', () => {
     expect(wineStatus({ inCellar: false, gifted: true, recommended: true })).toBe('gifted')
   })
+
+  test('consumed when context is missing', () => {
+    expect(wineStatus(undefined)).toBe('consumed')
+  })
 })
 
 describe('readyToDrink', () => {

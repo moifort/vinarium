@@ -2,14 +2,14 @@ import type { BeverageType, WineStatus } from '~/domain/wine/types'
 
 type DrinkWindow = { from?: number; until?: number }
 
-export const wineStatus = (context: {
+export const wineStatus = (context?: {
   inCellar: boolean
   gifted: boolean
   recommended: boolean
 }): WineStatus => {
-  if (context.inCellar) return 'in-cellar'
-  if (context.gifted) return 'gifted'
-  if (context.recommended) return 'recommended'
+  if (context?.inCellar) return 'in-cellar'
+  if (context?.gifted) return 'gifted'
+  if (context?.recommended) return 'recommended'
   return 'consumed'
 }
 
