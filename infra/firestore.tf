@@ -24,7 +24,14 @@ locals {
 }
 
 resource "google_firestore_index" "composite" {
-  for_each = { for i, idx in local.firestore_indexes : i => idx }
+  # Keyed by a stable identifier (collection + fields), not the array position, so
+  # adding or removing an index never re-keys — and therefore never destroys and
+  # recreates — the others. A position key caused a transient FAILED_PRECONDITION
+  # whenever the list changed in the middle.
+  for_each = {
+    for idx in local.firestore_indexes :
+    "${idx.collectionGroup}|${join(",", [for f in idx.fields : "${f.fieldPath}:${try(f.order, "NA")}"])}" => idx
+  }
 
   provider    = google-beta
   project     = google_project.this.project_id
@@ -39,4 +46,56 @@ resource "google_firestore_index" "composite" {
       order      = try(fields.value.order, null)
     }
   }
+}
+
+# Migrate existing state from the old position keys to the stable keys so the
+# switch is a no-op rename (no destroy/recreate, no index rebuild, no downtime).
+# These blocks can be removed once state is migrated on all environments.
+moved {
+  from = google_firestore_index.composite["0"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,createdAt:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["1"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,color:ASCENDING,createdAt:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["2"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,vintage:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["3"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,updatedAt:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["4"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,giftedBy:ASCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["5"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,region:ASCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["6"]
+  to   = google_firestore_index.composite["wines|userId:ASCENDING,purchasePrice:ASCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["7"]
+  to   = google_firestore_index.composite["cellar|userId:ASCENDING,createdAt:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["8"]
+  to   = google_firestore_index.composite["journal|userId:ASCENDING,date:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["9"]
+  to   = google_firestore_index.composite["journal|userId:ASCENDING,wineId:ASCENDING,date:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["10"]
+  to   = google_firestore_index.composite["tasting|userId:ASCENDING,rating:DESCENDING"]
+}
+moved {
+  from = google_firestore_index.composite["11"]
+  to   = google_firestore_index.composite["tasting|userId:ASCENDING,shortlist:ASCENDING,rating:DESCENDING"]
 }
