@@ -9,9 +9,9 @@ struct WineListRow: View {
     let isFavorite: Bool
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
+        HStack(alignment: .top) {
             BeverageBadge(beverageType: beverageType, color: color)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(name)
                     .font(.headline)
                 if let subtitle {
@@ -20,15 +20,13 @@ struct WineListRow: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             if let rating {
                 StarRatingView(rating: rating)
             }
             if isFavorite {
                 Image(systemName: "heart.fill")
                     .foregroundStyle(.red)
-                    .font(.default)
-                    .frame(alignment: .topLeading)
             }
         }
     }
