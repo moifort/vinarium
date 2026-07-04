@@ -89,6 +89,7 @@ struct WineListView: View {
             wine.vintage.map { "\($0)" },
             wine.region,
             wine.purchasePrice.map { String(format: "%.0f €", $0) },
+            wine.giftedBy.map { "Offert par \(abbreviated($0))" },
             wine.giftedTo.map { "Offert à \(abbreviated($0))" },
             wine.recommendedBy.map { "Conseillé par \(abbreviated($0))" },
         ].compactMap { $0 }

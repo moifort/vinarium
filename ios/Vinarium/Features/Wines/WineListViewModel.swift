@@ -33,7 +33,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "Tous vos vins ajoutés"
         case .favorites: "Vos coups de cœur"
-        case .gifted: "Vins offerts à vos proches"
+        case .gifted: "Vins qu'on vous a offerts"
         case .recommended: "Vins recommandés par vos proches"
         }
     }

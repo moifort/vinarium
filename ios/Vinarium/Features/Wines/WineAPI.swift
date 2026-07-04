@@ -164,7 +164,9 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
         placeName: w.placeName,
         isInCellar: w.cellar != nil,
         consumedDate: w.consumption?.consumedDate.flatMap { GraphQLHelpers.parseISO8601($0) },
-        isGifted: w.gift != nil,
+        // « Offerts » = cadeaux reçus, portés par le scalaire giftedBy sur le vin
+        // (le satellite gift, lui, représente un vin donné à quelqu'un).
+        isGifted: w.giftedBy != nil,
         isRecommended: w.recommendation != nil,
         createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
         updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date()
