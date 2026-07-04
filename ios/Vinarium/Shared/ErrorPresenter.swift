@@ -22,6 +22,9 @@ import SwiftUI
 @Observable
 final class ErrorPresenter {
     var message: String?
+    /// True while `run` is awaiting the network call — bind a button's spinner /
+    /// disabled state to this so every mutation shows a loader.
+    private(set) var isRunning = false
 
     /// Runs `operation`. On success, calls `onSuccess` (dismiss the sheet, refresh, ...).
     /// On failure, reports the error and stores its message so `.errorAlert` presents it;
@@ -30,6 +33,8 @@ final class ErrorPresenter {
         _ operation: @MainActor () async throws -> Void,
         onSuccess: @MainActor () -> Void = {}
     ) async {
+        isRunning = true
+        defer { isRunning = false }
         do {
             try await operation()
             onSuccess()

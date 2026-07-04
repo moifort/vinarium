@@ -67,6 +67,16 @@ enum GraphQLHelpers {
     static func graphQLNullable<T>(_ value: T?) -> GraphQLNullable<T> {
         value.map { .some($0) } ?? .none
     }
+
+    /// String overload: an empty/blank optional string is treated as absent
+    /// (`.none`), never sent as `""`. Many server fields are branded types that
+    /// require at least one character (PlaceName, Region, Domain, …), so sending
+    /// `""` is rejected as BAD_USER_INPUT.
+    static func graphQLNullable(_ value: String?) -> GraphQLNullable<String> {
+        guard let value, !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else { return .none }
+        return .some(value)
+    }
 }
 
 enum APIError: LocalizedError {
