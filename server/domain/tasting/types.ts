@@ -11,5 +11,5 @@ export type TastingNote = {
   rating?: Rating
   tastingNotes?: string
   contacts?: string[]
-  shortlist?: boolean
+  favorite?: boolean
 }

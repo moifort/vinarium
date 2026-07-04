@@ -90,8 +90,8 @@ enum CellarAPI {
         let input = VinariumGraphQL.ConsumptionInput(
             consumedDate: GraphQLHelpers.graphQLNullable(consumedDate),
             contacts: GraphQLHelpers.graphQLNullable(contacts),
+            favorite: .none,
             rating: GraphQLHelpers.graphQLNullable(rating),
-            shortlist: .none,
             tastingNotes: GraphQLHelpers.graphQLNullable(tastingNotes)
         )
         _ = try await GraphQLHelpers.perform(

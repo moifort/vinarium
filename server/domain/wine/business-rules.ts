@@ -40,8 +40,6 @@ const WINE_ONLY_ATTRIBUTES = [
 export const irrelevantAttributes = (beverageType: BeverageType) =>
   beverageType === 'wine' ? (['style'] as const) : WINE_ONLY_ATTRIBUTES
 
-export const FAVORITE_RATING = 5
-
-export const isFavorite = (rating?: number) => rating === FAVORITE_RATING
-
-export const isShortlisted = (tasting?: { shortlist?: boolean }) => tasting?.shortlist === true
+// Favorite is now an explicit heart flag, decoupled from the star rating:
+// a wine can be a favorite whatever its note (or with no note at all).
+export const isFavorite = (tasting?: { favorite?: boolean }) => tasting?.favorite === true

@@ -3,16 +3,12 @@ import SwiftUI
 struct ScanReviewPage: View {
     let scanResult: ScanResult
     let imageData: Data
-    let destination: ScanDestination
-    let onSave: (CreateWineRequest) async -> Void
-    let onFavorite: (CreateWineRequest, Date, [String], String?) async -> Void
-    let onShortlist: (CreateWineRequest, Date, Int?, [String], String?) async -> Void
-    let onRecommend: (CreateWineRequest, String?, String?) async -> Void
-    /// Reçoit l'état édité du formulaire pour que le retour à l'écran destination ne perde rien.
-    let onChangeDestination: (ScanResult) -> Void
+    var isSaving: Bool = false
+    let onSubmit: (ScanSubmission) async -> Void
     let onCancel: () -> Void
 
     @State private var showLocationEditor = false
+    @State private var showChoices = false
     @State private var name: String
     @State private var beverageType: BeverageType
     @State private var color: WineColor
@@ -32,11 +28,12 @@ struct ScanReviewPage: View {
     @State private var showGiftedByPicker = false
     @State private var location: DiscoveryLocationDraft?
 
-    // Champs de la destination (dégustation / conseil), saisis inline
+    // Champs optionnels de dégustation / conseil, tous saisissables inline.
+    @State private var favorite = false
+    @State private var rating = 0
     @State private var tastingDate = Date()
     @State private var contacts: [String] = []
     @State private var tastingNotes = ""
-    @State private var rating = 3
     @State private var recommenderName = ""
     @State private var recommendationComment = ""
     @State private var showContactPicker = false
@@ -45,23 +42,15 @@ struct ScanReviewPage: View {
     init(
         scanResult: ScanResult,
         imageData: Data,
-        destination: ScanDestination,
+        isSaving: Bool = false,
         initialLocation: DiscoveryLocationDraft? = nil,
-        onSave: @escaping (CreateWineRequest) async -> Void,
-        onFavorite: @escaping (CreateWineRequest, Date, [String], String?) async -> Void = { _, _, _, _ in },
-        onShortlist: @escaping (CreateWineRequest, Date, Int?, [String], String?) async -> Void = { _, _, _, _, _ in },
-        onRecommend: @escaping (CreateWineRequest, String?, String?) async -> Void = { _, _, _ in },
-        onChangeDestination: @escaping (ScanResult) -> Void = { _ in },
+        onSubmit: @escaping (ScanSubmission) async -> Void,
         onCancel: @escaping () -> Void = {}
     ) {
         self.scanResult = scanResult
         self.imageData = imageData
-        self.destination = destination
-        self.onSave = onSave
-        self.onFavorite = onFavorite
-        self.onShortlist = onShortlist
-        self.onRecommend = onRecommend
-        self.onChangeDestination = onChangeDestination
+        self.isSaving = isSaving
+        self.onSubmit = onSubmit
         self.onCancel = onCancel
         _name = State(initialValue: scanResult.name)
         _beverageType = State(initialValue: scanResult.beverageType)
@@ -85,15 +74,15 @@ struct ScanReviewPage: View {
 
     var body: some View {
         Form {
-            destinationSection
             photoSection
             mainInfoSection
             if isWine { originSection }
-            destinationDetailsSection
-            locationSection
+            tastingSection
             detailsSection
             if isWine { gardeSection }
             giftedBySection
+            conseilSection
+            locationSection
         }
         .navigationTitle("Vérifier la bouteille")
         .navigationBarTitleDisplayMode(.inline)
@@ -102,12 +91,26 @@ struct ScanReviewPage: View {
                 Button("Fermer", systemImage: "xmark") { onCancel() }
             }
 
-            ToolbarItemGroup(placement: .primaryAction) {
-                AsyncToolbarButton(title: destination.ctaTitle, systemImage: "plus") {
-                    await submit()
+            ToolbarItem(placement: .primaryAction) {
+                if isSaving {
+                    ProgressView()
+                } else {
+                    Button("Ajouter", systemImage: "plus") { showChoices = true }
+                        .accessibilityIdentifier("review-save-button")
                 }
-                .accessibilityIdentifier("review-save-button")
             }
+        }
+        .confirmationDialog(
+            "Ajouter cette bouteille",
+            isPresented: $showChoices,
+            titleVisibility: .visible
+        ) {
+            ForEach(ScanDestination.allCases) { choice in
+                Button(choice.label) { Task { await submit(choice) } }
+                    .accessibilityIdentifier(choice.accessibilityId)
+            }
+        } message: {
+            Text("Que veux-tu en faire ?")
         }
         .sheet(isPresented: $showGiftedByPicker) {
             ContactPicker { name in
@@ -135,26 +138,6 @@ struct ScanReviewPage: View {
     }
 
     // MARK: - Sections
-
-    private var destinationSection: some View {
-        Section {
-            HStack {
-                Label {
-                    Text(destination.label)
-                        .fontWeight(.medium)
-                } icon: {
-                    Image(systemName: destination.icon)
-                        .foregroundStyle(.tint)
-                }
-                Spacer()
-                Button("Modifier") { onChangeDestination(editedScanResult()) }
-                    .font(.subheadline)
-                    .accessibilityIdentifier("review-change-destination-button")
-            }
-        } header: {
-            Text("Destination")
-        }
-    }
 
     @ViewBuilder
     private var photoSection: some View {
@@ -259,65 +242,28 @@ struct ScanReviewPage: View {
         }
     }
 
-    @ViewBuilder
-    private var destinationDetailsSection: some View {
-        switch destination {
-        case .cellar:
-            EmptyView()
-
-        case .favorite:
-            Section {
-                tastingDateRow
-                contactsRows
-                tastingNotesField
-            } header: {
-                Text("Dégustation")
+    private var tastingSection: some View {
+        Section {
+            Toggle(isOn: $favorite) {
+                Label("Favori", systemImage: favorite ? "heart.fill" : "heart")
+                    .foregroundStyle(favorite ? .red : .primary)
             }
+            .accessibilityIdentifier("review-favorite-toggle")
 
-        case .shortlist:
-            Section {
-                tastingDateRow
-                Picker(selection: $rating) {
-                    ForEach(1...4, id: \.self) { value in
-                        Text("\(value) / 5").tag(value)
-                    }
-                } label: {
-                    Label("Note", systemImage: "star")
-                }
-                .accessibilityIdentifier("shortlist-rating-picker")
-                contactsRows
-                tastingNotesField
-            } header: {
-                Text("Dégustation")
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Note", systemImage: "star")
+                    .foregroundStyle(.secondary)
+                InteractiveStarRating(rating: $rating)
             }
+            .padding(.vertical, 4)
 
-        case .recommendation:
-            Section {
-                HStack {
-                    Label("Conseillé par", systemImage: "person.badge.star")
-                    TextField("Nom", text: $recommenderName)
-                        .textInputAutocapitalization(.words)
-                        .multilineTextAlignment(.trailing)
-                        .accessibilityIdentifier("review-recommender-field")
-                    Button {
-                        showRecommenderPicker = true
-                    } label: {
-                        Image(systemName: "person.crop.circle")
-                            .font(.title2)
-                            .foregroundStyle(.blue)
-                    }
-                    .buttonStyle(.plain)
-                }
-                VStack(alignment: .leading, spacing: 8) {
-                    Label("Commentaires", systemImage: "text.quote")
-                        .foregroundStyle(.secondary)
-                    TextField("Pourquoi ce conseil ?", text: $recommendationComment, axis: .vertical)
-                        .lineLimit(3...6)
-                }
-                .padding(.vertical, 4)
-            } header: {
-                Text("Conseil")
-            }
+            tastingDateRow
+            contactsRows
+            tastingNotesField
+        } header: {
+            Text("Dégustation")
+        } footer: {
+            Text("Un cœur pour vos coups de cœur, des étoiles pour la note — les deux sont indépendants.")
         }
     }
 
@@ -365,6 +311,35 @@ struct ScanReviewPage: View {
                 .lineLimit(3...6)
         }
         .padding(.vertical, 4)
+    }
+
+    private var conseilSection: some View {
+        Section {
+            HStack {
+                Label("Conseillé par", systemImage: "person.badge.star")
+                TextField("Nom", text: $recommenderName)
+                    .textInputAutocapitalization(.words)
+                    .multilineTextAlignment(.trailing)
+                    .accessibilityIdentifier("review-recommender-field")
+                Button {
+                    showRecommenderPicker = true
+                } label: {
+                    Image(systemName: "person.crop.circle")
+                        .font(.title2)
+                        .foregroundStyle(.blue)
+                }
+                .buttonStyle(.plain)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Commentaires", systemImage: "text.quote")
+                    .foregroundStyle(.secondary)
+                TextField("Pourquoi ce conseil ?", text: $recommendationComment, axis: .vertical)
+                    .lineLimit(3...6)
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Conseil")
+        }
     }
 
     private var locationSection: some View {
@@ -461,50 +436,19 @@ struct ScanReviewPage: View {
 
     // MARK: - Actions
 
-    private func submit() async {
-        var request = buildRequest()
-        switch destination {
-        case .cellar:
-            await onSave(request)
-        case .favorite:
-            request.rating = 5
-            await onFavorite(request, tastingDate, contacts, tastingNotes.isEmpty ? nil : tastingNotes)
-        case .shortlist:
-            request.shortlist = true
-            request.rating = rating
-            await onShortlist(request, tastingDate, rating, contacts, tastingNotes.isEmpty ? nil : tastingNotes)
-        case .recommendation:
-            await onRecommend(
-                request,
-                recommenderName.isEmpty ? nil : recommenderName,
-                recommendationComment.isEmpty ? nil : recommendationComment
-            )
-        }
-    }
-
-    /// L'état courant du formulaire re-projeté en ScanResult, pour ré-ouvrir la review
-    /// avec les mêmes valeurs après un aller-retour par l'écran destination.
-    private func editedScanResult() -> ScanResult {
-        ScanResult(
-            name: name,
-            beverageType: beverageType,
-            domain: domain.isEmpty ? nil : domain,
-            vintage: Int(vintage),
-            appellation: appellation.isEmpty ? nil : appellation,
-            region: region.isEmpty ? nil : region,
-            country: country.isEmpty ? nil : country,
-            color: isWine ? color : nil,
-            style: style.isEmpty ? nil : style,
-            grapeVarieties: grapeVarieties
-                .split(separator: ",")
-                .map { $0.trimmingCharacters(in: .whitespaces) }
-                .filter { !$0.isEmpty },
-            alcoholContent: Double(alcoholContent.replacingOccurrences(of: ",", with: ".")),
-            classification: classification.isEmpty ? nil : classification,
-            drinkFrom: Int(drinkFrom),
-            drinkUntil: Int(drinkUntil),
-            estimatedPrice: Double(estimatedPrice)
+    private func submit(_ choice: ScanDestination) async {
+        let submission = ScanSubmission(
+            request: buildRequest(),
+            choice: choice,
+            favorite: favorite,
+            rating: rating,
+            tastingDate: tastingDate,
+            contacts: contacts,
+            tastingNotes: tastingNotes.isEmpty ? nil : tastingNotes,
+            recommenderName: recommenderName.isEmpty ? nil : recommenderName,
+            recommendationComment: recommendationComment.isEmpty ? nil : recommendationComment
         )
+        await onSubmit(submission)
     }
 
     private func buildRequest() -> CreateWineRequest {
@@ -536,6 +480,7 @@ struct ScanReviewPage: View {
         )
     }
 }
+
 // MARK: - Preview
 
 private let mockImageData: Data = {
@@ -554,7 +499,7 @@ private let mockImageData: Data = {
     return image.jpegData(compressionQuality: 0.8) ?? Data()
 }()
 
-#Preview("Vin vers la cave") {
+#Preview("Vin") {
     let mockScanResult = ScanResult(
         name: "Château Margaux",
         beverageType: .wine,
@@ -577,13 +522,12 @@ private let mockImageData: Data = {
         ScanReviewPage(
             scanResult: mockScanResult,
             imageData: mockImageData,
-            destination: .cellar,
-            onSave: { _ in }
+            onSubmit: { _ in }
         )
     }
 }
 
-#Preview("Bière en favori") {
+#Preview("Bière") {
     let mockScanResult = ScanResult(
         name: "La Chouffe",
         beverageType: .beer,
@@ -606,8 +550,7 @@ private let mockImageData: Data = {
         ScanReviewPage(
             scanResult: mockScanResult,
             imageData: mockImageData,
-            destination: .favorite,
-            onSave: { _ in }
+            onSubmit: { _ in }
         )
     }
 }

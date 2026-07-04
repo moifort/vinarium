@@ -22,8 +22,7 @@ struct WineListContent: View {
                                     name: item.name,
                                     subtitle: item.subtitle,
                                     rating: item.rating,
-                                    isFavorite: item.isFavorite,
-                                    isShortlist: item.isShortlist
+                                    isFavorite: item.isFavorite
                                 )
                             }
                             .tint(.primary)
@@ -41,10 +40,7 @@ struct WineListContent: View {
     private var emptyState: some View {
         switch mode {
         case .favorites:
-            ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos vins pr\u{00E9}f\u{00E9}r\u{00E9}s en favoris"))
-                .frame(maxHeight: .infinity)
-        case .shortlist:
-            ContentUnavailableView("Aucun vin à retenir", systemImage: "bookmark", description: Text("Marquez des vins à essayer encore depuis le scan ou le détail"))
+            ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos coups de c\u{0153}ur en favoris"))
                 .frame(maxHeight: .infinity)
         case .gifted:
             ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins offerts appara\u{00EE}tront ici"))
@@ -74,7 +70,6 @@ extension WineListContent {
         let subtitle: String?
         let rating: Int?
         let isFavorite: Bool
-        let isShortlist: Bool
     }
 }
 
@@ -83,11 +78,11 @@ extension WineListContent {
         mode: .all,
         groups: [
             .init(label: "2018", items: [
-                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isShortlist: false),
-                .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false, isShortlist: false),
+                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true),
+                .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false),
             ]),
             .init(label: "2021", items: [
-                .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true, isShortlist: false),
+                .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
             ]),
         ],
         onWineTapped: { _ in }

@@ -17,7 +17,6 @@ struct WineDetailView: View {
     @State private var showDeleteConfirmation = false
     @State private var showPlacement = false
     @State private var showMove = false
-    @State private var showShortlist = false
     @State private var showFavorite = false
     @State private var showRecommendation = false
     @State private var isEditing = false
@@ -149,35 +148,19 @@ struct WineDetailView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showShortlist) {
-                if let detail {
-                    ShortlistSheet { date, contacts, notes, rating in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            try await WineAPI.addToShortlist(
-                                id: detail.id,
-                                consumedDate: formatter.string(from: date),
-                                rating: rating,
-                                contacts: contacts.isEmpty ? nil : contacts,
-                                tastingNotes: notes
-                            )
-                        } onSuccess: {
-                            showShortlist = false
-                            Task {
-                                await loadData()
-                                onUpdated?()
-                            }
-                        }
-                    }
-                    .presentationDetents([.medium])
-                    .errorAlert(sheetError)
-                }
-            }
             .sheet(isPresented: $showFavorite) {
                 if let detail {
-                    FavoriteSheet { _, _, _ in
+                    FavoriteSheet { date, contacts, notes, rating in
+                        let formatter = ISO8601DateFormatter()
                         await sheetError.run {
-                            try await WineAPI.addToFavorites(id: detail.id)
+                            try await WineAPI.recordTasting(
+                                id: detail.id,
+                                consumedDate: formatter.string(from: date),
+                                rating: rating == 0 ? nil : rating,
+                                contacts: contacts.isEmpty ? nil : contacts,
+                                tastingNotes: notes,
+                                favorite: true
+                            )
                         } onSuccess: {
                             showFavorite = false
                             Task {
@@ -277,24 +260,16 @@ struct WineDetailView: View {
 
                 AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {
                     await actionError.run {
-                        try await WineAPI.addToFavorites(id: detail.id)
+                        try await WineAPI.setFavorite(id: detail.id, favorite: true)
                     } onSuccess: {
                         dismiss()
                         onRemoved?()
                     }
                 }
-
-                Button {
-                    showShortlist = true
-                } label: {
-                    Label("À retenir", systemImage: "bookmark")
-                }
-                .accessibilityIdentifier("detail-shortlist-button")
             }
         }
         if let detail {
-            let isFavorite = detail.consumption?.rating == 5
-            let isShortlisted = detail.consumption?.shortlist == true && !isFavorite
+            let isFavorite = detail.consumption?.favorite == true
             let canOfferFromCellar = detail.cellar != nil && detail.cellar?.dateOut == nil
 
             ToolbarItemGroup {
@@ -304,21 +279,30 @@ struct WineDetailView: View {
                     }
 
                     Section {
-                        Button {
-                            showFavorite = true
-                        } label: {
-                            Label(isFavorite ? "Déjà en favoris" : "Ajouter aux favoris", systemImage: isFavorite ? "heart.fill" : "heart")
+                        if isFavorite {
+                            Button {
+                                Task {
+                                    await actionError.run {
+                                        try await WineAPI.setFavorite(id: detail.id, favorite: false)
+                                    } onSuccess: {
+                                        Task {
+                                            await loadData()
+                                            onUpdated?()
+                                        }
+                                    }
+                                }
+                            } label: {
+                                Label("Retirer des favoris", systemImage: "heart.slash")
+                            }
+                            .accessibilityIdentifier("menu-favorite-button")
+                        } else {
+                            Button {
+                                showFavorite = true
+                            } label: {
+                                Label("Ajouter aux favoris", systemImage: "heart")
+                            }
+                            .accessibilityIdentifier("menu-favorite-button")
                         }
-                        .disabled(isFavorite)
-                        .accessibilityIdentifier("menu-favorite-button")
-
-                        Button {
-                            showShortlist = true
-                        } label: {
-                            Label(isShortlisted ? "Déjà à retenir" : "À retenir", systemImage: isShortlisted ? "bookmark.fill" : "bookmark")
-                        }
-                        .disabled(isShortlisted)
-                        .accessibilityIdentifier("menu-shortlist-button")
 
                         Button {
                             showRecommendation = true

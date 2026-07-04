@@ -88,8 +88,8 @@ struct WineListPage: View {
             colorFilter: $color,
             groups: [
                 .init(label: "Mars 2026", items: [
-                    .init(id: "1", color: .red, name: "Château Margaux", subtitle: "2018 • Bordeaux", rating: 5, isFavorite: true, isShortlist: false),
-                    .init(id: "2", color: .white, name: "Pouilly-Fumé", subtitle: "2021 • Loire", rating: 4, isFavorite: false, isShortlist: false),
+                    .init(id: "1", color: .red, name: "Château Margaux", subtitle: "2018 • Bordeaux", rating: 5, isFavorite: true),
+                    .init(id: "2", color: .white, name: "Pouilly-Fumé", subtitle: "2021 • Loire", rating: 4, isFavorite: false),
                 ]),
             ],
             onWineTapped: { _ in },

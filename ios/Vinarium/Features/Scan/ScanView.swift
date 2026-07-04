@@ -6,8 +6,8 @@ import SwiftUI
 enum ScanFlowResult {
     case addedToCellar
     case addedToFavorites
-    case addedToShortlist
     case addedToRecommendations
+    case added
 }
 
 struct ScanView: View {
@@ -106,41 +106,14 @@ struct ScanView: View {
                 ScanAnalyzingPage()
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-            case .destination(let result, let imageData):
-                NavigationStack {
-                    ScanDestinationPage(
-                        name: result.name,
-                        beverageType: result.beverageType,
-                        color: result.color,
-                        style: result.style,
-                        vintage: result.vintage,
-                        onSelect: { destination in
-                            viewModel.step = .review(result, imageData, destination)
-                        },
-                        onCancel: { viewModel.reset() }
-                    )
-                }
-
-            case .review(let result, let imageData, let destination):
+            case .review(let result, let imageData):
                 NavigationStack {
                     ScanReviewPage(
                         scanResult: result,
                         imageData: imageData,
-                        destination: destination,
+                        isSaving: viewModel.isSaving,
                         initialLocation: viewModel.pendingLocation,
-                        onSave: { request in await viewModel.saveWine(request) },
-                        onFavorite: { request, date, contacts, notes in
-                            await viewModel.saveAsFavorite(request, consumedDate: date, contacts: contacts, tastingNotes: notes)
-                        },
-                        onShortlist: { request, date, rating, contacts, notes in
-                            await viewModel.saveAsShortlist(request, consumedDate: date, rating: rating, contacts: contacts, tastingNotes: notes)
-                        },
-                        onRecommend: { request, recommenderName, comment in
-                            await viewModel.saveAsRecommendation(request, recommenderName: recommenderName, comment: comment)
-                        },
-                        onChangeDestination: { editedResult in
-                            viewModel.step = .destination(editedResult, imageData)
-                        },
+                        onSubmit: { submission in await viewModel.submit(submission) },
                         onCancel: { viewModel.reset() }
                     )
                 }
@@ -186,18 +159,18 @@ struct ScanView: View {
                         onFlowCompleted(.addedToFavorites)
                     }
 
-            case .shortlistSaved:
-                Color.clear
-                    .onAppear {
-                        viewModel.reset()
-                        onFlowCompleted(.addedToShortlist)
-                    }
-
             case .recommendationSaved:
                 Color.clear
                     .onAppear {
                         viewModel.reset()
                         onFlowCompleted(.addedToRecommendations)
+                    }
+
+            case .saved:
+                Color.clear
+                    .onAppear {
+                        viewModel.reset()
+                        onFlowCompleted(.added)
                     }
             }
         }

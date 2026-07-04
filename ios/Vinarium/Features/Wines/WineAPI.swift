@@ -90,29 +90,33 @@ enum WineAPI {
         )
     }
 
-    static func addToFavorites(id: String) async throws {
+    /// Toggle the favorite (heart) flag without clobbering an existing tasting note.
+    static func setFavorite(id: String, favorite: Bool) async throws {
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.MarkFavoriteMutation(wineId: id)
+            mutation: VinariumGraphQL.MarkFavoriteMutation(wineId: id, favorite: favorite)
         )
     }
 
-    static func addToShortlist(
+    /// Record a tasting note (rating, notes, favorite flag) for a wine.
+    static func recordTasting(
         id: String,
         consumedDate: String? = nil,
         rating: Int? = nil,
         contacts: [String]? = nil,
-        tastingNotes: String? = nil
+        tastingNotes: String? = nil,
+        favorite: Bool? = nil
     ) async throws {
-        let input = VinariumGraphQL.ShortlistInput(
+        let input = VinariumGraphQL.TastingInput(
             consumedDate: GraphQLHelpers.graphQLNullable(consumedDate),
             contacts: GraphQLHelpers.graphQLNullable(contacts),
+            favorite: GraphQLHelpers.graphQLNullable(favorite),
             rating: GraphQLHelpers.graphQLNullable(rating),
             tastingNotes: GraphQLHelpers.graphQLNullable(tastingNotes)
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.AddToShortlistMutation(wineId: id, input: input)
+            mutation: VinariumGraphQL.RecordTastingMutation(wineId: id, input: input)
         )
     }
 }
@@ -151,7 +155,7 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
         notes: w.notes,
         giftedBy: w.giftedBy,
         rating: w.consumption?.rating,
-        shortlist: w.consumption?.shortlist,
+        isFavorite: w.consumption?.favorite ?? false,
         giftedTo: w.gift?.recipientName,
         recommendedBy: w.recommendation?.recommenderName,
         contacts: w.consumption?.contacts,
@@ -204,7 +208,7 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
                 rating: $0.rating,
                 tastingNotes: $0.tastingNotes,
                 contacts: $0.contacts,
-                shortlist: $0.shortlist
+                favorite: $0.favorite
             )
         },
         gift: w.gift.map {

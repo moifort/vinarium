@@ -4,13 +4,27 @@ import SwiftUI
 enum ScanStep {
     case camera
     case scanning
-    case destination(ScanResult, Data)
-    case review(ScanResult, Data, ScanDestination)
+    case review(ScanResult, Data)
     case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
     case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
     case favoriteSaved
-    case shortlistSaved
     case recommendationSaved
+    case saved
+}
+
+/// État complet de la fiche au moment de valider, plus le choix de la popup.
+/// Le vin porte les champs scalaires (dont `giftedBy`) ; la dégustation et le
+/// conseil sont persistés séparément selon ce qui est rempli.
+struct ScanSubmission {
+    let request: CreateWineRequest
+    let choice: ScanDestination
+    let favorite: Bool
+    let rating: Int
+    let tastingDate: Date
+    let contacts: [String]
+    let tastingNotes: String?
+    let recommenderName: String?
+    let recommendationComment: String?
 }
 
 @MainActor @Observable
@@ -19,6 +33,10 @@ final class ScanViewModel {
     var error: String?
     var isSaving = false
     var pendingLocation: DiscoveryLocationDraft?
+    /// Vin déjà créé pendant cette session de review : si une écriture
+    /// post-création (dégustation / conseil) échoue, un nouveau clic ne recrée
+    /// pas un doublon — on réutilise le vin existant.
+    private var createdWine: Wine?
 
     func capturePhoto(_ imageData: Data) {
         step = .scanning
@@ -27,7 +45,7 @@ final class ScanViewModel {
         Task {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
-                self.step = .destination(result, imageData)
+                self.step = .review(result, imageData)
             } catch {
                 self.error = reportError(error)
                 self.step = .camera
@@ -49,89 +67,84 @@ final class ScanViewModel {
         }
     }
 
-    func saveWine(_ request: CreateWineRequest) async {
+    func submit(_ submission: ScanSubmission) async {
         guard !isSaving else { return }
         isSaving = true
         error = nil
         defer { isSaving = false }
         do {
-            let wine = try await WineAPI.create(request)
-            step = .placing(
-                id: wine.id,
-                name: wine.name,
-                beverageType: wine.beverageType,
-                color: wine.color,
-                vintage: wine.vintage
-            )
+            // Réutilise le vin déjà créé si un retry suit un échec post-création.
+            let wine: Wine
+            if let existing = createdWine {
+                wine = existing
+            } else {
+                wine = try await WineAPI.create(submission.request)
+                createdWine = wine
+            }
+            try await persistTasting(for: wine.id, submission)
+            try await persistRecommendation(for: wine.id, submission)
+
+            switch submission.choice {
+            case .cellar:
+                step = .placing(
+                    id: wine.id,
+                    name: wine.name,
+                    beverageType: wine.beverageType,
+                    color: wine.color,
+                    vintage: wine.vintage
+                )
+            case .favorite:
+                step = .favoriteSaved
+            case .recommendation:
+                step = .recommendationSaved
+            case .justSave:
+                step = .saved
+            }
         } catch {
             self.error = reportError(error)
         }
     }
 
-    func saveAsFavorite(_ request: CreateWineRequest, consumedDate: Date, contacts: [String], tastingNotes: String?) async {
-        guard !isSaving else { return }
-        isSaving = true
-        error = nil
-        defer { isSaving = false }
-        do {
-            var enrichedRequest = request
-            let formatter = ISO8601DateFormatter()
-            enrichedRequest.consumedDate = formatter.string(from: consumedDate)
-            enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
-            enrichedRequest.tastingNotes = tastingNotes
-            _ = try await WineAPI.create(enrichedRequest)
-            step = .favoriteSaved
-        } catch {
-            self.error = reportError(error)
-        }
+    /// Enregistre une note de dégustation si la fiche en porte une : coup de cœur
+    /// explicite, choix « Favori », note en étoiles ou commentaires/contacts.
+    private func persistTasting(for wineId: String, _ s: ScanSubmission) async throws {
+        let markFavorite = s.favorite || s.choice == .favorite
+        let hasTastingDetails = s.rating > 0 || s.tastingNotes != nil || !s.contacts.isEmpty
+        guard markFavorite || hasTastingDetails else { return }
+
+        let formatter = ISO8601DateFormatter()
+        try await WineAPI.recordTasting(
+            id: wineId,
+            consumedDate: formatter.string(from: s.tastingDate),
+            rating: s.rating == 0 ? nil : s.rating,
+            contacts: s.contacts.isEmpty ? nil : s.contacts,
+            tastingNotes: s.tastingNotes,
+            favorite: markFavorite ? true : nil
+        )
     }
 
-    func saveAsShortlist(_ request: CreateWineRequest, consumedDate: Date, rating: Int?, contacts: [String], tastingNotes: String?) async {
-        guard !isSaving else { return }
-        isSaving = true
-        error = nil
-        defer { isSaving = false }
-        do {
-            var enrichedRequest = request
-            let formatter = ISO8601DateFormatter()
-            enrichedRequest.consumedDate = formatter.string(from: consumedDate)
-            enrichedRequest.contacts = contacts.isEmpty ? nil : contacts
-            enrichedRequest.tastingNotes = tastingNotes
-            enrichedRequest.rating = rating
-            enrichedRequest.shortlist = true
-            _ = try await WineAPI.create(enrichedRequest)
-            step = .shortlistSaved
-        } catch {
-            self.error = reportError(error)
-        }
-    }
-
-    func saveAsRecommendation(_ request: CreateWineRequest, recommenderName: String?, comment: String?) async {
-        guard !isSaving else { return }
-        isSaving = true
-        error = nil
-        defer { isSaving = false }
-        do {
-            let wine = try await WineAPI.create(request)
-            try await RecommendationAPI.create(wineId: wine.id, recommenderName: recommenderName, comment: comment)
-            step = .recommendationSaved
-        } catch {
-            self.error = reportError(error)
-        }
+    /// Enregistre un conseil si un « conseillé par » est renseigné ou si le choix
+    /// de la popup est « Conseillé ».
+    private func persistRecommendation(for wineId: String, _ s: ScanSubmission) async throws {
+        let name = s.recommenderName?.isEmpty == false ? s.recommenderName : nil
+        let comment = s.recommendationComment?.isEmpty == false ? s.recommendationComment : nil
+        guard s.choice == .recommendation || name != nil || comment != nil else { return }
+        try await RecommendationAPI.create(wineId: wineId, recommenderName: name, comment: comment)
     }
 
     func reset() {
         step = .camera
         error = nil
         pendingLocation = nil
+        createdWine = nil
     }
 }
 
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.shortlistSaved, .shortlistSaved), (.recommendationSaved, .recommendationSaved): return true
-        case (.destination, .destination), (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
+        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved), (.saved, .saved): return true
+        case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }
     }

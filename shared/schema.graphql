@@ -129,8 +129,8 @@ Tasting note / consumption record for a wine
 type Consumption {
   consumedDate: DateTime
   contacts: [String!]
+  favorite: Boolean
   rating: Rating
-  shortlist: Boolean
   tastingNotes: String
 }
 
@@ -140,8 +140,8 @@ Details captured when consuming a bottle
 input ConsumptionInput {
   consumedDate: DateTime
   contacts: [String!]
+  favorite: Boolean
   rating: Rating
-  shortlist: Boolean
   tastingNotes: String
 }
 
@@ -160,7 +160,6 @@ type Dashboard {
   lastBottle: LastBottle
   lastExit: JournalEvent
   readyToDrink: [ReadyToDrinkWine!]!
-  shortlist: [ShortlistWine!]!
   totalValue: Float!
 }
 
@@ -180,6 +179,7 @@ type FavoriteWine {
   estimatedPrice: Eur
   id: WineId!
   name: WineName!
+  rating: Float
   tastingDate: DateTime
   vintage: Year
 }
@@ -264,11 +264,6 @@ type Mutation {
   addRecommendation(input: RecommendationInput!, wineId: WineId!): Boolean!
 
   """
-  Add a wine to the shortlist with optional tasting details
-  """
-  addToShortlist(input: ShortlistInput!, wineId: WineId!): Boolean!
-
-  """
   Add a new beverage to the catalog
   """
   addWine(input: AddWineInput!): Wine!
@@ -294,9 +289,9 @@ type Mutation {
   importData(payload: String!): ImportResult!
 
   """
-  Mark a wine as favorite (creates / overwrites a tasting note with rating 5)
+  Toggle the favorite (heart) flag on a wine, preserving any existing tasting note
   """
-  markFavorite(wineId: WineId!): Boolean!
+  markFavorite(favorite: Boolean = true, wineId: WineId!): Boolean!
 
   """
   Move a bottle to a different position in the cellar
@@ -307,6 +302,11 @@ type Mutation {
   Place a wine in the cellar grid
   """
   placeBottle(col: Int!, row: Int!, wineId: WineId!): CellarBottle!
+
+  """
+  Record a tasting note (rating, notes, favorite flag) for a wine
+  """
+  recordTasting(input: TastingInput!, wineId: WineId!): Boolean!
 
   """
   Remove a bottle from the cellar without recording why
@@ -444,32 +444,22 @@ type ScanResult {
 }
 
 """
-Tasting fields captured when adding a wine to the shortlist
-"""
-input ShortlistInput {
-  consumedDate: DateTime
-  contacts: [String!]
-  rating: Rating
-  tastingNotes: String
-}
-
-type ShortlistWine {
-  beverageType: BeverageType!
-  color: WineColor
-  estimatedPrice: Eur
-  id: WineId!
-  name: WineName!
-  rating: Float
-  tastingDate: DateTime
-  vintage: Year
-}
-
-"""
 Sort direction
 """
 enum SortOrder {
   ASC
   DESC
+}
+
+"""
+Tasting fields captured when recording a tasting note
+"""
+input TastingInput {
+  consumedDate: DateTime
+  contacts: [String!]
+  favorite: Boolean
+  rating: Rating
+  tastingNotes: String
 }
 
 """

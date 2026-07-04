@@ -46,16 +46,28 @@ struct ScanReviewPage {
         return self
     }
 
-    /// Ajout vers la cave : la sauvegarde enchaîne sur le placement.
-    func tapSave() throws -> PlacementPage {
+    /// Ouvre la popup de choix (bouton +) puis tape le choix demandé.
+    private func chooseDestination(_ identifier: String) throws {
         app.swipeUp()
         try app.buttons["review-save-button"].tapOrFail()
+        try app.buttons[identifier].tapOrFail()
+    }
+
+    /// Ajout vers la cave : enchaîne sur le placement.
+    func addToCellar() throws -> PlacementPage {
+        try chooseDestination("choice-cellar")
         return PlacementPage(app: app)
     }
 
-    /// Ajout favori / à retenir / conseillé : la sauvegarde termine le flow.
-    func submit() throws {
-        app.swipeUp()
-        try app.buttons["review-save-button"].tapOrFail()
+    func addAsFavorite() throws {
+        try chooseDestination("choice-favorite")
+    }
+
+    func addAsRecommendation() throws {
+        try chooseDestination("choice-recommendation")
+    }
+
+    func justSave() throws {
+        try chooseDestination("choice-justSave")
     }
 }

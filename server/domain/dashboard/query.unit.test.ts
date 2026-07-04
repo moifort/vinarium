@@ -45,6 +45,7 @@ const seedDashboardData = () => {
   fake.seed('tasting', `${userId}_w2`, {
     userId,
     wineId: 'w2',
+    favorite: true,
     rating: 5,
     consumedDate: new Date('2026-02-01'),
   })
@@ -75,8 +76,7 @@ describe('DashboardQuery.get', () => {
     expect(view.bottleCount).toBe(1)
     expect(view.totalValue).toBe(30)
     expect(view.readyToDrink).toMatchObject([{ id: 'w1', position: 'A1', urgent: false }])
-    expect(view.favorites).toMatchObject([{ id: 'w2', name: 'Domaine Favori' }])
-    expect(view.shortlist).toEqual([])
+    expect(view.favorites).toMatchObject([{ id: 'w2', name: 'Domaine Favori', rating: 5 }])
     expect(view.lastBottle).toMatchObject({ wine: { id: 'w1' }, position: 'A1' })
     expect(view.lastExit).toMatchObject({ wineId: 'w2', type: 'out' })
     expect(view.history).toHaveLength(2)

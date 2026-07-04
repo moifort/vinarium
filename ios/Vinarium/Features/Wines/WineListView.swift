@@ -4,7 +4,6 @@ import SwiftUI
 
 struct WineListView: View {
     @Binding var showFavorites: Bool
-    @Binding var showShortlist: Bool
     @Binding var showRecommended: Bool
 
     @State private var viewModel = WineListViewModel()
@@ -59,13 +58,6 @@ struct WineListView: View {
                     Task { await viewModel.load() }
                 }
             }
-            .onChange(of: showShortlist) {
-                if showShortlist {
-                    viewModel.mode = .shortlist
-                    showShortlist = false
-                    Task { await viewModel.load() }
-                }
-            }
             .onChange(of: showRecommended) {
                 if showRecommended {
                     viewModel.mode = .recommended
@@ -86,8 +78,7 @@ struct WineListView: View {
                     name: wine.name,
                     subtitle: Self.subtitle(for: wine),
                     rating: wine.rating,
-                    isFavorite: wine.rating == 5,
-                    isShortlist: wine.shortlist == true && wine.rating != 5
+                    isFavorite: wine.isFavorite
                 )
             })
         }
@@ -115,7 +106,6 @@ struct WineListView: View {
 
 #Preview("Liste de vins") {
     @Previewable @State var showFavorites = false
-    @Previewable @State var showShortlist = false
     @Previewable @State var showRecommended = false
-    WineListView(showFavorites: $showFavorites, showShortlist: $showShortlist, showRecommended: $showRecommended)
+    WineListView(showFavorites: $showFavorites, showRecommended: $showRecommended)
 }

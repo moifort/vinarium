@@ -1,12 +1,14 @@
 import SwiftUI
 
 struct FavoriteSheet: View {
-    let onConfirm: (Date, [String], String?) async -> Void
+    /// (date, contacts, notes, rating) — rating is 0 when the user left it unset.
+    let onConfirm: (Date, [String], String?, Int) async -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var consumedDate = Date()
     @State private var contacts: [String] = []
     @State private var tastingNotes = ""
+    @State private var rating = 0
     @State private var showContactPicker = false
 
     var body: some View {
@@ -51,7 +53,14 @@ struct FavoriteSheet: View {
                         )
                         .labelsHidden()
                     }
-            
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label("Note", systemImage: "star")
+                            .foregroundStyle(.secondary)
+                        InteractiveStarRating(rating: $rating)
+                    }
+                    .padding(.vertical, 4)
+
                     VStack(alignment: .leading, spacing: 8) {
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Commentaires", systemImage: "text.quote")
@@ -77,7 +86,8 @@ struct FavoriteSheet: View {
                         await onConfirm(
                             consumedDate,
                             contacts,
-                            tastingNotes.isEmpty ? nil : tastingNotes
+                            tastingNotes.isEmpty ? nil : tastingNotes,
+                            rating
                         )
                     }
                     .accessibilityIdentifier("confirm-favorite-button")
@@ -95,5 +105,5 @@ struct FavoriteSheet: View {
 }
 
 #Preview {
-    FavoriteSheet { _, _, _ in }
+    FavoriteSheet { _, _, _, _ in }
 }

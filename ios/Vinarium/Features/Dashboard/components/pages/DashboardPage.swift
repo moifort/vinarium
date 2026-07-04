@@ -15,8 +15,6 @@ struct DashboardPage: View {
 
                 FavoritesSection(items: content.favorites, onWineTapped: onWineTapped)
 
-                ShortlistSection(items: content.shortlist, onWineTapped: onWineTapped)
-
                 JournalSection(events: content.events, onEventTapped: onWineTapped)
             }
             .padding()
@@ -40,7 +38,6 @@ extension DashboardPage {
         let stats: DashboardStatsRow.Stats
         let readyToDrink: [ReadyToDrinkSection.Item]
         let favorites: [FavoritesSection.Item]
-        let shortlist: [ShortlistSection.Item]
         let events: [JournalSection.Event]
     }
 }
@@ -55,10 +52,7 @@ extension DashboardPage {
                     .init(id: "2", color: .white, name: "Pouilly-Fumé 2021", urgent: false, drinkUntil: nil, position: "B1"),
                 ],
                 favorites: [
-                    .init(id: "3", color: .red, name: "Romanée-Conti 2015", vintage: 2015, tastingDate: Date(), estimatedPrice: 3500),
-                ],
-                shortlist: [
-                    .init(id: "4", color: .white, name: "Chablis Grand Cru", vintage: 2019, tastingDate: nil, rating: 4),
+                    .init(id: "3", color: .red, name: "Romanée-Conti 2015", vintage: 2015, tastingDate: Date(), estimatedPrice: 3500, rating: 5),
                 ],
                 events: [
                     .init(isEntry: true, wineName: "Pétrus 2012", position: "C2", wineId: "5", date: Date()),
@@ -78,7 +72,6 @@ extension DashboardPage {
                 stats: .init(bottleCount: 0, totalValue: 0),
                 readyToDrink: [],
                 favorites: [],
-                shortlist: [],
                 events: []
             ),
             onStatsTapped: {},

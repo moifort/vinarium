@@ -5,23 +5,12 @@ struct DashboardData: Codable, Sendable {
     let totalValue: Double
     let readyToDrink: [DashboardWine]
     let favorites: [DashboardFavorite]
-    let shortlist: [DashboardShortlistEntry]
     let lastBottle: DashboardEntry?
     let lastExit: DashboardHistoryEvent?
     let history: [DashboardHistoryEvent]
 }
 
 struct DashboardFavorite: Codable, Identifiable, Sendable {
-    let id: String
-    let name: String
-    let beverageType: BeverageType
-    let color: WineColor?
-    let vintage: Int?
-    let estimatedPrice: Double?
-    let tastingDate: Date?
-}
-
-struct DashboardShortlistEntry: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let beverageType: BeverageType

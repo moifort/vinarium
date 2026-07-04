@@ -1,27 +1,9 @@
 import { JournalEventType } from '~/domain/journal/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
-import type {
-  DashboardView,
-  FavoriteWine,
-  LastBottle,
-  ReadyToDrinkWine,
-  ShortlistWine,
-} from '../../types'
+import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from '../../types'
 
 const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').implement({
-  fields: (t) => ({
-    id: t.expose('id', { type: 'WineId' }),
-    name: t.expose('name', { type: 'WineName' }),
-    beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
-    color: t.expose('color', { type: WineColorEnum, nullable: true }),
-    vintage: t.expose('vintage', { type: 'Year', nullable: true }),
-    estimatedPrice: t.expose('estimatedPrice', { type: 'Eur', nullable: true }),
-    tastingDate: t.expose('tastingDate', { type: 'DateTime', nullable: true }),
-  }),
-})
-
-const ShortlistWineType = builder.objectRef<ShortlistWine>('ShortlistWine').implement({
   fields: (t) => ({
     id: t.expose('id', { type: 'WineId' }),
     name: t.expose('name', { type: 'WineName' }),
@@ -71,7 +53,6 @@ export const DashboardType = builder.objectRef<DashboardView>('Dashboard').imple
     totalValue: t.exposeFloat('totalValue'),
     readyToDrink: t.field({ type: [ReadyToDrinkWineType], resolve: (d) => d.readyToDrink }),
     favorites: t.field({ type: [FavoriteWineType], resolve: (d) => d.favorites }),
-    shortlist: t.field({ type: [ShortlistWineType], resolve: (d) => d.shortlist }),
     lastBottle: t.field({ type: LastBottleType, nullable: true, resolve: (d) => d.lastBottle }),
     lastExit: t.field({ type: JournalEventType, nullable: true, resolve: (d) => d.lastExit }),
     history: t.field({ type: [JournalEventType], resolve: (d) => d.history }),

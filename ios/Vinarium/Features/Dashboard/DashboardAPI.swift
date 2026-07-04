@@ -30,17 +30,6 @@ enum DashboardAPI {
                     color: $0.color.map { WineColor(graphql: $0) },
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
-                    tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) }
-                )
-            },
-            shortlist: d.shortlist.map {
-                DashboardShortlistEntry(
-                    id: $0.id,
-                    name: $0.name,
-                    beverageType: BeverageType(graphql: $0.beverageType),
-                    color: $0.color.map { WineColor(graphql: $0) },
-                    vintage: $0.vintage,
-                    estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) },
                     rating: $0.rating.map { Int($0) }
                 )

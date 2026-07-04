@@ -1,13 +1,12 @@
 import Foundation
 
 enum WineListMode: String, CaseIterable, Identifiable {
-    case all, favorites, shortlist, gifted, recommended
+    case all, favorites, gifted, recommended
     var id: String { rawValue }
     var label: String {
         switch self {
         case .all: "Tous"
         case .favorites: "Favoris"
-        case .shortlist: "À retenir"
         case .gifted: "Offerts"
         case .recommended: "Conseillés"
         }
@@ -16,7 +15,6 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "wineglass"
         case .favorites: "heart.fill"
-        case .shortlist: "bookmark.fill"
         case .gifted: "gift"
         case .recommended: "lightbulb"
         }
@@ -26,7 +24,6 @@ enum WineListMode: String, CaseIterable, Identifiable {
         switch self {
         case .all: "Mes Vins"
         case .favorites: "Favoris"
-        case .shortlist: "À retenir"
         case .gifted: "Offerts"
         case .recommended: "Conseillés"
         }
@@ -35,8 +32,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
     var subtitle: String {
         switch self {
         case .all: "Tous vos vins ajoutés"
-        case .favorites: "Vos vins notés 5 étoiles"
-        case .shortlist: "Vos vins à essayer encore"
+        case .favorites: "Vos coups de cœur"
         case .gifted: "Vins offerts à vos proches"
         case .recommended: "Vins recommandés par vos proches"
         }
@@ -45,7 +41,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
     /// Le Picker Statut n'a de sens que sur les modes non déjà filtrés par statut.
     var supportsStatusFilter: Bool {
         switch self {
-        case .all, .favorites, .shortlist: true
+        case .all, .favorites: true
         case .gifted, .recommended: false
         }
     }
@@ -146,8 +142,7 @@ final class WineListViewModel {
     private func filteredWines() -> [Wine] {
         var wines: [Wine] = switch mode {
         case .all: allWines
-        case .favorites: allWines.filter { $0.rating == 5 }
-        case .shortlist: allWines.filter { $0.shortlist == true && $0.rating != 5 }
+        case .favorites: allWines.filter(\.isFavorite)
         case .gifted: allWines.filter(\.isGifted)
         case .recommended: allWines.filter(\.isRecommended)
         }

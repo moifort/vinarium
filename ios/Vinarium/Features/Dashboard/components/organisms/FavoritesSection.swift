@@ -54,7 +54,9 @@ struct FavoritesSection: View {
                                     .foregroundStyle(.secondary)
                                 }
                                 Spacer()
-                                if let price = item.estimatedPrice {
+                                if let rating = item.rating {
+                                    StarRatingView(rating: rating)
+                                } else if let price = item.estimatedPrice {
                                     Text(String(format: "%.0f \u{20AC}", price))
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
@@ -83,14 +85,15 @@ extension FavoritesSection {
         let vintage: Int?
         let tastingDate: Date?
         let estimatedPrice: Double?
+        var rating: Int? = nil
     }
 }
 
 #Preview("Avec favoris") {
     FavoritesSection(
         items: [
-            .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux 2018", vintage: 2018, tastingDate: Date(), estimatedPrice: 120),
-            .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9} 2021", vintage: 2021, tastingDate: nil, estimatedPrice: nil),
+            .init(id: "1", color: .red, name: "Ch\u{00E2}teau Margaux 2018", vintage: 2018, tastingDate: Date(), estimatedPrice: 120, rating: 5),
+            .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9} 2021", vintage: 2021, tastingDate: nil, estimatedPrice: nil, rating: 3),
         ],
         onWineTapped: { _ in }
     )

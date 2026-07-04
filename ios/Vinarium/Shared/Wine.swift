@@ -67,7 +67,7 @@ struct Wine: Codable, Identifiable, Sendable {
     var notes: String? = nil
     var giftedBy: String? = nil
     var rating: Int? = nil
-    var shortlist: Bool? = nil
+    var isFavorite: Bool = false
     var giftedTo: String? = nil
     var recommendedBy: String? = nil
     var contacts: [String]? = nil
@@ -108,7 +108,7 @@ struct CreateWineRequest: Encodable, Sendable {
     var consumedDate: String?
     var tastingNotes: String?
     var contacts: [String]?
-    var shortlist: Bool?
+    var favorite: Bool?
     var latitude: Double?
     var longitude: Double?
     var placeName: String?

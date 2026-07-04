@@ -1,30 +1,22 @@
 import Foundation
 
-/// Ce que l'utilisateur veut faire de la bouteille identifiée — choisi juste après
-/// l'analyse, avant le formulaire de vérification.
+/// Ce que l'utilisateur veut faire de la bouteille identifiée — choisi via la
+/// popup (`confirmationDialog`) déclenchée par le bouton + de la fiche, une fois
+/// tous les champs saisis.
 enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
     case cellar
     case favorite
-    case shortlist
     case recommendation
+    case justSave
 
     var id: String { rawValue }
 
     var label: String {
         switch self {
-        case .cellar: "Ma cave"
+        case .cellar: "Ranger en cave"
         case .favorite: "Favori"
-        case .shortlist: "À retenir"
         case .recommendation: "Conseillé"
-        }
-    }
-
-    var caption: String {
-        switch self {
-        case .cellar: "Ranger la bouteille dans la cave"
-        case .favorite: "Un coup de cœur dégusté"
-        case .shortlist: "Goûté, à ne pas oublier"
-        case .recommendation: "Recommandé par quelqu'un"
+        case .justSave: "Juste enregistrer"
         }
     }
 
@@ -32,17 +24,10 @@ enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .cellar: "square.grid.3x3"
         case .favorite: "heart.fill"
-        case .shortlist: "bookmark.fill"
         case .recommendation: "person.badge.plus"
+        case .justSave: "checkmark.circle"
         }
     }
 
-    var ctaTitle: String {
-        switch self {
-        case .cellar: "Ajouter à la cave"
-        case .favorite: "Ajouter aux favoris"
-        case .shortlist: "Ajouter à retenir"
-        case .recommendation: "Ajouter le conseil"
-        }
-    }
+    var accessibilityId: String { "choice-\(rawValue)" }
 }

@@ -7,18 +7,11 @@ import type { TastingNote } from '~/domain/tasting/types'
 import {
   isFavorite,
   readyToDrink as isReadyToDrink,
-  isShortlisted,
   urgentToDrink,
 } from '~/domain/wine/business-rules'
 import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
-import type {
-  DashboardView,
-  FavoriteWine,
-  LastBottle,
-  ReadyToDrinkWine,
-  ShortlistWine,
-} from './types'
+import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from './types'
 
 export namespace DashboardQuery {
   export const get = async (userId: UserId): Promise<DashboardView> => {
@@ -52,22 +45,13 @@ export namespace DashboardQuery {
 
     const lastExit = history.find((event) => event.type === 'out')
 
-    const favorites = loadFavorites(
-      allTastings.filter(({ rating }) => isFavorite(rating)),
-      wineMap,
-    )
-
-    const shortlist = loadShortlist(
-      allTastings.filter((t) => isShortlisted(t) && !isFavorite(t.rating)),
-      wineMap,
-    )
+    const favorites = loadFavorites(allTastings.filter(isFavorite), wineMap)
 
     return {
       bottleCount,
       totalValue,
       readyToDrink,
       favorites,
-      shortlist,
       lastBottle,
       lastExit,
       history: history.slice(0, 10),
@@ -117,25 +101,8 @@ export namespace DashboardQuery {
           vintage: wine.vintage,
           estimatedPrice: wine.purchasePrice,
           tastingDate: tasting.consumedDate,
-        }
-      })
-      .filter((favorite): favorite is FavoriteWine => favorite !== undefined)
-
-  const loadShortlist = (tastings: TastingNote[], wineMap: Record<string, Wine>): ShortlistWine[] =>
-    tastings
-      .map((tasting): ShortlistWine | undefined => {
-        const wine = wineMap[tasting.wineId]
-        if (!wine) return undefined
-        return {
-          id: wine.id,
-          name: wine.name,
-          beverageType: wine.beverageType,
-          color: wine.color,
-          vintage: wine.vintage,
-          estimatedPrice: wine.purchasePrice,
-          tastingDate: tasting.consumedDate,
           rating: tasting.rating,
         }
       })
-      .filter((entry): entry is ShortlistWine => entry !== undefined)
+      .filter((favorite): favorite is FavoriteWine => favorite !== undefined)
 }

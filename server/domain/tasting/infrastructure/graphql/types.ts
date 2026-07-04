@@ -9,7 +9,7 @@ export const ConsumptionType = builder.objectRef<TastingNote>('Consumption').imp
     rating: t.expose('rating', { type: 'Rating', nullable: true }),
     tastingNotes: t.exposeString('tastingNotes', { nullable: true }),
     contacts: t.exposeStringList('contacts', { nullable: true }),
-    shortlist: t.exposeBoolean('shortlist', { nullable: true }),
+    favorite: t.exposeBoolean('favorite', { nullable: true }),
   }),
 })
 

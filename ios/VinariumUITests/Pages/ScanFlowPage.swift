@@ -10,13 +10,14 @@ struct ScanFlowPage {
         return self
     }
 
-    func selectPhotoFromPicker() throws -> ScanDestinationChoicePage {
+    func selectPhotoFromPicker() throws -> ScanReviewPage {
         try app.buttons["scan-photo-picker"].tapOrFail()
 
         // In test mode (-UITestPhoto), tapping the button loads the bundled image
         // directly — no PHPicker interaction needed. Wait longer for AI scan.
-        try app.navigationBars["Nouvelle bouteille"].waitOrFail(timeout: 15)
+        // After the analysis the flow lands straight on the editable review form.
+        try app.navigationBars["Vérifier la bouteille"].waitOrFail(timeout: 15)
 
-        return ScanDestinationChoicePage(app: app)
+        return ScanReviewPage(app: app)
     }
 }

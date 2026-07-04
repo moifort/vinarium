@@ -7,7 +7,7 @@ export const ConsumptionInput = builder.inputType('ConsumptionInput', {
     rating: t.field({ type: 'Rating' }),
     tastingNotes: t.string(),
     contacts: t.stringList(),
-    shortlist: t.boolean(),
+    favorite: t.boolean(),
   }),
 })
 

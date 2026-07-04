@@ -12,13 +12,11 @@ final class CellarFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        let destination = try scanner.selectPhotoFromPicker()
-        try destination.verify()
-        let review = try destination.chooseCellar()
+        let review = try scanner.selectPhotoFromPicker()
         try review.verify()
 
         _ = try review.clearAndTypeName(wineName)
-        let placement = try review.tapSave()
+        let placement = try review.addToCellar()
 
         // 2. PLACEMENT: verify, select position, done
         try placement.verify()

@@ -32,7 +32,7 @@ query WineList {
     }
     consumption {
       rating
-      shortlist
+      favorite
       consumedDate
       contacts
     }

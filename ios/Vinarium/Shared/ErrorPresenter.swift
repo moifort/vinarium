@@ -9,9 +9,9 @@ import SwiftUI
 ///
 /// // In an action closure:
 /// await errorPresenter.run {
-///     try await WineAPI.addToShortlist(...)
+///     try await WineAPI.recordTasting(...)
 /// } onSuccess: {
-///     showShortlist = false
+///     showFavorite = false
 /// }
 ///
 /// // On the view (inside the sheet content if the action runs in a sheet,

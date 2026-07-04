@@ -7,7 +7,6 @@ struct WineListRow: View {
     let subtitle: String?
     let rating: Int?
     let isFavorite: Bool
-    let isShortlist: Bool
 
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
@@ -22,17 +21,12 @@ struct WineListRow: View {
                 }
             }
             Spacer()
-            if let rating, !isFavorite {
+            if let rating {
                 StarRatingView(rating: rating)
             }
             if isFavorite {
                 Image(systemName: "heart.fill")
                     .foregroundStyle(.red)
-                    .font(.default)
-                    .frame(alignment: .topLeading)
-            } else if isShortlist {
-                Image(systemName: "bookmark.fill")
-                    .foregroundStyle(.indigo)
                     .font(.default)
                     .frame(alignment: .topLeading)
             }
@@ -47,32 +41,28 @@ struct WineListRow: View {
             name: "Ch\u{00E2}teau Margaux",
             subtitle: "2018 \u{2022} Bordeaux \u{2022} 45 \u{20AC}",
             rating: 4,
-            isFavorite: false,
-            isShortlist: false
+            isFavorite: false
         )
         WineListRow(
             color: .white,
             name: "Château La Sauvageonne Cuvée Les Oliviers",
             subtitle: "2021",
             rating: 5,
-            isFavorite: true,
-            isShortlist: false
+            isFavorite: true
         )
         WineListRow(
             color: .sparkling,
             name: "Cidre de Normandie",
             subtitle: "Maison Dupont",
             rating: 3,
-            isFavorite: false,
-            isShortlist: true
+            isFavorite: true
         )
         WineListRow(
             color: .rosé,
             name: "C\u{00F4}tes de Provence",
             subtitle: nil,
             rating: nil,
-            isFavorite: false,
-            isShortlist: false
+            isFavorite: false
         )
         WineListRow(
             beverageType: .beer,
@@ -80,8 +70,7 @@ struct WineListRow: View {
             name: "La Chouffe",
             subtitle: "Blonde forte \u{2022} Belgique",
             rating: nil,
-            isFavorite: false,
-            isShortlist: false
+            isFavorite: false
         )
     }
 }

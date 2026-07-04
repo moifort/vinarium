@@ -1,9 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
-  FAVORITE_RATING,
   irrelevantAttributes,
   isFavorite,
-  isShortlisted,
   readyToDrink,
   requiresColor,
   urgentToDrink,
@@ -81,15 +79,19 @@ describe('urgentToDrink', () => {
 })
 
 describe('isFavorite', () => {
-  test('true when rating equals FAVORITE_RATING', () => {
-    expect(isFavorite(FAVORITE_RATING)).toBe(true)
+  test('true when favorite flag is true', () => {
+    expect(isFavorite({ favorite: true })).toBe(true)
   })
 
-  test('false when rating is lower', () => {
-    expect(isFavorite(4)).toBe(false)
+  test('false when favorite flag is false', () => {
+    expect(isFavorite({ favorite: false })).toBe(false)
   })
 
-  test('false when undefined', () => {
+  test('false when favorite flag is missing', () => {
+    expect(isFavorite({})).toBe(false)
+  })
+
+  test('false when tasting is undefined', () => {
     expect(isFavorite(undefined)).toBe(false)
   })
 })
@@ -131,23 +133,5 @@ describe('requiresColor', () => {
     'other',
   ] as const)('%s does not require a color', (beverageType) => {
     expect(requiresColor(beverageType)).toBe(false)
-  })
-})
-
-describe('isShortlisted', () => {
-  test('true when shortlist flag is true', () => {
-    expect(isShortlisted({ shortlist: true })).toBe(true)
-  })
-
-  test('false when shortlist flag is false', () => {
-    expect(isShortlisted({ shortlist: false })).toBe(false)
-  })
-
-  test('false when shortlist flag is missing', () => {
-    expect(isShortlisted({})).toBe(false)
-  })
-
-  test('false when tasting is undefined', () => {
-    expect(isShortlisted(undefined)).toBe(false)
   })
 })

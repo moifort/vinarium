@@ -12,16 +12,13 @@ final class RecommendationFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        // 2. DESTINATION: choose "Conseillé"
-        let destination = try scanner.selectPhotoFromPicker()
-        try destination.verify()
-        let review = try destination.chooseRecommendation()
+        // 2. REVIEW: land directly on the editable form, fill recommender, add as recommendation
+        let review = try scanner.selectPhotoFromPicker()
         try review.verify()
 
-        // 3. REVIEW: set name, fill recommender inline, save
         _ = try review.clearAndTypeName(wineName)
         _ = try review.typeRecommenderName("Jean")
-        try review.submit()
+        try review.addAsRecommendation()
 
         // 4. WINE LIST (CONSEILLÉS): verify navigation to Vins tab with recommended segment
         let wineList = try WineListPage(app: app).verify()
