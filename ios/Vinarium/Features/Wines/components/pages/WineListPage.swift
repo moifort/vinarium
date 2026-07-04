@@ -9,6 +9,7 @@ struct WineListPage: View {
     @Binding var beverageTypeFilter: BeverageType?
     let groups: [WineListContent.Group]
     var hasMore: Bool = false
+    var isLoading: Bool = false
     var onWineTapped: (String) -> Void
     var onRefresh: () async -> Void
     var onPrefetch: (String) -> Void = { _ in }
@@ -19,6 +20,7 @@ struct WineListPage: View {
             mode: mode,
             groups: groups,
             hasMore: hasMore,
+            isLoading: isLoading,
             onWineTapped: onWineTapped,
             onPrefetch: onPrefetch,
             onLoadMore: onLoadMore

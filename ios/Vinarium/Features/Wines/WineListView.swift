@@ -11,32 +11,23 @@ struct WineListView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.isLoading && viewModel.groupedWines.isEmpty {
-                    ProgressView("Chargement...")
-                } else if !viewModel.hasWines {
-                    ContentUnavailableView(
-                        "Aucun vin",
-                        systemImage: "wineglass",
-                        description: Text("Ajoutez des vins en scannant une étiquette")
-                    )
-                } else {
-                    WineListPage(
-                        mode: $viewModel.mode,
-                        sort: $viewModel.sort,
-                        sortDescending: $viewModel.sortDescending,
-                        statusFilter: $viewModel.statusFilter,
-                        colorFilter: $viewModel.colorFilter,
-                        beverageTypeFilter: $viewModel.beverageTypeFilter,
-                        groups: mappedGroups,
-                        hasMore: viewModel.hasMore,
-                        onWineTapped: { selectedWineId = $0 },
-                        onRefresh: { await viewModel.load() },
-                        onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
-                        onLoadMore: { await viewModel.loadMore() }
-                    )
-                }
-            }
+            // Toujours afficher la page (barre de vues/filtre en haut fixe) ; seul le
+            // corps liste passe en loader lors d'un changement de vue/tri/filtre.
+            WineListPage(
+                mode: $viewModel.mode,
+                sort: $viewModel.sort,
+                sortDescending: $viewModel.sortDescending,
+                statusFilter: $viewModel.statusFilter,
+                colorFilter: $viewModel.colorFilter,
+                beverageTypeFilter: $viewModel.beverageTypeFilter,
+                groups: mappedGroups,
+                hasMore: viewModel.hasMore,
+                isLoading: viewModel.isLoading,
+                onWineTapped: { selectedWineId = $0 },
+                onRefresh: { await viewModel.load() },
+                onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
+                onLoadMore: { await viewModel.loadMore() }
+            )
             .sentryTrace("Wine List", waitForFullDisplay: true)
             // Chargement initial ; les changements de vue/tri/filtre passent par les
             // didSet du ViewModel (scheduleReload).

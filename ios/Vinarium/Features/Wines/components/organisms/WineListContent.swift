@@ -4,12 +4,18 @@ struct WineListContent: View {
     let mode: WineListMode
     let groups: [Group]
     var hasMore: Bool = false
+    var isLoading: Bool = false
     var onWineTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
 
+    private var isEmpty: Bool { groups.allSatisfy { $0.items.isEmpty } }
+
     var body: some View {
-        if groups.allSatisfy({ $0.items.isEmpty }) && !hasMore {
+        if isEmpty && isLoading {
+            ProgressView("Chargement...")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if isEmpty && !hasMore {
             emptyState
         } else {
             List {
