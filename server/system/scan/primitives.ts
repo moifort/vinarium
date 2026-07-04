@@ -13,23 +13,27 @@ export const ImageHash = (value: unknown) => {
 const nullToUndefined = <T>(schema: z.ZodNullable<z.ZodType<T>>) =>
   schema.transform((v) => v ?? undefined)
 
+// Gemini's structured output marks absent fields as explicit null (the prompt
+// instructs it to), so every optional field must accept null and coerce it away.
 export const ScanResultSchema = z.object({
   name: z.string(),
   // Absent on results cached before multi-beverage support: those are all wines.
   beverageType: z.enum(['wine', 'spirit', 'beer', 'sake', 'cider', 'other']).default('wine'),
-  color: z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).optional(),
-  style: z.string().optional(),
-  alcoholContent: z.number().optional(),
-  domain: z.string().optional(),
-  vintage: z.number().int().optional(),
-  appellation: z.string().optional(),
-  region: z.string().optional(),
-  country: z.string().optional(),
-  grapeVarieties: z.array(z.string()).optional(),
-  classification: z.string().optional(),
-  drinkFrom: z.number().int().optional(),
-  drinkUntil: z.number().int().optional(),
-  estimatedPrice: z.number().optional(),
+  color: nullToUndefined(
+    z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).nullable(),
+  ).optional(),
+  style: nullToUndefined(z.string().nullable()).optional(),
+  alcoholContent: nullToUndefined(z.number().nullable()).optional(),
+  domain: nullToUndefined(z.string().nullable()).optional(),
+  vintage: nullToUndefined(z.number().int().nullable()).optional(),
+  appellation: nullToUndefined(z.string().nullable()).optional(),
+  region: nullToUndefined(z.string().nullable()).optional(),
+  country: nullToUndefined(z.string().nullable()).optional(),
+  grapeVarieties: nullToUndefined(z.array(z.string()).nullable()).optional(),
+  classification: nullToUndefined(z.string().nullable()).optional(),
+  drinkFrom: nullToUndefined(z.number().int().nullable()).optional(),
+  drinkUntil: nullToUndefined(z.number().int().nullable()).optional(),
+  estimatedPrice: nullToUndefined(z.number().nullable()).optional(),
 })
 
 export const EnrichSchema = z.object({

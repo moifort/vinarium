@@ -81,6 +81,36 @@ describe('parseScanResponse', () => {
       const result = parseScanResponse(JSON.stringify({ name: 'Vin', beverageType: 'wine' }))
       expect(result.color).toBeUndefined()
     })
+
+    test('accepts explicit nulls — the Gemini schema marks absent fields as null', () => {
+      // Reproduces the production payload that crashed the scan: the prompt
+      // instructs Gemini to set unknown fields to null, not to omit them.
+      const withNulls = JSON.stringify({
+        name: 'Vin de Table',
+        beverageType: 'wine',
+        color: 'red',
+        style: null,
+        alcoholContent: null,
+        domain: null,
+        vintage: null,
+        appellation: null,
+        region: null,
+        country: null,
+        grapeVarieties: [],
+        classification: null,
+        drinkFrom: null,
+        drinkUntil: null,
+        estimatedPrice: null,
+      })
+
+      const result = parseScanResponse(withNulls)
+
+      expect(result.name).toBe('Vin de Table')
+      expect(result.domain).toBeUndefined()
+      expect(result.vintage).toBeUndefined()
+      expect(result.appellation).toBeUndefined()
+      expect(result.style).toBeUndefined()
+    })
   })
 
   describe('malformed or invalid-shape JSON', () => {
