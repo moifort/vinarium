@@ -5,7 +5,9 @@ struct CellarPage: View {
     let groups: [CaveBottleList.Group]
     let events: [JournalEventList.Event]
     var bottlesHasMore: Bool = false
+    var bottlesLoadMoreFailed: Bool = false
     var historyHasMore: Bool = false
+    var historyLoadMoreFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onEventTapped: (String) -> Void
@@ -22,6 +24,7 @@ struct CellarPage: View {
                 CaveBottleList(
                     groups: groups,
                     hasMore: bottlesHasMore,
+                    loadMoreFailed: bottlesLoadMoreFailed,
                     onBottleTapped: onBottleTapped,
                     onRemoveRequested: onRemoveRequested,
                     onPrefetch: onBottlesPrefetch,
@@ -31,6 +34,7 @@ struct CellarPage: View {
                 JournalEventList(
                     events: events,
                     hasMore: historyHasMore,
+                    loadMoreFailed: historyLoadMoreFailed,
                     onEventTapped: onEventTapped,
                     onPrefetch: onHistoryPrefetch,
                     onLoadMore: onHistoryLoadMore

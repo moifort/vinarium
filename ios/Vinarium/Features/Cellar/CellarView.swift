@@ -26,7 +26,9 @@ struct CellarView: View {
                         groups: mappedGroups,
                         events: mappedEvents,
                         bottlesHasMore: viewModel.bottlesHasMore,
+                        bottlesLoadMoreFailed: viewModel.bottlesLoadMoreFailed,
                         historyHasMore: viewModel.historyHasMore,
+                        historyLoadMoreFailed: viewModel.historyLoadMoreFailed,
                         onBottleTapped: { selectedWineId = $0 },
                         onRemoveRequested: { wineId in
                             wineForRemovalChoice = viewModel.groupedRows

@@ -3,6 +3,7 @@ import SwiftUI
 struct JournalEventList: View {
     let events: [Event]
     var hasMore: Bool = false
+    var loadMoreFailed: Bool = false
     var onEventTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
@@ -43,14 +44,11 @@ struct JournalEventList: View {
                 }
 
                 if hasMore {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    .listRowSeparator(.hidden)
-                    .accessibilityLabel("Chargement de plus d'événements")
-                    .task { await onLoadMore() }
+                    LoadMoreRow(
+                        failed: loadMoreFailed,
+                        loadingLabel: "Chargement de plus d'événements",
+                        onLoadMore: onLoadMore
+                    )
                 }
             }
         }

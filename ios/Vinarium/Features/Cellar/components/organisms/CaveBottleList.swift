@@ -3,6 +3,7 @@ import SwiftUI
 struct CaveBottleList: View {
     let groups: [Group]
     var hasMore: Bool = false
+    var loadMoreFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
@@ -45,14 +46,11 @@ struct CaveBottleList: View {
                 }
 
                 if hasMore {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    .listRowSeparator(.hidden)
-                    .accessibilityLabel("Chargement de plus de bouteilles")
-                    .task { await onLoadMore() }
+                    LoadMoreRow(
+                        failed: loadMoreFailed,
+                        loadingLabel: "Chargement de plus de bouteilles",
+                        onLoadMore: onLoadMore
+                    )
                 }
             }
         }

@@ -10,6 +10,7 @@ struct WineListPage: View {
     let groups: [WineListContent.Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
+    var loadMoreFailed: Bool = false
     var errorMessage: String?
     var onWineTapped: (String) -> Void
     var onRefresh: () async -> Void
@@ -22,6 +23,7 @@ struct WineListPage: View {
             groups: groups,
             hasMore: hasMore,
             isLoading: isLoading,
+            loadMoreFailed: loadMoreFailed,
             errorMessage: errorMessage,
             onWineTapped: onWineTapped,
             onPrefetch: onPrefetch,

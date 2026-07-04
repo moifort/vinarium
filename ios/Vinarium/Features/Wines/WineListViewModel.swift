@@ -104,6 +104,9 @@ final class WineListViewModel {
     var isLoading = true
     var isLoadingMore = false
     var hasMore = false
+    /// Dernier loadMore en échec : la sentinelle devient un bouton « Réessayer »
+    /// au lieu d'un spinner qui tournerait pour toujours sans nouvelle tentative.
+    private(set) var loadMoreFailed = false
     var error: String?
     // Tout changement de vue/tri/filtre recharge la page 0 côté serveur.
     var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
@@ -140,6 +143,7 @@ final class WineListViewModel {
         groupedWines = []
         hasMore = false
         isLoadingMore = false // les loadMore périmés sortent sans toucher cet état
+        loadMoreFailed = false
         isLoading = true
         reloadTask = Task { await load() }
     }
@@ -171,6 +175,7 @@ final class WineListViewModel {
         guard hasMore, !isLoadingMore, let last = wines.last else { return }
         let requested = generation
         isLoadingMore = true
+        loadMoreFailed = false
         do {
             let page = try await fetchPage(after: last.id)
             guard requested == generation else { return } // la vue a changé entre-temps
@@ -181,6 +186,7 @@ final class WineListViewModel {
             return
         } catch {
             guard requested == generation else { return }
+            loadMoreFailed = true
             self.error = reportError(error)
         }
         isLoadingMore = false

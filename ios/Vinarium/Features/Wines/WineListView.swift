@@ -23,6 +23,7 @@ struct WineListView: View {
                 groups: mappedGroups,
                 hasMore: viewModel.hasMore,
                 isLoading: viewModel.isLoading,
+                loadMoreFailed: viewModel.loadMoreFailed,
                 errorMessage: viewModel.error,
                 onWineTapped: { selectedWineId = $0 },
                 onRefresh: { await viewModel.load() },

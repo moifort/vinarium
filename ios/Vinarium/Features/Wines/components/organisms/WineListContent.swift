@@ -5,6 +5,7 @@ struct WineListContent: View {
     let groups: [Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
+    var loadMoreFailed: Bool = false
     var errorMessage: String?
     var onWineTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
@@ -52,14 +53,11 @@ struct WineListContent: View {
                 }
 
                 if hasMore {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
-                    }
-                    .listRowSeparator(.hidden)
-                    .accessibilityLabel("Chargement de plus de vins")
-                    .task { await onLoadMore() }
+                    LoadMoreRow(
+                        failed: loadMoreFailed,
+                        loadingLabel: "Chargement de plus de vins",
+                        onLoadMore: onLoadMore
+                    )
                 }
             }
             .listStyle(.insetGrouped)

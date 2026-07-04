@@ -35,9 +35,11 @@ final class CellarGridViewModel {
     var bottles: [CellarBottle] = []
     var bottlesHasMore = false
     var isLoadingMoreBottles = false
+    private(set) var bottlesLoadMoreFailed = false
     var history: [HistoryEvent] = []
     var historyHasMore = false
     var isLoadingMoreHistory = false
+    private(set) var historyLoadMoreFailed = false
     var displayMode: CellarDisplayMode = .cave
     var isLoading = false
     var error: String?
@@ -74,6 +76,8 @@ final class CellarGridViewModel {
         let requested = generation
         isLoadingMoreBottles = false
         isLoadingMoreHistory = false
+        bottlesLoadMoreFailed = false
+        historyLoadMoreFailed = false
         isLoading = true
         error = nil
         do {
@@ -97,6 +101,7 @@ final class CellarGridViewModel {
         guard bottlesHasMore, !isLoadingMoreBottles, let last = bottles.last else { return }
         let requested = generation
         isLoadingMoreBottles = true
+        bottlesLoadMoreFailed = false
         do {
             let page = try await CellarAPI.getBottles(limit: pageSize, after: last.wineId)
             guard requested == generation else { return } // la liste a été rechargée entre-temps
@@ -104,6 +109,7 @@ final class CellarGridViewModel {
             bottlesHasMore = page.hasMore
         } catch {
             guard requested == generation else { return }
+            bottlesLoadMoreFailed = true
             self.error = reportError(error)
         }
         isLoadingMoreBottles = false
@@ -123,6 +129,7 @@ final class CellarGridViewModel {
         guard historyHasMore, !isLoadingMoreHistory else { return }
         let requested = generation
         isLoadingMoreHistory = true
+        historyLoadMoreFailed = false
         do {
             let page = try await CellarAPI.getHistory(limit: pageSize, offset: history.count)
             guard requested == generation else { return } // la liste a été rechargée entre-temps
@@ -130,6 +137,7 @@ final class CellarGridViewModel {
             historyHasMore = page.hasMore
         } catch {
             guard requested == generation else { return }
+            historyLoadMoreFailed = true
             self.error = reportError(error)
         }
         isLoadingMoreHistory = false
