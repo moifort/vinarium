@@ -1,22 +1,14 @@
-"""
-Manually add a beverage to the catalog
-"""
+"""Manually add a beverage to the catalog"""
 input AddWineInput {
-  """
-  Alcohol by volume (% vol)
-  """
+  """Alcohol by volume (% vol)"""
   alcoholContent: Float
   appellation: Appellation
 
-  """
-  Kind of beverage — defaults to WINE when absent
-  """
+  """Kind of beverage — defaults to WINE when absent"""
   beverageType: BeverageType
   classification: Classification
 
-  """
-  Wine color — required when the beverage is a wine
-  """
+  """Wine color — required when the beverage is a wine"""
   color: WineColor
   country: Country
   domain: WineDomain
@@ -30,9 +22,7 @@ input AddWineInput {
   notes: String
   placeName: PlaceName
 
-  """
-  ISO date string
-  """
+  """ISO date string"""
   purchaseDate: String
   purchasePrice: Eur
   region: Region
@@ -41,19 +31,13 @@ input AddWineInput {
   vintage: Year
 }
 
-"""
-Wine appellation (AOC / AOP / DOC ...)
-"""
+"""Wine appellation (AOC / AOP / DOC ...)"""
 scalar Appellation
 
-"""
-Beverage style for non-wine drinks (IPA, Single Malt, Junmai ...)
-"""
+"""Beverage style for non-wine drinks (IPA, Single Malt, Junmai ...)"""
 scalar BeverageStyle
 
-"""
-Kind of beverage a bottle contains
-"""
+"""Kind of beverage a bottle contains"""
 enum BeverageType {
   BEER
   CIDER
@@ -63,9 +47,7 @@ enum BeverageType {
   WINE
 }
 
-"""
-A bottle physically placed in the cellar grid
-"""
+"""A bottle physically placed in the cellar grid"""
 type CellarBottle {
   col: Int!
   colLabel: Int!
@@ -76,9 +58,7 @@ type CellarBottle {
   wineId: WineId!
 }
 
-"""
-A cellar bottle joined with the corresponding wine
-"""
+"""A cellar bottle joined with the corresponding wine"""
 type CellarBottleWithWine {
   col: Int!
   colLabel: Int!
@@ -89,20 +69,14 @@ type CellarBottleWithWine {
   wineId: WineId!
 }
 
-"""
-A page of cellar bottles joined with their wine
-"""
+"""A page of cellar bottles joined with their wine"""
 type CellarBottles {
-  """
-  Whether more bottles are available after this page
-  """
+  """Whether more bottles are available after this page"""
   hasMore: Boolean!
   items: [CellarBottleWithWine!]!
 }
 
-"""
-Configuration and current usage of the cellar grid
-"""
+"""Configuration and current usage of the cellar grid"""
 type CellarInfo {
   capacity: Int!
   cols: Int!
@@ -110,9 +84,7 @@ type CellarInfo {
   rows: Int!
 }
 
-"""
-A free cellar position suggestion
-"""
+"""A free cellar position suggestion"""
 type CellarPosition {
   col: Int!
   colLabel: Int!
@@ -120,23 +92,17 @@ type CellarPosition {
   rowLabel: String!
 }
 
-"""
-A single version section of the application changelog
-"""
+"""A single version section of the application changelog"""
 type ChangelogEntry {
   date: DateTime
   notes: [String!]!
   version: String!
 }
 
-"""
-Wine classification (Grand Cru, Premier Cru ...)
-"""
+"""Wine classification (Grand Cru, Premier Cru ...)"""
 scalar Classification
 
-"""
-Tasting note / consumption record for a wine
-"""
+"""Tasting note / consumption record for a wine"""
 type Consumption {
   consumedDate: DateTime
   contacts: [String!]
@@ -145,9 +111,7 @@ type Consumption {
   tastingNotes: String
 }
 
-"""
-Details captured when consuming a bottle
-"""
+"""Details captured when consuming a bottle"""
 input ConsumptionInput {
   consumedDate: DateTime
   contacts: [String!]
@@ -156,14 +120,10 @@ input ConsumptionInput {
   tastingNotes: String
 }
 
-"""
-Country name
-"""
+"""Country name"""
 scalar Country
 
-"""
-Aggregated dashboard view for the current user
-"""
+"""Aggregated dashboard view for the current user"""
 type Dashboard {
   bottleCount: Int!
   favorites: [FavoriteWine!]!
@@ -174,14 +134,10 @@ type Dashboard {
   totalValue: Float!
 }
 
-"""
-ISO 8601 date-time string
-"""
+"""ISO 8601 date-time string"""
 scalar DateTime
 
-"""
-Euro amount (non-negative)
-"""
+"""Euro amount (non-negative)"""
 scalar Eur
 
 type FavoriteWine {
@@ -195,25 +151,19 @@ type FavoriteWine {
   vintage: Year
 }
 
-"""
-Record of a wine that was gifted away
-"""
+"""Record of a wine that was gifted away"""
 type Gift {
   giftedDate: DateTime!
   recipientName: PersonName
 }
 
-"""
-Details captured when gifting a bottle
-"""
+"""Details captured when gifting a bottle"""
 input GiftInput {
   giftedDate: DateTime!
   recipientName: PersonName
 }
 
-"""
-Number of records imported per domain
-"""
+"""Number of records imported per domain"""
 type ImportResult {
   cellar: Int!
   gift: Int!
@@ -223,9 +173,7 @@ type ImportResult {
   wines: Int!
 }
 
-"""
-A timestamped cellar entry/exit event for a wine
-"""
+"""A timestamped cellar entry/exit event for a wine"""
 type JournalEvent {
   date: DateTime!
   position: String!
@@ -244,13 +192,9 @@ enum JournalEventType {
   OUT
 }
 
-"""
-A page of cellar journal events
-"""
+"""A page of cellar journal events"""
 type JournalEvents {
-  """
-  Whether more events are available after this page
-  """
+  """Whether more events are available after this page"""
   hasMore: Boolean!
   items: [JournalEvent!]!
 }
@@ -269,30 +213,20 @@ type LastBottleWine {
   vintage: Year
 }
 
-"""
-Latitude (-90..90)
-"""
+"""Latitude (-90..90)"""
 scalar Latitude
 
-"""
-Longitude (-180..180)
-"""
+"""Longitude (-180..180)"""
 scalar Longitude
 
 type Mutation {
-  """
-  Record a recommendation for a wine
-  """
+  """Record a recommendation for a wine"""
   addRecommendation(input: RecommendationInput!, wineId: WineId!): Boolean!
 
-  """
-  Add a new beverage to the catalog
-  """
+  """Add a new beverage to the catalog"""
   addWine(input: AddWineInput!): Wine!
 
-  """
-  Remove a bottle from the cellar and record consumption (tasting note)
-  """
+  """Remove a bottle from the cellar and record consumption (tasting note)"""
   consumeBottle(input: ConsumptionInput!, wineId: WineId!): Boolean!
 
   """
@@ -300,9 +234,7 @@ type Mutation {
   """
   deleteWine(id: WineId!): Boolean!
 
-  """
-  Remove a bottle from the cellar and record it as a gift
-  """
+  """Remove a bottle from the cellar and record it as a gift"""
   giftBottle(input: GiftInput!, wineId: WineId!): Boolean!
 
   """
@@ -315,76 +247,52 @@ type Mutation {
   """
   markFavorite(favorite: Boolean = true, wineId: WineId!): Boolean!
 
-  """
-  Move a bottle to a different position in the cellar
-  """
+  """Move a bottle to a different position in the cellar"""
   moveBottle(col: Int!, row: Int!, wineId: WineId!): CellarBottle!
 
-  """
-  Place a wine in the cellar grid
-  """
+  """Place a wine in the cellar grid"""
   placeBottle(col: Int!, row: Int!, wineId: WineId!): CellarBottle!
 
-  """
-  Record a tasting note (rating, notes, favorite flag) for a wine
-  """
+  """Record a tasting note (rating, notes, favorite flag) for a wine"""
   recordTasting(input: TastingInput!, wineId: WineId!): Boolean!
 
-  """
-  Remove a bottle from the cellar without recording why
-  """
+  """Remove a bottle from the cellar without recording why"""
   removeBottle(wineId: WineId!): Boolean!
 
   """
   Analyze a wine label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.
   """
   scanWine(
-    """
-    JPEG image, base64-encoded (no data URL prefix)
-    """
+    """JPEG image, base64-encoded (no data URL prefix)"""
     imageBase64: String!
   ): ScanResult!
 
-  """
-  Update an existing wine
-  """
+  """Update an existing wine"""
   updateWine(id: WineId!, input: UpdateWineInput!): Wine!
 }
 
-"""
-Person name (1-200 chars)
-"""
+"""Person name (1-200 chars)"""
 scalar PersonName
 
-"""
-Place name (1-200 chars)
-"""
+"""Place name (1-200 chars)"""
 scalar PlaceName
 
 type Query {
   """
-  A page of bottles currently in the cellar, newest first, with the joined wine
+  A page of bottles currently in the cellar, in grid order, with the joined wine
   """
   cellarBottles(after: WineId, limit: Int = 15): CellarBottles!
 
-  """
-  Cellar grid dimensions and current placement count
-  """
+  """Cellar grid dimensions and current placement count"""
   cellarInfo: CellarInfo!
 
-  """
-  Application changelog, most recent versions first
-  """
+  """Application changelog, most recent versions first"""
   changelog: [ChangelogEntry!]!
 
-  """
-  Aggregated dashboard view for the current user
-  """
+  """Aggregated dashboard view for the current user"""
   dashboard: Dashboard!
 
-  """
-  JSON-encoded export of every record belonging to the current user
-  """
+  """JSON-encoded export of every record belonging to the current user"""
   exportData: String!
 
   """
@@ -392,33 +300,17 @@ type Query {
   """
   journalEvents(limit: Int = 15, offset: Int = 0): JournalEvents!
 
-  """
-  Suggest the next free cellar position (null if cellar is full)
-  """
+  """Suggest the next free cellar position (null if cellar is full)"""
   suggestCellarPosition: CellarPosition
 
-  """
-  Get a single wine by ID
-  """
+  """Get a single wine by ID"""
   wine(id: WineId!): Wine
 
-  """
-  A page of the current user’s wine list, filtered and sorted per view
-  """
-  wines(
-    after: WineId
-    color: WineColor
-    limit: Int = 40
-    mode: WineListMode = ALL
-    order: SortOrder = DESC
-    sort: WineSort = UPDATED_AT
-    status: WineStatusFilter = ALL
-  ): Wines!
+  """A page of the current user’s wine list, filtered and sorted per view"""
+  wines(after: WineId, color: WineColor, limit: Int = 40, mode: WineListMode = ALL, order: SortOrder = DESC, sort: WineSort = UPDATED_AT, status: WineStatusFilter = ALL): Wines!
 }
 
-"""
-Rating (1-5)
-"""
+"""Rating (1-5)"""
 scalar Rating
 
 type ReadyToDrinkWine {
@@ -431,30 +323,22 @@ type ReadyToDrinkWine {
   urgent: Boolean!
 }
 
-"""
-Record of a wine that was recommended by someone
-"""
+"""Record of a wine that was recommended by someone"""
 type Recommendation {
   comment: String
   recommenderName: PersonName
 }
 
-"""
-Details captured when recording a recommendation for a wine
-"""
+"""Details captured when recording a recommendation for a wine"""
 input RecommendationInput {
   comment: String
   recommenderName: PersonName
 }
 
-"""
-Wine region (e.g. Bordeaux, Bourgogne)
-"""
+"""Wine region (e.g. Bordeaux, Bourgogne)"""
 scalar Region
 
-"""
-Structured beverage info extracted from a label image (Gemini).
-"""
+"""Structured beverage info extracted from a label image (Gemini)."""
 type ScanResult {
   alcoholContent: Float
   appellation: String
@@ -473,17 +357,13 @@ type ScanResult {
   vintage: Int
 }
 
-"""
-Sort direction
-"""
+"""Sort direction"""
 enum SortOrder {
   ASC
   DESC
 }
 
-"""
-Tasting fields captured when recording a tasting note
-"""
+"""Tasting fields captured when recording a tasting note"""
 input TastingInput {
   consumedDate: DateTime
   contacts: [String!]
@@ -492,13 +372,9 @@ input TastingInput {
   tastingNotes: String
 }
 
-"""
-Update an existing wine. Absent fields keep their current value.
-"""
+"""Update an existing wine. Absent fields keep their current value."""
 input UpdateWineInput {
-  """
-  Alcohol by volume (% vol)
-  """
+  """Alcohol by volume (% vol)"""
   alcoholContent: Float
   appellation: Appellation
   beverageType: BeverageType
@@ -523,29 +399,21 @@ input UpdateWineInput {
   vintage: Year
 }
 
-"""
-Firebase Auth user identifier
-"""
+"""Firebase Auth user identifier"""
 scalar UserId
 
-"""
-A beverage in the user’s collection (wine, spirit, beer, sake ...)
-"""
+"""A beverage in the user’s collection (wine, spirit, beer, sake ...)"""
 type Wine {
   alcoholContent: Float
   appellation: Appellation
   beverageType: BeverageType!
 
-  """
-  Position in the cellar grid (null if the wine is not in cellar)
-  """
+  """Position in the cellar grid (null if the wine is not in cellar)"""
   cellar: CellarBottle
   classification: Classification
   color: WineColor
 
-  """
-  Tasting / consumption details for this wine (null if never recorded)
-  """
+  """Tasting / consumption details for this wine (null if never recorded)"""
   consumption: Consumption
   country: Country
   createdAt: DateTime!
@@ -553,16 +421,12 @@ type Wine {
   drinkFrom: Year
   drinkUntil: Year
 
-  """
-  Gift details for this wine (null if never gifted)
-  """
+  """Gift details for this wine (null if never gifted)"""
   gift: Gift
   giftedBy: PersonName
   grapeVarieties: [String!]
 
-  """
-  Cellar entry/exit history for this wine, most recent first
-  """
+  """Cellar entry/exit history for this wine, most recent first"""
   history: [JournalEvent!]!
   id: WineId!
   latitude: Latitude
@@ -573,9 +437,7 @@ type Wine {
   purchaseDate: String
   purchasePrice: Eur
 
-  """
-  Recommendation details for this wine (null if never recommended)
-  """
+  """Recommendation details for this wine (null if never recommended)"""
   recommendation: Recommendation
   region: Region
   servingTemperature: Float
@@ -585,9 +447,7 @@ type Wine {
   vintage: Year
 }
 
-"""
-Wine color category
-"""
+"""Wine color category"""
 enum WineColor {
   RED
   ROSE
@@ -596,19 +456,13 @@ enum WineColor {
   WHITE
 }
 
-"""
-Wine producer / château / domain
-"""
+"""Wine producer / château / domain"""
 scalar WineDomain
 
-"""
-Wine unique identifier (UUID v4)
-"""
+"""Wine unique identifier (UUID v4)"""
 scalar WineId
 
-"""
-Which view of the wine list to page through
-"""
+"""Which view of the wine list to page through"""
 enum WineListMode {
   ALL
   FAVORITES
@@ -616,14 +470,10 @@ enum WineListMode {
   RECOMMENDED
 }
 
-"""
-Wine display name (non-empty)
-"""
+"""Wine display name (non-empty)"""
 scalar WineName
 
-"""
-Field used to sort the wine list
-"""
+"""Field used to sort the wine list"""
 enum WineSort {
   COLOR
   CREATED_AT
@@ -633,9 +483,7 @@ enum WineSort {
   VINTAGE
 }
 
-"""
-Lifecycle status of a wine
-"""
+"""Lifecycle status of a wine"""
 enum WineStatus {
   CONSUMED
   GIFTED
@@ -643,32 +491,22 @@ enum WineStatus {
   RECOMMENDED
 }
 
-"""
-Optional lifecycle filter applied to the wine list
-"""
+"""Optional lifecycle filter applied to the wine list"""
 enum WineStatusFilter {
   ALL
   CONSUMED
   IN_CELLAR
 }
 
-"""
-A page of the wine list
-"""
+"""A page of the wine list"""
 type Wines {
-  """
-  Whether more wines are available after this page
-  """
+  """Whether more wines are available after this page"""
   hasMore: Boolean!
   items: [Wine!]!
 
-  """
-  Number of wines in this page (full count is not computed)
-  """
+  """Number of wines in this page (full count is not computed)"""
   totalCount: Int!
 }
 
-"""
-Calendar year (>= 1800)
-"""
+"""Calendar year (>= 1800)"""
 scalar Year

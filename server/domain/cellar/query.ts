@@ -36,7 +36,7 @@ export namespace CellarQuery {
     return bottles.map(toView)
   }
 
-  // One page of cellar bottles (newest first) joined with their wine.
+  // One page of cellar bottles in grid order (row, col) joined with their wine.
   export const getBottlesPage = async (
     userId: UserId,
     { limit, after }: { limit: number; after?: WineId },

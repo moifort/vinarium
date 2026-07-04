@@ -13,7 +13,7 @@ builder.queryField('cellarInfo', (t) =>
 builder.queryField('cellarBottles', (t) =>
   t.field({
     type: CellarBottlesType,
-    description: 'A page of bottles currently in the cellar, newest first, with the joined wine',
+    description: 'A page of bottles currently in the cellar, in grid order, with the joined wine',
     args: {
       limit: t.arg.int({ defaultValue: 15 }),
       after: t.arg({ type: 'WineId' }),
