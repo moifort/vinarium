@@ -64,6 +64,17 @@ struct WineDetailView: View {
                     readToolbar
                 }
             }
+            // Les actions du menu (favori, suppression …) ferment le menu avant que
+            // la mutation parte : on matérialise l'appel réseau par un voile + spinner.
+            .overlay {
+                if actionError.isRunning {
+                    ZStack {
+                        Color.black.opacity(0.1).ignoresSafeArea()
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(actionError.isRunning)
             .errorAlert(actionError)
             .task {
                 await loadData()

@@ -105,7 +105,6 @@ final class WineListViewModel {
     var isLoadingMore = false
     var hasMore = false
     var totalCount = 0
-    var hasWines = false
     var error: String?
     // Tout changement de vue/tri/filtre recharge la page 0 côté serveur.
     var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
@@ -120,8 +119,14 @@ final class WineListViewModel {
     var mode: WineListMode = .all { didSet { if oldValue != mode { scheduleReload() } } }
 
     private let pageSize = 15
-    private let prefetchThreshold = 10
+    // Bien en dessous de pageSize, sinon la page suivante se chargerait dès
+    // l'affichage de la première (chargement en chaîne involontaire).
+    private let prefetchThreshold = 5
     private var reloadTask: Task<Void, Never>?
+    // Jeton anti-résultats périmés : les fetch Apollo ne sont pas annulables, donc
+    // une réponse d'une vue précédente peut arriver APRÈS celle de la vue courante.
+    // Chaque scheduleReload invalide les réponses des générations antérieures.
+    private var generation = 0
 
     private(set) var groupedWines: [(String, [Wine])] = []
 
@@ -131,9 +136,11 @@ final class WineListViewModel {
     /// la navigation.
     func scheduleReload() {
         reloadTask?.cancel()
+        generation += 1
         wines = []
         groupedWines = []
         hasMore = false
+        isLoadingMore = false // les loadMore périmés sortent sans toucher cet état
         isLoading = true
         reloadTask = Task { await load() }
     }
@@ -141,17 +148,20 @@ final class WineListViewModel {
     /// Charge la première page (au changement de vue/tri/filtre, à l'apparition,
     /// au pull-to-refresh et après une mutation).
     func load() async {
+        let requested = generation
         isLoading = true
         error = nil
         do {
             let page = try await fetchPage(after: nil)
+            guard requested == generation else { return } // réponse d'une vue périmée
             wines = page.items
             hasMore = page.hasMore
             totalCount = page.totalCount
-            if !wines.isEmpty { hasWines = true }
         } catch is CancellationError {
             // Rechargement annulé par un changement de filtre plus récent — on ignore.
+            return
         } catch {
+            guard requested == generation else { return }
             self.error = reportError(error)
         }
         rebuildPresentation()
@@ -162,15 +172,19 @@ final class WineListViewModel {
     /// Charge la page suivante et l'ajoute aux vins déjà chargés.
     func loadMore() async {
         guard hasMore, !isLoadingMore, let last = wines.last else { return }
+        let requested = generation
         isLoadingMore = true
         do {
             let page = try await fetchPage(after: last.id)
+            guard requested == generation else { return } // la vue a changé entre-temps
             wines.append(contentsOf: page.items)
             hasMore = page.hasMore
             totalCount = page.totalCount
             rebuildPresentation()
         } catch is CancellationError {
+            return
         } catch {
+            guard requested == generation else { return }
             self.error = reportError(error)
         }
         isLoadingMore = false
