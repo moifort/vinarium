@@ -37,8 +37,9 @@ struct WineListView: View {
                 }
             }
             .sentryTrace("Wine List", waitForFullDisplay: true)
-            // filterKey change (vue/tri/filtre) recharge la page 0 côté serveur.
-            .task(id: viewModel.filterKey) {
+            // Chargement initial ; les changements de vue/tri/filtre passent par les
+            // didSet du ViewModel (scheduleReload).
+            .task {
                 await viewModel.load()
                 SentrySDK.reportFullyDisplayed()
             }
@@ -59,14 +60,14 @@ struct WineListView: View {
                 if showFavorites {
                     viewModel.mode = .favorites
                     showFavorites = false
-                    Task { await viewModel.load() }
+                    viewModel.scheduleReload()
                 }
             }
             .onChange(of: showRecommended) {
                 if showRecommended {
                     viewModel.mode = .recommended
                     showRecommended = false
-                    Task { await viewModel.load() }
+                    viewModel.scheduleReload()
                 }
             }
         }

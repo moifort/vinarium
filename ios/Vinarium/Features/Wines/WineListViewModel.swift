@@ -107,21 +107,26 @@ final class WineListViewModel {
     var totalCount = 0
     var hasWines = false
     var error: String?
-    var sort: WineSort = .updatedAt
-    var sortDescending = true
-    var statusFilter: WineStatusFilter = .all
-    var colorFilter: WineColor?
-    var mode: WineListMode = .all
+    // Tout changement de vue/tri/filtre recharge la page 0 côté serveur.
+    var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
+    var sortDescending = true { didSet { if oldValue != sortDescending { scheduleReload() } } }
+    var statusFilter: WineStatusFilter = .all {
+        didSet { if oldValue != statusFilter { scheduleReload() } }
+    }
+    var colorFilter: WineColor? { didSet { if oldValue != colorFilter { scheduleReload() } } }
+    var mode: WineListMode = .all { didSet { if oldValue != mode { scheduleReload() } } }
 
     private let pageSize = 40
     private let prefetchThreshold = 10
+    private var reloadTask: Task<Void, Never>?
 
     private(set) var groupedWines: [(String, [Wine])] = []
 
-    /// Change de valeur à chaque changement de vue/tri/filtre — la vue s'en sert
-    /// comme `.task(id:)` pour recharger la page 0 côté serveur.
-    var filterKey: String {
-        "\(mode.rawValue)-\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)-\(colorFilter?.rawValue ?? "all")"
+    /// Recharge la page 0, en annulant un rechargement précédent encore en cours
+    /// (changements de filtre rapides). Appelé par les `didSet` et la navigation.
+    func scheduleReload() {
+        reloadTask?.cancel()
+        reloadTask = Task { await load() }
     }
 
     /// Charge la première page (au changement de vue/tri/filtre, à l'apparition,
@@ -136,7 +141,7 @@ final class WineListViewModel {
             totalCount = page.totalCount
             if !wines.isEmpty { hasWines = true }
         } catch is CancellationError {
-            // Annulé par SwiftUI (changement de filterKey) — on ignore.
+            // Rechargement annulé par un changement de filtre plus récent — on ignore.
         } catch {
             self.error = reportError(error)
         }
