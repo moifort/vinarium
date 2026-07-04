@@ -7,7 +7,9 @@ struct DashboardEventRow: View {
     let position: String
 
     var body: some View {
-        HStack(spacing: 12) {
+        // Même recette que les autres rows : icône alignée en haut, colonne texte
+        // pleine largeur alignée à gauche, nom tronqué avec ellipsis.
+        HStack(alignment: .top, spacing: 12) {
             Image(systemName: isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(isEntry ? .green : .red)
                 .font(.title3)
@@ -17,12 +19,12 @@ struct DashboardEventRow: View {
                 Text(wineName)
                     .font(.subheadline)
                     .fontWeight(.medium)
+                    .lineLimit(1)
                 Text(label)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
-
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             PositionBadge(position: position)
         }

@@ -33,7 +33,9 @@ struct FavoritesSection: View {
                         Button {
                             onWineTapped(item.id)
                         } label: {
-                            HStack(spacing: 10) {
+                            // Même recette que les autres rows : pastille alignée en
+                            // haut, colonne texte pleine largeur alignée à gauche.
+                            HStack(alignment: .top, spacing: 10) {
                                 BeverageBadge(beverageType: item.beverageType, color: item.color)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(item.name)
@@ -53,7 +55,7 @@ struct FavoritesSection: View {
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                 }
-                                Spacer()
+                                .frame(maxWidth: .infinity, alignment: .leading)
                                 if let rating = item.rating {
                                     StarRatingView(rating: rating)
                                 } else if let price = item.estimatedPrice {

@@ -32,7 +32,8 @@ struct ReadyToDrinkSection: View {
                         Button {
                             onWineTapped(item.id)
                         } label: {
-                            HStack(spacing: 10) {
+                            // Même recette que les autres rows : pastille alignée en haut.
+                            HStack(alignment: .top, spacing: 10) {
                                 BeverageBadge(beverageType: item.beverageType, color: item.color)
                                 Text(item.name)
                                     .font(.subheadline)
