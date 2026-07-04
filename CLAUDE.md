@@ -18,8 +18,18 @@
 
 1. Always verify the build before committing (backend `bun tsc --noEmit` + `xcodebuild` depending on what was touched)
 2. Run `bunx nitro prepare` before `bun tsc` if routes were added/modified
-3. After each completed task: run an expert code review (`superpowers:requesting-code-review`) before proposing the commit
-4. After each completed task: request user validation BEFORE committing
+3. After each completed task: run an expert code review (`superpowers:requesting-code-review`) before committing
+4. **Commit freely**: group and commit changes as you see fit without asking the user — don't ask about grouping, you decide.
+5. **Never push until the user explicitly says "push".** Commits accumulate locally; pushing is user-gated.
+
+### Push protocol (only when the user says "push")
+
+Before pushing, update the user-facing surfaces, then push:
+
+1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
+2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
+3. **Changelog** (`CHANGELOG.md`): add user-facing entries (in French) under `## Unreleased`, then run `bun run generate:assets` to regenerate `server/system/changelog-content.ts` (the iOS-facing asset served via GraphQL — never edit it by hand).
+4. Push.
 
 ## Skills
 
