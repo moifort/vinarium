@@ -12,7 +12,7 @@ struct WineListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if !viewModel.hasWines && viewModel.isLoading {
+                if viewModel.isLoading && viewModel.groupedWines.isEmpty {
                     ProgressView("Chargement...")
                 } else if !viewModel.hasWines {
                     ContentUnavailableView(

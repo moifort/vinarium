@@ -126,9 +126,15 @@ final class WineListViewModel {
     private(set) var groupedWines: [(String, [Wine])] = []
 
     /// Recharge la page 0, en annulant un rechargement précédent encore en cours
-    /// (changements de filtre rapides). Appelé par les `didSet` et la navigation.
+    /// (changements de filtre rapides). Vide la liste et repasse en chargement pour
+    /// que la vue affiche le loader et reparte de zéro. Appelé par les `didSet` et
+    /// la navigation.
     func scheduleReload() {
         reloadTask?.cancel()
+        wines = []
+        groupedWines = []
+        hasMore = false
+        isLoading = true
         reloadTask = Task { await load() }
     }
 
