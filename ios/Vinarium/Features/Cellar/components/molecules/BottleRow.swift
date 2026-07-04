@@ -22,16 +22,16 @@ struct BottleRow<Title: View, Subtitle: View>: View {
     }
 
     var body: some View {
-        HStack {
+        HStack(alignment: .top) {
             BeverageBadge(beverageType: beverageType, color: color)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 title
                     .font(.headline)
                 subtitle
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
             PositionBadge(position: position)
         }
     }

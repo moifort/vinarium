@@ -1,6 +1,12 @@
 import Apollo
 import Foundation
 
+/// One page of cellar journal events.
+struct HistoryPage {
+    let events: [HistoryEvent]
+    let hasMore: Bool
+}
+
 enum CellarAPI {
     static func getBottles() async throws -> [CellarBottle] {
         let data = try await GraphQLHelpers.fetch(
@@ -35,12 +41,12 @@ enum CellarAPI {
         }
     }
 
-    static func getHistory() async throws -> [HistoryEvent] {
+    static func getHistory(limit: Int, offset: Int) async throws -> HistoryPage {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarHistoryQuery()
+            query: VinariumGraphQL.CellarHistoryQuery(limit: .some(limit), offset: .some(offset))
         )
-        return data.journalEvents.map { e in
+        let events = data.journalEvents.items.map { e in
             HistoryEvent(
                 type: mapEventType(e.type),
                 date: GraphQLHelpers.parseISO8601(e.date) ?? Date(),
@@ -51,6 +57,7 @@ enum CellarAPI {
                 position: e.position
             )
         }
+        return HistoryPage(events: events, hasMore: data.journalEvents.hasMore)
     }
 
     static func suggest() async throws -> CellarSuggestion {

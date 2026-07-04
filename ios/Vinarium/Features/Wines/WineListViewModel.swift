@@ -116,7 +116,7 @@ final class WineListViewModel {
     var colorFilter: WineColor? { didSet { if oldValue != colorFilter { scheduleReload() } } }
     var mode: WineListMode = .all { didSet { if oldValue != mode { scheduleReload() } } }
 
-    private let pageSize = 40
+    private let pageSize = 15
     private let prefetchThreshold = 10
     private var reloadTask: Task<Void, Never>?
 

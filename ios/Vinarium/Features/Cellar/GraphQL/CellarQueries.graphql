@@ -25,15 +25,18 @@ query CellarBottles {
   }
 }
 
-query CellarHistory {
-  journalEvents {
-    type
-    date
-    wineId
-    wineName
-    wineBeverageType
-    wineColor
-    position
+query CellarHistory($limit: Int, $offset: Int) {
+  journalEvents(limit: $limit, offset: $offset) {
+    items {
+      type
+      date
+      wineId
+      wineName
+      wineBeverageType
+      wineColor
+      position
+    }
+    hasMore
   }
 }
 

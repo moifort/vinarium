@@ -2,7 +2,10 @@ import SwiftUI
 
 struct JournalEventList: View {
     let events: [Event]
+    var hasMore: Bool = false
     var onEventTapped: (String) -> Void
+    var onPrefetch: (String) -> Void = { _ in }
+    var onLoadMore: () async -> Void = {}
 
     private var groupedByDate: [(date: String, events: [Event])] {
         let formatter = DateFormatter()
@@ -34,8 +37,19 @@ struct JournalEventList: View {
                                 }
                             }
                             .tint(.primary)
+                            .onAppear { onPrefetch(event.id) }
                         }
                     }
+                }
+
+                if hasMore {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
+                    .task { await onLoadMore() }
                 }
             }
         }

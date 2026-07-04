@@ -38,6 +38,7 @@ type FakeQuery = {
   where: (field: string, op: string, value: unknown) => FakeQuery
   orderBy: (field: string, direction?: 'asc' | 'desc') => FakeQuery
   limit: (count: number) => FakeQuery
+  offset: (count: number) => FakeQuery
   startAfter: (cursor: FakeSnapshot) => FakeQuery
   get: () => Promise<{ docs: Array<{ data: () => Doc; ref: FakeRef }> }>
 }
@@ -94,6 +95,7 @@ export const createFakeFirestore = () => {
     filters: Filter[]
     order?: { field: string; direction: 'asc' | 'desc' }
     limit?: number
+    offset?: number
     startAfterId?: string
   }
 
@@ -110,6 +112,7 @@ export const createFakeFirestore = () => {
     orderBy: (field, direction = 'asc') =>
       makeQuery(collection, { ...state, order: { field, direction } }),
     limit: (count) => makeQuery(collection, { ...state, limit: count }),
+    offset: (count) => makeQuery(collection, { ...state, offset: count }),
     startAfter: (cursor) => makeQuery(collection, { ...state, startAfterId: cursor.id }),
     get: async () => {
       reads += 1
@@ -131,6 +134,7 @@ export const createFakeFirestore = () => {
         const cursorIndex = matching.findIndex(([id]) => id === state.startAfterId)
         if (cursorIndex >= 0) matching = matching.slice(cursorIndex + 1)
       }
+      if (state.offset !== undefined) matching = matching.slice(state.offset)
       if (state.limit !== undefined) matching = matching.slice(0, state.limit)
       return {
         docs: matching.map(([id, data]) => ({ data: () => data, ref: makeRef(collection, id) })),

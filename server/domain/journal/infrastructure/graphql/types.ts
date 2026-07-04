@@ -22,6 +22,18 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
   }),
 })
 
+export const JournalEventsType = builder
+  .objectRef<{ items: JournalEventView[]; hasMore: boolean }>('JournalEvents')
+  .implement({
+    description: 'A page of cellar journal events',
+    fields: (t) => ({
+      items: t.field({ type: [JournalEventType], resolve: ({ items }) => items }),
+      hasMore: t.exposeBoolean('hasMore', {
+        description: 'Whether more events are available after this page',
+      }),
+    }),
+  })
+
 // Extend WineType with the per-wine history
 builder.objectField(WineType, 'history', (t) =>
   t.field({

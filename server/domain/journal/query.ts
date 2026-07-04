@@ -1,4 +1,4 @@
-import { keyBy, sortBy } from 'lodash-es'
+import { keyBy, sortBy, uniq } from 'lodash-es'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import * as repository from '~/domain/journal/infrastructure/repository'
 import type { JournalEntry, JournalEventView } from '~/domain/journal/types'
@@ -17,6 +17,23 @@ export namespace JournalQuery {
       entries.map((entry) => toView(entry, wineMap)),
       ({ date }) => -new Date(date).getTime(),
     )
+  }
+
+  // One page of journal events (offset-based). Loads only the page's wines by id.
+  export const getPage = async (
+    userId: UserId,
+    { limit, offset }: { limit: number; offset: number },
+  ) => {
+    const { entries, hasMore } = await repository.findPage(userId, { limit, offset })
+    const wines = await WineQuery.getManyByWineIds(
+      userId,
+      uniq(entries.map(({ wineId }) => wineId)),
+    )
+    const wineMap = keyBy(wines, ({ id }) => id)
+    const items = entries
+      .filter(({ wineId }) => wineMap[wineId])
+      .map((entry) => toView(entry, wineMap))
+    return { items, hasMore }
   }
 
   export const getAllByWineId = async (

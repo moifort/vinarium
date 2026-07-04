@@ -14,6 +14,23 @@ export const findAllByUser = (userId: UserId): Promise<JournalEntry[]> =>
     return snap.docs.map((doc) => doc.data())
   })
 
+// One page of journal entries, most recent first. Offset-based: the journal grows
+// slowly and its events carry no stable id to use as a cursor.
+export const findPage = async (
+  userId: UserId,
+  { limit, offset }: { limit: number; offset: number },
+): Promise<{ entries: JournalEntry[]; hasMore: boolean }> => {
+  const snap = await journal()
+    .where('userId', '==', userId)
+    .orderBy('date', 'desc')
+    .offset(offset)
+    .limit(limit + 1)
+    .get()
+  const entries = snap.docs.map((doc) => doc.data())
+  const hasMore = entries.length > limit
+  return { entries: hasMore ? entries.slice(0, limit) : entries, hasMore }
+}
+
 export const findByWineId = async (userId: UserId, wineId: WineId): Promise<JournalEntry[]> => {
   const snap = await journal()
     .where('userId', '==', userId)

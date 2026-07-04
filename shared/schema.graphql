@@ -233,6 +233,17 @@ enum JournalEventType {
   OUT
 }
 
+"""
+A page of cellar journal events
+"""
+type JournalEvents {
+  """
+  Whether more events are available after this page
+  """
+  hasMore: Boolean!
+  items: [JournalEvent!]!
+}
+
 type LastBottle {
   date: DateTime!
   position: String!
@@ -366,9 +377,9 @@ type Query {
   exportData: String!
 
   """
-  All cellar entry/exit events for the current user, most recent first
+  A page of cellar entry/exit events for the current user, most recent first
   """
-  journalEvents: [JournalEvent!]!
+  journalEvents(limit: Int = 15, offset: Int = 0): JournalEvents!
 
   """
   Suggest the next free cellar position (null if cellar is full)
