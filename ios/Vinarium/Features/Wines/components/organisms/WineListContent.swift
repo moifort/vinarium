@@ -73,7 +73,7 @@ struct WineListContent: View {
             ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos coups de c\u{0153}ur en favoris"))
                 .frame(maxHeight: .infinity)
         case .gifted:
-            ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins offerts appara\u{00EE}tront ici"))
+            ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins qu'on vous a offerts appara\u{00EE}tront ici"))
                 .frame(maxHeight: .infinity)
         case .recommended:
             ContentUnavailableView("Aucun vin conseillé", systemImage: "person.2.badge", description: Text("Les vins conseillés par vos amis apparaîtront ici"))

@@ -42,8 +42,10 @@ struct WineListView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
-                    onRemoved: { Task { await viewModel.load() } },
-                    onUpdated: { Task { await viewModel.load() } }
+                    // scheduleReload (et non load) : invalide les loadMore en vol
+                    // pour éviter d'append des données périmées après la mutation.
+                    onRemoved: { viewModel.scheduleReload() },
+                    onUpdated: { viewModel.scheduleReload() }
                 )
             }
             // Ces triggers arrivent après un scan (mutation) : le refetch est

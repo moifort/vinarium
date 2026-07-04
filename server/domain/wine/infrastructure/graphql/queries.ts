@@ -47,15 +47,10 @@ const assemble = async (userId: UserId, wineIds: WineId[]): Promise<WineListItem
     }))
 }
 
-// Candidate wine ids for a view, loaded in full (no cursor). Used by the views
-// whose porter collection has no orderable date field (favorites, recommended,
-// consumed) and by any view once a facet filter (color, beverage type) is
-// active — a cursor would skip matches since facets live on the wine document.
-const fullLoadWineIds = async (
-  userId: UserId,
-  mode: WineListMode,
-  status: WineStatusFilter,
-): Promise<WineId[]> => {
+// Candidate wine ids for a view, loaded in full (no cursor). The satellite views
+// (favorites, gifted, recommended) are small subsets; status and facet filters
+// are applied after assembly, so they work uniformly on every view.
+const candidateWineIds = async (userId: UserId, mode: WineListMode): Promise<WineId[]> => {
   if (mode === 'favorites') {
     const tastings = await TastingQuery.getAll(userId)
     return tastings.filter((tasting) => tasting.favorite === true).map((tasting) => tasting.wineId)
@@ -68,19 +63,21 @@ const fullLoadWineIds = async (
     const wines = await WineQuery.findAll(userId)
     return wines.filter((wine) => wine.giftedBy !== undefined).map((wine) => wine.id)
   }
-  if (status === 'in-cellar') {
-    const placements = await CellarQuery.getAllPlacements(userId)
-    return placements.map((placement) => placement.wineId)
-  }
-  if (status === 'consumed') {
-    const tastings = await TastingQuery.getAll(userId)
-    return tastings
-      .filter((tasting) => tasting.consumedDate !== undefined)
-      .map((tasting) => tasting.wineId)
-  }
   const wines = await WineQuery.findAll(userId)
   return wines.map((wine) => wine.id)
 }
+
+const matchesStatus = (item: WineListItem, status: WineStatusFilter) => {
+  if (status === 'in-cellar') return item.cellar != null
+  if (status === 'consumed') return item.consumption?.consumedDate != null
+  return true
+}
+
+// Cursor pagination is only safe when ordering by a field present on every wine
+// document: Firestore's orderBy silently DROPS documents missing the field, so
+// paging by vintage/region/price would make wines without them disappear
+// (before pagination they showed up in the "Sans millésime/région" groups).
+const CURSOR_SAFE_SORTS: readonly string[] = ['createdAt', 'updatedAt']
 
 builder.queryField('wines', (t) =>
   t.field({
@@ -105,43 +102,29 @@ builder.queryField('wines', (t) =>
       const color: WineColor | undefined = args.color ?? undefined
       const beverageType: BeverageType | undefined = args.beverageType ?? undefined
 
-      // Facet filters (color, beverage type) live on the wine document, not on
-      // the porter collections' cursor keys: paging under a facet would skip
-      // matches page after page. Serve the filtered subset in full instead.
-      if (color || beverageType) {
-        const ids = await fullLoadWineIds(userId, mode, status)
-        const items = (await assemble(userId, ids)).filter(
-          (item) =>
-            (!color || item.color === color) &&
-            (!beverageType || item.beverageType === beverageType),
-        )
-        return { items, hasMore: false, totalCount: items.length }
-      }
+      const sort = args.sort ?? 'updatedAt'
+      const facetActive = color !== undefined || beverageType !== undefined
 
-      // Truly paginated paths: the porter collection carries an order field.
-      if (mode === 'gifted') {
-        const { wineIds, hasMore } = await WineQuery.giftedPage(userId, { limit, after, order })
-        const items = await assemble(userId, wineIds)
-        return { items, hasMore, totalCount: items.length }
-      }
-      if (mode === 'all' && status === 'in-cellar') {
-        const { wineIds, hasMore } = await CellarQuery.pageWineIds(userId, { limit, after, order })
-        const items = await assemble(userId, wineIds)
-        return { items, hasMore, totalCount: items.length }
-      }
-      if (mode === 'all' && status === 'all') {
-        const { wineIds, hasMore } = await WineQuery.page(userId, {
-          limit,
-          after,
-          sort: args.sort ?? 'updatedAt',
-          order,
-        })
+      // The only truly paginated path: the unbounded default view, with no facet
+      // active (facets live on the wine document: a cursor would skip matches
+      // page after page) and a sort field present on every document (see
+      // CURSOR_SAFE_SORTS). Every other view is a bounded subset served in full,
+      // so the client can sort and group it freely with no cross-page jumps.
+      if (!facetActive && mode === 'all' && status === 'all' && CURSOR_SAFE_SORTS.includes(sort)) {
+        const { wineIds, hasMore } = await WineQuery.page(userId, { limit, after, sort, order })
         const items = await assemble(userId, wineIds)
         return { items, hasMore, totalCount: items.length }
       }
 
-      // Full-load paths (favorites, recommended, consumed): single page.
-      const items = await assemble(userId, await fullLoadWineIds(userId, mode, status))
+      // Everything else (satellite views, facet filters, sorts on optional
+      // fields): serve the filtered subset in full, the client sorts and groups.
+      const ids = await candidateWineIds(userId, mode)
+      const items = (await assemble(userId, ids)).filter(
+        (item) =>
+          matchesStatus(item, status) &&
+          (!color || item.color === color) &&
+          (!beverageType || item.beverageType === beverageType),
+      )
       return { items, hasMore: false, totalCount: items.length }
     },
   }),

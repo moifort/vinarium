@@ -53,15 +53,3 @@ describe('WineQuery.page', () => {
     expect(fake.reads - before).toBe(1)
   })
 })
-
-describe('WineQuery.giftedPage', () => {
-  test('pages only wines received as a gift, excluding those without giftedBy', async () => {
-    seedWine('w1', { giftedBy: 'Alice' })
-    seedWine('w2', { giftedBy: 'Bob' })
-    seedWine('w3')
-
-    const page = await WineQuery.giftedPage(userId, { limit: 10, order: 'asc' })
-    expect(page.wineIds.map(String).sort()).toEqual(['w1', 'w2'])
-    expect(page.hasMore).toBe(false)
-  })
-})

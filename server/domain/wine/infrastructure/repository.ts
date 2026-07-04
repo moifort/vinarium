@@ -40,26 +40,6 @@ export const findPage = async (userId: UserId, args: PageArgs): Promise<WinePage
   return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((w) => w.id), hasMore }
 }
 
-// The "Offerts" view: wines received as a gift carry giftedBy; page over them
-// ordered by donor name (the only wine field guaranteed present on this subset).
-export const findGiftedPage = async (
-  userId: UserId,
-  args: { limit: number; after?: WineId; order: SortOrder },
-): Promise<WinePage> => {
-  let query = wines()
-    .where('userId', '==', userId)
-    .where('giftedBy', '!=', null)
-    .orderBy('giftedBy', args.order)
-  if (args.after) {
-    const cursor = await wines().doc(args.after).get()
-    if (cursor.exists) query = query.startAfter(cursor)
-  }
-  const snap = await query.limit(args.limit + 1).get()
-  const docs = snap.docs.map((doc) => doc.data())
-  const hasMore = docs.length > args.limit
-  return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((w) => w.id), hasMore }
-}
-
 // Batch-load a page of wines by id with a single getAll — no full-collection scan.
 export const findManyByWineIds = async (userId: UserId, wineIds: WineId[]): Promise<Wine[]> => {
   if (wineIds.length === 0) return []

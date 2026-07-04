@@ -59,7 +59,7 @@ export namespace DashboardQuery {
       favorites,
       lastBottle,
       lastExit,
-      history: history.slice(0, 10),
+      history: history.slice(0, DASHBOARD_SECTION_LIMIT),
     }
   }
 

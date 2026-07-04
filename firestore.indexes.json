@@ -34,30 +34,6 @@
       ]
     },
     {
-      "collectionGroup": "wines",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "giftedBy", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "wines",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "region", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "wines",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "purchasePrice", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "cellar",
       "queryScope": "COLLECTION",
       "fields": [

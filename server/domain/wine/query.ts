@@ -17,12 +17,6 @@ export namespace WineQuery {
     args: { limit: number; after?: WineId; sort: WineSort; order: SortOrder },
   ) => repository.findPage(userId, args)
 
-  // One page of wine ids for the "Offerts" view (wines received as a gift).
-  export const giftedPage = async (
-    userId: UserId,
-    args: { limit: number; after?: WineId; order: SortOrder },
-  ) => repository.findGiftedPage(userId, args)
-
   // Batch-load the wines of a page by id (no full-collection scan).
   export const getManyByWineIds = async (userId: UserId, wineIds: WineId[]) =>
     repository.findManyByWineIds(userId, wineIds)

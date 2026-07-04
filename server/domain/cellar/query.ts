@@ -53,12 +53,6 @@ export namespace CellarQuery {
     return { items, hasMore }
   }
 
-  // One page of wine ids currently in the cellar, ordered by placement date.
-  export const pageWineIds = async (
-    userId: UserId,
-    args: { limit: number; after?: WineId; order: 'asc' | 'desc' },
-  ) => repository.findPage(userId, args)
-
   // Cellar placements for a page of wines, batch-loaded by id.
   export const getPlacementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
     (await repository.findManyByWineIds(userId, wineIds)).map(toView)

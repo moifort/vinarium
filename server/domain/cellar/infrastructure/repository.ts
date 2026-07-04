@@ -21,23 +21,6 @@ export const findBy = async (userId: UserId, wineId: WineId): Promise<CellarBott
   return doc.data() ?? null
 }
 
-// One page of cellar wine ids ordered by placement date (cellar docs always
-// carry createdAt), newest first / oldest first per `order`.
-export const findPage = async (
-  userId: UserId,
-  args: { limit: number; after?: WineId; order: 'asc' | 'desc' },
-): Promise<{ wineIds: WineId[]; hasMore: boolean }> => {
-  let query = cellar().where('userId', '==', userId).orderBy('createdAt', args.order)
-  if (args.after) {
-    const cursor = await cellar().doc(docId(userId, args.after)).get()
-    if (cursor.exists) query = query.startAfter(cursor)
-  }
-  const snap = await query.limit(args.limit + 1).get()
-  const docs = snap.docs.map((doc) => doc.data())
-  const hasMore = docs.length > args.limit
-  return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((b) => b.wineId), hasMore }
-}
-
 // One page of cellar bottles in grid order (row then column): the cave screen
 // groups by row, so pages must fill the grid top-to-bottom — paginating by date
 // would make rows appear incomplete and sections jump around while scrolling.
