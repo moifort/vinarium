@@ -1,5 +1,6 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
+import { CellarQuery } from '../../query'
 import type { CellarBottle, CellarBottleView } from '../../types'
 
 export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottle').implement({
@@ -67,6 +68,10 @@ builder.objectField(WineType, 'cellar', (t) =>
     type: CellarBottleType,
     nullable: true,
     description: 'Position in the cellar grid (null if the wine is not in cellar)',
-    resolve: (wine, _, { loaders }) => loaders.cellarPlacement.byWineId(wine.id),
+    resolve: async (wine, _, { userId }) => {
+      if (wine.cellar !== undefined) return wine.cellar
+      const placements = await CellarQuery.getAllPlacements(userId)
+      return placements.find((placement) => placement.wineId === wine.id) ?? null
+    },
   }),
 )

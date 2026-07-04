@@ -381,9 +381,17 @@ type Query {
   wine(id: WineId!): Wine
 
   """
-  List all wines belonging to the current user
+  A page of the current user’s wine list, filtered and sorted per view
   """
-  wines: [Wine!]!
+  wines(
+    after: WineId
+    color: WineColor
+    limit: Int = 40
+    mode: WineListMode = ALL
+    order: SortOrder = DESC
+    sort: WineSort = UPDATED_AT
+    status: WineStatusFilter = ALL
+  ): Wines!
 }
 
 """
@@ -577,6 +585,16 @@ Wine unique identifier (UUID v4)
 scalar WineId
 
 """
+Which view of the wine list to page through
+"""
+enum WineListMode {
+  ALL
+  FAVORITES
+  GIFTED
+  RECOMMENDED
+}
+
+"""
 Wine display name (non-empty)
 """
 scalar WineName
@@ -601,6 +619,31 @@ enum WineStatus {
   GIFTED
   IN_CELLAR
   RECOMMENDED
+}
+
+"""
+Optional lifecycle filter applied to the wine list
+"""
+enum WineStatusFilter {
+  ALL
+  CONSUMED
+  IN_CELLAR
+}
+
+"""
+A page of the wine list
+"""
+type Wines {
+  """
+  Whether more wines are available after this page
+  """
+  hasMore: Boolean!
+  items: [Wine!]!
+
+  """
+  Number of wines in this page (full count is not computed)
+  """
+  totalCount: Int!
 }
 
 """

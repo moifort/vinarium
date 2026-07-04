@@ -1,5 +1,6 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
+import { RecommendationQuery } from '../../query'
 import type { Recommendation } from '../../types'
 
 export const RecommendationType = builder.objectRef<Recommendation>('Recommendation').implement({
@@ -15,6 +16,10 @@ builder.objectField(WineType, 'recommendation', (t) =>
     type: RecommendationType,
     nullable: true,
     description: 'Recommendation details for this wine (null if never recommended)',
-    resolve: (wine, _, { loaders }) => loaders.recommendation.byWineId(wine.id),
+    resolve: async (wine, _, { userId }) => {
+      if (wine.recommendation !== undefined) return wine.recommendation
+      const recommendations = await RecommendationQuery.getAll(userId)
+      return recommendations.find((recommendation) => recommendation.wineId === wine.id) ?? null
+    },
   }),
 )

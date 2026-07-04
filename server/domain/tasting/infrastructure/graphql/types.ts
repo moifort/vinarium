@@ -1,5 +1,6 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
+import { TastingQuery } from '../../query'
 import type { TastingNote } from '../../types'
 
 export const ConsumptionType = builder.objectRef<TastingNote>('Consumption').implement({
@@ -18,6 +19,10 @@ builder.objectField(WineType, 'consumption', (t) =>
     type: ConsumptionType,
     nullable: true,
     description: 'Tasting / consumption details for this wine (null if never recorded)',
-    resolve: (wine, _, { loaders }) => loaders.consumption.byWineId(wine.id),
+    resolve: async (wine, _, { userId }) => {
+      if (wine.consumption !== undefined) return wine.consumption
+      const tastings = await TastingQuery.getAll(userId)
+      return tastings.find((tasting) => tasting.wineId === wine.id) ?? null
+    },
   }),
 )

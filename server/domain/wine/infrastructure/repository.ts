@@ -1,11 +1,17 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import type { UserId } from '~/domain/shared/types'
-import type { Wine, WineId } from '~/domain/wine/types'
+import type { SortOrder, Wine, WineId, WineSort } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
 import { memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const wines = () => db().collection('wines').withConverter(genericDataConverter<Wine>())
+
+// The wine document fields each sort option maps to.
+const sortField = (sort: WineSort) => (sort === 'price' ? 'purchasePrice' : sort)
+
+export type WinePage = { wineIds: WineId[]; hasMore: boolean }
+export type PageArgs = { limit: number; after?: WineId; sort: WineSort; order: SortOrder }
 
 export const findAllByUser = (userId: UserId): Promise<Wine[]> =>
   memoizedPerRequest(`wines:all:${userId}`, async () => {
@@ -17,6 +23,41 @@ export const findBy = async (userId: UserId, id: WineId): Promise<Wine | null> =
   const doc = await wines().doc(id).get()
   const data = doc.data()
   return data && data.userId === userId ? data : null
+}
+
+// One page of wines ordered by the chosen field. Reads limit+1 docs to know if a
+// next page exists, then trims. Nullable sort fields (vintage/region/color/price)
+// drop wines missing that field — expected Firestore orderBy behaviour.
+export const findPage = async (userId: UserId, args: PageArgs): Promise<WinePage> => {
+  let query = wines().where('userId', '==', userId).orderBy(sortField(args.sort), args.order)
+  if (args.after) {
+    const cursor = await wines().doc(args.after).get()
+    if (cursor.exists) query = query.startAfter(cursor)
+  }
+  const snap = await query.limit(args.limit + 1).get()
+  const docs = snap.docs.map((doc) => doc.data())
+  const hasMore = docs.length > args.limit
+  return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((w) => w.id), hasMore }
+}
+
+// The "Offerts" view: wines received as a gift carry giftedBy; page over them
+// ordered by donor name (the only wine field guaranteed present on this subset).
+export const findGiftedPage = async (
+  userId: UserId,
+  args: { limit: number; after?: WineId; order: SortOrder },
+): Promise<WinePage> => {
+  let query = wines()
+    .where('userId', '==', userId)
+    .where('giftedBy', '!=', null)
+    .orderBy('giftedBy', args.order)
+  if (args.after) {
+    const cursor = await wines().doc(args.after).get()
+    if (cursor.exists) query = query.startAfter(cursor)
+  }
+  const snap = await query.limit(args.limit + 1).get()
+  const docs = snap.docs.map((doc) => doc.data())
+  const hasMore = docs.length > args.limit
+  return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((w) => w.id), hasMore }
 }
 
 // Batch-load a page of wines by id with a single getAll — no full-collection scan.

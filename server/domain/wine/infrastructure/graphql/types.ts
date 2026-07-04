@@ -1,8 +1,24 @@
+import type { CellarBottleView } from '~/domain/cellar/types'
+import type { Gift } from '~/domain/gift/types'
+import type { Recommendation } from '~/domain/recommendation/types'
 import { builder } from '~/domain/shared/graphql/builder'
+import type { TastingNote } from '~/domain/tasting/types'
 import type { Wine } from '../../types'
 import { BeverageTypeEnum, WineColorEnum } from './enums'
 
-export const WineType = builder.objectRef<Wine>('Wine').implement({
+// A wine as returned by the paginated list: the satellite fields may already be
+// attached (page path) or left undefined (single-wine / cellar-bottle path, where
+// the field resolver falls back to a per-request query). `null` means "loaded,
+// none"; `undefined` means "not provided by this producer".
+export type WineListItem = Wine &
+  Partial<{
+    cellar: CellarBottleView | null
+    consumption: TastingNote | null
+    gift: Gift | null
+    recommendation: Recommendation | null
+  }>
+
+export const WineType = builder.objectRef<WineListItem>('Wine').implement({
   description: 'A beverage in the user’s collection (wine, spirit, beer, sake ...)',
   fields: (t) => ({
     id: t.expose('id', { type: 'WineId' }),
@@ -31,5 +47,22 @@ export const WineType = builder.objectRef<Wine>('Wine').implement({
     placeName: t.expose('placeName', { type: 'PlaceName', nullable: true }),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
     updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
+  }),
+})
+
+// Paginated wine list payload: the page of items plus the cursor-less pagination
+// signals (façon pchook). `totalCount` is present when known, else the page size.
+export type WinesPage = { items: WineListItem[]; hasMore: boolean; totalCount: number }
+
+export const WinesType = builder.objectRef<WinesPage>('Wines').implement({
+  description: 'A page of the wine list',
+  fields: (t) => ({
+    items: t.field({ type: [WineType], resolve: ({ items }) => items }),
+    hasMore: t.exposeBoolean('hasMore', {
+      description: 'Whether more wines are available after this page',
+    }),
+    totalCount: t.exposeInt('totalCount', {
+      description: 'Number of wines in this page (full count is not computed)',
+    }),
   }),
 })

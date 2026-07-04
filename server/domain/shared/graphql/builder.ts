@@ -21,11 +21,8 @@ import type {
   WineId,
   WineName,
 } from '~/domain/wine/types'
-import type { Loaders } from './loaders'
-
 export type GraphQLContext = {
   event: H3Event
-  loaders: Loaders
   userId: UserId
 }
 

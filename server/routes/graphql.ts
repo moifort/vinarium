@@ -1,5 +1,4 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
-import { createLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
 import { createLogger } from '~/system/logger'
 
@@ -38,7 +37,7 @@ export default defineEventHandler(async (event) => {
         body: undefined,
         search: search.toString(),
       },
-      context: async () => ({ event, loaders: createLoaders(userId), userId }),
+      context: async () => ({ event, userId }),
     })
     return sendApolloResponse(event, response)
   }
@@ -49,7 +48,7 @@ export default defineEventHandler(async (event) => {
 
   const response = await apollo.executeHTTPGraphQLRequest({
     httpGraphQLRequest: { method: 'POST', headers: headerMap, body, search: '' },
-    context: async () => ({ event, loaders: createLoaders(userId), userId }),
+    context: async () => ({ event, userId }),
   })
   return sendApolloResponse(event, response)
 })

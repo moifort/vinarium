@@ -23,6 +23,9 @@ export type BeverageType = 'wine' | 'spirit' | 'beer' | 'sake' | 'cider' | 'othe
 export type WineSort = 'createdAt' | 'updatedAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'
 export type WineStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'
+// Which view of the wine list is shown, and an optional lifecycle filter on it.
+export type WineListMode = 'all' | 'favorites' | 'gifted' | 'recommended'
+export type WineStatusFilter = 'all' | 'in-cellar' | 'consumed'
 
 export type Wine = {
   id: WineId

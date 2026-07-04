@@ -43,6 +43,25 @@ export const SortOrderEnum = builder.enumType('SortOrder', {
   } as const,
 })
 
+export const WineListModeEnum = builder.enumType('WineListMode', {
+  description: 'Which view of the wine list to page through',
+  values: {
+    ALL: { value: 'all' },
+    FAVORITES: { value: 'favorites' },
+    GIFTED: { value: 'gifted' },
+    RECOMMENDED: { value: 'recommended' },
+  } as const,
+})
+
+export const WineStatusFilterEnum = builder.enumType('WineStatusFilter', {
+  description: 'Optional lifecycle filter applied to the wine list',
+  values: {
+    ALL: { value: 'all' },
+    IN_CELLAR: { value: 'in-cellar' },
+    CONSUMED: { value: 'consumed' },
+  } as const,
+})
+
 export const WineStatusEnum = builder.enumType('WineStatus', {
   description: 'Lifecycle status of a wine',
   values: {
