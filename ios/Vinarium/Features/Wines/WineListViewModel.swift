@@ -48,7 +48,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
-    case updatedAt, vintage, region, color, price, contact
+    case updatedAt, vintage, region, color, price
     var id: String { rawValue }
     var label: String {
         switch self {
@@ -57,7 +57,6 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "Région"
         case .color: "Couleur"
         case .price: "Prix"
-        case .contact: "Contact"
         }
     }
     var icon: String {
@@ -67,7 +66,6 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "map"
         case .color: "paintpalette"
         case .price: "eurosign.circle"
-        case .contact: "person.2"
         }
     }
 }
@@ -100,28 +98,45 @@ private let wineMonthYearFormatter: DateFormatter = {
 
 @MainActor @Observable
 final class WineListViewModel {
-    /// Données brutes du serveur — remplies uniquement par `load()`.
-    private(set) var allWines: [Wine] = []
+    /// Pages accumulées depuis le serveur, dans l'ordre de tri courant.
+    private(set) var wines: [Wine] = []
     /// Démarre à true pour éviter un flash « Aucun vin » avant le premier load().
     var isLoading = true
+    var isLoadingMore = false
+    var hasMore = false
+    var totalCount = 0
     var hasWines = false
     var error: String?
-    var sort: WineSort = .updatedAt { didSet { rebuildPresentation() } }
-    var sortDescending = true { didSet { rebuildPresentation() } }
-    var statusFilter: WineStatusFilter = .all { didSet { rebuildPresentation() } }
-    var colorFilter: WineColor? { didSet { rebuildPresentation() } }
-    var mode: WineListMode = .all { didSet { rebuildPresentation() } }
+    var sort: WineSort = .updatedAt
+    var sortDescending = true
+    var statusFilter: WineStatusFilter = .all
+    var colorFilter: WineColor?
+    var mode: WineListMode = .all
+
+    private let pageSize = 40
+    private let prefetchThreshold = 10
 
     private(set) var groupedWines: [(String, [Wine])] = []
 
-    /// Seul point de contact réseau : appelé à l'apparition, au pull-to-refresh
-    /// et après mutation. Les filtres/tris recalculent en mémoire.
+    /// Change de valeur à chaque changement de vue/tri/filtre — la vue s'en sert
+    /// comme `.task(id:)` pour recharger la page 0 côté serveur.
+    var filterKey: String {
+        "\(mode.rawValue)-\(sort.rawValue)-\(sortDescending)-\(statusFilter.rawValue)-\(colorFilter?.rawValue ?? "all")"
+    }
+
+    /// Charge la première page (au changement de vue/tri/filtre, à l'apparition,
+    /// au pull-to-refresh et après une mutation).
     func load() async {
         isLoading = true
         error = nil
         do {
-            allWines = try await WineAPI.list()
-            if !allWines.isEmpty { hasWines = true }
+            let page = try await fetchPage(after: nil)
+            wines = page.items
+            hasMore = page.hasMore
+            totalCount = page.totalCount
+            if !wines.isEmpty { hasWines = true }
+        } catch is CancellationError {
+            // Annulé par SwiftUI (changement de filterKey) — on ignore.
         } catch {
             self.error = reportError(error)
         }
@@ -129,34 +144,55 @@ final class WineListViewModel {
         isLoading = false
     }
 
-    // MARK: - Presentation pipeline: mode → statut → couleur → tri → groupage
+    /// Charge la page suivante et l'ajoute aux vins déjà chargés.
+    func loadMore() async {
+        guard hasMore, !isLoadingMore, let last = wines.last else { return }
+        isLoadingMore = true
+        do {
+            let page = try await fetchPage(after: last.id)
+            wines.append(contentsOf: page.items)
+            hasMore = page.hasMore
+            totalCount = page.totalCount
+            rebuildPresentation()
+        } catch is CancellationError {
+        } catch {
+            self.error = reportError(error)
+        }
+        isLoadingMore = false
+    }
 
-    private func rebuildPresentation() {
-        groupedWines = Self.buildGroupedWines(
-            wines: filteredWines(),
+    /// Déclenche le chargement de la page suivante quand une ligne proche de la
+    /// fin apparaît (infinite scroll).
+    func prefetchIfNeeded(for wineId: String) {
+        guard hasMore, !isLoadingMore else { return }
+        guard let index = wines.firstIndex(where: { $0.id == wineId }) else { return }
+        if wines.count - index <= prefetchThreshold {
+            Task { await loadMore() }
+        }
+    }
+
+    private func fetchPage(after: String?) async throws -> WinePage {
+        try await WineAPI.list(
+            mode: mode,
             sort: sort,
-            sortDescending: sortDescending
+            sortDescending: sortDescending,
+            statusFilter: statusFilter,
+            color: colorFilter,
+            limit: pageSize,
+            after: after
         )
     }
 
-    private func filteredWines() -> [Wine] {
-        var wines: [Wine] = switch mode {
-        case .all: allWines
-        case .favorites: allWines.filter(\.isFavorite)
-        case .gifted: allWines.filter(\.isGifted)
-        case .recommended: allWines.filter(\.isRecommended)
-        }
-        if mode.supportsStatusFilter {
-            switch statusFilter {
-            case .all: break
-            case .inCellar: wines = wines.filter(\.isInCellar)
-            case .consumed: wines = wines.filter { $0.consumedDate != nil }
-            }
-        }
-        if let colorFilter {
-            wines = wines.filter { $0.color == colorFilter }
-        }
-        return wines
+    // MARK: - Presentation: le serveur filtre/trie par vue ; on regroupe en
+    // sections localement (le filtre couleur reste appliqué côté client).
+
+    private func rebuildPresentation() {
+        let displayed = colorFilter.map { color in wines.filter { $0.color == color } } ?? wines
+        groupedWines = Self.buildGroupedWines(
+            wines: displayed,
+            sort: sort,
+            sortDescending: sortDescending
+        )
     }
 
     private static func buildGroupedWines(
@@ -164,10 +200,6 @@ final class WineListViewModel {
         sort: WineSort,
         sortDescending: Bool
     ) -> [(String, [Wine])] {
-        if sort == .contact {
-            return buildContactGroupedWines(displayed: wines, sortDescending: sortDescending)
-        }
-
         // Pre-sort so items inside each group follow the sort order too —
         // Dictionary(grouping:) preserves element order within groups.
         let sorted = wines.sorted {
@@ -201,8 +233,6 @@ final class WineListViewModel {
             case .price:
                 let (order, label) = priceRange(wine.purchasePrice)
                 return (Double(order), label, wine)
-            case .contact:
-                return (0, "", wine) // unreachable: handled by early return above
             }
         }
 
@@ -238,33 +268,7 @@ final class WineListViewModel {
                         + (BeverageType.allCases.firstIndex(of: wine.beverageType) ?? 0)
             )
         case .price: wine.purchasePrice ?? 0
-        case .contact: 0
         }
-    }
-
-    private static func buildContactGroupedWines(
-        displayed: [Wine], sortDescending: Bool
-    ) -> [(String, [Wine])] {
-        var groups: [String: [Wine]] = [:]
-        var noContact: [Wine] = []
-        for wine in displayed {
-            let contacts = wine.contacts ?? []
-            if contacts.isEmpty {
-                noContact.append(wine)
-            } else {
-                for contact in contacts {
-                    groups[contact, default: []].append(wine)
-                }
-            }
-        }
-        var result = groups.sorted { first, second in
-            let ascending = first.key.localizedCompare(second.key) == .orderedAscending
-            return sortDescending ? !ascending : ascending
-        }
-        if !noContact.isEmpty {
-            result.append(("Sans contact", noContact))
-        }
-        return result
     }
 
     private static func priceRange(_ price: Double?) -> (order: Int, label: String) {

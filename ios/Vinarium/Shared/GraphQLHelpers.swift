@@ -5,7 +5,9 @@ import Foundation
 enum GraphQLHelpers {
     static func fetch<Q: GraphQLQuery>(_ client: ApolloClient, query: Q) async throws -> Q.Data {
         try await withCheckedThrowingContinuation { continuation in
-            client.fetch(query: query, cachePolicy: .fetchIgnoringCacheData) { result in
+            // Cache fully disabled: never read from nor write to the normalized
+            // store — avoids a class of stale/normalization bugs.
+            client.fetch(query: query, cachePolicy: .fetchIgnoringCacheCompletely) { result in
                 switch result {
                 case .success(let graphQLResult):
                     if let errors = graphQLResult.errors, !errors.isEmpty {
@@ -29,7 +31,7 @@ enum GraphQLHelpers {
 
     static func perform<M: GraphQLMutation>(_ client: ApolloClient, mutation: M) async throws -> M.Data {
         try await withCheckedThrowingContinuation { continuation in
-            client.perform(mutation: mutation) { result in
+            client.perform(mutation: mutation, publishResultToStore: false) { result in
                 switch result {
                 case .success(let graphQLResult):
                     if let errors = graphQLResult.errors, !errors.isEmpty {

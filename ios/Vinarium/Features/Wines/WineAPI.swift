@@ -1,13 +1,38 @@
 import Apollo
 import Foundation
 
+/// One page of the wine list, mirroring the server's `Wines` payload.
+struct WinePage {
+    let items: [Wine]
+    let hasMore: Bool
+    let totalCount: Int
+}
+
 enum WineAPI {
-    static func list() async throws -> [Wine] {
-        let data = try await GraphQLHelpers.fetch(
-            GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.WineListQuery()
+    static func list(
+        mode: WineListMode,
+        sort: WineSort,
+        sortDescending: Bool,
+        statusFilter: WineStatusFilter,
+        color: WineColor?,
+        limit: Int,
+        after: String?
+    ) async throws -> WinePage {
+        let query = VinariumGraphQL.WineListQuery(
+            mode: .some(.case(gqlMode(mode))),
+            status: .some(.case(gqlStatus(statusFilter))),
+            color: color.map { .some(graphQLColor($0)) } ?? .none,
+            sort: .some(.case(gqlSort(sort))),
+            order: .some(.case(sortDescending ? .desc : .asc)),
+            limit: .some(limit),
+            after: GraphQLHelpers.graphQLNullable(after)
         )
-        return data.wines.map(mapWine)
+        let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: query)
+        return WinePage(
+            items: data.wines.items.map(mapWine),
+            hasMore: data.wines.hasMore,
+            totalCount: data.wines.totalCount
+        )
     }
 
     static func getDetail(id: String) async throws -> UserWineDetail {
@@ -133,7 +158,34 @@ private func graphQLColor(_ color: WineColor) -> GraphQLEnum<VinariumGraphQL.Win
     }
 }
 
-private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wine) -> Wine {
+private func gqlMode(_ mode: WineListMode) -> VinariumGraphQL.WineListMode {
+    switch mode {
+    case .all: .all
+    case .favorites: .favorites
+    case .gifted: .gifted
+    case .recommended: .recommended
+    }
+}
+
+private func gqlStatus(_ status: WineStatusFilter) -> VinariumGraphQL.WineStatusFilter {
+    switch status {
+    case .all: .all
+    case .inCellar: .inCellar
+    case .consumed: .consumed
+    }
+}
+
+private func gqlSort(_ sort: WineSort) -> VinariumGraphQL.WineSort {
+    switch sort {
+    case .updatedAt: .updatedAt
+    case .vintage: .vintage
+    case .region: .region
+    case .color: .color
+    case .price: .price
+    }
+}
+
+private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wines.Item) -> Wine {
     Wine(
         id: w.id,
         name: w.name,

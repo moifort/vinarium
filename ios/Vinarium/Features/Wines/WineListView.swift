@@ -28,13 +28,17 @@ struct WineListView: View {
                         statusFilter: $viewModel.statusFilter,
                         colorFilter: $viewModel.colorFilter,
                         groups: mappedGroups,
+                        hasMore: viewModel.hasMore,
                         onWineTapped: { selectedWineId = $0 },
-                        onRefresh: { await viewModel.load() }
+                        onRefresh: { await viewModel.load() },
+                        onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
+                        onLoadMore: { await viewModel.loadMore() }
                     )
                 }
             }
             .sentryTrace("Wine List", waitForFullDisplay: true)
-            .task {
+            // filterKey change (vue/tri/filtre) recharge la page 0 côté serveur.
+            .task(id: viewModel.filterKey) {
                 await viewModel.load()
                 SentrySDK.reportFullyDisplayed()
             }

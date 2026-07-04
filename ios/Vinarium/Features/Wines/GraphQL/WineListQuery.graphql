@@ -1,48 +1,68 @@
-query WineList {
-  wines {
-    id
-    name
-    beverageType
-    color
-    style
-    alcoholContent
-    vintage
-    domain
-    appellation
-    region
-    country
-    classification
-    purchasePrice
-    purchaseDate
-    drinkFrom
-    drinkUntil
-    notes
-    giftedBy
-    grapeVarieties
-    latitude
-    longitude
-    placeName
-    createdAt
-    updatedAt
-    cellar {
-      row
-      col
-      rowLabel
-      colLabel
+query WineList(
+  $mode: WineListMode
+  $status: WineStatusFilter
+  $color: WineColor
+  $sort: WineSort
+  $order: SortOrder
+  $limit: Int
+  $after: WineId
+) {
+  wines(
+    mode: $mode
+    status: $status
+    color: $color
+    sort: $sort
+    order: $order
+    limit: $limit
+    after: $after
+  ) {
+    items {
+      id
+      name
+      beverageType
+      color
+      style
+      alcoholContent
+      vintage
+      domain
+      appellation
+      region
+      country
+      classification
+      purchasePrice
+      purchaseDate
+      drinkFrom
+      drinkUntil
+      notes
+      giftedBy
+      grapeVarieties
+      latitude
+      longitude
+      placeName
+      createdAt
+      updatedAt
+      cellar {
+        row
+        col
+        rowLabel
+        colLabel
+      }
+      consumption {
+        rating
+        favorite
+        consumedDate
+        contacts
+      }
+      gift {
+        recipientName
+        giftedDate
+      }
+      recommendation {
+        recommenderName
+        comment
+      }
     }
-    consumption {
-      rating
-      favorite
-      consumedDate
-      contacts
-    }
-    gift {
-      recipientName
-      giftedDate
-    }
-    recommendation {
-      recommenderName
-      comment
-    }
+    hasMore
+    totalCount
   }
 }

@@ -7,14 +7,20 @@ struct WineListPage: View {
     @Binding var statusFilter: WineStatusFilter
     @Binding var colorFilter: WineColor?
     let groups: [WineListContent.Group]
+    var hasMore: Bool = false
     var onWineTapped: (String) -> Void
     var onRefresh: () async -> Void
+    var onPrefetch: (String) -> Void = { _ in }
+    var onLoadMore: () async -> Void = {}
 
     var body: some View {
         WineListContent(
             mode: mode,
             groups: groups,
-            onWineTapped: onWineTapped
+            hasMore: hasMore,
+            onWineTapped: onWineTapped,
+            onPrefetch: onPrefetch,
+            onLoadMore: onLoadMore
         )
         .navigationTitle(mode.title)
         .navigationSubtitle(mode.subtitle)

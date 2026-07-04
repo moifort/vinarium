@@ -3,7 +3,10 @@ import SwiftUI
 struct WineListContent: View {
     let mode: WineListMode
     let groups: [Group]
+    var hasMore: Bool = false
     var onWineTapped: (String) -> Void
+    var onPrefetch: (String) -> Void = { _ in }
+    var onLoadMore: () async -> Void = {}
 
     var body: some View {
         if groups.allSatisfy({ $0.items.isEmpty }) {
@@ -26,10 +29,21 @@ struct WineListContent: View {
                                 )
                             }
                             .tint(.primary)
+                            .onAppear { onPrefetch(item.id) }
                         }
                     } header: {
                         Text(group.label)
                     }
+                }
+
+                if hasMore {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
+                    .task { await onLoadMore() }
                 }
             }
             .listStyle(.insetGrouped)
