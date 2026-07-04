@@ -66,9 +66,20 @@ struct CellarPlacementPage: View {
         }
         .navigationTitle("Placement")
         .navigationBarTitleDisplayMode(.inline)
+        // Voile + spinner pendant l'écriture ; Annuler est neutralisé pour ne pas
+        // fermer la page au milieu de la mutation.
+        .overlay {
+            if isPlacing {
+                ZStack {
+                    Color.black.opacity(0.1).ignoresSafeArea()
+                    ProgressView()
+                }
+            }
+        }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Annuler", systemImage: "xmark") { onCancel() }
+                    .disabled(isPlacing)
             }
         }
     }

@@ -23,6 +23,7 @@ struct WineListView: View {
                 groups: mappedGroups,
                 hasMore: viewModel.hasMore,
                 isLoading: viewModel.isLoading,
+                errorMessage: viewModel.error,
                 onWineTapped: { selectedWineId = $0 },
                 onRefresh: { await viewModel.load() },
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
@@ -50,18 +51,26 @@ struct WineListView: View {
             // changement de filtre.
             .onChange(of: showFavorites) {
                 if showFavorites {
-                    viewModel.mode = .favorites
+                    switchTo(.favorites)
                     showFavorites = false
-                    viewModel.scheduleReload()
                 }
             }
             .onChange(of: showRecommended) {
                 if showRecommended {
-                    viewModel.mode = .recommended
+                    switchTo(.recommended)
                     showRecommended = false
-                    viewModel.scheduleReload()
                 }
             }
+        }
+    }
+
+    /// Bascule vers une vue après un scan : changer `mode` recharge via son didSet ;
+    /// si on y est déjà, forcer le refetch pour voir le vin fraîchement créé.
+    private func switchTo(_ mode: WineListMode) {
+        if viewModel.mode == mode {
+            viewModel.scheduleReload()
+        } else {
+            viewModel.mode = mode
         }
     }
 

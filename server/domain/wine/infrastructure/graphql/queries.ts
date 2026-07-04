@@ -5,8 +5,9 @@ import { builder } from '~/domain/shared/graphql/builder'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
 import { WineQuery } from '../../query'
-import type { WineId, WineListMode, WineStatusFilter } from '../../types'
+import type { BeverageType, WineColor, WineId, WineListMode, WineStatusFilter } from '../../types'
 import {
+  BeverageTypeEnum,
   SortOrderEnum,
   WineColorEnum,
   WineListModeEnum,
@@ -46,9 +47,10 @@ const assemble = async (userId: UserId, wineIds: WineId[]): Promise<WineListItem
     }))
 }
 
-// Views whose porter collection has no orderable date field (favorites,
-// recommended, consumed) are small subsets: load their wine ids in full and let
-// the client sort/group. hasMore is false for these.
+// Candidate wine ids for a view, loaded in full (no cursor). Used by the views
+// whose porter collection has no orderable date field (favorites, recommended,
+// consumed) and by any view once a facet filter (color, beverage type) is
+// active — a cursor would skip matches since facets live on the wine document.
 const fullLoadWineIds = async (
   userId: UserId,
   mode: WineListMode,
@@ -62,11 +64,22 @@ const fullLoadWineIds = async (
     const recommendations = await RecommendationQuery.getAll(userId)
     return recommendations.map((recommendation) => recommendation.wineId)
   }
-  // mode 'all' with the 'consumed' status filter
-  const tastings = await TastingQuery.getAll(userId)
-  return tastings
-    .filter((tasting) => status !== 'consumed' || tasting.consumedDate !== undefined)
-    .map((tasting) => tasting.wineId)
+  if (mode === 'gifted') {
+    const wines = await WineQuery.findAll(userId)
+    return wines.filter((wine) => wine.giftedBy !== undefined).map((wine) => wine.id)
+  }
+  if (status === 'in-cellar') {
+    const placements = await CellarQuery.getAllPlacements(userId)
+    return placements.map((placement) => placement.wineId)
+  }
+  if (status === 'consumed') {
+    const tastings = await TastingQuery.getAll(userId)
+    return tastings
+      .filter((tasting) => tasting.consumedDate !== undefined)
+      .map((tasting) => tasting.wineId)
+  }
+  const wines = await WineQuery.findAll(userId)
+  return wines.map((wine) => wine.id)
 }
 
 builder.queryField('wines', (t) =>
@@ -77,6 +90,7 @@ builder.queryField('wines', (t) =>
       mode: t.arg({ type: WineListModeEnum, defaultValue: 'all' }),
       status: t.arg({ type: WineStatusFilterEnum, defaultValue: 'all' }),
       color: t.arg({ type: WineColorEnum }),
+      beverageType: t.arg({ type: BeverageTypeEnum }),
       sort: t.arg({ type: WineSortEnum, defaultValue: 'updatedAt' }),
       order: t.arg({ type: SortOrderEnum, defaultValue: 'desc' }),
       limit: t.arg.int({ defaultValue: 40 }),
@@ -88,6 +102,21 @@ builder.queryField('wines', (t) =>
       const after = args.after ?? undefined
       const mode = args.mode ?? 'all'
       const status = args.status ?? 'all'
+      const color: WineColor | undefined = args.color ?? undefined
+      const beverageType: BeverageType | undefined = args.beverageType ?? undefined
+
+      // Facet filters (color, beverage type) live on the wine document, not on
+      // the porter collections' cursor keys: paging under a facet would skip
+      // matches page after page. Serve the filtered subset in full instead.
+      if (color || beverageType) {
+        const ids = await fullLoadWineIds(userId, mode, status)
+        const items = (await assemble(userId, ids)).filter(
+          (item) =>
+            (!color || item.color === color) &&
+            (!beverageType || item.beverageType === beverageType),
+        )
+        return { items, hasMore: false, totalCount: items.length }
+      }
 
       // Truly paginated paths: the porter collection carries an order field.
       if (mode === 'gifted') {

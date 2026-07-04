@@ -2,6 +2,7 @@ query WineList(
   $mode: WineListMode
   $status: WineStatusFilter
   $color: WineColor
+  $beverageType: BeverageType
   $sort: WineSort
   $order: SortOrder
   $limit: Int
@@ -11,6 +12,7 @@ query WineList(
     mode: $mode
     status: $status
     color: $color
+    beverageType: $beverageType
     sort: $sort
     order: $order
     limit: $limit

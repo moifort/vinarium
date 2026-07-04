@@ -19,6 +19,7 @@ struct LocationEditorSheet: View {
     @State private var searchModel = LocationSearchModel()
     @State private var searchQuery = ""
     @State private var resolvingId: String?
+    @State private var isClearing = false
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -120,10 +121,15 @@ struct LocationEditorSheet: View {
                             .foregroundStyle(.primary)
 
                         Spacer()
+
+                        if isClearing {
+                            ProgressView()
+                        }
                     }
                     .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
+                .disabled(isClearing)
             }
 
             if !searchModel.suggestions.isEmpty {
@@ -155,6 +161,9 @@ struct LocationEditorSheet: View {
     }
 
     private func clearLocation() async {
+        guard !isClearing else { return }
+        isClearing = true
+        defer { isClearing = false }
         await onConfirm(nil)
         dismiss()
     }

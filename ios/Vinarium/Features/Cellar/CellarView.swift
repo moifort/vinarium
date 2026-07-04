@@ -47,6 +47,23 @@ struct CellarView: View {
                 await viewModel.load()
                 SentrySDK.reportFullyDisplayed()
             }
+            // Choix déclenché par le swipe « Sortir » : consommer ou offrir.
+            .confirmationDialog(
+                "Sortir de la cave",
+                isPresented: Binding(
+                    get: { wineForRemovalChoice != nil },
+                    set: { if !$0 { wineForRemovalChoice = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: wineForRemovalChoice
+            ) { item in
+                Button("Consommer") { wineForConsumption = item }
+                    .accessibilityIdentifier("choice-consume")
+                Button("Offrir") { wineForGift = item }
+                    .accessibilityIdentifier("choice-gift")
+            } message: { item in
+                Text(item.name)
+            }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
@@ -57,9 +74,9 @@ struct CellarView: View {
                     onUpdated: { Task { await viewModel.load() } }
                 )
             }
-            .sheet(item: $wineForConsumption, onDismiss: {
-                Task { await viewModel.load() }
-            }) { item in
+            // Recharge uniquement après une mutation réussie — annuler un sheet ne
+            // doit pas déclencher un refetch complet de la cave.
+            .sheet(item: $wineForConsumption) { item in
                 ConsumptionSheet { date, rating, notes, contacts in
                     let formatter = ISO8601DateFormatter()
                     await sheetError.run {
@@ -72,13 +89,12 @@ struct CellarView: View {
                         )
                     } onSuccess: {
                         wineForConsumption = nil
+                        Task { await viewModel.load() }
                     }
                 }
                 .errorAlert(sheetError)
             }
-            .sheet(item: $wineForGift, onDismiss: {
-                Task { await viewModel.load() }
-            }) { item in
+            .sheet(item: $wineForGift) { item in
                 GiftSheet { date, recipientName in
                     let formatter = ISO8601DateFormatter()
                     await sheetError.run {
@@ -89,6 +105,7 @@ struct CellarView: View {
                         )
                     } onSuccess: {
                         wineForGift = nil
+                        Task { await viewModel.load() }
                     }
                 }
                 .errorAlert(sheetError)

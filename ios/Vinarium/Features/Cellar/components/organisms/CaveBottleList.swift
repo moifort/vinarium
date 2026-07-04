@@ -36,6 +36,7 @@ struct CaveBottleList: View {
                                     Label("Sortir", systemImage: "arrow.up.circle")
                                 }
                                 .tint(.red)
+                                .accessibilityIdentifier("cellar-remove-\(item.id)")
                             }
                         }
                     } header: {
@@ -50,6 +51,7 @@ struct CaveBottleList: View {
                         Spacer()
                     }
                     .listRowSeparator(.hidden)
+                    .accessibilityLabel("Chargement de plus de bouteilles")
                     .task { await onLoadMore() }
                 }
             }

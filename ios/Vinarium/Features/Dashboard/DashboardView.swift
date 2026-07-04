@@ -31,6 +31,13 @@ struct DashboardView: View {
                 await viewModel.load()
                 SentrySDK.reportFullyDisplayed()
             }
+            // La vue reste vivante dans le TabView : sans ça, revenir sur Accueil
+            // après un scan/une mutation montrerait des stats périmées.
+            .onChange(of: selectedTab) {
+                if selectedTab == .home {
+                    Task { await viewModel.load() }
+                }
+            }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }

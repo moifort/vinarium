@@ -5,6 +5,7 @@ struct WineListContent: View {
     let groups: [Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
+    var errorMessage: String?
     var onWineTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
@@ -15,6 +16,14 @@ struct WineListContent: View {
         if isEmpty && isLoading {
             ProgressView("Chargement...")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else if isEmpty, let errorMessage {
+            // Un échec réseau ne doit pas se déguiser en « Aucun vin ».
+            ContentUnavailableView(
+                "Erreur",
+                systemImage: "exclamationmark.triangle",
+                description: Text(errorMessage)
+            )
+            .frame(maxHeight: .infinity)
         } else if isEmpty && !hasMore {
             emptyState
         } else {
@@ -49,6 +58,7 @@ struct WineListContent: View {
                         Spacer()
                     }
                     .listRowSeparator(.hidden)
+                    .accessibilityLabel("Chargement de plus de vins")
                     .task { await onLoadMore() }
                 }
             }

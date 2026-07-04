@@ -15,6 +15,7 @@ enum WineAPI {
         sortDescending: Bool,
         statusFilter: WineStatusFilter,
         color: WineColor?,
+        beverageType: BeverageType?,
         limit: Int,
         after: String?
     ) async throws -> WinePage {
@@ -22,6 +23,7 @@ enum WineAPI {
             mode: .some(.case(gqlMode(mode))),
             status: .some(.case(gqlStatus(statusFilter))),
             color: color.map { .some(graphQLColor($0)) } ?? .none,
+            beverageType: beverageType.map { .some($0.graphQLValue) } ?? .none,
             sort: .some(.case(gqlSort(sort))),
             order: .some(.case(sortDescending ? .desc : .asc)),
             limit: .some(limit),

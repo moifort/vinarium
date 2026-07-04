@@ -49,6 +49,7 @@ struct JournalEventList: View {
                         Spacer()
                     }
                     .listRowSeparator(.hidden)
+                    .accessibilityLabel("Chargement de plus d'événements")
                     .task { await onLoadMore() }
                 }
             }

@@ -104,7 +104,6 @@ final class WineListViewModel {
     var isLoading = true
     var isLoadingMore = false
     var hasMore = false
-    var totalCount = 0
     var error: String?
     // Tout changement de vue/tri/filtre recharge la page 0 côté serveur.
     var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
@@ -156,7 +155,6 @@ final class WineListViewModel {
             guard requested == generation else { return } // réponse d'une vue périmée
             wines = page.items
             hasMore = page.hasMore
-            totalCount = page.totalCount
         } catch is CancellationError {
             // Rechargement annulé par un changement de filtre plus récent — on ignore.
             return
@@ -166,7 +164,6 @@ final class WineListViewModel {
         }
         rebuildPresentation()
         isLoading = false
-        continueLoadingIfFilteredEmpty()
     }
 
     /// Charge la page suivante et l'ajoute aux vins déjà chargés.
@@ -179,7 +176,6 @@ final class WineListViewModel {
             guard requested == generation else { return } // la vue a changé entre-temps
             wines.append(contentsOf: page.items)
             hasMore = page.hasMore
-            totalCount = page.totalCount
             rebuildPresentation()
         } catch is CancellationError {
             return
@@ -188,15 +184,6 @@ final class WineListViewModel {
             self.error = reportError(error)
         }
         isLoadingMore = false
-        continueLoadingIfFilteredEmpty()
-    }
-
-    /// Les filtres couleur/type s'appliquent côté client : si la page courante ne
-    /// contient aucun match mais qu'il reste des pages, on continue de charger
-    /// jusqu'à trouver des résultats (ou épuiser la liste).
-    private func continueLoadingIfFilteredEmpty() {
-        guard groupedWines.isEmpty, hasMore, !isLoadingMore else { return }
-        Task { await loadMore() }
     }
 
     /// Déclenche le chargement de la page suivante quand une ligne proche de la
@@ -216,21 +203,18 @@ final class WineListViewModel {
             sortDescending: sortDescending,
             statusFilter: statusFilter,
             color: colorFilter,
+            beverageType: beverageTypeFilter,
             limit: pageSize,
             after: after
         )
     }
 
-    // MARK: - Presentation: le serveur filtre/trie par vue ; on regroupe en
-    // sections localement (le filtre couleur reste appliqué côté client).
+    // MARK: - Presentation: le serveur filtre (vue, statut, couleur, type) et
+    // borne ; on regroupe seulement en sections localement.
 
     private func rebuildPresentation() {
-        let displayed = wines.filter { wine in
-            (colorFilter == nil || wine.color == colorFilter)
-                && (beverageTypeFilter == nil || wine.beverageType == beverageTypeFilter)
-        }
         groupedWines = Self.buildGroupedWines(
-            wines: displayed,
+            wines: wines,
             sort: sort,
             sortDescending: sortDescending
         )

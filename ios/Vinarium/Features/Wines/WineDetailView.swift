@@ -10,6 +10,7 @@ struct WineDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var detail: UserWineDetail?
     @State private var isLoading = true
+    @State private var isRefreshing = false
     @State private var error: String?
     @State private var showConsumption = false
     @State private var showRemovalChoice = false
@@ -65,16 +66,17 @@ struct WineDetailView: View {
                 }
             }
             // Les actions du menu (favori, suppression …) ferment le menu avant que
-            // la mutation parte : on matérialise l'appel réseau par un voile + spinner.
+            // la mutation parte, et les refetch post-mutation gardent le contenu :
+            // dans les deux cas on matérialise l'appel réseau par un voile + spinner.
             .overlay {
-                if actionError.isRunning {
+                if actionError.isRunning || isRefreshing {
                     ZStack {
                         Color.black.opacity(0.1).ignoresSafeArea()
                         ProgressView()
                     }
                 }
             }
-            .disabled(actionError.isRunning)
+            .disabled(actionError.isRunning || isRefreshing)
             .errorAlert(actionError)
             .task {
                 await loadData()
@@ -128,6 +130,7 @@ struct WineDetailView: View {
                         CellarPlacementView(
                             wineId: detail.id,
                             wineName: detail.name,
+                            beverageType: detail.beverageType,
                             wineColor: detail.color,
                             wineVintage: detail.vintage,
                             onCancel: { showPlacement = false }
@@ -367,6 +370,10 @@ struct WineDetailView: View {
     // MARK: - Helpers
 
     private func loadData() async {
+        // Rafraîchissement post-mutation : garder le contenu affiché, montrer le
+        // voile plutôt que de remplacer toute la page par un spinner.
+        if detail != nil { isRefreshing = true }
+        defer { isRefreshing = false }
         do {
             let loadedDetail = try await WineAPI.getDetail(id: wineId)
             detail = loadedDetail
