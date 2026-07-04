@@ -27,6 +27,7 @@ struct WineListView: View {
                         sortDescending: $viewModel.sortDescending,
                         statusFilter: $viewModel.statusFilter,
                         colorFilter: $viewModel.colorFilter,
+                        beverageTypeFilter: $viewModel.beverageTypeFilter,
                         groups: mappedGroups,
                         hasMore: viewModel.hasMore,
                         onWineTapped: { selectedWineId = $0 },

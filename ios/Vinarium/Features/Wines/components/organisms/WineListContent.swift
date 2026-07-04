@@ -9,7 +9,7 @@ struct WineListContent: View {
     var onLoadMore: () async -> Void = {}
 
     var body: some View {
-        if groups.allSatisfy({ $0.items.isEmpty }) {
+        if groups.allSatisfy({ $0.items.isEmpty }) && !hasMore {
             emptyState
         } else {
             List {

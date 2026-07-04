@@ -32,6 +32,9 @@ enum BeverageType: String, Codable, CaseIterable, Identifiable, Sendable {
         }
     }
 
+    /// Première lettre du type, affichée dans la pastille des boissons non-vin.
+    var initial: String { String(label.prefix(1)).uppercased() }
+
     var displayColor: Color {
         switch self {
         case .wine: Color(red: 0.5, green: 0.05, blue: 0.1)      // bordeaux

@@ -10,8 +10,9 @@ struct BeverageBadge: View {
         if let color {
             WineColorBadge(color: color)
         } else {
-            Image(systemName: beverageType.icon)
-                .font(.system(size: 9, weight: .semibold))
+            // Boissons non-vin : première lettre du type plutôt qu'une icône.
+            Text(beverageType.initial)
+                .font(.system(size: 9, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 14, height: 14)
                 .background(Circle().fill(beverageType.displayColor))

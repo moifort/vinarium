@@ -114,6 +114,9 @@ final class WineListViewModel {
         didSet { if oldValue != statusFilter { scheduleReload() } }
     }
     var colorFilter: WineColor? { didSet { if oldValue != colorFilter { scheduleReload() } } }
+    var beverageTypeFilter: BeverageType? {
+        didSet { if oldValue != beverageTypeFilter { scheduleReload() } }
+    }
     var mode: WineListMode = .all { didSet { if oldValue != mode { scheduleReload() } } }
 
     private let pageSize = 15
@@ -147,6 +150,7 @@ final class WineListViewModel {
         }
         rebuildPresentation()
         isLoading = false
+        continueLoadingIfFilteredEmpty()
     }
 
     /// Charge la page suivante et l'ajoute aux vins déjà chargés.
@@ -164,6 +168,15 @@ final class WineListViewModel {
             self.error = reportError(error)
         }
         isLoadingMore = false
+        continueLoadingIfFilteredEmpty()
+    }
+
+    /// Les filtres couleur/type s'appliquent côté client : si la page courante ne
+    /// contient aucun match mais qu'il reste des pages, on continue de charger
+    /// jusqu'à trouver des résultats (ou épuiser la liste).
+    private func continueLoadingIfFilteredEmpty() {
+        guard groupedWines.isEmpty, hasMore, !isLoadingMore else { return }
+        Task { await loadMore() }
     }
 
     /// Déclenche le chargement de la page suivante quand une ligne proche de la
@@ -192,7 +205,10 @@ final class WineListViewModel {
     // sections localement (le filtre couleur reste appliqué côté client).
 
     private func rebuildPresentation() {
-        let displayed = colorFilter.map { color in wines.filter { $0.color == color } } ?? wines
+        let displayed = wines.filter { wine in
+            (colorFilter == nil || wine.color == colorFilter)
+                && (beverageTypeFilter == nil || wine.beverageType == beverageTypeFilter)
+        }
         groupedWines = Self.buildGroupedWines(
             wines: displayed,
             sort: sort,
