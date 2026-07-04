@@ -25,6 +25,7 @@ struct CellarView: View {
                         displayMode: $viewModel.displayMode,
                         groups: mappedGroups,
                         events: mappedEvents,
+                        bottlesHasMore: viewModel.bottlesHasMore,
                         historyHasMore: viewModel.historyHasMore,
                         onBottleTapped: { selectedWineId = $0 },
                         onRemoveRequested: { wineId in
@@ -34,6 +35,8 @@ struct CellarView: View {
                         },
                         onEventTapped: { selectedWineId = $0 },
                         onRefresh: { await viewModel.load() },
+                        onBottlesPrefetch: { viewModel.prefetchBottlesIfNeeded(for: $0) },
+                        onBottlesLoadMore: { await viewModel.loadMoreBottles() },
                         onHistoryPrefetch: { viewModel.prefetchHistoryIfNeeded(for: $0) },
                         onHistoryLoadMore: { await viewModel.loadMoreHistory() }
                     )

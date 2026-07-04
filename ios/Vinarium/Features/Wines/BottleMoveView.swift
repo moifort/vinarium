@@ -77,7 +77,7 @@ struct BottleMoveView: View {
 
     private func loadData() async {
         do {
-            bottles = try await CellarAPI.getBottles()
+            bottles = try await CellarAPI.getAllBottles()
             isLoading = false
         } catch {
             self.error = reportError(error)

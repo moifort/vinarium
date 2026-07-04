@@ -7,13 +7,22 @@ struct HistoryPage {
     let hasMore: Bool
 }
 
+/// One page of cellar bottles.
+struct BottlesPage {
+    let bottles: [CellarBottle]
+    let hasMore: Bool
+}
+
 enum CellarAPI {
-    static func getBottles() async throws -> [CellarBottle] {
+    static func getBottles(limit: Int, after: String?) async throws -> BottlesPage {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarBottlesQuery()
+            query: VinariumGraphQL.CellarBottlesQuery(
+                limit: .some(limit),
+                after: GraphQLHelpers.graphQLNullable(after)
+            )
         )
-        return data.cellarBottles.map { b in
+        let bottles = data.cellarBottles.items.map { b in
             CellarBottle(
                 wineId: b.wineId,
                 wine: Wine(
@@ -39,6 +48,14 @@ enum CellarAPI {
                 createdAt: GraphQLHelpers.parseISO8601(b.createdAt) ?? Date()
             )
         }
+        return BottlesPage(bottles: bottles, hasMore: data.cellarBottles.hasMore)
+    }
+
+    /// Toutes les bouteilles de la cave (grille complète pour placer/déplacer une
+    /// bouteille). La cave est bornée par sa capacité physique : une grande page
+    /// la couvre entièrement.
+    static func getAllBottles() async throws -> [CellarBottle] {
+        try await getBottles(limit: 1000, after: nil).bottles
     }
 
     static func getHistory(limit: Int, offset: Int) async throws -> HistoryPage {

@@ -36,6 +36,23 @@ export namespace CellarQuery {
     return bottles.map(toView)
   }
 
+  // One page of cellar bottles (newest first) joined with their wine.
+  export const getBottlesPage = async (
+    userId: UserId,
+    { limit, after }: { limit: number; after?: WineId },
+  ) => {
+    const { bottles, hasMore } = await repository.findBottlesPage(userId, { limit, after })
+    const wines = await WineQuery.getManyByWineIds(
+      userId,
+      bottles.map(({ wineId }) => wineId),
+    )
+    const wineMap = keyBy(wines, 'id')
+    const items = bottles
+      .filter(({ wineId }) => wineMap[wineId])
+      .map((bottle) => ({ ...toView(bottle), wine: wineMap[bottle.wineId] }))
+    return { items, hasMore }
+  }
+
   // One page of wine ids currently in the cellar, ordered by placement date.
   export const pageWineIds = async (
     userId: UserId,

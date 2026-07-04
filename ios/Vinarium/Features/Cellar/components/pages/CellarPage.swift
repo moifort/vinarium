@@ -4,11 +4,14 @@ struct CellarPage: View {
     @Binding var displayMode: CellarDisplayMode
     let groups: [CaveBottleList.Group]
     let events: [JournalEventList.Event]
+    var bottlesHasMore: Bool = false
     var historyHasMore: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onEventTapped: (String) -> Void
     var onRefresh: () async -> Void
+    var onBottlesPrefetch: (String) -> Void = { _ in }
+    var onBottlesLoadMore: () async -> Void = {}
     var onHistoryPrefetch: (String) -> Void = { _ in }
     var onHistoryLoadMore: () async -> Void = {}
 
@@ -18,8 +21,11 @@ struct CellarPage: View {
             case .cave:
                 CaveBottleList(
                     groups: groups,
+                    hasMore: bottlesHasMore,
                     onBottleTapped: onBottleTapped,
-                    onRemoveRequested: onRemoveRequested
+                    onRemoveRequested: onRemoveRequested,
+                    onPrefetch: onBottlesPrefetch,
+                    onLoadMore: onBottlesLoadMore
                 )
             case .journal:
                 JournalEventList(

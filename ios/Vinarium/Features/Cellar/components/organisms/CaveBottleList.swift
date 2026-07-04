@@ -2,8 +2,11 @@ import SwiftUI
 
 struct CaveBottleList: View {
     let groups: [Group]
+    var hasMore: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
+    var onPrefetch: (String) -> Void = { _ in }
+    var onLoadMore: () async -> Void = {}
 
     var body: some View {
         if groups.isEmpty {
@@ -25,6 +28,7 @@ struct CaveBottleList: View {
                                 }
                             }
                             .tint(.primary)
+                            .onAppear { onPrefetch(item.id) }
                             .swipeActions(edge: .trailing) {
                                 Button {
                                     onRemoveRequested(item.id)
@@ -37,6 +41,16 @@ struct CaveBottleList: View {
                     } header: {
                         Label("Rangée \(group.label)", systemImage: "cabinet")
                     }
+                }
+
+                if hasMore {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    .listRowSeparator(.hidden)
+                    .task { await onLoadMore() }
                 }
             }
         }

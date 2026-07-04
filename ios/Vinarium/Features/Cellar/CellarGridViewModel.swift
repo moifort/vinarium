@@ -33,6 +33,8 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
 @MainActor @Observable
 final class CellarGridViewModel {
     var bottles: [CellarBottle] = []
+    var bottlesHasMore = false
+    var isLoadingMoreBottles = false
     var history: [HistoryEvent] = []
     var historyHasMore = false
     var isLoadingMoreHistory = false
@@ -40,7 +42,7 @@ final class CellarGridViewModel {
     var isLoading = false
     var error: String?
 
-    private let historyPageSize = 15
+    private let pageSize = 15
     private let prefetchThreshold = 5
 
     var groupedRows: [CellarRowGroup] {
@@ -67,10 +69,11 @@ final class CellarGridViewModel {
         isLoading = true
         error = nil
         do {
-            async let bottlesData = CellarAPI.getBottles()
-            async let historyData = CellarAPI.getHistory(limit: historyPageSize, offset: 0)
+            async let bottlesData = CellarAPI.getBottles(limit: pageSize, after: nil)
+            async let historyData = CellarAPI.getHistory(limit: pageSize, offset: 0)
             let (b, h) = try await (bottlesData, historyData)
-            bottles = b
+            bottles = b.bottles
+            bottlesHasMore = b.hasMore
             history = h.events
             historyHasMore = h.hasMore
         } catch {
@@ -79,12 +82,35 @@ final class CellarGridViewModel {
         isLoading = false
     }
 
+    /// Charge la page suivante de bouteilles et l'ajoute à la grille.
+    func loadMoreBottles() async {
+        guard bottlesHasMore, !isLoadingMoreBottles, let last = bottles.last else { return }
+        isLoadingMoreBottles = true
+        do {
+            let page = try await CellarAPI.getBottles(limit: pageSize, after: last.wineId)
+            bottles.append(contentsOf: page.bottles)
+            bottlesHasMore = page.hasMore
+        } catch {
+            self.error = reportError(error)
+        }
+        isLoadingMoreBottles = false
+    }
+
+    /// Déclenche le chargement quand une bouteille proche de la fin apparaît.
+    func prefetchBottlesIfNeeded(for wineId: String) {
+        guard bottlesHasMore, !isLoadingMoreBottles else { return }
+        guard let index = bottles.firstIndex(where: { $0.wineId == wineId }) else { return }
+        if bottles.count - index <= prefetchThreshold {
+            Task { await loadMoreBottles() }
+        }
+    }
+
     /// Charge la page suivante du journal et l'ajoute à l'historique.
     func loadMoreHistory() async {
         guard historyHasMore, !isLoadingMoreHistory else { return }
         isLoadingMoreHistory = true
         do {
-            let page = try await CellarAPI.getHistory(limit: historyPageSize, offset: history.count)
+            let page = try await CellarAPI.getHistory(limit: pageSize, offset: history.count)
             history.append(contentsOf: page.events)
             historyHasMore = page.hasMore
         } catch {

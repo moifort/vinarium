@@ -33,6 +33,21 @@ export const CellarBottleWithWineType = builder
     }),
   })
 
+export const CellarBottlesType = builder
+  .objectRef<{
+    items: (CellarBottleView & { wine: import('~/domain/wine/types').Wine })[]
+    hasMore: boolean
+  }>('CellarBottles')
+  .implement({
+    description: 'A page of cellar bottles joined with their wine',
+    fields: (t) => ({
+      items: t.field({ type: [CellarBottleWithWineType], resolve: ({ items }) => items }),
+      hasMore: t.exposeBoolean('hasMore', {
+        description: 'Whether more bottles are available after this page',
+      }),
+    }),
+  })
+
 export const CellarInfoType = builder
   .objectRef<{ rows: number; cols: number; capacity: number; placedCount: number }>('CellarInfo')
   .implement({

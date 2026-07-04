@@ -1,27 +1,30 @@
-query CellarBottles {
-  cellarBottles {
-    wineId
-    row
-    col
-    rowLabel
-    colLabel
-    createdAt
-    wine {
-      id
-      name
-      beverageType
-      color
-      style
-      vintage
-      domain
-      appellation
-      region
-      country
-      classification
-      purchasePrice
-      drinkFrom
-      drinkUntil
+query CellarBottles($limit: Int, $after: WineId) {
+  cellarBottles(limit: $limit, after: $after) {
+    items {
+      wineId
+      row
+      col
+      rowLabel
+      colLabel
+      createdAt
+      wine {
+        id
+        name
+        beverageType
+        color
+        style
+        vintage
+        domain
+        appellation
+        region
+        country
+        classification
+        purchasePrice
+        drinkFrom
+        drinkUntil
+      }
     }
+    hasMore
   }
 }
 

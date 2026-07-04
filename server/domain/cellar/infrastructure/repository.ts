@@ -38,6 +38,22 @@ export const findPage = async (
   return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((b) => b.wineId), hasMore }
 }
 
+// One page of cellar bottles ordered by placement date (newest first).
+export const findBottlesPage = async (
+  userId: UserId,
+  { limit, after }: { limit: number; after?: WineId },
+): Promise<{ bottles: CellarBottle[]; hasMore: boolean }> => {
+  let query = cellar().where('userId', '==', userId).orderBy('createdAt', 'desc')
+  if (after) {
+    const cursor = await cellar().doc(docId(userId, after)).get()
+    if (cursor.exists) query = query.startAfter(cursor)
+  }
+  const snap = await query.limit(limit + 1).get()
+  const bottles = snap.docs.map((doc) => doc.data())
+  const hasMore = bottles.length > limit
+  return { bottles: hasMore ? bottles.slice(0, limit) : bottles, hasMore }
+}
+
 // Batch-load cellar placements for a page of wines with a single getAll.
 export const findManyByWineIds = async (
   userId: UserId,

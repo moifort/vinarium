@@ -90,6 +90,17 @@ type CellarBottleWithWine {
 }
 
 """
+A page of cellar bottles joined with their wine
+"""
+type CellarBottles {
+  """
+  Whether more bottles are available after this page
+  """
+  hasMore: Boolean!
+  items: [CellarBottleWithWine!]!
+}
+
+"""
 Configuration and current usage of the cellar grid
 """
 type CellarInfo {
@@ -352,9 +363,9 @@ scalar PlaceName
 
 type Query {
   """
-  All bottles currently in the cellar, with the joined wine
+  A page of bottles currently in the cellar, newest first, with the joined wine
   """
-  cellarBottles: [CellarBottleWithWine!]!
+  cellarBottles(after: WineId, limit: Int = 15): CellarBottles!
 
   """
   Cellar grid dimensions and current placement count

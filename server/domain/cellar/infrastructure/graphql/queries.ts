@@ -1,6 +1,6 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { CellarQuery } from '../../query'
-import { CellarBottleWithWineType, CellarInfoType, CellarPositionType } from './types'
+import { CellarBottlesType, CellarInfoType, CellarPositionType } from './types'
 
 builder.queryField('cellarInfo', (t) =>
   t.field({
@@ -12,9 +12,17 @@ builder.queryField('cellarInfo', (t) =>
 
 builder.queryField('cellarBottles', (t) =>
   t.field({
-    type: [CellarBottleWithWineType],
-    description: 'All bottles currently in the cellar, with the joined wine',
-    resolve: (_root, _args, { userId }) => CellarQuery.getAllBottles(userId),
+    type: CellarBottlesType,
+    description: 'A page of bottles currently in the cellar, newest first, with the joined wine',
+    args: {
+      limit: t.arg.int({ defaultValue: 15 }),
+      after: t.arg({ type: 'WineId' }),
+    },
+    resolve: (_root, args, { userId }) =>
+      CellarQuery.getBottlesPage(userId, {
+        limit: args.limit ?? 15,
+        after: args.after ?? undefined,
+      }),
   }),
 )
 
