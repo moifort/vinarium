@@ -9,6 +9,7 @@ import { chunk } from 'lodash-es'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
+import { memoizedPerRequest } from '~/system/request-cache'
 
 // Generic Firestore converter that preserves type information when reading
 // documents and recursively turns Timestamp instances back into JS Date.
@@ -53,13 +54,22 @@ export const userWineRecordRepository = <T extends { userId: UserId; wineId: Win
   const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
 
   return {
-    findAllByUser: async (userId: UserId): Promise<T[]> => {
-      const snap = await records().where('userId', '==', userId).get()
-      return snap.docs.map((doc) => doc.data())
-    },
+    findAllByUser: (userId: UserId): Promise<T[]> =>
+      memoizedPerRequest(`${collectionName}:all:${userId}`, async () => {
+        const snap = await records().where('userId', '==', userId).get()
+        return snap.docs.map((doc) => doc.data())
+      }),
     findBy: async (userId: UserId, wineId: WineId): Promise<T | null> => {
       const doc = await records().doc(docId(userId, wineId)).get()
       return doc.data() ?? null
+    },
+    // Batch-load the records for a page of wines with a single getAll — one read
+    // per id, no full-collection scan. Missing docs come back undefined.
+    findManyByWineIds: async (userId: UserId, wineIds: WineId[]): Promise<T[]> => {
+      if (wineIds.length === 0) return []
+      const refs = wineIds.map((wineId) => records().doc(docId(userId, wineId)))
+      const snaps = await db().getAll(...refs)
+      return snaps.map((snap) => snap.data()).filter((data): data is T => data !== undefined)
     },
     save: async (record: T): Promise<T> => {
       await records().doc(docId(record.userId, record.wineId)).set(record)

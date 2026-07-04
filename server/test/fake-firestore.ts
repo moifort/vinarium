@@ -12,10 +12,12 @@ import type { Firestore } from 'firebase-admin/firestore'
 
 type Doc = Record<string, unknown>
 
+export type FakeSnapshot = { exists: boolean; id: string; data: () => Doc | undefined }
+
 export type FakeRef = {
   collection: string
   id: string
-  get: () => Promise<{ data: () => Doc | undefined }>
+  get: () => Promise<FakeSnapshot>
   set: (data: Doc) => Promise<void>
   delete: () => Promise<void>
 }
@@ -35,6 +37,8 @@ export type DirectWrite = { type: 'set' | 'delete'; collection: string; id: stri
 type FakeQuery = {
   where: (field: string, op: string, value: unknown) => FakeQuery
   orderBy: (field: string, direction?: 'asc' | 'desc') => FakeQuery
+  limit: (count: number) => FakeQuery
+  startAfter: (cursor: FakeSnapshot) => FakeQuery
   get: () => Promise<{ docs: Array<{ data: () => Doc; ref: FakeRef }> }>
 }
 
@@ -43,6 +47,8 @@ type FakeCollection = {
   doc: (id?: string) => FakeRef
   add: (data: Doc) => Promise<FakeRef>
   where: FakeQuery['where']
+  orderBy: FakeQuery['orderBy']
+  limit: FakeQuery['limit']
   get: FakeQuery['get']
 }
 
@@ -67,7 +73,8 @@ export const createFakeFirestore = () => {
     id,
     get: async () => {
       reads += 1
-      return { data: () => docsOf(collection).get(id) }
+      const doc = docsOf(collection).get(id)
+      return { exists: doc !== undefined, id, data: () => doc }
     },
     set: async (data) => {
       directWrites.push({ type: 'set', collection, id })
@@ -82,36 +89,49 @@ export const createFakeFirestore = () => {
   const sortValue = (value: unknown) =>
     value instanceof Date ? value.getTime() : (value as number | string)
 
-  // The fake only implements equality filtering — fail loudly rather than
-  // silently return wrong results if production code starts using other operators.
-  const assertEqualityOperator = (op: string) => {
-    if (op !== '==') throw new Error(`fake-firestore only supports '==' queries, got '${op}'`)
+  type Filter = [field: string, op: string, value: unknown]
+  type QueryState = {
+    filters: Filter[]
+    order?: { field: string; direction: 'asc' | 'desc' }
+    limit?: number
+    startAfterId?: string
   }
 
-  const makeQuery = (
-    collection: string,
-    filters: Array<[string, unknown]>,
-    order?: { field: string; direction: 'asc' | 'desc' },
-  ): FakeQuery => ({
-    where: (field, op, value) => {
-      assertEqualityOperator(op)
-      return makeQuery(collection, [...filters, [field, value]], order)
-    },
-    orderBy: (field, direction = 'asc') => makeQuery(collection, filters, { field, direction }),
+  // Only the operators production code actually uses — fail loudly otherwise.
+  const matchesFilter = (data: Doc, [field, op, value]: Filter) => {
+    if (op === '==') return data[field] === value
+    if (op === '!=') return data[field] !== undefined && data[field] !== value
+    throw new Error(`fake-firestore only supports '==' and '!=' queries, got '${op}'`)
+  }
+
+  const makeQuery = (collection: string, state: QueryState): FakeQuery => ({
+    where: (field, op, value) =>
+      makeQuery(collection, { ...state, filters: [...state.filters, [field, op, value]] }),
+    orderBy: (field, direction = 'asc') =>
+      makeQuery(collection, { ...state, order: { field, direction } }),
+    limit: (count) => makeQuery(collection, { ...state, limit: count }),
+    startAfter: (cursor) => makeQuery(collection, { ...state, startAfterId: cursor.id }),
     get: async () => {
       reads += 1
-      const matching = [...docsOf(collection).entries()].filter(([, data]) =>
-        filters.every(([field, value]) => data[field] === value),
+      let matching = [...docsOf(collection).entries()].filter(([, data]) =>
+        state.filters.every((filter) => matchesFilter(data, filter)),
       )
-      if (order) {
-        const { field, direction } = order
-        matching.sort(([, a], [, b]) => {
+      if (state.order) {
+        const { field, direction } = state.order
+        // Firestore uses the document id as an implicit tie-break — mirror it.
+        matching.sort(([idA, a], [idB, b]) => {
           const left = sortValue(a[field])
           const right = sortValue(b[field])
-          const comparison = left < right ? -1 : left > right ? 1 : 0
+          const primary = left < right ? -1 : left > right ? 1 : 0
+          const comparison = primary !== 0 ? primary : idA < idB ? -1 : idA > idB ? 1 : 0
           return direction === 'desc' ? -comparison : comparison
         })
       }
+      if (state.startAfterId) {
+        const cursorIndex = matching.findIndex(([id]) => id === state.startAfterId)
+        if (cursorIndex >= 0) matching = matching.slice(cursorIndex + 1)
+      }
+      if (state.limit !== undefined) matching = matching.slice(0, state.limit)
       return {
         docs: matching.map(([id, data]) => ({ data: () => data, ref: makeRef(collection, id) })),
       }
@@ -126,11 +146,10 @@ export const createFakeFirestore = () => {
       await ref.set(data)
       return ref
     },
-    where: (field, op, value) => {
-      assertEqualityOperator(op)
-      return makeQuery(name, [[field, value]])
-    },
-    get: () => makeQuery(name, []).get(),
+    where: (field, op, value) => makeQuery(name, { filters: [[field, op, value]] }),
+    orderBy: (field, direction) => makeQuery(name, { filters: [] }).orderBy(field, direction),
+    limit: (count) => makeQuery(name, { filters: [] }).limit(count),
+    get: () => makeQuery(name, { filters: [] }).get(),
   })
 
   const makeBatch = (): FakeBatch => {
@@ -159,8 +178,16 @@ export const createFakeFirestore = () => {
     return batch
   }
 
+  const getAll = async (...refs: FakeRef[]) => {
+    reads += refs.length
+    return refs.map((ref) => {
+      const doc = docsOf(ref.collection).get(ref.id)
+      return { exists: doc !== undefined, id: ref.id, data: () => doc }
+    })
+  }
+
   return {
-    db: { collection: makeCollection, batch: makeBatch } as unknown as Firestore,
+    db: { collection: makeCollection, batch: makeBatch, getAll } as unknown as Firestore,
     seed: (collection: string, id: string, data: Doc) => {
       docsOf(collection).set(id, { ...data })
     },
@@ -183,6 +210,10 @@ const holder = { current: createFakeFirestore() }
 
 export const resetFakeFirestore = () => {
   holder.current = createFakeFirestore()
+  // Give each test a fresh, stable request context so memoizedPerRequest() caches
+  // within the test (mirroring one HTTP request) and is cleared between tests.
+  const context: Record<string, unknown> = {}
+  ;(globalThis as unknown as { useEvent: () => unknown }).useEvent = () => ({ context })
   return holder.current
 }
 

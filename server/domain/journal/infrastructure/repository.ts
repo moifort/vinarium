@@ -3,14 +3,16 @@ import type { JournalEntry } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
+import { memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const journal = () => db().collection('journal').withConverter(genericDataConverter<JournalEntry>())
 
-export const findAllByUser = async (userId: UserId): Promise<JournalEntry[]> => {
-  const snap = await journal().where('userId', '==', userId).orderBy('date', 'desc').get()
-  return snap.docs.map((doc) => doc.data())
-}
+export const findAllByUser = (userId: UserId): Promise<JournalEntry[]> =>
+  memoizedPerRequest(`journal:all:${userId}`, async () => {
+    const snap = await journal().where('userId', '==', userId).orderBy('date', 'desc').get()
+    return snap.docs.map((doc) => doc.data())
+  })
 
 export const findByWineId = async (userId: UserId, wineId: WineId): Promise<JournalEntry[]> => {
   const snap = await journal()

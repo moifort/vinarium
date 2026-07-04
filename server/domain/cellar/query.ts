@@ -4,7 +4,7 @@ import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CELLAR_SIZE, type CellarBottle, type CellarBottleView } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { WineQuery } from '~/domain/wine/query'
-import type { Wine, WineId } from '~/domain/wine/types'
+import type { WineId } from '~/domain/wine/types'
 
 export namespace CellarQuery {
   export const getCellarInfo = async (userId: UserId) => {
@@ -17,15 +17,10 @@ export namespace CellarQuery {
     }
   }
 
-  // preloadedWines lets callers that already fetched the user's wines (dashboard)
-  // skip the redundant collection read.
-  export const getAllBottles = async (
-    userId: UserId,
-    preloadedWines?: Wine[] | Promise<Wine[]>,
-  ) => {
+  export const getAllBottles = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
       repository.findAllByUser(userId),
-      preloadedWines ?? WineQuery.findAll(userId),
+      WineQuery.findAll(userId),
     ])
     const wineMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {

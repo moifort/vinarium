@@ -13,15 +13,17 @@ import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
 import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from './types'
 
+// Dashboard sections are a glanceable preview, not a full list — cap each one.
+const DASHBOARD_SECTION_LIMIT = 5
+
 export namespace DashboardQuery {
   export const get = async (userId: UserId): Promise<DashboardView> => {
-    // Fetch the wines collection once and share it with the sub-queries
-    const winesPromise = WineQuery.findAll(userId)
+    // The per-request cache dedupes the shared wines read across these queries.
     const [allBottles, history, allTastings, wines] = await Promise.all([
-      CellarQuery.getAllBottles(userId, winesPromise),
-      JournalQuery.getAll(userId, winesPromise),
+      CellarQuery.getAllBottles(userId),
+      JournalQuery.getAll(userId),
       TastingQuery.getAll(userId),
-      winesPromise,
+      WineQuery.findAll(userId),
     ])
 
     const currentYear = new Date().getFullYear()
@@ -38,14 +40,17 @@ export namespace DashboardQuery {
         .map((b) => toReadyToDrinkWine(b, currentYear)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Number.POSITIVE_INFINITY,
-    )
+    ).slice(0, DASHBOARD_SECTION_LIMIT)
 
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
 
     const lastExit = history.find((event) => event.type === 'out')
 
-    const favorites = loadFavorites(allTastings.filter(isFavorite), wineMap)
+    const favorites = loadFavorites(allTastings.filter(isFavorite), wineMap).slice(
+      0,
+      DASHBOARD_SECTION_LIMIT,
+    )
 
     return {
       bottleCount,
