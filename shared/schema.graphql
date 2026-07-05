@@ -431,6 +431,26 @@ type Query {
   journalEvents(limit: Int = 15, offset: Int = 0): JournalEvents!
 
   """
+  Search the whole collection by name, producer, subtype, region, vintage or person, ranked by relevance. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
+  """
+  searchWines(
+    """
+    Combinable facet filters
+    """
+    filters: SearchFiltersInput
+
+    """
+    Max hits returned
+    """
+    limit: Int = 50
+
+    """
+    Free text — case- and accent-insensitive
+    """
+    query: String
+  ): SearchResults!
+
+  """
   Suggest the next free cellar position (null if cellar is full)
   """
   suggestCellarPosition: CellarPosition
@@ -511,6 +531,82 @@ type ScanResult {
   region: String
   subtype: BeverageSubtype
   vintage: Int
+}
+
+"""
+Facet filters combinable with the text query. Absent facets are not filtered on.
+"""
+input SearchFiltersInput {
+  """
+  Keep only these beverage types
+  """
+  beverageTypes: [BeverageType!]
+
+  """
+  Keep only these wine colors
+  """
+  colors: [WineColor!]
+
+  """
+  Keep only wines flagged as favorite
+  """
+  favorite: Boolean
+
+  """
+  Keep only wines received or given as a gift
+  """
+  gifted: Boolean
+
+  """
+  Keep only wines in the cellar or already consumed
+  """
+  status: WineStatusFilter
+}
+
+"""
+A wine that matched the search, with the fields that matched it
+"""
+type SearchHit {
+  """
+  Which fields matched — empty when only facet filters applied
+  """
+  matchedFields: [SearchMatchedField!]!
+
+  """
+  The matched wine, with its satellites already attached
+  """
+  wine: Wine!
+}
+
+"""
+Which wine field a search query matched — the client groups results by it
+"""
+enum SearchMatchedField {
+  APPELLATION
+  GIFTED_BY
+  GIFT_RECIPIENT
+  NAME
+  PRODUCER
+  RECOMMENDER
+  REGION
+  SUBTYPE
+  TASTING_CONTACT
+  VINTAGE
+}
+
+"""
+Search results ranked by relevance
+"""
+type SearchResults {
+  """
+  Matched wines, best relevance first (capped at the requested limit)
+  """
+  hits: [SearchHit!]!
+
+  """
+  Total number of matches before the limit was applied
+  """
+  totalCount: Int!
 }
 
 """

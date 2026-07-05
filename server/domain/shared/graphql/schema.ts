@@ -41,6 +41,12 @@ import '~/domain/recommendation/infrastructure/graphql/mutations'
 import '~/domain/dashboard/infrastructure/graphql/types'
 import '~/domain/dashboard/infrastructure/graphql/queries'
 
+// Search domain (read-only, reuses WineType imported above)
+import '~/domain/search/infrastructure/graphql/enums'
+import '~/domain/search/infrastructure/graphql/inputs'
+import '~/domain/search/infrastructure/graphql/types'
+import '~/domain/search/infrastructure/graphql/queries'
+
 // Changelog (application release notes)
 import '~/domain/changelog/infrastructure/graphql/types'
 import '~/domain/changelog/infrastructure/graphql/queries'
