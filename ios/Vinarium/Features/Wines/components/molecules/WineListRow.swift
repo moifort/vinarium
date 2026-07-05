@@ -7,6 +7,7 @@ struct WineListRow: View {
     let subtitle: String?
     let rating: Int?
     let isFavorite: Bool
+    var isInCellar: Bool = false
 
     var body: some View {
         HStack(alignment: .top) {
@@ -24,6 +25,12 @@ struct WineListRow: View {
             if let rating {
                 StarRatingView(rating: rating)
             }
+            if isInCellar {
+                Image(systemName: "cabinet")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel("En cave")
+            }
             if isFavorite {
                 Image(systemName: "heart.fill")
                     .foregroundStyle(.red)
@@ -39,14 +46,16 @@ struct WineListRow: View {
             name: "Ch\u{00E2}teau Margaux",
             subtitle: "2018 \u{2022} Bordeaux \u{2022} 45 \u{20AC}",
             rating: 4,
-            isFavorite: false
+            isFavorite: false,
+            isInCellar: true
         )
         WineListRow(
             color: .white,
             name: "Château La Sauvageonne Cuvée Les Oliviers",
             subtitle: "2021",
             rating: 5,
-            isFavorite: true
+            isFavorite: true,
+            isInCellar: true
         )
         WineListRow(
             color: .sparkling,

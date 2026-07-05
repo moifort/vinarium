@@ -87,7 +87,8 @@ struct WineListView: View {
                     name: wine.name,
                     subtitle: Self.subtitle(for: wine),
                     rating: wine.rating,
-                    isFavorite: wine.isFavorite
+                    isFavorite: wine.isFavorite,
+                    isInCellar: wine.isInCellar
                 )
             })
         }

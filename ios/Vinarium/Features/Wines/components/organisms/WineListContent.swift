@@ -41,7 +41,8 @@ struct WineListContent: View {
                                     name: item.name,
                                     subtitle: item.subtitle,
                                     rating: item.rating,
-                                    isFavorite: item.isFavorite
+                                    isFavorite: item.isFavorite,
+                                    isInCellar: item.isInCellar
                                 )
                             }
                             .tint(.primary)
@@ -98,6 +99,7 @@ extension WineListContent {
         let subtitle: String?
         let rating: Int?
         let isFavorite: Bool
+        var isInCellar: Bool = false
     }
 }
 
@@ -106,7 +108,7 @@ extension WineListContent {
         mode: .all,
         groups: [
             .init(label: "2018", items: [
-                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true),
+                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isInCellar: true),
                 .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false),
             ]),
             .init(label: "2021", items: [
