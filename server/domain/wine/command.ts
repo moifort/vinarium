@@ -1,6 +1,11 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import type { UserId } from '~/domain/shared/types'
-import { irrelevantAttributes, requiresColor } from '~/domain/wine/business-rules'
+import {
+  irrelevantAttributes,
+  requiresColor,
+  retainedSubtype,
+  subtypeAllowed,
+} from '~/domain/wine/business-rules'
 import * as repository from '~/domain/wine/infrastructure/repository'
 import { randomWineId } from '~/domain/wine/primitives'
 import type { BeverageType, Wine, WineId, WineName } from '~/domain/wine/types'
@@ -15,6 +20,8 @@ export namespace WineCommand {
     >,
   ) => {
     if (requiresColor(beverageType) && !data.color) return 'color-required' as const
+    if (data.subtype && !subtypeAllowed(beverageType, data.subtype))
+      return 'subtype-invalid' as const
     const now = new Date()
     return await repository.save(
       withoutIrrelevantAttributes({
@@ -38,6 +45,13 @@ export namespace WineCommand {
     if (!existing) return 'not-found' as const
     const updated = withoutIrrelevantAttributes({ ...existing, ...data, updatedAt: new Date() })
     if (requiresColor(updated.beverageType) && !updated.color) return 'color-required' as const
+    // A subtype explicitly provided must fit the (possibly new) type; one merely
+    // inherited from before a type change is silently dropped when it no longer fits.
+    if (data.subtype && !subtypeAllowed(updated.beverageType, data.subtype))
+      return 'subtype-invalid' as const
+    const subtype = retainedSubtype(updated.beverageType, updated.subtype)
+    if (subtype === undefined) delete updated.subtype
+    else updated.subtype = subtype
     return await repository.save(updated)
   }
 

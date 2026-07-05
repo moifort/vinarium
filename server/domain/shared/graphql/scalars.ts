@@ -12,14 +12,7 @@ import {
   Year,
 } from '~/domain/shared/primitives'
 import { Rating } from '~/domain/tasting/primitives'
-import {
-  Appellation,
-  BeverageStyle,
-  Classification,
-  WineDomain,
-  WineId,
-  WineName,
-} from '~/domain/wine/primitives'
+import { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/primitives'
 import { builder } from './builder'
 
 const validatedParse =
@@ -60,12 +53,6 @@ builder.scalarType('WineDomain', {
   description: 'Wine producer / château / domain',
   serialize: (value) => value as string,
   parseValue: validatedParse('WineDomain', WineDomain),
-})
-
-builder.scalarType('BeverageStyle', {
-  description: 'Beverage style for non-wine drinks (IPA, Single Malt, Junmai ...)',
-  serialize: (value) => value as string,
-  parseValue: validatedParse('BeverageStyle', BeverageStyle),
 })
 
 builder.scalarType('Appellation', {

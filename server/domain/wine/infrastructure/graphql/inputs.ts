@@ -1,5 +1,5 @@
 import { builder } from '~/domain/shared/graphql/builder'
-import { BeverageTypeEnum, WineColorEnum } from './enums'
+import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
 
 export const AddWineInput = builder.inputType('AddWineInput', {
   description: 'Manually add a beverage to the catalog',
@@ -13,7 +13,10 @@ export const AddWineInput = builder.inputType('AddWineInput', {
       type: WineColorEnum,
       description: 'Wine color — required when the beverage is a wine',
     }),
-    style: t.field({ type: 'BeverageStyle' }),
+    subtype: t.field({
+      type: BeverageSubtypeEnum,
+      description: 'Structured subtype — must be valid for the beverage type',
+    }),
     alcoholContent: t.float({ description: 'Alcohol by volume (% vol)' }),
     vintage: t.field({ type: 'Year' }),
     domain: t.field({ type: 'WineDomain' }),
@@ -41,7 +44,7 @@ export const UpdateWineInput = builder.inputType('UpdateWineInput', {
     name: t.field({ type: 'WineName' }),
     beverageType: t.field({ type: BeverageTypeEnum }),
     color: t.field({ type: WineColorEnum }),
-    style: t.field({ type: 'BeverageStyle' }),
+    subtype: t.field({ type: BeverageSubtypeEnum }),
     alcoholContent: t.float({ description: 'Alcohol by volume (% vol)' }),
     vintage: t.field({ type: 'Year' }),
     domain: t.field({ type: 'WineDomain' }),

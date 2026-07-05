@@ -1,4 +1,6 @@
 import { createHash } from 'node:crypto'
+import { SUBTYPES_BY_BEVERAGE } from '~/domain/wine/business-rules'
+import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
 import { config } from '~/system/config/index'
 import { createLogger } from '~/system/logger'
 import {
@@ -45,7 +47,7 @@ export namespace Scan {
             parts: [
               { inline_data: { mime_type: 'image/jpeg', data: base64 } },
               {
-                text: "Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 1 — Détermine d'abord beverageType parmi : wine (vin), spirit (spiritueux/alcool fort distillé), beer (bière), sake (saké japonais), cider (cidre/poiré), other. Indices de classification :\n- wine : mention de cépages, d'appellation (AOC/AOP/DOC), millésime, ~11-15% vol, bouteille bordelaise/bourguignonne.\n- spirit : whisky, rhum, gin, vodka, cognac, armagnac, tequila, mezcal, liqueur — souvent 37,5-50%+ vol, mention d'âge (ex : 12 ans) ou de distillerie.\n- beer : brasserie, IPA/Lager/Stout/Pils/Triple, ~4-9% vol, canette ou bouteille capsulée.\n- sake : texte japonais, mention 純米/吟醸/大吟醸 (Junmai/Ginjo/Daiginjo), kura (brasserie de saké), ~14-17% vol.\n- cider : pomme/poire, cidrerie, Brut/Doux/Fermier, ~2-8% vol.\nSi le type est réellement indéterminable, mets 'other'.\n\nÉTAPE 2 — Selon le type :\n- Pour un vin : color est OBLIGATOIRE, et estime drinkFrom/drinkUntil selon le type de vin, le millésime, la région et la classification.\n- Pour toute autre boisson : mets color à null, laisse les champs spécifiques au vin (grapeVarieties, appellation, classification, drinkFrom, drinkUntil) à null, et renseigne style avec un exemple adapté au type : spirit → Single Malt, Blended, Bourbon, Rhum agricole, London Dry… ; beer → IPA, Stout, Pils, Lager, Triple… ; sake → Junmai, Ginjo, Daiginjo, Honjozo… ; cider → Brut, Doux, Fermier, Poiré…\n\nLe champ domain désigne le producteur : domaine, distillerie, brasserie ou kura. Pour alcoholContent, indique le degré d'alcool en % vol s'il est visible. Pour estimatedPrice, estime le prix actuel du marché en euros selon le producteur et les caractéristiques. Toutes les valeurs textuelles (nom, producteur, région, pays, cépages, appellation, classification, style) doivent être en français. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).",
+                text: "Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 1 — Détermine d'abord beverageType parmi : wine (vin), spirit (spiritueux/alcool fort distillé), beer (bière), sake (saké japonais), cider (cidre/poiré), other. Indices de classification :\n- wine : mention de cépages, d'appellation (AOC/AOP/DOC), millésime, ~11-15% vol, bouteille bordelaise/bourguignonne.\n- spirit : whisky, rhum, gin, vodka, cognac, armagnac, tequila, mezcal, liqueur — souvent 37,5-50%+ vol, mention d'âge (ex : 12 ans) ou de distillerie.\n- beer : brasserie, IPA/Lager/Stout/Pils/Triple, ~4-9% vol, canette ou bouteille capsulée.\n- sake : texte japonais, mention 純米/吟醸/大吟醸 (Junmai/Ginjo/Daiginjo), kura (brasserie de saké), ~14-17% vol.\n- cider : pomme/poire, cidrerie, Brut/Doux/Fermier, ~2-8% vol.\nSi le type est réellement indéterminable, mets 'other'.\n\nÉTAPE 2 — Selon le type :\n- Pour un vin : color est OBLIGATOIRE parmi red/white/rosé — c'est la robe. Un champagne, crémant ou autre effervescent garde sa robe en color (white ou rosé) et reçoit subtype 'sparkling'. Estime drinkFrom/drinkUntil selon le type de vin, le millésime, la région et la classification.\n- Pour toute autre boisson : mets color à null et laisse les champs spécifiques au vin (grapeVarieties, appellation, classification, drinkFrom, drinkUntil) à null.\n\nÉTAPE 3 — Renseigne subtype avec une valeur COHÉRENTE avec beverageType, ou null si incertain :\n- wine → sparkling (effervescent), sweet (moelleux/liquoreux), late-harvest (vendanges tardives), vin-jaune, porto, fortified (autre vin muté : Banyuls, Madère, Xérès…)\n- spirit → rum, whisky, gin, vodka, cognac, armagnac, tequila (ou mezcal), liqueur, eau-de-vie\n- beer → blonde, blanche, amber (ambrée), brune, ipa, stout, pils (ou lager), triple\n- sake → junmai, ginjo, daiginjo, honjozo, nigori, sparkling (saké pétillant)\n- cider → brut, doux, demi-sec, poire (poiré)\n- 'other' si aucune valeur ne convient.\n\nLe champ domain désigne le producteur : domaine, distillerie, brasserie ou kura. Pour alcoholContent, indique le degré d'alcool en % vol s'il est visible. Pour estimatedPrice, estime le prix actuel du marché en euros selon le producteur et les caractéristiques. Toutes les valeurs textuelles (nom, producteur, région, pays, cépages, appellation, classification) doivent être en français. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).",
               },
             ],
           },
@@ -64,10 +66,11 @@ export namespace Scan {
                 enum: ['wine', 'spirit', 'beer', 'sake', 'cider', 'other'],
                 description: "Type de boisson ; 'other' si indéterminable",
               },
-              style: {
+              subtype: {
                 type: 'string',
+                enum: [...BEVERAGE_SUBTYPE_VALUES],
                 nullable: true,
-                description: 'Style de la boisson hors vin (ex : IPA, Single Malt, Junmai)',
+                description: 'Sous-type structuré, cohérent avec beverageType ; null si incertain',
               },
               alcoholContent: {
                 type: 'number',
@@ -97,9 +100,9 @@ export namespace Scan {
               },
               color: {
                 type: 'string',
-                enum: ['red', 'white', 'rosé', 'sparkling', 'sweet'],
+                enum: ['red', 'white', 'rosé'],
                 nullable: true,
-                description: 'Couleur/type du vin — obligatoire pour un vin, null sinon',
+                description: 'Robe du vin — obligatoire pour un vin, null sinon',
               },
               grapeVarieties: {
                 type: 'array',
@@ -132,7 +135,7 @@ export namespace Scan {
             propertyOrdering: [
               'name',
               'beverageType',
-              'style',
+              'subtype',
               'alcoholContent',
               'domain',
               'vintage',
@@ -172,7 +175,7 @@ export namespace Scan {
     const description = [
       scanResult.name,
       scanResult.domain,
-      scanResult.style,
+      scanResult.subtype,
       scanResult.vintage ? `millésime ${scanResult.vintage}` : null,
       scanResult.appellation,
       scanResult.region,
@@ -181,22 +184,18 @@ export namespace Scan {
       .filter(Boolean)
       .join(', ')
 
-    const wineFields = `  "drinkFrom": number ou null (année à partir de laquelle boire),
+    // The structured subtype the enrichment may fill: only the values valid for
+    // this beverage type are offered to the model.
+    const subtypeField = `  "subtype": string ou null (sous-type, uniquement parmi : ${SUBTYPES_BY_BEVERAGE[scanResult.beverageType].join(', ')}),`
+
+    const wineFields = `${subtypeField}
+  "drinkFrom": number ou null (année à partir de laquelle boire),
   "drinkUntil": number ou null (année limite pour le boire),
   "grapeVarieties": string[] (cépages principaux),
   "classification": string ou null (classification officielle),
   "appellation": string ou null (appellation),`
 
-    const STYLE_EXAMPLES: Record<ScanResult['beverageType'], string> = {
-      wine: '',
-      spirit: 'Single Malt, Blended, Bourbon, Rhum agricole, London Dry',
-      beer: 'IPA, Stout, Pils, Lager, Triple',
-      sake: 'Junmai, Ginjo, Daiginjo, Honjozo',
-      cider: 'Brut, Doux, Fermier, Poiré',
-      other: 'style de la boisson',
-    }
-
-    const otherFields = `  "style": string ou null (style, ex : ${STYLE_EXAMPLES[scanResult.beverageType]}),`
+    const otherFields = subtypeField
 
     const prompt = `Recherche des informations sur ce ${BEVERAGE_LABELS[scanResult.beverageType]} : ${description}.
 
@@ -235,7 +234,7 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
         ...scanResult,
         estimatedPrice: enriched.estimatedPrice ?? scanResult.estimatedPrice,
         alcoholContent: enriched.alcoholContent ?? scanResult.alcoholContent,
-        style: enriched.style ?? scanResult.style,
+        subtype: enriched.subtype ?? scanResult.subtype,
         drinkFrom: enriched.drinkFrom ?? scanResult.drinkFrom,
         drinkUntil: enriched.drinkUntil ?? scanResult.drinkUntil,
         grapeVarieties:

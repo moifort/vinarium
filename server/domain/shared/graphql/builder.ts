@@ -13,14 +13,7 @@ import type {
   Year,
 } from '~/domain/shared/types'
 import type { Rating } from '~/domain/tasting/types'
-import type {
-  Appellation,
-  BeverageStyle,
-  Classification,
-  WineDomain,
-  WineId,
-  WineName,
-} from '~/domain/wine/types'
+import type { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/types'
 export type GraphQLContext = {
   event: H3Event
   userId: UserId
@@ -42,7 +35,6 @@ export const builder = new SchemaBuilder<{
     WineId: { Input: WineId; Output: WineId }
     WineName: { Input: WineName; Output: WineName }
     WineDomain: { Input: WineDomain; Output: WineDomain }
-    BeverageStyle: { Input: BeverageStyle; Output: BeverageStyle }
     Appellation: { Input: Appellation; Output: Appellation }
     Classification: { Input: Classification; Output: Classification }
     Country: { Input: Country; Output: Country }

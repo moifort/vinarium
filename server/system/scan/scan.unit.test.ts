@@ -44,25 +44,58 @@ describe('parseScanResponse', () => {
     })
 
     test('accepts all valid color values', () => {
-      for (const color of ['red', 'white', 'rosé', 'sparkling', 'sweet'] as const) {
+      for (const color of ['red', 'white', 'rosé'] as const) {
         const result = parseScanResponse(JSON.stringify({ name: 'Test', color }))
         expect(result.color).toBe(color)
       }
     })
 
-    test('parses a non-wine beverage with style and alcohol content', () => {
+    test('normalizes the legacy pseudo-colors to white plus a subtype', () => {
+      const sparkling = parseScanResponse(JSON.stringify({ name: 'Crémant', color: 'sparkling' }))
+      expect(sparkling.color).toBe('white')
+      expect(sparkling.subtype).toBe('sparkling')
+
+      const sweet = parseScanResponse(JSON.stringify({ name: 'Sauternes', color: 'sweet' }))
+      expect(sweet.color).toBe('white')
+      expect(sweet.subtype).toBe('sweet')
+    })
+
+    test('parses a non-wine beverage with subtype and alcohol content', () => {
       const beer = JSON.stringify({
         name: 'La Chouffe',
         beverageType: 'beer',
-        style: 'Blonde forte',
+        subtype: 'blonde',
         alcoholContent: 8,
         country: 'Belgique',
       })
       const result = parseScanResponse(beer)
       expect(result.beverageType).toBe('beer')
-      expect(result.style).toBe('Blonde forte')
+      expect(result.subtype).toBe('blonde')
       expect(result.alcoholContent).toBe(8)
       expect(result.color).toBeUndefined()
+    })
+
+    test('maps a legacy free-text style to a structured subtype', () => {
+      const beer = JSON.stringify({
+        name: 'La Chouffe',
+        beverageType: 'beer',
+        style: 'Blonde forte',
+      })
+      expect(parseScanResponse(beer).subtype).toBe('blonde')
+    })
+
+    test('degrades a hallucinated out-of-enum subtype to undefined', () => {
+      const result = parseScanResponse(
+        JSON.stringify({ name: 'Test', beverageType: 'beer', subtype: 'super-blonde' }),
+      )
+      expect(result.subtype).toBeUndefined()
+    })
+
+    test('drops a subtype incoherent with the beverage type', () => {
+      const result = parseScanResponse(
+        JSON.stringify({ name: 'Test', beverageType: 'beer', subtype: 'junmai' }),
+      )
+      expect(result.subtype).toBeUndefined()
     })
 
     test('accepts all valid beverage types', () => {
@@ -109,7 +142,7 @@ describe('parseScanResponse', () => {
       expect(result.domain).toBeUndefined()
       expect(result.vintage).toBeUndefined()
       expect(result.appellation).toBeUndefined()
-      expect(result.style).toBeUndefined()
+      expect(result.subtype).toBeUndefined()
     })
   })
 
@@ -168,7 +201,7 @@ describe('scanWithCache', () => {
     expect(result.color).toBe('red')
   })
 
-  test('returns cached results with an explicit beverageType untouched', async () => {
+  test('normalizes a legacy cached free-text style to a structured subtype', async () => {
     const imageBuffer = Buffer.from('other-fake-jpeg-bytes')
     const imageHash = createHash('sha256').update(imageBuffer).digest('hex')
     fake.seed('scan-cache', imageHash, {
@@ -180,7 +213,22 @@ describe('scanWithCache', () => {
     const result = await Scan.scanWithCache(imageBuffer)
 
     expect(result.beverageType).toBe('beer')
-    expect(result.style).toBe('Blonde forte')
+    expect(result.subtype).toBe('blonde')
+  })
+
+  test('normalizes a legacy cached sparkling color to white + sparkling subtype', async () => {
+    const imageBuffer = Buffer.from('sparkling-fake-jpeg-bytes')
+    const imageHash = createHash('sha256').update(imageBuffer).digest('hex')
+    fake.seed('scan-cache', imageHash, {
+      imageHash,
+      result: { name: 'Crémant d’Alsace', beverageType: 'wine', color: 'sparkling' },
+      cachedAt: new Date('2026-01-01'),
+    })
+
+    const result = await Scan.scanWithCache(imageBuffer)
+
+    expect(result.color).toBe('white')
+    expect(result.subtype).toBe('sparkling')
   })
 })
 

@@ -6,8 +6,47 @@ export const WineColorEnum = builder.enumType('WineColor', {
     RED: { value: 'red' },
     WHITE: { value: 'white' },
     ROSE: { value: 'rosé' },
+  } as const,
+})
+
+export const BeverageSubtypeEnum = builder.enumType('BeverageSubtype', {
+  description:
+    'Structured refinement of a beverage type. Validity depends on the beverageType ' +
+    '(an IPA on a spirit is rejected); OTHER fits every type.',
+  values: {
     SPARKLING: { value: 'sparkling' },
     SWEET: { value: 'sweet' },
+    LATE_HARVEST: { value: 'late-harvest' },
+    VIN_JAUNE: { value: 'vin-jaune' },
+    PORTO: { value: 'porto' },
+    FORTIFIED: { value: 'fortified' },
+    RUM: { value: 'rum' },
+    WHISKY: { value: 'whisky' },
+    GIN: { value: 'gin' },
+    VODKA: { value: 'vodka' },
+    COGNAC: { value: 'cognac' },
+    ARMAGNAC: { value: 'armagnac' },
+    TEQUILA: { value: 'tequila' },
+    LIQUEUR: { value: 'liqueur' },
+    EAU_DE_VIE: { value: 'eau-de-vie' },
+    BLONDE: { value: 'blonde' },
+    BLANCHE: { value: 'blanche' },
+    AMBER: { value: 'amber' },
+    BRUNE: { value: 'brune' },
+    IPA: { value: 'ipa' },
+    STOUT: { value: 'stout' },
+    PILS: { value: 'pils' },
+    TRIPLE: { value: 'triple' },
+    JUNMAI: { value: 'junmai' },
+    GINJO: { value: 'ginjo' },
+    DAIGINJO: { value: 'daiginjo' },
+    HONJOZO: { value: 'honjozo' },
+    NIGORI: { value: 'nigori' },
+    BRUT: { value: 'brut' },
+    DOUX: { value: 'doux' },
+    DEMI_SEC: { value: 'demi-sec' },
+    POIRE: { value: 'poire' },
+    OTHER: { value: 'other' },
   } as const,
 })
 

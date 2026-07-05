@@ -18,6 +18,10 @@ builder.mutationField('addWine', (t) =>
         throw new GraphQLError('A wine requires a color', {
           extensions: { code: 'BAD_USER_INPUT' },
         })
+      if (result === 'subtype-invalid')
+        throw new GraphQLError('This subtype does not fit the beverage type', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        })
       return result
     },
   }),
@@ -37,6 +41,10 @@ builder.mutationField('updateWine', (t) =>
         throw new GraphQLError('Wine not found', { extensions: { code: 'NOT_FOUND' } })
       if (result === 'color-required')
         throw new GraphQLError('A wine requires a color', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        })
+      if (result === 'subtype-invalid')
+        throw new GraphQLError('This subtype does not fit the beverage type', {
           extensions: { code: 'BAD_USER_INPUT' },
         })
       return result

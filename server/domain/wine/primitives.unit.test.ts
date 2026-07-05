@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
-  BeverageStyle,
+  BEVERAGE_SUBTYPE_VALUES,
+  BeverageSubtype,
   BeverageType,
   SortOrder,
   WineColor,
@@ -24,9 +25,11 @@ describe('WineName', () => {
 })
 
 describe('WineColor', () => {
-  test.each(['red', 'white', 'rosé', 'sparkling', 'sweet'] as const)('accepts "%s"', (color) =>
+  test.each(['red', 'white', 'rosé'] as const)('accepts "%s"', (color) =>
     expect(WineColor(color) as string).toBe(color))
   test('rejects invalid color', () => expect(() => WineColor('blue')).toThrow())
+  test.each(['sparkling', 'sweet'] as const)('rejects legacy pseudo-color "%s"', (color) =>
+    expect(() => WineColor(color)).toThrow())
 })
 
 describe('BeverageType', () => {
@@ -35,9 +38,14 @@ describe('BeverageType', () => {
   test('rejects invalid type', () => expect(() => BeverageType('juice')).toThrow())
 })
 
-describe('BeverageStyle', () => {
-  test('accepts non-empty string', () => expect(BeverageStyle('IPA') as string).toBe('IPA'))
-  test('rejects empty string', () => expect(() => BeverageStyle('')).toThrow())
+describe('BeverageSubtype', () => {
+  test('accepts every declared value', () => {
+    for (const subtype of BEVERAGE_SUBTYPE_VALUES) {
+      expect(BeverageSubtype(subtype) as string).toBe(subtype)
+    }
+  })
+  test('rejects free text', () => expect(() => BeverageSubtype('Blonde forte')).toThrow())
+  test('rejects empty string', () => expect(() => BeverageSubtype('')).toThrow())
 })
 
 describe('WineSort', () => {

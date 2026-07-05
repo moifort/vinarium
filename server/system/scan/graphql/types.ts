@@ -1,5 +1,9 @@
 import { builder } from '~/domain/shared/graphql/builder'
-import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
+import {
+  BeverageSubtypeEnum,
+  BeverageTypeEnum,
+  WineColorEnum,
+} from '~/domain/wine/infrastructure/graphql/enums'
 import type { ScanResult } from '../types'
 
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({
@@ -8,7 +12,7 @@ export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implem
     name: t.exposeString('name'),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
-    style: t.exposeString('style', { nullable: true }),
+    subtype: t.expose('subtype', { type: BeverageSubtypeEnum, nullable: true }),
     alcoholContent: t.exposeFloat('alcoholContent', { nullable: true }),
     domain: t.exposeString('domain', { nullable: true }),
     vintage: t.exposeInt('vintage', { nullable: true }),

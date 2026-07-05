@@ -5,8 +5,16 @@ import { builder } from '~/domain/shared/graphql/builder'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
 import { WineQuery } from '../../query'
-import type { BeverageType, WineColor, WineId, WineListMode, WineStatusFilter } from '../../types'
+import type {
+  BeverageSubtype,
+  BeverageType,
+  WineColor,
+  WineId,
+  WineListMode,
+  WineStatusFilter,
+} from '../../types'
 import {
+  BeverageSubtypeEnum,
   BeverageTypeEnum,
   SortOrderEnum,
   WineColorEnum,
@@ -88,6 +96,7 @@ builder.queryField('wines', (t) =>
       status: t.arg({ type: WineStatusFilterEnum, defaultValue: 'all' }),
       color: t.arg({ type: WineColorEnum }),
       beverageType: t.arg({ type: BeverageTypeEnum }),
+      subtype: t.arg({ type: BeverageSubtypeEnum }),
       sort: t.arg({ type: WineSortEnum, defaultValue: 'updatedAt' }),
       order: t.arg({ type: SortOrderEnum, defaultValue: 'desc' }),
       limit: t.arg.int({ defaultValue: 40 }),
@@ -101,9 +110,10 @@ builder.queryField('wines', (t) =>
       const status = args.status ?? 'all'
       const color: WineColor | undefined = args.color ?? undefined
       const beverageType: BeverageType | undefined = args.beverageType ?? undefined
+      const subtype: BeverageSubtype | undefined = args.subtype ?? undefined
 
       const sort = args.sort ?? 'updatedAt'
-      const facetActive = color !== undefined || beverageType !== undefined
+      const facetActive = color !== undefined || beverageType !== undefined || subtype !== undefined
 
       // The only truly paginated path: the unbounded default view, with no facet
       // active (facets live on the wine document: a cursor would skip matches
@@ -123,7 +133,8 @@ builder.queryField('wines', (t) =>
         (item) =>
           matchesStatus(item, status) &&
           (!color || item.color === color) &&
-          (!beverageType || item.beverageType === beverageType),
+          (!beverageType || item.beverageType === beverageType) &&
+          (!subtype || item.subtype === subtype),
       )
       return { items, hasMore: false, totalCount: items.length }
     },

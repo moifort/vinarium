@@ -4,7 +4,7 @@ import type { Recommendation } from '~/domain/recommendation/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { TastingNote } from '~/domain/tasting/types'
 import type { Wine } from '../../types'
-import { BeverageTypeEnum, WineColorEnum } from './enums'
+import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
 
 // A wine as returned by the paginated list: the satellite fields may already be
 // attached (page path) or left undefined (single-wine / cellar-bottle path, where
@@ -26,7 +26,7 @@ export const WineType = builder.objectRef<WineListItem>('Wine').implement({
     name: t.expose('name', { type: 'WineName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
-    style: t.expose('style', { type: 'BeverageStyle', nullable: true }),
+    subtype: t.expose('subtype', { type: BeverageSubtypeEnum, nullable: true }),
     alcoholContent: t.exposeFloat('alcoholContent', { nullable: true }),
     vintage: t.expose('vintage', { type: 'Year', nullable: true }),
     domain: t.expose('domain', { type: 'WineDomain', nullable: true }),

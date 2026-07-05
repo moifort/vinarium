@@ -2,7 +2,7 @@ import { make } from 'ts-brand'
 import { z } from 'zod'
 import type {
   Appellation as AppellationType,
-  BeverageStyle as BeverageStyleType,
+  BeverageSubtype as BeverageSubtypeType,
   BeverageType as BeverageTypeType,
   Classification as ClassificationType,
   SortOrder as SortOrderType,
@@ -42,15 +42,51 @@ export const Classification = (value: unknown) => {
 }
 
 export const WineColor = (value: unknown) =>
-  z.enum(['red', 'white', 'rosé', 'sparkling', 'sweet']).parse(value) as WineColorType
+  z.enum(['red', 'white', 'rosé']).parse(value) as WineColorType
 
 export const BeverageType = (value: unknown) =>
   z.enum(['wine', 'spirit', 'beer', 'sake', 'cider', 'other']).parse(value) as BeverageTypeType
 
-export const BeverageStyle = (value: unknown) => {
-  const v = z.string().min(1).parse(value)
-  return make<BeverageStyleType>()(v)
-}
+// Single source for the Zod enums (scan schema reuses it). Must stay in sync
+// with the BeverageSubtype union in types.ts and SUBTYPES_BY_BEVERAGE.
+export const BEVERAGE_SUBTYPE_VALUES = [
+  'sparkling',
+  'sweet',
+  'late-harvest',
+  'vin-jaune',
+  'porto',
+  'fortified',
+  'rum',
+  'whisky',
+  'gin',
+  'vodka',
+  'cognac',
+  'armagnac',
+  'tequila',
+  'liqueur',
+  'eau-de-vie',
+  'blonde',
+  'blanche',
+  'amber',
+  'brune',
+  'ipa',
+  'stout',
+  'pils',
+  'triple',
+  'junmai',
+  'ginjo',
+  'daiginjo',
+  'honjozo',
+  'nigori',
+  'brut',
+  'doux',
+  'demi-sec',
+  'poire',
+  'other',
+] as const
+
+export const BeverageSubtype = (value: unknown) =>
+  z.enum(BEVERAGE_SUBTYPE_VALUES).parse(value) as BeverageSubtypeType
 
 export const WineSort = (value: unknown) =>
   z

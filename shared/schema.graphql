@@ -37,7 +37,11 @@ input AddWineInput {
   purchasePrice: Eur
   region: Region
   servingTemperature: Float
-  style: BeverageStyle
+
+  """
+  Structured subtype — must be valid for the beverage type
+  """
+  subtype: BeverageSubtype
   vintage: Year
 }
 
@@ -47,9 +51,43 @@ Wine appellation (AOC / AOP / DOC ...)
 scalar Appellation
 
 """
-Beverage style for non-wine drinks (IPA, Single Malt, Junmai ...)
+Structured refinement of a beverage type. Validity depends on the beverageType (an IPA on a spirit is rejected); OTHER fits every type.
 """
-scalar BeverageStyle
+enum BeverageSubtype {
+  AMBER
+  ARMAGNAC
+  BLANCHE
+  BLONDE
+  BRUNE
+  BRUT
+  COGNAC
+  DAIGINJO
+  DEMI_SEC
+  DOUX
+  EAU_DE_VIE
+  FORTIFIED
+  GIN
+  GINJO
+  HONJOZO
+  IPA
+  JUNMAI
+  LATE_HARVEST
+  LIQUEUR
+  NIGORI
+  OTHER
+  PILS
+  POIRE
+  PORTO
+  RUM
+  SPARKLING
+  STOUT
+  SWEET
+  TEQUILA
+  TRIPLE
+  VIN_JAUNE
+  VODKA
+  WHISKY
+}
 
 """
 Kind of beverage a bottle contains
@@ -414,6 +452,7 @@ type Query {
     order: SortOrder = DESC
     sort: WineSort = UPDATED_AT
     status: WineStatusFilter = ALL
+    subtype: BeverageSubtype
   ): Wines!
 }
 
@@ -470,7 +509,7 @@ type ScanResult {
   grapeVarieties: [String!]
   name: String!
   region: String
-  style: String
+  subtype: BeverageSubtype
   vintage: Int
 }
 
@@ -520,7 +559,7 @@ input UpdateWineInput {
   purchasePrice: Eur
   region: Region
   servingTemperature: Float
-  style: BeverageStyle
+  subtype: BeverageSubtype
   vintage: Year
 }
 
@@ -580,7 +619,7 @@ type Wine {
   recommendation: Recommendation
   region: Region
   servingTemperature: Float
-  style: BeverageStyle
+  subtype: BeverageSubtype
   updatedAt: DateTime!
   userId: UserId!
   vintage: Year
@@ -592,8 +631,6 @@ Wine color category
 enum WineColor {
   RED
   ROSE
-  SPARKLING
-  SWEET
   WHITE
 }
 
