@@ -129,15 +129,24 @@ final class ScanViewModel {
 
     /// Enregistre un conseil si un « conseillé par » ou un commentaire est renseigné.
     private func persistRecommendation(for wineId: String, _ s: ScanSubmission) async throws {
-        let name = s.recommenderName?.isEmpty == false ? s.recommenderName : nil
-        let comment = s.recommendationComment?.isEmpty == false ? s.recommendationComment : nil
+        let (name, comment) = recommendationFields(s)
         guard name != nil || comment != nil else { return }
         try await RecommendationAPI.create(wineId: wineId, recommenderName: name, comment: comment)
     }
 
     /// La fiche porte-t-elle un conseil (nom ou commentaire) ?
     private func hasRecommendation(_ s: ScanSubmission) -> Bool {
-        s.recommenderName?.isEmpty == false || s.recommendationComment?.isEmpty == false
+        let (name, comment) = recommendationFields(s)
+        return name != nil || comment != nil
+    }
+
+    /// Source unique des champs conseil normalisés : l'écran de fin et la
+    /// persistance doivent voir exactement la même chose.
+    private func recommendationFields(_ s: ScanSubmission) -> (name: String?, comment: String?) {
+        (
+            s.recommenderName?.isEmpty == false ? s.recommenderName : nil,
+            s.recommendationComment?.isEmpty == false ? s.recommendationComment : nil
+        )
     }
 
     func reset() {
