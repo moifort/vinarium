@@ -59,12 +59,11 @@ struct ScanReviewPage {
         return PlacementPage(app: app)
     }
 
-    func addAsFavorite() throws {
-        try chooseDestination("choice-favorite")
-    }
-
-    func addAsRecommendation() throws {
-        try chooseDestination("choice-recommendation")
+    /// Active le toggle « Favori » inline du formulaire (section Dégustation).
+    func markAsFavorite() throws -> Self {
+        let toggle = try app.switches["review-favorite-toggle"].waitOrFail()
+        toggle.switches.firstMatch.tap()
+        return self
     }
 
     func justSave() throws {

@@ -12,12 +12,14 @@ final class FavoriteFlowTest: BaseUITest {
         let scanner = try tabBar.openScanner()
         try scanner.verify()
 
-        // 2. REVIEW: land directly on the editable form, set name, add as favorite
+        // 2. REVIEW: land directly on the editable form, set name, toggle the inline
+        // favorite then save — the popup no longer offers a "Favori" destination
         let review = try scanner.selectPhotoFromPicker()
         try review.verify()
 
         _ = try review.clearAndTypeName(wineName)
-        try review.addAsFavorite()
+        _ = try review.markAsFavorite()
+        try review.justSave()
 
         // 3. WINE LIST (FAVORIS): verify navigation to Vins tab with favorites segment selected
         let wineList = try WineListPage(app: app).verify()

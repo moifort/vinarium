@@ -93,12 +93,16 @@ final class ScanViewModel {
                     color: wine.color,
                     vintage: wine.vintage
                 )
-            case .favorite:
-                step = .favoriteSaved
-            case .recommendation:
-                step = .recommendationSaved
             case .justSave:
-                step = .saved
+                // L'écran de fin reflète ce que la fiche portait (favori / conseil),
+                // plus un choix de popup : il oriente la liste vers la bonne vue.
+                if submission.favorite {
+                    step = .favoriteSaved
+                } else if hasRecommendation(submission) {
+                    step = .recommendationSaved
+                } else {
+                    step = .saved
+                }
             }
         } catch {
             self.error = reportError(error)
@@ -106,9 +110,9 @@ final class ScanViewModel {
     }
 
     /// Enregistre une note de dégustation si la fiche en porte une : coup de cœur
-    /// explicite, choix « Favori », note en étoiles ou commentaires/contacts.
+    /// explicite, note en étoiles ou commentaires/contacts.
     private func persistTasting(for wineId: String, _ s: ScanSubmission) async throws {
-        let markFavorite = s.favorite || s.choice == .favorite
+        let markFavorite = s.favorite
         let hasTastingDetails = s.rating > 0 || s.tastingNotes != nil || !s.contacts.isEmpty
         guard markFavorite || hasTastingDetails else { return }
 
@@ -123,13 +127,17 @@ final class ScanViewModel {
         )
     }
 
-    /// Enregistre un conseil si un « conseillé par » est renseigné ou si le choix
-    /// de la popup est « Conseillé ».
+    /// Enregistre un conseil si un « conseillé par » ou un commentaire est renseigné.
     private func persistRecommendation(for wineId: String, _ s: ScanSubmission) async throws {
         let name = s.recommenderName?.isEmpty == false ? s.recommenderName : nil
         let comment = s.recommendationComment?.isEmpty == false ? s.recommendationComment : nil
-        guard s.choice == .recommendation || name != nil || comment != nil else { return }
+        guard name != nil || comment != nil else { return }
         try await RecommendationAPI.create(wineId: wineId, recommenderName: name, comment: comment)
+    }
+
+    /// La fiche porte-t-elle un conseil (nom ou commentaire) ?
+    private func hasRecommendation(_ s: ScanSubmission) -> Bool {
+        s.recommenderName?.isEmpty == false || s.recommendationComment?.isEmpty == false
     }
 
     func reset() {

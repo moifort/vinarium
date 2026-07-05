@@ -5,8 +5,6 @@ import Foundation
 /// tous les champs saisis.
 enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
     case cellar
-    case favorite
-    case recommendation
     case justSave
 
     var id: String { rawValue }
@@ -14,8 +12,6 @@ enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
     var label: String {
         switch self {
         case .cellar: "Ranger en cave"
-        case .favorite: "Favori"
-        case .recommendation: "Conseillé"
         case .justSave: "Juste enregistrer"
         }
     }
@@ -23,8 +19,6 @@ enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
     var icon: String {
         switch self {
         case .cellar: "square.grid.3x3"
-        case .favorite: "heart.fill"
-        case .recommendation: "person.badge.plus"
         case .justSave: "checkmark.circle"
         }
     }
