@@ -58,7 +58,7 @@ enum WineAPI {
             name: created.name,
             beverageType: BeverageType(graphql: created.beverageType),
             color: created.color.map { WineColor(graphql: $0) },
-            style: created.style,
+            subtype: created.subtype.flatMap { BeverageSubtype(graphql: $0) },
             vintage: created.vintage,
             createdAt: GraphQLHelpers.parseISO8601(created.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(created.updatedAt) ?? Date()
@@ -77,7 +77,7 @@ enum WineAPI {
             name: updated.name,
             beverageType: BeverageType(graphql: updated.beverageType),
             color: updated.color.map { WineColor(graphql: $0) },
-            style: updated.style,
+            subtype: updated.subtype.flatMap { BeverageSubtype(graphql: $0) },
             vintage: updated.vintage,
             createdAt: Date(),
             updatedAt: GraphQLHelpers.parseISO8601(updated.updatedAt) ?? Date()
@@ -107,7 +107,7 @@ enum WineAPI {
             region: s.region,
             country: s.country,
             color: s.color.map { WineColor(graphql: $0) },
-            style: s.style,
+            subtype: s.subtype.flatMap { BeverageSubtype(graphql: $0) },
             grapeVarieties: s.grapeVarieties ?? [],
             alcoholContent: s.alcoholContent,
             classification: s.classification,
@@ -155,8 +155,6 @@ private func graphQLColor(_ color: WineColor) -> GraphQLEnum<VinariumGraphQL.Win
     case .red: return .case(.red)
     case .white: return .case(.white)
     case .rosé: return .case(.rose)
-    case .sparkling: return .case(.sparkling)
-    case .sweet: return .case(.sweet)
     }
 }
 
@@ -197,7 +195,7 @@ private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wines.Item) -> Wine
         name: w.name,
         beverageType: BeverageType(graphql: w.beverageType),
         color: w.color.map { WineColor(graphql: $0) },
-        style: w.style,
+        subtype: w.subtype.flatMap { BeverageSubtype(graphql: $0) },
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
@@ -237,7 +235,7 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
         name: w.name,
         beverageType: BeverageType(graphql: w.beverageType),
         color: w.color.map { WineColor(graphql: $0) },
-        style: w.style,
+        subtype: w.subtype.flatMap { BeverageSubtype(graphql: $0) },
         domain: w.domain,
         vintage: w.vintage,
         appellation: w.appellation,
@@ -310,7 +308,7 @@ private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddWineI
         purchaseDate: GraphQLHelpers.graphQLNullable(r.purchaseDate),
         purchasePrice: GraphQLHelpers.graphQLNullable(r.purchasePrice),
         region: GraphQLHelpers.graphQLNullable(r.region),
-        style: GraphQLHelpers.graphQLNullable(r.style),
+        subtype: r.subtype.map { .some($0.graphql) } ?? .none,
         vintage: GraphQLHelpers.graphQLNullable(r.vintage)
     )
 }
@@ -335,7 +333,7 @@ private func updateWineInput(from r: UpdateWineRequest) -> VinariumGraphQL.Updat
         purchaseDate: GraphQLHelpers.graphQLNullable(r.purchaseDate),
         purchasePrice: GraphQLHelpers.graphQLNullable(r.purchasePrice),
         region: GraphQLHelpers.graphQLNullable(r.region),
-        style: GraphQLHelpers.graphQLNullable(r.style),
+        subtype: r.subtype.map { .some($0.graphql) } ?? .none,
         vintage: GraphQLHelpers.graphQLNullable(r.vintage)
     )
 }

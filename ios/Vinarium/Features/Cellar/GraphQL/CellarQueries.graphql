@@ -12,7 +12,7 @@ query CellarBottles($limit: Int, $after: WineId) {
         name
         beverageType
         color
-        style
+        subtype
         vintage
         domain
         appellation

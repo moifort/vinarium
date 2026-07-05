@@ -30,7 +30,7 @@ enum CellarAPI {
                     name: b.wine.name,
                     beverageType: BeverageType(graphql: b.wine.beverageType),
                     color: b.wine.color.map { WineColor(graphql: $0) },
-                    style: b.wine.style,
+                    subtype: b.wine.subtype.flatMap { BeverageSubtype(graphql: $0) },
                     domain: b.wine.domain,
                     vintage: b.wine.vintage,
                     appellation: b.wine.appellation,

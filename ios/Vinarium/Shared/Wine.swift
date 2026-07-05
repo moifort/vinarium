@@ -4,8 +4,6 @@ enum WineColor: String, Codable, CaseIterable, Identifiable {
     case red
     case white
     case rosé
-    case sparkling
-    case sweet
 
     var id: String { rawValue }
 
@@ -14,8 +12,6 @@ enum WineColor: String, Codable, CaseIterable, Identifiable {
         case .red: "Rouge"
         case .white: "Blanc"
         case .rosé: "Rosé"
-        case .sparkling: "Pétillant"
-        case .sweet: "Moelleux"
         }
     }
 
@@ -24,8 +20,6 @@ enum WineColor: String, Codable, CaseIterable, Identifiable {
         case .red: .red
         case .white: .yellow
         case .rosé: .pink
-        case .sparkling: .mint
-        case .sweet: .orange
         }
     }
 }
@@ -33,15 +27,13 @@ enum WineColor: String, Codable, CaseIterable, Identifiable {
 import SwiftUI
 
 enum WineDisplayColor {
-    case red, yellow, pink, mint, orange
+    case red, yellow, pink
 
     var color: Color {
         switch self {
         case .red: Color(red: 0.5, green: 0.05, blue: 0.1)      // bordeaux
         case .yellow: Color(red: 0.85, green: 0.88, blue: 0.55)  // paille/vert clair
         case .pink: Color(red: 1.0, green: 0.42, blue: 0.55)     // rose vif
-        case .mint: Color(red: 1.0, green: 0.82, blue: 0.0)      // or champagne
-        case .orange: Color(red: 0.82, green: 0.52, blue: 0.08)  // ambre miel
         }
     }
 }
@@ -51,7 +43,7 @@ struct Wine: Codable, Identifiable, Sendable {
     let name: String
     var beverageType: BeverageType = .wine
     var color: WineColor? = nil
-    var style: String? = nil
+    var subtype: BeverageSubtype? = nil
     var domain: String? = nil
     var vintage: Int? = nil
     var appellation: String? = nil
@@ -89,7 +81,7 @@ struct CreateWineRequest: Encodable, Sendable {
     let name: String
     var beverageType: BeverageType = .wine
     var color: WineColor?
-    var style: String?
+    var subtype: BeverageSubtype?
     var domain: String?
     var vintage: Int?
     var appellation: String?
@@ -118,7 +110,7 @@ struct UpdateWineRequest: Encodable, Sendable {
     var name: String?
     var beverageType: BeverageType?
     var color: WineColor?
-    var style: String?
+    var subtype: BeverageSubtype?
     var domain: String?
     var vintage: Int?
     var appellation: String?

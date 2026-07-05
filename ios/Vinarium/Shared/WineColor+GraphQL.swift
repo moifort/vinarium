@@ -12,8 +12,6 @@ extension WineColor {
             case .red: self = .red
             case .white: self = .white
             case .rose: self = .rosé
-            case .sparkling: self = .sparkling
-            case .sweet: self = .sweet
             }
         case .unknown:
             self = .red

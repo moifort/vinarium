@@ -58,7 +58,8 @@ struct WineListRow: View {
             isInCellar: true
         )
         WineListRow(
-            color: .sparkling,
+            beverageType: .cider,
+            color: nil,
             name: "Cidre de Normandie",
             subtitle: "Maison Dupont",
             rating: 3,

@@ -8,7 +8,7 @@ struct WineEditForm: View {
     @State private var name: String
     @State private var beverageType: BeverageType
     @State private var color: WineColor
-    @State private var style: String
+    @State private var subtype: BeverageSubtype?
     @State private var domain: String
     @State private var vintage: String
     @State private var appellation: String
@@ -33,7 +33,7 @@ struct WineEditForm: View {
         _name = State(initialValue: initial.name)
         _beverageType = State(initialValue: initial.beverageType)
         _color = State(initialValue: initial.color)
-        _style = State(initialValue: initial.style)
+        _subtype = State(initialValue: initial.subtype)
         _domain = State(initialValue: initial.domain)
         _vintage = State(initialValue: initial.vintage)
         _appellation = State(initialValue: initial.appellation)
@@ -75,13 +75,15 @@ struct WineEditForm: View {
                     } label: {
                         Label("Couleur", systemImage: "paintpalette")
                     }
-                } else {
-                    LabeledContent {
-                        TextField("IPA, Single Malt, Junmai...", text: $style)
-                            .multilineTextAlignment(.trailing)
-                    } label: {
-                        Label("Style", systemImage: "tag")
+                }
+
+                Picker(selection: $subtype) {
+                    Text("—").tag(BeverageSubtype?.none)
+                    ForEach(BeverageSubtype.allowed(for: beverageType)) { s in
+                        Text(s.label(for: beverageType)).tag(BeverageSubtype?.some(s))
                     }
+                } label: {
+                    Label("Sous-type", systemImage: "tag")
                 }
 
                 LabeledContent {
@@ -262,6 +264,12 @@ struct WineEditForm: View {
         .sheet(isPresented: $showGiftedByPicker) {
             ContactPicker { giftedBy = $0 }
         }
+        // Un sous-type hérité d'un autre type de boisson n'a plus de sens.
+        .onChange(of: beverageType) {
+            if let current = subtype, !BeverageSubtype.allowed(for: beverageType).contains(current) {
+                subtype = nil
+            }
+        }
     }
 
     private func save() async {
@@ -276,7 +284,7 @@ struct WineEditForm: View {
             name: name,
             beverageType: beverageType,
             color: isWine ? color : nil,
-            style: isWine || style.isEmpty ? nil : style,
+            subtype: subtype,
             domain: domain.isEmpty ? nil : domain,
             vintage: Int(vintage),
             appellation: isWine && !appellation.isEmpty ? appellation : nil,
@@ -306,7 +314,7 @@ extension WineEditForm {
         var name: String
         var beverageType: BeverageType = .wine
         var color: WineColor
-        var style: String = ""
+        var subtype: BeverageSubtype? = nil
         var domain: String
         var vintage: String
         var appellation: String

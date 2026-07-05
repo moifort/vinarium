@@ -99,9 +99,11 @@ struct WineDetailContent: View {
     }
 
     private var headerSubtitle: String {
+        let subtypeLabel = content.subtype?.label(for: content.beverageType)
+        // « Rouge • Porto » pour un vin, « Bière Blonde » pour le reste.
         let kind = content.beverageType == .wine
-            ? content.color?.label
-            : [content.beverageType.label, content.style].compactMap { $0 }.joined(separator: " ")
+            ? [content.color?.label, subtypeLabel].compactMap { $0 }.joined(separator: " \u{2022} ")
+            : [content.beverageType.label, subtypeLabel].compactMap { $0 }.joined(separator: " ")
         return [kind,
                 content.domain,
                 content.vintage.map { "\($0)" }]
@@ -115,7 +117,7 @@ extension WineDetailContent {
     struct Content {
         var beverageType: BeverageType = .wine
         let color: WineColor?
-        var style: String? = nil
+        var subtype: BeverageSubtype? = nil
         let name: String
         let domain: String?
         let vintage: Int?

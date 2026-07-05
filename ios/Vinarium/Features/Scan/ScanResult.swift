@@ -9,7 +9,7 @@ struct ScanResult: Decodable, Sendable {
     let region: String?
     let country: String?
     let color: WineColor?
-    let style: String?
+    let subtype: BeverageSubtype?
     let grapeVarieties: [String]
     let alcoholContent: Double?
     let classification: String?

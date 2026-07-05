@@ -398,7 +398,7 @@ struct WineDetailView: View {
         return WineDetailContent.Content(
             beverageType: detail.beverageType,
             color: detail.color,
-            style: detail.style,
+            subtype: detail.subtype,
             name: detail.name,
             domain: detail.domain,
             vintage: detail.vintage,
@@ -451,7 +451,7 @@ struct WineDetailView: View {
             name: detail.name,
             beverageType: detail.beverageType,
             color: detail.color ?? .red,
-            style: detail.style ?? "",
+            subtype: detail.subtype,
             domain: detail.domain ?? "",
             vintage: detail.vintage.map(String.init) ?? "",
             appellation: detail.appellation ?? "",

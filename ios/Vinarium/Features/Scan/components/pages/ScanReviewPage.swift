@@ -12,7 +12,7 @@ struct ScanReviewPage: View {
     @State private var name: String
     @State private var beverageType: BeverageType
     @State private var color: WineColor
-    @State private var style: String
+    @State private var subtype: BeverageSubtype?
     @State private var alcoholContent: String
     @State private var domain: String
     @State private var vintage: String
@@ -55,7 +55,11 @@ struct ScanReviewPage: View {
         _name = State(initialValue: scanResult.name)
         _beverageType = State(initialValue: scanResult.beverageType)
         _color = State(initialValue: scanResult.color ?? .red)
-        _style = State(initialValue: scanResult.style ?? "")
+        // Le serveur garantit déjà la cohérence type/sous-type du scan, mais on
+        // re-filtre : un sous-type inconnu du picker rendrait la sélection muette.
+        _subtype = State(initialValue: scanResult.subtype.flatMap { s in
+            BeverageSubtype.allowed(for: scanResult.beverageType).contains(s) ? s : nil
+        })
         _alcoholContent = State(initialValue: scanResult.alcoholContent.map { String(format: "%.1f", $0) } ?? "")
         _domain = State(initialValue: scanResult.domain ?? "")
         _vintage = State(initialValue: scanResult.vintage.map(String.init) ?? "")
@@ -180,12 +184,21 @@ struct ScanReviewPage: View {
                 } label: {
                     Label("Couleur", systemImage: "paintpalette")
                 }
-            } else {
-                LabeledContent {
-                    TextField("IPA, Single Malt, Junmai...", text: $style)
-                        .multilineTextAlignment(.trailing)
-                } label: {
-                    Label("Style", systemImage: "tag")
+            }
+
+            Picker(selection: $subtype) {
+                Text("—").tag(BeverageSubtype?.none)
+                ForEach(BeverageSubtype.allowed(for: beverageType)) { s in
+                    Text(s.label(for: beverageType)).tag(BeverageSubtype?.some(s))
+                }
+            } label: {
+                Label("Sous-type", systemImage: "tag")
+            }
+            .onChange(of: beverageType) {
+                // Un sous-type hérité d'un autre type de boisson n'a plus de sens.
+                if let current = subtype,
+                   !BeverageSubtype.allowed(for: beverageType).contains(current) {
+                    subtype = nil
                 }
             }
 
@@ -461,7 +474,7 @@ struct ScanReviewPage: View {
             name: name,
             beverageType: beverageType,
             color: isWine ? color : nil,
-            style: isWine || style.isEmpty ? nil : style,
+            subtype: subtype,
             domain: domain.isEmpty ? nil : domain,
             vintage: Int(vintage),
             appellation: isWine && !appellation.isEmpty ? appellation : nil,
@@ -509,7 +522,7 @@ private let mockImageData: Data = {
         region: "Bordeaux",
         country: "France",
         color: .red,
-        style: nil,
+        subtype: nil,
         grapeVarieties: ["Cabernet Sauvignon", "Merlot", "Petit Verdot"],
         alcoholContent: 13.5,
         classification: "1er Grand Cru Classé",
@@ -537,7 +550,7 @@ private let mockImageData: Data = {
         region: "Wallonie",
         country: "Belgique",
         color: nil,
-        style: "Blonde forte",
+        subtype: .blonde,
         grapeVarieties: [],
         alcoholContent: 8,
         classification: nil,

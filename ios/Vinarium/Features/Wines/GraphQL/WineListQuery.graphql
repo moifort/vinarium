@@ -23,7 +23,7 @@ query WineList(
       name
       beverageType
       color
-      style
+      subtype
       alcoholContent
       vintage
       domain
