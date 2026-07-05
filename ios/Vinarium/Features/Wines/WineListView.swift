@@ -85,33 +85,13 @@ struct WineListView: View {
                     beverageType: wine.beverageType,
                     color: wine.color,
                     name: wine.name,
-                    subtitle: Self.subtitle(for: wine),
+                    subtitle: wine.listSubtitle,
                     rating: wine.rating,
                     isFavorite: wine.isFavorite,
                     isInCellar: wine.isInCellar
                 )
             })
         }
-    }
-
-    private static func subtitle(for wine: Wine) -> String? {
-        let parts: [String] = [
-            wine.vintage.map { "\($0)" },
-            wine.region,
-            wine.purchasePrice.map { String(format: "%.0f €", $0) },
-            wine.giftedBy.map { "Offert par \(abbreviated($0))" },
-            wine.giftedTo.map { "Offert à \(abbreviated($0))" },
-            wine.recommendedBy.map { "Conseillé par \(abbreviated($0))" },
-        ].compactMap { $0 }
-        return parts.isEmpty ? nil : parts.joined(separator: " • ")
-    }
-
-    private static func abbreviated(_ fullName: String) -> String {
-        let components = fullName.split(separator: " ")
-        if components.count >= 2, let lastInitial = components.last?.first {
-            return "\(components.first!) \(lastInitial)."
-        }
-        return fullName
     }
 }
 

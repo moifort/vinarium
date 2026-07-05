@@ -1,0 +1,47 @@
+import Apollo
+import Foundation
+
+enum SearchAPI {
+    static func search(query: String, filters: SearchFilters, limit: Int = 50) async throws
+        -> SearchResults
+    {
+        let gqlQuery = VinariumGraphQL.SearchQuery(
+            query: GraphQLHelpers.graphQLNullable(query.isEmpty ? nil : query),
+            filters: .some(input(from: filters)),
+            limit: .some(limit)
+        )
+        let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: gqlQuery)
+        return SearchResults(
+            hits: data.searchWines.hits.map { hit in
+                SearchHit(
+                    wine: Wine(listFields: hit.wine.fragments.wineListFields),
+                    matchedFields: hit.matchedFields.map { SearchMatchedField(graphql: $0) }
+                )
+            },
+            totalCount: data.searchWines.totalCount
+        )
+    }
+
+    /// Only active facets are sent; an inactive facet is omitted so the server
+    /// leaves it unfiltered.
+    private static func input(from f: SearchFilters) -> VinariumGraphQL.SearchFiltersInput {
+        VinariumGraphQL.SearchFiltersInput(
+            beverageTypes: f.beverageTypes.isEmpty
+                ? .none : .some(f.beverageTypes.map { $0.graphQLValue }),
+            colors: f.colors.isEmpty ? .none : .some(f.colors.map { $0.graphQLValue }),
+            favorite: f.favorite ? .some(true) : .none,
+            gifted: f.gifted ? .some(true) : .none,
+            status: f.status == .all ? .none : .some(gqlStatus(f.status))
+        )
+    }
+
+    private static func gqlStatus(
+        _ status: WineStatusFilter
+    ) -> GraphQLEnum<VinariumGraphQL.WineStatusFilter> {
+        switch status {
+        case .all: .case(.all)
+        case .inCellar: .case(.inCellar)
+        case .consumed: .case(.consumed)
+        }
+    }
+}

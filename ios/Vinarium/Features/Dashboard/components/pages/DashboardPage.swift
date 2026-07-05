@@ -30,6 +30,7 @@ struct DashboardPage: View {
                 .accessibilityLabel("Réglages")
             }
         }
+        .searchToolbarButton()
     }
 }
 

@@ -4,6 +4,7 @@
     "schemaSearchPaths": ["../shared/schema.graphql"],
     "operationSearchPaths": [
       "Vinarium/Features/Wines/GraphQL/*.graphql",
+      "Vinarium/Features/Search/GraphQL/*.graphql",
       "Vinarium/Features/Cellar/GraphQL/*.graphql",
       "Vinarium/Features/Dashboard/GraphQL/*.graphql",
       "Vinarium/Features/Scan/GraphQL/*.graphql",

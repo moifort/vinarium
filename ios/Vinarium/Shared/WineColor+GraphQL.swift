@@ -17,4 +17,12 @@ extension WineColor {
             self = .red
         }
     }
+
+    var graphQLValue: GraphQLEnum<VinariumGraphQL.WineColor> {
+        switch self {
+        case .red: .case(.red)
+        case .white: .case(.white)
+        case .rosé: .case(.rose)
+        }
+    }
 }

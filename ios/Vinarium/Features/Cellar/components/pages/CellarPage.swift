@@ -54,6 +54,7 @@ struct CellarPage: View {
                 }
             }
         }
+        .searchToolbarButton()
         .navigationTitle(displayMode.title)
         .navigationSubtitle(displayMode.subtitle)
         .navigationBarTitleDisplayMode(.large)

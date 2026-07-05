@@ -31,7 +31,7 @@ enum WineAPI {
         )
         let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: query)
         return WinePage(
-            items: data.wines.items.map(mapWine),
+            items: data.wines.items.map { Wine(listFields: $0.fragments.wineListFields) },
             hasMore: data.wines.hasMore,
             totalCount: data.wines.totalCount
         )
@@ -151,11 +151,7 @@ enum WineAPI {
 // MARK: - Mapping helpers
 
 private func graphQLColor(_ color: WineColor) -> GraphQLEnum<VinariumGraphQL.WineColor> {
-    switch color {
-    case .red: return .case(.red)
-    case .white: return .case(.white)
-    case .rosé: return .case(.rose)
-    }
+    color.graphQLValue
 }
 
 private func gqlMode(_ mode: WineListMode) -> VinariumGraphQL.WineListMode {
@@ -187,46 +183,6 @@ private func gqlSort(_ sort: WineSort) -> VinariumGraphQL.WineSort {
     // serveur demandé est alors sans effet sur les sections.
     case .person: .updatedAt
     }
-}
-
-private func mapWine(_ w: VinariumGraphQL.WineListQuery.Data.Wines.Item) -> Wine {
-    Wine(
-        id: w.id,
-        name: w.name,
-        beverageType: BeverageType(graphql: w.beverageType),
-        color: w.color.map { WineColor(graphql: $0) },
-        subtype: w.subtype.flatMap { BeverageSubtype(graphql: $0) },
-        domain: w.domain,
-        vintage: w.vintage,
-        appellation: w.appellation,
-        region: w.region,
-        country: w.country,
-        grapeVarieties: w.grapeVarieties,
-        alcoholContent: w.alcoholContent,
-        classification: w.classification,
-        purchasePrice: w.purchasePrice,
-        purchaseDate: w.purchaseDate,
-        drinkFrom: w.drinkFrom,
-        drinkUntil: w.drinkUntil,
-        notes: w.notes,
-        giftedBy: w.giftedBy,
-        rating: w.consumption?.rating,
-        isFavorite: w.consumption?.favorite ?? false,
-        giftedTo: w.gift?.recipientName,
-        recommendedBy: w.recommendation?.recommenderName,
-        contacts: w.consumption?.contacts,
-        latitude: w.latitude,
-        longitude: w.longitude,
-        placeName: w.placeName,
-        isInCellar: w.cellar != nil,
-        consumedDate: w.consumption?.consumedDate.flatMap { GraphQLHelpers.parseISO8601($0) },
-        // « Offerts » = cadeaux reçus, portés par le scalaire giftedBy sur le vin
-        // (le satellite gift, lui, représente un vin donné à quelqu'un).
-        isGifted: w.giftedBy != nil,
-        isRecommended: w.recommendation != nil,
-        createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
-        updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date()
-    )
 }
 
 private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWineDetail {

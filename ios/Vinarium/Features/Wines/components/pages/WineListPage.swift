@@ -91,6 +91,7 @@ struct WineListPage: View {
                 .accessibilityIdentifier("winelist-sort-menu")
             }
         }
+        .searchToolbarButton()
     }
 }
 

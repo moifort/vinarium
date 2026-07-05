@@ -1,0 +1,11 @@
+query Search($query: String, $filters: SearchFiltersInput, $limit: Int) {
+  searchWines(query: $query, filters: $filters, limit: $limit) {
+    hits {
+      matchedFields
+      wine {
+        ...WineListFields
+      }
+    }
+    totalCount
+  }
+}

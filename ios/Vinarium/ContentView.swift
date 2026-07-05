@@ -27,6 +27,7 @@ struct ContentView: View {
     @State private var cellarRefreshTrigger = UUID()
     @State private var showFavorites = false
     @State private var showRecommended = false
+    @State private var searchPresenter = SearchPresenter()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -54,6 +55,10 @@ struct ContentView: View {
                 selectedTab = oldValue
                 showScanner = true
             }
+        }
+        .environment(searchPresenter)
+        .fullScreenCover(isPresented: $searchPresenter.isPresented) {
+            SearchView()
         }
         .fullScreenCover(isPresented: $showScanner) {
             ScanView { result in
