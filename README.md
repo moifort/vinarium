@@ -15,6 +15,7 @@ A purely functional approach to wine cellar management.
 - **Journal** — entry/exit history with tasting notes and ratings
 - **Dashboard** — cellar stats, total value, ready-to-drink alerts, recent activity
 - **Wine catalog** — full metadata, grape varieties, appellations, drink windows, structured subtypes for every beverage (porto, rum, blonde ale, sparkling sake…)
+- **Global search** — full-screen search across names, producers, subtypes, regions, vintages and people (gifts, recommendations), ranked by relevance and grouped by match (in cellar, consumed, gifts…), with combinable facet chips
 
 <p align="center">
   <img src="screenshots/wine-detail.png" width="250" alt="Wine detail">
