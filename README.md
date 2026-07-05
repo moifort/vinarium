@@ -115,6 +115,7 @@ Required environment variables (`.env`) :
 NITRO_GOOGLE_API_KEY=...
 NITRO_ADMIN_TOKEN=...
 NITRO_SENTRY_DSN=...    # optional
+FIXME_DSN=...           # optional, reports production errors to Fixme (https://github.com/moifort/fixme)
 ```
 
 ## iOS App
