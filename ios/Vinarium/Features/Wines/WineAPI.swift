@@ -184,6 +184,10 @@ private func gqlSort(_ sort: WineSort) -> VinariumGraphQL.WineSort {
     case .region: .region
     case .color: .color
     case .price: .price
+    // « Par personne » est un groupement purement client, réservé aux modes
+    // Offerts/Conseillés où le serveur renvoie le subset complet : le tri
+    // serveur demandé est alors sans effet sur les sections.
+    case .person: .updatedAt
     }
 }
 

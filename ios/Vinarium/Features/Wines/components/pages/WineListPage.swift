@@ -49,7 +49,7 @@ struct WineListPage: View {
             ToolbarItemGroup {
                 Menu {
                     Picker("Tri", selection: $sort) {
-                        ForEach(WineSort.allCases) { sort in
+                        ForEach(WineSort.available(for: mode)) { sort in
                             Label(sort.label, systemImage: sort.icon).tag(sort)
                         }
                     }

@@ -48,7 +48,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
 }
 
 enum WineSort: String, CaseIterable, Identifiable {
-    case updatedAt, vintage, region, color, price
+    case updatedAt, vintage, region, color, price, person
     var id: String { rawValue }
     var label: String {
         switch self {
@@ -57,6 +57,7 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "Région"
         case .color: "Couleur"
         case .price: "Prix"
+        case .person: "Par personne"
         }
     }
     var icon: String {
@@ -66,7 +67,14 @@ enum WineSort: String, CaseIterable, Identifiable {
         case .region: "map"
         case .color: "paintpalette"
         case .price: "eurosign.circle"
+        case .person: "person"
         }
+    }
+
+    /// « Par personne » n'a de sens que là où chaque vin porte une personne :
+    /// qui l'a offert (Offerts) ou qui l'a conseillé (Conseillés).
+    static func available(for mode: WineListMode) -> [WineSort] {
+        allCases.filter { $0 != .person || mode == .gifted || mode == .recommended }
     }
 }
 
@@ -118,7 +126,16 @@ final class WineListViewModel {
     var beverageTypeFilter: BeverageType? {
         didSet { if oldValue != beverageTypeFilter { scheduleReload() } }
     }
-    var mode: WineListMode = .all { didSet { if oldValue != mode { scheduleReload() } } }
+    var mode: WineListMode = .all {
+        didSet {
+            guard oldValue != mode else { return }
+            // Le tri « Par personne » n'existe pas hors Offerts/Conseillés : retomber
+            // sur le tri par défaut. Son didSet planifie un reload redondant avec le
+            // nôtre (même requête, l'un des deux aboutit) — bénin, pas de flash.
+            if !WineSort.available(for: mode).contains(sort) { sort = .updatedAt }
+            scheduleReload()
+        }
+    }
 
     private let pageSize = 15
     // Bien en dessous de pageSize, sinon la page suivante se chargerait dès
@@ -222,14 +239,19 @@ final class WineListViewModel {
         groupedWines = Self.buildGroupedWines(
             wines: wines,
             sort: sort,
-            sortDescending: sortDescending
+            sortDescending: sortDescending,
+            mode: mode
         )
     }
+
+    /// Groupe sans personne quand le tri « Par personne » est actif.
+    private static let unnamedPersonLabel = "Sans nom"
 
     private static func buildGroupedWines(
         wines: [Wine],
         sort: WineSort,
-        sortDescending: Bool
+        sortDescending: Bool,
+        mode: WineListMode
     ) -> [(String, [Wine])] {
         // Pre-sort so items inside each group follow the sort order too —
         // Dictionary(grouping:) preserves element order within groups.
@@ -264,14 +286,24 @@ final class WineListViewModel {
             case .price:
                 let (order, label) = priceRange(wine.purchasePrice)
                 return (Double(order), label, wine)
+            case .person:
+                // Offerts = la personne qui a offert la bouteille ; Conseillés = celle
+                // qui l'a conseillée. (Tri absent des autres modes via available(for:).)
+                let name = mode == .gifted ? wine.giftedBy : wine.recommendedBy
+                return (0, name ?? unnamedPersonLabel, wine)
             }
         }
 
         let grouped = Dictionary(grouping: keyed, by: \.label)
         let result: [(key: String, value: [(sortKey: Double, label: String, wine: Wine)])]
-        if sort == .region {
-            // Region groups have no numeric key — order them alphabetically (French-aware)
+        if sort == .region || sort == .person {
+            // These groups have no numeric key — order them alphabetically (French-aware),
+            // with the "no person" bucket pinned last whatever the direction.
             result = grouped.sorted { first, second in
+                if sort == .person {
+                    if first.key == unnamedPersonLabel { return false }
+                    if second.key == unnamedPersonLabel { return true }
+                }
                 let ascending = first.key.localizedCompare(second.key) == .orderedAscending
                 return sortDescending ? !ascending : ascending
             }
@@ -292,6 +324,9 @@ final class WineListViewModel {
         case .updatedAt: wine.updatedAt.timeIntervalSince1970
         case .vintage: Double(wine.vintage ?? 0)
         case .region: 0 // groups carry the ordering; keep server order inside
+        // The full-subset paths (gifted/recommended) come back unsorted from the
+        // server, so order inside each person's section explicitly.
+        case .person: wine.updatedAt.timeIntervalSince1970
         case .color:
             Double(
                 wine.color.map { WineColor.allCases.firstIndex(of: $0) ?? 0 }
