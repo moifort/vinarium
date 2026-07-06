@@ -1,5 +1,9 @@
 # Vinarium - Project Directives
 
+## Language
+
+Everything versioned and technical is written in **English**: commit messages, code, code comments, and documentation (README, this file). The **only** French in the repo is user-facing copy — `CHANGELOG.md` entries and the iOS app's on-screen text. Never mix languages in a commit message or a comment.
+
 ## Build & Verification Commands
 
 - **Backend typecheck**: `bun tsc --noEmit`
