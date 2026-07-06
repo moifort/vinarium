@@ -5,6 +5,7 @@
 - Listes, recherche et tableau de bord plus rapides : le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un filtre.
 - Ouverture de la fiche détail nettement plus rapide : le serveur lit désormais uniquement les informations du vin consulté au lieu de parcourir toute la cave.
 - Fiche détail : le sous-titre ne répète plus la maison et le millésime, déjà affichés dans les informations juste en dessous.
+- Fiche détail : le sous-titre affiche uniquement le sous-type de la boisson (Porto, Blonde…) ; à défaut, la couleur pour un vin et le type pour les autres boissons.
 - Recherche globale : une loupe dans la barre d'outils ouvre une recherche plein écran. Tapez un nom de vin, un producteur, un millésime ou une personne — les résultats sont classés par pertinence et regroupés clairement (en cave, déjà bus, cadeaux, conseillés…). Filtres combinables (couleur, type, favori, en cave, cadeaux) proposés au-dessus des résultats.
 - Les listes signalent d'un coup d'œil les bouteilles en cave (icône armoire).
 - Vues Offerts et Conseillés : nouveau tri « Par personne » qui regroupe la liste par donateur ou par conseiller.

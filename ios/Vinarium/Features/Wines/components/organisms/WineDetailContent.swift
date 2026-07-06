@@ -99,12 +99,16 @@ struct WineDetailContent: View {
     }
 
     private var headerSubtitle: String {
-        let subtypeLabel = content.subtype?.label(for: content.beverageType)
-        // Juste le type : « Rouge • Porto » pour un vin, « Bière Blonde » pour le reste.
+        // Uniquement le sous-type (« Porto », « Blonde »). À défaut de sous-type,
+        // on affiche la couleur pour un vin, le type pour les autres boissons.
         // La maison et le millésime restent affichés plus bas (LabeledInfoRow) — inutile de les répéter ici.
-        return content.beverageType == .wine
-            ? [content.color?.label, subtypeLabel].compactMap { $0 }.joined(separator: " \u{2022} ")
-            : [content.beverageType.label, subtypeLabel].compactMap { $0 }.joined(separator: " ")
+        if let subtypeLabel = content.subtype?.label(for: content.beverageType) {
+            return subtypeLabel
+        }
+        let fallback = content.beverageType == .wine
+            ? content.color?.label
+            : content.beverageType.label
+        return fallback ?? ""
     }
 }
 
