@@ -35,8 +35,8 @@ query Dashboard {
     lastExit {
       type
       date
-      wineId
-      wineName
+      beverageId
+      beverageName
       wineBeverageType
       wineColor
       position
@@ -44,8 +44,8 @@ query Dashboard {
     history {
       type
       date
-      wineId
-      wineName
+      beverageId
+      beverageName
       wineBeverageType
       wineColor
       position

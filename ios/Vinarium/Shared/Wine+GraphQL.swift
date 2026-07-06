@@ -5,24 +5,26 @@ extension Wine {
     /// global search) into the domain model. Single source of truth so both
     /// query paths stay in sync.
     init(listFields w: VinariumGraphQL.WineListFields) {
+        // Wine-only fields now live under the `details` union member.
+        let details = w.details?.asWineDetails
         self.init(
             id: w.id,
             name: w.name,
             beverageType: BeverageType(graphql: w.beverageType),
-            color: w.color.map { WineColor(graphql: $0) },
+            color: details?.color.map { WineColor(graphql: $0) },
             subtype: w.subtype.flatMap { BeverageSubtype(graphql: $0) },
-            domain: w.domain,
-            vintage: w.vintage,
-            appellation: w.appellation,
+            domain: w.producer,
+            vintage: details?.vintage,
+            appellation: details?.appellation,
             region: w.region,
             country: w.country,
-            grapeVarieties: w.grapeVarieties,
+            grapeVarieties: details?.grapeVarieties,
             alcoholContent: w.alcoholContent,
-            classification: w.classification,
+            classification: details?.classification,
             purchasePrice: w.purchase?.price,
             purchaseDate: w.purchase?.date,
-            drinkFrom: w.drinkWindow?.from,
-            drinkUntil: w.drinkWindow?.until,
+            drinkFrom: details?.drinkWindow?.from,
+            drinkUntil: details?.drinkWindow?.until,
             notes: w.notes,
             giftedBy: w.gift?.received?.from,
             rating: w.consumption?.rating,

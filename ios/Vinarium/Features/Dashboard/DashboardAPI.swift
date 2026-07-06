@@ -82,8 +82,8 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
         switch type { case .case(.in): return "in"; case .case(.out): return "out"; case .unknown: return "in" }
     }
     var dateString: String { date }
-    var wineIdString: String { wineId }
-    var wineNameString: String { wineName }
+    var wineIdString: String { beverageId }
+    var wineNameString: String { beverageName }
     var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }
@@ -94,8 +94,8 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
         switch type { case .case(.in): return "in"; case .case(.out): return "out"; case .unknown: return "in" }
     }
     var dateString: String { date }
-    var wineIdString: String { wineId }
-    var wineNameString: String { wineName }
+    var wineIdString: String { beverageId }
+    var wineNameString: String { beverageName }
     var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }

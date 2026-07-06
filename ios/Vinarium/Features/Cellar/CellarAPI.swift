@@ -23,23 +23,24 @@ enum CellarAPI {
             )
         )
         let bottles = data.cellarBottles.items.map { b in
-            CellarBottle(
-                wineId: b.wineId,
+            let details = b.wine.details?.asWineDetails
+            return CellarBottle(
+                wineId: b.beverageId,
                 wine: Wine(
                     id: b.wine.id,
                     name: b.wine.name,
                     beverageType: BeverageType(graphql: b.wine.beverageType),
-                    color: b.wine.color.map { WineColor(graphql: $0) },
+                    color: details?.color.map { WineColor(graphql: $0) },
                     subtype: b.wine.subtype.flatMap { BeverageSubtype(graphql: $0) },
-                    domain: b.wine.domain,
-                    vintage: b.wine.vintage,
-                    appellation: b.wine.appellation,
+                    domain: b.wine.producer,
+                    vintage: details?.vintage,
+                    appellation: details?.appellation,
                     region: b.wine.region,
                     country: b.wine.country,
-                    classification: b.wine.classification,
+                    classification: details?.classification,
                     purchasePrice: b.wine.purchase?.price,
-                    drinkFrom: b.wine.drinkWindow?.from,
-                    drinkUntil: b.wine.drinkWindow?.until,
+                    drinkFrom: details?.drinkWindow?.from,
+                    drinkUntil: details?.drinkWindow?.until,
                     createdAt: Date(),
                     updatedAt: Date()
                 ),
@@ -67,8 +68,8 @@ enum CellarAPI {
             HistoryEvent(
                 type: mapEventType(e.type),
                 date: GraphQLHelpers.parseISO8601(e.date) ?? Date(),
-                wineId: e.wineId,
-                wineName: e.wineName,
+                wineId: e.beverageId,
+                wineName: e.beverageName,
                 wineBeverageType: BeverageType(graphql: e.wineBeverageType),
                 wineColor: e.wineColor.map { WineColor(graphql: $0) },
                 position: e.position
@@ -92,7 +93,7 @@ enum CellarAPI {
         let rowIndex = rowIndexFromLabel(row)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.PlaceBottleMutation(wineId: wineId, row: rowIndex, col: col)
+            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: rowIndex, col: col)
         )
     }
 
@@ -100,7 +101,7 @@ enum CellarAPI {
         let rowIndex = rowIndexFromLabel(row)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.MoveBottleMutation(wineId: wineId, row: rowIndex, col: col)
+            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: rowIndex, col: col)
         )
     }
 
@@ -120,7 +121,7 @@ enum CellarAPI {
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.ConsumeBottleMutation(wineId: wineId, input: input)
+            mutation: VinariumGraphQL.ConsumeBottleMutation(beverageId: wineId, input: input)
         )
     }
 
@@ -135,7 +136,7 @@ enum CellarAPI {
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.GiftBottleMutation(wineId: wineId, input: input)
+            mutation: VinariumGraphQL.GiftBottleMutation(beverageId: wineId, input: input)
         )
     }
 }

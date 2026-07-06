@@ -12,13 +12,13 @@ enum SearchAPI {
         )
         let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: gqlQuery)
         return SearchResults(
-            hits: data.searchWines.hits.map { hit in
+            hits: data.searchBeverages.hits.map { hit in
                 SearchHit(
                     wine: Wine(listFields: hit.wine.fragments.wineListFields),
                     matchedFields: hit.matchedFields.map { SearchMatchedField(graphql: $0) }
                 )
             },
-            totalCount: data.searchWines.totalCount
+            totalCount: data.searchBeverages.totalCount
         )
     }
 
@@ -37,7 +37,7 @@ enum SearchAPI {
 
     private static func gqlStatus(
         _ status: WineStatusFilter
-    ) -> GraphQLEnum<VinariumGraphQL.WineStatusFilter> {
+    ) -> GraphQLEnum<VinariumGraphQL.BeverageStatusFilter> {
         switch status {
         case .all: .case(.all)
         case .inCellar: .case(.inCellar)

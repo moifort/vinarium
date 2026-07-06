@@ -1,40 +1,48 @@
-mutation AddWine($input: AddWineInput!) {
-  addWine(input: $input) {
+mutation AddWine($input: AddBeverageInput!) {
+  addBeverage(input: $input) {
     id
     name
     beverageType
-    color
     subtype
-    vintage
+    details {
+      ... on WineDetails {
+        color
+        vintage
+      }
+    }
     createdAt
     updatedAt
   }
 }
 
-mutation UpdateWine($id: WineId!, $input: UpdateWineInput!) {
-  updateWine(id: $id, input: $input) {
+mutation UpdateWine($id: BeverageId!, $input: UpdateBeverageInput!) {
+  updateBeverage(id: $id, input: $input) {
     id
     name
     beverageType
-    color
     subtype
-    vintage
+    details {
+      ... on WineDetails {
+        color
+        vintage
+      }
+    }
     updatedAt
   }
 }
 
-mutation DeleteWine($id: WineId!) {
-  deleteWine(id: $id)
+mutation DeleteWine($id: BeverageId!) {
+  deleteBeverage(id: $id)
 }
 
-mutation MarkFavorite($wineId: WineId!, $favorite: Boolean!) {
-  markFavorite(wineId: $wineId, favorite: $favorite)
+mutation MarkFavorite($beverageId: BeverageId!, $favorite: Boolean!) {
+  markFavorite(beverageId: $beverageId, favorite: $favorite)
 }
 
-mutation RecordTasting($wineId: WineId!, $input: TastingInput!) {
-  recordTasting(wineId: $wineId, input: $input)
+mutation RecordTasting($beverageId: BeverageId!, $input: TastingInput!) {
+  recordTasting(beverageId: $beverageId, input: $input)
 }
 
-mutation AddRecommendation($wineId: WineId!, $input: RecommendationInput!) {
-  addRecommendation(wineId: $wineId, input: $input)
+mutation AddRecommendation($beverageId: BeverageId!, $input: RecommendationInput!) {
+  addRecommendation(beverageId: $beverageId, input: $input)
 }

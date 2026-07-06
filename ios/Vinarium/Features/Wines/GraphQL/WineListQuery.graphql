@@ -1,14 +1,14 @@
 query WineList(
-  $mode: WineListMode
-  $status: WineStatusFilter
+  $mode: BeverageListMode
+  $status: BeverageStatusFilter
   $color: WineColor
   $beverageType: BeverageType
-  $sort: WineSort
+  $sort: BeverageSort
   $order: SortOrder
   $limit: Int
-  $after: WineId
+  $after: BeverageId
 ) {
-  wines(
+  beverages(
     mode: $mode
     status: $status
     color: $color

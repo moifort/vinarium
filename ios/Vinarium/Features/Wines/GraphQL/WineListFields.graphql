@@ -1,30 +1,34 @@
-fragment WineListFields on Wine {
+fragment WineListFields on Beverage {
   id
   name
   beverageType
-  color
   subtype
   alcoholContent
-  vintage
-  domain
-  appellation
+  producer
   region
   country
-  classification
+  notes
   purchase {
     price
     date
   }
-  drinkWindow {
-    from
-    until
-  }
-  notes
-  grapeVarieties
   place {
     latitude
     longitude
     name
+  }
+  details {
+    ... on WineDetails {
+      color
+      vintage
+      appellation
+      classification
+      drinkWindow {
+        from
+        until
+      }
+      grapeVarieties
+    }
   }
   createdAt
   updatedAt

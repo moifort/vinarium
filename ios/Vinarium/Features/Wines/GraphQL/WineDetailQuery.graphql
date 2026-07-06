@@ -1,32 +1,36 @@
-query WineDetail($id: WineId!) {
-  wine(id: $id) {
+query WineDetail($id: BeverageId!) {
+  beverage(id: $id) {
     id
     name
     beverageType
-    color
     subtype
     alcoholContent
-    vintage
-    domain
-    appellation
+    producer
     region
     country
-    classification
+    notes
     purchase {
       price
       date
     }
-    drinkWindow {
-      from
-      until
-    }
-    notes
-    grapeVarieties
-    servingTemperature
     place {
       latitude
       longitude
       name
+    }
+    details {
+      ... on WineDetails {
+        color
+        vintage
+        appellation
+        classification
+        drinkWindow {
+          from
+          until
+        }
+        grapeVarieties
+        servingTemperature
+      }
     }
     createdAt
     updatedAt
@@ -61,8 +65,8 @@ query WineDetail($id: WineId!) {
     history {
       type
       date
-      wineId
-      wineName
+      beverageId
+      beverageName
       wineBeverageType
       wineColor
       position

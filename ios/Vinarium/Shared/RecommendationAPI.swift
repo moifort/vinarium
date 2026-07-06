@@ -9,7 +9,7 @@ enum RecommendationAPI {
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.AddRecommendationMutation(wineId: wineId, input: input)
+            mutation: VinariumGraphQL.AddRecommendationMutation(beverageId: wineId, input: input)
         )
     }
 }

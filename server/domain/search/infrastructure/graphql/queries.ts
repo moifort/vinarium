@@ -5,7 +5,7 @@ import type { SearchFilters } from '../../types'
 import { SearchFiltersInput } from './inputs'
 import { SearchResultsType } from './types'
 
-builder.queryField('searchWines', (t) =>
+builder.queryField('searchBeverages', (t) =>
   t.field({
     type: SearchResultsType,
     description:

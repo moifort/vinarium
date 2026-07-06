@@ -1,5 +1,5 @@
 mutation ScanWine($imageBase64: String!) {
-  scanWine(imageBase64: $imageBase64) {
+  scanBeverage(imageBase64: $imageBase64) {
     name
     beverageType
     color

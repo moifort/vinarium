@@ -1,6 +1,6 @@
-mutation PlaceBottle($wineId: WineId!, $row: Int!, $col: Int!) {
-  placeBottle(wineId: $wineId, row: $row, col: $col) {
-    wineId
+mutation PlaceBottle($beverageId: BeverageId!, $row: Int!, $col: Int!) {
+  placeBottle(beverageId: $beverageId, row: $row, col: $col) {
+    beverageId
     row
     col
     rowLabel
@@ -8,9 +8,9 @@ mutation PlaceBottle($wineId: WineId!, $row: Int!, $col: Int!) {
   }
 }
 
-mutation MoveBottle($wineId: WineId!, $row: Int!, $col: Int!) {
-  moveBottle(wineId: $wineId, row: $row, col: $col) {
-    wineId
+mutation MoveBottle($beverageId: BeverageId!, $row: Int!, $col: Int!) {
+  moveBottle(beverageId: $beverageId, row: $row, col: $col) {
+    beverageId
     row
     col
     rowLabel
@@ -18,14 +18,14 @@ mutation MoveBottle($wineId: WineId!, $row: Int!, $col: Int!) {
   }
 }
 
-mutation ConsumeBottle($wineId: WineId!, $input: ConsumptionInput!) {
-  consumeBottle(wineId: $wineId, input: $input)
+mutation ConsumeBottle($beverageId: BeverageId!, $input: ConsumptionInput!) {
+  consumeBottle(beverageId: $beverageId, input: $input)
 }
 
-mutation GiftBottle($wineId: WineId!, $input: GiftInput!) {
-  giftBottle(wineId: $wineId, input: $input)
+mutation GiftBottle($beverageId: BeverageId!, $input: GiftInput!) {
+  giftBottle(beverageId: $beverageId, input: $input)
 }
 
-mutation RemoveBottle($wineId: WineId!) {
-  removeBottle(wineId: $wineId)
+mutation RemoveBottle($beverageId: BeverageId!) {
+  removeBottle(beverageId: $beverageId)
 }

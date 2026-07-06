@@ -1,7 +1,7 @@
-query CellarBottles($limit: Int, $after: WineId) {
+query CellarBottles($limit: Int, $after: BeverageId) {
   cellarBottles(limit: $limit, after: $after) {
     items {
-      wineId
+      beverageId
       row
       col
       rowLabel
@@ -11,20 +11,24 @@ query CellarBottles($limit: Int, $after: WineId) {
         id
         name
         beverageType
-        color
         subtype
-        vintage
-        domain
-        appellation
+        producer
         region
         country
-        classification
         purchase {
           price
         }
-        drinkWindow {
-          from
-          until
+        details {
+          ... on WineDetails {
+            color
+            vintage
+            appellation
+            classification
+            drinkWindow {
+              from
+              until
+            }
+          }
         }
       }
     }
@@ -37,8 +41,8 @@ query CellarHistory($limit: Int, $offset: Int) {
     items {
       type
       date
-      wineId
-      wineName
+      beverageId
+      beverageName
       wineBeverageType
       wineColor
       position
