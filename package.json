@@ -11,7 +11,13 @@
     "lint:fix": "bunx biome check --write",
     "generate:assets": "bun scripts/generate-changelog-asset.ts",
     "generate:graphql": "bun scripts/export-graphql-schema.ts",
-    "generate": "bun run generate:assets && bun run generate:graphql"
+    "generate": "bun run generate:assets && bun run generate:graphql",
+    "bootstrap": "./scripts/bootstrap.sh",
+    "destroy": "./scripts/teardown.sh",
+    "infra:build": "bun install --frozen-lockfile && bunx nitro prepare && bun run generate:graphql && bun run build",
+    "infra:init": "cd infra && ../scripts/tf init",
+    "infra:plan": "bun run infra:build && cd infra && ../scripts/tf plan",
+    "infra:apply": "bun run infra:build && cd infra && ../scripts/tf apply"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",

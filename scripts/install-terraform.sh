@@ -5,7 +5,7 @@
 # version is already installed.
 #
 # This removes the need for users to install terraform system-wide before
-# running `make bootstrap` or `make plan|apply|destroy`.
+# running `bun run bootstrap` or `bun run infra:plan|infra:apply|destroy`.
 
 set -euo pipefail
 

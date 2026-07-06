@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 #
 # tf — thin wrapper that ensures the pinned terraform binary exists,
-# then execs it with the passed arguments. Used by the Makefile so
-# `make plan|apply|infra-init|destroy` work on a fresh machine.
+# then execs it with the passed arguments. Used by the package.json scripts
+# so `bun run infra:plan|infra:apply|infra:init|destroy` work on a fresh machine.
 
 set -euo pipefail
 

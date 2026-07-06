@@ -24,6 +24,7 @@ ios/Vinarium/Shared/Secrets.swift
 ios/VinariumUITests/Support/TestSecrets.swift
 
 doc/
+docs/
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
