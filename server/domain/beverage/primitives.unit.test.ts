@@ -1,27 +1,27 @@
 import { describe, expect, test } from 'bun:test'
 import {
   BEVERAGE_SUBTYPE_VALUES,
+  BeverageId,
+  BeverageName,
+  BeverageSort,
+  BeverageStatus,
   BeverageSubtype,
   BeverageType,
   SortOrder,
   WineColor,
-  WineId,
-  WineName,
-  WineSort,
-  WineStatus,
-} from '~/domain/wine/primitives'
+} from '~/domain/beverage/primitives'
 
-describe('WineId', () => {
+describe('BeverageId', () => {
   test('accepts valid UUID', () => {
     const uuid = crypto.randomUUID()
-    expect(WineId(uuid) as string).toBe(uuid)
+    expect(BeverageId(uuid) as string).toBe(uuid)
   })
-  test('rejects random string', () => expect(() => WineId('not-a-uuid')).toThrow())
+  test('rejects random string', () => expect(() => BeverageId('not-a-uuid')).toThrow())
 })
 
-describe('WineName', () => {
-  test('accepts non-empty string', () => expect(WineName('Margaux') as string).toBe('Margaux'))
-  test('rejects empty string', () => expect(() => WineName('')).toThrow())
+describe('BeverageName', () => {
+  test('accepts non-empty string', () => expect(BeverageName('Margaux') as string).toBe('Margaux'))
+  test('rejects empty string', () => expect(() => BeverageName('')).toThrow())
 })
 
 describe('WineColor', () => {
@@ -48,7 +48,7 @@ describe('BeverageSubtype', () => {
   test('rejects empty string', () => expect(() => BeverageSubtype('')).toThrow())
 })
 
-describe('WineSort', () => {
+describe('BeverageSort', () => {
   test.each([
     'createdAt',
     'updatedAt',
@@ -56,8 +56,8 @@ describe('WineSort', () => {
     'region',
     'color',
     'price',
-  ] as const)('accepts "%s"', (sort) => expect(WineSort(sort) as string).toBe(sort))
-  test('rejects invalid sort', () => expect(() => WineSort('invalid')).toThrow())
+  ] as const)('accepts "%s"', (sort) => expect(BeverageSort(sort) as string).toBe(sort))
+  test('rejects invalid sort', () => expect(() => BeverageSort('invalid')).toThrow())
 })
 
 describe('SortOrder', () => {
@@ -66,8 +66,8 @@ describe('SortOrder', () => {
   test('rejects invalid order', () => expect(() => SortOrder('up')).toThrow())
 })
 
-describe('WineStatus', () => {
+describe('BeverageStatus', () => {
   test.each(['in-cellar', 'consumed', 'gifted', 'recommended'] as const)('accepts "%s"', (status) =>
-    expect(WineStatus(status) as string).toBe(status))
-  test('rejects invalid status', () => expect(() => WineStatus('invalid')).toThrow())
+    expect(BeverageStatus(status) as string).toBe(status))
+  test('rejects invalid status', () => expect(() => BeverageStatus('invalid')).toThrow())
 })

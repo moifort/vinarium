@@ -4,6 +4,7 @@ import { migration0002 } from './0002-merge-favorite-shortlist'
 import { migration0003 } from './0003-wine-subtypes'
 import { migration0004 } from './0004-wine-sub-objects'
 import { migration0005 } from './0005-gifted-by-to-gift'
+import { migration0006 } from './0006-beverage-model'
 
 export const migrations: Migration[] = [
   migration0001,
@@ -11,4 +12,5 @@ export const migrations: Migration[] = [
   migration0003,
   migration0004,
   migration0005,
+  migration0006,
 ]

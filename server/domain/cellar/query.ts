@@ -1,10 +1,10 @@
 import { keyBy, range } from 'lodash-es'
+import { BeverageQuery } from '~/domain/beverage/query'
+import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { CELLAR_SIZE, type CellarBottle, type CellarBottleView } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
-import { WineQuery } from '~/domain/wine/query'
-import type { WineId } from '~/domain/wine/types'
 
 // A placed bottle projected with its grid labels — the shared cellar view shape,
 // used by the queries below and by the placement mutations.
@@ -26,13 +26,15 @@ export namespace CellarQuery {
   export const bottlesWithWine = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
       repository.findAllByUser(userId),
-      WineQuery.findAll(userId),
+      BeverageQuery.findAll(userId),
     ])
-    const wineMap = keyBy(wines, 'id')
+    const beverageMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {
-      const wine = wineMap[bottle.wineId]
-      if (!wine)
-        throw new Error(`Wine ${bottle.wineId} not found for bottle at ${bottle.row},${bottle.col}`)
+      const wine = beverageMap[bottle.beverageId]
+      if (!wine) {
+        const at = `${bottle.row},${bottle.col}`
+        throw new Error(`Beverage ${bottle.beverageId} not found for bottle at ${at}`)
+      }
       return { ...bottleView(bottle), wine }
     })
   }
@@ -48,23 +50,23 @@ export namespace CellarQuery {
   // One page of cellar bottles in grid order (row, col) joined with their wine.
   export const bottlesPage = async (
     userId: UserId,
-    { limit, after }: { limit: number; after?: WineId },
+    { limit, after }: { limit: number; after?: BeverageId },
   ) => {
     const { bottles, hasMore } = await repository.findBottlesPage(userId, { limit, after })
-    const wines = await WineQuery.byWineIds(
+    const wines = await BeverageQuery.byBeverageIds(
       userId,
-      bottles.map(({ wineId }) => wineId),
+      bottles.map(({ beverageId }) => beverageId),
     )
-    const wineMap = keyBy(wines, 'id')
+    const beverageMap = keyBy(wines, 'id')
     const items = bottles
-      .filter(({ wineId }) => wineMap[wineId])
-      .map((bottle) => ({ ...bottleView(bottle), wine: wineMap[bottle.wineId] }))
+      .filter(({ beverageId }) => beverageMap[beverageId])
+      .map((bottle) => ({ ...bottleView(bottle), wine: beverageMap[bottle.beverageId] }))
     return { items, hasMore }
   }
 
   // Cellar placements for a page of wines, batch-loaded by id.
-  export const placementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
-    (await repository.findManyByWineIds(userId, wineIds)).map(bottleView)
+  export const placementsByBeverageIds = async (userId: UserId, beverageIds: BeverageId[]) =>
+    (await repository.findManyByBeverageIds(userId, beverageIds)).map(bottleView)
 
   export const suggestPosition = async (userId: UserId) => {
     const allBottles = await repository.findAllByUser(userId)

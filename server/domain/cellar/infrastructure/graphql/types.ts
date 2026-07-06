@@ -1,11 +1,11 @@
+import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import { WineType } from '~/domain/wine/infrastructure/graphql/types'
 import type { CellarBottle, CellarBottleView, CellarBottleWithWine } from '../../types'
 
 export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottle').implement({
   description: 'A bottle physically placed in the cellar grid',
   fields: (t) => ({
-    wineId: t.expose('wineId', { type: 'WineId' }),
+    beverageId: t.expose('beverageId', { type: 'BeverageId' }),
     row: t.exposeInt('row'),
     col: t.exposeInt('col'),
     rowLabel: t.exposeString('rowLabel'),
@@ -20,13 +20,13 @@ export const CellarBottleWithWineType = builder
   .implement({
     description: 'A cellar bottle joined with the corresponding wine',
     fields: (t) => ({
-      wineId: t.expose('wineId', { type: 'WineId' }),
+      beverageId: t.expose('beverageId', { type: 'BeverageId' }),
       row: t.exposeInt('row'),
       col: t.exposeInt('col'),
       rowLabel: t.exposeString('rowLabel'),
       colLabel: t.exposeInt('colLabel'),
       createdAt: t.expose('createdAt', { type: 'DateTime' }),
-      wine: t.field({ type: WineType, resolve: (b) => b.wine }),
+      wine: t.field({ type: BeverageType, resolve: (b) => b.wine }),
     }),
   })
 
@@ -71,8 +71,8 @@ export const CellarPositionType = builder
     }),
   })
 
-// Extend WineType with the cellar nested field, batched by the per-request loader.
-builder.objectField(WineType, 'cellar', (t) =>
+// Extend BeverageType with the cellar nested field, batched by the per-request loader.
+builder.objectField(BeverageType, 'cellar', (t) =>
   t.field({
     type: CellarBottleType,
     nullable: true,

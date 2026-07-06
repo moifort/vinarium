@@ -1,4 +1,4 @@
-import type { BeverageSubtype, WineColor } from '~/domain/wine/types'
+import type { BeverageSubtype, WineColor } from '~/domain/beverage/types'
 
 // Best-effort translation of the pre-subtype data model (free-text style, a
 // 5-value color enum that smuggled sparkling/sweet in) into today's structured

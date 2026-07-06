@@ -1,5 +1,5 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
-import { wineSatelliteLoaders } from '~/domain/shared/graphql/loaders'
+import { beverageSatelliteLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
 
 export default defineEventHandler(async (event) => {
@@ -7,7 +7,7 @@ export default defineEventHandler(async (event) => {
   const userId = (event.context as { userId?: UserId }).userId
   if (!userId) throw createError({ statusCode: 401, statusMessage: 'Missing user context' })
   // One loader set per request: memoization and batching stay request-scoped.
-  const context = async () => ({ event, userId, loaders: wineSatelliteLoaders(userId) })
+  const context = async () => ({ event, userId, loaders: beverageSatelliteLoaders(userId) })
 
   const headerMap = new HeaderMap()
   for (const [key, value] of Object.entries(getHeaders(event))) {

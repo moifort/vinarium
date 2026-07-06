@@ -16,26 +16,26 @@ beforeEach(() => {
 })
 
 const seedDashboardData = () => {
-  fake.seed('wines', 'w1', {
+  fake.seed('beverages', 'w1', {
     id: 'w1',
     userId,
     name: 'Château Cave',
-    color: 'red',
+    beverageType: 'wine',
     purchase: { price: 30 },
-    drinkWindow: { from: currentYear - 1, until: currentYear + 5 },
+    wine: { color: 'red', drinkWindow: { from: currentYear - 1, until: currentYear + 5 } },
     createdAt: new Date('2026-01-10'),
   })
-  fake.seed('wines', 'w2', {
+  fake.seed('beverages', 'w2', {
     id: 'w2',
     userId,
     name: 'Domaine Favori',
-    color: 'white',
-    vintage: 2019,
+    beverageType: 'wine',
+    wine: { color: 'white', vintage: 2019 },
     createdAt: new Date('2026-01-05'),
   })
   fake.seed('cellar', `${userId}_w1`, {
     userId,
-    wineId: 'w1',
+    beverageId: 'w1',
     row: 0,
     col: 0,
     createdAt: new Date('2026-01-10'),
@@ -43,14 +43,14 @@ const seedDashboardData = () => {
   })
   fake.seed('tasting', `${userId}_w2`, {
     userId,
-    wineId: 'w2',
+    beverageId: 'w2',
     favorite: true,
     rating: 5,
     consumedDate: new Date('2026-02-01'),
   })
   fake.seed('journal', 'j1', {
     userId,
-    wineId: 'w1',
+    beverageId: 'w1',
     type: 'in',
     row: 0,
     col: 0,
@@ -58,7 +58,7 @@ const seedDashboardData = () => {
   })
   fake.seed('journal', 'j2', {
     userId,
-    wineId: 'w2',
+    beverageId: 'w2',
     type: 'out',
     row: 1,
     col: 1,
@@ -77,7 +77,7 @@ describe('DashboardQuery.view', () => {
     expect(view.readyToDrink).toMatchObject([{ id: 'w1', position: 'A1', urgent: false }])
     expect(view.favorites).toMatchObject([{ id: 'w2', name: 'Domaine Favori', rating: 5 }])
     expect(view.lastBottle).toMatchObject({ wine: { id: 'w1' }, position: 'A1' })
-    expect(view.lastExit).toMatchObject({ wineId: 'w2', type: 'out' })
+    expect(view.lastExit).toMatchObject({ beverageId: 'w2', type: 'out' })
     expect(view.history).toHaveLength(2)
   })
 

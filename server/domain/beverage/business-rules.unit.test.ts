@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
-  irrelevantAttributes,
+  beverageStatus,
   isFavorite,
   readyToDrink,
   requiresColor,
@@ -8,33 +8,36 @@ import {
   SUBTYPES_BY_BEVERAGE,
   subtypeAllowed,
   urgentToDrink,
-  wineStatus,
-} from '~/domain/wine/business-rules'
-import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
+  wineDetails,
+} from '~/domain/beverage/business-rules'
+import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
+import type { Beverage } from '~/domain/beverage/types'
 
-describe('wineStatus', () => {
+describe('beverageStatus', () => {
   test('in-cellar when bottle present', () => {
-    expect(wineStatus({ inCellar: true, gifted: false, recommended: false })).toBe('in-cellar')
+    expect(beverageStatus({ inCellar: true, gifted: false, recommended: false })).toBe('in-cellar')
   })
 
   test('gifted when not in cellar and gifted', () => {
-    expect(wineStatus({ inCellar: false, gifted: true, recommended: false })).toBe('gifted')
+    expect(beverageStatus({ inCellar: false, gifted: true, recommended: false })).toBe('gifted')
   })
 
   test('recommended when not in cellar, not gifted, and recommended', () => {
-    expect(wineStatus({ inCellar: false, gifted: false, recommended: true })).toBe('recommended')
+    expect(beverageStatus({ inCellar: false, gifted: false, recommended: true })).toBe(
+      'recommended',
+    )
   })
 
   test('consumed when not in cellar, not gifted, not recommended', () => {
-    expect(wineStatus({ inCellar: false, gifted: false, recommended: false })).toBe('consumed')
+    expect(beverageStatus({ inCellar: false, gifted: false, recommended: false })).toBe('consumed')
   })
 
   test('in-cellar takes priority over gifted', () => {
-    expect(wineStatus({ inCellar: true, gifted: true, recommended: false })).toBe('in-cellar')
+    expect(beverageStatus({ inCellar: true, gifted: true, recommended: false })).toBe('in-cellar')
   })
 
   test('gifted takes priority over recommended', () => {
-    expect(wineStatus({ inCellar: false, gifted: true, recommended: true })).toBe('gifted')
+    expect(beverageStatus({ inCellar: false, gifted: true, recommended: true })).toBe('gifted')
   })
 })
 
@@ -100,9 +103,13 @@ describe('isFavorite', () => {
   })
 })
 
-describe('irrelevantAttributes', () => {
-  test('a wine keeps every attribute (the subtype is relevant everywhere)', () => {
-    expect(irrelevantAttributes('wine')).toEqual([])
+describe('wineDetails', () => {
+  test('returns the wine details of a wine', () => {
+    const wine = {
+      beverageType: 'wine',
+      wine: { color: 'red', vintage: 2015 },
+    } as Beverage
+    expect(wineDetails(wine)?.color).toBe('red')
   })
 
   test.each([
@@ -111,15 +118,8 @@ describe('irrelevantAttributes', () => {
     'sake',
     'cider',
     'other',
-  ] as const)('a %s has no wine-specific attributes', (beverageType) => {
-    expect(irrelevantAttributes(beverageType)).toEqual([
-      'color',
-      'grapeVarieties',
-      'appellation',
-      'classification',
-      'drinkWindow',
-      'servingTemperature',
-    ])
+  ] as const)('a %s has no wine details', (beverageType) => {
+    expect(wineDetails({ beverageType } as Beverage)).toBeUndefined()
   })
 })
 

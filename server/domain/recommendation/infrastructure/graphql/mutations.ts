@@ -8,11 +8,11 @@ builder.mutationField('addRecommendation', (t) =>
     type: 'Boolean',
     description: 'Record a recommendation for a wine',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       input: t.arg({ type: RecommendationInput, required: true }),
     },
-    resolve: async (_root, { wineId, input }, { userId }) => {
-      await RecommendationCommand.create({ userId, wineId, ...stripNulls(input) })
+    resolve: async (_root, { beverageId, input }, { userId }) => {
+      await RecommendationCommand.create({ userId, beverageId, ...stripNulls(input) })
       return true
     },
   }),

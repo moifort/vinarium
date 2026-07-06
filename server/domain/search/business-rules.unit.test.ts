@@ -11,16 +11,36 @@ import {
 import type { SearchableWine } from '~/domain/search/types'
 
 // Satellites are attached only when present — a bare wine carries no such keys.
-const aWine = (overrides: Record<string, unknown> = {}): SearchableWine =>
-  ({
+// Wine-only overrides (color, vintage, appellation ...) are routed into the
+// nested `wine` details; everything else stays at the top level.
+const WINE_DETAIL_KEYS = [
+  'color',
+  'vintage',
+  'appellation',
+  'classification',
+  'grapeVarieties',
+  'drinkWindow',
+  'servingTemperature',
+]
+const aWine = (overrides: Record<string, unknown> = {}): SearchableWine => {
+  const wine: Record<string, unknown> = {}
+  const base: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(overrides)) {
+    if (WINE_DETAIL_KEYS.includes(key)) wine[key] = value
+    else base[key] = value
+  }
+  const beverageType = (base.beverageType as string) ?? 'wine'
+  return {
     id: 'w1',
     userId: 'user-1',
     name: 'Château Margaux',
-    beverageType: 'wine',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
-    ...overrides,
-  }) as SearchableWine
+    ...base,
+    beverageType,
+    ...(beverageType === 'wine' ? { wine } : {}),
+  } as SearchableWine
+}
 
 describe('normalizedForSearch', () => {
   test('lowercases and strips accents', () => {
@@ -92,8 +112,8 @@ describe('searchHit', () => {
   test('collects every matched field', () => {
     const wine = aWine({
       name: 'Margaux',
-      gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Margaux' } },
-      consumption: { userId: 'user-1', wineId: 'w1', contacts: ['Margaux Dupont'] },
+      gift: { userId: 'user-1', beverageId: 'w1', received: { from: 'Margaux' } },
+      consumption: { userId: 'user-1', beverageId: 'w1', contacts: ['Margaux Dupont'] },
     })
     const hit = searchHit(wine, 'margaux')
     expect(hit?.matchedFields).toEqual(['name', 'gifted-by', 'tasting-contact'])
@@ -108,10 +128,10 @@ describe('searchHit', () => {
 
   test('name outranks producer, producer outranks person, at equal strength', () => {
     const name = searchHit(aWine({ name: 'Margaux' }), 'margaux')?.score ?? 0
-    const producer = searchHit(aWine({ domain: 'Margaux' }), 'margaux')?.score ?? 0
+    const producer = searchHit(aWine({ producer: 'Margaux' }), 'margaux')?.score ?? 0
     const person =
       searchHit(
-        aWine({ gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Margaux' } } }),
+        aWine({ gift: { userId: 'user-1', beverageId: 'w1', received: { from: 'Margaux' } } }),
         'margaux',
       )?.score ?? 0
     expect(name).toBeGreaterThan(producer)
@@ -138,17 +158,17 @@ describe('searchHit', () => {
     const wine = aWine({
       gift: {
         userId: 'user-1',
-        wineId: 'w1',
+        beverageId: 'w1',
         given: { date: new Date(), recipientName: 'Alice' },
       },
-      recommendation: { userId: 'user-1', wineId: 'w1', recommenderName: 'Alicia' },
+      recommendation: { userId: 'user-1', beverageId: 'w1', recommenderName: 'Alicia' },
     })
     expect(searchHit(wine, 'alic')?.matchedFields).toEqual(['gift-recipient', 'recommender'])
   })
 
   test('best contact wins among several', () => {
     const wine = aWine({
-      consumption: { userId: 'user-1', wineId: 'w1', contacts: ['Bob Martin', 'Alice'] },
+      consumption: { userId: 'user-1', beverageId: 'w1', contacts: ['Bob Martin', 'Alice'] },
     })
     expect(searchHit(wine, 'alice')?.score).toBe(120)
   })
@@ -173,15 +193,15 @@ describe('passesFilters', () => {
   })
 
   test('favorite filter needs an explicit favorite tasting', () => {
-    const favorite = aWine({ consumption: { userId: 'user-1', wineId: 'w1', favorite: true } })
+    const favorite = aWine({ consumption: { userId: 'user-1', beverageId: 'w1', favorite: true } })
     expect(passesFilters(favorite, { favorite: true })).toBe(true)
     expect(passesFilters(aWine(), { favorite: true })).toBe(false)
   })
 
   test('status filter on cellar presence and consumption', () => {
-    const inCellar = aWine({ cellar: { userId: 'user-1', wineId: 'w1', row: 0, col: 0 } })
+    const inCellar = aWine({ cellar: { userId: 'user-1', beverageId: 'w1', row: 0, col: 0 } })
     const consumed = aWine({
-      consumption: { userId: 'user-1', wineId: 'w1', consumedDate: new Date() },
+      consumption: { userId: 'user-1', beverageId: 'w1', consumedDate: new Date() },
     })
     expect(passesFilters(inCellar, { status: 'in-cellar' })).toBe(true)
     expect(passesFilters(consumed, { status: 'in-cellar' })).toBe(false)
@@ -192,10 +212,10 @@ describe('passesFilters', () => {
 
   test('gifted filter accepts received or given wines', () => {
     const received = aWine({
-      gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Alice' } },
+      gift: { userId: 'user-1', beverageId: 'w1', received: { from: 'Alice' } },
     })
     const given = aWine({
-      gift: { userId: 'user-1', wineId: 'w1', given: { date: new Date() } },
+      gift: { userId: 'user-1', beverageId: 'w1', given: { date: new Date() } },
     })
     expect(passesFilters(received, { gifted: true })).toBe(true)
     expect(passesFilters(given, { gifted: true })).toBe(true)

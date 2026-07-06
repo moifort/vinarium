@@ -1,14 +1,14 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { CellarBottle } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
 import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const cellar = () => db().collection('cellar').withConverter(genericDataConverter<CellarBottle>())
 
-const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
+const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
 const allCacheKey = (userId: UserId) => `cellar:all:${userId}`
 
 export const findAllByUser = (userId: UserId): Promise<CellarBottle[]> =>
@@ -17,8 +17,11 @@ export const findAllByUser = (userId: UserId): Promise<CellarBottle[]> =>
     return snap.docs.map((doc) => doc.data())
   })
 
-export const findBy = async (userId: UserId, wineId: WineId): Promise<CellarBottle | null> => {
-  const doc = await cellar().doc(docId(userId, wineId)).get()
+export const findBy = async (
+  userId: UserId,
+  beverageId: BeverageId,
+): Promise<CellarBottle | null> => {
+  const doc = await cellar().doc(docId(userId, beverageId)).get()
   return doc.data() ?? null
 }
 
@@ -49,7 +52,7 @@ export const countByUser = async (userId: UserId): Promise<number> => {
 // would make rows appear incomplete and sections jump around while scrolling.
 export const findBottlesPage = async (
   userId: UserId,
-  { limit, after }: { limit: number; after?: WineId },
+  { limit, after }: { limit: number; after?: BeverageId },
 ): Promise<{ bottles: CellarBottle[]; hasMore: boolean }> => {
   let query = cellar().where('userId', '==', userId).orderBy('row', 'asc').orderBy('col', 'asc')
   if (after) {
@@ -64,29 +67,33 @@ export const findBottlesPage = async (
 
 // Batch-load cellar placements for a page of wines with a single getAll. When
 // the full scan already ran in this request, reuse it: zero extra reads.
-export const findManyByWineIds = async (
+export const findManyByBeverageIds = async (
   userId: UserId,
-  wineIds: WineId[],
+  beverageIds: BeverageId[],
 ): Promise<CellarBottle[]> => {
-  if (wineIds.length === 0) return []
+  if (beverageIds.length === 0) return []
   if (isInRequestCache(allCacheKey(userId))) {
-    const wanted = new Set(wineIds)
-    return (await findAllByUser(userId)).filter((bottle) => wanted.has(bottle.wineId))
+    const wanted = new Set(beverageIds)
+    return (await findAllByUser(userId)).filter((bottle) => wanted.has(bottle.beverageId))
   }
-  const refs = wineIds.map((wineId) => cellar().doc(docId(userId, wineId)))
+  const refs = beverageIds.map((beverageId) => cellar().doc(docId(userId, beverageId)))
   const snaps = await db().getAll(...refs)
   return snaps.map((snap) => snap.data()).filter((b): b is CellarBottle => b !== undefined)
 }
 
 export const save = async (entry: CellarBottle, batch?: WriteBatch): Promise<CellarBottle> => {
-  const ref = cellar().doc(docId(entry.userId, entry.wineId))
+  const ref = cellar().doc(docId(entry.userId, entry.beverageId))
   if (batch) batch.set(ref, entry)
   else await ref.set(entry)
   return entry
 }
 
-export const remove = async (userId: UserId, wineId: WineId, batch?: WriteBatch): Promise<void> => {
-  const ref = cellar().doc(docId(userId, wineId))
+export const remove = async (
+  userId: UserId,
+  beverageId: BeverageId,
+  batch?: WriteBatch,
+): Promise<void> => {
+  const ref = cellar().doc(docId(userId, beverageId))
   if (batch) batch.delete(ref)
   else await ref.delete()
 }

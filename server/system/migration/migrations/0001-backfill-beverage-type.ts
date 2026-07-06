@@ -1,7 +1,7 @@
 import { MigrationName, MigrationVersion } from '~/system/migration/primitives'
 import type { Migration } from '~/system/migration/types'
 
-// Wines created before the multi-beverage support have no beverageType: they are all wines.
+// Beverages created before the multi-beverage support have no beverageType: they are all wines.
 export const migration0001: Migration = {
   version: MigrationVersion(1),
   name: MigrationName('backfill-beverage-type'),

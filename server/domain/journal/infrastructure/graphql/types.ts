@@ -1,6 +1,6 @@
+import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructure/graphql/enums'
+import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
-import { WineType } from '~/domain/wine/infrastructure/graphql/types'
 import { JournalQuery } from '../../query'
 import type { JournalEventView } from '../../types'
 
@@ -14,8 +14,8 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
   fields: (t) => ({
     type: t.expose('type', { type: JournalEventTypeEnum }),
     date: t.expose('date', { type: 'DateTime' }),
-    wineId: t.expose('wineId', { type: 'WineId' }),
-    wineName: t.expose('wineName', { type: 'WineName' }),
+    beverageId: t.expose('beverageId', { type: 'BeverageId' }),
+    beverageName: t.expose('beverageName', { type: 'BeverageName' }),
     wineBeverageType: t.expose('wineBeverageType', { type: BeverageTypeEnum }),
     wineColor: t.expose('wineColor', { type: WineColorEnum, nullable: true }),
     position: t.exposeString('position'),
@@ -34,9 +34,9 @@ export const JournalEventsType = builder
     }),
   })
 
-// Extend WineType with the per-wine history, batched by the per-request loader:
+// Extend BeverageType with the per-wine history, batched by the per-request loader:
 // a page of wines selecting `history` costs one journal query, not one per wine.
-builder.objectField(WineType, 'history', (t) =>
+builder.objectField(BeverageType, 'history', (t) =>
   t.field({
     type: [JournalEventType],
     description: 'Cellar entry/exit history for this wine, most recent first',

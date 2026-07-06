@@ -4,11 +4,11 @@ import { Scan } from '~/system/scan'
 import { imageWithinSizeLimit } from '~/system/scan/limits'
 import { ScanResultType } from './types'
 
-builder.mutationField('scanWine', (t) =>
+builder.mutationField('scanBeverage', (t) =>
   t.field({
     type: ScanResultType,
     description:
-      'Analyze a wine label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.',
+      'Analyze a beverage label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.',
     args: {
       imageBase64: t.arg.string({
         required: true,

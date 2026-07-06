@@ -6,11 +6,11 @@ import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
 const { schema } = await import('~/domain/shared/graphql/schema')
-const { wineSatelliteLoaders } = await import('~/domain/shared/graphql/loaders')
+const { beverageSatelliteLoaders } = await import('~/domain/shared/graphql/loaders')
 
 const userId = 'user-1' as UserId
 
-// The WineId scalar validates UUIDs — deterministic ones keep assertions readable.
+// The BeverageId scalar validates UUIDs — deterministic ones keep assertions readable.
 const wid = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
 
 let fake = resetFakeFirestore()
@@ -24,32 +24,32 @@ const execute = (source: string) =>
   graphql({
     schema,
     source,
-    contextValue: { userId, event: undefined as never, loaders: wineSatelliteLoaders(userId) },
+    contextValue: { userId, event: undefined as never, loaders: beverageSatelliteLoaders(userId) },
   })
 
 const seedWine = (id: string, over: Record<string, unknown> = {}) =>
-  fake.seed('wines', id, {
+  fake.seed('beverages', id, {
     id,
     userId,
-    name: `Wine ${id}`,
+    name: `Beverage ${id}`,
     beverageType: 'wine',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
     ...over,
   })
 
-// Satellite collections key their single record per (user, wine) as `${userId}_${wineId}`.
-const seedSatellites = (wineId: string) => {
-  fake.seed('tasting', `${userId}_${wineId}`, { userId, wineId, rating: 4, favorite: true })
-  fake.seed('gift', `${userId}_${wineId}`, {
+// Satellite collections key their single record per (user, wine) as `${userId}_${beverageId}`.
+const seedSatellites = (beverageId: string) => {
+  fake.seed('tasting', `${userId}_${beverageId}`, { userId, beverageId, rating: 4, favorite: true })
+  fake.seed('gift', `${userId}_${beverageId}`, {
     userId,
-    wineId,
+    beverageId,
     given: { date: new Date('2026-02-01'), recipientName: 'Alice' },
   })
-  fake.seed('recommendation', `${userId}_${wineId}`, { userId, wineId, comment: 'Superbe' })
-  fake.seed('cellar', `${userId}_${wineId}`, {
+  fake.seed('recommendation', `${userId}_${beverageId}`, { userId, beverageId, comment: 'Superbe' })
+  fake.seed('cellar', `${userId}_${beverageId}`, {
     userId,
-    wineId,
+    beverageId,
     row: 2,
     col: 3,
     createdAt: new Date('2026-01-15'),
@@ -59,7 +59,7 @@ const seedSatellites = (wineId: string) => {
 
 const detailQuery = (id: string) => `
   query {
-    wine(id: "${id}") {
+    beverage(id: "${id}") {
       id
       name
       cellar { row col rowLabel colLabel }
@@ -78,9 +78,9 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    expect(result.data?.wine).toEqual({
+    expect(result.data?.beverage).toEqual({
       id: wid(1),
-      name: `Wine ${wid(1)}`,
+      name: `Beverage ${wid(1)}`,
       cellar: { row: 2, col: 3, rowLabel: 'C', colLabel: 4 },
       consumption: { rating: 4, favorite: true },
       gift: { given: { recipientName: 'Alice' } },
@@ -101,7 +101,7 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    // 1 wine + 4 satellites, each a keyed get on doc `${userId}_${wineId}`
+    // 1 wine + 4 satellites, each a keyed get on doc `${userId}_${beverageId}`
     expect(fake.docReads - before.docReads).toBe(5)
     expect(fake.queryReads - before.queryReads).toBe(0)
   })
@@ -113,9 +113,9 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    expect(result.data?.wine).toEqual({
+    expect(result.data?.beverage).toEqual({
       id: wid(1),
-      name: `Wine ${wid(1)}`,
+      name: `Beverage ${wid(1)}`,
       cellar: null,
       consumption: null,
       gift: null,
@@ -126,10 +126,10 @@ describe('wine(id) detail query', () => {
   })
 
   test('returns null for a wine owned by another user', async () => {
-    fake.seed('wines', wid(1), {
+    fake.seed('beverages', wid(1), {
       id: wid(1),
       userId: 'someone-else',
-      name: `Wine ${wid(1)}`,
+      name: `Beverage ${wid(1)}`,
       beverageType: 'wine',
       createdAt: new Date('2026-01-01'),
       updatedAt: new Date('2026-01-01'),
@@ -138,7 +138,7 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    expect(result.data?.wine).toBeNull()
+    expect(result.data?.beverage).toBeNull()
   })
 })
 
@@ -151,7 +151,7 @@ describe('wines list query', () => {
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     const result = await execute(`
       query {
-        wines(limit: 10) {
+        beverages(limit: 10) {
           items {
             id
             cellar { row col }
@@ -164,8 +164,9 @@ describe('wines list query', () => {
     `)
 
     expect(result.errors).toBeUndefined()
-    const items = (result.data?.wines as { items: Array<{ id: string } & Record<string, unknown>> })
-      .items
+    const items = (
+      result.data?.beverages as { items: Array<{ id: string } & Record<string, unknown>> }
+    ).items
     expect(items).toHaveLength(2)
     const byId = new Map(items.map((item) => [item.id, item]))
     expect(byId.get(wid(1))).toEqual({
@@ -194,7 +195,7 @@ describe('wines list query', () => {
       seedWine(wid(i))
       fake.seed('journal', `entry-${i}`, {
         userId,
-        wineId: wid(i),
+        beverageId: wid(i),
         type: 'in',
         row: 0,
         col: i - 1,
@@ -205,14 +206,14 @@ describe('wines list query', () => {
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     const result = await execute(`
       query {
-        wines(limit: 10) {
+        beverages(limit: 10) {
           items { id history { type position } }
         }
       }
     `)
 
     expect(result.errors).toBeUndefined()
-    const items = (result.data?.wines as { items: Array<{ history: unknown[] }> }).items
+    const items = (result.data?.beverages as { items: Array<{ history: unknown[] }> }).items
     expect(items).toHaveLength(5)
     for (const item of items) expect(item.history).toHaveLength(1)
     // 1 page query + 1 batched `in` query over the 5 wine ids — never 5 queries.

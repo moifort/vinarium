@@ -121,7 +121,7 @@ describe('architecture', () => {
     const targets = glob('server/domain/*/{query,command,business-rules}.ts')
     // Exported names must carry intent, never a getX/computeX/handleX scaffold.
     // Reads read as `all`, `byId`, `view`, `placements`; writes as the business
-    // action (`placeWine`, `giveTo`). `findAll`/`findBy` stay (repository idiom).
+    // action (`placeBeverage`, `giveTo`). `findAll`/`findBy` stay (repository idiom).
     const bannedPrefixes = /export const (get|compute|handle|process|manage|perform|fetch)[A-Z]/
 
     for (const file of targets) {
@@ -191,8 +191,8 @@ describe('architecture', () => {
 
     // Known exceptions: data integrity checks where referenced entity is missing
     const allowedThrowPatterns: Record<string, RegExp[]> = {
-      'server/domain/cellar/query.ts': [/Wine .+ not found for bottle at/],
-      'server/domain/journal/query.ts': [/Wine not found:/],
+      'server/domain/cellar/query.ts': [/Beverage .+ not found for bottle at/],
+      'server/domain/journal/query.ts': [/Beverage not found:/],
     }
 
     for (const file of targets) {

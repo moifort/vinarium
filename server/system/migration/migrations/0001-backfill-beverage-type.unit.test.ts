@@ -53,7 +53,7 @@ describe('migration 0001 backfill-beverage-type', () => {
 
   test('splits writes into several batches beyond the Firestore 500-op limit', async () => {
     for (let i = 0; i < 501; i++) {
-      fake.seed('wines', `w${i}`, { name: `Wine ${i}` })
+      fake.seed('wines', `w${i}`, { name: `Beverage ${i}` })
     }
 
     const result = await migration0001.migrate({ db: fake.db })

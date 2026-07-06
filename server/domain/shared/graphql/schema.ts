@@ -7,32 +7,32 @@ import './scalars'
 // owns enums.ts, types.ts, inputs.ts, queries.ts, mutations.ts under its
 // infrastructure/graphql/ directory, mirroring the bazar layout.
 
-// Wine domain
-import '~/domain/wine/infrastructure/graphql/enums'
-import '~/domain/wine/infrastructure/graphql/types'
-import '~/domain/wine/infrastructure/graphql/inputs'
-import '~/domain/wine/infrastructure/graphql/queries'
-import '~/domain/wine/infrastructure/graphql/mutations'
+// Beverage domain
+import '~/domain/beverage/infrastructure/graphql/enums'
+import '~/domain/beverage/infrastructure/graphql/types'
+import '~/domain/beverage/infrastructure/graphql/inputs'
+import '~/domain/beverage/infrastructure/graphql/queries'
+import '~/domain/beverage/infrastructure/graphql/mutations'
 
-// Cellar domain (extends WineType with .cellar field)
+// Cellar domain (extends BeverageType with .cellar field)
 import '~/domain/cellar/infrastructure/graphql/types'
 import '~/domain/cellar/infrastructure/graphql/inputs'
 import '~/domain/cellar/infrastructure/graphql/queries'
 import '~/domain/cellar/infrastructure/graphql/mutations'
 
-// Journal domain (extends WineType with .history field)
+// Journal domain (extends BeverageType with .history field)
 import '~/domain/journal/infrastructure/graphql/types'
 import '~/domain/journal/infrastructure/graphql/queries'
 
-// Tasting domain (extends WineType with .consumption field)
+// Tasting domain (extends BeverageType with .consumption field)
 import '~/domain/tasting/infrastructure/graphql/types'
 import '~/domain/tasting/infrastructure/graphql/inputs'
 import '~/domain/tasting/infrastructure/graphql/mutations'
 
-// Gift domain (extends WineType with .gift field)
+// Gift domain (extends BeverageType with .gift field)
 import '~/domain/gift/infrastructure/graphql/types'
 
-// Recommendation domain (extends WineType with .recommendation field)
+// Recommendation domain (extends BeverageType with .recommendation field)
 import '~/domain/recommendation/infrastructure/graphql/types'
 import '~/domain/recommendation/infrastructure/graphql/inputs'
 import '~/domain/recommendation/infrastructure/graphql/mutations'
@@ -41,7 +41,7 @@ import '~/domain/recommendation/infrastructure/graphql/mutations'
 import '~/domain/dashboard/infrastructure/graphql/types'
 import '~/domain/dashboard/infrastructure/graphql/queries'
 
-// Search domain (read-only, reuses WineType imported above)
+// Search domain (read-only, reuses BeverageType imported above)
 import '~/domain/search/infrastructure/graphql/enums'
 import '~/domain/search/infrastructure/graphql/inputs'
 import '~/domain/search/infrastructure/graphql/types'

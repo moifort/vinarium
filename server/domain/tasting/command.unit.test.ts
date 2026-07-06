@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import type { Rating } from '~/domain/tasting/types'
-import type { WineId } from '~/domain/wine/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -9,7 +9,7 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 const { TastingCommand } = await import('~/domain/tasting/command')
 
 const userId = 'user-1' as UserId
-const wineId = 'w1' as WineId
+const beverageId = 'w1' as BeverageId
 const rating = (value: number) => value as Rating
 
 let fake = resetFakeFirestore()
@@ -20,11 +20,11 @@ beforeEach(() => {
 
 describe('TastingCommand.create (merge-upsert)', () => {
   test('preserves an existing favorite when later recording a consumption', async () => {
-    fake.seed('tasting', `${userId}_w1`, { userId, wineId, favorite: true })
+    fake.seed('tasting', `${userId}_w1`, { userId, beverageId, favorite: true })
 
     await TastingCommand.create({
       userId,
-      wineId,
+      beverageId,
       rating: rating(4),
       tastingNotes: 'Belle robe',
     })
@@ -38,12 +38,12 @@ describe('TastingCommand.create (merge-upsert)', () => {
   test('preserves an existing rating and notes when only the favorite flag is provided', async () => {
     fake.seed('tasting', `${userId}_w1`, {
       userId,
-      wineId,
+      beverageId,
       rating: rating(4),
       tastingNotes: 'Épicé',
     })
 
-    await TastingCommand.create({ userId, wineId, favorite: true })
+    await TastingCommand.create({ userId, beverageId, favorite: true })
 
     const saved = fake.snapshot('tasting').get(`${userId}_w1`)
     expect(saved?.favorite).toBe(true)
@@ -52,18 +52,23 @@ describe('TastingCommand.create (merge-upsert)', () => {
   })
 
   test('saves a fresh note when none exists', async () => {
-    await TastingCommand.create({ userId, wineId, rating: rating(5) })
+    await TastingCommand.create({ userId, beverageId, rating: rating(5) })
 
     const saved = fake.snapshot('tasting').get(`${userId}_w1`)
-    expect(saved).toEqual({ userId, wineId, rating: 5 })
+    expect(saved).toEqual({ userId, beverageId, rating: 5 })
   })
 })
 
 describe('TastingCommand.setFavorite', () => {
   test('sets the flag while keeping the existing rating and notes', async () => {
-    fake.seed('tasting', `${userId}_w1`, { userId, wineId, rating: rating(3), tastingNotes: 'Vif' })
+    fake.seed('tasting', `${userId}_w1`, {
+      userId,
+      beverageId,
+      rating: rating(3),
+      tastingNotes: 'Vif',
+    })
 
-    await TastingCommand.setFavorite(userId, wineId, true)
+    await TastingCommand.setFavorite(userId, beverageId, true)
 
     const saved = fake.snapshot('tasting').get(`${userId}_w1`)
     expect(saved?.favorite).toBe(true)
@@ -72,11 +77,11 @@ describe('TastingCommand.setFavorite', () => {
   })
 
   test('creates a favorite-only note when none exists', async () => {
-    await TastingCommand.setFavorite(userId, wineId, true)
+    await TastingCommand.setFavorite(userId, beverageId, true)
 
     expect(fake.snapshot('tasting').get(`${userId}_w1`)).toEqual({
       userId,
-      wineId,
+      beverageId,
       favorite: true,
     })
   })
@@ -84,12 +89,12 @@ describe('TastingCommand.setFavorite', () => {
   test('clears the flag without dropping the rest of the note', async () => {
     fake.seed('tasting', `${userId}_w1`, {
       userId,
-      wineId,
+      beverageId,
       favorite: true,
       rating: rating(5),
     })
 
-    await TastingCommand.setFavorite(userId, wineId, false)
+    await TastingCommand.setFavorite(userId, beverageId, false)
 
     const saved = fake.snapshot('tasting').get(`${userId}_w1`)
     expect(saved?.favorite).toBe(false)

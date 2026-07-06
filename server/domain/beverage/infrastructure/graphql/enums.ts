@@ -1,7 +1,7 @@
 import { builder } from '~/domain/shared/graphql/builder'
 
 export const WineColorEnum = builder.enumType('WineColor', {
-  description: 'Wine color category',
+  description: 'Beverage color category',
   values: {
     RED: { value: 'red' },
     WHITE: { value: 'white' },
@@ -62,8 +62,8 @@ export const BeverageTypeEnum = builder.enumType('BeverageType', {
   } as const,
 })
 
-export const WineSortEnum = builder.enumType('WineSort', {
-  description: 'Field used to sort the wine list',
+export const BeverageSortEnum = builder.enumType('BeverageSort', {
+  description: 'Field used to sort the beverage list',
   values: {
     CREATED_AT: { value: 'createdAt' },
     UPDATED_AT: { value: 'updatedAt' },
@@ -82,8 +82,8 @@ export const SortOrderEnum = builder.enumType('SortOrder', {
   } as const,
 })
 
-export const WineListModeEnum = builder.enumType('WineListMode', {
-  description: 'Which view of the wine list to page through',
+export const BeverageListModeEnum = builder.enumType('BeverageListMode', {
+  description: 'Which view of the beverage list to page through',
   values: {
     ALL: { value: 'all' },
     FAVORITES: { value: 'favorites' },
@@ -92,8 +92,8 @@ export const WineListModeEnum = builder.enumType('WineListMode', {
   } as const,
 })
 
-export const WineStatusFilterEnum = builder.enumType('WineStatusFilter', {
-  description: 'Optional lifecycle filter applied to the wine list',
+export const BeverageStatusFilterEnum = builder.enumType('BeverageStatusFilter', {
+  description: 'Optional lifecycle filter applied to the beverage list',
   values: {
     ALL: { value: 'all' },
     IN_CELLAR: { value: 'in-cellar' },
@@ -101,8 +101,8 @@ export const WineStatusFilterEnum = builder.enumType('WineStatusFilter', {
   } as const,
 })
 
-export const WineStatusEnum = builder.enumType('WineStatus', {
-  description: 'Lifecycle status of a wine',
+export const BeverageStatusEnum = builder.enumType('BeverageStatus', {
+  description: 'Lifecycle status of a beverage',
   values: {
     IN_CELLAR: { value: 'in-cellar' },
     CONSUMED: { value: 'consumed' },

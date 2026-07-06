@@ -1,4 +1,4 @@
-import { subtypeFromLegacy } from '~/domain/wine/legacy-mapping'
+import { subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
 import { MigrationName, MigrationVersion } from '~/system/migration/primitives'
 import type { Migration } from '~/system/migration/types'
 

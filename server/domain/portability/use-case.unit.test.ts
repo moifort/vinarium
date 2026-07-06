@@ -16,10 +16,10 @@ beforeEach(() => {
 })
 
 const seedWine = (id: string) =>
-  fake.seed('wines', id, {
+  fake.seed('beverages', id, {
     id,
     userId,
-    name: `Wine ${id}`,
+    name: `Beverage ${id}`,
     beverageType: 'wine',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
@@ -30,13 +30,13 @@ describe('PortabilityUseCase.exportAll', () => {
     seedWine(wid(1))
     fake.seed('cellar', `${userId}_${wid(1)}`, {
       userId,
-      wineId: wid(1),
+      beverageId: wid(1),
       row: 0,
       col: 0,
       createdAt: new Date('2026-01-02'),
       updatedAt: new Date('2026-01-02'),
     })
-    fake.seed('tasting', `${userId}_${wid(1)}`, { userId, wineId: wid(1), favorite: true })
+    fake.seed('tasting', `${userId}_${wid(1)}`, { userId, beverageId: wid(1), favorite: true })
 
     const envelope = await PortabilityUseCase.exportAll(userId)
 
@@ -69,7 +69,7 @@ describe('PortabilityUseCase.importAll', () => {
         },
       ],
       cellar: [],
-      tasting: [{ userId: 'other-account', wineId: wid(1), favorite: true }],
+      tasting: [{ userId: 'other-account', beverageId: wid(1), favorite: true }],
       recommendation: [],
       gift: [],
       journal: [],
@@ -85,7 +85,7 @@ describe('PortabilityUseCase.importAll', () => {
       gift: 0,
       journal: 0,
     })
-    const wines = fake.snapshot('wines')
+    const wines = fake.snapshot('beverages')
     expect(wines.has(wid(99))).toBe(false) // old data wiped
     expect(wines.get(wid(1))?.userId).toBe(userId) // re-stamped to the importer
     expect(fake.snapshot('tasting').get(`${userId}_${wid(1)}`)?.userId).toBe(userId)

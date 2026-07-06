@@ -13,12 +13,14 @@ builder.mutationField('placeBottle', (t) =>
     type: CellarBottleType,
     description: 'Place a wine in the cellar grid',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       row: t.arg.int({ required: true }),
       col: t.arg.int({ required: true }),
     },
-    resolve: async (_root, { wineId, row, col }, { userId }) =>
-      bottleView(await CellarCommand.placeWine(userId, wineId, CellarRow(row), CellarCol(col))),
+    resolve: async (_root, { beverageId, row, col }, { userId }) =>
+      bottleView(
+        await CellarCommand.placeBeverage(userId, beverageId, CellarRow(row), CellarCol(col)),
+      ),
   }),
 )
 
@@ -27,14 +29,19 @@ builder.mutationField('moveBottle', (t) =>
     type: CellarBottleType,
     description: 'Move a bottle to a different position in the cellar',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       row: t.arg.int({ required: true }),
       col: t.arg.int({ required: true }),
     },
-    resolve: async (_root, { wineId, row, col }, { userId }) => {
-      const result = await CellarCommand.moveBottle(userId, wineId, CellarRow(row), CellarCol(col))
+    resolve: async (_root, { beverageId, row, col }, { userId }) => {
+      const result = await CellarCommand.moveBottle(
+        userId,
+        beverageId,
+        CellarRow(row),
+        CellarCol(col),
+      )
       if (result === 'not-in-cellar')
-        throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })
+        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
       return bottleView(result)
     },
   }),
@@ -45,16 +52,16 @@ builder.mutationField('consumeBottle', (t) =>
     type: 'Boolean',
     description: 'Remove a bottle from the cellar and record consumption (tasting note)',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       input: t.arg({ type: ConsumptionInput, required: true }),
     },
-    resolve: async (_root, { wineId, input }, { userId }) => {
-      const result = await CellarUseCase.removeBottle(userId, wineId, {
+    resolve: async (_root, { beverageId, input }, { userId }) => {
+      const result = await CellarUseCase.removeBottle(userId, beverageId, {
         type: 'tasting',
         ...stripNulls(input),
       })
       if (result === 'not-in-cellar')
-        throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })
+        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
       return true
     },
   }),
@@ -65,17 +72,17 @@ builder.mutationField('giftBottle', (t) =>
     type: 'Boolean',
     description: 'Remove a bottle from the cellar and record it as a gift',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       input: t.arg({ type: GiftInput, required: true }),
     },
-    resolve: async (_root, { wineId, input }, { userId }) => {
+    resolve: async (_root, { beverageId, input }, { userId }) => {
       const { giftedDate, recipientName } = stripNulls(input)
-      const result = await CellarUseCase.removeBottle(userId, wineId, {
+      const result = await CellarUseCase.removeBottle(userId, beverageId, {
         type: 'gift',
         given: { date: giftedDate, ...(recipientName && { recipientName }) },
       })
       if (result === 'not-in-cellar')
-        throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })
+        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
       return true
     },
   }),
@@ -85,11 +92,11 @@ builder.mutationField('removeBottle', (t) =>
   t.field({
     type: 'Boolean',
     description: 'Remove a bottle from the cellar without recording why',
-    args: { wineId: t.arg({ type: 'WineId', required: true }) },
-    resolve: async (_root, { wineId }, { userId }) => {
-      const result = await CellarUseCase.removeBottle(userId, wineId)
+    args: { beverageId: t.arg({ type: 'BeverageId', required: true }) },
+    resolve: async (_root, { beverageId }, { userId }) => {
+      const result = await CellarUseCase.removeBottle(userId, beverageId)
       if (result === 'not-in-cellar')
-        throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })
+        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
       return true
     },
   }),

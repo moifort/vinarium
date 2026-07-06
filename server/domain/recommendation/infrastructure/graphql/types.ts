@@ -1,5 +1,5 @@
+import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import { WineType } from '~/domain/wine/infrastructure/graphql/types'
 import type { Recommendation } from '../../types'
 
 export const RecommendationType = builder.objectRef<Recommendation>('Recommendation').implement({
@@ -10,7 +10,7 @@ export const RecommendationType = builder.objectRef<Recommendation>('Recommendat
   }),
 })
 
-builder.objectField(WineType, 'recommendation', (t) =>
+builder.objectField(BeverageType, 'recommendation', (t) =>
   t.field({
     type: RecommendationType,
     nullable: true,

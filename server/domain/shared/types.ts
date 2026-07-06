@@ -11,3 +11,4 @@ export type PersonName = Brand<string, 'PersonName'>
 export type Latitude = Brand<number, 'Latitude'>
 export type Longitude = Brand<number, 'Longitude'>
 export type PlaceName = Brand<string, 'PlaceName'>
+export type Percentage = Brand<number, 'Percentage'>

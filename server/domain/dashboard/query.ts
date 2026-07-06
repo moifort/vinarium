@@ -1,17 +1,18 @@
 import { keyBy, sortBy } from 'lodash-es'
+import {
+  isFavorite,
+  readyToDrink as isReadyToDrink,
+  urgentToDrink,
+  wineDetails,
+} from '~/domain/beverage/business-rules'
+import { BeverageQuery } from '~/domain/beverage/query'
+import type { Beverage } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottleWithWine } from '~/domain/cellar/types'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
-import {
-  isFavorite,
-  readyToDrink as isReadyToDrink,
-  urgentToDrink,
-} from '~/domain/wine/business-rules'
-import { WineQuery } from '~/domain/wine/query'
-import type { Wine } from '~/domain/wine/types'
 import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from './types'
 
 // Dashboard sections are a glanceable preview, not a full list — cap each one.
@@ -24,18 +25,18 @@ export namespace DashboardQuery {
       CellarQuery.bottlesWithWine(userId),
       JournalQuery.all(userId),
       TastingQuery.all(userId),
-      WineQuery.findAll(userId),
+      BeverageQuery.findAll(userId),
     ])
 
     const currentYear = new Date().getFullYear()
-    const wineMap = keyBy(wines, 'id')
+    const beverageMap = keyBy(wines, 'id')
 
     const bottleCount = allBottles.length
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchase?.price ?? 0), 0)
 
     const readyToDrink = sortBy(
       allBottles
-        .filter((b) => isReadyToDrink(b.wine.drinkWindow ?? {}, currentYear))
+        .filter((b) => isReadyToDrink(wineDetails(b.wine)?.drinkWindow ?? {}, currentYear))
         .map((b) => toReadyToDrinkWine(b, currentYear)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Number.POSITIVE_INFINITY,
@@ -46,7 +47,7 @@ export namespace DashboardQuery {
 
     const lastExit = history.find((event) => event.type === 'out')
 
-    const favorites = loadFavorites(allTastings.filter(isFavorite), wineMap).slice(
+    const favorites = loadFavorites(allTastings.filter(isFavorite), beverageMap).slice(
       0,
       DASHBOARD_SECTION_LIMIT,
     )
@@ -65,42 +66,50 @@ export namespace DashboardQuery {
   const toReadyToDrinkWine = (
     bottle: CellarBottleWithWine,
     currentYear: number,
-  ): ReadyToDrinkWine => ({
-    id: bottle.wine.id,
-    name: bottle.wine.name,
-    beverageType: bottle.wine.beverageType,
-    color: bottle.wine.color,
-    position: `${bottle.rowLabel}${bottle.colLabel}`,
-    urgent: urgentToDrink(bottle.wine.drinkWindow ?? {}, currentYear),
-    drinkUntil: bottle.wine.drinkWindow?.until,
-  })
+  ): ReadyToDrinkWine => {
+    const details = wineDetails(bottle.wine)
+    return {
+      id: bottle.wine.id,
+      name: bottle.wine.name,
+      beverageType: bottle.wine.beverageType,
+      color: details?.color,
+      position: `${bottle.rowLabel}${bottle.colLabel}`,
+      urgent: urgentToDrink(details?.drinkWindow ?? {}, currentYear),
+      drinkUntil: details?.drinkWindow?.until,
+    }
+  }
 
   const toLastBottle = (bottle?: CellarBottleWithWine): LastBottle | undefined => {
     if (!bottle) return undefined
+    const details = wineDetails(bottle.wine)
     return {
       wine: {
         id: bottle.wine.id,
         name: bottle.wine.name,
         beverageType: bottle.wine.beverageType,
-        color: bottle.wine.color,
-        vintage: bottle.wine.vintage,
+        color: details?.color,
+        vintage: details?.vintage,
       },
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       date: bottle.createdAt,
     }
   }
 
-  const loadFavorites = (tastings: TastingNote[], wineMap: Record<string, Wine>): FavoriteWine[] =>
+  const loadFavorites = (
+    tastings: TastingNote[],
+    beverageMap: Record<string, Beverage>,
+  ): FavoriteWine[] =>
     tastings
       .map((tasting): FavoriteWine | undefined => {
-        const wine = wineMap[tasting.wineId]
+        const wine = beverageMap[tasting.beverageId]
         if (!wine) return undefined
+        const details = wineDetails(wine)
         return {
           id: wine.id,
           name: wine.name,
           beverageType: wine.beverageType,
-          color: wine.color,
-          vintage: wine.vintage,
+          color: details?.color,
+          vintage: details?.vintage,
           estimatedPrice: wine.purchase?.price,
           tastingDate: tasting.consumedDate,
           rating: tasting.rating,

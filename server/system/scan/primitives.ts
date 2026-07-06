@@ -1,8 +1,8 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
-import { retainedSubtype } from '~/domain/wine/business-rules'
-import { pureColor, subtypeFromLegacy } from '~/domain/wine/legacy-mapping'
-import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
+import { retainedSubtype } from '~/domain/beverage/business-rules'
+import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
+import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
 
 export const ImageHash = (value: unknown) => {

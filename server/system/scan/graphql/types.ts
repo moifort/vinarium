@@ -1,9 +1,9 @@
-import { builder } from '~/domain/shared/graphql/builder'
 import {
   BeverageSubtypeEnum,
   BeverageTypeEnum,
   WineColorEnum,
-} from '~/domain/wine/infrastructure/graphql/enums'
+} from '~/domain/beverage/infrastructure/graphql/enums'
+import { builder } from '~/domain/shared/graphql/builder'
 import type { ScanResult } from '../types'
 
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({

@@ -1,8 +1,8 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import { chunk } from 'lodash-es'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { JournalEntry } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
 import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
@@ -24,15 +24,21 @@ const IN_QUERY_LIMIT = 30
 // per 30 wines instead of one per wine. Unordered: callers sort per wine (equality
 // + `in` needs no composite index). When the full scan already ran in this
 // request, reuse it: zero extra reads.
-export const findByWineIds = async (userId: UserId, wineIds: WineId[]): Promise<JournalEntry[]> => {
-  if (wineIds.length === 0) return []
+export const findByBeverageIds = async (
+  userId: UserId,
+  beverageIds: BeverageId[],
+): Promise<JournalEntry[]> => {
+  if (beverageIds.length === 0) return []
   if (isInRequestCache(allCacheKey(userId))) {
-    const wanted = new Set(wineIds)
-    return (await findAllByUser(userId)).filter((entry) => wanted.has(entry.wineId))
+    const wanted = new Set(beverageIds)
+    return (await findAllByUser(userId)).filter((entry) => wanted.has(entry.beverageId))
   }
   const slices = await Promise.all(
-    chunk(wineIds, IN_QUERY_LIMIT).map(async (slice) => {
-      const snap = await journal().where('userId', '==', userId).where('wineId', 'in', slice).get()
+    chunk(beverageIds, IN_QUERY_LIMIT).map(async (slice) => {
+      const snap = await journal()
+        .where('userId', '==', userId)
+        .where('beverageId', 'in', slice)
+        .get()
       return snap.docs.map((doc) => doc.data())
     }),
   )
@@ -56,12 +62,15 @@ export const findPage = async (
   return { entries: hasMore ? entries.slice(0, limit) : entries, hasMore }
 }
 
-export const removeByWineId = async (
+export const removeByBeverageId = async (
   userId: UserId,
-  wineId: WineId,
+  beverageId: BeverageId,
   batch?: WriteBatch,
 ): Promise<void> => {
-  const snap = await journal().where('userId', '==', userId).where('wineId', '==', wineId).get()
+  const snap = await journal()
+    .where('userId', '==', userId)
+    .where('beverageId', '==', beverageId)
+    .get()
   // A wine's journal holds a handful of in/out movements — far below the
   // 500-writes Firestore batch cap, so enlisting them all in one batch is safe.
   const target = batch ?? db().batch()

@@ -1,10 +1,21 @@
 import { GraphQLError } from 'graphql'
 import { ZodError } from 'zod'
 import {
+  Appellation,
+  BeverageId,
+  BeverageName,
+  Celsius,
+  Classification,
+  GrapeVariety,
+  Notes,
+  Producer,
+} from '~/domain/beverage/primitives'
+import {
   Country,
   Eur,
   Latitude,
   Longitude,
+  Percentage,
   PersonName,
   PlaceName,
   Region,
@@ -12,7 +23,6 @@ import {
   Year,
 } from '~/domain/shared/primitives'
 import { Rating } from '~/domain/tasting/primitives'
-import { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/primitives'
 import { builder } from './builder'
 
 const validatedParse =
@@ -37,34 +47,52 @@ builder.scalarType('UserId', {
   parseValue: validatedParse('UserId', UserId),
 })
 
-builder.scalarType('WineId', {
-  description: 'Wine unique identifier (UUID v4)',
+builder.scalarType('BeverageId', {
+  description: 'Beverage unique identifier (UUID v4)',
   serialize: (value) => value as string,
-  parseValue: validatedParse('WineId', WineId),
+  parseValue: validatedParse('BeverageId', BeverageId),
 })
 
-builder.scalarType('WineName', {
-  description: 'Wine display name (non-empty)',
+builder.scalarType('BeverageName', {
+  description: 'Beverage display name (non-empty)',
   serialize: (value) => value as string,
-  parseValue: validatedParse('WineName', WineName),
+  parseValue: validatedParse('BeverageName', BeverageName),
 })
 
-builder.scalarType('WineDomain', {
-  description: 'Wine producer / château / domain',
+builder.scalarType('Producer', {
+  description: 'Beverage producer / château / domaine / distillery / brewery',
   serialize: (value) => value as string,
-  parseValue: validatedParse('WineDomain', WineDomain),
+  parseValue: validatedParse('Producer', Producer),
+})
+
+builder.scalarType('Notes', {
+  description: 'Free-form tasting notes',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('Notes', Notes),
 })
 
 builder.scalarType('Appellation', {
-  description: 'Wine appellation (AOC / AOP / DOC ...)',
+  description: 'Beverage appellation (AOC / AOP / DOC ...)',
   serialize: (value) => value as string,
   parseValue: validatedParse('Appellation', Appellation),
 })
 
 builder.scalarType('Classification', {
-  description: 'Wine classification (Grand Cru, Premier Cru ...)',
+  description: 'Beverage classification (Grand Cru, Premier Cru ...)',
   serialize: (value) => value as string,
   parseValue: validatedParse('Classification', Classification),
+})
+
+builder.scalarType('GrapeVariety', {
+  description: 'A grape variety (cépage)',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('GrapeVariety', GrapeVariety),
+})
+
+builder.scalarType('Celsius', {
+  description: 'A temperature in degrees Celsius',
+  serialize: (value) => value as number,
+  parseValue: validatedParse('Celsius', Celsius),
 })
 
 builder.scalarType('Country', {
@@ -74,7 +102,7 @@ builder.scalarType('Country', {
 })
 
 builder.scalarType('Region', {
-  description: 'Wine region (e.g. Bordeaux, Bourgogne)',
+  description: 'Beverage region (e.g. Bordeaux, Bourgogne)',
   serialize: (value) => value as string,
   parseValue: validatedParse('Region', Region),
 })
@@ -101,6 +129,12 @@ builder.scalarType('Eur', {
   description: 'Euro amount (non-negative)',
   serialize: (value) => value as number,
   parseValue: validatedParse('Eur', Eur),
+})
+
+builder.scalarType('Percentage', {
+  description: 'A percentage (0..100)',
+  serialize: (value) => value as number,
+  parseValue: validatedParse('Percentage', Percentage),
 })
 
 builder.scalarType('Latitude', {

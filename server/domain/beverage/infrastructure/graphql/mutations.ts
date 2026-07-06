@@ -1,0 +1,138 @@
+import { GraphQLError } from 'graphql'
+import { builder } from '~/domain/shared/graphql/builder'
+import { stripNulls } from '~/utils/input'
+import type { BeverageData, WineDetails } from '../../types'
+import { BeverageUseCase } from '../../use-case'
+import { AddBeverageInput, UpdateBeverageInput } from './inputs'
+import { BeverageType } from './types'
+
+// Drop null/undefined entries; return undefined if nothing survives — so an
+// all-empty sub-object never reaches Firestore (which rejects undefined values).
+const compact = <T extends Record<string, unknown>>(obj: T): T | undefined => {
+  const cleaned = Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined && value !== null),
+  ) as T
+  return Object.keys(cleaned).length > 0 ? cleaned : undefined
+}
+
+// The flat input carries wine/purchase/place fields at the top level; the write
+// model nests them. A wine's details are only meaningful for a wine, but harmless
+// to pass otherwise (the command drops them for non-wine types).
+type BeverageFlatInput = {
+  color?: unknown
+  vintage?: unknown
+  appellation?: unknown
+  classification?: unknown
+  grapeVarieties?: unknown
+  servingTemperature?: unknown
+  drinkFrom?: unknown
+  drinkUntil?: unknown
+  purchasePrice?: unknown
+  purchaseDate?: unknown
+  latitude?: unknown
+  longitude?: unknown
+  placeName?: unknown
+  alcoholContent?: unknown
+  producer?: unknown
+  region?: unknown
+  country?: unknown
+  notes?: unknown
+  subtype?: unknown
+}
+
+const toData = (input: BeverageFlatInput): BeverageData => {
+  const drinkWindow = compact({ from: input.drinkFrom, until: input.drinkUntil })
+  const wine = compact({
+    color: input.color,
+    vintage: input.vintage,
+    appellation: input.appellation,
+    classification: input.classification,
+    grapeVarieties: input.grapeVarieties,
+    drinkWindow,
+    servingTemperature: input.servingTemperature,
+  }) as WineDetails | undefined
+  const purchase = compact({ price: input.purchasePrice, date: input.purchaseDate })
+  const place = compact({
+    latitude: input.latitude,
+    longitude: input.longitude,
+    name: input.placeName,
+  })
+  const base = compact({
+    alcoholContent: input.alcoholContent,
+    producer: input.producer,
+    region: input.region,
+    country: input.country,
+    notes: input.notes,
+  })
+  return {
+    ...(base ?? {}),
+    ...(input.subtype !== undefined ? { subtype: input.subtype } : {}),
+    ...(purchase ? { purchase } : {}),
+    ...(place ? { place } : {}),
+    ...(wine ? { wine } : {}),
+  } as BeverageData
+}
+
+const colorRequired = () =>
+  new GraphQLError('A wine requires a color', { extensions: { code: 'BAD_USER_INPUT' } })
+const subtypeInvalid = () =>
+  new GraphQLError('This subtype does not fit the beverage type', {
+    extensions: { code: 'BAD_USER_INPUT' },
+  })
+
+builder.mutationField('addBeverage', (t) =>
+  t.field({
+    type: BeverageType,
+    description: 'Add a new beverage to the catalog',
+    args: { input: t.arg({ type: AddBeverageInput, required: true }) },
+    resolve: async (_root, { input }, { userId }) => {
+      const clean = stripNulls(input)
+      const result = await BeverageUseCase.add(
+        userId,
+        clean.name,
+        clean.beverageType ?? 'wine',
+        toData(clean),
+        clean.giftedBy,
+      )
+      if (result === 'color-required') throw colorRequired()
+      if (result === 'subtype-invalid') throw subtypeInvalid()
+      return result
+    },
+  }),
+)
+
+builder.mutationField('updateBeverage', (t) =>
+  t.field({
+    type: BeverageType,
+    description: 'Update an existing beverage',
+    args: {
+      id: t.arg({ type: 'BeverageId', required: true }),
+      input: t.arg({ type: UpdateBeverageInput, required: true }),
+    },
+    resolve: async (_root, { id, input }, { userId }) => {
+      const clean = stripNulls(input)
+      const data = { ...toData(clean), name: clean.name, beverageType: clean.beverageType }
+      const result = await BeverageUseCase.update(userId, id, data, clean.giftedBy)
+      if (result === 'not-found')
+        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
+      if (result === 'color-required') throw colorRequired()
+      if (result === 'subtype-invalid') throw subtypeInvalid()
+      return result
+    },
+  }),
+)
+
+builder.mutationField('deleteBeverage', (t) =>
+  t.field({
+    type: 'Boolean',
+    description:
+      'Delete a beverage and all related data (cellar, tasting, gift, recommendation, journal)',
+    args: { id: t.arg({ type: 'BeverageId', required: true }) },
+    resolve: async (_root, { id }, { userId }) => {
+      const result = await BeverageUseCase.removeCompletely(userId, id)
+      if (result === 'not-found')
+        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
+      return true
+    },
+  }),
+)

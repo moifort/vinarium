@@ -1,5 +1,5 @@
 import type { Recommendation } from '~/domain/recommendation/types'
-import { userWineRecordRepository } from '~/utils/firestore'
+import { userBeverageRecordRepository } from '~/utils/firestore'
 
-export const { findAllByUser, findBy, findManyByWineIds, save, remove, removeAllByUser } =
-  userWineRecordRepository<Recommendation>('recommendation')
+export const { findAllByUser, findBy, findManyByBeverageIds, save, remove, removeAllByUser } =
+  userBeverageRecordRepository<Recommendation>('recommendation')

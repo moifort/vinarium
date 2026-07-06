@@ -1,12 +1,12 @@
+import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructure/graphql/enums'
 import { JournalEventType } from '~/domain/journal/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import { BeverageTypeEnum, WineColorEnum } from '~/domain/wine/infrastructure/graphql/enums'
 import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from '../../types'
 
 const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').implement({
   fields: (t) => ({
-    id: t.expose('id', { type: 'WineId' }),
-    name: t.expose('name', { type: 'WineName' }),
+    id: t.expose('id', { type: 'BeverageId' }),
+    name: t.expose('name', { type: 'BeverageName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
     vintage: t.expose('vintage', { type: 'Year', nullable: true }),
@@ -18,8 +18,8 @@ const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').impleme
 
 const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWine').implement({
   fields: (t) => ({
-    id: t.expose('id', { type: 'WineId' }),
-    name: t.expose('name', { type: 'WineName' }),
+    id: t.expose('id', { type: 'BeverageId' }),
+    name: t.expose('name', { type: 'BeverageName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
     position: t.exposeString('position'),
@@ -30,8 +30,8 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
 
 const LastBottleWineType = builder.objectRef<LastBottle['wine']>('LastBottleWine').implement({
   fields: (t) => ({
-    id: t.expose('id', { type: 'WineId' }),
-    name: t.expose('name', { type: 'WineName' }),
+    id: t.expose('id', { type: 'BeverageId' }),
+    name: t.expose('name', { type: 'BeverageName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
     vintage: t.expose('vintage', { type: 'Year', nullable: true }),

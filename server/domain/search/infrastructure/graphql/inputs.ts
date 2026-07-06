@@ -1,9 +1,9 @@
-import { builder } from '~/domain/shared/graphql/builder'
 import {
+  BeverageStatusFilterEnum,
   BeverageTypeEnum,
   WineColorEnum,
-  WineStatusFilterEnum,
-} from '~/domain/wine/infrastructure/graphql/enums'
+} from '~/domain/beverage/infrastructure/graphql/enums'
+import { builder } from '~/domain/shared/graphql/builder'
 
 export const SearchFiltersInput = builder.inputType('SearchFiltersInput', {
   description: 'Facet filters combinable with the text query. Absent facets are not filtered on.',
@@ -15,7 +15,7 @@ export const SearchFiltersInput = builder.inputType('SearchFiltersInput', {
     }),
     favorite: t.boolean({ description: 'Keep only wines flagged as favorite' }),
     status: t.field({
-      type: WineStatusFilterEnum,
+      type: BeverageStatusFilterEnum,
       description: 'Keep only wines in the cellar or already consumed',
     }),
     gifted: t.boolean({ description: 'Keep only wines received or given as a gift' }),

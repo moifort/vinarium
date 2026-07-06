@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
-import { SUBTYPES_BY_BEVERAGE } from '~/domain/wine/business-rules'
-import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
+import { SUBTYPES_BY_BEVERAGE } from '~/domain/beverage/business-rules'
+import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
 import { config } from '~/system/config/index'
 import {
   EnrichSchema,

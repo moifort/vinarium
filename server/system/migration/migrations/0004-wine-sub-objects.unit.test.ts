@@ -61,7 +61,7 @@ describe('migration 0004 wine-sub-objects', () => {
 
   test('splits writes beyond the Firestore 500-op limit', async () => {
     for (let i = 0; i < 501; i++) {
-      fake.seed('wines', `w${i}`, { name: `Wine ${i}`, beverageType: 'wine', drinkFrom: 2030 })
+      fake.seed('wines', `w${i}`, { name: `Beverage ${i}`, beverageType: 'wine', drinkFrom: 2030 })
     }
 
     const result = await migration0004.migrate({ db: fake.db })

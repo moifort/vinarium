@@ -16,7 +16,7 @@ export const migration0005: Migration = {
       db.collection('gift').get(),
     ])
 
-    // The pre-migration gift docs, keyed by their id (`${userId}_${wineId}`).
+    // The pre-migration gift docs, keyed by their id (`${userId}_${beverageId}`).
     const giftById = new Map(giftSnap.docs.map((doc) => [doc.ref.id, doc.data()]))
 
     // Compute the final shape of every touched gift doc in memory first, so the
@@ -44,7 +44,7 @@ export const migration0005: Migration = {
       if (giftedBy == null) continue
       const giftId = `${data.userId}_${data.id}`
       const existing = nextGift.get(giftId)?.data ??
-        giftById.get(giftId) ?? { userId: data.userId, wineId: data.id }
+        giftById.get(giftId) ?? { userId: data.userId, beverageId: data.id }
       const ref = db.collection('gift').doc(giftId)
       nextGift.set(giftId, { ref, data: { ...existing, received: { from: giftedBy } } })
     }

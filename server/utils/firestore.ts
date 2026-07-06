@@ -6,8 +6,8 @@ import type {
   WriteBatch,
 } from 'firebase-admin/firestore'
 import { chunk } from 'lodash-es'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
 import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 
@@ -50,14 +50,14 @@ export const deleteInBatches = async (refs: DocumentReference[]): Promise<void> 
   }
 }
 
-// Repository for collections holding one record per (user, wine) pair, stored
-// under the deterministic doc id `${userId}_${wineId}` — the shared shape of
+// Repository for collections holding one record per (user, beverage) pair, stored
+// under the deterministic doc id `${userId}_${beverageId}` — the shared shape of
 // the tasting/gift/recommendation satellite collections.
-export const userWineRecordRepository = <T extends { userId: UserId; wineId: WineId }>(
+export const userBeverageRecordRepository = <T extends { userId: UserId; beverageId: BeverageId }>(
   collectionName: string,
 ) => {
   const records = () => db().collection(collectionName).withConverter(genericDataConverter<T>())
-  const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
+  const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
   const allCacheKey = (userId: UserId) => `${collectionName}:all:${userId}`
 
   const findAllByUser = (userId: UserId): Promise<T[]> =>
@@ -68,32 +68,32 @@ export const userWineRecordRepository = <T extends { userId: UserId; wineId: Win
 
   return {
     findAllByUser,
-    findBy: async (userId: UserId, wineId: WineId): Promise<T | null> => {
-      const doc = await records().doc(docId(userId, wineId)).get()
+    findBy: async (userId: UserId, beverageId: BeverageId): Promise<T | null> => {
+      const doc = await records().doc(docId(userId, beverageId)).get()
       return doc.data() ?? null
     },
-    // Batch-load the records for a page of wines with a single getAll — one read
-    // per id, no full-collection scan. Missing docs come back undefined. When the
-    // full scan already ran in this request, reuse it: zero extra reads. Safe as
-    // long as no mutation scans then writes this collection then re-resolves a
+    // Batch-load the records for a page of beverages with a single getAll — one
+    // read per id, no full-collection scan. Missing docs come back undefined. When
+    // the full scan already ran in this request, reuse it: zero extra reads. Safe
+    // as long as no mutation scans then writes this collection then re-resolves a
     // satellite in the same request (the read-then-write caveat in request-cache.ts);
     // evictFromRequestCache is the escape hatch if that flow ever appears.
-    findManyByWineIds: async (userId: UserId, wineIds: WineId[]): Promise<T[]> => {
-      if (wineIds.length === 0) return []
+    findManyByBeverageIds: async (userId: UserId, beverageIds: BeverageId[]): Promise<T[]> => {
+      if (beverageIds.length === 0) return []
       if (isInRequestCache(allCacheKey(userId))) {
-        const wanted = new Set(wineIds)
-        return (await findAllByUser(userId)).filter((record) => wanted.has(record.wineId))
+        const wanted = new Set(beverageIds)
+        return (await findAllByUser(userId)).filter((record) => wanted.has(record.beverageId))
       }
-      const refs = wineIds.map((wineId) => records().doc(docId(userId, wineId)))
+      const refs = beverageIds.map((beverageId) => records().doc(docId(userId, beverageId)))
       const snaps = await db().getAll(...refs)
       return snaps.map((snap) => snap.data()).filter((data): data is T => data !== undefined)
     },
     save: async (record: T): Promise<T> => {
-      await records().doc(docId(record.userId, record.wineId)).set(record)
+      await records().doc(docId(record.userId, record.beverageId)).set(record)
       return record
     },
-    remove: async (userId: UserId, wineId: WineId, batch?: WriteBatch): Promise<void> => {
-      const ref = records().doc(docId(userId, wineId))
+    remove: async (userId: UserId, beverageId: BeverageId, batch?: WriteBatch): Promise<void> => {
+      const ref = records().doc(docId(userId, beverageId))
       if (batch) batch.delete(ref)
       else await ref.delete()
     },

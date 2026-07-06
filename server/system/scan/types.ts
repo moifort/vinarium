@@ -1,5 +1,5 @@
 import type { Brand } from 'ts-brand'
-import type { BeverageSubtype, BeverageType, WineColor } from '~/domain/wine/types'
+import type { BeverageSubtype, BeverageType, WineColor } from '~/domain/beverage/types'
 
 export type ImageHash = Brand<string, 'ImageHash'>
 

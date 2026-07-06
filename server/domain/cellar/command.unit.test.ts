@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -11,11 +11,11 @@ const { CellarCommand } = await import('~/domain/cellar/command')
 const userId = 'user-1' as UserId
 const row = (value: number) => value as CellarRow
 const col = (value: number) => value as CellarCol
-const wine = (id: string) => id as WineId
+const wine = (id: string) => id as BeverageId
 
-const bottle = (wineId: string, r: number, c: number): CellarBottle => ({
+const bottle = (beverageId: string, r: number, c: number): CellarBottle => ({
   userId,
-  wineId: wine(wineId),
+  beverageId: wine(beverageId),
   row: row(r),
   col: col(c),
   createdAt: new Date('2026-01-01'),
@@ -52,9 +52,9 @@ describe('CellarCommand.moveBottle', () => {
     const journal = [...fake.snapshot('journal').values()]
     expect(journal).toHaveLength(2)
     const out = journal.find((entry) => entry.type === 'out')
-    expect(out).toMatchObject({ wineId: 'w1', row: 0, col: 0, userId })
+    expect(out).toMatchObject({ beverageId: 'w1', row: 0, col: 0, userId })
     const entryIn = journal.find((entry) => entry.type === 'in')
-    expect(entryIn).toMatchObject({ wineId: 'w1', row: 2, col: 3, userId })
+    expect(entryIn).toMatchObject({ beverageId: 'w1', row: 2, col: 3, userId })
   })
 
   test('swaps with the occupant of the target position in one batch', async () => {
@@ -77,16 +77,16 @@ describe('CellarCommand.moveBottle', () => {
     expect(fake.snapshot('cellar').get(`${userId}_w2`)).toMatchObject({ row: 0, col: 0 })
 
     const journal = [...fake.snapshot('journal').values()]
-    const trail = journal.map(({ type, wineId, row: r, col: c }) => ({
+    const trail = journal.map(({ type, beverageId, row: r, col: c }) => ({
       type,
-      wineId,
+      beverageId,
       row: r,
       col: c,
     }))
-    expect(trail).toContainEqual({ type: 'out', wineId: 'w1', row: 0, col: 0 })
-    expect(trail).toContainEqual({ type: 'in', wineId: 'w1', row: 1, col: 1 })
-    expect(trail).toContainEqual({ type: 'out', wineId: 'w2', row: 1, col: 1 })
-    expect(trail).toContainEqual({ type: 'in', wineId: 'w2', row: 0, col: 0 })
+    expect(trail).toContainEqual({ type: 'out', beverageId: 'w1', row: 0, col: 0 })
+    expect(trail).toContainEqual({ type: 'in', beverageId: 'w1', row: 1, col: 1 })
+    expect(trail).toContainEqual({ type: 'out', beverageId: 'w2', row: 1, col: 1 })
+    expect(trail).toContainEqual({ type: 'in', beverageId: 'w2', row: 0, col: 0 })
     expect(trail).toHaveLength(4)
   })
 
@@ -118,7 +118,7 @@ describe('CellarCommand.moveBottle', () => {
 
     const result = await CellarCommand.moveBottle(userId, wine('w1'), row(2), col(3))
 
-    expect((result as CellarBottle).wineId).toBe(wine('w1'))
+    expect((result as CellarBottle).beverageId).toBe(wine('w1'))
     expect(fake.batches).toHaveLength(0)
     expect(fake.directWrites).toEqual([])
     expect(fake.snapshot('journal').size).toBe(0)

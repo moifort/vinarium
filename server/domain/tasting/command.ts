@@ -1,8 +1,8 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import * as repository from '~/domain/tasting/infrastructure/repository'
 import type { TastingNote } from '~/domain/tasting/types'
-import type { WineId } from '~/domain/wine/types'
 import { bulkSave } from '~/utils/firestore'
 
 export namespace TastingCommand {
@@ -13,19 +13,23 @@ export namespace TastingCommand {
   // only the fields they mean to set (nulls stripped at the API boundary), so
   // the merge preserves everything they leave untouched.
   export const create = async (note: TastingNote) => {
-    const existing = await repository.findBy(note.userId, note.wineId)
+    const existing = await repository.findBy(note.userId, note.beverageId)
     return repository.save(existing ? { ...existing, ...note } : note)
   }
 
   // Toggle the favorite (heart) flag without clobbering an existing note:
   // read-modify-write so the rating and tasting notes survive the toggle.
-  export const setFavorite = async (userId: UserId, wineId: WineId, favorite: boolean) => {
-    const existing = await repository.findBy(userId, wineId)
-    await repository.save({ ...(existing ?? { userId, wineId }), favorite })
+  export const setFavorite = async (userId: UserId, beverageId: BeverageId, favorite: boolean) => {
+    const existing = await repository.findBy(userId, beverageId)
+    await repository.save({ ...(existing ?? { userId, beverageId }), favorite })
   }
 
-  export const removeWine = async (userId: UserId, wineId: WineId, batch?: WriteBatch) => {
-    await repository.remove(userId, wineId, batch)
+  export const removeBeverage = async (
+    userId: UserId,
+    beverageId: BeverageId,
+    batch?: WriteBatch,
+  ) => {
+    await repository.remove(userId, beverageId, batch)
   }
 
   // Wipe the user's tasting notes and restore the given records (account import).

@@ -1,4 +1,7 @@
 import { z } from 'zod'
+import { BeverageCommand } from '~/domain/beverage/command'
+import { BeverageQuery } from '~/domain/beverage/query'
+import type { Beverage } from '~/domain/beverage/types'
 import { CellarCommand } from '~/domain/cellar/command'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottle } from '~/domain/cellar/types'
@@ -20,9 +23,6 @@ import type { UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
-import { WineCommand } from '~/domain/wine/command'
-import { WineQuery } from '~/domain/wine/query'
-import type { Wine } from '~/domain/wine/types'
 
 // Backup/restore orchestrator: it reads and replaces each domain's data through
 // that domain's public Query/Command surface (raw records, no view enrichment) —
@@ -30,7 +30,7 @@ import type { Wine } from '~/domain/wine/types'
 export namespace PortabilityUseCase {
   export const exportAll = async (userId: UserId): Promise<ExportEnvelope> => {
     const [wines, cellar, tasting, recommendation, gift, journal] = await Promise.all([
-      WineQuery.findAll(userId),
+      BeverageQuery.findAll(userId),
       CellarQuery.allRecords(userId),
       TastingQuery.all(userId),
       RecommendationQuery.all(userId),
@@ -74,7 +74,7 @@ export namespace PortabilityUseCase {
     const stamp = <T extends { userId: string }>(rows: T[]) =>
       rows.map((row) => ({ ...row, userId }))
 
-    const wines = stamp(envelope.wines) as Wine[]
+    const wines = stamp(envelope.wines) as Beverage[]
     const cellar = stamp(envelope.cellar) as CellarBottle[]
     const tasting = stamp(envelope.tasting) as TastingNote[]
     const recommendation = stamp(envelope.recommendation) as Recommendation[]
@@ -84,7 +84,7 @@ export namespace PortabilityUseCase {
     // Each domain wipes then restores its own collection (independent, so the
     // whole restore runs in parallel).
     await Promise.all([
-      WineCommand.replaceAllForUser(userId, wines),
+      BeverageCommand.replaceAllForUser(userId, wines),
       CellarCommand.replaceAllForUser(userId, cellar),
       TastingCommand.replaceAllForUser(userId, tasting),
       RecommendationCommand.replaceAllForUser(userId, recommendation),

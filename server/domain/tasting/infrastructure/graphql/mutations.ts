@@ -8,11 +8,11 @@ builder.mutationField('markFavorite', (t) =>
     type: 'Boolean',
     description: 'Toggle the favorite (heart) flag on a wine, preserving any existing tasting note',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       favorite: t.arg.boolean({ defaultValue: true }),
     },
-    resolve: async (_root, { wineId, favorite }, { userId }) => {
-      await TastingCommand.setFavorite(userId, wineId, favorite ?? true)
+    resolve: async (_root, { beverageId, favorite }, { userId }) => {
+      await TastingCommand.setFavorite(userId, beverageId, favorite ?? true)
       return true
     },
   }),
@@ -23,11 +23,11 @@ builder.mutationField('recordTasting', (t) =>
     type: 'Boolean',
     description: 'Record a tasting note (rating, notes, favorite flag) for a wine',
     args: {
-      wineId: t.arg({ type: 'WineId', required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true }),
       input: t.arg({ type: TastingInput, required: true }),
     },
-    resolve: async (_root, { wineId, input }, { userId }) => {
-      await TastingCommand.create({ userId, wineId, ...stripNulls(input) })
+    resolve: async (_root, { beverageId, input }, { userId }) => {
+      await TastingCommand.create({ userId, beverageId, ...stripNulls(input) })
       return true
     },
   }),

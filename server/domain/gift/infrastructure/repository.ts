@@ -1,5 +1,5 @@
 import type { Gift } from '~/domain/gift/types'
-import { userWineRecordRepository } from '~/utils/firestore'
+import { userBeverageRecordRepository } from '~/utils/firestore'
 
-export const { findAllByUser, findBy, findManyByWineIds, save, remove, removeAllByUser } =
-  userWineRecordRepository<Gift>('gift')
+export const { findAllByUser, findBy, findManyByBeverageIds, save, remove, removeAllByUser } =
+  userBeverageRecordRepository<Gift>('gift')

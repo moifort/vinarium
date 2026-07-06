@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { pureColor, subtypeFromLegacy } from '~/domain/wine/legacy-mapping'
+import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
 
 describe('pureColor', () => {
   test.each(['red', 'white', 'rosé'] as const)('keeps the pure color "%s"', (color) => {

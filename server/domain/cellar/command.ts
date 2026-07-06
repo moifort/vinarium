@@ -1,22 +1,22 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
+import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
 import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { atomically, bulkSave } from '~/utils/firestore'
 
 export namespace CellarCommand {
-  export const placeWine = async (
+  export const placeBeverage = async (
     userId: UserId,
-    wineId: WineId,
+    beverageId: BeverageId,
     row: CellarRow,
     col: CellarCol,
   ) => {
     const now = new Date()
     const entry = await repository.save({
       userId,
-      wineId,
+      beverageId,
       row,
       col,
       createdAt: now,
@@ -24,7 +24,7 @@ export namespace CellarCommand {
     })
     await JournalCommand.bottleIn(userId, {
       type: 'in',
-      wineId,
+      beverageId,
       row,
       col,
       date: now,
@@ -32,37 +32,37 @@ export namespace CellarCommand {
     return entry
   }
 
-  export const removeWine = async (userId: UserId, wineId: WineId) => {
-    const existing = await repository.findBy(userId, wineId)
+  export const removeBeverage = async (userId: UserId, beverageId: BeverageId) => {
+    const existing = await repository.findBy(userId, beverageId)
     if (!existing) return 'not-in-cellar' as const
     await JournalCommand.bottleOut(userId, {
       type: 'out',
-      wineId: existing.wineId,
+      beverageId: existing.beverageId,
       row: existing.row,
       col: existing.col,
       date: new Date(),
     })
-    await repository.remove(userId, wineId)
+    await repository.remove(userId, beverageId)
     return undefined
   }
 
   export const moveBottle = async (
     userId: UserId,
-    wineId: WineId,
+    beverageId: BeverageId,
     targetRow: CellarRow,
     targetCol: CellarCol,
   ) => {
     // Two independent keyed reads in parallel: the moved bottle and whatever
     // occupies the target slot — never a scan of the whole cellar.
     const [source, atTarget] = await Promise.all([
-      repository.findBy(userId, wineId),
+      repository.findBy(userId, beverageId),
       repository.findByPosition(userId, targetRow, targetCol),
     ])
     if (!source) return 'not-in-cellar' as const
     if (source.row === targetRow && source.col === targetCol) return source
 
     const now = new Date()
-    const occupant = atTarget && atTarget.wineId !== wineId ? atTarget : undefined
+    const occupant = atTarget && atTarget.beverageId !== beverageId ? atTarget : undefined
 
     // The swap (cellar saves) and its journal trail commit as one batch: a
     // partial failure can no longer leave the cellar half-moved or the journal
@@ -72,7 +72,7 @@ export namespace CellarCommand {
     return await atomically(async (batch) => {
       await JournalCommand.bottleOut(
         userId,
-        { type: 'out', wineId: source.wineId, row: source.row, col: source.col, date: now },
+        { type: 'out', beverageId: source.beverageId, row: source.row, col: source.col, date: now },
         batch,
       )
       const movedSource = await repository.save(
@@ -81,13 +81,25 @@ export namespace CellarCommand {
       )
       await JournalCommand.bottleIn(
         userId,
-        { type: 'in', wineId: movedSource.wineId, row: targetRow, col: targetCol, date: now },
+        {
+          type: 'in',
+          beverageId: movedSource.beverageId,
+          row: targetRow,
+          col: targetCol,
+          date: now,
+        },
         batch,
       )
       if (occupant) {
         await JournalCommand.bottleOut(
           userId,
-          { type: 'out', wineId: occupant.wineId, row: occupant.row, col: occupant.col, date: now },
+          {
+            type: 'out',
+            beverageId: occupant.beverageId,
+            row: occupant.row,
+            col: occupant.col,
+            date: now,
+          },
           batch,
         )
         await repository.save(
@@ -96,7 +108,13 @@ export namespace CellarCommand {
         )
         await JournalCommand.bottleIn(
           userId,
-          { type: 'in', wineId: occupant.wineId, row: source.row, col: source.col, date: now },
+          {
+            type: 'in',
+            beverageId: occupant.beverageId,
+            row: source.row,
+            col: source.col,
+            date: now,
+          },
           batch,
         )
       }
@@ -106,10 +124,14 @@ export namespace CellarCommand {
 
   // Deletes the wine's bottle without journaling a bottle-out movement: used when
   // the wine and its entire journal are erased together in the same batch (see
-  // WineUseCase.removeCompletely) — a freshly written journal entry would survive
+  // BeverageUseCase.removeCompletely) — a freshly written journal entry would survive
   // the journal wipe, since batched writes are invisible to the wipe's query.
-  export const eraseWine = async (userId: UserId, wineId: WineId, batch: WriteBatch) => {
-    await repository.remove(userId, wineId, batch)
+  export const eraseBeverage = async (
+    userId: UserId,
+    beverageId: BeverageId,
+    batch: WriteBatch,
+  ) => {
+    await repository.remove(userId, beverageId, batch)
   }
 
   // Wipe the user's cellar and restore the given bottles (account import).

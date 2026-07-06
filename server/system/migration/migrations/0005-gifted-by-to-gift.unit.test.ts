@@ -12,7 +12,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
   test('restructures an existing gift record into the given facet', async () => {
     fake.seed('gift', 'u1_w1', {
       userId: 'u1',
-      wineId: 'w1',
+      beverageId: 'w1',
       giftedDate: new Date('2026-01-01'),
       recipientName: 'Bob',
     })
@@ -21,7 +21,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
 
     expect(fake.snapshot('gift').get('u1_w1')).toEqual({
       userId: 'u1',
-      wineId: 'w1',
+      beverageId: 'w1',
       given: { date: new Date('2026-01-01'), recipientName: 'Bob' },
     })
   })
@@ -34,7 +34,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
     expect(fake.snapshot('wines').get('w1')).toEqual({ id: 'w1', userId: 'u1', name: 'Margaux' })
     expect(fake.snapshot('gift').get('u1_w1')).toEqual({
       userId: 'u1',
-      wineId: 'w1',
+      beverageId: 'w1',
       received: { from: 'Alice' },
     })
   })
@@ -43,7 +43,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
     fake.seed('wines', 'w1', { id: 'w1', userId: 'u1', name: 'Margaux', giftedBy: 'Alice' })
     fake.seed('gift', 'u1_w1', {
       userId: 'u1',
-      wineId: 'w1',
+      beverageId: 'w1',
       giftedDate: new Date('2026-01-01'),
       recipientName: 'Bob',
     })
@@ -52,7 +52,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
 
     expect(fake.snapshot('gift').get('u1_w1')).toEqual({
       userId: 'u1',
-      wineId: 'w1',
+      beverageId: 'w1',
       given: { date: new Date('2026-01-01'), recipientName: 'Bob' },
       received: { from: 'Alice' },
     })
@@ -61,7 +61,7 @@ describe('migration 0005 gifted-by-to-gift', () => {
 
   test('leaves already-migrated data untouched', async () => {
     fake.seed('wines', 'w1', { id: 'w1', userId: 'u1', name: 'Margaux' })
-    fake.seed('gift', 'u1_w1', { userId: 'u1', wineId: 'w1', received: { from: 'Alice' } })
+    fake.seed('gift', 'u1_w1', { userId: 'u1', beverageId: 'w1', received: { from: 'Alice' } })
 
     const result = await migration0005.migrate({ db: fake.db })
 

@@ -1,3 +1,4 @@
+import { wineDetails } from '~/domain/beverage/business-rules'
 import type { SearchableWine, SearchFilters, SearchHit, SearchMatchedField } from './types'
 
 // Accent-, case- and separator-insensitive canonical form: "Château" matches
@@ -51,13 +52,14 @@ const FIELD_WEIGHTS: Record<SearchMatchedField, number> = {
 // with the strength of that match. Contacts keep their best match only.
 const fieldStrengths = (item: SearchableWine, query: string) => {
   const contacts = item.consumption?.contacts ?? []
+  const details = wineDetails(item)
   const strengths: [SearchMatchedField, number][] = [
     ['name', matchStrength(item.name, query)],
-    ['producer', matchStrength(item.domain, query)],
+    ['producer', matchStrength(item.producer, query)],
     ['subtype', matchStrength(item.subtype, query)],
-    ['appellation', matchStrength(item.appellation, query)],
+    ['appellation', matchStrength(details?.appellation, query)],
     ['region', matchStrength(item.region, query)],
-    ['vintage', vintageStrength(item.vintage, query)],
+    ['vintage', vintageStrength(details?.vintage, query)],
     ['gifted-by', matchStrength(item.gift?.received?.from, query)],
     ['gift-recipient', matchStrength(item.gift?.given?.recipientName, query)],
     ['recommender', matchStrength(item.recommendation?.recommenderName, query)],
@@ -80,7 +82,8 @@ export const searchHit = (item: SearchableWine, query: string): SearchHit | null
 }
 
 export const passesFilters = (item: SearchableWine, filters: SearchFilters) => {
-  if (filters.colors?.length && (!item.color || !filters.colors.includes(item.color))) return false
+  const color = wineDetails(item)?.color
+  if (filters.colors?.length && (!color || !filters.colors.includes(color))) return false
   if (filters.beverageTypes?.length && !filters.beverageTypes.includes(item.beverageType))
     return false
   if (filters.favorite === true && item.consumption?.favorite !== true) return false

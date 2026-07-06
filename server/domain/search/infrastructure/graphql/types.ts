@@ -1,5 +1,5 @@
+import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import { WineType } from '~/domain/wine/infrastructure/graphql/types'
 import type { SearchHit } from '../../types'
 import { SearchMatchedFieldEnum } from './enums'
 
@@ -7,7 +7,7 @@ export const SearchHitType = builder.objectRef<SearchHit>('SearchHit').implement
   description: 'A wine that matched the search, with the fields that matched it',
   fields: (t) => ({
     wine: t.field({
-      type: WineType,
+      type: BeverageType,
       description: 'The matched wine',
       resolve: (hit) => hit.item,
     }),

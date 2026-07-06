@@ -14,12 +14,12 @@ beforeEach(() => {
 })
 
 const seed = () => {
-  fake.seed('wines', 'w1', { id: 'w1', userId, name: 'W1', beverageType: 'wine' })
+  fake.seed('beverages', 'w1', { id: 'w1', userId, name: 'W1', beverageType: 'wine' })
   for (let i = 0; i < 5; i++) {
     fake.seed('journal', `e${i}`, {
       type: 'in',
       userId,
-      wineId: 'w1',
+      beverageId: 'w1',
       row: 0,
       col: i,
       date: new Date(2026, 0, i + 1),

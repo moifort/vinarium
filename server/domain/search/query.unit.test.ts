@@ -15,29 +15,27 @@ beforeEach(() => {
 })
 
 const seed = () => {
-  fake.seed('wines', 'w1', {
+  fake.seed('beverages', 'w1', {
     id: 'w1',
     userId,
     name: 'Château Margaux',
     beverageType: 'wine',
-    color: 'red',
-    domain: 'Château Margaux',
+    producer: 'Château Margaux',
     region: 'Bordeaux',
-    vintage: 2015,
+    wine: { color: 'red', vintage: 2015 },
     createdAt: new Date('2026-01-03'),
     updatedAt: new Date('2026-01-03'),
   })
-  fake.seed('wines', 'w2', {
+  fake.seed('beverages', 'w2', {
     id: 'w2',
     userId,
     name: 'Pouilly-Fumé',
     beverageType: 'wine',
-    color: 'white',
-    vintage: 2021,
+    wine: { color: 'white', vintage: 2021 },
     createdAt: new Date('2026-01-02'),
     updatedAt: new Date('2026-01-02'),
   })
-  fake.seed('wines', 'w3', {
+  fake.seed('beverages', 'w3', {
     id: 'w3',
     userId,
     name: 'Porto Vintage',
@@ -48,7 +46,7 @@ const seed = () => {
   })
   fake.seed('cellar', `${userId}_w1`, {
     userId,
-    wineId: 'w1',
+    beverageId: 'w1',
     row: 0,
     col: 0,
     createdAt: new Date('2026-01-03'),
@@ -56,13 +54,13 @@ const seed = () => {
   })
   fake.seed('tasting', `${userId}_w2`, {
     userId,
-    wineId: 'w2',
+    beverageId: 'w2',
     favorite: true,
     consumedDate: new Date('2026-02-01'),
   })
   fake.seed('gift', `${userId}_w3`, {
     userId,
-    wineId: 'w3',
+    beverageId: 'w3',
     received: { from: 'Alice Martin' },
     given: { date: new Date('2026-01-01'), recipientName: 'Bob Durand' },
   })
@@ -100,7 +98,7 @@ describe('SearchQuery.acrossCollections', () => {
   })
 
   test('ranks by relevance', async () => {
-    fake.seed('wines', 'a', {
+    fake.seed('beverages', 'a', {
       id: 'a',
       userId,
       name: 'Château Margaux',
@@ -108,7 +106,7 @@ describe('SearchQuery.acrossCollections', () => {
       createdAt: new Date('2026-01-02'),
       updatedAt: new Date('2026-01-02'),
     })
-    fake.seed('wines', 'b', {
+    fake.seed('beverages', 'b', {
       id: 'b',
       userId,
       name: 'Margaux',

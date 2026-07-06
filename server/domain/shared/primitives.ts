@@ -7,6 +7,7 @@ import type {
   Latitude as LatitudeType,
   Longitude as LongitudeType,
   Month as MonthType,
+  Percentage as PercentageType,
   PersonName as PersonNameType,
   PlaceName as PlaceNameType,
   Region as RegionType,
@@ -71,6 +72,13 @@ export const Month = (value: unknown) => {
 }
 
 export const Count = (value: number) => make<CountType>()(value)
+
+export const Percentage = (value: unknown) => {
+  const v = z
+    .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().min(0).max(100))
+    .parse(value)
+  return make<PercentageType>()(v)
+}
 
 export const PersonName = (value: unknown) => {
   const v = z.string().min(1).max(200).parse(value)

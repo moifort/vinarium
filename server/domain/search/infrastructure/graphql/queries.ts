@@ -1,5 +1,5 @@
+import type { BeverageStatusFilter, BeverageType, WineColor } from '~/domain/beverage/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import type { BeverageType, WineColor, WineStatusFilter } from '~/domain/wine/types'
 import { SearchQuery } from '../../query'
 import type { SearchFilters } from '../../types'
 import { SearchFiltersInput } from './inputs'
@@ -22,7 +22,7 @@ builder.queryField('searchWines', (t) =>
         colors: (args.filters?.colors as WineColor[] | null) ?? undefined,
         beverageTypes: (args.filters?.beverageTypes as BeverageType[] | null) ?? undefined,
         favorite: args.filters?.favorite ?? undefined,
-        status: (args.filters?.status as WineStatusFilter | null) ?? undefined,
+        status: (args.filters?.status as BeverageStatusFilter | null) ?? undefined,
         gifted: args.filters?.gifted ?? undefined,
       }
       return SearchQuery.acrossCollections(userId, {

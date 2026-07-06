@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { BeverageId } from '~/domain/beverage/types'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
-import type { WineId } from '~/domain/wine/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -9,7 +9,7 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 const { CellarUseCase } = await import('~/domain/cellar/use-case')
 
 const userId = 'user-1' as UserId
-const wineId = 'w1' as WineId
+const beverageId = 'w1' as BeverageId
 
 let fake = resetFakeFirestore()
 
@@ -20,7 +20,7 @@ beforeEach(() => {
 const seedBottle = () =>
   fake.seed('cellar', `${userId}_w1`, {
     userId,
-    wineId,
+    beverageId,
     row: 0 as CellarRow,
     col: 0 as CellarCol,
     createdAt: new Date('2026-01-01'),
@@ -30,9 +30,9 @@ const seedBottle = () =>
 describe('CellarUseCase.removeBottle', () => {
   test('consuming a favorite bottle keeps it a favorite', async () => {
     seedBottle()
-    fake.seed('tasting', `${userId}_w1`, { userId, wineId, favorite: true })
+    fake.seed('tasting', `${userId}_w1`, { userId, beverageId, favorite: true })
 
-    const result = await CellarUseCase.removeBottle(userId, wineId, {
+    const result = await CellarUseCase.removeBottle(userId, beverageId, {
       type: 'tasting',
       rating: 4 as never,
       tastingNotes: 'Dernier verre',
@@ -48,7 +48,7 @@ describe('CellarUseCase.removeBottle', () => {
   })
 
   test('returns not-in-cellar when the bottle is absent', async () => {
-    const result = await CellarUseCase.removeBottle(userId, wineId, { type: 'tasting' })
+    const result = await CellarUseCase.removeBottle(userId, beverageId, { type: 'tasting' })
 
     expect(result).toBe('not-in-cellar')
   })
