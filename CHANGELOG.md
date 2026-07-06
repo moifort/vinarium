@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Correction : la liste « Mes Vins » s'affiche de nouveau au lieu d'un message d'erreur.
 - Listes, recherche et tableau de bord plus rapides : le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un filtre.
 - Ouverture de la fiche détail nettement plus rapide : le serveur lit désormais uniquement les informations du vin consulté au lieu de parcourir toute la cave.
 - Fiche détail : le sous-titre ne répète plus la maison et le millésime, déjà affichés dans les informations juste en dessous.
