@@ -1,6 +1,12 @@
-// Pothos optional input fields are typed as `T | null | undefined`. Domain
-// types use `T?` (undefined only). This helper drops the null variant so a
-// GraphQL input can be spread directly into a domain command argument.
+// Boundary converter: GraphQL nullability → domain "absent key" convention.
+//
+// Pothos optional input fields are typed as `T | null | undefined`; at runtime
+// graphql-js omits absent fields entirely, so the only variant to erase is an
+// explicit `null` sent by the client. Domain types use `T?` (a key is present
+// with a value, or not present at all) and Firestore rejects `undefined`
+// values — dropping the null KEYS (not nulling them) keeps both invariants.
+//
+// Not recursive: every mutation input in the schema is flat.
 type StripNulls<T> = { [K in keyof T]: Exclude<T[K], null> }
 
 export const stripNulls = <T extends Record<string, unknown>>(obj: T): StripNulls<T> => {

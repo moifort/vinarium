@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto'
 import { SUBTYPES_BY_BEVERAGE } from '~/domain/wine/business-rules'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
 import { config } from '~/system/config/index'
-import { createLogger } from '~/system/logger'
 import {
   EnrichSchema,
   ImageHash,
@@ -11,8 +10,6 @@ import {
 } from '~/system/scan/primitives'
 import * as repository from '~/system/scan/repository'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
-
-const log = createLogger('scan')
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
@@ -26,9 +23,8 @@ export namespace Scan {
     if (cached) return ScanResultSchema.parse(cached.result)
     const scanResult = await scanLabel(imageBuffer)
     const enriched = await enrichWithSearch(scanResult)
-    repository
-      .save({ imageHash, result: enriched, cachedAt: new Date() })
-      .catch((err) => log.warn('Failed to write scan result to cache', err))
+    // Best-effort cache: a failed write only costs a re-scan on the next hit.
+    repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
     return enriched
   }
 

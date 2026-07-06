@@ -7,9 +7,6 @@ import { config } from '~/system/config'
 export default defineEventHandler(async (event) => {
   const path = event.path ?? ''
 
-  // Public endpoints (no auth)
-  if (path === '/health') return
-
   // Admin endpoints (separate token, never a Firebase user)
   if (path.startsWith('/admin/')) {
     const auth = getHeader(event, 'authorization')

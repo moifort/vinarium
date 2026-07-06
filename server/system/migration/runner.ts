@@ -1,10 +1,7 @@
 import { sortBy } from 'lodash-es'
 import { db } from '~/system/firebase'
-import { createLogger } from '~/system/logger'
 import { MigrationVersion } from '~/system/migration/primitives'
 import type { Migration, MigrationMeta } from '~/system/migration/types'
-
-const log = createLogger('migration')
 
 const META_COLLECTION = 'migration-meta'
 const META_DOC_ID = 'state'
@@ -32,7 +29,9 @@ export const runMigrations = async (migrations: Migration[]) => {
       if (!result.ok)
         return { outcome: 'failed' as const, version: migration.version, error: result.error }
       await metaRef.set({ version: migration.version, appliedAt: new Date() })
-      log.info(
+      // Seule sortie du runner : visible dans Cloud Logging (la CI, elle, lit la
+      // réponse HTTP de POST /admin/migrate).
+      console.info(
         `Applied v${migration.version} "${migration.name}" (${result.transformed} transformed)`,
       )
     } catch (error) {

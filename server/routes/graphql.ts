@@ -1,18 +1,5 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
 import type { UserId } from '~/domain/shared/types'
-import { createLogger } from '~/system/logger'
-
-const log = createLogger('graphql')
-
-type GraphQLBody = { operationName?: string | null }
-
-const extractOperationName = (body: unknown): string => {
-  if (body && typeof body === 'object' && 'operationName' in body) {
-    const op = (body as GraphQLBody).operationName
-    if (typeof op === 'string' && op.length > 0) return op
-  }
-  return 'anonymous'
-}
 
 export default defineEventHandler(async (event) => {
   const apollo = useApollo()
@@ -43,9 +30,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const body = await readBody(event)
-  const operation = extractOperationName(body)
-  log.info(`→ ${operation} (user ${userId})`)
-
   const response = await apollo.executeHTTPGraphQLRequest({
     httpGraphQLRequest: { method: 'POST', headers: headerMap, body, search: '' },
     context: async () => ({ event, userId }),
