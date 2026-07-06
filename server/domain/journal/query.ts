@@ -40,6 +40,9 @@ export namespace JournalQuery {
   export const entriesByWineIds = async (userId: UserId, wineIds: WineId[]) =>
     repository.findByWineIds(userId, wineIds)
 
+  // Raw journal entries (no wine enrichment) — the read half of an account export.
+  export const allEntries = async (userId: UserId) => repository.findAllByUser(userId)
+
   // A wine's cellar history as displayable events, most recent first. Pure
   // mapping: the entries come from the batched loader, the wine from the parent.
   export const historyOf = (

@@ -42,6 +42,9 @@ export namespace CellarQuery {
     return bottles.map(bottleView)
   }
 
+  // Raw bottle records (no grid labels) — the read half of an account export.
+  export const allRecords = async (userId: UserId) => repository.findAllByUser(userId)
+
   // One page of cellar bottles in grid order (row, col) joined with their wine.
   export const getBottlesPage = async (
     userId: UserId,

@@ -77,9 +77,11 @@ describe('architecture', () => {
         const content = readFile(join(SERVER_DIR, '..', file))
         const lines = content.split('\n')
         for (let i = 0; i < lines.length; i++) {
-          const match = lines[i].match(/from\s+['"]~\/domain\/(\w+)\/repository['"]/)
+          const match = lines[i].match(
+            /from\s+['"]~\/domain\/(\w+)\/infrastructure\/repository['"]/,
+          )
           if (match && match[1] !== currentDomain) {
-            violations.push(`${file}:${i + 1}: imports ${match[1]}/repository`)
+            violations.push(`${file}:${i + 1}: imports ${match[1]}/infrastructure/repository`)
           }
         }
       }
@@ -115,25 +117,26 @@ describe('architecture', () => {
     })
   })
 
-  describe('read models do not bypass domain boundaries', () => {
-    const readModelFiles = glob('server/read-model/**/*.ts').filter((f) => !f.endsWith('.test.ts'))
+  describe('query.ts and command.ts name the business concept, not the technical pattern', () => {
+    const targets = glob('server/domain/*/{query,command,business-rules}.ts')
+    // Exported names must carry intent, never a computeX/handleX/processX scaffold.
+    // (`get*` reads are the accepted CQRS read idiom — the DDD skill's own query
+    // examples use getAll/getById — so they are intentionally NOT banned here.)
+    const bannedPrefixes = /export const (compute|handle|process|manage|perform)[A-Z]/
 
-    test('read models only use public Query/Command namespaces', () => {
-      const violations: string[] = []
-      for (const file of readModelFiles) {
+    for (const file of targets) {
+      test(`${basename(dirname(file))}/${basename(file)}`, () => {
         const content = readFile(join(SERVER_DIR, '..', file))
         const lines = content.split('\n')
+        const violations: string[] = []
         for (let i = 0; i < lines.length; i++) {
-          if (/from\s+['"]~\/domain\/\w+\/repository['"]/.test(lines[i])) {
-            violations.push(`${file}:${i + 1}: imports repository directly`)
-          }
-          if (/useStorage/.test(lines[i])) {
-            violations.push(`${file}:${i + 1}: uses useStorage directly`)
+          if (bannedPrefixes.test(lines[i])) {
+            violations.push(`${file}:${i + 1}: ${lines[i].trim()}`)
           }
         }
-      }
-      expect(violations).toEqual([])
-    })
+        expect(violations).toEqual([])
+      })
+    }
   })
 
   describe('business-rules.ts is pure (no IO)', () => {
@@ -169,10 +172,12 @@ describe('architecture', () => {
           if (/useStorage/.test(lines[i])) {
             violations.push(`${file}:${i + 1}: uses useStorage (must go through commands/queries)`)
           }
-          const repoMatch = lines[i].match(/from\s+['"]~\/domain\/(\w+)\/repository['"]/)
+          const repoMatch = lines[i].match(
+            /from\s+['"]~\/domain\/(\w+)\/infrastructure\/repository['"]/,
+          )
           if (repoMatch) {
             violations.push(
-              `${file}:${i + 1}: imports ${repoMatch[1]}/repository (must go through commands/queries)`,
+              `${file}:${i + 1}: imports ${repoMatch[1]}/infrastructure/repository (must go through commands/queries)`,
             )
           }
         }

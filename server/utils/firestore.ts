@@ -36,6 +36,12 @@ const toDate = (value: unknown): unknown => {
 // Firestore batches accept at most 500 operations.
 const BATCH_LIMIT = 400
 
+// Persist many records with bounded write concurrency — individual sets, not a
+// batch (the row count on an import/restore can exceed the 500-op batch cap).
+export const bulkSave = async <T>(rows: T[], save: (row: T) => Promise<unknown>): Promise<void> => {
+  for (const slice of chunk(rows, 50)) await Promise.all(slice.map((row) => save(row)))
+}
+
 export const deleteInBatches = async (refs: DocumentReference[]): Promise<void> => {
   for (const slice of chunk(refs, BATCH_LIMIT)) {
     const batch = db().batch()

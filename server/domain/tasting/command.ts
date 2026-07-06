@@ -3,6 +3,7 @@ import type { UserId } from '~/domain/shared/types'
 import * as repository from '~/domain/tasting/infrastructure/repository'
 import type { TastingNote } from '~/domain/tasting/types'
 import type { WineId } from '~/domain/wine/types'
+import { bulkSave } from '~/utils/firestore'
 
 export namespace TastingCommand {
   // Upsert a tasting note: overlay the provided fields onto any existing note
@@ -25,5 +26,11 @@ export namespace TastingCommand {
 
   export const removeWine = async (userId: UserId, wineId: WineId, batch?: WriteBatch) => {
     await repository.remove(userId, wineId, batch)
+  }
+
+  // Wipe the user's tasting notes and restore the given records (account import).
+  export const replaceAllForUser = async (userId: UserId, notes: TastingNote[]) => {
+    await repository.removeAllByUser(userId)
+    await bulkSave(notes, repository.save)
   }
 }

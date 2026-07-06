@@ -1,33 +1,41 @@
-import { chunk } from 'lodash-es'
 import { z } from 'zod'
-import * as cellarRepo from '~/domain/cellar/infrastructure/repository'
+import { CellarCommand } from '~/domain/cellar/command'
+import { CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottle } from '~/domain/cellar/types'
-import * as giftRepo from '~/domain/gift/infrastructure/repository'
+import { GiftCommand } from '~/domain/gift/command'
+import { GiftQuery } from '~/domain/gift/query'
 import type { Gift } from '~/domain/gift/types'
-import * as journalRepo from '~/domain/journal/infrastructure/repository'
+import { JournalCommand } from '~/domain/journal/command'
+import { JournalQuery } from '~/domain/journal/query'
 import type { JournalEntry } from '~/domain/journal/types'
 import {
   EXPORT_SCHEMA_VERSION,
   type ExportEnvelope,
   type ImportResult,
 } from '~/domain/portability/types'
-import * as recommendationRepo from '~/domain/recommendation/infrastructure/repository'
+import { RecommendationCommand } from '~/domain/recommendation/command'
+import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { Recommendation } from '~/domain/recommendation/types'
 import type { UserId } from '~/domain/shared/types'
-import * as tastingRepo from '~/domain/tasting/infrastructure/repository'
+import { TastingCommand } from '~/domain/tasting/command'
+import { TastingQuery } from '~/domain/tasting/query'
 import type { TastingNote } from '~/domain/tasting/types'
-import * as wineRepo from '~/domain/wine/infrastructure/repository'
+import { WineCommand } from '~/domain/wine/command'
+import { WineQuery } from '~/domain/wine/query'
 import type { Wine } from '~/domain/wine/types'
 
+// Backup/restore orchestrator: it reads and replaces each domain's data through
+// that domain's public Query/Command surface (raw records, no view enrichment) —
+// never its repository. The domains own their storage; portability only moves it.
 export namespace PortabilityUseCase {
   export const exportAll = async (userId: UserId): Promise<ExportEnvelope> => {
     const [wines, cellar, tasting, recommendation, gift, journal] = await Promise.all([
-      wineRepo.findAllByUser(userId),
-      cellarRepo.findAllByUser(userId),
-      tastingRepo.findAllByUser(userId),
-      recommendationRepo.findAllByUser(userId),
-      giftRepo.findAllByUser(userId),
-      journalRepo.findAllByUser(userId),
+      WineQuery.findAll(userId),
+      CellarQuery.allRecords(userId),
+      TastingQuery.getAll(userId),
+      RecommendationQuery.getAll(userId),
+      GiftQuery.getAll(userId),
+      JournalQuery.allEntries(userId),
     ])
     return {
       schemaVersion: EXPORT_SCHEMA_VERSION,
@@ -73,22 +81,15 @@ export namespace PortabilityUseCase {
     const gift = stamp(envelope.gift) as Gift[]
     const journal = stamp(envelope.journal) as JournalEntry[]
 
+    // Each domain wipes then restores its own collection (independent, so the
+    // whole restore runs in parallel).
     await Promise.all([
-      wineRepo.removeAllByUser(userId),
-      cellarRepo.removeAllByUser(userId),
-      tastingRepo.removeAllByUser(userId),
-      recommendationRepo.removeAllByUser(userId),
-      giftRepo.removeAllByUser(userId),
-      journalRepo.removeAllByUser(userId),
-    ])
-
-    await Promise.all([
-      saveAll(wines, (row) => wineRepo.save(row)),
-      saveAll(cellar, (row) => cellarRepo.save(row)),
-      saveAll(tasting, (row) => tastingRepo.save(row)),
-      saveAll(recommendation, (row) => recommendationRepo.save(row)),
-      saveAll(gift, (row) => giftRepo.save(row)),
-      saveAll(journal, (row) => journalRepo.save(row)),
+      WineCommand.replaceAllForUser(userId, wines),
+      CellarCommand.replaceAllForUser(userId, cellar),
+      TastingCommand.replaceAllForUser(userId, tasting),
+      RecommendationCommand.replaceAllForUser(userId, recommendation),
+      GiftCommand.replaceAllForUser(userId, gift),
+      JournalCommand.replaceAllForUser(userId, journal),
     ])
 
     return {
@@ -100,10 +101,6 @@ export namespace PortabilityUseCase {
       journal: journal.length,
     }
   }
-
-  const saveAll = async <T>(rows: T[], save: (row: T) => Promise<unknown>) => {
-    for (const batch of chunk(rows, 50)) await Promise.all(batch.map(save))
-  }
 }
 
 const dateSchema = z
@@ -113,7 +110,9 @@ const dateSchema = z
 const looseRecord = z.looseObject({ userId: z.string() })
 
 const envelopeSchema = z.object({
-  schemaVersion: z.literal(EXPORT_SCHEMA_VERSION),
+  // Any number parses; the explicit version guard in importAll returns a precise
+  // `unsupported-schema-version:X` rather than a generic shape error.
+  schemaVersion: z.number(),
   exportedAt: dateSchema,
   userId: z.string(),
   wines: z.array(looseRecord),

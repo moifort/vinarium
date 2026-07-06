@@ -1,10 +1,10 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import * as repository from '~/domain/cellar/infrastructure/repository'
-import type { CellarCol, CellarRow } from '~/domain/cellar/types'
+import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
 import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
-import { atomically } from '~/utils/firestore'
+import { atomically, bulkSave } from '~/utils/firestore'
 
 export namespace CellarCommand {
   export const placeWine = async (
@@ -110,5 +110,11 @@ export namespace CellarCommand {
   // the journal wipe, since batched writes are invisible to the wipe's query.
   export const eraseWine = async (userId: UserId, wineId: WineId, batch: WriteBatch) => {
     await repository.remove(userId, wineId, batch)
+  }
+
+  // Wipe the user's cellar and restore the given bottles (account import).
+  export const replaceAllForUser = async (userId: UserId, bottles: CellarBottle[]) => {
+    await repository.removeAllByUser(userId)
+    await bulkSave(bottles, repository.save)
   }
 }

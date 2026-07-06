@@ -9,6 +9,7 @@ import {
 import * as repository from '~/domain/wine/infrastructure/repository'
 import { randomWineId } from '~/domain/wine/primitives'
 import type { BeverageType, Wine, WineId, WineName } from '~/domain/wine/types'
+import { bulkSave } from '~/utils/firestore'
 
 export namespace WineCommand {
   export const add = async (
@@ -60,6 +61,13 @@ export namespace WineCommand {
     if (!existing) return 'not-found' as const
     await repository.remove(id, batch)
     return undefined
+  }
+
+  // Wipe the user's wines and restore the given set — the write half of an
+  // account import (records are pre-stamped with the importing user).
+  export const replaceAllForUser = async (userId: UserId, wines: Wine[]) => {
+    await repository.removeAllByUser(userId)
+    await bulkSave(wines, repository.save)
   }
 
   const withoutIrrelevantAttributes = (wine: Wine) => {
