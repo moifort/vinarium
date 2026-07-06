@@ -242,10 +242,18 @@ type FavoriteWine {
 }
 
 """
-Record of a wine that was gifted away
+How a wine relates to gifting — given away and/or received
 """
 type Gift {
-  giftedDate: DateTime!
+  given: GiftGiven
+  received: GiftReceived
+}
+
+"""
+The bottle was given away
+"""
+type GiftGiven {
+  date: DateTime!
   recipientName: PersonName
 }
 
@@ -255,6 +263,13 @@ Details captured when gifting a bottle
 input GiftInput {
   giftedDate: DateTime!
   recipientName: PersonName
+}
+
+"""
+The bottle was received as a gift (provenance)
+"""
+type GiftReceived {
+  from: PersonName!
 }
 
 """
@@ -700,7 +715,6 @@ type Wine {
   Gift details for this wine (null if never gifted)
   """
   gift: Gift
-  giftedBy: PersonName
   grapeVarieties: [String!]
 
   """

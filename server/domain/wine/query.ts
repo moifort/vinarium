@@ -1,4 +1,5 @@
 import { CellarQuery } from '~/domain/cellar/query'
+import { GiftQuery } from '~/domain/gift/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -96,7 +97,13 @@ export namespace WineQuery {
       const recommended = new Set(recommendations.map((recommendation) => recommendation.wineId))
       return wines.filter((wine) => recommended.has(wine.id))
     }
-    if (mode === 'gifted') return wines.filter((wine) => wine.giftedBy !== undefined)
+    if (mode === 'gifted') {
+      const gifts = await GiftQuery.all(userId)
+      const received = new Set(
+        gifts.filter((gift) => gift.received !== undefined).map((gift) => gift.wineId),
+      )
+      return wines.filter((wine) => received.has(wine.id))
+    }
     return wines
   }
 

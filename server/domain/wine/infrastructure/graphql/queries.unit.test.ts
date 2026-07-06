@@ -44,8 +44,7 @@ const seedSatellites = (wineId: string) => {
   fake.seed('gift', `${userId}_${wineId}`, {
     userId,
     wineId,
-    giftedDate: new Date('2026-02-01'),
-    recipientName: 'Alice',
+    given: { date: new Date('2026-02-01'), recipientName: 'Alice' },
   })
   fake.seed('recommendation', `${userId}_${wineId}`, { userId, wineId, comment: 'Superbe' })
   fake.seed('cellar', `${userId}_${wineId}`, {
@@ -65,7 +64,7 @@ const detailQuery = (id: string) => `
       name
       cellar { row col rowLabel colLabel }
       consumption { rating favorite }
-      gift { recipientName }
+      gift { given { recipientName } }
       recommendation { comment }
     }
   }
@@ -84,7 +83,7 @@ describe('wine(id) detail query', () => {
       name: `Wine ${wid(1)}`,
       cellar: { row: 2, col: 3, rowLabel: 'C', colLabel: 4 },
       consumption: { rating: 4, favorite: true },
-      gift: { recipientName: 'Alice' },
+      gift: { given: { recipientName: 'Alice' } },
       recommendation: { comment: 'Superbe' },
     })
   })
@@ -157,7 +156,7 @@ describe('wines list query', () => {
             id
             cellar { row col }
             consumption { rating }
-            gift { recipientName }
+            gift { given { recipientName } }
             recommendation { comment }
           }
         }
@@ -173,7 +172,7 @@ describe('wines list query', () => {
       id: wid(1),
       cellar: { row: 2, col: 3 },
       consumption: { rating: 4 },
-      gift: { recipientName: 'Alice' },
+      gift: { given: { recipientName: 'Alice' } },
       recommendation: { comment: 'Superbe' },
     })
     expect(byId.get(wid(2))).toEqual({

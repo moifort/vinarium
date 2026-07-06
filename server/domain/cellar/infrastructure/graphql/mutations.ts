@@ -69,9 +69,10 @@ builder.mutationField('giftBottle', (t) =>
       input: t.arg({ type: GiftInput, required: true }),
     },
     resolve: async (_root, { wineId, input }, { userId }) => {
+      const { giftedDate, recipientName } = stripNulls(input)
       const result = await CellarUseCase.removeBottle(userId, wineId, {
         type: 'gift',
-        ...stripNulls(input),
+        given: { date: giftedDate, ...(recipientName && { recipientName }) },
       })
       if (result === 'not-in-cellar')
         throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })

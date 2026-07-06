@@ -2,13 +2,42 @@ import { CellarCommand } from '~/domain/cellar/command'
 import { GiftCommand } from '~/domain/gift/command'
 import { JournalCommand } from '~/domain/journal/command'
 import { RecommendationCommand } from '~/domain/recommendation/command'
-import type { UserId } from '~/domain/shared/types'
+import type { PersonName, UserId } from '~/domain/shared/types'
 import { TastingCommand } from '~/domain/tasting/command'
 import { WineCommand } from '~/domain/wine/command'
-import type { WineId } from '~/domain/wine/types'
+import type { BeverageType, WineId, WineName } from '~/domain/wine/types'
 import { atomically } from '~/utils/firestore'
 
+type WineData = Parameters<typeof WineCommand.add>[3]
+
 export namespace WineUseCase {
+  // Add a wine and, when its provenance is known, record who gave it (the
+  // giftedBy field lives in the gift domain — a wine only carries what it is).
+  export const add = async (
+    userId: UserId,
+    name: WineName,
+    beverageType: BeverageType,
+    data: WineData,
+    receivedFrom?: PersonName,
+  ) => {
+    const result = await WineCommand.add(userId, name, beverageType, data)
+    if (typeof result !== 'string' && receivedFrom)
+      await GiftCommand.receiveFrom(userId, result.id, receivedFrom)
+    return result
+  }
+
+  export const update = async (
+    userId: UserId,
+    id: WineId,
+    data: Parameters<typeof WineCommand.update>[2],
+    receivedFrom?: PersonName,
+  ) => {
+    const result = await WineCommand.update(userId, id, data)
+    if (typeof result !== 'string' && receivedFrom)
+      await GiftCommand.receiveFrom(userId, id, receivedFrom)
+    return result
+  }
+
   export const removeCompletely = async (userId: UserId, id: WineId) =>
     await atomically(async (batch) => {
       const error = await WineCommand.remove(userId, id, batch)

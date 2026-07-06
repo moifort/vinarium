@@ -92,7 +92,7 @@ describe('searchHit', () => {
   test('collects every matched field', () => {
     const wine = aWine({
       name: 'Margaux',
-      giftedBy: 'Margaux',
+      gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Margaux' } },
       consumption: { userId: 'user-1', wineId: 'w1', contacts: ['Margaux Dupont'] },
     })
     const hit = searchHit(wine, 'margaux')
@@ -109,7 +109,11 @@ describe('searchHit', () => {
   test('name outranks producer, producer outranks person, at equal strength', () => {
     const name = searchHit(aWine({ name: 'Margaux' }), 'margaux')?.score ?? 0
     const producer = searchHit(aWine({ domain: 'Margaux' }), 'margaux')?.score ?? 0
-    const person = searchHit(aWine({ giftedBy: 'Margaux' }), 'margaux')?.score ?? 0
+    const person =
+      searchHit(
+        aWine({ gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Margaux' } } }),
+        'margaux',
+      )?.score ?? 0
     expect(name).toBeGreaterThan(producer)
     expect(producer).toBeGreaterThan(person)
   })
@@ -132,7 +136,11 @@ describe('searchHit', () => {
 
   test('matches gift recipient and recommender', () => {
     const wine = aWine({
-      gift: { userId: 'user-1', wineId: 'w1', giftedDate: new Date(), recipientName: 'Alice' },
+      gift: {
+        userId: 'user-1',
+        wineId: 'w1',
+        given: { date: new Date(), recipientName: 'Alice' },
+      },
       recommendation: { userId: 'user-1', wineId: 'w1', recommenderName: 'Alicia' },
     })
     expect(searchHit(wine, 'alic')?.matchedFields).toEqual(['gift-recipient', 'recommender'])
@@ -183,8 +191,12 @@ describe('passesFilters', () => {
   })
 
   test('gifted filter accepts received or given wines', () => {
-    const received = aWine({ giftedBy: 'Alice' })
-    const given = aWine({ gift: { userId: 'user-1', wineId: 'w1', giftedDate: new Date() } })
+    const received = aWine({
+      gift: { userId: 'user-1', wineId: 'w1', received: { from: 'Alice' } },
+    })
+    const given = aWine({
+      gift: { userId: 'user-1', wineId: 'w1', given: { date: new Date() } },
+    })
     expect(passesFilters(received, { gifted: true })).toBe(true)
     expect(passesFilters(given, { gifted: true })).toBe(true)
     expect(passesFilters(aWine(), { gifted: true })).toBe(false)

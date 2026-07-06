@@ -43,7 +43,6 @@ const seed = () => {
     name: 'Porto Vintage',
     beverageType: 'wine',
     subtype: 'porto',
-    giftedBy: 'Alice Martin',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
   })
@@ -64,8 +63,8 @@ const seed = () => {
   fake.seed('gift', `${userId}_w3`, {
     userId,
     wineId: 'w3',
-    giftedDate: new Date('2026-01-01'),
-    recipientName: 'Bob Durand',
+    received: { from: 'Alice Martin' },
+    given: { date: new Date('2026-01-01'), recipientName: 'Bob Durand' },
   })
 }
 

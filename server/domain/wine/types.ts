@@ -4,7 +4,6 @@ import type {
   Eur,
   Latitude,
   Longitude,
-  PersonName,
   PlaceName,
   Region,
   UserId,
@@ -98,7 +97,6 @@ export type Wine = {
   purchase?: WinePurchase
   drinkWindow?: DrinkWindow
   notes?: string
-  giftedBy?: PersonName
   servingTemperature?: number
   place?: WinePlace
   createdAt: Date

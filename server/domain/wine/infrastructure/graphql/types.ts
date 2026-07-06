@@ -50,7 +50,6 @@ export const WineType = builder.objectRef<Wine>('Wine').implement({
     purchase: t.field({ type: WinePurchaseType, nullable: true, resolve: (w) => w.purchase }),
     drinkWindow: t.field({ type: DrinkWindowType, nullable: true, resolve: (w) => w.drinkWindow }),
     notes: t.exposeString('notes', { nullable: true }),
-    giftedBy: t.expose('giftedBy', { type: 'PersonName', nullable: true }),
     servingTemperature: t.exposeFloat('servingTemperature', { nullable: true }),
     place: t.field({ type: WinePlaceType, nullable: true, resolve: (w) => w.place }),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),

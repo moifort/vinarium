@@ -1,7 +1,6 @@
 import { GraphQLError } from 'graphql'
 import { builder } from '~/domain/shared/graphql/builder'
 import { stripNulls } from '~/utils/input'
-import { WineCommand } from '../../command'
 import type { Wine } from '../../types'
 import { WineUseCase } from '../../use-case'
 import { AddWineInput, UpdateWineInput } from './inputs'
@@ -17,7 +16,9 @@ const compact = <T extends Record<string, unknown>>(obj: T): T | undefined => {
 }
 
 // The flat purchase/drink-window/place input fields, regrouped into the wine
-// aggregate's sub-objects. A sub-object with no set field is simply absent.
+// aggregate's sub-objects. A sub-object with no set field is simply absent. On
+// update a provided sub-object replaces the whole one (the edit form always
+// submits the complete current state, so partial overwrites can't happen).
 type WineFlatInput = {
   drinkFrom?: unknown
   drinkUntil?: unknown
@@ -52,6 +53,7 @@ builder.mutationField('addWine', (t) =>
       const {
         name,
         beverageType,
+        giftedBy,
         drinkFrom,
         drinkUntil,
         purchasePrice,
@@ -62,7 +64,7 @@ builder.mutationField('addWine', (t) =>
         ...scalars
       } = stripNulls(input)
       const data = { ...scalars, ...subObjects(input) }
-      const result = await WineCommand.add(userId, name, beverageType ?? 'wine', data)
+      const result = await WineUseCase.add(userId, name, beverageType ?? 'wine', data, giftedBy)
       if (result === 'color-required')
         throw new GraphQLError('A wine requires a color', {
           extensions: { code: 'BAD_USER_INPUT' },
@@ -86,6 +88,7 @@ builder.mutationField('updateWine', (t) =>
     },
     resolve: async (_root, { id, input }, { userId }) => {
       const {
+        giftedBy,
         drinkFrom,
         drinkUntil,
         purchasePrice,
@@ -96,7 +99,7 @@ builder.mutationField('updateWine', (t) =>
         ...scalars
       } = stripNulls(input)
       const data = { ...scalars, ...subObjects(input) }
-      const result = await WineCommand.update(userId, id, data)
+      const result = await WineUseCase.update(userId, id, data, giftedBy)
       if (result === 'not-found')
         throw new GraphQLError('Wine not found', { extensions: { code: 'NOT_FOUND' } })
       if (result === 'color-required')

@@ -58,8 +58,8 @@ const fieldStrengths = (item: SearchableWine, query: string) => {
     ['appellation', matchStrength(item.appellation, query)],
     ['region', matchStrength(item.region, query)],
     ['vintage', vintageStrength(item.vintage, query)],
-    ['gifted-by', matchStrength(item.giftedBy, query)],
-    ['gift-recipient', matchStrength(item.gift?.recipientName, query)],
+    ['gifted-by', matchStrength(item.gift?.received?.from, query)],
+    ['gift-recipient', matchStrength(item.gift?.given?.recipientName, query)],
     ['recommender', matchStrength(item.recommendation?.recommenderName, query)],
     ['tasting-contact', Math.max(0, ...contacts.map((contact) => matchStrength(contact, query)))],
   ]
@@ -86,8 +86,7 @@ export const passesFilters = (item: SearchableWine, filters: SearchFilters) => {
   if (filters.favorite === true && item.consumption?.favorite !== true) return false
   if (filters.status === 'in-cellar' && item.cellar === undefined) return false
   if (filters.status === 'consumed' && item.consumption?.consumedDate == null) return false
-  if (filters.gifted === true && item.giftedBy === undefined && item.gift === undefined)
-    return false
+  if (filters.gifted === true && item.gift === undefined) return false
   return true
 }
 
