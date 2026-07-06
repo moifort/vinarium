@@ -18,8 +18,8 @@ builder.objectField(WineType, 'recommendation', (t) =>
     description: 'Recommendation details for this wine (null if never recommended)',
     resolve: async (wine, _, { userId }) => {
       if (wine.recommendation !== undefined) return wine.recommendation
-      const recommendations = await RecommendationQuery.getAll(userId)
-      return recommendations.find((recommendation) => recommendation.wineId === wine.id) ?? null
+      const recommendation = await RecommendationQuery.getByWineId(userId, wine.id)
+      return recommendation === 'not-found' ? null : recommendation
     },
   }),
 )

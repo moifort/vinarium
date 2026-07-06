@@ -21,8 +21,8 @@ builder.objectField(WineType, 'consumption', (t) =>
     description: 'Tasting / consumption details for this wine (null if never recorded)',
     resolve: async (wine, _, { userId }) => {
       if (wine.consumption !== undefined) return wine.consumption
-      const tastings = await TastingQuery.getAll(userId)
-      return tastings.find((tasting) => tasting.wineId === wine.id) ?? null
+      const tasting = await TastingQuery.getByWineId(userId, wine.id)
+      return tasting === 'not-found' ? null : tasting
     },
   }),
 )

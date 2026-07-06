@@ -85,8 +85,8 @@ builder.objectField(WineType, 'cellar', (t) =>
     description: 'Position in the cellar grid (null if the wine is not in cellar)',
     resolve: async (wine, _, { userId }) => {
       if (wine.cellar !== undefined) return wine.cellar
-      const placements = await CellarQuery.getAllPlacements(userId)
-      return placements.find((placement) => placement.wineId === wine.id) ?? null
+      const bottle = await CellarQuery.getBottleByWineId(userId, wine.id)
+      return bottle === 'not-found' ? null : bottle
     },
   }),
 )

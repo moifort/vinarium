@@ -18,8 +18,8 @@ builder.objectField(WineType, 'gift', (t) =>
     description: 'Gift details for this wine (null if never gifted)',
     resolve: async (wine, _, { userId }) => {
       if (wine.gift !== undefined) return wine.gift
-      const gifts = await GiftQuery.getAll(userId)
-      return gifts.find((gift) => gift.wineId === wine.id) ?? null
+      const gift = await GiftQuery.getByWineId(userId, wine.id)
+      return gift === 'not-found' ? null : gift
     },
   }),
 )

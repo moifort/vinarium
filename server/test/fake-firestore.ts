@@ -59,7 +59,8 @@ export const createFakeFirestore = () => {
   const directWrites: DirectWrite[] = []
   let commitError: Error | undefined
   let generatedIds = 0
-  let reads = 0
+  let docReads = 0
+  let queryReads = 0
 
   const docsOf = (collection: string) => {
     const existing = store.get(collection)
@@ -73,7 +74,7 @@ export const createFakeFirestore = () => {
     collection,
     id,
     get: async () => {
-      reads += 1
+      docReads += 1
       const doc = docsOf(collection).get(id)
       return { exists: doc !== undefined, id, data: () => doc }
     },
@@ -115,7 +116,7 @@ export const createFakeFirestore = () => {
     offset: (count) => makeQuery(collection, { ...state, offset: count }),
     startAfter: (cursor) => makeQuery(collection, { ...state, startAfterId: cursor.id }),
     get: async () => {
-      reads += 1
+      queryReads += 1
       let matching = [...docsOf(collection).entries()].filter(([, data]) =>
         state.filters.every((filter) => matchesFilter(data, filter)),
       )
@@ -183,7 +184,7 @@ export const createFakeFirestore = () => {
   }
 
   const getAll = async (...refs: FakeRef[]) => {
-    reads += refs.length
+    docReads += refs.length
     return refs.map((ref) => {
       const doc = docsOf(ref.collection).get(ref.id)
       return { exists: doc !== undefined, id: ref.id, data: () => doc }
@@ -200,7 +201,16 @@ export const createFakeFirestore = () => {
     directWrites,
     // Firestore round-trips (document gets + query gets) — lets tests assert read budgets
     get reads() {
-      return reads
+      return docReads + queryReads
+    },
+    // Keyed document gets only (ref.get + getAll) — one read per document fetched
+    get docReads() {
+      return docReads
+    },
+    // Collection query gets only — a scan counts 1 whatever the number of docs returned,
+    // so asserting queryReads === 0 is the proof that a path never scans a collection
+    get queryReads() {
+      return queryReads
     },
     failCommitsWith: (error: Error) => {
       commitError = error
