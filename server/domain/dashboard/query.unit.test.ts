@@ -21,9 +21,8 @@ const seedDashboardData = () => {
     userId,
     name: 'Château Cave',
     color: 'red',
-    purchasePrice: 30,
-    drinkFrom: currentYear - 1,
-    drinkUntil: currentYear + 5,
+    purchase: { price: 30 },
+    drinkWindow: { from: currentYear - 1, until: currentYear + 5 },
     createdAt: new Date('2026-01-10'),
   })
   fake.seed('wines', 'w2', {

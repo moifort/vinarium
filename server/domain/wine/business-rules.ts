@@ -1,6 +1,8 @@
 import type { BeverageSubtype, BeverageType, WineStatus } from '~/domain/wine/types'
 
-type DrinkWindow = { from?: number; until?: number }
+// Years as plain numbers: the drink-window rules are pure arithmetic, decoupled
+// from the branded Year of the aggregate (a Year is assignable to number).
+type YearRange = { from?: number; until?: number }
 
 export const wineStatus = (context: {
   inCellar: boolean
@@ -13,15 +15,17 @@ export const wineStatus = (context: {
   return 'consumed'
 }
 
-export const readyToDrink = (window: DrinkWindow, year: number) => {
+export const readyToDrink = (window: YearRange, year: number) => {
   if (!window.from && !window.until) return false
   return (!window.from || window.from <= year) && (!window.until || window.until >= year)
 }
 
-export const urgentToDrink = (window: DrinkWindow, year: number) => {
+export const urgentToDrink = (window: YearRange, year: number) => {
   if (!window.until) return false
   return window.until <= year + 1
 }
+
+// The wine-only aggregate attributes cleared when a beverage stops being a wine.
 
 export const requiresColor = (beverageType: BeverageType) => beverageType === 'wine'
 
@@ -30,8 +34,7 @@ const WINE_ONLY_ATTRIBUTES = [
   'grapeVarieties',
   'appellation',
   'classification',
-  'drinkFrom',
-  'drinkUntil',
+  'drinkWindow',
   'servingTemperature',
 ] as const
 

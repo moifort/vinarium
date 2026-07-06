@@ -218,6 +218,14 @@ ISO 8601 date-time string
 scalar DateTime
 
 """
+The years a wine is at its best — either bound may stand alone
+"""
+type DrinkWindow {
+  from: Year
+  until: Year
+}
+
+"""
 Euro amount (non-negative)
 """
 scalar Eur
@@ -686,8 +694,7 @@ type Wine {
   country: Country
   createdAt: DateTime!
   domain: WineDomain
-  drinkFrom: Year
-  drinkUntil: Year
+  drinkWindow: DrinkWindow
 
   """
   Gift details for this wine (null if never gifted)
@@ -701,13 +708,10 @@ type Wine {
   """
   history: [JournalEvent!]!
   id: WineId!
-  latitude: Latitude
-  longitude: Longitude
   name: WineName!
   notes: String
-  placeName: PlaceName
-  purchaseDate: String
-  purchasePrice: Eur
+  place: WinePlace
+  purchase: WinePurchase
 
   """
   Recommendation details for this wine (null if never recommended)
@@ -754,6 +758,26 @@ enum WineListMode {
 Wine display name (non-empty)
 """
 scalar WineName
+
+"""
+Where the bottle was bought (coordinates and/or a place name)
+"""
+type WinePlace {
+  latitude: Latitude
+  longitude: Longitude
+  name: PlaceName
+}
+
+"""
+What the bottle cost and when it was acquired
+"""
+type WinePurchase {
+  """
+  ISO date string
+  """
+  date: String
+  price: Eur
+}
 
 """
 Field used to sort the wine list

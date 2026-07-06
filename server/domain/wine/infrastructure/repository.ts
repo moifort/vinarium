@@ -7,8 +7,8 @@ import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const wines = () => db().collection('wines').withConverter(genericDataConverter<Wine>())
 
-// The wine document fields each sort option maps to.
-const sortField = (sort: WineSort) => (sort === 'price' ? 'purchasePrice' : sort)
+// The wine document fields each sort option maps to (nested path for price).
+const sortField = (sort: WineSort) => (sort === 'price' ? 'purchase.price' : sort)
 
 export type WinePage = { wines: Wine[]; hasMore: boolean }
 export type PageArgs = { limit: number; after?: WineId; sort: WineSort; order: SortOrder }

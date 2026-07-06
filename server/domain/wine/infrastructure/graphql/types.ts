@@ -1,6 +1,31 @@
 import { builder } from '~/domain/shared/graphql/builder'
-import type { Wine } from '../../types'
+import type { DrinkWindow, Wine, WinePlace, WinePurchase } from '../../types'
 import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
+
+const DrinkWindowType = builder.objectRef<DrinkWindow>('DrinkWindow').implement({
+  description: 'The years a wine is at its best — either bound may stand alone',
+  fields: (t) => ({
+    from: t.expose('from', { type: 'Year', nullable: true }),
+    until: t.expose('until', { type: 'Year', nullable: true }),
+  }),
+})
+
+const WinePurchaseType = builder.objectRef<WinePurchase>('WinePurchase').implement({
+  description: 'What the bottle cost and when it was acquired',
+  fields: (t) => ({
+    price: t.expose('price', { type: 'Eur', nullable: true }),
+    date: t.exposeString('date', { nullable: true, description: 'ISO date string' }),
+  }),
+})
+
+const WinePlaceType = builder.objectRef<WinePlace>('WinePlace').implement({
+  description: 'Where the bottle was bought (coordinates and/or a place name)',
+  fields: (t) => ({
+    latitude: t.expose('latitude', { type: 'Latitude', nullable: true }),
+    longitude: t.expose('longitude', { type: 'Longitude', nullable: true }),
+    name: t.expose('name', { type: 'PlaceName', nullable: true }),
+  }),
+})
 
 // The satellite fields (cellar, consumption, gift, recommendation, history) are
 // grafted onto WineType by their own domains via builder.objectField and resolve
@@ -22,16 +47,12 @@ export const WineType = builder.objectRef<Wine>('Wine').implement({
     country: t.expose('country', { type: 'Country', nullable: true }),
     grapeVarieties: t.exposeStringList('grapeVarieties', { nullable: true }),
     classification: t.expose('classification', { type: 'Classification', nullable: true }),
-    purchasePrice: t.expose('purchasePrice', { type: 'Eur', nullable: true }),
-    purchaseDate: t.exposeString('purchaseDate', { nullable: true }),
-    drinkFrom: t.expose('drinkFrom', { type: 'Year', nullable: true }),
-    drinkUntil: t.expose('drinkUntil', { type: 'Year', nullable: true }),
+    purchase: t.field({ type: WinePurchaseType, nullable: true, resolve: (w) => w.purchase }),
+    drinkWindow: t.field({ type: DrinkWindowType, nullable: true, resolve: (w) => w.drinkWindow }),
     notes: t.exposeString('notes', { nullable: true }),
     giftedBy: t.expose('giftedBy', { type: 'PersonName', nullable: true }),
     servingTemperature: t.exposeFloat('servingTemperature', { nullable: true }),
-    latitude: t.expose('latitude', { type: 'Latitude', nullable: true }),
-    longitude: t.expose('longitude', { type: 'Longitude', nullable: true }),
-    placeName: t.expose('placeName', { type: 'PlaceName', nullable: true }),
+    place: t.field({ type: WinePlaceType, nullable: true, resolve: (w) => w.place }),
     createdAt: t.expose('createdAt', { type: 'DateTime' }),
     updatedAt: t.expose('updatedAt', { type: 'DateTime' }),
   }),

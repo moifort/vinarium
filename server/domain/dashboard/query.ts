@@ -31,13 +31,11 @@ export namespace DashboardQuery {
     const wineMap = keyBy(wines, 'id')
 
     const bottleCount = allBottles.length
-    const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchasePrice ?? 0), 0)
+    const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchase?.price ?? 0), 0)
 
     const readyToDrink = sortBy(
       allBottles
-        .filter((b) =>
-          isReadyToDrink({ from: b.wine.drinkFrom, until: b.wine.drinkUntil }, currentYear),
-        )
+        .filter((b) => isReadyToDrink(b.wine.drinkWindow ?? {}, currentYear))
         .map((b) => toReadyToDrinkWine(b, currentYear)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Number.POSITIVE_INFINITY,
@@ -73,8 +71,8 @@ export namespace DashboardQuery {
     beverageType: bottle.wine.beverageType,
     color: bottle.wine.color,
     position: `${bottle.rowLabel}${bottle.colLabel}`,
-    urgent: urgentToDrink({ until: bottle.wine.drinkUntil }, currentYear),
-    drinkUntil: bottle.wine.drinkUntil,
+    urgent: urgentToDrink(bottle.wine.drinkWindow ?? {}, currentYear),
+    drinkUntil: bottle.wine.drinkWindow?.until,
   })
 
   const toLastBottle = (bottle?: CellarBottleWithWine): LastBottle | undefined => {
@@ -103,7 +101,7 @@ export namespace DashboardQuery {
           beverageType: wine.beverageType,
           color: wine.color,
           vintage: wine.vintage,
-          estimatedPrice: wine.purchasePrice,
+          estimatedPrice: wine.purchase?.price,
           tastingDate: tasting.consumedDate,
           rating: tasting.rating,
         }

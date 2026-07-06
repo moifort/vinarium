@@ -69,6 +69,17 @@ export type WineStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'
 export type WineListMode = 'all' | 'favorites' | 'gifted' | 'recommended'
 export type WineStatusFilter = 'all' | 'in-cellar' | 'consumed'
 
+// The years a wine is at its best — either bound may stand alone (a wine to
+// drink "from 2028" with no upper bound, or "before 2030" with no lower one).
+export type DrinkWindow = { from?: Year; until?: Year }
+
+// Where the bottle was bought. A coordinate pair always travels together; the
+// place name may exist without them (a shop typed by hand) and vice-versa.
+export type WinePlace = { latitude?: Latitude; longitude?: Longitude; name?: PlaceName }
+
+// What the bottle cost and when it was acquired.
+export type WinePurchase = { price?: Eur; date?: string }
+
 export type Wine = {
   id: WineId
   userId: UserId
@@ -84,16 +95,12 @@ export type Wine = {
   country?: Country
   grapeVarieties?: string[]
   classification?: Classification
-  purchasePrice?: Eur
-  purchaseDate?: string
-  drinkFrom?: Year
-  drinkUntil?: Year
+  purchase?: WinePurchase
+  drinkWindow?: DrinkWindow
   notes?: string
   giftedBy?: PersonName
   servingTemperature?: number
-  latitude?: Latitude
-  longitude?: Longitude
-  placeName?: PlaceName
+  place?: WinePlace
   createdAt: Date
   updatedAt: Date
 }

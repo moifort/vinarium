@@ -117,8 +117,7 @@ describe('irrelevantAttributes', () => {
       'grapeVarieties',
       'appellation',
       'classification',
-      'drinkFrom',
-      'drinkUntil',
+      'drinkWindow',
       'servingTemperature',
     ])
   })
