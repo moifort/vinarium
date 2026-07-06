@@ -6,6 +6,6 @@ builder.queryField('dashboard', (t) =>
   t.field({
     type: DashboardType,
     description: 'Aggregated dashboard view for the current user',
-    resolve: (_root, _args, { userId }) => DashboardQuery.get(userId),
+    resolve: (_root, _args, { userId }) => DashboardQuery.view(userId),
   }),
 )

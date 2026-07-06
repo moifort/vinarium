@@ -19,10 +19,10 @@ export namespace SearchQuery {
   ) => {
     const [wines, placements, tastings, gifts, recommendations] = await Promise.all([
       WineQuery.findAll(userId),
-      CellarQuery.getAllPlacements(userId),
-      TastingQuery.getAll(userId),
-      GiftQuery.getAll(userId),
-      RecommendationQuery.getAll(userId),
+      CellarQuery.placements(userId),
+      TastingQuery.all(userId),
+      GiftQuery.all(userId),
+      RecommendationQuery.all(userId),
     ])
     const cellar = indexByWineId(placements)
     const consumption = indexByWineId(tastings)

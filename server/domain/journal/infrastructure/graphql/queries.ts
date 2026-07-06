@@ -11,6 +11,6 @@ builder.queryField('journalEvents', (t) =>
       offset: t.arg.int({ defaultValue: 0 }),
     },
     resolve: (_root, args, { userId }) =>
-      JournalQuery.getPage(userId, { limit: args.limit ?? 15, offset: args.offset ?? 0 }),
+      JournalQuery.page(userId, { limit: args.limit ?? 15, offset: args.offset ?? 0 }),
   }),
 )

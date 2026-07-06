@@ -27,10 +27,10 @@ const seed = () => {
   }
 }
 
-describe('JournalQuery.getPage', () => {
+describe('JournalQuery.page', () => {
   test('returns a bounded page most-recent-first with hasMore', async () => {
     seed()
-    const first = await JournalQuery.getPage(userId, { limit: 2, offset: 0 })
+    const first = await JournalQuery.page(userId, { limit: 2, offset: 0 })
     expect(first.items.length).toBe(2)
     expect(first.hasMore).toBe(true)
     // date desc: e4 (Jan 5) then e3 (Jan 4)
@@ -39,7 +39,7 @@ describe('JournalQuery.getPage', () => {
 
   test('offset advances the page and clears hasMore at the end', async () => {
     seed()
-    const page = await JournalQuery.getPage(userId, { limit: 2, offset: 4 })
+    const page = await JournalQuery.page(userId, { limit: 2, offset: 4 })
     expect(page.items.length).toBe(1)
     expect(page.hasMore).toBe(false)
   })

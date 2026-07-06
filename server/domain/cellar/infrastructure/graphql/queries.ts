@@ -6,7 +6,7 @@ builder.queryField('cellarInfo', (t) =>
   t.field({
     type: CellarInfoType,
     description: 'Cellar grid dimensions and current placement count',
-    resolve: (_root, _args, { userId }) => CellarQuery.getCellarInfo(userId),
+    resolve: (_root, _args, { userId }) => CellarQuery.info(userId),
   }),
 )
 
@@ -19,7 +19,7 @@ builder.queryField('cellarBottles', (t) =>
       after: t.arg({ type: 'WineId' }),
     },
     resolve: (_root, args, { userId }) =>
-      CellarQuery.getBottlesPage(userId, {
+      CellarQuery.bottlesPage(userId, {
         limit: args.limit ?? 15,
         after: args.after ?? undefined,
       }),

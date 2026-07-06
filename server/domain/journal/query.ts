@@ -7,7 +7,7 @@ import { WineQuery } from '~/domain/wine/query'
 import type { Wine, WineId } from '~/domain/wine/types'
 
 export namespace JournalQuery {
-  export const getAll = async (userId: UserId) => {
+  export const all = async (userId: UserId) => {
     const [entries, wines] = await Promise.all([
       repository.findAllByUser(userId),
       WineQuery.findAll(userId),
@@ -20,15 +20,12 @@ export namespace JournalQuery {
   }
 
   // One page of journal events (offset-based). Loads only the page's wines by id.
-  export const getPage = async (
+  export const page = async (
     userId: UserId,
     { limit, offset }: { limit: number; offset: number },
   ) => {
     const { entries, hasMore } = await repository.findPage(userId, { limit, offset })
-    const wines = await WineQuery.getManyByWineIds(
-      userId,
-      uniq(entries.map(({ wineId }) => wineId)),
-    )
+    const wines = await WineQuery.byWineIds(userId, uniq(entries.map(({ wineId }) => wineId)))
     const wineMap = keyBy(wines, ({ id }) => id)
     const items = entries
       .filter(({ wineId }) => wineMap[wineId])

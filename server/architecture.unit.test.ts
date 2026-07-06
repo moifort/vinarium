@@ -119,10 +119,10 @@ describe('architecture', () => {
 
   describe('query.ts and command.ts name the business concept, not the technical pattern', () => {
     const targets = glob('server/domain/*/{query,command,business-rules}.ts')
-    // Exported names must carry intent, never a computeX/handleX/processX scaffold.
-    // (`get*` reads are the accepted CQRS read idiom — the DDD skill's own query
-    // examples use getAll/getById — so they are intentionally NOT banned here.)
-    const bannedPrefixes = /export const (compute|handle|process|manage|perform)[A-Z]/
+    // Exported names must carry intent, never a getX/computeX/handleX scaffold.
+    // Reads read as `all`, `byId`, `view`, `placements`; writes as the business
+    // action (`placeWine`, `giveTo`). `findAll`/`findBy` stay (repository idiom).
+    const bannedPrefixes = /export const (get|compute|handle|process|manage|perform|fetch)[A-Z]/
 
     for (const file of targets) {
       test(`${basename(dirname(file))}/${basename(file)}`, () => {

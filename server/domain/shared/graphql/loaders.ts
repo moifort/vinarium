@@ -69,16 +69,16 @@ export type WineSatelliteLoaders = {
 
 export const wineSatelliteLoaders = (userId: UserId): WineSatelliteLoaders => ({
   cellar: batchedByWineId(async (wineIds) =>
-    indexByWineId(await CellarQuery.getPlacementsByWineIds(userId, wineIds)),
+    indexByWineId(await CellarQuery.placementsByWineIds(userId, wineIds)),
   ),
   consumption: batchedByWineId(async (wineIds) =>
-    indexByWineId(await TastingQuery.getManyByWineIds(userId, wineIds)),
+    indexByWineId(await TastingQuery.byWineIds(userId, wineIds)),
   ),
   gift: batchedByWineId(async (wineIds) =>
-    indexByWineId(await GiftQuery.getManyByWineIds(userId, wineIds)),
+    indexByWineId(await GiftQuery.byWineIds(userId, wineIds)),
   ),
   recommendation: batchedByWineId(async (wineIds) =>
-    indexByWineId(await RecommendationQuery.getManyByWineIds(userId, wineIds)),
+    indexByWineId(await RecommendationQuery.byWineIds(userId, wineIds)),
   ),
   history: batchedByWineId(async (wineIds) => {
     const entries = await JournalQuery.entriesByWineIds(userId, wineIds)

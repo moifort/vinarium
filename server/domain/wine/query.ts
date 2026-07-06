@@ -36,14 +36,14 @@ const CURSOR_SAFE_SORTS: readonly WineSort[] = ['createdAt', 'updatedAt']
 export namespace WineQuery {
   export const findAll = async (userId: UserId) => repository.findAllByUser(userId)
 
-  export const getById = async (userId: UserId, id: WineId) => {
+  export const byId = async (userId: UserId, id: WineId) => {
     const wine = await repository.findBy(userId, id)
     if (!wine) return 'not-found' as const
     return wine
   }
 
   // Batch-load the wines of a page by id (no full-collection scan).
-  export const getManyByWineIds = async (userId: UserId, wineIds: WineId[]) =>
+  export const byWineIds = async (userId: UserId, wineIds: WineId[]) =>
     repository.findManyByWineIds(userId, wineIds)
 
   // A page of the wine list, filtered and sorted per view.
@@ -85,14 +85,14 @@ export namespace WineQuery {
 
   const ofMode = async (userId: UserId, wines: Wine[], mode: WineListMode) => {
     if (mode === 'favorites') {
-      const tastings = await TastingQuery.getAll(userId)
+      const tastings = await TastingQuery.all(userId)
       const favorites = new Set(
         tastings.filter((tasting) => tasting.favorite === true).map((tasting) => tasting.wineId),
       )
       return wines.filter((wine) => favorites.has(wine.id))
     }
     if (mode === 'recommended') {
-      const recommendations = await RecommendationQuery.getAll(userId)
+      const recommendations = await RecommendationQuery.all(userId)
       const recommended = new Set(recommendations.map((recommendation) => recommendation.wineId))
       return wines.filter((wine) => recommended.has(wine.id))
     }
@@ -102,13 +102,11 @@ export namespace WineQuery {
 
   const ofStatus = async (userId: UserId, wines: Wine[], status: WineStatusFilter) => {
     if (status === 'in-cellar') {
-      const placed = new Set(
-        (await CellarQuery.getAllPlacements(userId)).map((bottle) => bottle.wineId),
-      )
+      const placed = new Set((await CellarQuery.placements(userId)).map((bottle) => bottle.wineId))
       return wines.filter((wine) => placed.has(wine.id))
     }
     if (status === 'consumed') {
-      const tastings = await TastingQuery.getAll(userId)
+      const tastings = await TastingQuery.all(userId)
       const consumed = new Set(
         tastings.filter((tasting) => tasting.consumedDate != null).map((tasting) => tasting.wineId),
       )

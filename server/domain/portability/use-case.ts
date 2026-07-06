@@ -32,9 +32,9 @@ export namespace PortabilityUseCase {
     const [wines, cellar, tasting, recommendation, gift, journal] = await Promise.all([
       WineQuery.findAll(userId),
       CellarQuery.allRecords(userId),
-      TastingQuery.getAll(userId),
-      RecommendationQuery.getAll(userId),
-      GiftQuery.getAll(userId),
+      TastingQuery.all(userId),
+      RecommendationQuery.all(userId),
+      GiftQuery.all(userId),
       JournalQuery.allEntries(userId),
     ])
     return {

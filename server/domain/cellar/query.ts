@@ -15,7 +15,7 @@ export const bottleView = (bottle: CellarBottle): CellarBottleView => ({
 })
 
 export namespace CellarQuery {
-  export const getCellarInfo = async (userId: UserId) => ({
+  export const info = async (userId: UserId) => ({
     rows: CELLAR_SIZE.rows,
     cols: CELLAR_SIZE.cols,
     capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
@@ -23,7 +23,7 @@ export namespace CellarQuery {
     placedCount: await repository.countByUser(userId),
   })
 
-  export const getAllBottles = async (userId: UserId) => {
+  export const bottlesWithWine = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
       repository.findAllByUser(userId),
       WineQuery.findAll(userId),
@@ -37,7 +37,7 @@ export namespace CellarQuery {
     })
   }
 
-  export const getAllPlacements = async (userId: UserId) => {
+  export const placements = async (userId: UserId) => {
     const bottles = await repository.findAllByUser(userId)
     return bottles.map(bottleView)
   }
@@ -46,12 +46,12 @@ export namespace CellarQuery {
   export const allRecords = async (userId: UserId) => repository.findAllByUser(userId)
 
   // One page of cellar bottles in grid order (row, col) joined with their wine.
-  export const getBottlesPage = async (
+  export const bottlesPage = async (
     userId: UserId,
     { limit, after }: { limit: number; after?: WineId },
   ) => {
     const { bottles, hasMore } = await repository.findBottlesPage(userId, { limit, after })
-    const wines = await WineQuery.getManyByWineIds(
+    const wines = await WineQuery.byWineIds(
       userId,
       bottles.map(({ wineId }) => wineId),
     )
@@ -63,7 +63,7 @@ export namespace CellarQuery {
   }
 
   // Cellar placements for a page of wines, batch-loaded by id.
-  export const getPlacementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
+  export const placementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
     (await repository.findManyByWineIds(userId, wineIds)).map(bottleView)
 
   export const suggestPosition = async (userId: UserId) => {

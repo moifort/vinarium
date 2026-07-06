@@ -18,12 +18,12 @@ import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from '
 const DASHBOARD_SECTION_LIMIT = 5
 
 export namespace DashboardQuery {
-  export const get = async (userId: UserId): Promise<DashboardView> => {
+  export const view = async (userId: UserId): Promise<DashboardView> => {
     // The per-request cache dedupes the shared wines read across these queries.
     const [allBottles, history, allTastings, wines] = await Promise.all([
-      CellarQuery.getAllBottles(userId),
-      JournalQuery.getAll(userId),
-      TastingQuery.getAll(userId),
+      CellarQuery.bottlesWithWine(userId),
+      JournalQuery.all(userId),
+      TastingQuery.all(userId),
       WineQuery.findAll(userId),
     ])
 

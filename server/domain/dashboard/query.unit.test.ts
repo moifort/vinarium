@@ -67,11 +67,11 @@ const seedDashboardData = () => {
   })
 }
 
-describe('DashboardQuery.get', () => {
+describe('DashboardQuery.view', () => {
   test('assembles the dashboard view', async () => {
     seedDashboardData()
 
-    const view = await DashboardQuery.get(userId)
+    const view = await DashboardQuery.view(userId)
 
     expect(view.bottleCount).toBe(1)
     expect(view.totalValue).toBe(30)
@@ -86,7 +86,7 @@ describe('DashboardQuery.get', () => {
     seedDashboardData()
 
     const before = fake.reads
-    await DashboardQuery.get(userId)
+    await DashboardQuery.view(userId)
 
     // wines + cellar + journal + tasting = 4 collection reads, no duplicates
     expect(fake.reads - before).toBe(4)

@@ -48,7 +48,7 @@ builder.queryField('wine', (t) =>
     description: 'Get a single wine by ID',
     args: { id: t.arg({ type: 'WineId', required: true }) },
     resolve: async (_root, { id }, { userId }) => {
-      const wine = await WineQuery.getById(userId, id)
+      const wine = await WineQuery.byId(userId, id)
       return wine === 'not-found' ? null : wine
     },
   }),
