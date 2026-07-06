@@ -1,6 +1,7 @@
 import { make } from 'ts-brand'
 import { z } from 'zod'
-import { pureColor, retainedSubtype, subtypeFromLegacy } from '~/domain/wine/business-rules'
+import { retainedSubtype } from '~/domain/wine/business-rules'
+import { pureColor, subtypeFromLegacy } from '~/domain/wine/legacy-mapping'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/wine/primitives'
 import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
 

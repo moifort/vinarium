@@ -1,6 +1,6 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
-import type { CellarBottle, CellarBottleView } from '../../types'
+import type { CellarBottle, CellarBottleView, CellarBottleWithWine } from '../../types'
 
 export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottle').implement({
   description: 'A bottle physically placed in the cellar grid',
@@ -16,9 +16,7 @@ export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottl
 })
 
 export const CellarBottleWithWineType = builder
-  .objectRef<CellarBottleView & { wine: import('~/domain/wine/types').Wine }>(
-    'CellarBottleWithWine',
-  )
+  .objectRef<CellarBottleWithWine>('CellarBottleWithWine')
   .implement({
     description: 'A cellar bottle joined with the corresponding wine',
     fields: (t) => ({
@@ -33,10 +31,7 @@ export const CellarBottleWithWineType = builder
   })
 
 export const CellarBottlesType = builder
-  .objectRef<{
-    items: (CellarBottleView & { wine: import('~/domain/wine/types').Wine })[]
-    hasMore: boolean
-  }>('CellarBottles')
+  .objectRef<{ items: CellarBottleWithWine[]; hasMore: boolean }>('CellarBottles')
   .implement({
     description: 'A page of cellar bottles joined with their wine',
     fields: (t) => ({

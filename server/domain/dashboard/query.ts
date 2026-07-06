@@ -1,5 +1,6 @@
 import { keyBy, sortBy } from 'lodash-es'
 import { CellarQuery } from '~/domain/cellar/query'
+import type { CellarBottleWithWine } from '~/domain/cellar/types'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -64,7 +65,7 @@ export namespace DashboardQuery {
   }
 
   const toReadyToDrinkWine = (
-    bottle: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number],
+    bottle: CellarBottleWithWine,
     currentYear: number,
   ): ReadyToDrinkWine => ({
     id: bottle.wine.id,
@@ -76,9 +77,7 @@ export namespace DashboardQuery {
     drinkUntil: bottle.wine.drinkUntil,
   })
 
-  const toLastBottle = (
-    bottle?: Awaited<ReturnType<typeof CellarQuery.getAllBottles>>[number],
-  ): LastBottle | undefined => {
+  const toLastBottle = (bottle?: CellarBottleWithWine): LastBottle | undefined => {
     if (!bottle) return undefined
     return {
       wine: {

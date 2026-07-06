@@ -3,16 +3,10 @@ import { builder } from '~/domain/shared/graphql/builder'
 import { stripNulls } from '~/utils/input'
 import { CellarCommand } from '../../command'
 import { CellarCol, CellarRow } from '../../primitives'
-import type { CellarBottle, CellarBottleView } from '../../types'
+import { bottleView } from '../../query'
 import { CellarUseCase } from '../../use-case'
 import { ConsumptionInput, GiftInput } from './inputs'
 import { CellarBottleType } from './types'
-
-const toView = (bottle: CellarBottle): CellarBottleView => ({
-  ...bottle,
-  rowLabel: CellarRow.toLabel(bottle.row),
-  colLabel: CellarCol.toLabel(bottle.col),
-})
 
 builder.mutationField('placeBottle', (t) =>
   t.field({
@@ -24,7 +18,7 @@ builder.mutationField('placeBottle', (t) =>
       col: t.arg.int({ required: true }),
     },
     resolve: async (_root, { wineId, row, col }, { userId }) =>
-      toView(await CellarCommand.placeWine(userId, wineId, CellarRow(row), CellarCol(col))),
+      bottleView(await CellarCommand.placeWine(userId, wineId, CellarRow(row), CellarCol(col))),
   }),
 )
 
@@ -41,7 +35,7 @@ builder.mutationField('moveBottle', (t) =>
       const result = await CellarCommand.moveBottle(userId, wineId, CellarRow(row), CellarCol(col))
       if (result === 'not-in-cellar')
         throw new GraphQLError('Wine not in cellar', { extensions: { code: 'NOT_FOUND' } })
-      return toView(result)
+      return bottleView(result)
     },
   }),
 )

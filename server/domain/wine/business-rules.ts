@@ -1,4 +1,4 @@
-import type { BeverageSubtype, BeverageType, WineColor, WineStatus } from '~/domain/wine/types'
+import type { BeverageSubtype, BeverageType, WineStatus } from '~/domain/wine/types'
 
 type DrinkWindow = { from?: number; until?: number }
 
@@ -72,75 +72,6 @@ export const subtypeAllowed = (beverageType: BeverageType, subtype: BeverageSubt
 // loses its IPA.
 export const retainedSubtype = (beverageType: BeverageType, subtype?: BeverageSubtype) =>
   subtype !== undefined && subtypeAllowed(beverageType, subtype) ? subtype : undefined
-
-// Normalizes the pre-subtype color enum: sparkling/sweet were wine subtypes
-// crammed into the color; their actual robe was never captured, white is the
-// most likely one. Unknown values yield undefined rather than a bad guess.
-export const pureColor = (color?: string): WineColor | undefined => {
-  if (color === 'red' || color === 'white' || color === 'rosé') return color
-  if (color === 'sparkling' || color === 'sweet') return 'white'
-  return undefined
-}
-
-// Ordered: more specific patterns first (daiginjo before ginjo before gin).
-const LEGACY_STYLE_PATTERNS: readonly (readonly [string, BeverageSubtype])[] = [
-  ['daiginjo', 'daiginjo'],
-  ['ginjo', 'ginjo'],
-  ['junmai', 'junmai'],
-  ['honjozo', 'honjozo'],
-  ['nigori', 'nigori'],
-  ['single malt', 'whisky'],
-  ['whisky', 'whisky'],
-  ['whiskey', 'whisky'],
-  ['bourbon', 'whisky'],
-  ['blended', 'whisky'],
-  ['rhum', 'rum'],
-  ['rum', 'rum'],
-  ['london dry', 'gin'],
-  ['gin', 'gin'],
-  ['vodka', 'vodka'],
-  ['cognac', 'cognac'],
-  ['armagnac', 'armagnac'],
-  ['tequila', 'tequila'],
-  ['mezcal', 'tequila'],
-  ['liqueur', 'liqueur'],
-  ['eau-de-vie', 'eau-de-vie'],
-  ['eau de vie', 'eau-de-vie'],
-  ['ipa', 'ipa'],
-  ['stout', 'stout'],
-  ['pils', 'pils'],
-  ['lager', 'pils'],
-  ['triple', 'triple'],
-  ['blonde', 'blonde'],
-  ['blanche', 'blanche'],
-  ['ambrée', 'amber'],
-  ['amber', 'amber'],
-  ['brune', 'brune'],
-  ['porto', 'porto'],
-  ['demi-sec', 'demi-sec'],
-  ['brut', 'brut'],
-  ['doux', 'doux'],
-  ['poiré', 'poire'],
-  ['poire', 'poire'],
-  ['pétillant', 'sparkling'],
-  ['sparkling', 'sparkling'],
-  ['mousseux', 'sparkling'],
-  ['moelleux', 'sweet'],
-] as const
-
-// Best-effort mapping of the legacy data (free-text style, 5-value color enum)
-// to a structured subtype. Shared by the Firestore migration and the scan-cache
-// re-parse so both normalize identically. No match yields undefined.
-export const subtypeFromLegacy = (legacy: {
-  style?: string
-  color?: string
-}): BeverageSubtype | undefined => {
-  if (legacy.color === 'sparkling') return 'sparkling'
-  if (legacy.color === 'sweet') return 'sweet'
-  const style = legacy.style?.toLowerCase()
-  if (!style) return undefined
-  return LEGACY_STYLE_PATTERNS.find(([pattern]) => style.includes(pattern))?.[1]
-}
 
 // Favorite is now an explicit heart flag, decoupled from the star rating:
 // a wine can be a favorite whatever its note (or with no note at all).

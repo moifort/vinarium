@@ -6,6 +6,14 @@ import type { UserId } from '~/domain/shared/types'
 import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
+// A placed bottle projected with its grid labels — the shared cellar view shape,
+// used by the queries below and by the placement mutations.
+export const bottleView = (bottle: CellarBottle): CellarBottleView => ({
+  ...bottle,
+  rowLabel: CellarRow.toLabel(bottle.row),
+  colLabel: CellarCol.toLabel(bottle.col),
+})
+
 export namespace CellarQuery {
   export const getCellarInfo = async (userId: UserId) => ({
     rows: CELLAR_SIZE.rows,
@@ -25,13 +33,13 @@ export namespace CellarQuery {
       const wine = wineMap[bottle.wineId]
       if (!wine)
         throw new Error(`Wine ${bottle.wineId} not found for bottle at ${bottle.row},${bottle.col}`)
-      return { ...toView(bottle), wine }
+      return { ...bottleView(bottle), wine }
     })
   }
 
   export const getAllPlacements = async (userId: UserId) => {
     const bottles = await repository.findAllByUser(userId)
-    return bottles.map(toView)
+    return bottles.map(bottleView)
   }
 
   // One page of cellar bottles in grid order (row, col) joined with their wine.
@@ -47,13 +55,13 @@ export namespace CellarQuery {
     const wineMap = keyBy(wines, 'id')
     const items = bottles
       .filter(({ wineId }) => wineMap[wineId])
-      .map((bottle) => ({ ...toView(bottle), wine: wineMap[bottle.wineId] }))
+      .map((bottle) => ({ ...bottleView(bottle), wine: wineMap[bottle.wineId] }))
     return { items, hasMore }
   }
 
   // Cellar placements for a page of wines, batch-loaded by id.
   export const getPlacementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
-    (await repository.findManyByWineIds(userId, wineIds)).map(toView)
+    (await repository.findManyByWineIds(userId, wineIds)).map(bottleView)
 
   export const suggestPosition = async (userId: UserId) => {
     const allBottles = await repository.findAllByUser(userId)
@@ -75,10 +83,4 @@ export namespace CellarQuery {
     if (!firstFree) return 'cellar-full' as const
     return { row: CellarRow(firstFree.row), col: CellarCol(firstFree.col) }
   }
-
-  const toView = (bottle: CellarBottle): CellarBottleView => ({
-    ...bottle,
-    rowLabel: CellarRow.toLabel(bottle.row),
-    colLabel: CellarCol.toLabel(bottle.col),
-  })
 }
