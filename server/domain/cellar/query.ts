@@ -7,15 +7,13 @@ import { WineQuery } from '~/domain/wine/query'
 import type { WineId } from '~/domain/wine/types'
 
 export namespace CellarQuery {
-  export const getCellarInfo = async (userId: UserId) => {
-    const bottles = await repository.findAllByUser(userId)
-    return {
-      rows: CELLAR_SIZE.rows,
-      cols: CELLAR_SIZE.cols,
-      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
-      placedCount: bottles.length,
-    }
-  }
+  export const getCellarInfo = async (userId: UserId) => ({
+    rows: CELLAR_SIZE.rows,
+    cols: CELLAR_SIZE.cols,
+    capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
+    // Server-side aggregation: counting never loads the cellar documents.
+    placedCount: await repository.countByUser(userId),
+  })
 
   export const getAllBottles = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
@@ -56,12 +54,6 @@ export namespace CellarQuery {
   // Cellar placements for a page of wines, batch-loaded by id.
   export const getPlacementsByWineIds = async (userId: UserId, wineIds: WineId[]) =>
     (await repository.findManyByWineIds(userId, wineIds)).map(toView)
-
-  export const getBottleByWineId = async (userId: UserId, wineId: WineId) => {
-    const bottle = await repository.findBy(userId, wineId)
-    if (!bottle) return 'not-found' as const
-    return toView(bottle)
-  }
 
   export const suggestPosition = async (userId: UserId) => {
     const allBottles = await repository.findAllByUser(userId)

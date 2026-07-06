@@ -52,14 +52,17 @@ export namespace CellarCommand {
     targetRow: CellarRow,
     targetCol: CellarCol,
   ) => {
-    const source = await repository.findBy(userId, wineId)
+    // Two independent keyed reads in parallel: the moved bottle and whatever
+    // occupies the target slot — never a scan of the whole cellar.
+    const [source, atTarget] = await Promise.all([
+      repository.findBy(userId, wineId),
+      repository.findByPosition(userId, targetRow, targetCol),
+    ])
     if (!source) return 'not-in-cellar' as const
     if (source.row === targetRow && source.col === targetCol) return source
 
     const now = new Date()
-    const occupant = (await repository.findAllByUser(userId)).find(
-      (entry) => entry.row === targetRow && entry.col === targetCol && entry.wineId !== wineId,
-    )
+    const occupant = atTarget && atTarget.wineId !== wineId ? atTarget : undefined
 
     // The swap (cellar saves) and its journal trail commit as one batch: a
     // partial failure can no longer leave the cellar half-moved or the journal

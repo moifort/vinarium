@@ -6,6 +6,7 @@ import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
 const { schema } = await import('~/domain/shared/graphql/schema')
+const { wineSatelliteLoaders } = await import('~/domain/shared/graphql/loaders')
 
 const userId = 'user-1' as UserId
 
@@ -18,8 +19,13 @@ beforeEach(() => {
 })
 
 // No resolver on the tested paths reads the H3 event — only userId matters.
+// A fresh loader set per execution mirrors the per-request context of the route.
 const execute = (source: string) =>
-  graphql({ schema, source, contextValue: { userId, event: undefined as never } })
+  graphql({
+    schema,
+    source,
+    contextValue: { userId, event: undefined as never, loaders: wineSatelliteLoaders(userId) },
+  })
 
 const seedWine = (id: string, over: Record<string, unknown> = {}) =>
   fake.seed('wines', id, {
@@ -138,7 +144,7 @@ describe('wine(id) detail query', () => {
 })
 
 describe('wines list query', () => {
-  test('still serves satellites from the batched assembly, without per-wine fallbacks', async () => {
+  test('serves satellites through the batched loaders, without per-wine fallbacks', async () => {
     seedWine(wid(1))
     seedWine(wid(2))
     seedSatellites(wid(1))
@@ -177,10 +183,41 @@ describe('wines list query', () => {
       gift: null,
       recommendation: null,
     })
-    // Budget guard for the short-circuit: 1 page query + batched getAll of 2 refs
-    // for the wines and each of the 4 satellite collections. If assemble ever
-    // stopped attaching satellites, the per-wine fallbacks would add 8 doc reads.
+    // Budget guard: 1 page query returning the full wine docs (never re-read),
+    // plus one batched getAll of 2 refs per selected satellite collection. If a
+    // loader ever stopped batching, per-wine fallbacks would double the doc reads.
     expect(fake.queryReads - before.queryReads).toBe(1)
-    expect(fake.docReads - before.docReads).toBe(10)
+    expect(fake.docReads - before.docReads).toBe(8)
+  })
+
+  test('history is batched: one journal query for the whole page, not one per wine', async () => {
+    for (let i = 1; i <= 5; i++) {
+      seedWine(wid(i))
+      fake.seed('journal', `entry-${i}`, {
+        userId,
+        wineId: wid(i),
+        type: 'in',
+        row: 0,
+        col: i - 1,
+        date: new Date('2026-03-01'),
+      })
+    }
+
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
+    const result = await execute(`
+      query {
+        wines(limit: 10) {
+          items { id history { type position } }
+        }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    const items = (result.data?.wines as { items: Array<{ history: unknown[] }> }).items
+    expect(items).toHaveLength(5)
+    for (const item of items) expect(item.history).toHaveLength(1)
+    // 1 page query + 1 batched `in` query over the 5 wine ids — never 5 queries.
+    expect(fake.queryReads - before.queryReads).toBe(2)
+    expect(fake.docReads - before.docReads).toBe(0)
   })
 })

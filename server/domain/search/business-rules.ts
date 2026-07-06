@@ -84,9 +84,10 @@ export const passesFilters = (item: SearchableWine, filters: SearchFilters) => {
   if (filters.beverageTypes?.length && !filters.beverageTypes.includes(item.beverageType))
     return false
   if (filters.favorite === true && item.consumption?.favorite !== true) return false
-  if (filters.status === 'in-cellar' && item.cellar === null) return false
+  if (filters.status === 'in-cellar' && item.cellar === undefined) return false
   if (filters.status === 'consumed' && item.consumption?.consumedDate == null) return false
-  if (filters.gifted === true && item.giftedBy === undefined && item.gift === null) return false
+  if (filters.gifted === true && item.giftedBy === undefined && item.gift === undefined)
+    return false
   return true
 }
 

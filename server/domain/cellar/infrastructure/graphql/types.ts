@@ -1,6 +1,5 @@
 import { builder } from '~/domain/shared/graphql/builder'
 import { WineType } from '~/domain/wine/infrastructure/graphql/types'
-import { CellarQuery } from '../../query'
 import type { CellarBottle, CellarBottleView } from '../../types'
 
 export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottle').implement({
@@ -77,16 +76,12 @@ export const CellarPositionType = builder
     }),
   })
 
-// Extend WineType with the cellar nested field
+// Extend WineType with the cellar nested field, batched by the per-request loader.
 builder.objectField(WineType, 'cellar', (t) =>
   t.field({
     type: CellarBottleType,
     nullable: true,
     description: 'Position in the cellar grid (null if the wine is not in cellar)',
-    resolve: async (wine, _, { userId }) => {
-      if (wine.cellar !== undefined) return wine.cellar
-      const bottle = await CellarQuery.getBottleByWineId(userId, wine.id)
-      return bottle === 'not-found' ? null : bottle
-    },
+    resolve: async (wine, _, { loaders }) => (await loaders.cellar.load(wine.id)) ?? null,
   }),
 )

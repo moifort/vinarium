@@ -2,7 +2,7 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import type { UserId } from '~/domain/shared/types'
 import type { SortOrder, Wine, WineId, WineSort } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { memoizedPerRequest } from '~/system/request-cache'
+import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const wines = () => db().collection('wines').withConverter(genericDataConverter<Wine>())
@@ -10,11 +10,13 @@ const wines = () => db().collection('wines').withConverter(genericDataConverter<
 // The wine document fields each sort option maps to.
 const sortField = (sort: WineSort) => (sort === 'price' ? 'purchasePrice' : sort)
 
-export type WinePage = { wineIds: WineId[]; hasMore: boolean }
+export type WinePage = { wines: Wine[]; hasMore: boolean }
 export type PageArgs = { limit: number; after?: WineId; sort: WineSort; order: SortOrder }
 
+const allCacheKey = (userId: UserId) => `wines:all:${userId}`
+
 export const findAllByUser = (userId: UserId): Promise<Wine[]> =>
-  memoizedPerRequest(`wines:all:${userId}`, async () => {
+  memoizedPerRequest(allCacheKey(userId), async () => {
     const snap = await wines().where('userId', '==', userId).orderBy('createdAt', 'desc').get()
     return snap.docs.map((doc) => doc.data())
   })
@@ -37,12 +39,17 @@ export const findPage = async (userId: UserId, args: PageArgs): Promise<WinePage
   const snap = await query.limit(args.limit + 1).get()
   const docs = snap.docs.map((doc) => doc.data())
   const hasMore = docs.length > args.limit
-  return { wineIds: (hasMore ? docs.slice(0, args.limit) : docs).map((w) => w.id), hasMore }
+  return { wines: hasMore ? docs.slice(0, args.limit) : docs, hasMore }
 }
 
 // Batch-load a page of wines by id with a single getAll — no full-collection scan.
+// When the full scan already ran in this request, reuse it: zero extra reads.
 export const findManyByWineIds = async (userId: UserId, wineIds: WineId[]): Promise<Wine[]> => {
   if (wineIds.length === 0) return []
+  if (isInRequestCache(allCacheKey(userId))) {
+    const wanted = new Set(wineIds)
+    return (await findAllByUser(userId)).filter((wine) => wanted.has(wine.id))
+  }
   const refs = wineIds.map((id) => wines().doc(id))
   const snaps = await db().getAll(...refs)
   return snaps

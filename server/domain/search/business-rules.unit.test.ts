@@ -10,6 +10,7 @@ import {
 } from '~/domain/search/business-rules'
 import type { SearchableWine } from '~/domain/search/types'
 
+// Satellites are attached only when present — a bare wine carries no such keys.
 const aWine = (overrides: Record<string, unknown> = {}): SearchableWine =>
   ({
     id: 'w1',
@@ -18,10 +19,6 @@ const aWine = (overrides: Record<string, unknown> = {}): SearchableWine =>
     beverageType: 'wine',
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
-    cellar: null,
-    consumption: null,
-    gift: null,
-    recommendation: null,
     ...overrides,
   }) as SearchableWine
 

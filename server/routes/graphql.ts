@@ -1,10 +1,13 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
+import { wineSatelliteLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
 
 export default defineEventHandler(async (event) => {
   const apollo = useApollo()
   const userId = (event.context as { userId?: UserId }).userId
   if (!userId) throw createError({ statusCode: 401, statusMessage: 'Missing user context' })
+  // One loader set per request: memoization and batching stay request-scoped.
+  const context = async () => ({ event, userId, loaders: wineSatelliteLoaders(userId) })
 
   const headerMap = new HeaderMap()
   for (const [key, value] of Object.entries(getHeaders(event))) {
@@ -24,7 +27,7 @@ export default defineEventHandler(async (event) => {
         body: undefined,
         search: search.toString(),
       },
-      context: async () => ({ event, userId }),
+      context,
     })
     return sendApolloResponse(event, response)
   }
@@ -32,7 +35,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const response = await apollo.executeHTTPGraphQLRequest({
     httpGraphQLRequest: { method: 'POST', headers: headerMap, body, search: '' },
-    context: async () => ({ event, userId }),
+    context,
   })
   return sendApolloResponse(event, response)
 })

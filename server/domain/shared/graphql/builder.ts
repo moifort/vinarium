@@ -14,9 +14,12 @@ import type {
 } from '~/domain/shared/types'
 import type { Rating } from '~/domain/tasting/types'
 import type { Appellation, Classification, WineDomain, WineId, WineName } from '~/domain/wine/types'
+import type { WineSatelliteLoaders } from './loaders'
+
 export type GraphQLContext = {
   event: H3Event
   userId: UserId
+  loaders: WineSatelliteLoaders
 }
 
 const DateTimeScalar = new GraphQLScalarType({

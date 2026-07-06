@@ -36,30 +36,21 @@ export namespace JournalQuery {
     return { items, hasMore }
   }
 
-  export const getAllByWineId = async (
-    userId: UserId,
+  // Raw entries for a page of wines, batched (for the per-request history loader).
+  export const entriesByWineIds = async (userId: UserId, wineIds: WineId[]) =>
+    repository.findByWineIds(userId, wineIds)
+
+  // A wine's cellar history as displayable events, most recent first. Pure
+  // mapping: the entries come from the batched loader, the wine from the parent.
+  export const historyOf = (
     wine: Pick<Wine, 'id' | 'name' | 'beverageType' | 'color'>,
+    entries: JournalEntry[],
   ) => {
-    const entries = await repository.findByWineId(userId, wine.id)
     const wineMap = keyBy([wine], ({ id }) => id)
     return sortBy(
       entries.map((entry) => toView(entry, wineMap)),
       ({ date }) => -new Date(date).getTime(),
     )
-  }
-
-  export const getCellarDates = async (userId: UserId, wineId: WineId) => {
-    const entries = await repository.findByWineId(userId, wineId)
-    const entryIn = entries.find((entry) => entry.type === 'in')
-    if (!entryIn) return 'not-found' as const
-    const entryOut = entries.find((entry) => entry.type === 'out')
-    return {
-      wineId,
-      dateIn: entryIn.date,
-      dateOut: entryOut?.date,
-      row: entryIn.row,
-      col: entryIn.col,
-    }
   }
 
   const toView = (

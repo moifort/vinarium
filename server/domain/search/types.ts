@@ -4,14 +4,15 @@ import type { Recommendation } from '~/domain/recommendation/types'
 import type { TastingNote } from '~/domain/tasting/types'
 import type { BeverageType, Wine, WineColor, WineStatusFilter } from '~/domain/wine/types'
 
-// A wine joined with all its satellites, ready for matching. Satellites are
-// always attached (null when absent), so the GraphQL WineType field resolvers
-// skip their per-request fallback queries entirely.
+// A wine joined with its satellites, ready for matching. A wine without a
+// satellite simply has no key for it — the object carries what exists, nothing
+// else. The GraphQL layer never reads these: its satellite fields resolve
+// through the per-request loaders, whose reads the search scans already warmed.
 export type SearchableWine = Wine & {
-  cellar: CellarBottleView | null
-  consumption: TastingNote | null
-  gift: Gift | null
-  recommendation: Recommendation | null
+  cellar?: CellarBottleView
+  consumption?: TastingNote
+  gift?: Gift
+  recommendation?: Recommendation
 }
 
 // Which wine attribute matched the query — the client groups results by it

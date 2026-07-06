@@ -1,18 +1,43 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
+import { chunk } from 'lodash-es'
 import type { JournalEntry } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { memoizedPerRequest } from '~/system/request-cache'
+import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const journal = () => db().collection('journal').withConverter(genericDataConverter<JournalEntry>())
 
+const allCacheKey = (userId: UserId) => `journal:all:${userId}`
+
 export const findAllByUser = (userId: UserId): Promise<JournalEntry[]> =>
-  memoizedPerRequest(`journal:all:${userId}`, async () => {
+  memoizedPerRequest(allCacheKey(userId), async () => {
     const snap = await journal().where('userId', '==', userId).orderBy('date', 'desc').get()
     return snap.docs.map((doc) => doc.data())
   })
+
+// Firestore caps `in` disjunctions at 30 values per query.
+const IN_QUERY_LIMIT = 30
+
+// Every journal entry of a page of wines, batched with `in` queries — one query
+// per 30 wines instead of one per wine. Unordered: callers sort per wine (equality
+// + `in` needs no composite index). When the full scan already ran in this
+// request, reuse it: zero extra reads.
+export const findByWineIds = async (userId: UserId, wineIds: WineId[]): Promise<JournalEntry[]> => {
+  if (wineIds.length === 0) return []
+  if (isInRequestCache(allCacheKey(userId))) {
+    const wanted = new Set(wineIds)
+    return (await findAllByUser(userId)).filter((entry) => wanted.has(entry.wineId))
+  }
+  const slices = await Promise.all(
+    chunk(wineIds, IN_QUERY_LIMIT).map(async (slice) => {
+      const snap = await journal().where('userId', '==', userId).where('wineId', 'in', slice).get()
+      return snap.docs.map((doc) => doc.data())
+    }),
+  )
+  return slices.flat()
+}
 
 // One page of journal entries, most recent first. Offset-based: the journal grows
 // slowly and its events carry no stable id to use as a cursor.
@@ -29,15 +54,6 @@ export const findPage = async (
   const entries = snap.docs.map((doc) => doc.data())
   const hasMore = entries.length > limit
   return { entries: hasMore ? entries.slice(0, limit) : entries, hasMore }
-}
-
-export const findByWineId = async (userId: UserId, wineId: WineId): Promise<JournalEntry[]> => {
-  const snap = await journal()
-    .where('userId', '==', userId)
-    .where('wineId', '==', wineId)
-    .orderBy('date', 'desc')
-    .get()
-  return snap.docs.map((doc) => doc.data())
 }
 
 export const removeByWineId = async (

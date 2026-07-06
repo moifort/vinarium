@@ -573,7 +573,7 @@ type SearchHit {
   matchedFields: [SearchMatchedField!]!
 
   """
-  The matched wine, with its satellites already attached
+  The matched wine
   """
   wine: Wine!
 }

@@ -25,31 +25,73 @@ const seedWine = (id: string, over: Record<string, unknown> = {}) =>
     ...over,
   })
 
-describe('WineQuery.page', () => {
-  test('returns a bounded page ordered by the sort field, with hasMore', async () => {
+const defaults = { mode: 'all', status: 'all', sort: 'createdAt', order: 'desc' } as const
+
+describe('WineQuery.list — paginated default view', () => {
+  test('returns a bounded page of full wines ordered by the sort field, with hasMore', async () => {
     seedWine('w1', { createdAt: new Date('2026-01-03') })
     seedWine('w2', { createdAt: new Date('2026-01-02') })
     seedWine('w3', { createdAt: new Date('2026-01-01') })
 
-    const first = await WineQuery.page(userId, { limit: 2, sort: 'createdAt', order: 'desc' })
-    expect(first.wineIds.map(String)).toEqual(['w1', 'w2'])
+    const first = await WineQuery.list(userId, { ...defaults, limit: 2 })
+    expect(first.items.map(({ id }) => String(id))).toEqual(['w1', 'w2'])
     expect(first.hasMore).toBe(true)
 
-    const next = await WineQuery.page(userId, {
-      limit: 2,
-      after: 'w2' as WineId,
-      sort: 'createdAt',
-      order: 'desc',
-    })
-    expect(next.wineIds.map(String)).toEqual(['w3'])
+    const next = await WineQuery.list(userId, { ...defaults, limit: 2, after: 'w2' as WineId })
+    expect(next.items.map(({ id }) => String(id))).toEqual(['w3'])
     expect(next.hasMore).toBe(false)
   })
 
   test('reads only limit+1 documents (bounded, not the whole collection)', async () => {
     for (let i = 0; i < 10; i++) seedWine(`w${i}`, { createdAt: new Date(2026, 0, i + 1) })
     const before = fake.reads
-    await WineQuery.page(userId, { limit: 3, sort: 'createdAt', order: 'desc' })
+    await WineQuery.list(userId, { ...defaults, limit: 3 })
     // one query get(); the fake counts a query as one read regardless of matches
     expect(fake.reads - before).toBe(1)
+  })
+})
+
+describe('WineQuery.list — filtered views', () => {
+  test('facet filters match on the wine documents alone (no satellite reads)', async () => {
+    seedWine('w1', { color: 'red' })
+    seedWine('w2', { color: 'white' })
+    seedWine('w3', { color: 'red' })
+
+    const before = fake.reads
+    const result = await WineQuery.list(userId, { ...defaults, limit: 40, color: 'red' })
+
+    expect(result.items.map(({ id }) => String(id)).toSorted()).toEqual(['w1', 'w3'])
+    expect(result.hasMore).toBe(false)
+    expect(result.totalCount).toBe(2)
+    // A pure facet view costs the single memoized wines scan — nothing else.
+    expect(fake.reads - before).toBe(1)
+  })
+
+  test('the in-cellar status adds exactly one cellar scan', async () => {
+    seedWine('w1')
+    seedWine('w2')
+    fake.seed('cellar', `${userId}_w1`, { userId, wineId: 'w1', row: 0, col: 0 })
+
+    const before = fake.reads
+    const result = await WineQuery.list(userId, { ...defaults, limit: 40, status: 'in-cellar' })
+
+    expect(result.items.map(({ id }) => String(id))).toEqual(['w1'])
+    expect(fake.reads - before).toBe(2) // wines scan + cellar scan
+  })
+
+  test('the favorites mode adds exactly one tasting scan', async () => {
+    seedWine('w1')
+    seedWine('w2')
+    fake.seed('tasting', `${userId}_w2`, { userId, wineId: 'w2', favorite: true })
+
+    const before = fake.reads
+    const result = await WineQuery.list(userId, {
+      ...defaults,
+      limit: 40,
+      mode: 'favorites',
+    })
+
+    expect(result.items.map(({ id }) => String(id))).toEqual(['w2'])
+    expect(fake.reads - before).toBe(2) // wines scan + tasting scan
   })
 })

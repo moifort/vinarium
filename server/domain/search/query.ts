@@ -28,13 +28,19 @@ export namespace SearchQuery {
     const consumption = indexByWineId(tastings)
     const gift = indexByWineId(gifts)
     const recommendation = indexByWineId(recommendations)
-    const items: SearchableWine[] = wines.map((wine) => ({
-      ...wine,
-      cellar: cellar.get(wine.id) ?? null,
-      consumption: consumption.get(wine.id) ?? null,
-      gift: gift.get(wine.id) ?? null,
-      recommendation: recommendation.get(wine.id) ?? null,
-    }))
+    // Attach only the satellites that exist: no key rather than a null value.
+    const items: SearchableWine[] = wines.map((wine) => {
+      const item: SearchableWine = { ...wine }
+      const bottle = cellar.get(wine.id)
+      if (bottle) item.cellar = bottle
+      const tasting = consumption.get(wine.id)
+      if (tasting) item.consumption = tasting
+      const given = gift.get(wine.id)
+      if (given) item.gift = given
+      const recommended = recommendation.get(wine.id)
+      if (recommended) item.recommendation = recommended
+      return item
+    })
     const hits = rankedHits(items, query, filters)
     return { hits: hits.slice(0, limit), totalCount: hits.length }
   }

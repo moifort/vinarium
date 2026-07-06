@@ -9,7 +9,7 @@ import { chunk } from 'lodash-es'
 import type { UserId } from '~/domain/shared/types'
 import type { WineId } from '~/domain/wine/types'
 import { db } from '~/system/firebase'
-import { memoizedPerRequest } from '~/system/request-cache'
+import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 
 // Generic Firestore converter that preserves type information when reading
 // documents and recursively turns Timestamp instances back into JS Date.
@@ -52,21 +52,32 @@ export const userWineRecordRepository = <T extends { userId: UserId; wineId: Win
 ) => {
   const records = () => db().collection(collectionName).withConverter(genericDataConverter<T>())
   const docId = (userId: UserId, wineId: WineId) => `${userId}_${wineId}`
+  const allCacheKey = (userId: UserId) => `${collectionName}:all:${userId}`
+
+  const findAllByUser = (userId: UserId): Promise<T[]> =>
+    memoizedPerRequest(allCacheKey(userId), async () => {
+      const snap = await records().where('userId', '==', userId).get()
+      return snap.docs.map((doc) => doc.data())
+    })
 
   return {
-    findAllByUser: (userId: UserId): Promise<T[]> =>
-      memoizedPerRequest(`${collectionName}:all:${userId}`, async () => {
-        const snap = await records().where('userId', '==', userId).get()
-        return snap.docs.map((doc) => doc.data())
-      }),
+    findAllByUser,
     findBy: async (userId: UserId, wineId: WineId): Promise<T | null> => {
       const doc = await records().doc(docId(userId, wineId)).get()
       return doc.data() ?? null
     },
     // Batch-load the records for a page of wines with a single getAll — one read
-    // per id, no full-collection scan. Missing docs come back undefined.
+    // per id, no full-collection scan. Missing docs come back undefined. When the
+    // full scan already ran in this request, reuse it: zero extra reads. Safe as
+    // long as no mutation scans then writes this collection then re-resolves a
+    // satellite in the same request (the read-then-write caveat in request-cache.ts);
+    // evictFromRequestCache is the escape hatch if that flow ever appears.
     findManyByWineIds: async (userId: UserId, wineIds: WineId[]): Promise<T[]> => {
       if (wineIds.length === 0) return []
+      if (isInRequestCache(allCacheKey(userId))) {
+        const wanted = new Set(wineIds)
+        return (await findAllByUser(userId)).filter((record) => wanted.has(record.wineId))
+      }
       const refs = wineIds.map((wineId) => records().doc(docId(userId, wineId)))
       const snaps = await db().getAll(...refs)
       return snaps.map((snap) => snap.data()).filter((data): data is T => data !== undefined)

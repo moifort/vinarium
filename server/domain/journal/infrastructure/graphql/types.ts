@@ -34,17 +34,13 @@ export const JournalEventsType = builder
     }),
   })
 
-// Extend WineType with the per-wine history
+// Extend WineType with the per-wine history, batched by the per-request loader:
+// a page of wines selecting `history` costs one journal query, not one per wine.
 builder.objectField(WineType, 'history', (t) =>
   t.field({
     type: [JournalEventType],
     description: 'Cellar entry/exit history for this wine, most recent first',
-    resolve: (wine, _, { userId }) =>
-      JournalQuery.getAllByWineId(userId, {
-        id: wine.id,
-        name: wine.name,
-        beverageType: wine.beverageType,
-        color: wine.color,
-      }),
+    resolve: async (wine, _, { loaders }) =>
+      JournalQuery.historyOf(wine, (await loaders.history.load(wine.id)) ?? []),
   }),
 )

@@ -8,7 +8,7 @@ export const SearchHitType = builder.objectRef<SearchHit>('SearchHit').implement
   fields: (t) => ({
     wine: t.field({
       type: WineType,
-      description: 'The matched wine, with its satellites already attached',
+      description: 'The matched wine',
       resolve: (hit) => hit.item,
     }),
     matchedFields: t.field({

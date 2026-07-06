@@ -41,6 +41,7 @@ type FakeQuery = {
   offset: (count: number) => FakeQuery
   startAfter: (cursor: FakeSnapshot) => FakeQuery
   get: () => Promise<{ docs: Array<{ data: () => Doc; ref: FakeRef }> }>
+  count: () => { get: () => Promise<{ data: () => { count: number } }> }
 }
 
 type FakeCollection = {
@@ -104,7 +105,8 @@ export const createFakeFirestore = () => {
   const matchesFilter = (data: Doc, [field, op, value]: Filter) => {
     if (op === '==') return data[field] === value
     if (op === '!=') return data[field] !== undefined && data[field] !== value
-    throw new Error(`fake-firestore only supports '==' and '!=' queries, got '${op}'`)
+    if (op === 'in') return Array.isArray(value) && value.includes(data[field])
+    throw new Error(`fake-firestore only supports '==', '!=' and 'in' queries, got '${op}'`)
   }
 
   const makeQuery = (collection: string, state: QueryState): FakeQuery => ({
@@ -141,6 +143,16 @@ export const createFakeFirestore = () => {
         docs: matching.map(([id, data]) => ({ data: () => data, ref: makeRef(collection, id) })),
       }
     },
+    // Aggregation count: like Firestore, one billed query round-trip, no documents.
+    count: () => ({
+      get: async () => {
+        queryReads += 1
+        const matching = [...docsOf(collection).values()].filter((data) =>
+          state.filters.every((filter) => matchesFilter(data, filter)),
+        )
+        return { data: () => ({ count: matching.length }) }
+      },
+    }),
   })
 
   const makeCollection = (name: string): FakeCollection => ({
