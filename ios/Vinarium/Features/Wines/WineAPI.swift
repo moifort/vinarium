@@ -200,12 +200,12 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
         grapeVarieties: w.grapeVarieties ?? [],
         alcoholContent: w.alcoholContent,
         classification: w.classification,
-        purchasePrice: w.purchasePrice,
-        purchaseDate: w.purchaseDate,
-        drinkFrom: w.drinkFrom,
-        drinkUntil: w.drinkUntil,
+        purchasePrice: w.purchase?.price,
+        purchaseDate: w.purchase?.date,
+        drinkFrom: w.drinkWindow?.from,
+        drinkUntil: w.drinkWindow?.until,
         notes: w.notes,
-        giftedBy: w.giftedBy,
+        giftedBy: w.gift?.received?.from,
         createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
         updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date(),
         cellar: w.cellar.map {
@@ -225,9 +225,11 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
                 favorite: $0.favorite
             )
         },
-        gift: w.gift.map {
+        // GiftInfo représente la facette « donné » (given) ; la provenance
+        // « reçu de » vit dans giftedBy ci-dessus.
+        gift: w.gift?.given.map {
             GiftInfo(
-                giftedDate: GraphQLHelpers.parseISO8601($0.giftedDate) ?? Date(),
+                giftedDate: GraphQLHelpers.parseISO8601($0.date) ?? Date(),
                 recipientName: $0.recipientName
             )
         },
@@ -237,9 +239,9 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Wine) -> UserWi
                 comment: $0.comment
             )
         },
-        latitude: w.latitude,
-        longitude: w.longitude,
-        placeName: w.placeName
+        latitude: w.place?.latitude,
+        longitude: w.place?.longitude,
+        placeName: w.place?.name
     )
 }
 

@@ -19,9 +19,13 @@ query CellarBottles($limit: Int, $after: WineId) {
         region
         country
         classification
-        purchasePrice
-        drinkFrom
-        drinkUntil
+        purchase {
+          price
+        }
+        drinkWindow {
+          from
+          until
+        }
       }
     }
     hasMore

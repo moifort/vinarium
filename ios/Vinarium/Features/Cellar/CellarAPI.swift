@@ -37,9 +37,9 @@ enum CellarAPI {
                     region: b.wine.region,
                     country: b.wine.country,
                     classification: b.wine.classification,
-                    purchasePrice: b.wine.purchasePrice,
-                    drinkFrom: b.wine.drinkFrom,
-                    drinkUntil: b.wine.drinkUntil,
+                    purchasePrice: b.wine.purchase?.price,
+                    drinkFrom: b.wine.drinkWindow?.from,
+                    drinkUntil: b.wine.drinkWindow?.until,
                     createdAt: Date(),
                     updatedAt: Date()
                 ),

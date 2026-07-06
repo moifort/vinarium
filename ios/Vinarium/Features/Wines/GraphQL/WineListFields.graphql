@@ -11,16 +11,21 @@ fragment WineListFields on Wine {
   region
   country
   classification
-  purchasePrice
-  purchaseDate
-  drinkFrom
-  drinkUntil
+  purchase {
+    price
+    date
+  }
+  drinkWindow {
+    from
+    until
+  }
   notes
-  giftedBy
   grapeVarieties
-  latitude
-  longitude
-  placeName
+  place {
+    latitude
+    longitude
+    name
+  }
   createdAt
   updatedAt
   cellar {
@@ -36,8 +41,13 @@ fragment WineListFields on Wine {
     contacts
   }
   gift {
-    recipientName
-    giftedDate
+    given {
+      recipientName
+      date
+    }
+    received {
+      from
+    }
   }
   recommendation {
     recommenderName
