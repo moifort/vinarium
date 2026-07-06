@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct WineListView: View {
@@ -30,12 +28,10 @@ struct WineListView: View {
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
                 onLoadMore: { await viewModel.loadMore() }
             )
-            .sentryTrace("Wine List", waitForFullDisplay: true)
             // Chargement initial ; les changements de vue/tri/filtre passent par les
             // didSet du ViewModel (scheduleReload).
             .task {
                 await viewModel.load()
-                SentrySDK.reportFullyDisplayed()
             }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },

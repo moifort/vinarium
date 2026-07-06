@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct CellarView: View {
@@ -44,10 +42,8 @@ struct CellarView: View {
                     )
                 }
             }
-            .sentryTrace("Cellar", waitForFullDisplay: true)
             .task(id: refreshTrigger) {
                 await viewModel.load()
-                SentrySDK.reportFullyDisplayed()
             }
             // Choix déclenché par le swipe « Sortir » : consommer ou offrir.
             .confirmationDialog(

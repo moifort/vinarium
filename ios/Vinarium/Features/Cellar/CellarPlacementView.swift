@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct CellarPlacementView: View {
@@ -44,10 +42,8 @@ struct CellarPlacementView: View {
                 )
             }
         }
-        .sentryTrace("Placement", waitForFullDisplay: true)
         .task {
             await loadData()
-            SentrySDK.reportFullyDisplayed()
         }
     }
 

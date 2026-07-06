@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct WineDetailView: View {
@@ -58,7 +56,6 @@ struct WineDetailView: View {
                     )
                 }
             }
-            .sentryTrace("Wine Detail", waitForFullDisplay: true)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 if !isEditing {
@@ -80,7 +77,6 @@ struct WineDetailView: View {
             .errorAlert(actionError)
             .task {
                 await loadData()
-                SentrySDK.reportFullyDisplayed()
             }
             .sheet(isPresented: $showConsumption) {
                 if let detail {

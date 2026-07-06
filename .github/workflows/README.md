@@ -6,7 +6,6 @@
 |------|---------|---------|
 | `deploy.yml` | Push to `main` | Build and deploy the Nitro server to production |
 | `renovate.yml` | Schedule | Automated dependency updates via Renovate |
-| `sentry-autofix.yml` | Sentry webhook | Automated issue triage via Sentry |
 | `test-unit.yml` | Push / PR | Run unit tests with Bun |
 
 ## Disabled workflows

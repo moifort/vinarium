@@ -4,7 +4,6 @@ import type {
   AdminToken as AdminTokenType,
   ApiToken as ApiTokenType,
   GoogleApiKey as GoogleApiKeyType,
-  SentryDsn as SentryDsnType,
 } from '~/system/config/types'
 
 export const ApiToken = (value: unknown) => {
@@ -20,9 +19,4 @@ export const AdminToken = (value: unknown) => {
 export const GoogleApiKey = (value: unknown) => {
   const v = z.string().min(1).parse(value)
   return make<GoogleApiKeyType>()(v)
-}
-
-export const SentryDsn = (value: unknown) => {
-  const v = z.string().min(1).parse(value)
-  return make<SentryDsnType>()(v)
 }

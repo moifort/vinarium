@@ -13,7 +13,7 @@ else (Auth flow, GraphQL client, codegen, feature refactors) is in code.
 | `https://github.com/apollographql/apollo-ios.git` | `Apollo`, `ApolloAPI` | 1.18.0 |
 | `https://github.com/firebase/firebase-ios-sdk.git` | `FirebaseCore`, `FirebaseAuth` | 11.0.0 |
 
-Both attached to the `Vinarium` target (Sentry stays on the same target).
+Both attached to the `Vinarium` target.
 
 ## 2. Capabilities
 

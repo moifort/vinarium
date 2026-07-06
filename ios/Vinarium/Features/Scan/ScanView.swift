@@ -1,6 +1,5 @@
 import CoreLocation
 import PhotosUI
-import SentrySwiftUI
 import SwiftUI
 
 enum ScanFlowResult {
@@ -174,7 +173,6 @@ struct ScanView: View {
                     }
             }
         }
-        .sentryTrace("Scan Flow")
         .animation(.easeInOut(duration: 0.3), value: viewModel.step)
         .onChange(of: selectedPhoto) {
             guard let item = selectedPhoto else { return }

@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct BottleMoveView: View {
@@ -42,10 +40,8 @@ struct BottleMoveView: View {
                     )
                 }
             }
-            .sentryTrace("Bottle Move", waitForFullDisplay: true)
             .task {
                 await loadData()
-                SentrySDK.reportFullyDisplayed()
             }
         }
     }

@@ -159,4 +159,3 @@ Adapt:
 Once the new APIs are in place and the app boots:
 - Remove this `MIGRATION_TODO.md`.
 - Update `ios/FIREBASE_SETUP.md` to reflect the steady state.
-- Strip any remaining `import Sentry`-only files if Sentry is dropped.

@@ -1,5 +1,3 @@
-import Sentry
-import SentrySwiftUI
 import SwiftUI
 
 struct DashboardView: View {
@@ -25,11 +23,9 @@ struct DashboardView: View {
                     ProgressView("Chargement...")
                 }
             }
-            .sentryTrace("Dashboard", waitForFullDisplay: true)
             .refreshable { await viewModel.load() }
             .task {
                 await viewModel.load()
-                SentrySDK.reportFullyDisplayed()
             }
             // La vue reste vivante dans le TabView : sans ça, revenir sur Accueil
             // après un scan/une mutation montrerait des stats périmées.
