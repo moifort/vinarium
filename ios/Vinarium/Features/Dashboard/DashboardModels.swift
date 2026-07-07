@@ -2,6 +2,7 @@ import Foundation
 
 struct DashboardData: Codable, Sendable {
     let bottleCount: Int
+    let capacity: Int
     let totalValue: Double
     let readyToDrink: [DashboardWine]
     let favorites: [DashboardFavorite]

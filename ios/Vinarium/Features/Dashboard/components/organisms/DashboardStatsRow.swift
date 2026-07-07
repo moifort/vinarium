@@ -10,6 +10,7 @@ struct DashboardStatsRow: View {
                 GradientWidget(
                     title: "En cave",
                     value: "\(stats.bottleCount)",
+                    denominator: "/\(stats.capacity)",
                     subtitle: "Bouteilles",
                     icon: "wineglass",
                     gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)],
@@ -38,13 +39,14 @@ struct DashboardStatsRow: View {
 extension DashboardStatsRow {
     struct Stats {
         let bottleCount: Int
+        let capacity: Int
         let totalValue: Double
     }
 }
 
 #Preview {
     DashboardStatsRow(
-        stats: .init(bottleCount: 12, totalValue: 450),
+        stats: .init(bottleCount: 41, capacity: 48, totalValue: 450),
         onTapped: {}
     )
     .frame(height: 140)

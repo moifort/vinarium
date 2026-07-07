@@ -55,7 +55,7 @@ struct DashboardView: View {
 
     private static func map(_ data: DashboardData) -> DashboardPage.Content {
         .init(
-            stats: .init(bottleCount: data.bottleCount, totalValue: data.totalValue),
+            stats: .init(bottleCount: data.bottleCount, capacity: data.capacity, totalValue: data.totalValue),
             readyToDrink: data.readyToDrink.map { wine in
                 .init(id: wine.id, beverageType: wine.beverageType, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position)
             },

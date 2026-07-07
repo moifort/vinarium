@@ -47,7 +47,7 @@ extension DashboardPage {
     NavigationStack {
         DashboardPage(
             content: .init(
-                stats: .init(bottleCount: 42, totalValue: 1850),
+                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
                 readyToDrink: [
                     .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
                     .init(id: "2", color: .white, name: "Pouilly-Fumé 2021", urgent: false, drinkUntil: nil, position: "B1"),
@@ -70,7 +70,7 @@ extension DashboardPage {
     NavigationStack {
         DashboardPage(
             content: .init(
-                stats: .init(bottleCount: 0, totalValue: 0),
+                stats: .init(bottleCount: 0, capacity: 48, totalValue: 0),
                 readyToDrink: [],
                 favorites: [],
                 events: []

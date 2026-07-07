@@ -10,6 +10,7 @@ enum DashboardAPI {
         let d = data.dashboard
         return DashboardData(
             bottleCount: d.bottleCount,
+            capacity: d.capacity,
             totalValue: d.totalValue,
             readyToDrink: d.readyToDrink.map {
                 DashboardWine(

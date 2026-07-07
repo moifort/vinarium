@@ -3,6 +3,7 @@ import SwiftUI
 struct GradientWidget: View {
     let title: String
     let value: String
+    var denominator: String? = nil
     let subtitle: String
     let icon: String
     let gradient: [Color]
@@ -17,11 +18,18 @@ struct GradientWidget: View {
 
             Spacer()
 
-            Text(value)
-                .font(.largeTitle.bold())
-                .foregroundStyle(.white)
-                .minimumScaleFactor(0.5)
-                .lineLimit(1)
+            HStack(alignment: .firstTextBaseline, spacing: 0) {
+                Text(value)
+                    .font(.largeTitle.bold())
+                if let denominator {
+                    Text(denominator)
+                        .font(.title3.bold())
+                        .foregroundStyle(.white.opacity(0.85))
+                }
+            }
+            .foregroundStyle(.white)
+            .minimumScaleFactor(0.5)
+            .lineLimit(1)
 
             Spacer()
 
@@ -60,7 +68,8 @@ struct GradientWidget: View {
     HStack(spacing: 12) {
         GradientWidget(
             title: "En cave",
-            value: "12",
+            value: "41",
+            denominator: "/48",
             subtitle: "Bouteilles",
             icon: "wineglass",
             gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)]
