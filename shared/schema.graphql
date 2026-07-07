@@ -327,6 +327,11 @@ Aggregated dashboard view for the current user
 """
 type Dashboard {
   bottleCount: Int!
+
+  """
+  Total cellar capacity (number of grid spots)
+  """
+  capacity: Int!
   favorites: [FavoriteWine!]!
   history: [JournalEvent!]!
   lastBottle: LastBottle

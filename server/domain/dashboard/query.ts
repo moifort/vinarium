@@ -8,7 +8,7 @@ import {
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
-import type { CellarBottleWithWine } from '~/domain/cellar/types'
+import { CELLAR_SIZE, type CellarBottleWithWine } from '~/domain/cellar/types'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -54,6 +54,7 @@ export namespace DashboardQuery {
 
     return {
       bottleCount,
+      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
       totalValue,
       readyToDrink,
       favorites,

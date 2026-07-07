@@ -50,6 +50,9 @@ export const DashboardType = builder.objectRef<DashboardView>('Dashboard').imple
   description: 'Aggregated dashboard view for the current user',
   fields: (t) => ({
     bottleCount: t.exposeInt('bottleCount'),
+    capacity: t.exposeInt('capacity', {
+      description: 'Total cellar capacity (number of grid spots)',
+    }),
     totalValue: t.exposeFloat('totalValue'),
     readyToDrink: t.field({ type: [ReadyToDrinkWineType], resolve: (d) => d.readyToDrink }),
     favorites: t.field({ type: [FavoriteWineType], resolve: (d) => d.favorites }),

@@ -73,6 +73,7 @@ describe('DashboardQuery.view', () => {
     const view = await DashboardQuery.view(userId)
 
     expect(view.bottleCount).toBe(1)
+    expect(view.capacity).toBe(48)
     expect(view.totalValue).toBe(30)
     expect(view.readyToDrink).toMatchObject([{ id: 'w1', position: 'A1', urgent: false }])
     expect(view.favorites).toMatchObject([{ id: 'w2', name: 'Domaine Favori', rating: 5 }])

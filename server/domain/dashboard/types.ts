@@ -4,6 +4,7 @@ import type { Eur, Year } from '~/domain/shared/types'
 
 export type DashboardView = {
   bottleCount: number
+  capacity: number
   totalValue: number
   readyToDrink: ReadyToDrinkWine[]
   favorites: FavoriteWine[]
