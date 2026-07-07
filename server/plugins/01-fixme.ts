@@ -1,6 +1,6 @@
 import { fixme } from 'fixme-nitro'
 
-// DSN exposé via NITRO_FIXME_DSN (Secret Manager en prod — infra/secrets.tf +
-// function.tf — et .env en local), suivant la convention NITRO_ du repo. Le SDK
-// prend le dsn en argument explicite, il n'impose donc pas le nom brut FIXME_DSN.
+// DSN provided via NITRO_FIXME_DSN (Secret Manager in prod — infra/secrets.tf +
+// function.tf — and .env locally), following the repo's NITRO_ convention. The SDK
+// takes the dsn as an explicit argument, so it doesn't require the raw FIXME_DSN name.
 export default fixme({ dsn: process.env.NITRO_FIXME_DSN })
