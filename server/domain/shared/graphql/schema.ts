@@ -51,6 +51,12 @@ import '~/domain/search/infrastructure/graphql/queries'
 import '~/domain/changelog/infrastructure/graphql/types'
 import '~/domain/changelog/infrastructure/graphql/queries'
 
+// Household domain (shared cellar between members of one home)
+import '~/domain/household/infrastructure/graphql/enums'
+import '~/domain/household/infrastructure/graphql/types'
+import '~/domain/household/infrastructure/graphql/queries'
+import '~/domain/household/infrastructure/graphql/mutations'
+
 // Portability (export and import of user data)
 import '~/domain/portability/infrastructure/graphql/types'
 import '~/domain/portability/infrastructure/graphql/queries'

@@ -11,6 +11,7 @@ import type {
   Notes,
   Producer,
 } from '~/domain/beverage/types'
+import type { HouseholdId } from '~/domain/household/types'
 import type {
   Country,
   Eur,
@@ -45,6 +46,7 @@ export const builder = new SchemaBuilder<{
   Scalars: {
     DateTime: { Input: Date; Output: Date }
     UserId: { Input: UserId; Output: UserId }
+    HouseholdId: { Input: HouseholdId; Output: HouseholdId }
     BeverageId: { Input: BeverageId; Output: BeverageId }
     BeverageName: { Input: BeverageName; Output: BeverageName }
     Producer: { Input: Producer; Output: Producer }

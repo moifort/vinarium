@@ -10,6 +10,7 @@ import {
   Notes,
   Producer,
 } from '~/domain/beverage/primitives'
+import { HouseholdId } from '~/domain/household/primitives'
 import {
   Country,
   Eur,
@@ -51,6 +52,12 @@ builder.scalarType('BeverageId', {
   description: 'Beverage unique identifier (UUID v4)',
   serialize: (value) => value as string,
   parseValue: validatedParse('BeverageId', BeverageId),
+})
+
+builder.scalarType('HouseholdId', {
+  description: 'Household unique identifier (UUID v4)',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('HouseholdId', HouseholdId),
 })
 
 builder.scalarType('BeverageName', {

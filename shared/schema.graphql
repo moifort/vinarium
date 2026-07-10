@@ -406,6 +406,56 @@ A grape variety (cépage)
 scalar GrapeVariety
 
 """
+A household: a group of people sharing one physical cellar
+"""
+type Household {
+  createdAt: DateTime!
+  id: HouseholdId!
+
+  """
+  Invitation codes still open, shown so any member can share them
+  """
+  invitations: [HouseholdInvitation!]!
+  members: [HouseholdMember!]!
+}
+
+"""
+Household unique identifier (UUID v4)
+"""
+scalar HouseholdId
+
+"""
+An open invitation code to join a household
+"""
+type HouseholdInvitation {
+  code: String!
+  expiresAt: DateTime!
+}
+
+"""
+A member of a household
+"""
+type HouseholdMember {
+  displayName: PersonName!
+
+  """
+  Whether this member is the current user
+  """
+  isMe: Boolean!
+  joinedAt: DateTime!
+  role: HouseholdRole!
+  userId: UserId!
+}
+
+"""
+A member’s role within their household
+"""
+enum HouseholdRole {
+  MEMBER
+  OWNER
+}
+
+"""
 Number of records imported per domain
 """
 type ImportResult {
@@ -490,6 +540,11 @@ type Mutation {
   consumeBottle(beverageId: BeverageId!, input: ConsumptionInput!): Boolean!
 
   """
+  Generate an invitation code for the current user’s household, creating the household on first use
+  """
+  createHouseholdInvitation(displayName: PersonName!): HouseholdInvitation!
+
+  """
   Delete a beverage and all related data (cellar, tasting, gift, recommendation, journal)
   """
   deleteBeverage(id: BeverageId!): Boolean!
@@ -503,6 +558,16 @@ type Mutation {
   Replace all the current user records with the contents of a JSON envelope
   """
   importData(payload: String!): ImportResult!
+
+  """
+  Join a household with an invitation code
+  """
+  joinHousehold(code: String!, displayName: PersonName!): Household!
+
+  """
+  Leave the current household
+  """
+  leaveHousehold: Boolean!
 
   """
   Toggle the favorite (heart) flag on a wine, preserving any existing tasting note
@@ -528,6 +593,16 @@ type Mutation {
   Remove a bottle from the cellar without recording why
   """
   removeBottle(beverageId: BeverageId!): Boolean!
+
+  """
+  Remove a member from the household (owner only)
+  """
+  removeHouseholdMember(userId: UserId!): Household!
+
+  """
+  Revoke an open invitation code
+  """
+  revokeHouseholdInvitation(code: String!): Boolean!
 
   """
   Analyze a beverage label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.
@@ -637,6 +712,11 @@ type Query {
   A page of cellar entry/exit events for the current user, most recent first
   """
   journalEvents(limit: Int = 15, offset: Int = 0): JournalEvents!
+
+  """
+  The current user’s household, or null if they belong to none
+  """
+  myHousehold: Household
 
   """
   Search the whole collection by name, producer, subtype, region, vintage or person, ranked by relevance. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
