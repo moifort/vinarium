@@ -46,7 +46,8 @@ enum CellarAPI {
                 ),
                 rowLabel: b.rowLabel,
                 colLabel: b.colLabel,
-                createdAt: GraphQLHelpers.parseISO8601(b.createdAt) ?? Date()
+                createdAt: GraphQLHelpers.parseISO8601(b.createdAt) ?? Date(),
+                ownerName: b.owner.isMine ? nil : b.owner.displayName
             )
         }
         return BottlesPage(bottles: bottles, hasMore: data.cellarBottles.hasMore)

@@ -4,6 +4,8 @@ struct BottleRow<Title: View, Subtitle: View>: View {
     let beverageType: BeverageType
     let color: WineColor?
     let position: String
+    /// The household member the bottle belongs to; nil for the viewer's own bottles.
+    let ownerName: String?
     let title: Title
     let subtitle: Subtitle
 
@@ -11,12 +13,14 @@ struct BottleRow<Title: View, Subtitle: View>: View {
         beverageType: BeverageType = .wine,
         color: WineColor?,
         position: String,
+        ownerName: String? = nil,
         @ViewBuilder title: () -> Title,
         @ViewBuilder subtitle: () -> Subtitle
     ) {
         self.beverageType = beverageType
         self.color = color
         self.position = position
+        self.ownerName = ownerName
         self.title = title()
         self.subtitle = subtitle()
     }
@@ -30,6 +34,15 @@ struct BottleRow<Title: View, Subtitle: View>: View {
                 subtitle
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                if let ownerName {
+                    Label(ownerName, systemImage: "person.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(.quaternary, in: Capsule())
+                        .padding(.top, 2)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             PositionBadge(position: position)
@@ -38,8 +51,20 @@ struct BottleRow<Title: View, Subtitle: View>: View {
 }
 
 extension BottleRow where Subtitle == EmptyView {
-    init(beverageType: BeverageType = .wine, color: WineColor?, position: String, @ViewBuilder title: () -> Title) {
-        self.init(beverageType: beverageType, color: color, position: position, title: title) {}
+    init(
+        beverageType: BeverageType = .wine,
+        color: WineColor?,
+        position: String,
+        ownerName: String? = nil,
+        @ViewBuilder title: () -> Title
+    ) {
+        self.init(
+            beverageType: beverageType,
+            color: color,
+            position: position,
+            ownerName: ownerName,
+            title: title
+        ) {}
     }
 }
 
@@ -50,8 +75,10 @@ extension BottleRow where Subtitle == EmptyView {
         } subtitle: {
             Text("2018")
         }
-        BottleRow(color: .white, position: "B3") {
+        BottleRow(color: .white, position: "B3", ownerName: "Marie") {
             Text("Pouilly-Fume")
+        } subtitle: {
+            Text("2021")
         }
     }
 }

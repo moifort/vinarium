@@ -64,7 +64,8 @@ final class CellarGridViewModel {
                             beverageType: $0.wine.beverageType,
                             color: $0.wine.color,
                             vintage: $0.wine.vintage,
-                            position: $0.position
+                            position: $0.position,
+                            ownerName: $0.ownerName
                         )
                     }
                 )

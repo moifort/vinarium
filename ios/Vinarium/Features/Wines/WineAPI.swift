@@ -244,7 +244,9 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Beverage) -> Us
         },
         latitude: w.place?.latitude,
         longitude: w.place?.longitude,
-        placeName: w.place?.name
+        placeName: w.place?.name,
+        isMine: w.isMine,
+        ownerName: w.ownerName
     )
 }
 

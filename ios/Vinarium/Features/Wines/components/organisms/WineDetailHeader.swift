@@ -8,6 +8,8 @@ struct WineDetailHeader: View {
     var producerLabel: String = "Domaine"
     let domain: String?
     let vintage: Int?
+    /// The household member who owns this wine, shown only for a housemate's bottle.
+    var ownerName: String? = nil
 
     var body: some View {
         Section {
@@ -22,6 +24,9 @@ struct WineDetailHeader: View {
                 }
             }
 
+            if let ownerName {
+                LabeledInfoRow(title: "Propri\u{00E9}taire", value: ownerName, icon: "person")
+            }
             if let domain {
                 LabeledInfoRow(title: producerLabel, value: domain, icon: "building.2")
             }

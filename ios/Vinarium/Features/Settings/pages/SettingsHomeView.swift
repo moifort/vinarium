@@ -49,8 +49,7 @@ struct SettingsHomeView: View {
                         SettingsRow(
                             icon: "person.2.fill",
                             title: "Partage",
-                            subtitle: "Bientôt disponible",
-                            tint: .gray
+                            tint: .purple
                         )
                     }
                 }

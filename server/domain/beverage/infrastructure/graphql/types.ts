@@ -1,3 +1,4 @@
+import { HouseholdQuery } from '~/domain/household/query'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { Beverage, DrinkWindow, Place, Purchase, WineDetails } from '../../types'
 import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
@@ -64,6 +65,16 @@ export const BeverageType = builder.objectRef<Beverage>('Beverage').implement({
     isMine: t.boolean({
       description: 'Whether this beverage belongs to the viewer (false for a housemate’s)',
       resolve: (beverage, _args, { userId }) => beverage.userId === userId,
+    }),
+    ownerName: t.field({
+      type: 'PersonName',
+      nullable: true,
+      description: 'The household member who owns this beverage (null when it is the viewer’s)',
+      resolve: async (beverage, _args, { userId }) => {
+        if (beverage.userId === userId) return null
+        const scope = await HouseholdQuery.cellarScope(userId)
+        return scope.displayNames.get(beverage.userId) ?? null
+      },
     }),
     name: t.expose('name', { type: 'BeverageName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),

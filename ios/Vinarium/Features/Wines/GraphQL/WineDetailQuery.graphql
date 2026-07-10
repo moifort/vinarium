@@ -1,6 +1,8 @@
 query WineDetail($id: BeverageId!) {
   beverage(id: $id) {
     id
+    isMine
+    ownerName
     name
     beverageType
     subtype

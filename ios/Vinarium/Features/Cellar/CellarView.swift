@@ -122,7 +122,8 @@ struct CellarView: View {
                         color: item.color,
                         title: item.name,
                         subtitle: item.vintage.map { "\($0)" },
-                        position: item.position
+                        position: item.position,
+                        ownerName: item.ownerName
                     )
                 }
             )

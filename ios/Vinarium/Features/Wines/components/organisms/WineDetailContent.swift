@@ -14,7 +14,8 @@ struct WineDetailContent: View {
                 subtitle: headerSubtitle,
                 producerLabel: content.beverageType.producerLabel,
                 domain: content.domain,
-                vintage: content.vintage
+                vintage: content.vintage,
+                ownerName: content.ownerName
             )
 
             if content.beverageType == .wine {
@@ -139,6 +140,7 @@ extension WineDetailContent {
         let consumption: ConsumptionSection?
         let gift: GiftSection?
         let recommendation: RecommendationSection?
+        var ownerName: String? = nil
     }
 
     struct CellarSection {

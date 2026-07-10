@@ -7,6 +7,10 @@ query CellarBottles($limit: Int, $after: BeverageId) {
       rowLabel
       colLabel
       createdAt
+      owner {
+        displayName
+        isMine
+      }
       wine {
         id
         name

@@ -6,6 +6,8 @@ struct CellarBottle: Codable, Identifiable, Sendable {
     let rowLabel: String
     let colLabel: Int
     let createdAt: Date
+    /// The household member who owns this bottle, or nil when it is the viewer's own.
+    var ownerName: String?
 
     var id: String { wineId }
     var position: String { "\(rowLabel)\(colLabel)" }
@@ -51,4 +53,5 @@ struct CellarRowItem: Identifiable, Sendable {
     let color: WineColor?
     let vintage: Int?
     let position: String
+    let ownerName: String?
 }

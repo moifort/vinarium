@@ -29,6 +29,11 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let latitude: Double?
     let longitude: Double?
     let placeName: String?
+    /// Whether this wine belongs to the viewer. False for a housemate's wine seen
+    /// through the shared cellar — owner-only actions are hidden then.
+    let isMine: Bool
+    /// The owning household member's name, when the wine isn't the viewer's own.
+    let ownerName: String?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -60,6 +65,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         latitude = try container.decodeIfPresent(Double.self, forKey: .latitude)
         longitude = try container.decodeIfPresent(Double.self, forKey: .longitude)
         placeName = try container.decodeIfPresent(String.self, forKey: .placeName)
+        isMine = try container.decodeIfPresent(Bool.self, forKey: .isMine) ?? true
+        ownerName = try container.decodeIfPresent(String.self, forKey: .ownerName)
     }
 
     init(
@@ -71,7 +78,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         giftedBy: String?, createdAt: Date, updatedAt: Date,
         cellar: CellarInfo?, consumption: ConsumptionInfo?, gift: GiftInfo?,
         recommendation: RecommendationInfo?,
-        latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil
+        latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil,
+        isMine: Bool = true, ownerName: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -101,6 +109,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.latitude = latitude
         self.longitude = longitude
         self.placeName = placeName
+        self.isMine = isMine
+        self.ownerName = ownerName
     }
 }
 

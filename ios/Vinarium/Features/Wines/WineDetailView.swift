@@ -284,8 +284,10 @@ struct WineDetailView: View {
 
             ToolbarItemGroup {
                 Menu {
-                    Button("Modifier", systemImage: "pencil") {
-                        isEditing = true
+                    if detail.isMine {
+                        Button("Modifier", systemImage: "pencil") {
+                            isEditing = true
+                        }
                     }
 
                     Section {
@@ -314,12 +316,14 @@ struct WineDetailView: View {
                             .accessibilityIdentifier("menu-favorite-button")
                         }
 
-                        Button {
-                            showRecommendation = true
-                        } label: {
-                            Label("Conseillé par un ami", systemImage: "person.badge.plus")
+                        if detail.isMine {
+                            Button {
+                                showRecommendation = true
+                            } label: {
+                                Label("Conseillé par un ami", systemImage: "person.badge.plus")
+                            }
+                            .accessibilityIdentifier("menu-recommendation-button")
                         }
-                        .accessibilityIdentifier("menu-recommendation-button")
 
                         if canOfferFromCellar {
                             Button {
@@ -331,10 +335,12 @@ struct WineDetailView: View {
                         }
                     }
 
-                    Button("Supprimer", systemImage: "trash", role: .destructive) {
-                        showDeleteConfirmation = true
+                    if detail.isMine {
+                        Button("Supprimer", systemImage: "trash", role: .destructive) {
+                            showDeleteConfirmation = true
+                        }
+                        .accessibilityIdentifier("delete-wine-button")
                     }
-                    .accessibilityIdentifier("delete-wine-button")
                 } label: {
                     Image(systemName: "ellipsis")
                 }
@@ -434,7 +440,8 @@ struct WineDetailView: View {
             },
             recommendation: detail.recommendation.map { reco in
                 .init(recommenderName: reco.recommenderName, comment: reco.comment)
-            }
+            },
+            ownerName: detail.ownerName
         )
     }
 

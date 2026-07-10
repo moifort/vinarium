@@ -87,6 +87,11 @@ type Beverage {
   isMine: Boolean!
   name: BeverageName!
   notes: Notes
+
+  """
+  The household member who owns this beverage (null when it is the viewer’s)
+  """
+  ownerName: PersonName
   place: Place
   producer: Producer
   purchase: Purchase

@@ -1,0 +1,47 @@
+fragment HouseholdFields on Household {
+  id
+  members {
+    userId
+    displayName
+    role
+    isMe
+    joinedAt
+  }
+  invitations {
+    code
+    expiresAt
+  }
+}
+
+query MyHousehold {
+  myHousehold {
+    ...HouseholdFields
+  }
+}
+
+mutation CreateHouseholdInvitation($displayName: PersonName!) {
+  createHouseholdInvitation(displayName: $displayName) {
+    code
+    expiresAt
+  }
+}
+
+mutation JoinHousehold($code: String!, $displayName: PersonName!) {
+  joinHousehold(code: $code, displayName: $displayName) {
+    ...HouseholdFields
+  }
+}
+
+mutation LeaveHousehold {
+  leaveHousehold
+}
+
+mutation RemoveHouseholdMember($userId: UserId!) {
+  removeHouseholdMember(userId: $userId) {
+    ...HouseholdFields
+  }
+}
+
+mutation RevokeHouseholdInvitation($code: String!) {
+  revokeHouseholdInvitation(code: $code)
+}

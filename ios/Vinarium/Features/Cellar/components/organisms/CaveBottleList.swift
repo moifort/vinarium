@@ -20,7 +20,7 @@ struct CaveBottleList: View {
                             Button {
                                 onBottleTapped(item.id)
                             } label: {
-                                BottleRow(beverageType: item.beverageType, color: item.color, position: item.position) {
+                                BottleRow(beverageType: item.beverageType, color: item.color, position: item.position, ownerName: item.ownerName) {
                                     Text(item.title)
                                 } subtitle: {
                                     if let subtitle = item.subtitle {
@@ -71,6 +71,7 @@ extension CaveBottleList {
         let title: String
         let subtitle: String?
         let position: String
+        var ownerName: String?
     }
 }
 
@@ -83,7 +84,7 @@ extension CaveBottleList {
                 .init(id: "2", color: .white, title: "Pouilly-Fume", subtitle: nil, position: "A2"),
             ]),
             .init(label: "B", items: [
-                .init(id: "3", color: .rosé, title: "Cotes de Provence", subtitle: "2022", position: "B1"),
+                .init(id: "3", color: .rosé, title: "Cotes de Provence", subtitle: "2022", position: "B1", ownerName: "Marie"),
             ]),
         ],
         onBottleTapped: { _ in },

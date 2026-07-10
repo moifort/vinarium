@@ -14,6 +14,27 @@ struct CellarSettingsInfo: Sendable, Hashable {
     let placedCount: Int
 }
 
+struct HouseholdMember: Identifiable, Hashable, Sendable {
+    let userId: String
+    let displayName: String
+    let isOwner: Bool
+    let isMe: Bool
+    var id: String { userId }
+}
+
+struct HouseholdInvite: Identifiable, Hashable, Sendable {
+    let code: String
+    let expiresAt: Date?
+    var id: String { code }
+}
+
+struct Household: Sendable, Hashable {
+    let members: [HouseholdMember]
+    let invitations: [HouseholdInvite]
+
+    var iAmOwner: Bool { members.contains { $0.isMe && $0.isOwner } }
+}
+
 struct ImportSummary: Sendable, Hashable {
     let wines: Int
     let cellar: Int
