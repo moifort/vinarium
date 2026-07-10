@@ -110,4 +110,42 @@ describe('PortabilityUseCase.importAll', () => {
       error: `unsupported-schema-version:${EXPORT_SCHEMA_VERSION + 1}`,
     })
   })
+
+  test('never touches a household member’s records', async () => {
+    // A housemate's bottle and wine sit in the shared collections under their id.
+    fake.seed('beverages', wid(50), {
+      id: wid(50),
+      userId: 'marie',
+      name: 'Marie’s wine',
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    })
+    fake.seed('cellar', `marie_${wid(50)}`, {
+      userId: 'marie',
+      beverageId: wid(50),
+      row: 5,
+      col: 5,
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    })
+
+    const envelope = {
+      schemaVersion: EXPORT_SCHEMA_VERSION,
+      exportedAt: new Date('2026-02-01').toISOString(),
+      userId,
+      wines: [],
+      cellar: [],
+      tasting: [],
+      recommendation: [],
+      gift: [],
+      journal: [],
+    }
+
+    await PortabilityUseCase.importAll(userId, JSON.stringify(envelope))
+
+    // The wipe is scoped to the importer, so marie's data survives intact.
+    expect(fake.snapshot('beverages').has(wid(50))).toBe(true)
+    expect(fake.snapshot('cellar').has(`marie_${wid(50)}`)).toBe(true)
+  })
 })

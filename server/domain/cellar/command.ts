@@ -1,7 +1,9 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
+import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
+import { HouseholdQuery } from '~/domain/household/query'
 import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
 import { atomically, bulkSave } from '~/utils/firestore'
@@ -13,6 +15,17 @@ export namespace CellarCommand {
     row: CellarRow,
     col: CellarCol,
   ) => {
+    // You only place your own wine into the shared grid — placing a housemate's
+    // beverage would write a second, mis-attributed bottle for it.
+    if ((await BeverageQuery.byId(userId, beverageId)) === 'not-found')
+      return 'not-your-beverage' as const
+
+    // The grid is shared: a slot filled by any household member is taken. The
+    // bottle's owner stays the caller (their own wine).
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const occupant = await repository.findByPositionForUsers(scope.memberIds, row, col)
+    if (occupant && occupant.beverageId !== beverageId) return 'position-occupied' as const
+
     const now = new Date()
     const entry = await repository.save({
       userId,
@@ -32,31 +45,36 @@ export namespace CellarCommand {
     return entry
   }
 
-  export const removeBeverage = async (userId: UserId, beverageId: BeverageId) => {
-    const existing = await repository.findBy(userId, beverageId)
+  // Remove a bottle from the shared grid. Any member may remove any bottle, but
+  // the cellar doc and the journal 'out' belong to the bottle's owner. Returns
+  // the owner so the use-case can attribute a gift to them.
+  export const removeBeverage = async (actorId: UserId, beverageId: BeverageId) => {
+    const scope = await HouseholdQuery.cellarScope(actorId)
+    const existing = await repository.findByForUsers(scope.memberIds, beverageId)
     if (!existing) return 'not-in-cellar' as const
-    await JournalCommand.bottleOut(userId, {
+    await JournalCommand.bottleOut(existing.userId, {
       type: 'out',
       beverageId: existing.beverageId,
       row: existing.row,
       col: existing.col,
       date: new Date(),
     })
-    await repository.remove(userId, beverageId)
-    return undefined
+    await repository.remove(existing.userId, beverageId)
+    return { ownerId: existing.userId }
   }
 
   export const moveBottle = async (
-    userId: UserId,
+    actorId: UserId,
     beverageId: BeverageId,
     targetRow: CellarRow,
     targetCol: CellarCol,
   ) => {
-    // Two independent keyed reads in parallel: the moved bottle and whatever
-    // occupies the target slot — never a scan of the whole cellar.
+    // Both the moved bottle and the target's occupant may belong to a housemate,
+    // so both are located across the household — never a scan of the whole cellar.
+    const scope = await HouseholdQuery.cellarScope(actorId)
     const [source, atTarget] = await Promise.all([
-      repository.findBy(userId, beverageId),
-      repository.findByPosition(userId, targetRow, targetCol),
+      repository.findByForUsers(scope.memberIds, beverageId),
+      repository.findByPositionForUsers(scope.memberIds, targetRow, targetCol),
     ])
     if (!source) return 'not-in-cellar' as const
     if (source.row === targetRow && source.col === targetCol) return source
@@ -68,10 +86,11 @@ export namespace CellarCommand {
     // partial failure can no longer leave the cellar half-moved or the journal
     // out of sync with the bottle positions. This guards against partial
     // writes, not concurrent moves — the occupant lookup above is not locked
-    // (a Firestore transaction would be needed for that).
+    // (a Firestore transaction would be needed for that). Each bottle keeps its
+    // own owner, and its movement is journaled under that owner, not the actor.
     return await atomically(async (batch) => {
       await JournalCommand.bottleOut(
-        userId,
+        source.userId,
         { type: 'out', beverageId: source.beverageId, row: source.row, col: source.col, date: now },
         batch,
       )
@@ -80,7 +99,7 @@ export namespace CellarCommand {
         batch,
       )
       await JournalCommand.bottleIn(
-        userId,
+        source.userId,
         {
           type: 'in',
           beverageId: movedSource.beverageId,
@@ -92,7 +111,7 @@ export namespace CellarCommand {
       )
       if (occupant) {
         await JournalCommand.bottleOut(
-          userId,
+          occupant.userId,
           {
             type: 'out',
             beverageId: occupant.beverageId,
@@ -107,7 +126,7 @@ export namespace CellarCommand {
           batch,
         )
         await JournalCommand.bottleIn(
-          userId,
+          occupant.userId,
           {
             type: 'in',
             beverageId: occupant.beverageId,

@@ -101,6 +101,33 @@ export const countByUsers = async (memberIds: UserId[]): Promise<number> => {
   return snap.data().count
 }
 
+// The bottle occupying a grid position anywhere in the household, if any — the
+// conflict guard for placement and moves. A targeted query, never a full scan.
+export const findByPositionForUsers = async (
+  memberIds: UserId[],
+  row: CellarBottle['row'],
+  col: CellarBottle['col'],
+): Promise<CellarBottle | null> => {
+  const snap = await cellar()
+    .where('userId', 'in', memberIds)
+    .where('row', '==', row)
+    .where('col', '==', col)
+    .limit(1)
+    .get()
+  return snap.docs[0]?.data() ?? null
+}
+
+// The bottle holding a beverage, whichever member owns it — a getAll probe over
+// the composed doc ids (one read per member), never a scan of the grid.
+export const findByForUsers = async (
+  memberIds: UserId[],
+  beverageId: BeverageId,
+): Promise<CellarBottle | null> => {
+  const refs = memberIds.map((userId) => cellar().doc(docId(userId, beverageId)))
+  const snaps = await db().getAll(...refs)
+  return snaps.map((snap) => snap.data()).find((b): b is CellarBottle => b !== undefined) ?? null
+}
+
 // One page of the shared grid in (row, col) order. The cursor bottle may belong
 // to any member, so its doc is resolved by probing the composed ids.
 export const findBottlesPageForUsers = async (

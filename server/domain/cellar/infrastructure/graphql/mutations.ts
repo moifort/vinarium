@@ -17,10 +17,21 @@ builder.mutationField('placeBottle', (t) =>
       row: t.arg.int({ required: true }),
       col: t.arg.int({ required: true }),
     },
-    resolve: async (_root, { beverageId, row, col }, { userId }) =>
-      bottleView(
-        await CellarCommand.placeBeverage(userId, beverageId, CellarRow(row), CellarCol(col)),
-      ),
+    resolve: async (_root, { beverageId, row, col }, { userId }) => {
+      const result = await CellarCommand.placeBeverage(
+        userId,
+        beverageId,
+        CellarRow(row),
+        CellarCol(col),
+      )
+      if (result === 'not-your-beverage')
+        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
+      if (result === 'position-occupied')
+        throw new GraphQLError('Cellar position already occupied', {
+          extensions: { code: 'POSITION_OCCUPIED' },
+        })
+      return bottleView(result)
+    },
   }),
 )
 

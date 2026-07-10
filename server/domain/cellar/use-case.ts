@@ -12,18 +12,20 @@ export type RemovalReason = GiftReason | TastingReason
 
 export namespace CellarUseCase {
   export const removeBottle = async (
-    userId: UserId,
+    actorId: UserId,
     beverageId: BeverageId,
     reason?: RemovalReason,
   ) => {
-    const error = await CellarCommand.removeBeverage(userId, beverageId)
-    if (error === 'not-in-cellar') return 'not-in-cellar' as const
+    const result = await CellarCommand.removeBeverage(actorId, beverageId)
+    if (result === 'not-in-cellar') return 'not-in-cellar' as const
 
     if (reason?.type === 'gift') {
-      await GiftCommand.giveTo(userId, beverageId, reason.given)
+      // The owner's wine was given away — the gift record is theirs.
+      await GiftCommand.giveTo(result.ownerId, beverageId, reason.given)
     } else if (reason?.type === 'tasting') {
+      // A tasting note is always the actor's own, even on a housemate's bottle.
       const { type: _t, ...tasting } = reason
-      await TastingCommand.create({ userId, beverageId, ...tasting })
+      await TastingCommand.create({ userId: actorId, beverageId, ...tasting })
     }
     return undefined
   }

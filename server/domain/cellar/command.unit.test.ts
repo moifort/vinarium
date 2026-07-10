@@ -124,3 +124,109 @@ describe('CellarCommand.moveBottle', () => {
     expect(fake.snapshot('journal').size).toBe(0)
   })
 })
+
+// The viewer 'user-1' shares a household with 'marie'.
+const seedHousehold = () => {
+  const memberDoc = (id: string, role: 'owner' | 'member') => ({
+    userId: id,
+    householdId: 'h1',
+    displayName: id,
+    role,
+    joinedAt: new Date('2026-01-01'),
+  })
+  fake.seed('household-members', userId, memberDoc(userId, 'owner'))
+  fake.seed('household-members', 'marie', memberDoc('marie', 'member'))
+}
+
+const marieBottle = (beverageId: string, r: number, c: number): CellarBottle => ({
+  userId: user('marie'),
+  beverageId: wine(beverageId),
+  row: row(r),
+  col: col(c),
+  createdAt: new Date('2026-01-01'),
+  updatedAt: new Date('2026-01-01'),
+})
+
+const user = (id: string) => id as UserId
+
+// A beverage owned by the given user, minimal shape for the ownership guard.
+const seedBeverage = (owner: string, id: string) =>
+  fake.seed('beverages', id, {
+    id: wine(id),
+    userId: user(owner),
+    name: `Wine ${id}`,
+    beverageType: 'wine',
+    createdAt: new Date('2026-01-01'),
+    updatedAt: new Date('2026-01-01'),
+  })
+
+describe('CellarCommand.placeBeverage (household)', () => {
+  test('rejects a slot occupied by a housemate’s bottle', async () => {
+    seedHousehold()
+    seedBeverage(userId, 'w1')
+    fake.seed('cellar', 'marie_w2', marieBottle('w2', 0, 0))
+
+    const result = await CellarCommand.placeBeverage(userId, wine('w1'), row(0), col(0))
+
+    expect(result).toBe('position-occupied')
+    expect(fake.snapshot('cellar').get(`${userId}_w1`)).toBeUndefined()
+  })
+
+  test('places into a free slot next to a housemate’s bottle', async () => {
+    seedHousehold()
+    seedBeverage(userId, 'w1')
+    fake.seed('cellar', 'marie_w2', marieBottle('w2', 0, 0))
+
+    const result = await CellarCommand.placeBeverage(userId, wine('w1'), row(0), col(1))
+
+    expect((result as CellarBottle).userId).toBe(userId)
+    expect(fake.snapshot('cellar').get(`${userId}_w1`)).toMatchObject({ row: 0, col: 1 })
+  })
+
+  test('refuses to place a housemate’s beverage, writing nothing', async () => {
+    seedHousehold()
+    seedBeverage('marie', 'w2')
+
+    const result = await CellarCommand.placeBeverage(userId, wine('w2'), row(3), col(3))
+
+    expect(result).toBe('not-your-beverage')
+    expect(fake.snapshot('cellar').get(`${userId}_w2`)).toBeUndefined()
+    expect(fake.snapshot('cellar').get('marie_w2')).toBeUndefined()
+  })
+})
+
+describe('CellarCommand.moveBottle (household)', () => {
+  test('a member moves a housemate’s bottle, journaling under its owner', async () => {
+    seedHousehold()
+    fake.seed('cellar', 'marie_w2', marieBottle('w2', 0, 0))
+
+    const result = await CellarCommand.moveBottle(userId, wine('w2'), row(3), col(4))
+
+    expect((result as CellarBottle).userId).toBe(user('marie'))
+    expect(fake.snapshot('cellar').get('marie_w2')).toMatchObject({ row: 3, col: 4 })
+    // The movement lands in marie's journal, not the actor's.
+    const journal = [...fake.snapshot('journal').values()]
+    expect(journal.every((entry) => entry.userId === 'marie')).toBe(true)
+    expect(journal).toHaveLength(2)
+  })
+
+  test('a cross-owner swap journals each bottle under its own owner', async () => {
+    seedHousehold()
+    fake.seed('cellar', `${userId}_w1`, bottle('w1', 0, 0))
+    fake.seed('cellar', 'marie_w2', marieBottle('w2', 1, 1))
+
+    await CellarCommand.moveBottle(userId, wine('w1'), row(1), col(1))
+
+    expect(fake.snapshot('cellar').get(`${userId}_w1`)).toMatchObject({ row: 1, col: 1, userId })
+    expect(fake.snapshot('cellar').get('marie_w2')).toMatchObject({
+      row: 0,
+      col: 0,
+      userId: 'marie',
+    })
+    const journal = [...fake.snapshot('journal').values()]
+    const w1Entries = journal.filter((entry) => entry.beverageId === 'w1')
+    const w2Entries = journal.filter((entry) => entry.beverageId === 'w2')
+    expect(w1Entries.every((entry) => entry.userId === userId)).toBe(true)
+    expect(w2Entries.every((entry) => entry.userId === 'marie')).toBe(true)
+  })
+})
