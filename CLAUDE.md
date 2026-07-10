@@ -80,6 +80,20 @@ Before pushing, update the user-facing surfaces, then push:
 - Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files)
 - `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools
 
+## App Store Distribution
+
+Full checklist in `ios/APP_STORE_SUBMISSION.md`. Build with the latest **final** Xcode (currently 26.6 / `17F113`, SDK `23F81a`) — never a beta/RC Xcode, and never an older release once a newer final ships. Both trigger **ITMS-90111** (Unsupported SDK or Xcode version) on upload.
+
+**The dev Mac runs a beta macOS**, so archives get a prerelease `BuildMachineOSBuild` stamp that App Store validation also rejects with ITMS-90111. After archiving, patch it to the latest **public** macOS build number *before* `-exportArchive` (export re-signs, so the patch survives):
+
+```bash
+# after `xcodebuild ... archive`, before `-exportArchive`:
+plutil -replace BuildMachineOSBuild -string '<latest public macOS build>' \
+  build/Vinarium.xcarchive/Products/Applications/Vinarium.app/Info.plist
+```
+
+Look up the current public macOS build at https://developer.apple.com/news/releases (pick the released macOS, not a beta/RC). Verify `DTXcodeBuild`/`DTSDKBuild` are untouched, then export. The clean alternative is to archive on a non-beta macOS (e.g. a GitHub Actions macOS runner with the final Xcode) — no patch needed. Bump `CURRENT_PROJECT_VERSION` (4 occurrences in `project.pbxproj`) for every new upload.
+
 ## API Token
 
 The API token is used for authentication when `NITRO_API_TOKEN` is set. To rotate the token, update it in:
