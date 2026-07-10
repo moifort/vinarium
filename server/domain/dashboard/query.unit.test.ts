@@ -88,7 +88,8 @@ describe('DashboardQuery.view', () => {
     const before = fake.reads
     await DashboardQuery.view(userId)
 
-    // wines + cellar + journal + tasting = 4 collection reads, no duplicates
-    expect(fake.reads - before).toBe(4)
+    // wines + cellar + journal + tasting = 4 collection reads, no duplicates, plus
+    // the household occupancy pair: the scope membership doc and a count aggregation.
+    expect(fake.reads - before).toBe(6)
   })
 })

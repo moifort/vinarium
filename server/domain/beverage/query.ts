@@ -12,6 +12,7 @@ import type {
 } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import { GiftQuery } from '~/domain/gift/query'
+import { HouseholdQuery } from '~/domain/household/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -43,9 +44,23 @@ export namespace BeverageQuery {
     return beverage
   }
 
+  // A beverage the viewer is allowed to see: their own, or a household member's
+  // (so a shared-cellar bottle opens its wine detail). Anything else is not-found.
+  export const byIdForViewer = async (viewerId: UserId, id: BeverageId) => {
+    const beverage = await repository.findById(id)
+    if (!beverage) return 'not-found' as const
+    if (beverage.userId === viewerId) return beverage
+    const scope = await HouseholdQuery.cellarScope(viewerId)
+    return scope.memberIds.includes(beverage.userId) ? beverage : ('not-found' as const)
+  }
+
   // Batch-load the beverages of a page by id (no full-collection scan).
   export const byBeverageIds = async (userId: UserId, beverageIds: BeverageId[]) =>
     repository.findManyByBeverageIds(userId, beverageIds)
+
+  // Batch-load a page of shared-cellar wines owned by any household member.
+  export const byBeverageIdsForUsers = async (memberIds: UserId[], beverageIds: BeverageId[]) =>
+    repository.findManyByBeverageIdsForUsers(memberIds, beverageIds)
 
   // A page of the beverage list, filtered and sorted per view.
   export const list = async (userId: UserId, criteria: BeverageListCriteria) => {

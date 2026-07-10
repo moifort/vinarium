@@ -21,17 +21,19 @@ const DASHBOARD_SECTION_LIMIT = 5
 export namespace DashboardQuery {
   export const view = async (userId: UserId): Promise<DashboardView> => {
     // The per-request cache dedupes the shared wines read across these queries.
-    const [allBottles, history, allTastings, wines] = await Promise.all([
+    // bottleCount reflects the whole shared cellar (occupancy is a household fact);
+    // every other section below stays personal, computed from the viewer's bottles.
+    const [allBottles, history, allTastings, wines, bottleCount] = await Promise.all([
       CellarQuery.bottlesWithWine(userId),
       JournalQuery.all(userId),
       TastingQuery.all(userId),
       BeverageQuery.findAll(userId),
+      CellarQuery.householdBottleCount(userId),
     ])
 
     const currentYear = new Date().getFullYear()
     const beverageMap = keyBy(wines, 'id')
 
-    const bottleCount = allBottles.length
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchase?.price ?? 0), 0)
 
     const readyToDrink = sortBy(

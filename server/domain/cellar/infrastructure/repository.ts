@@ -1,6 +1,6 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import type { BeverageId } from '~/domain/beverage/types'
-import type { CellarBottle } from '~/domain/cellar/types'
+import type { CellarBottle, OwnedBeverage } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
 import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
@@ -10,6 +10,10 @@ const cellar = () => db().collection('cellar').withConverter(genericDataConverte
 
 const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
 const allCacheKey = (userId: UserId) => `cellar:all:${userId}`
+// A household shares one grid, so its reads are keyed by the whole member set.
+// Sorted so the key is stable regardless of member order; a solo scope ([userId])
+// collapses to the same key as allCacheKey(userId), sharing that request's cache.
+const allUsersCacheKey = (memberIds: UserId[]) => `cellar:all:${[...memberIds].sort().join(',')}`
 
 export const findAllByUser = (userId: UserId): Promise<CellarBottle[]> =>
   memoizedPerRequest(allCacheKey(userId), async () => {
@@ -77,6 +81,51 @@ export const findManyByBeverageIds = async (
     return (await findAllByUser(userId)).filter((bottle) => wanted.has(bottle.beverageId))
   }
   const refs = beverageIds.map((beverageId) => cellar().doc(docId(userId, beverageId)))
+  const snaps = await db().getAll(...refs)
+  return snaps.map((snap) => snap.data()).filter((b): b is CellarBottle => b !== undefined)
+}
+
+// --- Household-scoped reads -------------------------------------------------
+// Each mirrors the single-user function above but spans a household's members.
+// When the scope is a lone user ([userId]) they degenerate to that user's view,
+// so callers can always route through these with the scope from cellarScope().
+
+export const findAllByUsers = (memberIds: UserId[]): Promise<CellarBottle[]> =>
+  memoizedPerRequest(allUsersCacheKey(memberIds), async () => {
+    const snap = await cellar().where('userId', 'in', memberIds).orderBy('createdAt', 'desc').get()
+    return snap.docs.map((doc) => doc.data())
+  })
+
+export const countByUsers = async (memberIds: UserId[]): Promise<number> => {
+  const snap = await cellar().where('userId', 'in', memberIds).count().get()
+  return snap.data().count
+}
+
+// One page of the shared grid in (row, col) order. The cursor bottle may belong
+// to any member, so its doc is resolved by probing the composed ids.
+export const findBottlesPageForUsers = async (
+  memberIds: UserId[],
+  { limit, after }: { limit: number; after?: BeverageId },
+): Promise<{ bottles: CellarBottle[]; hasMore: boolean }> => {
+  let query = cellar().where('userId', 'in', memberIds).orderBy('row', 'asc').orderBy('col', 'asc')
+  if (after) {
+    const refs = memberIds.map((userId) => cellar().doc(docId(userId, after)))
+    const snaps = await db().getAll(...refs)
+    const cursor = snaps.find((snap) => snap.exists)
+    if (cursor) query = query.startAfter(cursor)
+  }
+  const snap = await query.limit(limit + 1).get()
+  const bottles = snap.docs.map((doc) => doc.data())
+  const hasMore = bottles.length > limit
+  return { bottles: hasMore ? bottles.slice(0, limit) : bottles, hasMore }
+}
+
+// Bottles for a page of wines read at each wine's owner slot — one getAll of
+// exactly one ref per wine, whoever owns it. No household scan, no misses on
+// housemate ids, so the personal library list never amplifies its reads.
+export const findManyByExactIds = async (wines: OwnedBeverage[]): Promise<CellarBottle[]> => {
+  if (wines.length === 0) return []
+  const refs = wines.map((wine) => cellar().doc(docId(wine.userId, wine.id)))
   const snaps = await db().getAll(...refs)
   return snaps.map((snap) => snap.data()).filter((b): b is CellarBottle => b !== undefined)
 }

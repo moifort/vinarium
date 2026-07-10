@@ -1,6 +1,6 @@
 import type { Brand } from 'ts-brand'
 import type { Beverage, BeverageId } from '~/domain/beverage/types'
-import type { UserId } from '~/domain/shared/types'
+import type { PersonName, UserId } from '~/domain/shared/types'
 
 export type CellarRows = Brand<number, 'CellarRows'>
 export type CellarCols = Brand<number, 'CellarCols'>
@@ -23,8 +23,23 @@ export type CellarBottleView = CellarBottle & {
   colLabel: CellarColLabel
 }
 
-// A placed bottle joined with the wine it holds — what the cave screen and the
-// dashboard display side by side.
-export type CellarBottleWithWine = CellarBottleView & { wine: Beverage }
+// A beverage paired with its owner — enough to read its bottle at the exact
+// `${userId}_${id}` slot, no household scan (a bottle always sits at its owner's).
+export type OwnedBeverage = { id: BeverageId; userId: UserId }
+
+// Who a shared-cellar bottle belongs to. In a solo cellar every bottle is the
+// viewer's own; in a household, bottles carry the owner's name for a badge.
+export type CellarBottleOwner = {
+  userId: UserId
+  displayName?: PersonName
+  isMine: boolean
+}
+
+// A placed bottle joined with the wine it holds and its owner — what the cave
+// screen and the dashboard display side by side.
+export type CellarBottleWithWine = CellarBottleView & {
+  wine: Beverage
+  owner: CellarBottleOwner
+}
 
 export const CELLAR_SIZE = { rows: 6, cols: 8 } as const

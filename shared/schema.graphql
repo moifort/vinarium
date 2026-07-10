@@ -80,6 +80,11 @@ type Beverage {
   """
   history: [JournalEvent!]!
   id: BeverageId!
+
+  """
+  Whether this beverage belongs to the viewer (false for a housemate’s)
+  """
+  isMine: Boolean!
   name: BeverageName!
   notes: Notes
   place: Place
@@ -233,6 +238,19 @@ type CellarBottle {
 }
 
 """
+The household member a cellar bottle belongs to
+"""
+type CellarBottleOwner {
+  displayName: PersonName
+
+  """
+  Whether the bottle belongs to the viewer (no badge shown)
+  """
+  isMine: Boolean!
+  userId: UserId!
+}
+
+"""
 A cellar bottle joined with the corresponding wine
 """
 type CellarBottleWithWine {
@@ -240,6 +258,7 @@ type CellarBottleWithWine {
   col: Int!
   colLabel: Int!
   createdAt: DateTime!
+  owner: CellarBottleOwner!
   row: Int!
   rowLabel: String!
   wine: Beverage!

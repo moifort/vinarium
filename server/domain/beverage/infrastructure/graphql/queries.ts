@@ -45,10 +45,10 @@ builder.queryField('beverage', (t) =>
   t.field({
     type: BeverageType,
     nullable: true,
-    description: 'Get a single beverage by ID',
+    description: 'Get a single beverage by ID — the viewer’s own or a household member’s',
     args: { id: t.arg({ type: 'BeverageId', required: true }) },
     resolve: async (_root, { id }, { userId }) => {
-      const beverage = await BeverageQuery.byId(userId, id)
+      const beverage = await BeverageQuery.byIdForViewer(userId, id)
       return beverage === 'not-found' ? null : beverage
     },
   }),

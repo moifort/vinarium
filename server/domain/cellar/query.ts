@@ -3,7 +3,15 @@ import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import { CELLAR_SIZE, type CellarBottle, type CellarBottleView } from '~/domain/cellar/types'
+import {
+  CELLAR_SIZE,
+  type CellarBottle,
+  type CellarBottleOwner,
+  type CellarBottleView,
+  type OwnedBeverage,
+} from '~/domain/cellar/types'
+import { HouseholdQuery } from '~/domain/household/query'
+import type { CellarScope } from '~/domain/household/types'
 import type { UserId } from '~/domain/shared/types'
 
 // A placed bottle projected with its grid labels — the shared cellar view shape,
@@ -14,15 +22,37 @@ export const bottleView = (bottle: CellarBottle): CellarBottleView => ({
   colLabel: CellarCol.toLabel(bottle.col),
 })
 
-export namespace CellarQuery {
-  export const info = async (userId: UserId) => ({
-    rows: CELLAR_SIZE.rows,
-    cols: CELLAR_SIZE.cols,
-    capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
-    // Server-side aggregation: counting never loads the cellar documents.
-    placedCount: await repository.countByUser(userId),
-  })
+// A bottle's owner as seen by the viewer: their own bottles carry no name (the UI
+// omits the badge), a housemate's bottle carries theirs.
+const ownerOf = (bottle: CellarBottle, viewerId: UserId, scope: CellarScope): CellarBottleOwner => {
+  const isMine = bottle.userId === viewerId
+  return {
+    userId: bottle.userId,
+    displayName: isMine ? undefined : scope.displayNames.get(bottle.userId),
+    isMine,
+  }
+}
 
+export namespace CellarQuery {
+  export const info = async (userId: UserId) => {
+    const scope = await HouseholdQuery.cellarScope(userId)
+    return {
+      rows: CELLAR_SIZE.rows,
+      cols: CELLAR_SIZE.cols,
+      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
+      // Server-side aggregation over the whole household: never loads documents.
+      placedCount: await repository.countByUsers(scope.memberIds),
+    }
+  }
+
+  // How many bottles fill the shared cellar — the dashboard occupancy numerator.
+  export const householdBottleCount = async (userId: UserId) => {
+    const scope = await HouseholdQuery.cellarScope(userId)
+    return repository.countByUsers(scope.memberIds)
+  }
+
+  // The viewer's own placed bottles joined with their wine — the personal shape
+  // the dashboard reads (household bottles never enter the dashboard sections).
   export const bottlesWithWine = async (userId: UserId) => {
     const [bottles, wines] = await Promise.all([
       repository.findAllByUser(userId),
@@ -35,7 +65,7 @@ export namespace CellarQuery {
         const at = `${bottle.row},${bottle.col}`
         throw new Error(`Beverage ${bottle.beverageId} not found for bottle at ${at}`)
       }
-      return { ...bottleView(bottle), wine }
+      return { ...bottleView(bottle), wine, owner: { userId, isMine: true } }
     })
   }
 
@@ -47,29 +77,41 @@ export namespace CellarQuery {
   // Raw bottle records (no grid labels) — the read half of an account export.
   export const allRecords = async (userId: UserId) => repository.findAllByUser(userId)
 
-  // One page of cellar bottles in grid order (row, col) joined with their wine.
+  // One page of the shared grid in (row, col) order, each bottle joined with its
+  // wine and tagged with its owner.
   export const bottlesPage = async (
     userId: UserId,
     { limit, after }: { limit: number; after?: BeverageId },
   ) => {
-    const { bottles, hasMore } = await repository.findBottlesPage(userId, { limit, after })
-    const wines = await BeverageQuery.byBeverageIds(
-      userId,
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const { bottles, hasMore } = await repository.findBottlesPageForUsers(scope.memberIds, {
+      limit,
+      after,
+    })
+    const wines = await BeverageQuery.byBeverageIdsForUsers(
+      scope.memberIds,
       bottles.map(({ beverageId }) => beverageId),
     )
     const beverageMap = keyBy(wines, 'id')
     const items = bottles
       .filter(({ beverageId }) => beverageMap[beverageId])
-      .map((bottle) => ({ ...bottleView(bottle), wine: beverageMap[bottle.beverageId] }))
+      .map((bottle) => ({
+        ...bottleView(bottle),
+        wine: beverageMap[bottle.beverageId],
+        owner: ownerOf(bottle, userId, scope),
+      }))
     return { items, hasMore }
   }
 
-  // Cellar placements for a page of wines, batch-loaded by id.
-  export const placementsByBeverageIds = async (userId: UserId, beverageIds: BeverageId[]) =>
-    (await repository.findManyByBeverageIds(userId, beverageIds)).map(bottleView)
+  // Cellar placements for a page of wines, each read at its owner's exact slot —
+  // the shared-cellar loader. A bottle lives under `${owner}_${beverageId}`, so a
+  // housemate's wine resolves its placement with no household scan and no waste.
+  export const placementsByOwnedBeverages = async (wines: OwnedBeverage[]) =>
+    (await repository.findManyByExactIds(wines)).map(bottleView)
 
   export const suggestPosition = async (userId: UserId) => {
-    const allBottles = await repository.findAllByUser(userId)
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const allBottles = await repository.findAllByUsers(scope.memberIds)
     const result = suggest(allBottles)
     if (typeof result === 'string') return result
     return {

@@ -35,6 +35,31 @@ export const findBy = async (userId: UserId, id: BeverageId): Promise<Beverage |
   return data && data.userId === userId ? data : null
 }
 
+// Fetch a beverage without the owner guard — the caller authorizes the viewer
+// (owner or a household member) before exposing it.
+export const findById = async (id: BeverageId): Promise<Beverage | null> => {
+  const doc = await beverages().doc(id).get()
+  return doc.data() ?? null
+}
+
+// Batch-load a page of beverages owned by any of the given members (a household's
+// shared-cellar wines). The member set always comes from the household scope,
+// never from client input, so this is a controlled widening of the owner guard.
+export const findManyByBeverageIdsForUsers = async (
+  memberIds: UserId[],
+  beverageIds: BeverageId[],
+): Promise<Beverage[]> => {
+  if (beverageIds.length === 0) return []
+  const owners = new Set(memberIds)
+  const refs = beverageIds.map((id) => beverages().doc(id))
+  const snaps = await db().getAll(...refs)
+  return snaps
+    .map((snap) => snap.data())
+    .filter(
+      (beverage): beverage is Beverage => beverage !== undefined && owners.has(beverage.userId),
+    )
+}
+
 // One page of beverages ordered by the chosen field. Reads limit+1 docs to know
 // if a next page exists, then trims. Nullable sort fields (vintage/region/color/
 // price) drop beverages missing that field — expected Firestore orderBy behaviour.

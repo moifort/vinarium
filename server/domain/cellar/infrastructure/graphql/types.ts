@@ -1,6 +1,24 @@
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
-import type { CellarBottle, CellarBottleView, CellarBottleWithWine } from '../../types'
+import type {
+  CellarBottle,
+  CellarBottleOwner,
+  CellarBottleView,
+  CellarBottleWithWine,
+} from '../../types'
+
+export const CellarBottleOwnerType = builder
+  .objectRef<CellarBottleOwner>('CellarBottleOwner')
+  .implement({
+    description: 'The household member a cellar bottle belongs to',
+    fields: (t) => ({
+      userId: t.expose('userId', { type: 'UserId' }),
+      displayName: t.expose('displayName', { type: 'PersonName', nullable: true }),
+      isMine: t.exposeBoolean('isMine', {
+        description: 'Whether the bottle belongs to the viewer (no badge shown)',
+      }),
+    }),
+  })
 
 export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottle').implement({
   description: 'A bottle physically placed in the cellar grid',
@@ -27,6 +45,7 @@ export const CellarBottleWithWineType = builder
       colLabel: t.exposeInt('colLabel'),
       createdAt: t.expose('createdAt', { type: 'DateTime' }),
       wine: t.field({ type: BeverageType, resolve: (b) => b.wine }),
+      owner: t.field({ type: CellarBottleOwnerType, resolve: (b) => b.owner }),
     }),
   })
 
@@ -77,6 +96,7 @@ builder.objectField(BeverageType, 'cellar', (t) =>
     type: CellarBottleType,
     nullable: true,
     description: 'Position in the cellar grid (null if the wine is not in cellar)',
-    resolve: async (wine, _, { loaders }) => (await loaders.cellar.load(wine.id)) ?? null,
+    resolve: async (wine, _, { loaders }) =>
+      (await loaders.cellar.load({ id: wine.id, userId: wine.userId })) ?? null,
   }),
 )

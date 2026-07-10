@@ -61,6 +61,10 @@ export const BeverageType = builder.objectRef<Beverage>('Beverage').implement({
   fields: (t) => ({
     id: t.expose('id', { type: 'BeverageId' }),
     userId: t.expose('userId', { type: 'UserId' }),
+    isMine: t.boolean({
+      description: 'Whether this beverage belongs to the viewer (false for a housemate’s)',
+      resolve: (beverage, _args, { userId }) => beverage.userId === userId,
+    }),
     name: t.expose('name', { type: 'BeverageName' }),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     subtype: t.expose('subtype', { type: BeverageSubtypeEnum, nullable: true }),

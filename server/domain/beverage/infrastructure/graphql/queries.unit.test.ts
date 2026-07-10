@@ -101,7 +101,8 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    // 1 wine + 4 satellites, each a keyed get on doc `${userId}_${beverageId}`
+    // 1 wine + 4 satellites, each a keyed get on doc `${userId}_${beverageId}`.
+    // The viewer owns the wine, so no household scope is resolved.
     expect(fake.docReads - before.docReads).toBe(5)
     expect(fake.queryReads - before.queryReads).toBe(0)
   })
@@ -121,6 +122,7 @@ describe('wine(id) detail query', () => {
       gift: null,
       recommendation: null,
     })
+    // 1 wine + 4 satellite probes, all on the viewer's own docs.
     expect(fake.docReads - before.docReads).toBe(5)
     expect(fake.queryReads - before.queryReads).toBe(0)
   })
@@ -136,6 +138,71 @@ describe('wine(id) detail query', () => {
     })
 
     const result = await execute(detailQuery(wid(1)))
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.beverage).toBeNull()
+  })
+
+  test('exposes a household member’s wine, flagged as not mine', async () => {
+    // The viewer (user-1) shares a household with 'marie', who owns wid(1).
+    fake.seed('household-members', userId, {
+      userId,
+      householdId: 'h1',
+      displayName: 'Me',
+      role: 'owner',
+      joinedAt: new Date('2026-01-01'),
+    })
+    fake.seed('household-members', 'marie', {
+      userId: 'marie',
+      householdId: 'h1',
+      displayName: 'Marie',
+      role: 'member',
+      joinedAt: new Date('2026-01-02'),
+    })
+    fake.seed('beverages', wid(1), {
+      id: wid(1),
+      userId: 'marie',
+      name: `Beverage ${wid(1)}`,
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    })
+    // Marie's bottle lives under her own composed id — the loader must read her slot.
+    fake.seed('cellar', `marie_${wid(1)}`, {
+      userId: 'marie',
+      beverageId: wid(1),
+      row: 1,
+      col: 2,
+      createdAt: new Date('2026-01-15'),
+      updatedAt: new Date('2026-01-15'),
+    })
+
+    const result = await execute(
+      `query { beverage(id: "${wid(1)}") { id isMine cellar { row col } } }`,
+    )
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.beverage).toEqual({ id: wid(1), isMine: false, cellar: { row: 1, col: 2 } })
+  })
+
+  test('a stranger’s wine stays hidden even with a household', async () => {
+    fake.seed('household-members', userId, {
+      userId,
+      householdId: 'h1',
+      displayName: 'Me',
+      role: 'owner',
+      joinedAt: new Date('2026-01-01'),
+    })
+    fake.seed('beverages', wid(1), {
+      id: wid(1),
+      userId: 'stranger',
+      name: `Beverage ${wid(1)}`,
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    })
+
+    const result = await execute(`query { beverage(id: "${wid(1)}") { id isMine } }`)
 
     expect(result.errors).toBeUndefined()
     expect(result.data?.beverage).toBeNull()
@@ -184,8 +251,9 @@ describe('wines list query', () => {
       recommendation: null,
     })
     // Budget guard: 1 page query returning the full wine docs (never re-read),
-    // plus one batched getAll of 2 refs per selected satellite collection. If a
-    // loader ever stopped batching, per-wine fallbacks would double the doc reads.
+    // plus one batched getAll of 2 refs per selected satellite collection. The
+    // cellar loader reads each wine's own slot, so a household never fans out here.
+    // If a loader ever stopped batching, per-wine fallbacks would double the reads.
     expect(fake.queryReads - before.queryReads).toBe(1)
     expect(fake.docReads - before.docReads).toBe(8)
   })
