@@ -16,6 +16,7 @@ A purely functional approach to wine cellar management.
 - **Dashboard** — cellar stats, total value, ready-to-drink alerts, recent activity
 - **Wine catalog** — full metadata, grape varieties, appellations, drink windows, structured subtypes for every beverage (porto, rum, blonde ale, sparkling sake…)
 - **Global search** — full-screen search across names, producers, subtypes, regions, vintages and people (gifts, recommendations), ranked by relevance and grouped by match (in cellar, consumed, gifts…), with combinable facet chips
+- **Household sharing** — share one cellar with the people you live with via an invite code: a common grid where any member can place, move, drink or gift any bottle, while each person's catalog, tasting notes and journal stay private
 
 <p align="center">
   <img src="screenshots/wine-detail.png" width="250" alt="Wine detail">
@@ -33,7 +34,7 @@ A purely functional approach to wine cellar management.
 | -------- | ------------------------------------------------------------------------- |
 | iOS      | SwiftUI, Swift 6, iOS 26, Apollo iOS, Firebase Auth (Sign in with Apple) |
 | Backend  | Nitro on Firebase Cloud Functions Gen 2, Apollo Server 5, Pothos          |
-| Storage  | Firestore (multi-user, isolated by `userId`)                              |
+| Storage  | Firestore (multi-user, isolated by `userId`, shared cellars via households) |
 | AI       | Claude Sonnet 4.6 (vision), Gemini 2.0 Flash (web search)                 |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
 
