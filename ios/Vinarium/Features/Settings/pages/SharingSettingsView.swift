@@ -10,6 +10,8 @@ struct SharingSettingsView: View {
     @State private var loadError: String?
     @State private var displayName = ""
     @State private var showLeaveConfirmation = false
+    @State private var memberToRemove: HouseholdMember?
+    @State private var codeToRevoke: String?
     @State private var actionError = ErrorPresenter()
 
     var body: some View {
@@ -39,6 +41,36 @@ struct SharingSettingsView: View {
         }
         .disabled(actionError.isRunning)
         .errorAlert(actionError)
+        .confirmationDialog(
+            "Retirer ce membre ?",
+            isPresented: Binding(
+                get: { memberToRemove != nil },
+                set: { if !$0 { memberToRemove = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: memberToRemove
+        ) { member in
+            Button("Retirer \(member.displayName)", role: .destructive) {
+                Task { await removeMember(userId: member.userId) }
+            }
+        } message: { member in
+            Text("\(member.displayName) n'aura plus accès à la cave commune.")
+        }
+        .confirmationDialog(
+            "Révoquer ce code ?",
+            isPresented: Binding(
+                get: { codeToRevoke != nil },
+                set: { if !$0 { codeToRevoke = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: codeToRevoke
+        ) { code in
+            Button("Révoquer", role: .destructive) {
+                Task { await revoke(code: code) }
+            }
+        } message: { _ in
+            Text("Le code ne pourra plus être utilisé pour rejoindre le foyer.")
+        }
     }
 
     // MARK: - No household
@@ -76,7 +108,9 @@ struct SharingSettingsView: View {
                     .init(userId: $0.userId, name: $0.displayName, isOwner: $0.isOwner, isMe: $0.isMe)
                 },
                 canRemove: household.iAmOwner,
-                onRemove: { userId in Task { await removeMember(userId: userId) } }
+                onRemove: { userId in
+                    memberToRemove = household.members.first { $0.userId == userId }
+                }
             )
         }
 
@@ -86,7 +120,7 @@ struct SharingSettingsView: View {
             }
             ForEach(household.invitations) { invite in
                 InviteCodeCard(code: invite.code, expiresAt: invite.expiresAt) {
-                    Task { await revoke(code: invite.code) }
+                    codeToRevoke = invite.code
                 }
             }
             Button {

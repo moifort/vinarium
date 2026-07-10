@@ -18,6 +18,7 @@ struct InviteCodeCard: View {
                 .tracking(6)
                 .frame(maxWidth: .infinity)
                 .multilineTextAlignment(.center)
+                .textSelection(.enabled)
 
             if let expiresAt {
                 Text("Valable jusqu'au \(expiresAt.formatted(date: .abbreviated, time: .omitted))")

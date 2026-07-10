@@ -260,7 +260,7 @@ struct WineDetailView: View {
                 }
             }
         }
-        if let detail, detail.cellar == nil, detail.recommendation != nil {
+        if let detail, detail.isMine, detail.cellar == nil, detail.recommendation != nil {
             ToolbarItemGroup {
                 Button {
                     showPlacement = true
