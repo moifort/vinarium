@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Vinarium — Politique de confidentialité</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+        color: #1c1c1e;
+        background: #fff;
+      }
+      @media (prefers-color-scheme: dark) {
+        body { color: #e5e5e7; background: #1c1c1e; }
+        a { color: #6ca8ff; }
+        code { background: #2c2c2e; }
+      }
+      h1 { font-size: 1.7rem; margin-bottom: 0.25rem; }
+      h2 { font-size: 1.2rem; margin-top: 2rem; }
+      .updated { color: #8a8a8e; font-size: 0.9rem; margin-top: 0; }
+      code { background: #f2f2f7; padding: 0.1rem 0.35rem; border-radius: 4px; }
+      ul { padding-left: 1.2rem; }
+      li { margin: 0.3rem 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Politique de confidentialité — Vinarium</h1>
+    <p class="updated">Dernière mise à jour : 10 juillet 2026</p>
+
+    <p>
+      Vinarium est une application de gestion de cave à vin éditée par Polyforms
+      (« nous »). Cette politique décrit les données que l'application traite, pourquoi,
+      et vos droits. Pour toute question :
+      <a href="mailto:thibaut.mottet@gmail.com">thibaut.mottet@gmail.com</a>.
+    </p>
+
+    <h2>Données que nous traitons</h2>
+    <ul>
+      <li>
+        <strong>Compte.</strong> La connexion se fait via <em>Sign in with Apple</em>.
+        Nous recevons un identifiant Apple anonyme et, si vous l'autorisez, votre nom et une
+        adresse e-mail (éventuellement une adresse relais privée fournie par Apple). Ces
+        données servent uniquement à rattacher votre cave à votre compte.
+      </li>
+      <li>
+        <strong>Contenu de votre cave.</strong> Les vins, bouteilles, positions en cave,
+        notes de dégustation, évaluations, cadeaux, recommandations, historique et
+        informations d'achat que vous saisissez.
+      </li>
+      <li>
+        <strong>Photos d'étiquettes (scan).</strong> Lorsque vous scannez une étiquette, la
+        photo est envoyée à des services d'analyse par IA (Anthropic Claude et Google Gemini)
+        pour en extraire les informations du vin. L'image est mise en cache côté serveur, sans
+        lien avec votre identité, pour éviter de la réanalyser.
+      </li>
+      <li>
+        <strong>Localisation (facultative).</strong> Uniquement si vous choisissez
+        d'enregistrer le lieu où vous avez découvert un vin. Aucune localisation en arrière-plan.
+      </li>
+    </ul>
+
+    <h2>Partage entre membres d'un foyer</h2>
+    <p>
+      Si vous rejoignez un « foyer », les autres membres voient les bouteilles que vous placez
+      dans la cave commune, avec votre nom d'affichage. Votre bibliothèque, vos notes de
+      dégustation, votre journal et vos favoris restent privés et ne sont pas partagés.
+    </p>
+
+    <h2>Ce que nous ne faisons pas</h2>
+    <ul>
+      <li>Pas de publicité, pas de traçage publicitaire.</li>
+      <li>Aucune revente ni partage de vos données à des fins commerciales.</li>
+      <li>Aucun profilage au-delà du fonctionnement de l'application.</li>
+    </ul>
+
+    <h2>Hébergement</h2>
+    <p>
+      Les données sont stockées et traitées sur l'infrastructure Google Cloud (Firebase
+      Authentication, Firestore, Cloud Functions). Les photos d'étiquettes transitent par
+      Anthropic et Google au moment du scan.
+    </p>
+
+    <h2>Conservation et suppression</h2>
+    <p>
+      Vos données sont conservées tant que votre compte existe. Vous pouvez exporter
+      l'intégralité de vos données depuis l'application (Réglages → Données), et demander la
+      suppression complète de votre compte et de vos données en nous écrivant à
+      <a href="mailto:thibaut.mottet@gmail.com">thibaut.mottet@gmail.com</a>.
+    </p>
+
+    <h2>Vos droits</h2>
+    <p>
+      Conformément au RGPD, vous disposez d'un droit d'accès, de rectification, de portabilité
+      et de suppression de vos données. Exercez-les via l'adresse ci-dessus.
+    </p>
+  </body>
+</html>
