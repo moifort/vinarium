@@ -18,6 +18,9 @@ output
 .DS_Store
 *.xcworkspace
 xcuserdata/
+build/
+*.xcarchive
+*.ipa
 
 # iOS secrets (contains API tokens)
 ios/Vinarium/Shared/Secrets.swift
