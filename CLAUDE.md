@@ -33,7 +33,8 @@ Before pushing, update the user-facing surfaces, then push:
 1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
 2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
 3. **Changelog** (`CHANGELOG.md`): add user-facing entries (in French) under `## Unreleased`, then run `bun run generate:assets` to regenerate `server/system/changelog-content.ts` (the iOS-facing asset served via GraphQL — never edit it by hand).
-4. Push.
+4. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
+5. Push.
 
 ## Skills
 
