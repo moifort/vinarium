@@ -7,7 +7,12 @@ builder.mutationField('importData', (t) =>
   t.field({
     type: ImportResultType,
     description: 'Replace all the current user records with the contents of a JSON envelope',
-    args: { payload: t.arg.string({ required: true }) },
+    args: {
+      payload: t.arg.string({
+        required: true,
+        description: 'JSON export envelope to restore for the current user',
+      }),
+    },
     resolve: async (_root, { payload }, { userId }) => {
       const result = await PortabilityUseCase.importAll(userId, payload)
       if ('error' in result) throw new GraphQLError(result.error)

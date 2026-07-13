@@ -81,7 +81,9 @@ builder.mutationField('addBeverage', (t) =>
   t.field({
     type: BeverageType,
     description: 'Add a new beverage to the catalog',
-    args: { input: t.arg({ type: AddBeverageInput, required: true }) },
+    args: {
+      input: t.arg({ type: AddBeverageInput, required: true, description: 'New beverage fields' }),
+    },
     resolve: async (_root, { input }, { userId }) => {
       const clean = stripNulls(input)
       const result = await BeverageUseCase.add(
@@ -105,8 +107,12 @@ builder.mutationField('updateBeverage', (t) =>
     type: BeverageType,
     description: 'Update an existing beverage',
     args: {
-      id: t.arg({ type: 'BeverageId', required: true }),
-      input: t.arg({ type: UpdateBeverageInput, required: true }),
+      id: t.arg({ type: 'BeverageId', required: true, description: 'Beverage to update' }),
+      input: t.arg({
+        type: UpdateBeverageInput,
+        required: true,
+        description: 'Fields to overwrite',
+      }),
     },
     resolve: async (_root, { id, input }, { userId }) => {
       const clean = stripNulls(input)
@@ -127,7 +133,7 @@ builder.mutationField('deleteBeverage', (t) =>
     type: 'Boolean',
     description:
       'Delete a beverage and all related data (cellar, tasting, gift, recommendation, journal)',
-    args: { id: t.arg({ type: 'BeverageId', required: true }) },
+    args: { id: t.arg({ type: 'BeverageId', required: true, description: 'Beverage to delete' }) },
     resolve: async (_root, { id }, { userId }) => {
       const result = await BeverageUseCase.removeCompletely(userId, id)
       return match(result)

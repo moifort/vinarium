@@ -14,9 +14,9 @@ builder.mutationField('placeBottle', (t) =>
     type: CellarBottleType,
     description: 'Place a wine in the cellar grid',
     args: {
-      beverageId: t.arg({ type: 'BeverageId', required: true }),
-      row: t.arg.int({ required: true }),
-      col: t.arg.int({ required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Wine to place' }),
+      row: t.arg.int({ required: true, description: 'Target grid row (0-based)' }),
+      col: t.arg.int({ required: true, description: 'Target grid column (0-based)' }),
     },
     resolve: async (_root, { beverageId, row, col }, { userId }) => {
       const result = await CellarCommand.placeBeverage(
@@ -41,9 +41,9 @@ builder.mutationField('moveBottle', (t) =>
     type: CellarBottleType,
     description: 'Move a bottle to a different position in the cellar',
     args: {
-      beverageId: t.arg({ type: 'BeverageId', required: true }),
-      row: t.arg.int({ required: true }),
-      col: t.arg.int({ required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Bottle to move' }),
+      row: t.arg.int({ required: true, description: 'Destination grid row (0-based)' }),
+      col: t.arg.int({ required: true, description: 'Destination grid column (0-based)' }),
     },
     resolve: async (_root, { beverageId, row, col }, { userId }) => {
       const result = await CellarCommand.moveBottle(
@@ -65,8 +65,16 @@ builder.mutationField('consumeBottle', (t) =>
     type: 'Boolean',
     description: 'Remove a bottle from the cellar and record consumption (tasting note)',
     args: {
-      beverageId: t.arg({ type: 'BeverageId', required: true }),
-      input: t.arg({ type: ConsumptionInput, required: true }),
+      beverageId: t.arg({
+        type: 'BeverageId',
+        required: true,
+        description: 'Bottle being consumed',
+      }),
+      input: t.arg({
+        type: ConsumptionInput,
+        required: true,
+        description: 'Tasting note recorded on consumption',
+      }),
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {
       const result = await CellarUseCase.removeBottle(userId, beverageId, {
@@ -86,8 +94,12 @@ builder.mutationField('giftBottle', (t) =>
     type: 'Boolean',
     description: 'Remove a bottle from the cellar and record it as a gift',
     args: {
-      beverageId: t.arg({ type: 'BeverageId', required: true }),
-      input: t.arg({ type: GiftInput, required: true }),
+      beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Bottle given away' }),
+      input: t.arg({
+        type: GiftInput,
+        required: true,
+        description: 'Gift details (recipient, date)',
+      }),
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {
       const { giftedDate, recipientName } = stripNulls(input)
@@ -107,7 +119,9 @@ builder.mutationField('removeBottle', (t) =>
   t.field({
     type: 'Boolean',
     description: 'Remove a bottle from the cellar without recording why',
-    args: { beverageId: t.arg({ type: 'BeverageId', required: true }) },
+    args: {
+      beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Bottle to remove' }),
+    },
     resolve: async (_root, { beverageId }, { userId }) => {
       const result = await CellarUseCase.removeBottle(userId, beverageId)
       return match(result)

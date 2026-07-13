@@ -15,8 +15,11 @@ builder.queryField('cellarBottles', (t) =>
     type: CellarBottlesType,
     description: 'A page of bottles currently in the cellar, in grid order, with the joined wine',
     args: {
-      limit: t.arg.int({ defaultValue: 15 }),
-      after: t.arg({ type: 'BeverageId' }),
+      limit: t.arg.int({ defaultValue: 15, description: 'Maximum bottles returned in the page' }),
+      after: t.arg({
+        type: 'BeverageId',
+        description: 'Cursor: return the page following this bottle’s beverage id',
+      }),
     },
     resolve: (_root, args, { userId }) =>
       CellarQuery.bottlesPage(userId, {

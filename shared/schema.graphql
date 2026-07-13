@@ -1,22 +1,14 @@
-"""
-Manually add a beverage to the catalog
-"""
+"""Manually add a beverage to the catalog"""
 input AddBeverageInput {
-  """
-  Alcohol by volume (% vol)
-  """
+  """Alcohol by volume (% vol)"""
   alcoholContent: Percentage
   appellation: Appellation
 
-  """
-  Kind of beverage — defaults to WINE when absent
-  """
+  """Kind of beverage — defaults to WINE when absent"""
   beverageType: BeverageType
   classification: Classification
 
-  """
-  Beverage color — required when the beverage is a wine
-  """
+  """Beverage color — required when the beverage is a wine"""
   color: WineColor
   country: Country
   drinkFrom: Year
@@ -34,56 +26,38 @@ input AddBeverageInput {
   region: Region
   servingTemperature: Celsius
 
-  """
-  Structured subtype — must be valid for the beverage type
-  """
+  """Structured subtype — must be valid for the beverage type"""
   subtype: BeverageSubtype
   vintage: Year
 }
 
-"""
-Beverage appellation (AOC / AOP / DOC ...)
-"""
+"""Beverage appellation (AOC / AOP / DOC ...)"""
 scalar Appellation
 
-"""
-A beverage in the user’s collection (wine, spirit, beer, sake ...)
-"""
+"""A beverage in the user’s collection (wine, spirit, beer, sake ...)"""
 type Beverage {
   alcoholContent: Percentage
   beverageType: BeverageType!
 
-  """
-  Position in the cellar grid (null if the wine is not in cellar)
-  """
+  """Position in the cellar grid (null if the wine is not in cellar)"""
   cellar: CellarBottle
 
-  """
-  Tasting / consumption details for this wine (null if never recorded)
-  """
+  """Tasting / consumption details for this wine (null if never recorded)"""
   consumption: Consumption
   country: Country
   createdAt: DateTime!
 
-  """
-  Type-specific fields — non-null only for a wine
-  """
+  """Type-specific fields — non-null only for a wine"""
   details: BeverageDetails
 
-  """
-  Gift details for this wine (null if never gifted)
-  """
+  """Gift details for this wine (null if never gifted)"""
   gift: Gift
 
-  """
-  Cellar entry/exit history for this wine, most recent first
-  """
+  """Cellar entry/exit history for this wine, most recent first"""
   history: [JournalEvent!]!
   id: BeverageId!
 
-  """
-  Whether this beverage belongs to the viewer (false for a housemate’s)
-  """
+  """Whether this beverage belongs to the viewer (false for a housemate’s)"""
   isMine: Boolean!
   name: BeverageName!
   notes: Notes
@@ -96,9 +70,7 @@ type Beverage {
   producer: Producer
   purchase: Purchase
 
-  """
-  Recommendation details for this wine (null if never recommended)
-  """
+  """Recommendation details for this wine (null if never recommended)"""
   recommendation: Recommendation
   region: Region
   subtype: BeverageSubtype
@@ -106,19 +78,13 @@ type Beverage {
   userId: UserId!
 }
 
-"""
-Fields that exist only for a specific beverage type
-"""
+"""Fields that exist only for a specific beverage type"""
 union BeverageDetails = WineDetails
 
-"""
-Beverage unique identifier (UUID v4)
-"""
+"""Beverage unique identifier (UUID v4)"""
 scalar BeverageId
 
-"""
-Which view of the beverage list to page through
-"""
+"""Which view of the beverage list to page through"""
 enum BeverageListMode {
   ALL
   FAVORITES
@@ -126,14 +92,10 @@ enum BeverageListMode {
   RECOMMENDED
 }
 
-"""
-Beverage display name (non-empty)
-"""
+"""Beverage display name (non-empty)"""
 scalar BeverageName
 
-"""
-Field used to sort the beverage list
-"""
+"""Field used to sort the beverage list"""
 enum BeverageSort {
   COLOR
   CREATED_AT
@@ -143,9 +105,7 @@ enum BeverageSort {
   VINTAGE
 }
 
-"""
-Lifecycle status of a beverage
-"""
+"""Lifecycle status of a beverage"""
 enum BeverageStatus {
   CONSUMED
   GIFTED
@@ -153,9 +113,7 @@ enum BeverageStatus {
   RECOMMENDED
 }
 
-"""
-Optional lifecycle filter applied to the beverage list
-"""
+"""Optional lifecycle filter applied to the beverage list"""
 enum BeverageStatusFilter {
   ALL
   CONSUMED
@@ -201,9 +159,7 @@ enum BeverageSubtype {
   WHISKY
 }
 
-"""
-Kind of beverage a bottle contains
-"""
+"""Kind of beverage a bottle contains"""
 enum BeverageType {
   BEER
   CIDER
@@ -213,25 +169,17 @@ enum BeverageType {
   WINE
 }
 
-"""
-A page of the beverage list
-"""
+"""A page of the beverage list"""
 type Beverages {
-  """
-  Whether more beverages are available after this page
-  """
+  """Whether more beverages are available after this page"""
   hasMore: Boolean!
   items: [Beverage!]!
 
-  """
-  Number of beverages in this page (full count is not computed)
-  """
+  """Number of beverages in this page (full count is not computed)"""
   totalCount: Int!
 }
 
-"""
-A bottle physically placed in the cellar grid
-"""
+"""A bottle physically placed in the cellar grid"""
 type CellarBottle {
   beverageId: BeverageId!
   col: Int!
@@ -242,22 +190,16 @@ type CellarBottle {
   updatedAt: DateTime!
 }
 
-"""
-The household member a cellar bottle belongs to
-"""
+"""The household member a cellar bottle belongs to"""
 type CellarBottleOwner {
   displayName: PersonName
 
-  """
-  Whether the bottle belongs to the viewer (no badge shown)
-  """
+  """Whether the bottle belongs to the viewer (no badge shown)"""
   isMine: Boolean!
   userId: UserId!
 }
 
-"""
-A cellar bottle joined with the corresponding wine
-"""
+"""A cellar bottle joined with the corresponding wine"""
 type CellarBottleWithWine {
   beverageId: BeverageId!
   col: Int!
@@ -269,20 +211,14 @@ type CellarBottleWithWine {
   wine: Beverage!
 }
 
-"""
-A page of cellar bottles joined with their wine
-"""
+"""A page of cellar bottles joined with their wine"""
 type CellarBottles {
-  """
-  Whether more bottles are available after this page
-  """
+  """Whether more bottles are available after this page"""
   hasMore: Boolean!
   items: [CellarBottleWithWine!]!
 }
 
-"""
-Configuration and current usage of the cellar grid
-"""
+"""Configuration and current usage of the cellar grid"""
 type CellarInfo {
   capacity: Int!
   cols: Int!
@@ -290,9 +226,7 @@ type CellarInfo {
   rows: Int!
 }
 
-"""
-A free cellar position suggestion
-"""
+"""A free cellar position suggestion"""
 type CellarPosition {
   col: Int!
   colLabel: Int!
@@ -300,28 +234,20 @@ type CellarPosition {
   rowLabel: String!
 }
 
-"""
-A temperature in degrees Celsius
-"""
+"""A temperature in degrees Celsius"""
 scalar Celsius
 
-"""
-A single version section of the application changelog
-"""
+"""A single version section of the application changelog"""
 type ChangelogEntry {
   date: DateTime
   notes: [String!]!
   version: String!
 }
 
-"""
-Beverage classification (Grand Cru, Premier Cru ...)
-"""
+"""Beverage classification (Grand Cru, Premier Cru ...)"""
 scalar Classification
 
-"""
-Tasting note / consumption record for a wine
-"""
+"""Tasting note / consumption record for a wine"""
 type Consumption {
   consumedDate: DateTime
   contacts: [String!]
@@ -330,9 +256,7 @@ type Consumption {
   tastingNotes: String
 }
 
-"""
-Details captured when consuming a bottle
-"""
+"""Details captured when consuming a bottle"""
 input ConsumptionInput {
   consumedDate: DateTime
   contacts: [String!]
@@ -341,20 +265,14 @@ input ConsumptionInput {
   tastingNotes: String
 }
 
-"""
-Country name
-"""
+"""Country name"""
 scalar Country
 
-"""
-Aggregated dashboard view for the current user
-"""
+"""Aggregated dashboard view for the current user"""
 type Dashboard {
   bottleCount: Int!
 
-  """
-  Total cellar capacity (number of grid spots)
-  """
+  """Total cellar capacity (number of grid spots)"""
   capacity: Int!
   favorites: [FavoriteWine!]!
   history: [JournalEvent!]!
@@ -364,22 +282,16 @@ type Dashboard {
   totalValue: Float!
 }
 
-"""
-ISO 8601 date-time string
-"""
+"""ISO 8601 date-time string"""
 scalar DateTime
 
-"""
-The years a wine is at its best — either bound may stand alone
-"""
+"""The years a wine is at its best — either bound may stand alone"""
 type DrinkWindow {
   from: Year
   until: Year
 }
 
-"""
-Euro amount (non-negative)
-"""
+"""Euro amount (non-negative)"""
 scalar Eur
 
 type FavoriteWine {
@@ -393,95 +305,69 @@ type FavoriteWine {
   vintage: Year
 }
 
-"""
-How a wine relates to gifting — given away and/or received
-"""
+"""How a wine relates to gifting — given away and/or received"""
 type Gift {
   given: GiftGiven
   received: GiftReceived
 }
 
-"""
-The bottle was given away
-"""
+"""The bottle was given away"""
 type GiftGiven {
   date: DateTime!
   recipientName: PersonName
 }
 
-"""
-Details captured when gifting a bottle
-"""
+"""Details captured when gifting a bottle"""
 input GiftInput {
   giftedDate: DateTime!
   recipientName: PersonName
 }
 
-"""
-The bottle was received as a gift (provenance)
-"""
+"""The bottle was received as a gift (provenance)"""
 type GiftReceived {
   from: PersonName!
 }
 
-"""
-A grape variety (cépage)
-"""
+"""A grape variety (cépage)"""
 scalar GrapeVariety
 
-"""
-A household: a group of people sharing one physical cellar
-"""
+"""A household: a group of people sharing one physical cellar"""
 type Household {
   createdAt: DateTime!
   id: HouseholdId!
 
-  """
-  Invitation codes still open, shown so any member can share them
-  """
+  """Invitation codes still open, shown so any member can share them"""
   invitations: [HouseholdInvitation!]!
   members: [HouseholdMember!]!
 }
 
-"""
-Household unique identifier (UUID v4)
-"""
+"""Household unique identifier (UUID v4)"""
 scalar HouseholdId
 
-"""
-An open invitation code to join a household
-"""
+"""An open invitation code to join a household"""
 type HouseholdInvitation {
   code: String!
   expiresAt: DateTime!
 }
 
-"""
-A member of a household
-"""
+"""A member of a household"""
 type HouseholdMember {
   displayName: PersonName!
 
-  """
-  Whether this member is the current user
-  """
+  """Whether this member is the current user"""
   isMe: Boolean!
   joinedAt: DateTime!
   role: HouseholdRole!
   userId: UserId!
 }
 
-"""
-A member’s role within their household
-"""
+"""A member’s role within their household"""
 enum HouseholdRole {
   MEMBER
   OWNER
 }
 
-"""
-Number of records imported per domain
-"""
+"""Number of records imported per domain"""
 type ImportResult {
   cellar: Int!
   gift: Int!
@@ -491,9 +377,7 @@ type ImportResult {
   wines: Int!
 }
 
-"""
-A timestamped cellar entry/exit event for a wine
-"""
+"""A timestamped cellar entry/exit event for a wine"""
 type JournalEvent {
   beverageId: BeverageId!
   beverageName: BeverageName!
@@ -512,13 +396,9 @@ enum JournalEventType {
   OUT
 }
 
-"""
-A page of cellar journal events
-"""
+"""A page of cellar journal events"""
 type JournalEvents {
-  """
-  Whether more events are available after this page
-  """
+  """Whether more events are available after this page"""
   hasMore: Boolean!
   items: [JournalEvent!]!
 }
@@ -537,240 +417,285 @@ type LastBottleWine {
   vintage: Year
 }
 
-"""
-Latitude (-90..90)
-"""
+"""Latitude (-90..90)"""
 scalar Latitude
 
-"""
-Longitude (-180..180)
-"""
+"""Longitude (-180..180)"""
 scalar Longitude
 
 type Mutation {
-  """
-  Add a new beverage to the catalog
-  """
-  addBeverage(input: AddBeverageInput!): Beverage!
+  """Add a new beverage to the catalog"""
+  addBeverage(
+    """New beverage fields"""
+    input: AddBeverageInput!
+  ): Beverage!
 
-  """
-  Record a recommendation for a wine
-  """
-  addRecommendation(beverageId: BeverageId!, input: RecommendationInput!): Boolean!
+  """Record a recommendation for a wine"""
+  addRecommendation(
+    """Wine being recommended"""
+    beverageId: BeverageId!
 
-  """
-  Remove a bottle from the cellar and record consumption (tasting note)
-  """
-  consumeBottle(beverageId: BeverageId!, input: ConsumptionInput!): Boolean!
+    """Recommendation fields"""
+    input: RecommendationInput!
+  ): Boolean!
+
+  """Remove a bottle from the cellar and record consumption (tasting note)"""
+  consumeBottle(
+    """Bottle being consumed"""
+    beverageId: BeverageId!
+
+    """Tasting note recorded on consumption"""
+    input: ConsumptionInput!
+  ): Boolean!
 
   """
   Generate an invitation code for the current user’s household, creating the household on first use
   """
-  createHouseholdInvitation(displayName: PersonName!): HouseholdInvitation!
+  createHouseholdInvitation(
+    """Name the inviter is shown as in the household"""
+    displayName: PersonName!
+  ): HouseholdInvitation!
 
   """
   Delete a beverage and all related data (cellar, tasting, gift, recommendation, journal)
   """
-  deleteBeverage(id: BeverageId!): Boolean!
+  deleteBeverage(
+    """Beverage to delete"""
+    id: BeverageId!
+  ): Boolean!
 
-  """
-  Remove a bottle from the cellar and record it as a gift
-  """
-  giftBottle(beverageId: BeverageId!, input: GiftInput!): Boolean!
+  """Remove a bottle from the cellar and record it as a gift"""
+  giftBottle(
+    """Bottle given away"""
+    beverageId: BeverageId!
+
+    """Gift details (recipient, date)"""
+    input: GiftInput!
+  ): Boolean!
 
   """
   Replace all the current user records with the contents of a JSON envelope
   """
-  importData(payload: String!): ImportResult!
+  importData(
+    """JSON export envelope to restore for the current user"""
+    payload: String!
+  ): ImportResult!
 
-  """
-  Join a household with an invitation code
-  """
-  joinHousehold(code: String!, displayName: PersonName!): Household!
+  """Join a household with an invitation code"""
+  joinHousehold(
+    """Invitation code to redeem"""
+    code: String!
 
-  """
-  Leave the current household
-  """
+    """Name the joining member is shown as"""
+    displayName: PersonName!
+  ): Household!
+
+  """Leave the current household"""
   leaveHousehold: Boolean!
 
   """
   Toggle the favorite (heart) flag on a wine, preserving any existing tasting note
   """
-  markFavorite(beverageId: BeverageId!, favorite: Boolean = true): Boolean!
+  markFavorite(
+    """Wine to flag"""
+    beverageId: BeverageId!
 
-  """
-  Move a bottle to a different position in the cellar
-  """
-  moveBottle(beverageId: BeverageId!, col: Int!, row: Int!): CellarBottle!
+    """Desired favorite state"""
+    favorite: Boolean = true
+  ): Boolean!
 
-  """
-  Place a wine in the cellar grid
-  """
-  placeBottle(beverageId: BeverageId!, col: Int!, row: Int!): CellarBottle!
+  """Move a bottle to a different position in the cellar"""
+  moveBottle(
+    """Bottle to move"""
+    beverageId: BeverageId!
 
-  """
-  Record a tasting note (rating, notes, favorite flag) for a wine
-  """
-  recordTasting(beverageId: BeverageId!, input: TastingInput!): Boolean!
+    """Destination grid column (0-based)"""
+    col: Int!
 
-  """
-  Remove a bottle from the cellar without recording why
-  """
-  removeBottle(beverageId: BeverageId!): Boolean!
+    """Destination grid row (0-based)"""
+    row: Int!
+  ): CellarBottle!
 
-  """
-  Remove a member from the household (owner only)
-  """
-  removeHouseholdMember(userId: UserId!): Household!
+  """Place a wine in the cellar grid"""
+  placeBottle(
+    """Wine to place"""
+    beverageId: BeverageId!
 
-  """
-  Revoke an open invitation code
-  """
-  revokeHouseholdInvitation(code: String!): Boolean!
+    """Target grid column (0-based)"""
+    col: Int!
+
+    """Target grid row (0-based)"""
+    row: Int!
+  ): CellarBottle!
+
+  """Record a tasting note (rating, notes, favorite flag) for a wine"""
+  recordTasting(
+    """Wine being tasted"""
+    beverageId: BeverageId!
+
+    """Tasting note fields"""
+    input: TastingInput!
+  ): Boolean!
+
+  """Remove a bottle from the cellar without recording why"""
+  removeBottle(
+    """Bottle to remove"""
+    beverageId: BeverageId!
+  ): Boolean!
+
+  """Remove a member from the household (owner only)"""
+  removeHouseholdMember(
+    """Member to remove"""
+    userId: UserId!
+  ): Household!
+
+  """Revoke an open invitation code"""
+  revokeHouseholdInvitation(
+    """Invitation code to revoke"""
+    code: String!
+  ): Boolean!
 
   """
   Analyze a beverage label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.
   """
   scanBeverage(
-    """
-    JPEG image, base64-encoded (no data URL prefix)
-    """
+    """JPEG image, base64-encoded (no data URL prefix)"""
     imageBase64: String!
   ): ScanResult!
 
-  """
-  Update an existing beverage
-  """
-  updateBeverage(id: BeverageId!, input: UpdateBeverageInput!): Beverage!
+  """Update an existing beverage"""
+  updateBeverage(
+    """Beverage to update"""
+    id: BeverageId!
+
+    """Fields to overwrite"""
+    input: UpdateBeverageInput!
+  ): Beverage!
 }
 
-"""
-Free-form tasting notes
-"""
+"""Free-form tasting notes"""
 scalar Notes
 
-"""
-A percentage (0..100)
-"""
+"""A percentage (0..100)"""
 scalar Percentage
 
-"""
-Person name (1-200 chars)
-"""
+"""Person name (1-200 chars)"""
 scalar PersonName
 
-"""
-Where the bottle was bought (coordinates and/or a place name)
-"""
+"""Where the bottle was bought (coordinates and/or a place name)"""
 type Place {
   latitude: Latitude
   longitude: Longitude
   name: PlaceName
 }
 
-"""
-Place name (1-200 chars)
-"""
+"""Place name (1-200 chars)"""
 scalar PlaceName
 
-"""
-Beverage producer / château / domaine / distillery / brewery
-"""
+"""Beverage producer / château / domaine / distillery / brewery"""
 scalar Producer
 
-"""
-What the bottle cost and when it was acquired
-"""
+"""What the bottle cost and when it was acquired"""
 type Purchase {
   date: DateTime
   price: Eur
 }
 
 type Query {
-  """
-  Get a single beverage by ID
-  """
-  beverage(id: BeverageId!): Beverage
+  """Get a single beverage by ID — the viewer’s own or a household member’s"""
+  beverage(
+    """Beverage to fetch"""
+    id: BeverageId!
+  ): Beverage
 
   """
   A page of the current user’s beverage list, filtered and sorted per view
   """
   beverages(
+    """Cursor: return the page following this beverage id"""
     after: BeverageId
+
+    """Facet: keep only this beverage type (wine, beer, …)"""
     beverageType: BeverageType
+
+    """Facet: keep only this wine color"""
     color: WineColor
+
+    """Maximum beverages returned in the page"""
     limit: Int = 40
+
+    """List preset: all beverages or the favorites shortlist"""
     mode: BeverageListMode = ALL
+
+    """Sort direction"""
     order: SortOrder = DESC
+
+    """Field the page is ordered by"""
     sort: BeverageSort = UPDATED_AT
+
+    """Restrict to a cellar status (in-cellar, consumed, …)"""
     status: BeverageStatusFilter = ALL
+
+    """Facet: keep only this subtype"""
     subtype: BeverageSubtype
   ): Beverages!
 
   """
   A page of bottles currently in the cellar, in grid order, with the joined wine
   """
-  cellarBottles(after: BeverageId, limit: Int = 15): CellarBottles!
+  cellarBottles(
+    """Cursor: return the page following this bottle’s beverage id"""
+    after: BeverageId
 
-  """
-  Cellar grid dimensions and current placement count
-  """
+    """Maximum bottles returned in the page"""
+    limit: Int = 15
+  ): CellarBottles!
+
+  """Cellar grid dimensions and current placement count"""
   cellarInfo: CellarInfo!
 
-  """
-  Application changelog, most recent versions first
-  """
+  """Application changelog, most recent versions first"""
   changelog: [ChangelogEntry!]!
 
-  """
-  Aggregated dashboard view for the current user
-  """
+  """Aggregated dashboard view for the current user"""
   dashboard: Dashboard!
 
-  """
-  JSON-encoded export of every record belonging to the current user
-  """
+  """JSON-encoded export of every record belonging to the current user"""
   exportData: String!
 
   """
   A page of cellar entry/exit events for the current user, most recent first
   """
-  journalEvents(limit: Int = 15, offset: Int = 0): JournalEvents!
+  journalEvents(
+    """Maximum events returned in the page"""
+    limit: Int = 15
 
-  """
-  The current user’s household, or null if they belong to none
-  """
+    """Number of events to skip"""
+    offset: Int = 0
+  ): JournalEvents!
+
+  """The current user’s household, or null if they belong to none"""
   myHousehold: Household
 
   """
   Search the whole collection by name, producer, subtype, region, vintage or person, ranked by relevance. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
   """
   searchBeverages(
-    """
-    Combinable facet filters
-    """
+    """Combinable facet filters"""
     filters: SearchFiltersInput
 
-    """
-    Max hits returned
-    """
+    """Max hits returned"""
     limit: Int = 50
 
-    """
-    Free text — case- and accent-insensitive
-    """
+    """Free text — case- and accent-insensitive"""
     query: String
   ): SearchResults!
 
-  """
-  Suggest the next free cellar position (null if cellar is full)
-  """
+  """Suggest the next free cellar position (null if cellar is full)"""
   suggestCellarPosition: CellarPosition
 }
 
-"""
-Rating (1-5)
-"""
+"""Rating (1-5)"""
 scalar Rating
 
 type ReadyToDrinkWine {
@@ -783,30 +708,22 @@ type ReadyToDrinkWine {
   urgent: Boolean!
 }
 
-"""
-Record of a wine that was recommended by someone
-"""
+"""Record of a wine that was recommended by someone"""
 type Recommendation {
   comment: String
   recommenderName: PersonName
 }
 
-"""
-Details captured when recording a recommendation for a wine
-"""
+"""Details captured when recording a recommendation for a wine"""
 input RecommendationInput {
   comment: String
   recommenderName: PersonName
 }
 
-"""
-Beverage region (e.g. Bordeaux, Bourgogne)
-"""
+"""Beverage region (e.g. Bordeaux, Bourgogne)"""
 scalar Region
 
-"""
-Structured beverage info extracted from a label image (Gemini).
-"""
+"""Structured beverage info extracted from a label image (Gemini)."""
 type ScanResult {
   alcoholContent: Float
   appellation: String
@@ -829,44 +746,28 @@ type ScanResult {
 Facet filters combinable with the text query. Absent facets are not filtered on.
 """
 input SearchFiltersInput {
-  """
-  Keep only these beverage types
-  """
+  """Keep only these beverage types"""
   beverageTypes: [BeverageType!]
 
-  """
-  Keep only these wine colors
-  """
+  """Keep only these wine colors"""
   colors: [WineColor!]
 
-  """
-  Keep only wines flagged as favorite
-  """
+  """Keep only wines flagged as favorite"""
   favorite: Boolean
 
-  """
-  Keep only wines received or given as a gift
-  """
+  """Keep only wines received or given as a gift"""
   gifted: Boolean
 
-  """
-  Keep only wines in the cellar or already consumed
-  """
+  """Keep only wines in the cellar or already consumed"""
   status: BeverageStatusFilter
 }
 
-"""
-A wine that matched the search, with the fields that matched it
-"""
+"""A wine that matched the search, with the fields that matched it"""
 type SearchHit {
-  """
-  Which fields matched — empty when only facet filters applied
-  """
+  """Which fields matched — empty when only facet filters applied"""
   matchedFields: [SearchMatchedField!]!
 
-  """
-  The matched wine
-  """
+  """The matched wine"""
   wine: Beverage!
 }
 
@@ -886,32 +787,22 @@ enum SearchMatchedField {
   VINTAGE
 }
 
-"""
-Search results ranked by relevance
-"""
+"""Search results ranked by relevance"""
 type SearchResults {
-  """
-  Matched wines, best relevance first (capped at the requested limit)
-  """
+  """Matched wines, best relevance first (capped at the requested limit)"""
   hits: [SearchHit!]!
 
-  """
-  Total number of matches before the limit was applied
-  """
+  """Total number of matches before the limit was applied"""
   totalCount: Int!
 }
 
-"""
-Sort direction
-"""
+"""Sort direction"""
 enum SortOrder {
   ASC
   DESC
 }
 
-"""
-Tasting fields captured when recording a tasting note
-"""
+"""Tasting fields captured when recording a tasting note"""
 input TastingInput {
   consumedDate: DateTime
   contacts: [String!]
@@ -920,13 +811,9 @@ input TastingInput {
   tastingNotes: String
 }
 
-"""
-Update an existing beverage. Absent fields keep their current value.
-"""
+"""Update an existing beverage. Absent fields keep their current value."""
 input UpdateBeverageInput {
-  """
-  Alcohol by volume (% vol)
-  """
+  """Alcohol by volume (% vol)"""
   alcoholContent: Percentage
   appellation: Appellation
   beverageType: BeverageType
@@ -951,23 +838,17 @@ input UpdateBeverageInput {
   vintage: Year
 }
 
-"""
-Firebase Auth user identifier
-"""
+"""Firebase Auth user identifier"""
 scalar UserId
 
-"""
-Beverage color category
-"""
+"""Beverage color category"""
 enum WineColor {
   RED
   ROSE
   WHITE
 }
 
-"""
-Fields specific to a wine (absent on every other beverage type)
-"""
+"""Fields specific to a wine (absent on every other beverage type)"""
 type WineDetails {
   appellation: Appellation
   classification: Classification
@@ -978,7 +859,5 @@ type WineDetails {
   vintage: Year
 }
 
-"""
-Calendar year (>= 1800)
-"""
+"""Calendar year (>= 1800)"""
 scalar Year

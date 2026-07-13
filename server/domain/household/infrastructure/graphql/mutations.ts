@@ -53,7 +53,13 @@ builder.mutationField('createHouseholdInvitation', (t) =>
     type: HouseholdInvitationType,
     description:
       'Generate an invitation code for the current user’s household, creating the household on first use',
-    args: { displayName: t.arg({ type: 'PersonName', required: true }) },
+    args: {
+      displayName: t.arg({
+        type: 'PersonName',
+        required: true,
+        description: 'Name the inviter is shown as in the household',
+      }),
+    },
     resolve: async (_root, { displayName }, { userId }) => {
       const result = await HouseholdCommand.createInvitation(userId, displayName)
       return { code: result.code, expiresAt: result.expiresAt }
@@ -66,8 +72,12 @@ builder.mutationField('joinHousehold', (t) =>
     type: HouseholdType,
     description: 'Join a household with an invitation code',
     args: {
-      code: t.arg.string({ required: true }),
-      displayName: t.arg({ type: 'PersonName', required: true }),
+      code: t.arg.string({ required: true, description: 'Invitation code to redeem' }),
+      displayName: t.arg({
+        type: 'PersonName',
+        required: true,
+        description: 'Name the joining member is shown as',
+      }),
     },
     resolve: async (_root, { code, displayName }, { userId }) => {
       const result = await HouseholdCommand.joinByCode(userId, parseCode(code), displayName)
@@ -97,7 +107,9 @@ builder.mutationField('removeHouseholdMember', (t) =>
   t.field({
     type: HouseholdType,
     description: 'Remove a member from the household (owner only)',
-    args: { userId: t.arg({ type: 'UserId', required: true }) },
+    args: {
+      userId: t.arg({ type: 'UserId', required: true, description: 'Member to remove' }),
+    },
     resolve: async (_root, args, { userId }) => {
       const result = await HouseholdCommand.removeMember(userId, args.userId)
       return match(result)
@@ -112,7 +124,7 @@ builder.mutationField('revokeHouseholdInvitation', (t) =>
   t.field({
     type: 'Boolean',
     description: 'Revoke an open invitation code',
-    args: { code: t.arg.string({ required: true }) },
+    args: { code: t.arg.string({ required: true, description: 'Invitation code to revoke' }) },
     resolve: async (_root, { code }, { userId }) => {
       const result = await HouseholdCommand.revokeInvitation(userId, parseCode(code))
       return match(result)
