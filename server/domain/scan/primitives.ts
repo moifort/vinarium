@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { retainedSubtype } from '~/domain/beverage/business-rules'
 import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
-import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
+import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 
 export const ImageHash = (value: unknown) => {
   const v = z

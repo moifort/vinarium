@@ -1,7 +1,7 @@
 import { GraphQLError } from 'graphql'
+import { Scan } from '~/domain/scan'
+import { imageWithinSizeLimit } from '~/domain/scan/limits'
 import { builder } from '~/domain/shared/graphql/builder'
-import { Scan } from '~/system/scan'
-import { imageWithinSizeLimit } from '~/system/scan/limits'
 import { ScanResultType } from './types'
 
 builder.mutationField('scanBeverage', (t) =>

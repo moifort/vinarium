@@ -1,15 +1,15 @@
 import { createHash } from 'node:crypto'
 import { SUBTYPES_BY_BEVERAGE } from '~/domain/beverage/business-rules'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
-import { config } from '~/system/config/index'
+import * as repository from '~/domain/scan/infrastructure/repository'
 import {
   EnrichSchema,
   ImageHash,
   parseScanResponse,
   ScanResultSchema,
-} from '~/system/scan/primitives'
-import * as repository from '~/system/scan/repository'
-import type { ImageHash as ImageHashType, ScanResult } from '~/system/scan/types'
+} from '~/domain/scan/primitives'
+import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
+import { config } from '~/system/config/index'
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'

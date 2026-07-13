@@ -4,7 +4,7 @@ import {
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
 import { builder } from '~/domain/shared/graphql/builder'
-import type { ScanResult } from '../types'
+import type { ScanResult } from '../../types'
 
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({
   description: 'Structured beverage info extracted from a label image (Gemini).',

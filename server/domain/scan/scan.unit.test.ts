@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { createHash } from 'node:crypto'
-import { imageWithinSizeLimit, MAX_BASE64_LENGTH, MAX_IMAGE_SIZE_BYTES } from '~/system/scan/limits'
-import { parseScanResponse } from '~/system/scan/primitives'
+import { imageWithinSizeLimit, MAX_BASE64_LENGTH, MAX_IMAGE_SIZE_BYTES } from '~/domain/scan/limits'
+import { parseScanResponse } from '~/domain/scan/primitives'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
-const { Scan } = await import('~/system/scan/index')
+const { Scan } = await import('~/domain/scan/index')
 
 const validGeminiResponse = JSON.stringify({
   name: 'Château Margaux',

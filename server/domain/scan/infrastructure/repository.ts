@@ -1,5 +1,5 @@
+import type { CachedScanResult, ImageHash } from '~/domain/scan/types'
 import { db } from '~/system/firebase'
-import type { CachedScanResult, ImageHash } from '~/system/scan/types'
 import { genericDataConverter } from '~/utils/firestore'
 
 const cache = () =>
