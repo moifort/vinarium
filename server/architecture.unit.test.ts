@@ -148,8 +148,8 @@ describe('architecture', () => {
         const violations: string[] = []
         const lines = content.split('\n')
         for (let i = 0; i < lines.length; i++) {
-          if (/useStorage/.test(lines[i])) {
-            violations.push(`${file}:${i + 1}: uses useStorage (must be pure)`)
+          if (/~\/system\/firebase|firebase-admin|\bdb\(/.test(lines[i])) {
+            violations.push(`${file}:${i + 1}: touches Firestore (must be pure)`)
           }
           if (/\basync\b/.test(lines[i])) {
             violations.push(`${file}:${i + 1}: uses async (must be pure/synchronous)`)
@@ -169,8 +169,10 @@ describe('architecture', () => {
         const violations: string[] = []
         const lines = content.split('\n')
         for (let i = 0; i < lines.length; i++) {
-          if (/useStorage/.test(lines[i])) {
-            violations.push(`${file}:${i + 1}: uses useStorage (must go through commands/queries)`)
+          if (/~\/system\/firebase|\bdb\(/.test(lines[i])) {
+            violations.push(
+              `${file}:${i + 1}: touches Firestore directly (must go through commands/queries)`,
+            )
           }
           const repoMatch = lines[i].match(
             /from\s+['"]~\/domain\/(\w+)\/infrastructure\/repository['"]/,
@@ -184,6 +186,45 @@ describe('architecture', () => {
         expect(violations).toEqual([])
       })
     }
+  })
+
+  describe('Firestore is reached only through the storage layer', () => {
+    // db()/firebase-admin belong to repositories and the shared Firestore utils.
+    // Everything else must go through a domain's command/query namespace. The
+    // auth middleware is the sole exception: it side-effect-imports the module to
+    // initialize firebase-admin before verifyIdToken — it never touches db().
+    const allowedFirebaseImporters =
+      /^server\/(domain\/\w+\/infrastructure\/repository\.ts|utils\/firestore\.ts|system\/migration\/runner\.ts|middleware\/auth\.ts)$/
+    const serverFiles = glob('server/**/*.ts').filter((f) => !f.endsWith('.test.ts'))
+    // Catches both `import { db } from …` and side-effect `import '…'`.
+    const importsFirebase = /import\s+(?:[^'"]*\s+from\s+)?['"]~\/system\/firebase['"]/
+
+    test('~/system/firebase is imported only from the storage layer', () => {
+      const violations: string[] = []
+      for (const file of serverFiles) {
+        if (allowedFirebaseImporters.test(file)) continue
+        if (importsFirebase.test(readFile(join(SERVER_DIR, '..', file)))) {
+          violations.push(file)
+        }
+      }
+      expect(violations).toEqual([])
+    })
+  })
+
+  describe('test suffixes match what the test exercises', () => {
+    test('every .int.test.ts drives the fake Firestore', () => {
+      const violations = glob('server/**/*.int.test.ts').filter(
+        (f) => !/test\/fake-firestore/.test(readFile(join(SERVER_DIR, '..', f))),
+      )
+      expect(violations).toEqual([])
+    })
+
+    test('every .feat.test.ts executes the GraphQL schema', () => {
+      const violations = glob('server/**/*.feat.test.ts').filter(
+        (f) => !/from\s+['"]graphql['"]/.test(readFile(join(SERVER_DIR, '..', f))),
+      )
+      expect(violations).toEqual([])
+    })
   })
 
   describe('no throw in domain query.ts and command.ts', () => {
