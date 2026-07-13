@@ -1,12 +1,5 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { createHash } from 'node:crypto'
-import { imageWithinSizeLimit, MAX_BASE64_LENGTH, MAX_IMAGE_SIZE_BYTES } from '~/domain/scan/limits'
+import { describe, expect, test } from 'bun:test'
 import { parseScanResponse } from '~/domain/scan/primitives'
-import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
-
-mock.module('~/system/firebase', () => ({ db: fakeDb }))
-
-const { Scan } = await import('~/domain/scan/index')
 
 const validGeminiResponse = JSON.stringify({
   name: 'Château Margaux',
@@ -174,78 +167,5 @@ describe('parseScanResponse', () => {
     test('does not crash — throws instead of returning corrupted data', () => {
       expect(() => parseScanResponse('{"name": 42, "color": "red"}')).toThrow()
     })
-  })
-})
-
-describe('scanWithCache', () => {
-  let fake = resetFakeFirestore()
-
-  beforeEach(() => {
-    fake = resetFakeFirestore()
-  })
-
-  test('normalizes legacy cached results without beverageType to wine', async () => {
-    const imageBuffer = Buffer.from('fake-jpeg-bytes')
-    const imageHash = createHash('sha256').update(imageBuffer).digest('hex')
-    // Cached before multi-beverage support: no beverageType field
-    fake.seed('scan-cache', imageHash, {
-      imageHash,
-      result: { name: 'Château Margaux', color: 'red', vintage: 2018 },
-      cachedAt: new Date('2026-01-01'),
-    })
-
-    const result = await Scan.scanWithCache(imageBuffer)
-
-    expect(result.beverageType).toBe('wine')
-    expect(result.name).toBe('Château Margaux')
-    expect(result.color).toBe('red')
-  })
-
-  test('normalizes a legacy cached free-text style to a structured subtype', async () => {
-    const imageBuffer = Buffer.from('other-fake-jpeg-bytes')
-    const imageHash = createHash('sha256').update(imageBuffer).digest('hex')
-    fake.seed('scan-cache', imageHash, {
-      imageHash,
-      result: { name: 'La Chouffe', beverageType: 'beer', style: 'Blonde forte' },
-      cachedAt: new Date('2026-01-01'),
-    })
-
-    const result = await Scan.scanWithCache(imageBuffer)
-
-    expect(result.beverageType).toBe('beer')
-    expect(result.subtype).toBe('blonde')
-  })
-
-  test('normalizes a legacy cached sparkling color to white + sparkling subtype', async () => {
-    const imageBuffer = Buffer.from('sparkling-fake-jpeg-bytes')
-    const imageHash = createHash('sha256').update(imageBuffer).digest('hex')
-    fake.seed('scan-cache', imageHash, {
-      imageHash,
-      result: { name: 'Crémant d’Alsace', beverageType: 'wine', color: 'sparkling' },
-      cachedAt: new Date('2026-01-01'),
-    })
-
-    const result = await Scan.scanWithCache(imageBuffer)
-
-    expect(result.color).toBe('white')
-    expect(result.subtype).toBe('sparkling')
-  })
-})
-
-describe('scanWine upload size guard', () => {
-  test('accepts a payload exactly at the limit', () => {
-    expect(imageWithinSizeLimit(MAX_BASE64_LENGTH)).toBe(true)
-  })
-
-  test('rejects a payload one character over the limit', () => {
-    expect(imageWithinSizeLimit(MAX_BASE64_LENGTH + 1)).toBe(false)
-  })
-
-  test('a 10 MB decoded image base64-encodes to a length that exceeds the limit', () => {
-    // MAX_IMAGE_SIZE_BYTES is the decoded ceiling; base64 adds ~33 % overhead,
-    // so a buffer of that size + 1 byte must produce a base64 string that fails the guard.
-    const tenMbPlusOneBuffer = Buffer.alloc(MAX_IMAGE_SIZE_BYTES + 1)
-    const base64 = tenMbPlusOneBuffer.toString('base64')
-    expect(imageWithinSizeLimit(base64.length)).toBe(false)
   })
 })

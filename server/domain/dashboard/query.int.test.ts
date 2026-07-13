@@ -85,11 +85,12 @@ describe('DashboardQuery.view', () => {
   test('reads each collection exactly once (wines is shared, not re-fetched)', async () => {
     seedDashboardData()
 
-    const before = fake.reads
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     await DashboardQuery.view(userId)
 
     // wines + cellar + journal + tasting = 4 collection reads, no duplicates, plus
     // the household occupancy pair: the scope membership doc and a count aggregation.
-    expect(fake.reads - before).toBe(6)
+    expect(fake.queryReads - before.queryReads).toBe(5)
+    expect(fake.docReads - before.docReads).toBe(1)
   })
 })

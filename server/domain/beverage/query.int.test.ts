@@ -48,10 +48,11 @@ describe('BeverageQuery.list — paginated default view', () => {
 
   test('reads only limit+1 documents (bounded, not the whole collection)', async () => {
     for (let i = 0; i < 10; i++) seedWine(`w${i}`, { createdAt: new Date(2026, 0, i + 1) })
-    const before = fake.reads
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     await BeverageQuery.list(userId, { ...defaults, limit: 3 })
     // one query get(); the fake counts a query as one read regardless of matches
-    expect(fake.reads - before).toBe(1)
+    expect(fake.queryReads - before.queryReads).toBe(1)
+    expect(fake.docReads - before.docReads).toBe(0)
   })
 })
 
@@ -61,14 +62,15 @@ describe('BeverageQuery.list — filtered views', () => {
     seedWine('w2', { wine: { color: 'white' } })
     seedWine('w3', { wine: { color: 'red' } })
 
-    const before = fake.reads
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, color: 'red' })
 
     expect(result.items.map(({ id }) => String(id)).toSorted()).toEqual(['w1', 'w3'])
     expect(result.hasMore).toBe(false)
     expect(result.totalCount).toBe(2)
     // A pure facet view costs the single memoized wines scan — nothing else.
-    expect(fake.reads - before).toBe(1)
+    expect(fake.queryReads - before.queryReads).toBe(1)
+    expect(fake.docReads - before.docReads).toBe(0)
   })
 
   test('the in-cellar status adds exactly one cellar scan', async () => {
@@ -76,11 +78,12 @@ describe('BeverageQuery.list — filtered views', () => {
     seedWine('w2')
     fake.seed('cellar', `${userId}_w1`, { userId, beverageId: 'w1', row: 0, col: 0 })
 
-    const before = fake.reads
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, status: 'in-cellar' })
 
     expect(result.items.map(({ id }) => String(id))).toEqual(['w1'])
-    expect(fake.reads - before).toBe(2) // wines scan + cellar scan
+    expect(fake.queryReads - before.queryReads).toBe(2) // wines scan + cellar scan
+    expect(fake.docReads - before.docReads).toBe(0)
   })
 
   test('the favorites mode adds exactly one tasting scan', async () => {
@@ -88,7 +91,7 @@ describe('BeverageQuery.list — filtered views', () => {
     seedWine('w2')
     fake.seed('tasting', `${userId}_w2`, { userId, beverageId: 'w2', favorite: true })
 
-    const before = fake.reads
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     const result = await BeverageQuery.list(userId, {
       ...defaults,
       limit: 40,
@@ -96,6 +99,7 @@ describe('BeverageQuery.list — filtered views', () => {
     })
 
     expect(result.items.map(({ id }) => String(id))).toEqual(['w2'])
-    expect(fake.reads - before).toBe(2) // wines scan + tasting scan
+    expect(fake.queryReads - before.queryReads).toBe(2) // wines scan + tasting scan
+    expect(fake.docReads - before.docReads).toBe(0)
   })
 })
