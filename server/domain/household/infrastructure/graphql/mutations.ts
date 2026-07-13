@@ -1,29 +1,36 @@
-import { GraphQLError } from 'graphql'
+import { match, P } from 'ts-pattern'
 import { builder } from '~/domain/shared/graphql/builder'
+import { domainError, notFound } from '~/domain/shared/graphql/errors'
 import type { UserId } from '~/domain/shared/types'
 import { HouseholdCommand } from '../../command'
 import { InvitationCode } from '../../primitives'
 import { HouseholdQuery } from '../../query'
 import { HouseholdInvitationType, HouseholdType } from './types'
 
-// Maps each domain error string to the GraphQL error code the client branches on.
-const ERROR_CODES: Record<string, string> = {
-  'invalid-code': 'INVALID_CODE',
-  expired: 'CODE_EXPIRED',
-  'already-used': 'CODE_ALREADY_USED',
-  revoked: 'CODE_REVOKED',
-  'already-in-household': 'ALREADY_IN_HOUSEHOLD',
-  'not-in-household': 'NOT_FOUND',
-  'not-owner': 'NOT_OWNER',
-  'not-a-member': 'NOT_FOUND',
-  'cannot-remove-self': 'CANNOT_REMOVE_SELF',
-}
+// Derived from the commands so the union can never drift from the domain:
+// a new outcome literal grows this type and fails the exhaustive match below.
+type HouseholdError = Extract<
+  | Awaited<ReturnType<typeof HouseholdCommand.joinByCode>>
+  | Awaited<ReturnType<typeof HouseholdCommand.leave>>
+  | Awaited<ReturnType<typeof HouseholdCommand.removeMember>>
+  | Awaited<ReturnType<typeof HouseholdCommand.revokeInvitation>>
+  | Awaited<ReturnType<typeof HouseholdQuery.view>>,
+  string
+>
 
-const fail = (error: string): never => {
-  throw new GraphQLError(error.replace(/-/g, ' '), {
-    extensions: { code: ERROR_CODES[error] ?? 'BAD_REQUEST' },
-  })
-}
+// Maps each domain error to the GraphQL error code the client branches on.
+const householdError = (error: HouseholdError): never =>
+  match(error)
+    .with('invalid-code', () => domainError('INVALID_CODE', 'invalid code'))
+    .with('expired', () => domainError('CODE_EXPIRED', 'expired'))
+    .with('already-used', () => domainError('CODE_ALREADY_USED', 'already used'))
+    .with('revoked', () => domainError('CODE_REVOKED', 'revoked'))
+    .with('already-in-household', () => domainError('ALREADY_IN_HOUSEHOLD', 'already in household'))
+    .with('not-in-household', () => notFound('not in household'))
+    .with('not-owner', () => domainError('NOT_OWNER', 'not owner'))
+    .with('not-a-member', () => notFound('not a member'))
+    .with('cannot-remove-self', () => domainError('CANNOT_REMOVE_SELF', 'cannot remove self'))
+    .exhaustive()
 
 // Reject a malformed code the same way as an unknown one, rather than surfacing a
 // raw validation error.
@@ -31,15 +38,15 @@ const parseCode = (raw: string) => {
   try {
     return InvitationCode(raw)
   } catch {
-    return fail('invalid-code')
+    return householdError('invalid-code')
   }
 }
 
-const householdView = async (userId: UserId) => {
-  const view = await HouseholdQuery.view(userId)
-  if (view === 'not-in-household') return fail('not-in-household')
-  return view
-}
+const householdView = async (userId: UserId) =>
+  match(await HouseholdQuery.view(userId))
+    .with('not-in-household', householdError)
+    .with(P.not(P.string), (view) => view)
+    .exhaustive()
 
 builder.mutationField('createHouseholdInvitation', (t) =>
   t.field({
@@ -64,8 +71,10 @@ builder.mutationField('joinHousehold', (t) =>
     },
     resolve: async (_root, { code, displayName }, { userId }) => {
       const result = await HouseholdCommand.joinByCode(userId, parseCode(code), displayName)
-      if (typeof result === 'string') return fail(result)
-      return householdView(userId)
+      return match(result)
+        .with(P.string, householdError)
+        .with({ outcome: 'joined' }, () => householdView(userId))
+        .exhaustive()
     },
   }),
 )
@@ -76,8 +85,10 @@ builder.mutationField('leaveHousehold', (t) =>
     description: 'Leave the current household',
     resolve: async (_root, _args, { userId }) => {
       const result = await HouseholdCommand.leave(userId)
-      if (result === 'not-in-household') return fail(result)
-      return true
+      return match(result)
+        .with('not-in-household', householdError)
+        .with({ outcome: 'left' }, () => true)
+        .exhaustive()
     },
   }),
 )
@@ -89,8 +100,10 @@ builder.mutationField('removeHouseholdMember', (t) =>
     args: { userId: t.arg({ type: 'UserId', required: true }) },
     resolve: async (_root, args, { userId }) => {
       const result = await HouseholdCommand.removeMember(userId, args.userId)
-      if (typeof result === 'string') return fail(result)
-      return householdView(userId)
+      return match(result)
+        .with(P.string, householdError)
+        .with({ outcome: 'removed' }, () => householdView(userId))
+        .exhaustive()
     },
   }),
 )
@@ -102,8 +115,10 @@ builder.mutationField('revokeHouseholdInvitation', (t) =>
     args: { code: t.arg.string({ required: true }) },
     resolve: async (_root, { code }, { userId }) => {
       const result = await HouseholdCommand.revokeInvitation(userId, parseCode(code))
-      if (typeof result === 'string') return fail(result)
-      return true
+      return match(result)
+        .with(P.string, householdError)
+        .with({ outcome: 'revoked' }, () => true)
+        .exhaustive()
     },
   }),
 )

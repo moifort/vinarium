@@ -1,7 +1,7 @@
-import { GraphQLError } from 'graphql'
 import { Scan } from '~/domain/scan'
 import { imageWithinSizeLimit } from '~/domain/scan/limits'
 import { builder } from '~/domain/shared/graphql/builder'
+import { domainError } from '~/domain/shared/graphql/errors'
 import { ScanResultType } from './types'
 
 builder.mutationField('scanBeverage', (t) =>
@@ -16,17 +16,14 @@ builder.mutationField('scanBeverage', (t) =>
       }),
     },
     resolve: async (_root, { imageBase64 }) => {
-      if (!imageWithinSizeLimit(imageBase64.length)) {
-        throw new GraphQLError('Image exceeds the 10 MB size limit', {
-          extensions: { code: 'IMAGE_TOO_LARGE' },
-        })
-      }
+      if (!imageWithinSizeLimit(imageBase64.length))
+        return domainError('IMAGE_TOO_LARGE', 'Image exceeds the 10 MB size limit')
       try {
         const buffer = Buffer.from(imageBase64, 'base64')
         return await Scan.scanWithCache(buffer)
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Scan failed'
-        throw new GraphQLError(message, { extensions: { code: 'SCAN_FAILED' } })
+        return domainError('SCAN_FAILED', message)
       }
     },
   }),

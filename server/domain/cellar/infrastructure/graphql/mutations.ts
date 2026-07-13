@@ -1,5 +1,6 @@
-import { GraphQLError } from 'graphql'
+import { match, P } from 'ts-pattern'
 import { builder } from '~/domain/shared/graphql/builder'
+import { domainError, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
 import { CellarCommand } from '../../command'
 import { CellarCol, CellarRow } from '../../primitives'
@@ -24,13 +25,13 @@ builder.mutationField('placeBottle', (t) =>
         CellarRow(row),
         CellarCol(col),
       )
-      if (result === 'not-your-beverage')
-        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
-      if (result === 'position-occupied')
-        throw new GraphQLError('Cellar position already occupied', {
-          extensions: { code: 'POSITION_OCCUPIED' },
-        })
-      return bottleView(result)
+      return match(result)
+        .with('not-your-beverage', () => notFound('Beverage not found'))
+        .with('position-occupied', () =>
+          domainError('POSITION_OCCUPIED', 'Cellar position already occupied'),
+        )
+        .with(P.not(P.string), bottleView)
+        .exhaustive()
     },
   }),
 )
@@ -51,9 +52,10 @@ builder.mutationField('moveBottle', (t) =>
         CellarRow(row),
         CellarCol(col),
       )
-      if (result === 'not-in-cellar')
-        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
-      return bottleView(result)
+      return match(result)
+        .with('not-in-cellar', () => notFound('Beverage not in cellar'))
+        .with(P.not(P.string), bottleView)
+        .exhaustive()
     },
   }),
 )
@@ -71,9 +73,10 @@ builder.mutationField('consumeBottle', (t) =>
         type: 'tasting',
         ...stripNulls(input),
       })
-      if (result === 'not-in-cellar')
-        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
-      return true
+      return match(result)
+        .with('not-in-cellar', () => notFound('Beverage not in cellar'))
+        .with(undefined, () => true)
+        .exhaustive()
     },
   }),
 )
@@ -92,9 +95,10 @@ builder.mutationField('giftBottle', (t) =>
         type: 'gift',
         given: { date: giftedDate, ...(recipientName && { recipientName }) },
       })
-      if (result === 'not-in-cellar')
-        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
-      return true
+      return match(result)
+        .with('not-in-cellar', () => notFound('Beverage not in cellar'))
+        .with(undefined, () => true)
+        .exhaustive()
     },
   }),
 )
@@ -106,9 +110,10 @@ builder.mutationField('removeBottle', (t) =>
     args: { beverageId: t.arg({ type: 'BeverageId', required: true }) },
     resolve: async (_root, { beverageId }, { userId }) => {
       const result = await CellarUseCase.removeBottle(userId, beverageId)
-      if (result === 'not-in-cellar')
-        throw new GraphQLError('Beverage not in cellar', { extensions: { code: 'NOT_FOUND' } })
-      return true
+      return match(result)
+        .with('not-in-cellar', () => notFound('Beverage not in cellar'))
+        .with(undefined, () => true)
+        .exhaustive()
     },
   }),
 )

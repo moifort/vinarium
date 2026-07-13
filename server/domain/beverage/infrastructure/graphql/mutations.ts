@@ -1,5 +1,6 @@
-import { GraphQLError } from 'graphql'
+import { match, P } from 'ts-pattern'
 import { builder } from '~/domain/shared/graphql/builder'
+import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
 import type { BeverageData, WineDetails } from '../../types'
 import { BeverageUseCase } from '../../use-case'
@@ -73,12 +74,8 @@ const toData = (input: BeverageFlatInput): BeverageData => {
   } as BeverageData
 }
 
-const colorRequired = () =>
-  new GraphQLError('A wine requires a color', { extensions: { code: 'BAD_USER_INPUT' } })
-const subtypeInvalid = () =>
-  new GraphQLError('This subtype does not fit the beverage type', {
-    extensions: { code: 'BAD_USER_INPUT' },
-  })
+const colorRequired = () => badUserInput('A wine requires a color')
+const subtypeInvalid = () => badUserInput('This subtype does not fit the beverage type')
 
 builder.mutationField('addBeverage', (t) =>
   t.field({
@@ -94,9 +91,11 @@ builder.mutationField('addBeverage', (t) =>
         toData(clean),
         clean.giftedBy,
       )
-      if (result === 'color-required') throw colorRequired()
-      if (result === 'subtype-invalid') throw subtypeInvalid()
-      return result
+      return match(result)
+        .with('color-required', colorRequired)
+        .with('subtype-invalid', subtypeInvalid)
+        .with(P.not(P.string), (beverage) => beverage)
+        .exhaustive()
     },
   }),
 )
@@ -113,11 +112,12 @@ builder.mutationField('updateBeverage', (t) =>
       const clean = stripNulls(input)
       const data = { ...toData(clean), name: clean.name, beverageType: clean.beverageType }
       const result = await BeverageUseCase.update(userId, id, data, clean.giftedBy)
-      if (result === 'not-found')
-        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
-      if (result === 'color-required') throw colorRequired()
-      if (result === 'subtype-invalid') throw subtypeInvalid()
-      return result
+      return match(result)
+        .with('not-found', () => notFound('Beverage not found'))
+        .with('color-required', colorRequired)
+        .with('subtype-invalid', subtypeInvalid)
+        .with(P.not(P.string), (beverage) => beverage)
+        .exhaustive()
     },
   }),
 )
@@ -130,9 +130,10 @@ builder.mutationField('deleteBeverage', (t) =>
     args: { id: t.arg({ type: 'BeverageId', required: true }) },
     resolve: async (_root, { id }, { userId }) => {
       const result = await BeverageUseCase.removeCompletely(userId, id)
-      if (result === 'not-found')
-        throw new GraphQLError('Beverage not found', { extensions: { code: 'NOT_FOUND' } })
-      return true
+      return match(result)
+        .with('not-found', () => notFound('Beverage not found'))
+        .with(undefined, () => true)
+        .exhaustive()
     },
   }),
 )
