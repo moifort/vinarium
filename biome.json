@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**"]
+    "includes": ["**", "!shared/schema.graphql", "!server/system/changelog-content.ts"]
   },
   "formatter": {
     "enabled": true,
