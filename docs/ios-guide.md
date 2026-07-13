@@ -28,15 +28,18 @@ ios/Vinarium/
 │       └── LabeledInfoRow.swift
 └── Features/                   # Feature modules
     └── {Feature}/
+        ├── {Feature}View.swift        # Coordinator: owns the ViewModel, NavigationStack, sheets, domain→primitive mapping
         ├── {Feature}Models.swift      # Swift model structs (Wine, UserWineDetail …)
         ├── {Feature}API.swift         # Feature API enum (wraps GraphQL operations)
         ├── {Feature}ViewModel.swift   # ViewModel
         ├── GraphQL/                   # .graphql query/mutation operation files
         └── components/
-            ├── pages/                 # Coordinators (loading, sheets, navigation)
+            ├── pages/                 # Pure, previewable screen layouts (bindings + primitives + closures)
             ├── organisms/             # Composite sections, forms, content views
             └── molecules/             # Small composed views (rows, badges)
 ```
+
+Two layers split the "screen": the feature-root **`{Feature}View`** is the coordinator (it owns the `@State` ViewModel, the `NavigationStack`, sheet presentation, and maps domain models to primitives), and **`components/pages/{Feature}Page`** is a pure presentational view driven only by bindings, primitive data, and closures — so the whole screen stays previewable without a running server. `ContentView` wires the `{Feature}View` coordinators together.
 
 Xcode uses `fileSystemSynchronizedGroups`, so new files are picked up automatically — no manual project edits.
 
@@ -74,20 +77,47 @@ Key conventions:
 - `private(set)` for published state
 - Error reporting via `reportError()` (Sentry)
 
-### Page View
+### Coordinator (`{Feature}View`)
+
+The feature-root `*View` owns the ViewModel and all side effects (loading, navigation, sheets), maps the ViewModel's domain models to the primitives its `Page` expects, and holds nothing presentational itself:
 
 ```swift
-struct WineListPage: View {
+struct WineListView: View {
     @State private var viewModel = WineListViewModel()
+    @State private var selectedWineId: String?
 
     var body: some View {
         NavigationStack {
-            List(viewModel.wines) { wine in
-                WineListRow(name: wine.name, color: wine.color)
-            }
-            .navigationTitle("Cave")
+            WineListPage(
+                groups: mappedGroups,               // domain → primitives happens here
+                isLoading: viewModel.isLoading,
+                errorMessage: viewModel.error,
+                onWineTapped: { selectedWineId = $0 },
+                onRefresh: { await viewModel.load() }
+            )
             .task { await viewModel.load() }
+            .sheet(item: /* selectedWineId */) { WineDetailView(wineId: $0.id) }
         }
+    }
+}
+```
+
+### Page (pure, previewable)
+
+The `Page` under `components/pages/` takes only bindings, primitives, and closures — no ViewModel, no API calls — and adds the navigation chrome. It renders in a `#Preview` with mock data:
+
+```swift
+struct WineListPage: View {
+    let groups: [WineListContent.Group]
+    var isLoading = false
+    var errorMessage: String?
+    var onWineTapped: (String) -> Void
+    var onRefresh: () async -> Void
+
+    var body: some View {
+        WineListContent(groups: groups, isLoading: isLoading, onWineTapped: onWineTapped)
+            .navigationTitle("Cave")
+            .refreshable { await onRefresh() }
     }
 }
 ```
@@ -170,16 +200,17 @@ struct WineListPage: View {
 
 | Layer | Location | Receives | Examples |
 |-------|----------|----------|----------|
-| **Atoms** | `Shared/Components/` | Primitives | `WineColorBadge`, `StarRatingView` |
-| **Molecules** | `Features/{F}/components/molecules/` | Primitives | `WineListRow`, `LocationSection` |
+| **Coordinator** | `Features/{F}/{F}View.swift` | Owns the ViewModel | `WineListView`, `WineDetailView` |
+| **Pages** | `Features/{F}/components/pages/` | Bindings + primitives + closures | `WineListPage`, `WineDetailPage` |
 | **Organisms** | `Features/{F}/components/organisms/` | Primitives or `Item` / domain struct at the mapping boundary | `WineListContent`, `WineEditForm`, `WineDetailContent` |
-| **Pages** | `Features/{F}/components/pages/` | ViewModel | `WineListPage`, `WineDetailPage` |
+| **Molecules** | `Features/{F}/components/molecules/` | Primitives | `WineListRow`, `LocationSection` |
+| **Atoms** | `Shared/Components/` | Primitives | `WineColorBadge`, `StarRatingView` |
 
 **Atoms** in `Shared/Components/` are cross-feature. A molecule used in 2+ features should be promoted to `Shared/Components/`.
 
-### Page = Coordinator
+### Coordinator vs Page
 
-Pages handle loading, error states, sheets, navigation, and toolbar. They map domain models to primitives for child components. They are the only layer allowed to call APIs and hold `@State` for sheet presentation.
+The feature-root `{Feature}View` is the coordinator: it handles loading, error states, sheets, navigation, and the domain→primitive mapping, and is the only layer that holds the `@State` ViewModel and triggers API calls. The `{Feature}Page` it renders stays pure — bindings, primitives, and closures only — so it (and everything below it) is previewable. This is one layer more than a Page-owns-the-ViewModel setup, and the payoff is that the full screen layout previews without a server.
 
 ### Organisms as Mapping Boundaries
 
@@ -226,21 +257,21 @@ Benefits: previewable in isolation, testable independently, the parent page stay
 
 ### Previews as Storybook
 
-Every component below the page level **must** be previewable without a running server:
+Every component from the page level down **must** be previewable without a running server — pages included, since they hold no ViewModel:
 
 ```swift
-// Good — preview with inline data
+// Good — the pure Page previews with inline data
 #Preview("En cave") {
     WineDetailContent(detail: UserWineDetail(id: "1", name: "Margaux", /* … */), onRemoveRequested: {})
 }
 
 // Bad — preview that hits the API
 #Preview {
-    WineDetailPage(wineId: "c2f5486a-…")  // needs a server
+    WineDetailView(wineId: "c2f5486a-…")  // the coordinator loads data — needs a server
 }
 ```
 
-Pages (coordinators) are the exception — they load data. But their child organisms/molecules must all be previewable with mock data.
+The feature-root `{Feature}View` coordinator is the only exception — it owns the ViewModel and loads data, so it is not previewed. Its `Page` and every organism/molecule below must all preview with mock data.
 
 ## GraphQL Client (Apollo iOS)
 

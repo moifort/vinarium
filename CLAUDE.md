@@ -74,7 +74,7 @@ Full guide (writing/testing a migration): [docs/migrations.md](docs/migrations.m
 ## iOS Patterns (SwiftUI)
 
 - Target: iOS 26.0, Swift 6 (strict concurrency); `@MainActor` on ViewModels, `Sendable` on model types.
-- Feature structure `ios/Vinarium/Features/{Feature}/components/{pages,organisms,molecules}`, cross-feature atoms in `ios/Vinarium/Shared/Components/`. Primitive-first leaf views, pages as coordinators, organisms as mapping boundaries, previews as storybook. See [docs/ios-guide.md](docs/ios-guide.md).
+- Feature structure `ios/Vinarium/Features/{Feature}/` with the coordinator `{Feature}View.swift` at the root and `components/{pages,organisms,molecules}` below; cross-feature atoms in `ios/Vinarium/Shared/Components/`. The feature-root `*View` is the coordinator (owns the ViewModel, navigation, sheets, domain→primitive mapping); the `*Page` is pure and previewable. Primitive-first leaf views, organisms as mapping boundaries, previews as storybook. See [docs/ios-guide.md](docs/ios-guide.md).
 - GraphQL over Apollo iOS (`GraphQLClient` singleton, Firebase Bearer auth); `.graphql` operations in `Features/{Feature}/GraphQL/`, generated types in `Generated/GraphQL/` (namespace `VinariumGraphQL`).
 - Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files). `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools.
 
