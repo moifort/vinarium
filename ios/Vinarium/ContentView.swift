@@ -23,11 +23,28 @@ enum TabSelection: Int, CaseIterable, Identifiable {
 
 struct ContentView: View {
     @State private var selectedTab: TabSelection = .home
+    /// The last real content tab, restored when the scan cover is dismissed.
+    @State private var lastContentTab: TabSelection = .home
     @State private var showScanner = false
     @State private var cellarRefreshTrigger = UUID()
     @State private var showFavorites = false
     @State private var showRecommended = false
     @State private var searchPresenter = SearchPresenter()
+
+    /// The trailing "Scanner" entry must stay detached from the content tabs.
+    /// iOS 26 separates the `.search` role; iOS 27 folded `.search` back into the
+    /// main tab row and introduced `.prominent` for a trailing-separated tab.
+    /// Pick the role that detaches on the running OS, guarding `.prominent`
+    /// behind the SDK that defines it (Swift 6.4 / Xcode 27) so the app still
+    /// builds with Xcode 26.
+    private var scanTabRole: TabRole {
+        #if compiler(>=6.4)
+        if #available(iOS 27.0, *) {
+            return .prominent
+        }
+        #endif
+        return .search
+    }
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -43,24 +60,26 @@ struct ContentView: View {
                 WineListView(showFavorites: $showFavorites, showRecommended: $showRecommended)
             }
             .accessibilityIdentifier("tab-wines")
-            Tab(value: .scan, role: .search) {
+            Tab(value: .scan, role: scanTabRole) {
                 Color.clear
             } label: {
                 Label(TabSelection.scan.label, systemImage: TabSelection.scan.icon)
             }
             .accessibilityIdentifier("tab-scan")
         }
-        .onChange(of: selectedTab) { oldValue, newValue in
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .onChange(of: selectedTab) { _, newValue in
             if newValue == .scan {
-                selectedTab = oldValue
                 showScanner = true
+            } else {
+                lastContentTab = newValue
             }
         }
         .environment(searchPresenter)
         .fullScreenCover(isPresented: $searchPresenter.isPresented) {
             SearchView()
         }
-        .fullScreenCover(isPresented: $showScanner) {
+        .fullScreenCover(isPresented: $showScanner, onDismiss: restoreContentTab) {
             ScanView { result in
                 showScanner = false
                 switch result {
@@ -78,6 +97,13 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    /// After the scan cover closes, leave the empty scan tab and return to the
+    /// content tab the user came from (unless a successful scan already routed
+    /// the selection elsewhere).
+    private func restoreContentTab() {
+        if selectedTab == .scan { selectedTab = lastContentTab }
     }
 }
 
