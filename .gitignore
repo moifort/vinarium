@@ -27,7 +27,10 @@ ios/Vinarium/Shared/Secrets.swift
 ios/VinariumUITests/Support/TestSecrets.swift
 
 doc/
-docs/
+# Version the architecture guides; the App Store privacy policy (index.html)
+# stays local (it is served from the gh-pages branch).
+docs/*
+!docs/*.md
 firebase-debug.log
 firestore-debug.log
 ui-debug.log

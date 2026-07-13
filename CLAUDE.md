@@ -43,16 +43,17 @@ Before pushing, update the user-facing surfaces, then push:
 
 ## Backend Patterns (TypeScript/Nitro)
 
-- Domain architecture: `server/domain/{domain}/types.ts`, `primitives.ts`, `command.ts`, `query.ts`, `infrastructure/repository.ts`, `infrastructure/graphql/`
-- **`business-rules.ts`** (optional): pure functions (no IO, no async) extracted from complex commands. Function names ARE the business concept (`wineStatus`, `readyToDrink` — never `computeX`, `getX`, `calculateX`). Must have 100% test coverage (`business-rules.unit.test.ts`)
-- **`use-case.ts`** (optional): multi-domain orchestrations when a route needs to coordinate several commands/queries. Names carry business intent (`addWithTasting`, `removeCompletely` — never `handleX`, `processX`). No direct storage access.
-- Branded types with `ts-brand` + Zod validation constructors in `primitives.ts`
-- Discriminated unions for errors (no exceptions)
-- **Storage: native Firestore** (`firebase-admin`) via `db()` from `server/system/firebase.ts`, only inside `infrastructure/repository.ts`. Helpers in `server/utils/firestore.ts`: `genericDataConverter<T>()` (Timestamp→Date), `atomically(batch => ...)` (single-batch commits), `deleteInBatches(refs)`, `userBeverageRecordRepository<T>(collection)` (satellite collections keyed `${userId}_${beverageId}`: tasting/gift/recommendation)
-- **GraphQL** (Apollo Server + Pothos, single endpoint `POST /graphql`): nested `WineType` fields (cellar, consumption, gift, recommendation, history) must never scan a collection or read one doc per parent row (N+1). They resolve through the per-request loaders in `server/domain/shared/graphql/loaders.ts` (memoized + micro-batched by `wineId`, built per request on the GraphQL context) — a page of 40 wines costs one batched read per selected satellite, an unselected satellite costs nothing. Read budgets are asserted in tests via `fake.docReads`/`fake.queryReads`
-- **Naming**: function names carry the business concept, not the technical pattern. The name IS the rule or action.
-- **Tests**: `bun:test`, three suffixes — `*.unit.test.ts` (pure functions/primitives, no storage), `*.int.test.ts` (commands/queries against the fake Firestore), `*.feat.test.ts` (GraphQL end-to-end against the schema). Using `server/test/fake-firestore.ts` (`mock.module('~/system/firebase', () => ({ db: fakeDb }))`) makes a test `.int` (or `.feat` when it executes `graphql()`). The fake records batches, direct writes and read counters — assert read budgets with the split `fake.docReads`/`fake.queryReads` (proves "no collection scan"), not the combined `fake.reads`. Run one suite with `bun test .unit.test` / `.int.test` / `.feat.test`. Optional BDD narration DSL in `server/test/bdd.ts`
-- Formatter: Biome (spaces, single quotes, no semicolons, line width 100)
+Patterns live in `docs/`; the essentials:
+
+- **Domain architecture** — `server/domain/{domain}/` with `types.ts`, `primitives.ts`, `command.ts` (`XxxCommand` namespace), `query.ts` (`XxxQuery` namespace), optional `business-rules.ts` / `use-case.ts`, and `infrastructure/{repository.ts, graphql/}`. Repositories are bare functions (`import * as repository`), private to the domain. See [docs/architecture.md](docs/architecture.md) and [docs/domain-guide.md](docs/domain-guide.md).
+- **Branded types** — `ts-brand` + Zod constructors in `primitives.ts`; one GraphQL scalar per brand. See [docs/branded-types.md](docs/branded-types.md).
+- **Errors** — commands return bare string-literal outcomes (`'not-found' as const`) or the domain value; resolvers map them with `match().exhaustive()` + `notFound`/`badUserInput` helpers. `throw` for impossible states. See [docs/error-handling.md](docs/error-handling.md).
+- **Storage** — native Firestore (`firebase-admin`) via `db()` from `server/system/firebase.ts`, only inside `infrastructure/repository.ts`. Helpers in `server/utils/firestore.ts` (`genericDataConverter`, `atomically`, `deleteInBatches`, `bulkSave`, `userBeverageRecordRepository`). See [docs/architecture.md](docs/architecture.md#storage).
+- **GraphQL** — Apollo Server + Pothos, single endpoint `POST /graphql`. Nested `Beverage` satellite fields must never scan a collection or read one doc per parent row (N+1) — they resolve through the per-request loaders in `server/domain/shared/graphql/loaders.ts`. See [docs/api-patterns.md](docs/api-patterns.md).
+- **Naming** — function names carry the business concept, not the technical pattern. The name IS the rule or action. See [docs/code-style.md](docs/code-style.md).
+- **Observability** — never `console.*`; log via `createLogger(tag)` from `server/system/logger.ts` (consola). Sentry (error capture + domain-namespace tracing) activates only when `NITRO_SENTRY_DSN` is set — see `server/plugins/00-sentry.ts` and `server/system/sentry/`.
+- **Tests** — `bun:test`, three suffixes: `*.unit.test.ts` (pure functions/primitives), `*.int.test.ts` (commands/queries against the fake Firestore), `*.feat.test.ts` (GraphQL against the schema). Mock via `mock.module('~/system/firebase', () => ({ db: fakeDb }))`; assert read budgets with the split `fake.docReads`/`fake.queryReads`, not the combined `fake.reads`. Optional BDD DSL in `server/test/bdd.ts`. See [docs/domain-guide.md](docs/domain-guide.md#tests).
+- **Formatter** — Biome (spaces, single quotes, no semicolons, line width 100).
 
 ## Database Migrations
 
@@ -67,18 +68,14 @@ Before pushing, update the user-facing surfaces, then push:
 - **When to migrate**: renaming a field, changing a field's structure, changing enum values, removing stale data
 - **No migration needed**: adding a new optional (`?`) field, adding a new collection, changing query logic/routes
 
+Full guide (writing/testing a migration): [docs/migrations.md](docs/migrations.md).
+
 ## iOS Patterns (SwiftUI)
 
-- Target: iOS 26.0, Swift 6 (strict concurrency)
-- `@MainActor` on ViewModels, `Sendable` on model types
-- Feature structure: `ios/Vinarium/Features/{Feature}/` with `pages/`, `organisms/`, `molecules/` subdirectories
-- Shared atoms: `ios/Vinarium/Shared/Components/` — cross-feature reusable views (badges, ratings, labeled rows)
-- **Primitive-first views**: leaf views receive only primitives (`String`, `Int`, `Bool`, `Date?`, `WineColor`, closures) — never domain structs (`Wine`, `UserWineDetail`, `CellarBottle`). Use nested `Item` structs for 5+ parameters
-- **Previews as Storybook**: every component below page level must be previewable without a running server
-- **Pages = coordinators**: handle loading, error, sheets, toolbar, API calls. Map domain models to primitives for children
-- **Organisms as mapping boundaries**: can accept domain structs when they break them down into primitives for child sections
-- Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files)
-- `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools
+- Target: iOS 26.0, Swift 6 (strict concurrency); `@MainActor` on ViewModels, `Sendable` on model types.
+- Feature structure `ios/Vinarium/Features/{Feature}/components/{pages,organisms,molecules}`, cross-feature atoms in `ios/Vinarium/Shared/Components/`. Primitive-first leaf views, pages as coordinators, organisms as mapping boundaries, previews as storybook. See [docs/ios-guide.md](docs/ios-guide.md).
+- GraphQL over Apollo iOS (`GraphQLClient` singleton, Firebase Bearer auth); `.graphql` operations in `Features/{Feature}/GraphQL/`, generated types in `Generated/GraphQL/` (namespace `VinariumGraphQL`).
+- Xcode uses `fileSystemSynchronizedGroups` (no need to manually add files). `DEVELOPER_DIR` required because `xcode-select` points to CommandLineTools.
 
 ## App Store Distribution
 
