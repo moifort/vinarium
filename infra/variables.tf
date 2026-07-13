@@ -72,8 +72,8 @@ variable "google_api_key" {
   sensitive   = true
 }
 
-variable "fixme_dsn" {
-  description = "FIXME DSN for error reporting (empty disables FIXME). Exposed to the function as NITRO_FIXME_DSN, read via process.env.NITRO_FIXME_DSN in the Nitro plugin."
+variable "sentry_dsn" {
+  description = "Sentry DSN for error reporting and tracing (empty disables Sentry). Exposed to the function as NITRO_SENTRY_DSN, read via runtimeConfig in the Nitro plugin."
   type        = string
   sensitive   = true
   default     = ""

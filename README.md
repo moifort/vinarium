@@ -115,7 +115,7 @@ Required environment variables (`.env`) :
 ```
 NITRO_GOOGLE_API_KEY=...
 NITRO_ADMIN_TOKEN=...
-NITRO_FIXME_DSN=...     # optional
+NITRO_SENTRY_DSN=...    # optional
 ```
 
 ## iOS App

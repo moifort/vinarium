@@ -1,3 +1,5 @@
+import { generateDomainInstrumentation } from './server/system/sentry/generate-domain-instrumentation'
+
 export default defineNitroConfig({
   compatibilityDate: '2026-02-06',
   experimental: { asyncContext: true },
@@ -19,8 +21,12 @@ export default defineNitroConfig({
       moduleSideEffects: (id) => id.includes('/graphql/') || id.includes('node_modules'),
     },
   },
+  virtual: {
+    '#domain-instrumentation': generateDomainInstrumentation,
+  },
   runtimeConfig: {
     googleApiKey: '',
     adminToken: '',
+    sentryDsn: '',
   },
 })
