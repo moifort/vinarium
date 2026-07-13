@@ -37,6 +37,7 @@ A purely functional approach to wine cellar management.
 | Storage  | Firestore (multi-user, isolated by `userId`, shared cellars via households) |
 | AI       | Claude Sonnet 4.6 (vision), Gemini 2.0 Flash (web search)                 |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
+| Observability | Sentry (backend namespace tracing + iOS crash/error reporting)       |
 
 ## One-shot bootstrap
 
