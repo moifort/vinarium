@@ -46,7 +46,7 @@ describe('architecture', () => {
     }
   })
 
-  describe('no console.log/error/warn in server code', () => {
+  describe('no console usage in server code (use createLogger from ~/system/logger)', () => {
     const serverFiles = glob('server/**/*.ts').filter(
       (f) => !f.includes('test/') && !f.endsWith('.test.ts'),
     )
@@ -57,7 +57,7 @@ describe('architecture', () => {
         const content = readFile(join(SERVER_DIR, '..', file))
         const lines = content.split('\n')
         for (let i = 0; i < lines.length; i++) {
-          if (/console\.(log|error|warn)/.test(lines[i])) {
+          if (/\bconsole\.\w+/.test(lines[i])) {
             violations.push(`${file}:${i + 1}: ${lines[i].trim()}`)
           }
         }
