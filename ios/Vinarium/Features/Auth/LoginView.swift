@@ -11,9 +11,8 @@ struct LoginView: View {
         VStack(spacing: 32) {
             Spacer()
             VStack(spacing: 12) {
-                Image(systemName: "wineglass.fill")
-                    .font(.system(size: 64))
-                    .foregroundStyle(Color(red: 0.55, green: 0.07, blue: 0.16))
+                BrandLogo()
+                    .padding(.bottom, 4)
                 Text("Vinarium")
                     .font(.largeTitle.bold())
                 Text("Connecte-toi pour accéder à ta cave.")
