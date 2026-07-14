@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez une marque de cave dans la liste pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure.
+- La taille de la cave n'est plus figée : elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
 - Barre d'onglets : elle se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste épinglé et séparé à droite.
 - Partage de cave : invitez les personnes de votre foyer avec un code, et partagez une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal ; seules les bouteilles en cave sont mises en commun.
 - Cave partagée : toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille ; la sortie est enregistrée dans le journal du propriétaire du vin, et votre note de dégustation reste la vôtre.
