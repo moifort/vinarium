@@ -17,7 +17,11 @@ struct AuthRoot: View {
         }
         .environment(session)
         .task(id: session.user?.uid) {
-            if session.user != nil { await gate.refresh() }
+            if session.user != nil {
+                await gate.refresh()
+            } else {
+                gate.reset()
+            }
         }
     }
 

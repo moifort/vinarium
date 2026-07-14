@@ -22,14 +22,21 @@ export const cellarConfigKey = async (userId: UserId) => {
 }
 
 export namespace CellarCommand {
-  // Set the shared grid dimensions for the caller's cellar scope (onboarding, or
-  // a later resize). Written into the caller's batch when one is supplied.
+  // Initialise the grid dimensions for the caller's cellar scope during onboarding.
+  // Never overwrites an existing config: the grid is shared, so a housemate who
+  // onboards after the household already sized its cave must not resize (or shrink,
+  // stranding placed bottles) it. Returns the effective config either way.
   export const configureFor = async (
     userId: UserId,
     rows: CellarRows,
     cols: CellarCols,
     batch?: WriteBatch,
-  ) => repository.saveConfig(await cellarConfigKey(userId), { rows, cols }, batch)
+  ) => {
+    const key = await cellarConfigKey(userId)
+    const existing = await repository.findConfig(key)
+    if (existing) return existing
+    return repository.saveConfig(key, { rows, cols }, batch)
+  }
 
   export const placeBeverage = async (
     userId: UserId,

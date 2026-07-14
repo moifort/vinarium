@@ -61,6 +61,23 @@ describe('UserUseCase.completeOnboarding', () => {
     expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 12, cols: 7 })
   })
 
+  test('never overwrites the shared grid a housemate already configured', async () => {
+    fake.seed('household-members', 'a', member('a', 'h1'))
+    fake.seed('household-members', 'b', member('b', 'h1'))
+    fake.seed('cellar-configs', 'hh_h1', { rows: 12, cols: 7 })
+
+    // Member B onboards later and picks a smaller size — the grid must not shrink.
+    await UserUseCase.completeOnboarding(user('b'), {
+      firstName: 'Marie' as PersonName,
+      rows: 6 as CellarRows,
+      cols: 5 as CellarCols,
+    })
+
+    expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 12, cols: 7 })
+    // B is still onboarded — only the profile was written, not the config.
+    expect((await UserQuery.me(user('b'))).firstName as string).toBe('Marie')
+  })
+
   test('both writes land in a single committed batch (atomic)', async () => {
     await UserUseCase.completeOnboarding(user('u1'), {
       firstName: 'Thibaut' as PersonName,

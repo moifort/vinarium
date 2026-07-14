@@ -3,7 +3,7 @@ import type { BeverageId } from '~/domain/beverage/types'
 import type { CellarBottle, CellarConfig, OwnedBeverage } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
-import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
+import { evictFromRequestCache, isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const cellar = () => db().collection('cellar').withConverter(genericDataConverter<CellarBottle>())
@@ -11,10 +11,12 @@ const cellar = () => db().collection('cellar').withConverter(genericDataConverte
 const configs = () =>
   db().collection('cellar-configs').withConverter(genericDataConverter<CellarConfig>())
 
+const configCacheKey = (key: string) => `cellar:config:${key}`
+
 // The grid dimensions for a cellar scope, keyed by `hh_<householdId>` (shared) or
 // `usr_<userId>` (solo). Memoized: every cellarInfo/dashboard read resolves it.
 export const findConfig = (key: string): Promise<CellarConfig | null> =>
-  memoizedPerRequest(`cellar:config:${key}`, async () => {
+  memoizedPerRequest(configCacheKey(key), async () => {
     const doc = await configs().doc(key).get()
     return doc.data() ?? null
   })
@@ -27,6 +29,9 @@ export const saveConfig = async (
   const ref = configs().doc(key)
   if (batch) batch.set(ref, config)
   else await ref.set(config)
+  // Drop the memoized config so a read later in the same request sees the new size
+  // rather than a pre-write miss cached by configureFor's existence check.
+  evictFromRequestCache(configCacheKey(key))
   return config
 }
 

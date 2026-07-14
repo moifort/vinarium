@@ -29,4 +29,10 @@ final class OnboardingGate {
     func markCompleted() {
         state = .ready
     }
+
+    /// Clear the resolved state on sign-out so a different account signing in next
+    /// never sees the previous user's state for a frame before `refresh()` runs.
+    func reset() {
+        state = .loading
+    }
 }
