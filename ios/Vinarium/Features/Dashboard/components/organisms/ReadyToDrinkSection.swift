@@ -6,16 +6,9 @@ struct ReadyToDrinkSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("Pr\u{00EA}t \u{00E0} d\u{00E9}guster", systemImage: "wineglass")
-                    .font(.headline)
-                Spacer()
-                if !items.isEmpty {
-                    Text("\(items.count)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Label("Pr\u{00EA}t \u{00E0} d\u{00E9}guster", systemImage: "wineglass")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if items.isEmpty {
                 Text("Aucun vin prêt à déguster")

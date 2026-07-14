@@ -6,17 +6,10 @@ struct FavoritesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("Mes favoris", systemImage: "heart.fill")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
-                Spacer()
-                if !items.isEmpty {
-                    Text("\(items.count)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Label("Mes favoris", systemImage: "heart.fill")
+                .font(.headline)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if items.isEmpty {
                 Text("Aucun favori")

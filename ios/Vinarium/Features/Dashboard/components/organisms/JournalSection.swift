@@ -9,16 +9,9 @@ struct JournalSection: View {
         let lastExit = events.first { !$0.isEntry }
 
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Label("Journal", systemImage: "book")
-                    .font(.headline)
-                Spacer()
-                if !events.isEmpty {
-                    Text("\(events.count)")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-            }
+            Label("Journal", systemImage: "book")
+                .font(.headline)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if events.isEmpty {
                 Text("Aucun événement récent")
