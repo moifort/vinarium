@@ -1,15 +1,18 @@
+import MessageUI
 import SwiftUI
+import UIKit
 
-/// Displays a household invitation code with its expiry, a share sheet and a
-/// revoke action. Leaf view: primitives only.
+/// Displays a household invitation code with its expiry and the two sharing
+/// gestures — copy the join link, or open a pre-filled mail — plus a revoke
+/// action. Leaf view: it owns its share state, the parent runs the revoke.
 struct InviteCodeCard: View {
     let code: String
     let expiresAt: Date?
     let onRevoke: () -> Void
 
-    private var shareText: String {
-        "Rejoins ma cave sur Vinarium avec le code \(code)."
-    }
+    @Environment(\.openURL) private var openURL
+    @State private var linkCopied = false
+    @State private var showMail = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -29,8 +32,13 @@ struct InviteCodeCard: View {
             }
 
             HStack {
-                ShareLink(item: shareText) {
-                    Label("Partager", systemImage: "square.and.arrow.up")
+                Button(action: copyLink) {
+                    Label(linkCopied ? "Lien copié" : "Copier le lien",
+                          systemImage: linkCopied ? "checkmark" : "link")
+                }
+                Spacer()
+                Button(action: sendMail) {
+                    Label("E-mail", systemImage: "envelope")
                 }
                 Spacer()
                 Button("Révoquer", role: .destructive, action: onRevoke)
@@ -38,6 +46,41 @@ struct InviteCodeCard: View {
             .font(.subheadline)
         }
         .padding(.vertical, 4)
+        .sheet(isPresented: $showMail) {
+            MailComposeView(
+                subject: InvitationLink.mailSubject,
+                body: InvitationLink.mailBody(code: code)
+            ) { showMail = false }
+        }
+    }
+
+    private func copyLink() {
+        UIPasteboard.general.string = InvitationLink.url(code: code).absoluteString
+        withAnimation { linkCopied = true }
+        Task {
+            try? await Task.sleep(for: .seconds(2))
+            withAnimation { linkCopied = false }
+        }
+    }
+
+    private func sendMail() {
+        if MFMailComposeViewController.canSendMail() {
+            showMail = true
+        } else if let url = mailtoFallback() {
+            openURL(url)
+        }
+    }
+
+    /// Fallback when no Mail account is configured: hand the invitation to whatever
+    /// app registered for `mailto:`.
+    private func mailtoFallback() -> URL? {
+        var components = URLComponents()
+        components.scheme = "mailto"
+        components.queryItems = [
+            URLQueryItem(name: "subject", value: InvitationLink.mailSubject),
+            URLQueryItem(name: "body", value: InvitationLink.mailBody(code: code)),
+        ]
+        return components.url
     }
 }
 

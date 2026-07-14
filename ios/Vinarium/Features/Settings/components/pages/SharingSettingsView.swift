@@ -1,30 +1,32 @@
 import SwiftUI
 
 /// Coordinator for household sharing: loads the current household, then either
-/// offers to create/join one, or manages members and invitation codes.
+/// offers to create/join one, or manages members and invitation codes. The name
+/// attached to invitations and joins comes from the account (`me.firstName`).
 struct SharingSettingsView: View {
-    @Environment(AuthSession.self) private var authSession
-
     @State private var household: Household?
+    @State private var firstName: String?
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var displayName = ""
-    @State private var showLeaveConfirmation = false
     @State private var memberToRemove: HouseholdMember?
     @State private var codeToRevoke: String?
     @State private var actionError = ErrorPresenter()
 
     var body: some View {
-        Form {
+        Group {
             if isLoading {
-                ProgressView("Chargement…")
-            } else if let household {
-                inHousehold(household)
+                CenteredProgressView()
             } else {
-                noHousehold
-            }
-            if let loadError {
-                Text(loadError).foregroundStyle(.red)
+                Form {
+                    if let household {
+                        inHousehold(household)
+                    } else {
+                        noHousehold
+                    }
+                    if let loadError {
+                        Text(loadError).foregroundStyle(.red)
+                    }
+                }
             }
         }
         .navigationTitle("Partage")
@@ -83,17 +85,15 @@ struct SharingSettingsView: View {
                 .foregroundStyle(.secondary)
         }
         Section("Inviter quelqu'un") {
-            TextField("Votre nom", text: $displayName)
             Button {
                 Task { await generateInvite() }
             } label: {
                 Text("Générer un code d'invitation")
             }
-            .disabled(displayName.trimmingCharacters(in: .whitespaces).isEmpty)
         }
         Section("Rejoindre un foyer") {
-            JoinHouseholdForm(initialDisplayName: displayName, isWorking: actionError.isRunning) { code, name in
-                Task { await join(code: code, displayName: name) }
+            JoinHouseholdForm(isWorking: actionError.isRunning) { code in
+                Task { await join(code: code) }
             }
         }
     }
@@ -129,35 +129,22 @@ struct SharingSettingsView: View {
                 Label("Générer un nouveau code", systemImage: "plus")
             }
         }
-
-        Section {
-            Button("Quitter le foyer", role: .destructive) {
-                showLeaveConfirmation = true
-            }
-            .confirmationDialog(
-                "Quitter le foyer ?",
-                isPresented: $showLeaveConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Quitter", role: .destructive) { Task { await leave() } }
-            } message: {
-                Text("Vos bouteilles redeviendront visibles dans votre cave personnelle.")
-            }
-        }
     }
 
     // MARK: - Actions
 
     private func load() async {
-        if displayName.isEmpty {
-            displayName = authSession.user?.displayName ?? ""
-        }
+        // Fetch both concurrently. The household drives the screen, so only its
+        // failure surfaces an error; the prénom is best-effort (an existing member
+        // already carries a name, and the fallback covers a missing one).
+        async let me = OnboardingAPI.loadMe()
         do {
             household = try await HouseholdAPI.myHousehold()
             loadError = nil
         } catch {
             loadError = error.localizedDescription
         }
+        firstName = (try? await me)?.firstName
         isLoading = false
     }
 
@@ -169,16 +156,10 @@ struct SharingSettingsView: View {
         }
     }
 
-    private func join(code: String, displayName name: String) async {
+    private func join(code: String) async {
+        let name = currentName
         await actionError.run {
             household = try await HouseholdAPI.join(code: code, displayName: name)
-        }
-    }
-
-    private func leave() async {
-        await actionError.run {
-            try await HouseholdAPI.leave()
-            household = nil
         }
     }
 
@@ -195,11 +176,12 @@ struct SharingSettingsView: View {
         }
     }
 
-    /// The name to attach to a new invitation: the viewer's own household name once
-    /// they are a member, otherwise the name they typed before creating the household.
+    /// The name to attach to a new invitation or join: the viewer's existing name
+    /// within the household if they are already a member, otherwise their account
+    /// prénom (`me.firstName`, guaranteed by onboarding).
     private var currentName: String {
-        let trimmed = displayName.trimmingCharacters(in: .whitespaces)
         if let me = household?.members.first(where: { $0.isMe }) { return me.displayName }
+        let trimmed = (firstName ?? "").trimmingCharacters(in: .whitespaces)
         return trimmed.isEmpty ? "Moi" : trimmed
     }
 }
@@ -208,5 +190,4 @@ struct SharingSettingsView: View {
     NavigationStack {
         SharingSettingsView()
     }
-    .environment(AuthSession())
 }
