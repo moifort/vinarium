@@ -1,0 +1,15 @@
+query Me {
+  me {
+    firstName
+    onboardingCompleted
+    onboardingCompletedAt
+  }
+}
+
+mutation CompleteOnboarding($input: CompleteOnboardingInput!) {
+  completeOnboarding(input: $input) {
+    firstName
+    onboardingCompleted
+    onboardingCompletedAt
+  }
+}
