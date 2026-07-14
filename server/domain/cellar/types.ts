@@ -42,4 +42,9 @@ export type CellarBottleWithWine = CellarBottleView & {
   owner: CellarBottleOwner
 }
 
-export const CELLAR_SIZE = { rows: 6, cols: 8 } as const
+// The physical dimensions of a shared cellar grid, set during onboarding and
+// keyed by cellar scope (household or solo). Falls back to DEFAULT_CELLAR_SIZE
+// until configured.
+export type CellarConfig = { rows: CellarRows; cols: CellarCols }
+
+export const DEFAULT_CELLAR_SIZE = { rows: 6, cols: 8 } as const

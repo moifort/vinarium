@@ -8,7 +8,7 @@ import {
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
-import { CELLAR_SIZE, type CellarBottleWithWine } from '~/domain/cellar/types'
+import type { CellarBottleWithWine } from '~/domain/cellar/types'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -23,12 +23,13 @@ export namespace DashboardQuery {
     // The per-request cache dedupes the shared wines read across these queries.
     // bottleCount reflects the whole shared cellar (occupancy is a household fact);
     // every other section below stays personal, computed from the viewer's bottles.
-    const [allBottles, history, allTastings, wines, bottleCount] = await Promise.all([
+    const [allBottles, history, allTastings, wines, bottleCount, cellarConfig] = await Promise.all([
       CellarQuery.bottlesWithWine(userId),
       JournalQuery.all(userId),
       TastingQuery.all(userId),
       BeverageQuery.findAll(userId),
       CellarQuery.householdBottleCount(userId),
+      CellarQuery.config(userId),
     ])
 
     const currentYear = new Date().getFullYear()
@@ -56,7 +57,7 @@ export namespace DashboardQuery {
 
     return {
       bottleCount,
-      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
+      capacity: cellarConfig.rows * cellarConfig.cols,
       totalValue,
       readyToDrink,
       favorites,

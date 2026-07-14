@@ -1,13 +1,15 @@
 import { keyBy, range } from 'lodash-es'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
+import { cellarConfigKey } from '~/domain/cellar/command'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import {
-  CELLAR_SIZE,
   type CellarBottle,
   type CellarBottleOwner,
   type CellarBottleView,
+  type CellarConfig,
+  DEFAULT_CELLAR_SIZE,
   type OwnedBeverage,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
@@ -34,12 +36,22 @@ const ownerOf = (bottle: CellarBottle, viewerId: UserId, scope: CellarScope): Ce
 }
 
 export namespace CellarQuery {
+  // The configured grid dimensions for the caller's cellar scope, falling back to
+  // the default size until onboarding sets them.
+  export const config = async (
+    userId: UserId,
+  ): Promise<CellarConfig | typeof DEFAULT_CELLAR_SIZE> =>
+    (await repository.findConfig(await cellarConfigKey(userId))) ?? DEFAULT_CELLAR_SIZE
+
   export const info = async (userId: UserId) => {
-    const scope = await HouseholdQuery.cellarScope(userId)
+    const [scope, { rows, cols }] = await Promise.all([
+      HouseholdQuery.cellarScope(userId),
+      config(userId),
+    ])
     return {
-      rows: CELLAR_SIZE.rows,
-      cols: CELLAR_SIZE.cols,
-      capacity: CELLAR_SIZE.rows * CELLAR_SIZE.cols,
+      rows,
+      cols,
+      capacity: rows * cols,
       // Server-side aggregation over the whole household: never loads documents.
       placedCount: await repository.countByUsers(scope.memberIds),
     }
@@ -110,9 +122,12 @@ export namespace CellarQuery {
     (await repository.findManyByExactIds(wines)).map(bottleView)
 
   export const suggestPosition = async (userId: UserId) => {
-    const scope = await HouseholdQuery.cellarScope(userId)
+    const [scope, { rows, cols }] = await Promise.all([
+      HouseholdQuery.cellarScope(userId),
+      config(userId),
+    ])
     const allBottles = await repository.findAllByUsers(scope.memberIds)
-    const result = suggest(allBottles)
+    const result = suggest(allBottles, rows, cols)
     if (typeof result === 'string') return result
     return {
       row: result.row,
@@ -122,10 +137,10 @@ export namespace CellarQuery {
     }
   }
 
-  const suggest = (bottles: CellarBottle[]) => {
+  const suggest = (bottles: CellarBottle[], rows: number, cols: number) => {
     const occupied = bottles.map((bottle) => `${bottle.row},${bottle.col}`)
-    const firstFree = range(CELLAR_SIZE.rows)
-      .flatMap((row) => range(CELLAR_SIZE.cols).map((col) => ({ row, col })))
+    const firstFree = range(rows)
+      .flatMap((row) => range(cols).map((col) => ({ row, col })))
       .find(({ row, col }) => !occupied.includes(`${row},${col}`))
     if (!firstFree) return 'cellar-full' as const
     return { row: CellarRow(firstFree.row), col: CellarCol(firstFree.col) }

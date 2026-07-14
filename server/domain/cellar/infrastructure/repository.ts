@@ -1,12 +1,34 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import type { BeverageId } from '~/domain/beverage/types'
-import type { CellarBottle, OwnedBeverage } from '~/domain/cellar/types'
+import type { CellarBottle, CellarConfig, OwnedBeverage } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
 import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const cellar = () => db().collection('cellar').withConverter(genericDataConverter<CellarBottle>())
+
+const configs = () =>
+  db().collection('cellar-configs').withConverter(genericDataConverter<CellarConfig>())
+
+// The grid dimensions for a cellar scope, keyed by `hh_<householdId>` (shared) or
+// `usr_<userId>` (solo). Memoized: every cellarInfo/dashboard read resolves it.
+export const findConfig = (key: string): Promise<CellarConfig | null> =>
+  memoizedPerRequest(`cellar:config:${key}`, async () => {
+    const doc = await configs().doc(key).get()
+    return doc.data() ?? null
+  })
+
+export const saveConfig = async (
+  key: string,
+  config: CellarConfig,
+  batch?: WriteBatch,
+): Promise<CellarConfig> => {
+  const ref = configs().doc(key)
+  if (batch) batch.set(ref, config)
+  else await ref.set(config)
+  return config
+}
 
 const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
 const allCacheKey = (userId: UserId) => `cellar:all:${userId}`

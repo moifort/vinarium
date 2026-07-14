@@ -105,3 +105,28 @@ describe('CellarQuery.suggestPosition (household)', () => {
     expect(suggestion).toMatchObject({ row: 0, col: 2 })
   })
 })
+
+describe('CellarQuery.config', () => {
+  test('falls back to the default size when unconfigured', async () => {
+    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 6, cols: 8 })
+  })
+
+  test('honors a saved solo config (usr_ key)', async () => {
+    fake.seed('cellar-configs', 'usr_solo', { rows: 10, cols: 5 })
+    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 10, cols: 5 })
+  })
+
+  test('both household members read the same shared config (hh_ key)', async () => {
+    fake.seed('household-members', 'owner', member('owner', 'owner'))
+    fake.seed('household-members', 'marie', member('marie', 'member'))
+    fake.seed('cellar-configs', 'hh_h1', { rows: 12, cols: 7 })
+    expect(await CellarQuery.config(user('owner'))).toMatchObject({ rows: 12, cols: 7 })
+    expect(await CellarQuery.config(user('marie'))).toMatchObject({ rows: 12, cols: 7 })
+  })
+
+  test('info reflects the configured dimensions and capacity', async () => {
+    fake.seed('cellar-configs', 'usr_solo', { rows: 10, cols: 5 })
+    const info = await CellarQuery.info(user('solo'))
+    expect(info).toMatchObject({ rows: 10, cols: 5, capacity: 50 })
+  })
+})

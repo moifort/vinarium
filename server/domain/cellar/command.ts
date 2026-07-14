@@ -2,13 +2,35 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
-import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
+import type {
+  CellarBottle,
+  CellarCol,
+  CellarCols,
+  CellarRow,
+  CellarRows,
+} from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
 import { atomically, bulkSave } from '~/utils/firestore'
 
+// A cellar's config doc id: the whole household shares one grid, a solo user has
+// their own. Resolve this before opening a batch — it reads the membership doc.
+export const cellarConfigKey = async (userId: UserId) => {
+  const membership = await HouseholdQuery.membershipOf(userId)
+  return membership ? `hh_${membership.householdId}` : `usr_${userId}`
+}
+
 export namespace CellarCommand {
+  // Set the shared grid dimensions for the caller's cellar scope (onboarding, or
+  // a later resize). Written into the caller's batch when one is supplied.
+  export const configureFor = async (
+    userId: UserId,
+    rows: CellarRows,
+    cols: CellarCols,
+    batch?: WriteBatch,
+  ) => repository.saveConfig(await cellarConfigKey(userId), { rows, cols }, batch)
+
   export const placeBeverage = async (
     userId: UserId,
     beverageId: BeverageId,

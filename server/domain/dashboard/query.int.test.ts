@@ -91,6 +91,8 @@ describe('DashboardQuery.view', () => {
     // wines + cellar + journal + tasting = 4 collection reads, no duplicates, plus
     // the household occupancy pair: the scope membership doc and a count aggregation.
     expect(fake.queryReads - before.queryReads).toBe(5)
-    expect(fake.docReads - before.docReads).toBe(1)
+    // Two keyed doc reads: the scope membership doc, and the cellar-config doc that
+    // sizes the capacity (both memoized — the membership is not re-read for config).
+    expect(fake.docReads - before.docReads).toBe(2)
   })
 })

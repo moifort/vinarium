@@ -30,6 +30,7 @@ describe('CellarRows', () => {
   test('accepts 100', () => expect(CellarRows(100) as number).toBe(100))
   test('rejects 0', () => expect(() => CellarRows(0)).toThrow())
   test('rejects 101', () => expect(() => CellarRows(101)).toThrow())
+  test('rejects non-integers', () => expect(() => CellarRows(2.5)).toThrow())
 })
 
 describe('CellarCols', () => {
@@ -37,4 +38,5 @@ describe('CellarCols', () => {
   test('accepts 100', () => expect(CellarCols(100) as number).toBe(100))
   test('rejects 0', () => expect(() => CellarCols(0)).toThrow())
   test('rejects 101', () => expect(() => CellarCols(101)).toThrow())
+  test('rejects non-integers', () => expect(() => CellarCols(2.5)).toThrow())
 })
