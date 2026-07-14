@@ -57,6 +57,12 @@ import '~/domain/household/infrastructure/graphql/types'
 import '~/domain/household/infrastructure/graphql/queries'
 import '~/domain/household/infrastructure/graphql/mutations'
 
+// User domain (profile + onboarding state)
+import '~/domain/user/infrastructure/graphql/types'
+import '~/domain/user/infrastructure/graphql/inputs'
+import '~/domain/user/infrastructure/graphql/queries'
+import '~/domain/user/infrastructure/graphql/mutations'
+
 // Portability (export and import of user data)
 import '~/domain/portability/infrastructure/graphql/types'
 import '~/domain/portability/infrastructure/graphql/queries'

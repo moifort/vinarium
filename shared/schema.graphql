@@ -247,6 +247,18 @@ type ChangelogEntry {
 """Beverage classification (Grand Cru, Premier Cru ...)"""
 scalar Classification
 
+"""The prénom and cellar dimensions collected by the onboarding wizard"""
+input CompleteOnboardingInput {
+  """Number of slots per row (1..100)"""
+  cols: Int!
+
+  """The user’s first name"""
+  firstName: PersonName!
+
+  """Number of rows, labelled A..Z (1..100)"""
+  rows: Int!
+}
+
 """Tasting note / consumption record for a wine"""
 type Consumption {
   consumedDate: DateTime
@@ -423,6 +435,21 @@ scalar Latitude
 """Longitude (-180..180)"""
 scalar Longitude
 
+"""The signed-in user’s profile and onboarding state"""
+type Me {
+  """The user’s first name, set during onboarding"""
+  firstName: PersonName
+
+  """Whether onboarding is done — the flag the app routes on"""
+  onboardingCompleted: Boolean!
+
+  """When onboarding was completed, null if it never was"""
+  onboardingCompletedAt: DateTime
+
+  """Firebase Auth user id"""
+  userId: UserId!
+}
+
 type Mutation {
   """Add a new beverage to the catalog"""
   addBeverage(
@@ -438,6 +465,12 @@ type Mutation {
     """Recommendation fields"""
     input: RecommendationInput!
   ): Boolean!
+
+  """Finish onboarding: save the user’s prénom and cellar dimensions"""
+  completeOnboarding(
+    """The prénom and cellar dimensions to persist"""
+    input: CompleteOnboardingInput!
+  ): Me!
 
   """Remove a bottle from the cellar and record consumption (tasting note)"""
   consumeBottle(
@@ -673,6 +706,9 @@ type Query {
     """Number of events to skip"""
     offset: Int = 0
   ): JournalEvents!
+
+  """The signed-in user’s profile and onboarding state"""
+  me: Me!
 
   """The current user’s household, or null if they belong to none"""
   myHousehold: Household
