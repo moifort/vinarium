@@ -63,3 +63,10 @@ query SuggestCellarPosition {
     colLabel
   }
 }
+
+query CellarGridInfo {
+  cellarInfo {
+    rows
+    cols
+  }
+}

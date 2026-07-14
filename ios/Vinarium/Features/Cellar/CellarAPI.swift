@@ -13,6 +13,12 @@ struct BottlesPage {
     let hasMore: Bool
 }
 
+/// The configured grid dimensions of the shared cellar.
+struct CellarGridInfo {
+    let rows: Int
+    let cols: Int
+}
+
 enum CellarAPI {
     static func getBottles(limit: Int, after: String?) async throws -> BottlesPage {
         let data = try await GraphQLHelpers.fetch(
@@ -77,6 +83,14 @@ enum CellarAPI {
             )
         }
         return HistoryPage(events: events, hasMore: data.journalEvents.hasMore)
+    }
+
+    static func info() async throws -> CellarGridInfo {
+        let data = try await GraphQLHelpers.fetch(
+            GraphQLClient.shared.apollo,
+            query: VinariumGraphQL.CellarGridInfoQuery()
+        )
+        return CellarGridInfo(rows: data.cellarInfo.rows, cols: data.cellarInfo.cols)
     }
 
     static func suggest() async throws -> CellarSuggestion {

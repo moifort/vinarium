@@ -12,6 +12,8 @@ struct CellarPlacementView: View {
     @State private var bottles: [CellarBottle] = []
     @State private var suggestedRow: String?
     @State private var suggestedCol: Int?
+    @State private var rows = 6
+    @State private var cols = 8
     @State private var isLoading = true
     @State private var error: String?
     @State private var isPlacing = false
@@ -49,9 +51,9 @@ struct CellarPlacementView: View {
 
     private var availableGroups: [CellarPlacementPage.Group] {
         let occupied = Set(bottles.map { $0.position })
-        return (0..<6).compactMap { rowIdx in
+        return (0..<rows).compactMap { rowIdx in
             let rowLetter = String(UnicodeScalar(65 + rowIdx)!)
-            let free: [CellarPlacementPage.Position] = (1...8).compactMap { col in
+            let free: [CellarPlacementPage.Position] = (1...cols).compactMap { col in
                 let label = "\(rowLetter)\(col)"
                 guard !occupied.contains(label) else { return nil }
                 return .init(label: label)
@@ -65,10 +67,13 @@ struct CellarPlacementView: View {
         do {
             async let bottlesData = CellarAPI.getAllBottles()
             async let suggestion = CellarAPI.suggest()
-            let (b, s) = try await (bottlesData, suggestion)
+            async let gridInfo = CellarAPI.info()
+            let (b, s, g) = try await (bottlesData, suggestion, gridInfo)
             bottles = b
             suggestedRow = s.row
             suggestedCol = s.col
+            rows = g.rows
+            cols = g.cols
             isLoading = false
         } catch {
             self.error = reportError(error)
