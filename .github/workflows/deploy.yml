@@ -91,6 +91,13 @@ jobs:
           terraform init -input=false
           terraform apply -auto-approve -input=false
 
+      # Ships public/ (the invitation universal-link AASA + the /rejoindre landing
+      # page). Uses the WIF-provided ADC above. Requires the Hosting site to exist
+      # in the project and vinarium.app to be connected as a custom domain (one-off
+      # console setup); the deploy SA needs the Firebase Hosting Admin role.
+      - name: Deploy Firebase Hosting
+        run: bunx firebase-tools deploy --only hosting --project "${{ vars.GCP_PROJECT_ID }}" --non-interactive
+
       - name: Run Firestore migrations
         working-directory: infra
         run: |
