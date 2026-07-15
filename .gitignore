@@ -53,11 +53,11 @@ ios/shared/
 # to the Pothos schema and commit the diff.
 
 # fastlane (CI-only, used by release-ios.yml `submit` job) — generated artifacts
-fastlane/report.xml
-fastlane/README.md
-fastlane/metadata/
-fastlane/screenshots/
-fastlane/test_output/
+infra/fastlane/report.xml
+infra/fastlane/README.md
+infra/fastlane/metadata/
+infra/fastlane/screenshots/
+infra/fastlane/test_output/
 
 # Claude Code
 .claude/

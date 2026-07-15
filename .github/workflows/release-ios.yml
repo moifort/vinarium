@@ -176,6 +176,7 @@ jobs:
         with:
           ruby-version: '3.3'
           bundler-cache: true
+          working-directory: infra
 
       - name: Install the App Store Connect API key
         run: |
@@ -207,14 +208,15 @@ jobs:
       - name: Build the "What's New" notes from CHANGELOG.md
         run: |
           set -euo pipefail
-          mkdir -p fastlane/metadata/fr-FR
+          mkdir -p infra/fastlane/metadata/fr-FR
           # Bullets under the first "## " section become the release notes. App Store caps
           # "What's New" at 4000 chars, so keep whole bullets until ~3900 (drop the rest).
           awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.md \
             | awk 'BEGIN{max=3900; total=0} {len=length($0)+1; if (total+len>max) exit; total+=len; print}' \
-            > fastlane/metadata/fr-FR/release_notes.txt
-          echo "---- What's New (fr-FR), $(wc -c < fastlane/metadata/fr-FR/release_notes.txt) chars ----"
-          cat fastlane/metadata/fr-FR/release_notes.txt
+            > infra/fastlane/metadata/fr-FR/release_notes.txt
+          echo "---- What's New (fr-FR), $(wc -c < infra/fastlane/metadata/fr-FR/release_notes.txt) chars ----"
+          cat infra/fastlane/metadata/fr-FR/release_notes.txt
 
       - name: Attach build and submit for review
+        working-directory: infra
         run: bundle exec fastlane ios submit
