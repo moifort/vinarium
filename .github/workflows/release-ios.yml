@@ -1,4 +1,4 @@
-name: Release iOS
+name: Release
 
 on:
   push:
@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   release:
+    name: 📱 iOS build & upload
     runs-on: macos-15
     timeout-minutes: 40
     env:
@@ -156,6 +157,7 @@ jobs:
   # review (auto-release on approval). No Xcode needed — runs on Linux. Tag pushes only;
   # a manual workflow_dispatch stops after upload so it can be submitted by hand.
   submit:
+    name: 🍎 iOS submit
     needs: release
     if: startsWith(github.ref, 'refs/tags/ios-v')
     runs-on: ubuntu-latest
@@ -190,10 +192,12 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p fastlane/metadata/fr-FR
-          # Bullets under the first "## " section become the release notes (bullets kept).
+          # Bullets under the first "## " section become the release notes. App Store caps
+          # "What's New" at 4000 chars, so keep whole bullets until ~3900 (drop the rest).
           awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.md \
+            | awk 'BEGIN{max=3900; total=0} {len=length($0)+1; if (total+len>max) exit; total+=len; print}' \
             > fastlane/metadata/fr-FR/release_notes.txt
-          echo "---- What's New (fr-FR) ----"
+          echo "---- What's New (fr-FR), $(wc -c < fastlane/metadata/fr-FR/release_notes.txt) chars ----"
           cat fastlane/metadata/fr-FR/release_notes.txt
 
       - name: Attach build and submit for review
