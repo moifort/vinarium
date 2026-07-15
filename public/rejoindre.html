@@ -79,7 +79,9 @@
         partagée. Sinon, saisissez ce code dans l'app :
       </p>
       <div class="code" id="code" hidden></div>
-      <a class="button" id="download" hidden>Télécharger Vinarium</a>
+      <a class="button" id="download" href="https://apps.apple.com/app/vinarium/" hidden
+        >Télécharger Vinarium</a
+      >
     </main>
     <script>
       // TODO: set to the real App Store id once the app is published (e.g. '1234567890').
@@ -91,16 +93,18 @@
       var parts = window.location.pathname.split('/').filter(Boolean)
       var code = parts.length > 1 ? decodeURIComponent(parts[1]).toUpperCase() : ''
       var el = document.getElementById('code')
+      var dl = null
+      var banner = null
       if (code && el) {
         el.textContent = code
         el.hidden = false
       }
 
       if (APP_STORE_ID) {
-        var dl = document.getElementById('download')
+        dl = document.getElementById('download')
         dl.href = 'https://apps.apple.com/app/vinarium/id' + APP_STORE_ID
         dl.hidden = false
-        var banner = document.createElement('meta')
+        banner = document.createElement('meta')
         banner.name = 'apple-itunes-app'
         banner.content = 'app-id=' + APP_STORE_ID
         document.head.appendChild(banner)
