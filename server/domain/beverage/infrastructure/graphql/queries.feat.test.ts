@@ -232,8 +232,8 @@ describe('wines list query', () => {
 
     expect(result.errors).toBeUndefined()
     const items = (
-      result.data?.beverages as { items: Array<{ id: string } & Record<string, unknown>> }
-    ).items
+      result.data as { beverages: { items: Array<{ id: string } & Record<string, unknown>> } }
+    ).beverages.items
     expect(items).toHaveLength(2)
     const byId = new Map(items.map((item) => [item.id, item]))
     expect(byId.get(wid(1))).toEqual({
@@ -281,7 +281,8 @@ describe('wines list query', () => {
     `)
 
     expect(result.errors).toBeUndefined()
-    const items = (result.data?.beverages as { items: Array<{ history: unknown[] }> }).items
+    const items = (result.data as { beverages: { items: Array<{ history: unknown[] }> } }).beverages
+      .items
     expect(items).toHaveLength(5)
     for (const item of items) expect(item.history).toHaveLength(1)
     // 1 page query + 1 batched `in` query over the 5 wine ids — never 5 queries.
