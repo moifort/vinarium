@@ -23,6 +23,17 @@ struct InviteCodeCard: View {
                 .multilineTextAlignment(.center)
                 .textSelection(.enabled)
 
+            // The API only ever returns still-open codes, so every invitation
+            // shown here is pending — the badge is intentionally static.
+            Text("En attente")
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.orange)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 3)
+                .background(Color.orange.opacity(0.15))
+                .clipShape(.capsule)
+                .frame(maxWidth: .infinity)
+
             if let expiresAt {
                 Text("Valable jusqu'au \(expiresAt.formatted(date: .abbreviated, time: .omitted))")
                     .font(.caption)
@@ -36,12 +47,15 @@ struct InviteCodeCard: View {
                     Label(linkCopied ? "Lien copié" : "Copier le lien",
                           systemImage: linkCopied ? "checkmark" : "link")
                 }
+                .buttonStyle(.borderless)
                 Spacer()
                 Button(action: sendMail) {
                     Label("E-mail", systemImage: "envelope")
                 }
+                .buttonStyle(.borderless)
                 Spacer()
                 Button("Révoquer", role: .destructive, action: onRevoke)
+                    .buttonStyle(.borderless)
             }
             .font(.subheadline)
         }

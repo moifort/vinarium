@@ -123,6 +123,9 @@ struct SharingSettingsView: View {
                     codeToRevoke = invite.code
                 }
             }
+        }
+
+        Section {
             Button {
                 Task { await generateInvite() }
             } label: {
