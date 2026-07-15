@@ -27,13 +27,6 @@ enum HouseholdAPI {
         return map(data.joinHousehold.fragments.householdFields)
     }
 
-    static func leave() async throws {
-        _ = try await GraphQLHelpers.perform(
-            GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.LeaveHouseholdMutation()
-        )
-    }
-
     static func removeMember(userId: String) async throws -> Household {
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,

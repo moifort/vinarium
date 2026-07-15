@@ -11,6 +11,17 @@
       "ignore": ["node_modules"]
     }
   ],
+  "hosting": {
+    "public": "public",
+    "ignore": ["firebase.json", "**/node_modules/**"],
+    "rewrites": [{ "source": "/rejoindre/**", "destination": "/rejoindre.html" }],
+    "headers": [
+      {
+        "source": "/.well-known/apple-app-site-association",
+        "headers": [{ "key": "Content-Type", "value": "application/json" }]
+      }
+    ]
+  },
   "emulators": {
     "auth": { "port": 9099 },
     "functions": { "port": 5001 },

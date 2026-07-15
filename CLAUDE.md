@@ -82,7 +82,9 @@ Full guide (writing/testing a migration): [docs/migrations.md](docs/migrations.m
 
 Full checklist in `ios/APP_STORE_SUBMISSION.md`. Build with the latest **final** Xcode (currently 26.6 / `17F113`, SDK `23F81a`) — never a beta/RC Xcode, and never an older release once a newer final ships. Both trigger **ITMS-90111** (Unsupported SDK or Xcode version) on upload.
 
-**The dev Mac runs a beta macOS**, so archives get a prerelease `BuildMachineOSBuild` stamp that App Store validation also rejects with ITMS-90111. After archiving, patch it to the latest **public** macOS build number *before* `-exportArchive` (export re-signs, so the patch survives):
+**Automated release**: pushing a `ios-v<version>` tag runs `.github/workflows/release-ios.yml` (macOS runner, final Xcode) — it archives, exports and uploads to App Store Connect via an App Store Connect API key (automatic signing). Build number = `git rev-list --count HEAD` (no manual `CURRENT_PROJECT_VERSION` bump), marketing version from the tag. Because the CI runner is on a **final** macOS, the `BuildMachineOSBuild` patch below only concerns **local** archives made on the beta-macOS dev Mac.
+
+**The dev Mac runs a beta macOS**, so archives made locally get a prerelease `BuildMachineOSBuild` stamp that App Store validation also rejects with ITMS-90111. After archiving, patch it to the latest **public** macOS build number *before* `-exportArchive` (export re-signs, so the patch survives):
 
 ```bash
 # after `xcodebuild ... archive`, before `-exportArchive`:
