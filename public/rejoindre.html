@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="apple-itunes-app" content="app-id=0000000000" />
+    <!-- Smart App Banner: injected by the script below only once APP_STORE_ID is set. -->
     <title>Rejoindre un foyer — Vinarium</title>
     <style>
       :root {
@@ -79,11 +79,14 @@
         partagée. Sinon, saisissez ce code dans l'app :
       </p>
       <div class="code" id="code" hidden></div>
-      <a class="button" href="https://apps.apple.com/app/vinarium/id0000000000">
-        Télécharger Vinarium
-      </a>
+      <a class="button" id="download" hidden>Télécharger Vinarium</a>
     </main>
     <script>
+      // TODO: set to the real App Store id once the app is published (e.g. '1234567890').
+      // While empty, the download button and Smart App Banner stay hidden so the page
+      // never ships a link that 404s.
+      var APP_STORE_ID = ''
+
       // The invitation code is the last path segment: /rejoindre/<CODE>.
       var parts = window.location.pathname.split('/').filter(Boolean)
       var code = parts.length > 1 ? decodeURIComponent(parts[1]).toUpperCase() : ''
@@ -91,6 +94,16 @@
       if (code && el) {
         el.textContent = code
         el.hidden = false
+      }
+
+      if (APP_STORE_ID) {
+        var dl = document.getElementById('download')
+        dl.href = 'https://apps.apple.com/app/vinarium/id' + APP_STORE_ID
+        dl.hidden = false
+        var banner = document.createElement('meta')
+        banner.name = 'apple-itunes-app'
+        banner.content = 'app-id=' + APP_STORE_ID
+        document.head.appendChild(banner)
       }
     </script>
   </body>
