@@ -108,6 +108,22 @@ The API token is used for authentication when `NITRO_API_TOKEN` is set. To rotat
 
 See `.example` files next to the Secrets files for the expected format.
 
+## Sentry Error Triage
+
+When the user asks to look at a Sentry error (usually with an issue URL or ID), run this workflow:
+
+1. **Token** — read `SENTRY_AUTH_TOKEN` from `.env` (gitignored; a Sentry user auth token, `sntryu_...`). Never echo, print, or commit it. Load it with `set -a; . ./.env; set +a` and reference `$SENTRY_AUTH_TOKEN` only inside the header.
+2. **Read the issue** — the org is `polyforms`; take `{issue_id}` from the URL the user pastes (e.g. `https://polyforms.sentry.io/issues/<id>/`). Fetch context via the REST API with `-H "Authorization: Bearer $SENTRY_AUTH_TOKEN"`:
+   - `GET https://sentry.io/api/0/organizations/{org}/issues/{issue_id}/`
+   - `GET https://sentry.io/api/0/organizations/{org}/issues/{issue_id}/events/latest/`
+3. **Diagnose** — use `superpowers:systematic-debugging`; trace the stack to the domain code.
+4. **Fix** the bug.
+5. **Regression test** — if it's a serious functional bug, write a test that fails before the fix and passes after (`*.unit/int/feat.test.ts` per the domain test conventions).
+6. **Verify locally** — `bun tsc --noEmit` (+ `bunx nitro prepare` first if routes changed) and `bun test`.
+7. **Commit** — push stays user-gated (never push until the user says "push").
+8. **Resolve** — only **after** the user has pushed **and** CI is green (verify with `gh run list`/`watch` on `main`), mark the issue resolved:
+   `PUT https://sentry.io/api/0/organizations/{org}/issues/{issue_id}/` with body `{"status":"resolved"}` and the same Bearer header.
+
 ## iOS Simulator
 
 - Device: iPhone 17, OS 26.2
