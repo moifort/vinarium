@@ -24,7 +24,7 @@ enum CellarAPI {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.CellarBottlesQuery(
-                limit: .some(limit),
+                limit: .some(Int32(limit)),
                 after: GraphQLHelpers.graphQLNullable(after)
             )
         )
@@ -69,7 +69,7 @@ enum CellarAPI {
     static func getHistory(limit: Int, offset: Int) async throws -> HistoryPage {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarHistoryQuery(limit: .some(limit), offset: .some(offset))
+            query: VinariumGraphQL.CellarHistoryQuery(limit: .some(Int32(limit)), offset: .some(Int32(offset)))
         )
         let events = data.journalEvents.items.map { e in
             HistoryEvent(
@@ -90,7 +90,7 @@ enum CellarAPI {
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.CellarGridInfoQuery()
         )
-        return CellarGridInfo(rows: data.cellarInfo.rows, cols: data.cellarInfo.cols)
+        return CellarGridInfo(rows: Int(data.cellarInfo.rows), cols: Int(data.cellarInfo.cols))
     }
 
     static func suggest() async throws -> CellarSuggestion {
@@ -108,7 +108,7 @@ enum CellarAPI {
         let rowIndex = rowIndexFromLabel(row)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: rowIndex, col: col)
+            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: Int32(rowIndex), col: Int32(col))
         )
     }
 
@@ -116,7 +116,7 @@ enum CellarAPI {
         let rowIndex = rowIndexFromLabel(row)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: rowIndex, col: col)
+            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: Int32(rowIndex), col: Int32(col))
         )
     }
 

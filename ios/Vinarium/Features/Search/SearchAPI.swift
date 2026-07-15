@@ -8,7 +8,7 @@ enum SearchAPI {
         let gqlQuery = VinariumGraphQL.SearchQuery(
             query: GraphQLHelpers.graphQLNullable(query.isEmpty ? nil : query),
             filters: .some(input(from: filters)),
-            limit: .some(limit)
+            limit: .some(Int32(limit))
         )
         let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: gqlQuery)
         return SearchResults(

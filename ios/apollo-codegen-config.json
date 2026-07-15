@@ -27,5 +27,8 @@
     "testMocks": {
       "none": {}
     }
+  },
+  "options": {
+    "markTypesNonisolated": true
   }
 }

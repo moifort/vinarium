@@ -1,53 +1,36 @@
 import Apollo
-import ApolloAPI
 import FirebaseAuth
 import Foundation
 
-// Firebase's getIDToken callback is not typed Sendable, but Firebase Auth is
-// thread-safe and Apollo's RequestChain expects completion on any queue.
-extension HTTPRequest: @retroactive @unchecked Sendable {}
-extension HTTPResponse: @retroactive @unchecked Sendable {}
-
 /// Injects the current Firebase user's ID token into every GraphQL request as
-/// `Authorization: Bearer <token>`. Firebase Auth refreshes the token under
-/// the hood so this is always fresh.
-struct FirebaseTokenInterceptor: ApolloInterceptor {
-    let id = UUID().uuidString
-
-    func interceptAsync<Operation: GraphQLOperation>(
-        chain: any RequestChain,
-        request: HTTPRequest<Operation>,
-        response: HTTPResponse<Operation>?,
-        completion: @escaping (Result<GraphQLResult<Operation.Data>, any Error>) -> Void
-    ) {
-        guard let currentUser = Auth.auth().currentUser else {
-            chain.proceedAsync(
-                request: request,
-                response: response,
-                interceptor: self,
-                completion: completion
-            )
-            return
+/// `Authorization: Bearer <token>`. Firebase Auth refreshes the token under the
+/// hood so this is always fresh. Runs at the HTTP layer (Apollo 2.x) where the
+/// request is a plain `URLRequest`.
+struct FirebaseTokenInterceptor: HTTPInterceptor {
+    func intercept(
+        request: URLRequest,
+        next: NextHTTPInterceptorFunction
+    ) async throws -> HTTPResponse {
+        var request = request
+        if let currentUser = Auth.auth().currentUser {
+            let token = try await currentUser.idToken()
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         }
-        currentUser.getIDToken { token, error in
-            if let error {
-                chain.handleErrorAsync(
-                    error,
-                    request: request,
-                    response: response,
-                    completion: completion
-                )
-                return
+        return try await next(request)
+    }
+}
+
+private extension User {
+    /// Async wrapper around Firebase's callback-based ID token fetch.
+    func idToken() async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            getIDToken { token, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: token ?? "")
+                }
             }
-            if let token {
-                request.addHeader(name: "Authorization", value: "Bearer \(token)")
-            }
-            chain.proceedAsync(
-                request: request,
-                response: response,
-                interceptor: self,
-                completion: completion
-            )
         }
     }
 }

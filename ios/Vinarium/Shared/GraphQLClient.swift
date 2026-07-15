@@ -4,9 +4,9 @@ import Foundation
 
 /// Singleton ApolloClient configured for the Firebase Functions /graphql endpoint.
 /// Each request goes through:
-///   1. FirebaseTokenInterceptor — injects Authorization: Bearer <ID Token>
-///   2. (Apollo default chain — parsing, error handling)
-///   3. GraphQLLoggingInterceptor — logs operation name + GraphQL errors
+///   1. GraphQL interceptors — Apollo defaults + GraphQLLoggingInterceptor (logs errors)
+///   2. HTTP interceptors — FirebaseTokenInterceptor (injects Authorization: Bearer <ID Token>)
+///      then Apollo's ResponseCodeInterceptor
 final class GraphQLClient: @unchecked Sendable {
     static let shared = GraphQLClient()
 
@@ -18,20 +18,36 @@ final class GraphQLClient: @unchecked Sendable {
     private init() {
         let url = APIClient.shared.baseURL.appendingPathComponent("graphql")
         let store = ApolloStore()
-        let interceptorProvider = AuthenticatedInterceptorProvider(store: store)
         let transport = RequestChainNetworkTransport(
-            interceptorProvider: interceptorProvider,
+            urlSession: URLSession(configuration: .default),
+            interceptorProvider: AuthenticatedInterceptorProvider(),
+            store: store,
             endpointURL: url
         )
         apollo = ApolloClient(networkTransport: transport, store: store)
     }
 }
 
-final class AuthenticatedInterceptorProvider: DefaultInterceptorProvider {
-    override func interceptors<O: GraphQLOperation>(for operation: O) -> [any ApolloInterceptor] {
-        var list = super.interceptors(for: operation)
-        list.insert(FirebaseTokenInterceptor(), at: 0)
-        list.append(GraphQLLoggingInterceptor())
-        return list
+/// Adds our Firebase auth (HTTP) and error logging (GraphQL) interceptors on top
+/// of Apollo's default chain. Apollo 2.x makes `DefaultInterceptorProvider` final,
+/// so we conform to `InterceptorProvider` directly and re-list the defaults.
+struct AuthenticatedInterceptorProvider: InterceptorProvider {
+    func graphQLInterceptors<Operation: GraphQLOperation>(
+        for operation: Operation
+    ) -> [any GraphQLInterceptor] {
+        [
+            MaxRetryInterceptor(),
+            AutomaticPersistedQueryInterceptor(),
+            GraphQLLoggingInterceptor(),
+        ]
+    }
+
+    func httpInterceptors<Operation: GraphQLOperation>(
+        for operation: Operation
+    ) -> [any HTTPInterceptor] {
+        [
+            FirebaseTokenInterceptor(),
+            ResponseCodeInterceptor(),
+        ]
     }
 }

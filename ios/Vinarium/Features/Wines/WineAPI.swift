@@ -26,7 +26,7 @@ enum WineAPI {
             beverageType: beverageType.map { .some($0.graphQLValue) } ?? .none,
             sort: .some(.case(gqlSort(sort))),
             order: .some(.case(sortDescending ? .desc : .asc)),
-            limit: .some(limit),
+            limit: .some(Int32(limit)),
             after: GraphQLHelpers.graphQLNullable(after)
         )
         let data = try await GraphQLHelpers.fetch(GraphQLClient.shared.apollo, query: query)
