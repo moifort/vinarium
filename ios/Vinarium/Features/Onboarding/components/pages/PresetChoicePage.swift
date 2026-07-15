@@ -44,39 +44,29 @@ struct PresetChoicePage: View {
             .sorted { ($0.letter == "#" ? 1 : 0, $0.letter) < ($1.letter == "#" ? 1 : 0, $1.letter) }
     }
 
-    private var indexLetters: [String] { letterSections.map(\.letter) }
-
     // MARK: Body
 
     var body: some View {
-        ScrollViewReader { proxy in
-            List {
-                Section {
-                    customRow
-                }
-
-                ForEach(letterSections) { section in
-                    Section {
-                        ForEach(section.models) { preset in
-                            row(title: preset.displayName, subtitle: subtitle(for: preset)) {
-                                choose(.preset(preset))
-                            }
-                            .accessibilityIdentifier("onboarding-preset-\(preset.id)")
-                        }
-                    } header: {
-                        Text(section.letter)
-                    }
-                    .id(section.id)
-                }
+        List {
+            Section {
+                customRow
             }
-            .listStyle(.insetGrouped)
-            .searchable(text: $searchText, prompt: "Rechercher (marque, modèle)")
-            .overlay(alignment: .trailing) {
-                if !isSearching {
-                    sectionIndex(proxy)
+
+            ForEach(letterSections) { section in
+                Section {
+                    ForEach(section.models) { preset in
+                        row(title: preset.displayName, subtitle: subtitle(for: preset)) {
+                            choose(.preset(preset))
+                        }
+                        .accessibilityIdentifier("onboarding-preset-\(preset.id)")
+                    }
+                } header: {
+                    Text(section.letter)
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .searchable(text: $searchText, prompt: "Rechercher (marque, modèle)")
         .navigationTitle("Votre cave")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
@@ -136,34 +126,6 @@ struct PresetChoicePage: View {
         Image(systemName: "chevron.forward")
             .font(.caption.weight(.semibold))
             .foregroundStyle(.tertiary)
-    }
-
-    // MARK: A-Z index
-
-    private func sectionIndex(_ proxy: ScrollViewProxy) -> some View {
-        let letters = indexLetters
-        return GeometryReader { geo in
-            VStack(spacing: 0) {
-                ForEach(letters, id: \.self) { letter in
-                    Text(letter)
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundStyle(.tint)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        guard !letters.isEmpty else { return }
-                        let step = geo.size.height / CGFloat(letters.count)
-                        let index = min(letters.count - 1, max(0, Int(value.location.y / step)))
-                        proxy.scrollTo(letters[index], anchor: .top)
-                    }
-            )
-        }
-        .frame(width: 18)
-        .padding(.trailing, 3)
     }
 
     // MARK: Helpers
