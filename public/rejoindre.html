@@ -87,8 +87,8 @@
       // The invitation code is the last path segment: /rejoindre/<CODE>.
       var parts = window.location.pathname.split('/').filter(Boolean)
       var code = parts.length > 1 ? decodeURIComponent(parts[1]).toUpperCase() : ''
-      if (code) {
-        var el = document.getElementById('code')
+      var el = document.getElementById('code')
+      if (code && el) {
         el.textContent = code
         el.hidden = false
       }
