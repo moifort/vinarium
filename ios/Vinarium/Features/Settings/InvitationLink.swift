@@ -3,11 +3,16 @@ import Foundation
 /// Builds the shareable artefacts for a household invitation code: the universal
 /// link a guest opens to join, and the e-mail subject/body wrapped around it.
 enum InvitationLink {
+    /// Host serving the invitation universal link + AASA (the Firebase Hosting
+    /// default domain). Kept in sync with the `applinks:` entitlement and the
+    /// deep-link host check in `AuthRoot`.
+    static let host = "vinarium-prod.web.app"
+
     /// The universal link that opens the app on `/rejoindre/<CODE>` (and falls back
     /// to the web landing page when the app is not installed).
     static func url(code: String) -> URL {
         // The code alphabet is URL-safe (A–Z, 2–9), so no escaping is needed.
-        URL(string: "https://vinarium.app/rejoindre/\(code)")!
+        URL(string: "https://\(host)/rejoindre/\(code)")!
     }
 
     static let mailSubject = "Rejoins ma cave sur Vinarium"
