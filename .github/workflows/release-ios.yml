@@ -101,6 +101,16 @@ jobs:
           chmod +x "$CLI_DIR/apollo-ios-cli"
           (cd ios && "$CLI_DIR/apollo-ios-cli" generate)
 
+      - name: Install the App Store provisioning profile
+        env:
+          IOS_PROVISION_PROFILE: ${{ secrets.IOS_PROVISION_PROFILE }}
+        run: |
+          set -euo pipefail
+          PROFILES_DIR="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$PROFILES_DIR"
+          printf '%s' "$IOS_PROVISION_PROFILE" | base64 -d \
+            > "$PROFILES_DIR/555cefe2-ee65-486b-a86c-b811434d3b09.mobileprovision"
+
       - name: Archive (Release, automatic signing via ASC key)
         run: |
           set -euo pipefail
@@ -115,17 +125,13 @@ jobs:
             CURRENT_PROJECT_VERSION="$BUILD" \
             archive
 
-      - name: Export a signed .ipa
+      - name: Export a signed .ipa (manual signing)
         run: |
           set -euo pipefail
           xcodebuild -exportArchive \
             -archivePath build/Vinarium.xcarchive \
             -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/export \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            -exportPath build/export
 
       - name: Upload to App Store Connect
         run: |

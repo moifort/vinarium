@@ -2,16 +2,26 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- App Store Connect distribution. On older Xcode use "app-store" instead. -->
+    <!-- App Store Connect distribution with a dedicated (non-managed) certificate.
+         Manual signing avoids Xcode cloud signing, which cannot mint/use managed
+         distribution certificates from a fresh CI machine. The cert (.p12) is imported
+         into a keychain and the profile is installed by earlier workflow steps. -->
     <key>method</key>
     <string>app-store-connect</string>
     <key>teamID</key>
     <string>46C337T7YN</string>
     <key>signingStyle</key>
-    <string>automatic</string>
+    <string>manual</string>
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.polyforms.vinarium.app</key>
+        <string>Vinarium App Store</string>
+    </dict>
     <key>uploadSymbols</key>
     <true/>
-    <!-- Produce a signed .ipa on disk; upload it with Transporter or Xcode Organizer. -->
+    <!-- Produce a signed .ipa on disk; the next step uploads it via altool. -->
     <key>destination</key>
     <string>export</string>
 </dict>
