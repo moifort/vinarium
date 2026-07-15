@@ -1,4 +1,4 @@
-name: Deploy
+name: Release
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   deploy:
+    name: 🚀 Backend
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

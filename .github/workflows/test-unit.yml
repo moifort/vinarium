@@ -1,4 +1,4 @@
-name: Unit Tests
+name: Tests
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   unit:
+    name: 🧪 Unit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -27,6 +28,7 @@ jobs:
   # firebase-admin 14 vs firebase-functions) pass locally but only fail at
   # `terraform apply`. This reproduces that resolution here so it fails fast.
   deploy-deps:
+    name: 📦 Prod deps (npm strict)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

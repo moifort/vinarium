@@ -1,4 +1,4 @@
-name: Integration Tests
+name: Tests
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   int:
+    name: 🔗 Integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
