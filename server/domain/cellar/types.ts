@@ -4,6 +4,7 @@ import type { PersonName, UserId } from '~/domain/shared/types'
 
 export type CellarRows = Brand<number, 'CellarRows'>
 export type CellarCols = Brand<number, 'CellarCols'>
+export type CellarZones = Brand<number, 'CellarZones'>
 export type CellarRow = Brand<number, 'CellarRow'>
 export type CellarCol = Brand<number, 'CellarCol'>
 export type CellarRowLabel = Brand<string, 'CellarRowLabel'>
@@ -44,7 +45,8 @@ export type CellarBottleWithWine = CellarBottleView & {
 
 // The physical dimensions of a shared cellar grid, set during onboarding and
 // keyed by cellar scope (household or solo). Falls back to DEFAULT_CELLAR_SIZE
-// until configured.
-export type CellarConfig = { rows: CellarRows; cols: CellarCols }
+// until configured. `zones` records the cooler's temperature zones (1..3),
+// captured at onboarding — stored for later use, not yet consumed by the grid.
+export type CellarConfig = { rows: CellarRows; cols: CellarCols; zones: CellarZones }
 
-export const DEFAULT_CELLAR_SIZE = { rows: 6, cols: 8 } as const
+export const DEFAULT_CELLAR_SIZE = { rows: 6, cols: 8, zones: 1 } as const

@@ -107,13 +107,18 @@ describe('CellarQuery.suggestPosition (household)', () => {
 })
 
 describe('CellarQuery.config', () => {
-  test('falls back to the default size when unconfigured', async () => {
-    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 6, cols: 8 })
+  test('falls back to the default size (1 zone) when unconfigured', async () => {
+    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 6, cols: 8, zones: 1 })
   })
 
   test('honors a saved solo config (usr_ key)', async () => {
+    fake.seed('cellar-configs', 'usr_solo', { rows: 10, cols: 5, zones: 2 })
+    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 10, cols: 5, zones: 2 })
+  })
+
+  test('defaults zones to 1 for a config saved before the field existed', async () => {
     fake.seed('cellar-configs', 'usr_solo', { rows: 10, cols: 5 })
-    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 10, cols: 5 })
+    expect(await CellarQuery.config(user('solo'))).toMatchObject({ rows: 10, cols: 5, zones: 1 })
   })
 
   test('both household members read the same shared config (hh_ key)', async () => {

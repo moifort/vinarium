@@ -8,7 +8,6 @@ import {
   type CellarBottle,
   type CellarBottleOwner,
   type CellarBottleView,
-  type CellarConfig,
   DEFAULT_CELLAR_SIZE,
   type OwnedBeverage,
 } from '~/domain/cellar/types'
@@ -37,20 +36,29 @@ const ownerOf = (bottle: CellarBottle, viewerId: UserId, scope: CellarScope): Ce
 
 export namespace CellarQuery {
   // The configured grid dimensions for the caller's cellar scope, falling back to
-  // the default size until onboarding sets them.
+  // the default size until onboarding sets them. `zones` defaults to 1 for configs
+  // written before the field existed.
   export const config = async (
     userId: UserId,
-  ): Promise<CellarConfig | typeof DEFAULT_CELLAR_SIZE> =>
-    (await repository.findConfig(await cellarConfigKey(userId))) ?? DEFAULT_CELLAR_SIZE
+  ): Promise<{ rows: number; cols: number; zones: number }> => {
+    const stored = await repository.findConfig(await cellarConfigKey(userId))
+    if (!stored) return DEFAULT_CELLAR_SIZE
+    return {
+      rows: stored.rows,
+      cols: stored.cols,
+      zones: stored.zones ?? DEFAULT_CELLAR_SIZE.zones,
+    }
+  }
 
   export const info = async (userId: UserId) => {
-    const [scope, { rows, cols }] = await Promise.all([
+    const [scope, { rows, cols, zones }] = await Promise.all([
       HouseholdQuery.cellarScope(userId),
       config(userId),
     ])
     return {
       rows,
       cols,
+      zones,
       capacity: rows * cols,
       // Server-side aggregation over the whole household: never loads documents.
       placedCount: await repository.countByUsers(scope.memberIds),

@@ -62,12 +62,19 @@ export const CellarBottlesType = builder
   })
 
 export const CellarInfoType = builder
-  .objectRef<{ rows: number; cols: number; capacity: number; placedCount: number }>('CellarInfo')
+  .objectRef<{
+    rows: number
+    cols: number
+    zones: number
+    capacity: number
+    placedCount: number
+  }>('CellarInfo')
   .implement({
     description: 'Configuration and current usage of the cellar grid',
     fields: (t) => ({
       rows: t.exposeInt('rows'),
       cols: t.exposeInt('cols'),
+      zones: t.exposeInt('zones', { description: 'Number of temperature zones (1..3)' }),
       capacity: t.exposeInt('capacity'),
       placedCount: t.exposeInt('placedCount'),
     }),

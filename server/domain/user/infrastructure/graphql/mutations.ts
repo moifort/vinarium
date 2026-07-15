@@ -1,4 +1,4 @@
-import { CellarCols, CellarRows } from '~/domain/cellar/primitives'
+import { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/primitives'
 import { builder } from '~/domain/shared/graphql/builder'
 import { badUserInput } from '~/domain/shared/graphql/errors'
 import { UserQuery } from '~/domain/user/query'
@@ -18,9 +18,9 @@ builder.mutationField('completeOnboarding', (t) =>
       }),
     },
     resolve: async (_root, { input }, { userId }) => {
-      // rows/cols travel as Int and are validated here (1..100); a bad value is a
+      // rows/cols/zones travel as Int and are validated here; a bad value is a
       // BAD_USER_INPUT rather than a raw Zod error.
-      const dimensions = parseDimensions(input.rows, input.cols)
+      const dimensions = parseDimensions(input.rows, input.cols, input.zones)
       await UserUseCase.completeOnboarding(userId, {
         firstName: input.firstName,
         ...dimensions,
@@ -30,10 +30,10 @@ builder.mutationField('completeOnboarding', (t) =>
   }),
 )
 
-const parseDimensions = (rows: number, cols: number) => {
+const parseDimensions = (rows: number, cols: number, zones: number) => {
   try {
-    return { rows: CellarRows(rows), cols: CellarCols(cols) }
+    return { rows: CellarRows(rows), cols: CellarCols(cols), zones: CellarZones(zones) }
   } catch {
-    return badUserInput('rows and cols must be integers between 1 and 100')
+    return badUserInput('rows/cols must be 1..100 and zones 1..3')
   }
 }

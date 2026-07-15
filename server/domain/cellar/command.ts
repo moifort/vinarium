@@ -8,6 +8,7 @@ import type {
   CellarCols,
   CellarRow,
   CellarRows,
+  CellarZones,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import { JournalCommand } from '~/domain/journal/command'
@@ -30,12 +31,13 @@ export namespace CellarCommand {
     userId: UserId,
     rows: CellarRows,
     cols: CellarCols,
+    zones: CellarZones,
     batch?: WriteBatch,
   ) => {
     const key = await cellarConfigKey(userId)
     const existing = await repository.findConfig(key)
     if (existing) return existing
-    return repository.saveConfig(key, { rows, cols }, batch)
+    return repository.saveConfig(key, { rows, cols, zones }, batch)
   }
 
   export const placeBeverage = async (

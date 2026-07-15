@@ -10,5 +10,6 @@ export const CompleteOnboardingInput = builder.inputType('CompleteOnboardingInpu
     }),
     rows: t.int({ required: true, description: 'Number of rows, labelled A..Z (1..100)' }),
     cols: t.int({ required: true, description: 'Number of slots per row (1..100)' }),
+    zones: t.int({ required: true, description: 'Number of temperature zones (1..3)' }),
   }),
 })

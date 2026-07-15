@@ -22,9 +22,9 @@ const execute = (source: string) =>
     contextValue: { userId, event: undefined as never, loaders: beverageSatelliteLoaders(userId) },
   })
 
-const completeOnboarding = (rows: number, cols: number) => `
+const completeOnboarding = (rows: number, cols: number, zones = 2) => `
   mutation {
-    completeOnboarding(input: { firstName: "Thibaut", rows: ${rows}, cols: ${cols} }) {
+    completeOnboarding(input: { firstName: "Thibaut", rows: ${rows}, cols: ${cols}, zones: ${zones} }) {
       firstName
       onboardingCompleted
       onboardingCompletedAt
@@ -55,16 +55,22 @@ describe('completeOnboarding mutation', () => {
 
     const me = await execute(`query { me { firstName onboardingCompleted } }`)
     expect(me.data?.me).toMatchObject({ firstName: 'Thibaut', onboardingCompleted: true })
-    expect(fake.snapshot('cellar-configs').get('usr_user-1')).toMatchObject({ rows: 10, cols: 5 })
+    expect(fake.snapshot('cellar-configs').get('usr_user-1')).toMatchObject({
+      rows: 10,
+      cols: 5,
+      zones: 2,
+    })
   })
 
   test.each([
-    [0, 8],
-    [101, 8],
-    [6, 0],
-    [6, 101],
-  ])('rejects out-of-range dimensions %p x %p with BAD_USER_INPUT', async (rows, cols) => {
-    const result = await execute(completeOnboarding(rows, cols))
+    [0, 8, 1],
+    [101, 8, 1],
+    [6, 0, 1],
+    [6, 101, 1],
+    [6, 8, 0],
+    [6, 8, 4],
+  ])('rejects out-of-range dimensions %p x %p / %p zones with BAD_USER_INPUT', async (rows, cols, zones) => {
+    const result = await execute(completeOnboarding(rows, cols, zones))
     expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
   })
 })

@@ -1,5 +1,5 @@
 import { CellarCommand } from '~/domain/cellar/command'
-import type { CellarCols, CellarRows } from '~/domain/cellar/types'
+import type { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { UserCommand } from '~/domain/user/command'
 import { atomically } from '~/utils/firestore'
@@ -10,10 +10,10 @@ export namespace UserUseCase {
   // onboarded" — either both land or neither does.
   export const completeOnboarding = async (
     userId: UserId,
-    input: { firstName: PersonName; rows: CellarRows; cols: CellarCols },
+    input: { firstName: PersonName; rows: CellarRows; cols: CellarCols; zones: CellarZones },
   ) =>
     atomically(async (batch) => {
-      await CellarCommand.configureFor(userId, input.rows, input.cols, batch)
+      await CellarCommand.configureFor(userId, input.rows, input.cols, input.zones, batch)
       return UserCommand.completeOnboarding(userId, input.firstName, batch)
     })
 }

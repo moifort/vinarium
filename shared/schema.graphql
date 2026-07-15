@@ -224,6 +224,9 @@ type CellarInfo {
   cols: Int!
   placedCount: Int!
   rows: Int!
+
+  """Number of temperature zones (1..3)"""
+  zones: Int!
 }
 
 """A free cellar position suggestion"""
@@ -257,6 +260,9 @@ input CompleteOnboardingInput {
 
   """Number of rows, labelled A..Z (1..100)"""
   rows: Int!
+
+  """Number of temperature zones (1..3)"""
+  zones: Int!
 }
 
 """Tasting note / consumption record for a wine"""

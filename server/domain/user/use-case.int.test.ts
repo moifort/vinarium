@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { CellarCols, CellarRows } from '~/domain/cellar/types'
+import type { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/types'
 import type { HouseholdId, HouseholdMember } from '~/domain/household/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
@@ -32,6 +32,7 @@ describe('UserUseCase.completeOnboarding', () => {
       firstName: 'Thibaut' as PersonName,
       rows: 10 as CellarRows,
       cols: 5 as CellarCols,
+      zones: 2 as CellarZones,
     })
 
     const me = await UserQuery.me(user('u1'))
@@ -39,7 +40,7 @@ describe('UserUseCase.completeOnboarding', () => {
     expect(me.onboardingCompletedAt).toBeInstanceOf(Date)
 
     const config = await CellarQuery.config(user('u1'))
-    expect(config).toMatchObject({ rows: 10, cols: 5 })
+    expect(config).toMatchObject({ rows: 10, cols: 5, zones: 2 })
   })
 
   test('a solo user stores config under a usr_ scope key', async () => {
@@ -47,8 +48,13 @@ describe('UserUseCase.completeOnboarding', () => {
       firstName: 'Marie' as PersonName,
       rows: 8 as CellarRows,
       cols: 6 as CellarCols,
+      zones: 1 as CellarZones,
     })
-    expect(fake.snapshot('cellar-configs').get('usr_solo')).toMatchObject({ rows: 8, cols: 6 })
+    expect(fake.snapshot('cellar-configs').get('usr_solo')).toMatchObject({
+      rows: 8,
+      cols: 6,
+      zones: 1,
+    })
   })
 
   test('a household member stores config under the shared hh_ scope key', async () => {
@@ -57,8 +63,13 @@ describe('UserUseCase.completeOnboarding', () => {
       firstName: 'Thibaut' as PersonName,
       rows: 12 as CellarRows,
       cols: 7 as CellarCols,
+      zones: 2 as CellarZones,
     })
-    expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 12, cols: 7 })
+    expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({
+      rows: 12,
+      cols: 7,
+      zones: 2,
+    })
   })
 
   test('never overwrites the shared grid a housemate already configured', async () => {
@@ -71,6 +82,7 @@ describe('UserUseCase.completeOnboarding', () => {
       firstName: 'Marie' as PersonName,
       rows: 6 as CellarRows,
       cols: 5 as CellarCols,
+      zones: 2 as CellarZones,
     })
 
     expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 12, cols: 7 })
@@ -83,6 +95,7 @@ describe('UserUseCase.completeOnboarding', () => {
       firstName: 'Thibaut' as PersonName,
       rows: 10 as CellarRows,
       cols: 5 as CellarCols,
+      zones: 1 as CellarZones,
     })
     expect(fake.batches).toHaveLength(1)
     expect(fake.batches[0].commits).toBe(1)

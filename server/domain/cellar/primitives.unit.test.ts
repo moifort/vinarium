@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'bun:test'
 import { make } from 'ts-brand'
-import { CellarCol, CellarCols, CellarRow, CellarRows } from '~/domain/cellar/primitives'
+import {
+  CellarCol,
+  CellarCols,
+  CellarRow,
+  CellarRows,
+  CellarZones,
+} from '~/domain/cellar/primitives'
 import type { CellarCol as CellarColType, CellarRow as CellarRowType } from '~/domain/cellar/types'
 
 describe('CellarRow', () => {
@@ -39,4 +45,12 @@ describe('CellarCols', () => {
   test('rejects 0', () => expect(() => CellarCols(0)).toThrow())
   test('rejects 101', () => expect(() => CellarCols(101)).toThrow())
   test('rejects non-integers', () => expect(() => CellarCols(2.5)).toThrow())
+})
+
+describe('CellarZones', () => {
+  test('accepts 1', () => expect(CellarZones(1) as number).toBe(1))
+  test('accepts 3', () => expect(CellarZones(3) as number).toBe(3))
+  test('rejects 0', () => expect(() => CellarZones(0)).toThrow())
+  test('rejects 4', () => expect(() => CellarZones(4)).toThrow())
+  test('rejects non-integers', () => expect(() => CellarZones(1.5)).toThrow())
 })
