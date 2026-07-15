@@ -14,13 +14,48 @@ struct SummaryPage: View {
     var body: some View {
         VStack(spacing: 0) {
             List {
+                Section {
+                    VStack(spacing: 10) {
+                        Image(systemName: "wineglass.fill")
+                            .font(.system(size: 44))
+                            .foregroundStyle(.tint)
+                        Text("\(capacity)")
+                            .font(.system(size: 44, weight: .bold, design: .rounded))
+                            .contentTransition(.numericText())
+                        Text(capacity > 1 ? "bouteilles au total" : "bouteille au total")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .listRowBackground(Color.clear)
+                }
+
                 Section("Récapitulatif") {
-                    LabeledContent("Prénom", value: firstName)
-                    LabeledContent("Rangées", value: "\(rows)")
-                    LabeledContent("Emplacements par rangée", value: "\(cols)")
-                    LabeledContent("Zones de température", value: "\(zones)")
-                    LabeledContent("Capacité totale") {
-                        Text("\(capacity) emplacements").fontWeight(.semibold)
+                    LabeledContent {
+                        Text(firstName)
+                    } label: {
+                        Label("Prénom", systemImage: "person.fill")
+                    }
+                    LabeledContent {
+                        Text("\(rows)")
+                    } label: {
+                        Label("Rangées", systemImage: "square.grid.3x3")
+                    }
+                    LabeledContent {
+                        Text("\(cols)")
+                    } label: {
+                        Label("Emplacements par rangée", systemImage: "rectangle.split.3x1")
+                    }
+                    LabeledContent {
+                        Text("\(zones)")
+                    } label: {
+                        Label("Zones de température", systemImage: "thermometer.medium")
+                    }
+                    LabeledContent {
+                        Text("\(capacity) bouteilles").fontWeight(.semibold)
+                    } label: {
+                        Label("Capacité totale", systemImage: "square.stack.3d.up.fill")
                     }
                 }
             }
