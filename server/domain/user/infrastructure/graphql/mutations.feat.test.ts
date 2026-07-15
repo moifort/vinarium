@@ -49,8 +49,8 @@ describe('completeOnboarding mutation', () => {
       onboardingCompleted: true,
     })
     expect(
-      (mutation.data?.completeOnboarding as { onboardingCompletedAt: string })
-        .onboardingCompletedAt,
+      (mutation.data as { completeOnboarding: { onboardingCompletedAt: string } })
+        .completeOnboarding.onboardingCompletedAt,
     ).toBeString()
 
     const me = await execute(`query { me { firstName onboardingCompleted } }`)
