@@ -61,6 +61,19 @@ jobs:
           echo "MARKETING=$MARKETING" >> "$GITHUB_ENV"
           echo "Releasing Vinarium $MARKETING ($BUILD)"
 
+      - name: Generate Apollo GraphQL code (gitignored, regenerated per build)
+        run: |
+          set -euo pipefail
+          # Resolve SPM so the apollo-ios checkout (and its bundled CLI) exists.
+          xcodebuild -resolvePackageDependencies \
+            -project ios/Vinarium.xcodeproj -scheme Vinarium
+          # Apollo 2.x ships the CLI as a tarball inside the checkout — extract it.
+          CLI_DIR=$(find "$HOME/Library/Developer/Xcode/DerivedData" -type d \
+            -path "*/SourcePackages/checkouts/apollo-ios/CLI" | head -1)
+          tar -xzf "$CLI_DIR/apollo-ios-cli.tar.gz" -C "$CLI_DIR"
+          chmod +x "$CLI_DIR/apollo-ios-cli"
+          (cd ios && "$CLI_DIR/apollo-ios-cli" generate)
+
       - name: Archive (Release, automatic signing via ASC key)
         run: |
           set -euo pipefail
