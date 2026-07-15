@@ -48,6 +48,33 @@ jobs:
           printf '%s' "${{ secrets.ASC_KEY_P8 }}" \
             > "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8"
 
+      - name: Import the distribution signing certificate
+        env:
+          IOS_DIST_CERT_P12: ${{ secrets.IOS_DIST_CERT_P12 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+        run: |
+          set -euo pipefail
+          # A dedicated (non-managed) Apple Distribution cert + private key, so signing
+          # never depends on Xcode cloud-managed certificates (unusable from a fresh CI
+          # machine). The .p12 is base64-encoded in the secret; import it into a throwaway
+          # keychain that codesign/xcodebuild search during archive and export.
+          KEYCHAIN="$RUNNER_TEMP/vinarium-signing.keychain-db"
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          CERT_PATH="$RUNNER_TEMP/dist-cert.p12"
+          printf '%s' "$IOS_DIST_CERT_P12" | base64 -d > "$CERT_PATH"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN"
+          security import "$CERT_PATH" -P "$IOS_DIST_CERT_PASSWORD" \
+            -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN" >/dev/null
+          # Prepend our keychain to the user search list so xcodebuild finds the identity.
+          security list-keychains -d user -s "$KEYCHAIN" \
+            $(security list-keychains -d user | sed 's/["[:space:]]//g')
+          rm -f "$CERT_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN"
+
       - name: Compute version numbers
         run: |
           set -euo pipefail
