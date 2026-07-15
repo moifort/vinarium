@@ -1,5 +1,12 @@
 import SwiftUI
 
+/// A pending invitation to join, carried from an `onOpenURL` universal link to the
+/// sheet that presents it. Identifiable so it can drive `.sheet(item:)`.
+struct HouseholdJoinRequest: Identifiable {
+    let code: String
+    var id: String { code }
+}
+
 /// Standalone join screen presented when the app opens an invitation universal
 /// link. The code arrives pre-filled from the link; the name comes from the
 /// account (`me.firstName`). On success it confirms, then dismisses.

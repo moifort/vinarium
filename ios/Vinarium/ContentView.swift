@@ -22,6 +22,9 @@ enum TabSelection: Int, CaseIterable, Identifiable {
 }
 
 struct ContentView: View {
+    /// A pending invitation from a universal link, presented once the app is ready.
+    @Binding var joinRequest: HouseholdJoinRequest?
+
     @State private var selectedTab: TabSelection = .home
     /// The last real content tab, restored when the scan cover is dismissed.
     @State private var lastContentTab: TabSelection = .home
@@ -97,6 +100,13 @@ struct ContentView: View {
                 }
             }
         }
+        .sheet(item: $joinRequest) { request in
+            JoinHouseholdSheet(code: request.code) {
+                // The guest now shares the cave: refresh it so the joined
+                // household's bottles appear without a manual reload.
+                cellarRefreshTrigger = UUID()
+            }
+        }
     }
 
     /// After the scan cover closes, leave the empty scan tab and return to the
@@ -108,5 +118,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(joinRequest: .constant(nil))
 }

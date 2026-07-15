@@ -7,14 +7,11 @@ import SwiftUI
 struct AuthRoot: View {
     @State private var session = AuthSession()
     @State private var gate = OnboardingGate()
-    @State private var joinRequest: JoinRequest?
 
     /// A pending invitation code, kept until the app is ready to present the join
     /// sheet (a link opened while signed out surfaces after sign-in + onboarding).
-    private struct JoinRequest: Identifiable {
-        let code: String
-        var id: String { code }
-    }
+    /// `ContentView` owns the presentation so it can refresh the shared cave on join.
+    @State private var joinRequest: HouseholdJoinRequest?
 
     var body: some View {
         Group {
@@ -34,7 +31,7 @@ struct AuthRoot: View {
         }
         .onOpenURL { url in
             if let code = Self.joinCode(from: url) {
-                joinRequest = JoinRequest(code: code)
+                joinRequest = HouseholdJoinRequest(code: code)
             }
         }
     }
@@ -48,10 +45,7 @@ struct AuthRoot: View {
         case .required:
             OnboardingView(onCompleted: { gate.markCompleted() })
         case .ready:
-            ContentView()
-                .sheet(item: $joinRequest) { request in
-                    JoinHouseholdSheet(code: request.code)
-                }
+            ContentView(joinRequest: $joinRequest)
         case .failed(let message):
             ContentUnavailableView {
                 Label("Connexion impossible", systemImage: "wifi.exclamationmark")
