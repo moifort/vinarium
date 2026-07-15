@@ -3,7 +3,8 @@
 ## Unreleased
 - Écran de connexion : le logo s'anime à l'ouverture — une mosaïque de capsules aux couleurs de l'app apparaît en cascade.
 - Tableau de bord : les en-têtes de sections (Prêt à déguster, Mes favoris, Journal) n'affichent plus de compteur, pour un rendu plus épuré.
-- Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez une marque de cave dans la liste pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure.
+- Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez votre modèle dans un catalogue de caves à vin du commerce (recherche par marque ou modèle, classées par marque) pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure ; le nombre de zones de température est aussi enregistré.
+- Le résumé de configuration affiche des icônes et le nombre total de bouteilles que peut contenir votre cave.
 - La taille de la cave n'est plus figée : elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
 - Barre d'onglets : elle se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste épinglé et séparé à droite.
 - Partage de cave : invitez les personnes de votre foyer avec un code, et partagez une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal ; seules les bouteilles en cave sont mises en commun.

@@ -17,7 +17,7 @@ A purely functional approach to wine cellar management.
 - **Wine catalog** — full metadata, grape varieties, appellations, drink windows, structured subtypes for every beverage (porto, rum, blonde ale, sparkling sake…)
 - **Global search** — full-screen search across names, producers, subtypes, regions, vintages and people (gifts, recommendations), ranked by relevance and grouped by match (in cellar, consumed, gifts…), with combinable facet chips
 - **Household sharing** — share one cellar with the people you live with via an invite code: a common grid where any member can place, move, drink or gift any bottle, while each person's catalog, tasting notes and journal stay private
-- **Onboarding** — a first-launch wizard that collects the user's first name and sizes the cellar (rows A→Z × slots per row), with cellar-brand presets for automatic dimensioning; the grid dimensions are configurable per scope rather than fixed
+- **Onboarding** — a first-launch wizard that collects the user's first name and sizes the cellar (rows A→Z × slots per row), with a searchable catalog of real consumer wine coolers (grouped by brand) for automatic dimensioning and the temperature-zone count; the grid dimensions are configurable per scope rather than fixed
 
 <p align="center">
   <img src="screenshots/wine-detail.png" width="250" alt="Wine detail">
