@@ -2,13 +2,11 @@ import SwiftUI
 
 struct PresetChoicePage: View {
     let presets: [CellarPreset]
-    let selection: PresetChoice?
     var onSelect: (PresetChoice) -> Void
     var onNext: () -> Void
     var onBack: () -> Void
 
     @State private var searchText = ""
-    @State private var activeIndexLetter: String?
 
     // MARK: Grouping (Contacts-style: one section per brand, alphabetical)
 
@@ -49,72 +47,36 @@ struct PresetChoicePage: View {
         }
     }
 
-    /// The distinct leading letters of the visible brands, in order — the A-Z index.
-    private var indexLetters: [String] {
-        var seen: [String] = []
-        for section in brandSections {
-            let letter = String(section.brand.prefix(1)).uppercased()
-            if !seen.contains(letter) { seen.append(letter) }
-        }
-        return seen
-    }
-
-    private func firstBrandId(for letter: String) -> String? {
-        brandSections.first { String($0.brand.prefix(1)).uppercased() == letter }?.id
-    }
-
     // MARK: Body
 
     var body: some View {
-        VStack(spacing: 0) {
-            ScrollViewReader { proxy in
-                List {
-                    Section {
-                        row(
-                            title: "Sur mesure",
-                            subtitle: "Je saisis moi-même les dimensions",
-                            isSelected: selection == .custom
-                        ) { onSelect(.custom) }
-                        .accessibilityIdentifier("onboarding-preset-custom")
-                    }
+        List {
+            Section {
+                row(title: "Sur mesure", subtitle: "Je saisis moi-même les dimensions") {
+                    choose(.custom)
+                }
+                .accessibilityIdentifier("onboarding-preset-custom")
+            }
 
-                    ForEach(brandSections) { section in
-                        Section {
-                            ForEach(section.models) { preset in
-                                row(
-                                    title: preset.model,
-                                    subtitle: subtitle(for: preset),
-                                    isSelected: selection == .preset(preset)
-                                ) { onSelect(.preset(preset)) }
-                                .accessibilityIdentifier("onboarding-preset-\(preset.id)")
-                            }
-                        } header: {
-                            Text(section.brand)
+            ForEach(brandSections) { section in
+                Section {
+                    ForEach(section.models) { preset in
+                        row(title: preset.model, subtitle: subtitle(for: preset)) {
+                            choose(.preset(preset))
                         }
-                        .id(section.id)
+                        .accessibilityIdentifier("onboarding-preset-\(preset.id)")
                     }
-                }
-                .listStyle(.insetGrouped)
-                .searchable(text: $searchText, prompt: "Rechercher (marque, modèle)")
-                .overlay(alignment: .trailing) {
-                    if !isSearching {
-                        sectionIndex(proxy)
-                    }
+                } header: {
+                    Text(section.brand)
                 }
             }
-
-            Button(action: onNext) {
-                Text("Continuer")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .disabled(selection == nil)
-            .padding()
-            .accessibilityIdentifier("onboarding-preset-next")
         }
+        .listStyle(.plain)
+        .searchable(text: $searchText, prompt: "Rechercher (marque, modèle)")
         .navigationTitle("Votre cave")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button("Retour", systemImage: "chevron.left", action: onBack)
@@ -122,41 +84,12 @@ struct PresetChoicePage: View {
         }
     }
 
-    // MARK: A-Z index
-
-    private func sectionIndex(_ proxy: ScrollViewProxy) -> some View {
-        let letters = indexLetters
-        return GeometryReader { geo in
-            VStack(spacing: 0) {
-                ForEach(letters, id: \.self) { letter in
-                    Text(letter)
-                        .font(.system(size: 11, weight: .bold))
-                        .foregroundStyle(.tint)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { value in
-                        guard !letters.isEmpty else { return }
-                        let step = geo.size.height / CGFloat(letters.count)
-                        let index = min(letters.count - 1, max(0, Int(value.location.y / step)))
-                        let letter = letters[index]
-                        if letter != activeIndexLetter { activeIndexLetter = letter }
-                        if let id = firstBrandId(for: letter) {
-                            proxy.scrollTo(id, anchor: .top)
-                        }
-                    }
-                    .onEnded { _ in activeIndexLetter = nil }
-            )
-        }
-        .frame(width: 22)
-        .padding(.trailing, 2)
-        .sensoryFeedback(.selection, trigger: activeIndexLetter)
-    }
-
     // MARK: Rows & helpers
+
+    private func choose(_ choice: PresetChoice) {
+        onSelect(choice)
+        onNext()
+    }
 
     private func subtitle(for preset: CellarPreset) -> String {
         let zones = preset.zones == 1 ? "1 zone" : "\(preset.zones) zones"
@@ -170,7 +103,6 @@ struct PresetChoicePage: View {
     private func row(
         title: String,
         subtitle: String,
-        isSelected: Bool,
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
@@ -180,11 +112,11 @@ struct PresetChoicePage: View {
                     Text(subtitle).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.tint)
-                }
+                Image(systemName: "chevron.forward")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
             }
+            .contentShape(Rectangle())
         }
         .tint(.primary)
     }
@@ -194,7 +126,6 @@ struct PresetChoicePage: View {
     NavigationStack {
         PresetChoicePage(
             presets: CellarPreset.all,
-            selection: .custom,
             onSelect: { _ in },
             onNext: {},
             onBack: {}

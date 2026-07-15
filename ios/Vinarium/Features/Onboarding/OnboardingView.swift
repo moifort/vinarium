@@ -42,7 +42,6 @@ struct OnboardingView: View {
         case .preset:
             PresetChoicePage(
                 presets: CellarPreset.all,
-                selection: viewModel.choice,
                 onSelect: { viewModel.select($0) },
                 onNext: { go(.dimensions) },
                 onBack: { go(.firstName) }
