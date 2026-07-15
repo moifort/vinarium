@@ -38,7 +38,14 @@ ui-debug.log
 
 # iOS Firebase + Apollo
 ios/Vinarium/GoogleService-Info.plist
-ios/Vinarium/Generated/GraphQL/
+# Apollo code is regenerated per build EXCEPT the hand-edited custom scalar mappings
+# (Year=Int, Eur=Double, …). Codegen never overwrites those files, so they must be
+# committed — otherwise CI's fresh checkout regenerates them as the default String and
+# the app fails to compile (Year? aka String? vs Int?).
+ios/Vinarium/Generated/GraphQL/*
+!ios/Vinarium/Generated/GraphQL/Schema/
+ios/Vinarium/Generated/GraphQL/Schema/*
+!ios/Vinarium/Generated/GraphQL/Schema/CustomScalars/
 ios/shared/
 
 # Note: shared/schema.graphql IS committed — it's the source of truth for
