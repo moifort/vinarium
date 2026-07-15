@@ -82,7 +82,12 @@ Full guide (writing/testing a migration): [docs/migrations.md](docs/migrations.m
 
 Full checklist in `ios/APP_STORE_SUBMISSION.md`. Build with the latest **final** Xcode (currently 26.6 / `17F113`, SDK `23F81a`) — never a beta/RC Xcode, and never an older release once a newer final ships. Both trigger **ITMS-90111** (Unsupported SDK or Xcode version) on upload.
 
-**Automated release**: pushing a `ios-v<version>` tag runs `.github/workflows/release-ios.yml` (macOS runner, final Xcode) — it archives, exports and uploads to App Store Connect via an App Store Connect API key (automatic signing). Build number = `git rev-list --count HEAD` (no manual `CURRENT_PROJECT_VERSION` bump), marketing version from the tag. Because the CI runner is on a **final** macOS, the `BuildMachineOSBuild` patch below only concerns **local** archives made on the beta-macOS dev Mac.
+**Automated release flow** (full procedure in `ios/APP_STORE_SUBMISSION.md`), in order:
+1. Write the release notes (French) under `## Unreleased` in `CHANGELOG.md`.
+2. **Push `main`** — `deploy.yml` deploys the backend *and* stamps `## Unreleased` → `## YYYY.MM.DD`, regenerating the served changelog asset. This step is **required for the in-app changelog**: the app renders a dated `## YYYY.MM.DD` heading as a proper release, but `## Unreleased` shows literally as "Unreleased", so the notes only display correctly once a `main` deploy has versioned them.
+3. **Push a `ios-v<version>` tag** — runs `.github/workflows/release-ios.yml` (macOS runner, final Xcode): archive → export → upload to App Store Connect via the App Store Connect API key (automatic signing). Build number = `git rev-list --count HEAD` (no manual `CURRENT_PROJECT_VERSION` bump), marketing version from the tag.
+
+Because the CI runner is on a **final** macOS, the `BuildMachineOSBuild` patch below only concerns **local** archives made on the beta-macOS dev Mac.
 
 **The dev Mac runs a beta macOS**, so archives made locally get a prerelease `BuildMachineOSBuild` stamp that App Store validation also rejects with ITMS-90111. After archiving, patch it to the latest **public** macOS build number *before* `-exportArchive` (export re-signs, so the patch survives):
 

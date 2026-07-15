@@ -44,20 +44,33 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 
 ## Phase 3 — Archive & upload [Xcode]
 
-> **Automated release (recommended).** Pushing a `ios-v<version>` tag (e.g. `ios-v1.1`) runs
-> the **`.github/workflows/release-ios.yml`** workflow on a GitHub macOS runner: it archives,
-> exports and uploads to App Store Connect automatically (automatic signing driven by an App
-> Store Connect API key). The tag sets `MARKETING_VERSION` (`ios-v1.1` → `1.1`) and the build
-> number is `git rev-list --count HEAD` — no manual `CURRENT_PROJECT_VERSION` bump. You can
-> also trigger it manually from the Actions tab (`workflow_dispatch`). The runner is on a
-> **final** macOS, so the `BuildMachineOSBuild` patch below is unnecessary there.
+> **Automated release flow (recommended).** Two moving parts — the backend (which serves the
+> in-app changelog) and the app binary. Do them in this order:
+>
+> 1. **Changelog** — write the user-facing notes (French) under `## Unreleased` in
+>    `CHANGELOG.md`.
+> 2. **Push `main`** — `deploy.yml` deploys the backend *and* stamps `## Unreleased` →
+>    `## YYYY.MM.DD`, regenerating `server/system/changelog-content.ts` (the changelog asset
+>    served to the app over GraphQL). **This versioning is required**: the app parses `##`
+>    headings — a dated `## YYYY.MM.DD` (dots) shows as a proper release, whereas
+>    `## Unreleased` shows literally as "Unreleased". So the changelog only displays correctly
+>    once it's been stamped by a `main` deploy.
+> 3. **Push a `ios-v<version>` tag** (e.g. `ios-v1.1`) — runs
+>    **`.github/workflows/release-ios.yml`** on a GitHub macOS runner: archive → export →
+>    upload to App Store Connect (automatic signing driven by the App Store Connect API key).
+>    The tag sets `MARKETING_VERSION` (`ios-v1.1` → `1.1`); the build number is
+>    `git rev-list --count HEAD` — no manual `CURRENT_PROJECT_VERSION` bump. Also triggerable
+>    from the Actions tab (`workflow_dispatch`). The runner is on a **final** macOS, so the
+>    `BuildMachineOSBuild` patch below is unnecessary there.
+> 4. **Attach the build** to the version in App Store Connect (Phase 4 below) once it finishes
+>    processing.
 >
 > One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
 > Connect API key with the *App Manager* role) and `IOS_GOOGLE_SERVICE_INFO_PLIST` (base64 of
 > the gitignored `GoogleService-Info.plist`). Do **not** reuse the `APPLE_*` secrets — those
 > are the *Sign in with Apple* AuthKey used by Terraform.
 
-The manual flow below stays as the fallback:
+The manual archive/upload below stays as the fallback for step 3:
 
 ```bash
 # 1. Archive (Release, real device destination)
