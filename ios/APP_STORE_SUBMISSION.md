@@ -44,6 +44,21 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 
 ## Phase 3 — Archive & upload [Xcode]
 
+> **Automated release (recommended).** Pushing a `ios-v<version>` tag (e.g. `ios-v1.1`) runs
+> the **`.github/workflows/release-ios.yml`** workflow on a GitHub macOS runner: it archives,
+> exports and uploads to App Store Connect automatically (automatic signing driven by an App
+> Store Connect API key). The tag sets `MARKETING_VERSION` (`ios-v1.1` → `1.1`) and the build
+> number is `git rev-list --count HEAD` — no manual `CURRENT_PROJECT_VERSION` bump. You can
+> also trigger it manually from the Actions tab (`workflow_dispatch`). The runner is on a
+> **final** macOS, so the `BuildMachineOSBuild` patch below is unnecessary there.
+>
+> One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
+> Connect API key with the *App Manager* role) and `IOS_GOOGLE_SERVICE_INFO_PLIST` (base64 of
+> the gitignored `GoogleService-Info.plist`). Do **not** reuse the `APPLE_*` secrets — those
+> are the *Sign in with Apple* AuthKey used by Terraform.
+
+The manual flow below stays as the fallback:
+
 ```bash
 # 1. Archive (Release, real device destination)
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
