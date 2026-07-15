@@ -5,31 +5,38 @@ enum OnboardingStep: Int, CaseIterable {
     case welcome, firstName, preset, dimensions, summary
 }
 
-/// A cellar brand/model preset that pre-fills the grid dimensions.
+/// A real consumer wine cooler (Boulanger / Darty catalog): brand, model,
+/// manufacturer bottle capacity and number of temperature zones. The app's grid
+/// is uniform, so `defaultGrid()` derives a starting rows × cols from the
+/// capacity — the user can adjust it afterwards. The full list lives in
+/// `CellarPreset.all` (CellarPresetCatalog.swift).
 struct CellarPreset: Identifiable, Hashable {
     let id: String
     let brand: String
     let model: String
-    let rows: Int
-    let cols: Int
+    let bottles: Int
+    let zones: Int
 
     var displayName: String { "\(brand) \(model)" }
-    var capacity: Int { rows * cols }
-}
+    var capacity: Int { bottles }
 
-extension CellarPreset {
-    // Real consumer wine coolers (French market: Climadiff / La Sommelière). The
-    // app's grid is uniform, so each cooler's shelf-and-capacity layout is mapped
-    // to rows × cols = its manufacturer capacity (rows are A→Z, ≤ 26). These are a
-    // starting point the user can adjust. Sources: climadiff.com, lasommeliere.com.
-    static let all: [CellarPreset] = [
-        CellarPreset(id: "climadiff-cuvee12", brand: "Climadiff", model: "Cuvée 12", rows: 4, cols: 3),
-        CellarPreset(id: "climadiff-cle18", brand: "Climadiff", model: "CLE18", rows: 6, cols: 3),
-        CellarPreset(id: "climadiff-cli24", brand: "Climadiff", model: "CLI24", rows: 3, cols: 8),
-        CellarPreset(id: "lasommeliere-ls28", brand: "La Sommelière", model: "LS28", rows: 4, cols: 7),
-        CellarPreset(id: "lasommeliere-ls50", brand: "La Sommelière", model: "LS50", rows: 5, cols: 10),
-        CellarPreset(id: "lasommeliere-ls100", brand: "La Sommelière", model: "LS100", rows: 10, cols: 10),
-    ]
+    /// An indicative uniform grid holding at least `bottles`, roughly square with
+    /// slightly wider rows, capped at 26 rows (A→Z) and 100 columns.
+    func defaultGrid() -> (rows: Int, cols: Int) {
+        CellarPreset.grid(forBottles: bottles)
+    }
+
+    static func grid(forBottles bottles: Int) -> (rows: Int, cols: Int) {
+        let count = max(1, bottles)
+        var cols = Int((Double(count) * 1.4).squareRoot().rounded())
+        cols = min(OnboardingLimits.maxCols, max(1, cols))
+        var rows = Int((Double(count) / Double(cols)).rounded(.up))
+        if rows > OnboardingLimits.maxRows {
+            rows = OnboardingLimits.maxRows
+            cols = min(OnboardingLimits.maxCols, Int((Double(count) / Double(rows)).rounded(.up)))
+        }
+        return (max(1, rows), max(1, cols))
+    }
 }
 
 /// The user's dimensioning choice: a known preset, or a custom manual size.
@@ -43,4 +50,6 @@ enum OnboardingLimits {
     static let maxRows = 26
     /// Matches the backend CellarCols validator (1..100).
     static let maxCols = 100
+    /// Matches the backend CellarZones validator (1..3).
+    static let maxZones = 3
 }

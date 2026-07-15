@@ -7,14 +7,34 @@ struct PresetChoicePage: View {
     var onNext: () -> Void
     var onBack: () -> Void
 
+    @State private var searchText = ""
+
+    private var filtered: [CellarPreset] {
+        let sorted = presets.sorted {
+            $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending
+        }
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return sorted }
+        return sorted.filter { $0.displayName.localizedCaseInsensitiveContains(query) }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             List {
                 Section {
-                    ForEach(presets) { preset in
+                    row(
+                        title: "Sur mesure",
+                        subtitle: "Je saisis moi-même les dimensions",
+                        isSelected: selection == .custom
+                    ) { onSelect(.custom) }
+                    .accessibilityIdentifier("onboarding-preset-custom")
+                }
+
+                Section {
+                    ForEach(filtered) { preset in
                         row(
                             title: preset.displayName,
-                            subtitle: "\(preset.rows) rangées × \(preset.cols) — \(preset.capacity) emplacements",
+                            subtitle: subtitle(for: preset),
                             isSelected: selection == .preset(preset)
                         ) { onSelect(.preset(preset)) }
                         .accessibilityIdentifier("onboarding-preset-\(preset.id)")
@@ -24,16 +44,8 @@ struct PresetChoicePage: View {
                 } footer: {
                     Text("Sélectionnez votre modèle pour un dimensionnement automatique. Vous pourrez ajuster les valeurs ensuite.")
                 }
-
-                Section {
-                    row(
-                        title: "Sur mesure",
-                        subtitle: "Je saisis moi-même les dimensions",
-                        isSelected: selection == .custom
-                    ) { onSelect(.custom) }
-                    .accessibilityIdentifier("onboarding-preset-custom")
-                }
             }
+            .searchable(text: $searchText, prompt: "Rechercher (marque, modèle)")
 
             Button(action: onNext) {
                 Text("Continuer")
@@ -52,6 +64,11 @@ struct PresetChoicePage: View {
                 Button("Retour", systemImage: "chevron.left", action: onBack)
             }
         }
+    }
+
+    private func subtitle(for preset: CellarPreset) -> String {
+        let zones = preset.zones == 1 ? "1 zone" : "\(preset.zones) zones"
+        return "\(preset.bottles) bouteilles · \(zones)"
     }
 
     private func row(

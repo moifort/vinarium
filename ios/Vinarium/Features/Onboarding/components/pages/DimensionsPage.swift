@@ -3,6 +3,7 @@ import SwiftUI
 struct DimensionsPage: View {
     @Binding var rows: Int
     @Binding var cols: Int
+    @Binding var zones: Int
     var onNext: () -> Void
     var onBack: () -> Void
 
@@ -27,6 +28,20 @@ struct DimensionsPage: View {
                     Text("Dimensions de la cave")
                 } footer: {
                     Text("Les rangées sont étiquetées de A à Z (26 au maximum).")
+                }
+
+                Section {
+                    Picker("Zones de température", selection: $zones) {
+                        ForEach(1...OnboardingLimits.maxZones, id: \.self) { count in
+                            Text("\(count)").tag(count)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .accessibilityIdentifier("onboarding-zones-picker")
+                } header: {
+                    Text("Zones de température")
+                } footer: {
+                    Text("Nombre de compartiments à températures indépendantes de votre cave.")
                 }
 
                 Section {
@@ -57,6 +72,6 @@ struct DimensionsPage: View {
 
 #Preview {
     NavigationStack {
-        DimensionsPage(rows: .constant(12), cols: .constant(6), onNext: {}, onBack: {})
+        DimensionsPage(rows: .constant(12), cols: .constant(6), zones: .constant(2), onNext: {}, onBack: {})
     }
 }

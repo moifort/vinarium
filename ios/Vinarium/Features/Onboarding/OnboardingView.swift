@@ -51,6 +51,7 @@ struct OnboardingView: View {
             DimensionsPage(
                 rows: $viewModel.rows,
                 cols: $viewModel.cols,
+                zones: $viewModel.zones,
                 onNext: { go(.summary) },
                 onBack: { go(.preset) }
             )
@@ -59,6 +60,7 @@ struct OnboardingView: View {
                 firstName: viewModel.trimmedFirstName,
                 rows: viewModel.rows,
                 cols: viewModel.cols,
+                zones: viewModel.zones,
                 isSubmitting: viewModel.isSubmitting,
                 onSubmit: submit,
                 onBack: { go(.dimensions) }

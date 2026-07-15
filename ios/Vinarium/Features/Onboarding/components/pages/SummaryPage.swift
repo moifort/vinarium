@@ -4,6 +4,7 @@ struct SummaryPage: View {
     let firstName: String
     let rows: Int
     let cols: Int
+    let zones: Int
     let isSubmitting: Bool
     var onSubmit: () -> Void
     var onBack: () -> Void
@@ -17,6 +18,7 @@ struct SummaryPage: View {
                     LabeledContent("Prénom", value: firstName)
                     LabeledContent("Rangées", value: "\(rows)")
                     LabeledContent("Emplacements par rangée", value: "\(cols)")
+                    LabeledContent("Zones de température", value: "\(zones)")
                     LabeledContent("Capacité totale") {
                         Text("\(capacity) emplacements").fontWeight(.semibold)
                     }
@@ -58,6 +60,7 @@ struct SummaryPage: View {
             firstName: "Thibaut",
             rows: 12,
             cols: 6,
+            zones: 2,
             isSubmitting: false,
             onSubmit: {},
             onBack: {}

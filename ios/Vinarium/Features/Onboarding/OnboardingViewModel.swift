@@ -8,6 +8,7 @@ final class OnboardingViewModel {
     var choice: PresetChoice?
     var rows = 6
     var cols = 8
+    var zones = 1
 
     private(set) var isSubmitting = false
     var error: String?
@@ -20,6 +21,7 @@ final class OnboardingViewModel {
         !trimmedFirstName.isEmpty
             && (1...OnboardingLimits.maxRows).contains(rows)
             && (1...OnboardingLimits.maxCols).contains(cols)
+            && (1...OnboardingLimits.maxZones).contains(zones)
     }
 
     var capacity: Int { rows * cols }
@@ -28,8 +30,10 @@ final class OnboardingViewModel {
     func select(_ choice: PresetChoice) {
         self.choice = choice
         if case .preset(let preset) = choice {
-            rows = min(preset.rows, OnboardingLimits.maxRows)
-            cols = min(preset.cols, OnboardingLimits.maxCols)
+            let grid = preset.defaultGrid()
+            rows = min(grid.rows, OnboardingLimits.maxRows)
+            cols = min(grid.cols, OnboardingLimits.maxCols)
+            zones = min(preset.zones, OnboardingLimits.maxZones)
         }
     }
 
@@ -43,7 +47,8 @@ final class OnboardingViewModel {
             try await OnboardingAPI.completeOnboarding(
                 firstName: trimmedFirstName,
                 rows: rows,
-                cols: cols
+                cols: cols,
+                zones: zones
             )
             isSubmitting = false
             return true

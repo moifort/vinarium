@@ -18,11 +18,12 @@ enum OnboardingAPI {
         )
     }
 
-    static func completeOnboarding(firstName: String, rows: Int, cols: Int) async throws {
+    static func completeOnboarding(firstName: String, rows: Int, cols: Int, zones: Int) async throws {
         let input = VinariumGraphQL.CompleteOnboardingInput(
             cols: Int32(cols),
             firstName: firstName,
-            rows: Int32(rows)
+            rows: Int32(rows),
+            zones: Int32(zones)
         )
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
