@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Partage : chaque code d'invitation affiche un badge « En attente », et les actions Copier le lien, E-mail et Révoquer se déclenchent désormais indépendamment — un appui n'active plus les trois à la fois. Le bouton « Générer un nouveau code » est séparé dans son propre bloc.
 - Écran de connexion : le logo s'anime à l'ouverture — une mosaïque de capsules aux couleurs de l'app apparaît en cascade.
 - Tableau de bord : les en-têtes de sections (Prêt à déguster, Mes favoris, Journal) n'affichent plus de compteur, pour un rendu plus épuré.
 - Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez votre modèle dans un catalogue de caves à vin du commerce (recherche par marque ou modèle, classées par marque) pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure ; le nombre de zones de température est aussi enregistré.
