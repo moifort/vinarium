@@ -1,0 +1,55 @@
+default_platform(:ios)
+
+platform :ios do
+  # Attach the already-uploaded build to its App Store version, set the "What's New"
+  # notes from CHANGELOG.md, and submit for review with automatic release on approval.
+  # The binary is uploaded by the `release` job (altool); this lane never uploads it.
+  desc "Attach the uploaded build to its version and submit it for review (auto-release)."
+  lane :submit do
+    api_key = app_store_connect_api_key(
+      key_id: ENV.fetch("ASC_KEY_ID"),
+      issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+      key_filepath: ENV.fetch("ASC_KEY_PATH")
+    )
+
+    app_id  = "com.polyforms.vinarium.app"
+    version = ENV.fetch("MARKETING")
+    build   = ENV.fetch("BUILD")
+
+    # App Store Connect processes an uploaded binary for a few minutes before it can be
+    # attached to a version. Poll TestFlight until our build number appears.
+    UI.message("Waiting for build #{build} (v#{version}) to finish processing…")
+    ready = false
+    40.times do |i|
+      seen = begin
+        latest_testflight_build_number(api_key: api_key, app_identifier: app_id, version: version)
+      rescue StandardError
+        nil
+      end
+      if seen.to_s == build.to_s
+        ready = true
+        break
+      end
+      UI.message("…not ready (seen: #{seen.inspect}), retry #{i + 1}/40")
+      sleep(30)
+    end
+    UI.user_error!("Build #{build} never finished processing (~20 min timeout)") unless ready
+
+    deliver(
+      api_key: api_key,
+      app_identifier: app_id,
+      app_version: version,
+      build_number: build,
+      submit_for_review: true,
+      automatic_release: true,
+      force: true,                 # no interactive HTML preview
+      skip_binary_upload: true,    # the binary was already uploaded by the release job
+      skip_screenshots: true,      # screenshots are managed manually, once
+      run_precheck_before_submit: false,
+      submission_information: {
+        export_compliance_uses_encryption: false,
+        add_id_info_uses_idfa: false
+      }
+    )
+  end
+end

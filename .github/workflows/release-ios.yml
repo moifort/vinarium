@@ -150,3 +150,51 @@ jobs:
             build/export/*.ipa
           if-no-files-found: ignore
           retention-days: 14
+
+  # After the binary is uploaded, wait for App Store Connect to finish processing it,
+  # then attach it to its version, set the "What's New" from CHANGELOG, and submit for
+  # review (auto-release on approval). No Xcode needed — runs on Linux. Tag pushes only;
+  # a manual workflow_dispatch stops after upload so it can be submitted by hand.
+  submit:
+    needs: release
+    if: startsWith(github.ref, 'refs/tags/ios-v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0   # git rev-list --count HEAD must see the full history
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Install the App Store Connect API key
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s' "${{ secrets.ASC_KEY_P8 }}" > "$RUNNER_TEMP/asc/AuthKey.p8"
+          echo "ASC_KEY_PATH=$RUNNER_TEMP/asc/AuthKey.p8" >> "$GITHUB_ENV"
+
+      - name: Compute version numbers
+        run: |
+          set -euo pipefail
+          echo "BUILD=$(git rev-list --count HEAD)" >> "$GITHUB_ENV"
+          echo "MARKETING=${GITHUB_REF_NAME#ios-v}" >> "$GITHUB_ENV"
+
+      - name: Build the "What's New" notes from CHANGELOG.md
+        run: |
+          set -euo pipefail
+          mkdir -p fastlane/metadata/fr-FR
+          # Bullets under the first "## " section become the release notes (bullets kept).
+          awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.md \
+            > fastlane/metadata/fr-FR/release_notes.txt
+          echo "---- What's New (fr-FR) ----"
+          cat fastlane/metadata/fr-FR/release_notes.txt
+
+      - name: Attach build and submit for review
+        run: bundle exec fastlane ios submit
