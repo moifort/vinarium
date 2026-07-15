@@ -92,10 +92,12 @@ jobs:
           terraform apply -auto-approve -input=false
 
       # Ships public/ (the invitation universal-link AASA + the /rejoindre landing
-      # page). Uses the WIF-provided ADC above. Requires the Hosting site to exist
-      # in the project and vinarium.app to be connected as a custom domain (one-off
-      # console setup); the deploy SA needs the Firebase Hosting Admin role.
+      # page). Uses the WIF-provided ADC above (the deploy SA is project owner, so
+      # no extra Hosting role is needed). Non-fatal: until the Hosting site and the
+      # vinarium.app custom domain exist (one-off console setup), this fails softly
+      # instead of breaking the backend deploy and migrations below.
       - name: Deploy Firebase Hosting
+        continue-on-error: true
         run: bunx firebase-tools deploy --only hosting --project "${{ vars.GCP_PROJECT_ID }}" --non-interactive
 
       - name: Run Firestore migrations
