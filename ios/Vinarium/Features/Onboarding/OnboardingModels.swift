@@ -18,16 +18,17 @@ struct CellarPreset: Identifiable, Hashable {
 }
 
 extension CellarPreset {
-    // NOTE — VALEURS À VALIDER : dimensions plausibles pour amorcer le choix, à
-    // confirmer avec les fiches constructeur avant mise en production. Les rangées
-    // sont plafonnées à 26 (étiquettes A→Z).
+    // Real consumer wine coolers (French market: Climadiff / La Sommelière). The
+    // app's grid is uniform, so each cooler's shelf-and-capacity layout is mapped
+    // to rows × cols = its manufacturer capacity (rows are A→Z, ≤ 26). These are a
+    // starting point the user can adjust. Sources: climadiff.com, lasommeliere.com.
     static let all: [CellarPreset] = [
-        CellarPreset(id: "eurocave-pure-l", brand: "EuroCave", model: "Pure L", rows: 12, cols: 6),
-        CellarPreset(id: "eurocave-compact-s", brand: "EuroCave", model: "Compact S", rows: 8, cols: 5),
-        CellarPreset(id: "liebherr-wkes", brand: "Liebherr", model: "WKes 4552", rows: 10, cols: 6),
-        CellarPreset(id: "climadiff-cls210", brand: "Climadiff", model: "CLS210", rows: 14, cols: 8),
-        CellarPreset(id: "vinocave-168", brand: "Vinocave", model: "168 bouteilles", rows: 14, cols: 6),
-        CellarPreset(id: "avintage-av54", brand: "Avintage", model: "AV54", rows: 6, cols: 5),
+        CellarPreset(id: "climadiff-cuvee12", brand: "Climadiff", model: "Cuvée 12", rows: 4, cols: 3),
+        CellarPreset(id: "climadiff-cle18", brand: "Climadiff", model: "CLE18", rows: 6, cols: 3),
+        CellarPreset(id: "climadiff-cli24", brand: "Climadiff", model: "CLI24", rows: 3, cols: 8),
+        CellarPreset(id: "lasommeliere-ls28", brand: "La Sommelière", model: "LS28", rows: 4, cols: 7),
+        CellarPreset(id: "lasommeliere-ls50", brand: "La Sommelière", model: "LS50", rows: 5, cols: 10),
+        CellarPreset(id: "lasommeliere-ls100", brand: "La Sommelière", model: "LS100", rows: 10, cols: 10),
     ]
 }
 

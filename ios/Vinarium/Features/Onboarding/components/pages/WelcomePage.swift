@@ -6,10 +6,7 @@ struct WelcomePage: View {
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
-            Image(systemName: "cellularbars")
-                .font(.system(size: 64))
-                .foregroundStyle(.tint)
-                .accessibilityHidden(true)
+            BrandLogo()
             VStack(spacing: 12) {
                 Text("Bienvenue dans Vinarium")
                     .font(.largeTitle.bold())
