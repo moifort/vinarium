@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Écran de connexion : le logo s'anime à l'ouverture — une mosaïque de capsules aux couleurs de l'app apparaît en cascade.
+- Tableau de bord : les en-têtes de sections (Prêt à déguster, Mes favoris, Journal) n'affichent plus de compteur, pour un rendu plus épuré.
 - Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez une marque de cave dans la liste pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure.
 - La taille de la cave n'est plus figée : elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
 - Barre d'onglets : elle se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste épinglé et séparé à droite.
