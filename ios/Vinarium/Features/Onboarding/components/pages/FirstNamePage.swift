@@ -6,6 +6,7 @@ struct FirstNamePage: View {
     var onBack: () -> Void
 
     @FocusState private var focused: Bool
+    @State private var appeared = false
 
     private var trimmed: String {
         firstName.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -20,6 +21,7 @@ struct FirstNamePage: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
+            .entrance(appeared, delay: 0)
 
             TextField("Prénom", text: $firstName)
                 .textContentType(.givenName)
@@ -31,6 +33,7 @@ struct FirstNamePage: View {
                 .background(Color(.systemGray6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .accessibilityIdentifier("onboarding-firstname-field")
+                .entrance(appeared, delay: 0.08)
 
             Spacer()
 
@@ -42,6 +45,7 @@ struct FirstNamePage: View {
             .controlSize(.large)
             .disabled(trimmed.isEmpty)
             .accessibilityIdentifier("onboarding-firstname-next")
+            .entrance(appeared, delay: 0.16)
         }
         .padding()
         .navigationTitle("Prénom")
@@ -51,7 +55,19 @@ struct FirstNamePage: View {
                 Button("Retour", systemImage: "chevron.left", action: onBack)
             }
         }
-        .onAppear { focused = true }
+        .onAppear {
+            appeared = true
+            focused = true
+        }
+    }
+}
+
+private extension View {
+    /// One-shot staggered entrance: fade in while sliding up a few points.
+    func entrance(_ appeared: Bool, delay: Double) -> some View {
+        opacity(appeared ? 1 : 0)
+            .offset(y: appeared ? 0 : 14)
+            .animation(.spring(duration: 0.45, bounce: 0.2).delay(delay), value: appeared)
     }
 }
 
