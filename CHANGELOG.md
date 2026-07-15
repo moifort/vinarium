@@ -11,6 +11,7 @@
 - Cave partagée : toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille ; la sortie est enregistrée dans le journal du propriétaire du vin, et votre note de dégustation reste la vôtre.
 - Fiche d'un vin d'un autre membre : le nom du propriétaire est affiché et les actions réservées (modifier, supprimer, conseiller) sont masquées.
 - Réglages : l'entrée « Partage » (auparavant « Bientôt disponible ») permet désormais de créer ou rejoindre un foyer, gérer les membres et révoquer les codes d'invitation.
+- Liens d'invitation : ouvrir un lien de partage lance désormais directement l'application sur l'écran pour rejoindre le foyer ; si l'app n'est pas installée, la page propose de la télécharger depuis l'App Store.
 - Tableau de bord : le widget « En cave » affiche l'occupation de la cave — bouteilles placées sur capacité totale (ex. 41/48), le total en plus petit.
 - Correction : la liste « Mes Vins » s'affiche de nouveau au lieu d'un message d'erreur.
 - Listes, recherche et tableau de bord plus rapides : le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un filtre.
