@@ -248,7 +248,7 @@ describe('CellarCommand.reconfigure', () => {
 
     const result = await CellarCommand.reconfigure(userId, rows(10), cols(5), zones(2))
 
-    expect(result).toEqual({ rows: 10, cols: 5, zones: 2 })
+    expect(result).toEqual({ rows: rows(10), cols: cols(5), zones: zones(2) })
     expect(fake.snapshot('cellar-configs').get(`usr_${userId}`)).toEqual({
       rows: 10,
       cols: 5,
@@ -262,7 +262,7 @@ describe('CellarCommand.reconfigure', () => {
 
     const result = await CellarCommand.reconfigure(userId, rows(4), cols(5), zones(1))
 
-    expect(result).toEqual({ rows: 4, cols: 5, zones: 1 })
+    expect(result).toEqual({ rows: rows(4), cols: cols(5), zones: zones(1) })
     expect(fake.snapshot('cellar-configs').get(`usr_${userId}`)).toMatchObject({ rows: 4, cols: 5 })
   })
 
