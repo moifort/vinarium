@@ -7,8 +7,11 @@ struct ProfileSettingsView: View {
     var body: some View {
         Form {
             Section("Compte") {
+                if let firstName, !firstName.isEmpty {
+                    LabeledInfoRow(title: "Prénom", value: firstName, icon: "person.fill")
+                }
                 if let displayName = authSession.user?.displayName, !displayName.isEmpty {
-                    LabeledInfoRow(title: "Nom", value: displayName, icon: "person.fill")
+                    LabeledInfoRow(title: "Nom", value: displayName, icon: "person.text.rectangle.fill")
                 }
                 if let email = authSession.user?.email, !email.isEmpty {
                     LabeledInfoRow(title: "Email", value: email, icon: "envelope.fill")
@@ -30,6 +33,11 @@ struct ProfileSettingsView: View {
         }
         .navigationTitle("Profil")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var firstName: String? {
+        guard let displayName = authSession.user?.displayName else { return nil }
+        return displayName.split(separator: " ").first.map(String.init)
     }
 
     private var shortUid: String {
