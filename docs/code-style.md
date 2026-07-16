@@ -181,7 +181,7 @@ Function names carry the **business concept**, not the technical pattern. The na
 
 ## Language
 
-All code, comments, commit messages, and documentation are in **English**. The only French in the repo is user-facing copy (`CHANGELOG.md` and the iOS app's on-screen text).
+All code, comments, commit messages, and documentation are in **English** — including `CHANGELOG.md`, the English source of truth. The only French in the repo is user-facing copy: `CHANGELOG.fr.md` (the served French translation) and the iOS app's on-screen text.
 
 ## Swift Rules
 
