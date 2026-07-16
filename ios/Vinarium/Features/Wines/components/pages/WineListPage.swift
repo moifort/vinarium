@@ -41,6 +41,7 @@ struct WineListPage: View {
                     } label: {
                         Label(item.label, systemImage: item.icon)
                     }
+                    .labelStyle(.iconOnly)
                     .tint(mode == item ? .accentColor : .primary)
                     .accessibilityIdentifier("winelist-mode-\(item.rawValue)")
                 }

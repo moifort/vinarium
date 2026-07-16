@@ -72,7 +72,7 @@ struct ConsumptionSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler", systemImage: "xmark") { dismiss() }
+                    ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     AsyncToolbarButton(title: "Confirmer", systemImage: "checkmark") {

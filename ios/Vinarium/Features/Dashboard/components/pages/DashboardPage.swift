@@ -23,11 +23,8 @@ struct DashboardPage: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button(action: onSettingsTapped) {
-                    Image(systemName: "gearshape")
-                }
-                .accessibilityIdentifier("dashboard-settings-button")
-                .accessibilityLabel("Réglages")
+                ToolbarIconButton(title: "Réglages", systemImage: "gearshape", action: onSettingsTapped)
+                    .accessibilityIdentifier("dashboard-settings-button")
             }
         }
         .searchToolbarButton()

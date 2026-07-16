@@ -59,7 +59,7 @@ struct BottleMovePage: View {
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Annuler", systemImage: "xmark") { onCancel() }
+                ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) { onCancel() }
                     .disabled(isMoving)
             }
         }

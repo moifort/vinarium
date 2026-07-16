@@ -92,7 +92,7 @@ struct ScanReviewPage: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Fermer", systemImage: "xmark") { onCancel() }
+                ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { onCancel() }
             }
 
             ToolbarItem(placement: .primaryAction) {
@@ -100,6 +100,7 @@ struct ScanReviewPage: View {
                     ProgressView()
                 } else {
                     Button("Ajouter", systemImage: "plus") { showChoices = true }
+                        .labelStyle(.iconOnly)
                         .accessibilityIdentifier("review-save-button")
                 }
             }

@@ -255,6 +255,31 @@ struct WineEditForm: View {
 
 Benefits: previewable in isolation, testable independently, the parent page stays lean.
 
+### Toolbar / navigation CTAs
+
+Top-of-screen CTAs (navigation bars, sheet headers) follow one convention across the whole app:
+**icon-only**, positioned by role. Never a text label — the `title` is passed only for accessibility
+(VoiceOver), never rendered.
+
+| Side | Role | Icon | Placement |
+|------|------|------|-----------|
+| Left | Cancel / Close / dismiss | `xmark` | `.cancellationAction` |
+| Left | Back (onboarding navigation) | `chevron.left` | `.topBarLeading` |
+| Right | Confirm / Save | `checkmark` | `.confirmationAction` |
+| Right | Add | `plus` | `.primaryAction` |
+| Right | Secondary actions (view modes, sort, move/remove) | domain icon | `ToolbarItemGroup` |
+
+Render every toolbar CTA through the two shared atoms in `Shared/Components/` — never an inline
+`Button` with a visible label:
+
+- **`ToolbarIconButton(title:systemImage:role:action:)`** — synchronous icon-only button for
+  cancel / close / back and secondary actions. Applies `.labelStyle(.iconOnly)`; keeps `title` for VoiceOver.
+- **`AsyncToolbarButton(title:systemImage:action:)`** — async confirm button; shows a `ProgressView`
+  while the action runs, icon-only otherwise.
+
+For a `Button`/`Menu`/mode-toggle that can't use these atoms, force `.labelStyle(.iconOnly)` yourself
+and keep the `Label`'s text for accessibility.
+
 ### Previews as Storybook
 
 Every component from the page level down **must** be previewable without a running server — pages included, since they hold no ViewModel:

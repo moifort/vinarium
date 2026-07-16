@@ -45,7 +45,7 @@ struct RecommendationSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Annuler", systemImage: "xmark") {
+                    ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) {
                         dismiss()
                     }
                 }

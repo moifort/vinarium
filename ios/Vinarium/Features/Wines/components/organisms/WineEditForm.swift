@@ -237,7 +237,7 @@ struct WineEditForm: View {
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Annuler", systemImage: "xmark") {
+                ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) {
                     onCancel()
                 }
                 .disabled(isSaving)
@@ -249,6 +249,7 @@ struct WineEditForm: View {
                     Button("Enregistrer", systemImage: "checkmark") {
                         Task { await save() }
                     }
+                    .labelStyle(.iconOnly)
                     .disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }

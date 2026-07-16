@@ -23,6 +23,7 @@ struct AsyncToolbarButton: View {
                 Label(title, systemImage: systemImage)
             }
         }
+        .labelStyle(.iconOnly)
         .disabled(isInProgress)
     }
 }

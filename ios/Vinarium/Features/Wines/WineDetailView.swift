@@ -233,18 +233,20 @@ struct WineDetailView: View {
     @ToolbarContentBuilder
     private var readToolbar: some ToolbarContent {
         ToolbarItem(placement: .cancellationAction) {
-            Button("Fermer", systemImage: "xmark") { dismiss() }
+            ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
         }
         if let cellar = detail?.cellar, cellar.dateOut == nil {
             ToolbarItemGroup {
                 Button("Déplacer", systemImage: "arrow.left.arrow.right") {
                     showMove = true
                 }
+                .labelStyle(.iconOnly)
                 .accessibilityIdentifier("move-bottle-button")
 
                 Button("Sortir", systemImage: "arrow.up") {
                     showRemovalChoice = true
                 }
+                .labelStyle(.iconOnly)
                 .accessibilityIdentifier("remove-from-cellar-button")
                 .confirmationDialog(
                     "Sortir de la cave",
@@ -262,10 +264,8 @@ struct WineDetailView: View {
         }
         if let detail, detail.isMine, detail.cellar == nil, detail.recommendation != nil {
             ToolbarItemGroup {
-                Button {
+                ToolbarIconButton(title: "Ajouter à la cave", systemImage: "plus") {
                     showPlacement = true
-                } label: {
-                    Label("Ajouter à la cave", systemImage: "plus")
                 }
 
                 AsyncToolbarButton(title: "Ajouter aux favoris", systemImage: "heart") {

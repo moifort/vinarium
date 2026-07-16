@@ -49,6 +49,7 @@ struct CellarPage: View {
                     } label: {
                         Label(mode.label, systemImage: mode.icon)
                     }
+                    .labelStyle(.iconOnly)
                     .tint(displayMode == mode ? .accentColor : .primary)
                     .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
                 }

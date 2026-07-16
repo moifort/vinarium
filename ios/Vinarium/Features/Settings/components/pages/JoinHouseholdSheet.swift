@@ -65,7 +65,11 @@ struct JoinHouseholdSheet: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(joined ? "Terminé" : "Annuler") { dismiss() }
+                    ToolbarIconButton(
+                        title: joined ? "Terminé" : "Annuler",
+                        systemImage: "xmark",
+                        role: .cancel
+                    ) { dismiss() }
                 }
             }
             .task {

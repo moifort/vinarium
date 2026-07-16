@@ -33,7 +33,7 @@ struct CellarReconfigureView: View {
                 .animation(.default, value: viewModel.step)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Annuler") { dismiss() }
+                        ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) { dismiss() }
                     }
                 }
         }

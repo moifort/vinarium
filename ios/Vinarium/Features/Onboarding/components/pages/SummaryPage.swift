@@ -74,7 +74,7 @@ struct SummaryPage: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button("Retour", systemImage: "chevron.left", action: onBack)
+                ToolbarIconButton(title: "Retour", systemImage: "chevron.left", action: onBack)
                     .disabled(isSubmitting)
             }
         }

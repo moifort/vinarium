@@ -25,12 +25,9 @@ struct SearchView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
+                    ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {
                         dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
                     }
-                    .accessibilityLabel("Fermer")
                     .accessibilityIdentifier("search-close-button")
                 }
                 if viewModel.isLoading {

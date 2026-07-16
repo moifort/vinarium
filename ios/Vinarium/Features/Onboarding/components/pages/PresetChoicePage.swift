@@ -73,7 +73,7 @@ struct PresetChoicePage: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                Button("Retour", systemImage: "chevron.left", action: onBack)
+                ToolbarIconButton(title: "Retour", systemImage: "chevron.left", action: onBack)
             }
         }
     }
