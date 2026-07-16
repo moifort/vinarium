@@ -4,6 +4,8 @@ struct DimensionsPage: View {
     @Binding var rows: Int
     @Binding var cols: Int
     @Binding var zones: Int
+    var nextTitle: String = "Continuer"
+    var isBusy = false
     var onNext: () -> Void
     var onBack: () -> Void
 
@@ -52,11 +54,18 @@ struct DimensionsPage: View {
             }
 
             Button(action: onNext) {
-                Text("Continuer")
-                    .frame(maxWidth: .infinity)
+                Group {
+                    if isBusy {
+                        ProgressView()
+                    } else {
+                        Text(nextTitle)
+                    }
+                }
+                .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
+            .disabled(isBusy)
             .padding()
             .accessibilityIdentifier("onboarding-dimensions-next")
         }

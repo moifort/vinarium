@@ -10,8 +10,16 @@ struct ChangelogVersion: Identifiable, Hashable, Sendable {
 struct CellarSettingsInfo: Sendable, Hashable {
     let rows: Int
     let cols: Int
+    let zones: Int
     let capacity: Int
     let placedCount: Int
+}
+
+/// Outcome of a cellar reconfiguration: either the updated grid, or a refusal
+/// carrying how many placed bottles would fall outside the requested dimensions.
+enum ReconfigureCellarOutcome: Sendable {
+    case success(CellarSettingsInfo)
+    case blocked(outOfBounds: Int)
 }
 
 struct HouseholdMember: Identifiable, Hashable, Sendable {

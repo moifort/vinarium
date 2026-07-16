@@ -4,6 +4,7 @@ struct CellarInfoSettingsView: View {
     @State private var info: CellarSettingsInfo?
     @State private var error: String?
     @State private var isLoading = true
+    @State private var isReconfiguring = false
 
     var body: some View {
         Group {
@@ -42,6 +43,15 @@ struct CellarInfoSettingsView: View {
                                 )
                             }
                         }
+                        Section {
+                            Button {
+                                isReconfiguring = true
+                            } label: {
+                                Label("Reconfigurer ma cave", systemImage: "slider.horizontal.3")
+                            }
+                        } footer: {
+                            Text("Choisissez un modèle du commerce ou ajustez les dimensions.")
+                        }
                     } else if let error {
                         Text(error).foregroundStyle(.red)
                     }
@@ -52,6 +62,16 @@ struct CellarInfoSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task { await load() }
         .refreshable { await load() }
+        .sheet(isPresented: $isReconfiguring) {
+            if let info {
+                CellarReconfigureView(
+                    rows: info.rows,
+                    cols: info.cols,
+                    zones: info.zones,
+                    onReconfigured: { updated in self.info = updated }
+                )
+            }
+        }
     }
 
     private func load() async {

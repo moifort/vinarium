@@ -10,8 +10,25 @@ query CellarInfo {
   cellarInfo {
     rows
     cols
+    zones
     capacity
     placedCount
+  }
+}
+
+mutation ReconfigureCellar($rows: Int!, $cols: Int!, $zones: Int!) {
+  reconfigureCellar(rows: $rows, cols: $cols, zones: $zones) {
+    __typename
+    ... on CellarInfo {
+      rows
+      cols
+      zones
+      capacity
+      placedCount
+    }
+    ... on CellarReconfigureBlocked {
+      outOfBoundsCount
+    }
   }
 }
 

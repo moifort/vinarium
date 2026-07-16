@@ -24,9 +24,41 @@ enum SettingsAPI {
         return CellarSettingsInfo(
             rows: info.rows,
             cols: info.cols,
+            zones: info.zones,
             capacity: info.capacity,
             placedCount: info.placedCount
         )
+    }
+
+    static func reconfigureCellar(
+        rows: Int,
+        cols: Int,
+        zones: Int
+    ) async throws -> ReconfigureCellarOutcome {
+        let data = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.ReconfigureCellarMutation(
+                rows: Int32(rows),
+                cols: Int32(cols),
+                zones: Int32(zones)
+            )
+        )
+        let result = data.reconfigureCellar
+        if let info = result.asCellarInfo {
+            return .success(
+                CellarSettingsInfo(
+                    rows: info.rows,
+                    cols: info.cols,
+                    zones: info.zones,
+                    capacity: info.capacity,
+                    placedCount: info.placedCount
+                )
+            )
+        }
+        if let blocked = result.asCellarReconfigureBlocked {
+            return .blocked(outOfBounds: blocked.outOfBoundsCount)
+        }
+        throw APIError.invalidResponse
     }
 
     static func exportData() async throws -> String {
