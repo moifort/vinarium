@@ -34,9 +34,10 @@ Before pushing, update the user-facing surfaces, then push:
 
 1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
 2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
-3. **Changelog** (`CHANGELOG.md` + `CHANGELOG.fr.md`): add the English entries under `## Unreleased` in `CHANGELOG.md` (source of truth), then add the French translation under `## Unreleased` in `CHANGELOG.fr.md` (the served copy). Use the `### New`/`### Fixes`/`### Performance` (EN) and `### Nouveautés`/`### Corrections`/`### Performance` (FR) sub-sections, and only log consequential changes (exclude renames, subtitle changes, and other cosmetic tweaks). At the iOS release, rename the `## Unreleased` heading to `## <version> (<YYYY.MM.DD>)` in both files (there is no CI date-stamp — versioning is manual). Then run `bun run generate:assets` to regenerate `server/system/changelog-content.ts` from `CHANGELOG.fr.md` (the iOS-facing asset served via GraphQL — never edit it by hand).
-4. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
-5. Push.
+3. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
+4. Push.
+
+**Not at push time — the changelog.** Do **not** touch `CHANGELOG.md` / `CHANGELOG.fr.md` when pushing. The changelog is written only at the moment of an iOS App Store release, as part of the release flow (see [App Store Distribution](#app-store-distribution)) — a normal `main` push carries no changelog change.
 
 ## Skills
 
