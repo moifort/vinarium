@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2 (2026.07.16)
+
+### Nouveautés
+- Vous pouvez maintenant changer la taille de votre cave quand vous voulez, depuis les Réglages. Ajoutez ou enlevez des rangées et des emplacements — vos bouteilles restent à leur place.
+- Cave partagée : les bouteilles de toutes les personnes de votre foyer apparaissent maintenant ensemble dans votre liste et votre recherche, chacune avec le nom de son propriétaire. Elles s'affichent tout de suite, même juste après avoir rejoint le foyer.
+- Votre prénom s'affiche maintenant sur votre profil.
+
+### Corrections
+- Ouvrir un lien d'invitation ouvre bien l'application à chaque fois.
+
 ## 1.1 (2026.07.15)
 
 ### Nouveautés

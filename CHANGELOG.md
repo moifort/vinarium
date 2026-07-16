@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2 (2026.07.16)
+
+### New
+- You can now change your cellar's size whenever you like, from Settings. Add or remove rows and slots — your bottles stay in place.
+- Shared cellar: the bottles of everyone in your home now show up together in your list and your search, each with its owner's name. They appear right away, even just after you join.
+- Your first name now shows on your profile.
+
+### Fixes
+- Opening an invitation link now reliably opens the app.
+
 ## 1.1 (2026.07.15)
 
 ### New
