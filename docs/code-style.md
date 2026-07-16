@@ -183,6 +183,10 @@ Function names carry the **business concept**, not the technical pattern. The na
 
 All code, comments, commit messages, and documentation are in **English** — including `CHANGELOG.md`, the English source of truth. The only French in the repo is user-facing copy: `CHANGELOG.fr.md` (the served French translation) and the iOS app's on-screen text.
 
+### Changelog copy tone
+
+Write changelog notes (both `CHANGELOG.md` and `CHANGELOG.fr.md`) as plain, impersonal statements of what was put in place. Do not address the reader (no "you", no `vous`/`tu`): prefer "The cellar's size can now be changed from Settings" over "You can now change your cellar's size". Keep sentences flowing and concise, cut filler words, and never use an em-dash or en-dash (`—`, `–`) in the copy — reword, or use a period, comma, or colon instead. See the changelog section in [CLAUDE.md](../CLAUDE.md) for the file structure and tone rule.
+
 ## Swift Rules
 
 - `@MainActor` on all ViewModels

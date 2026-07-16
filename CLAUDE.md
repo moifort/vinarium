@@ -6,6 +6,8 @@ Everything versioned and technical is written in **English**: commit messages, c
 
 The changelog lives in two files, each organized newest-version-first. Each version heading carries the App Store version **and** its release date: `## 1.1 (2026.07.15)` (a plain `## Unreleased`, no date, is allowed for pending work). The app shows the version as the row title and formats the date on the right. Under each version, three sub-sections (only those that have content): `CHANGELOG.md` uses `### New` / `### Fixes` / `### Performance`, and `CHANGELOG.fr.md` mirrors it with `### Nouveautés` / `### Corrections` / `### Performance`. Only log **consequential** changes — cosmetic tweaks (renaming a label, changing a subtitle, dropping a counter) have no impact and are excluded. Note: the server parser only reads `## ` headings and bullets, so `###` sub-headings are ignored and the app renders a flat list — the sections are organizational for the repo.
 
+**Tone of the notes** (both files). Write each bullet as a plain, impersonal statement of what was put in place. Do **not** address the reader: no "you" in English, no `vous`/`tu` in French. Prefer "The cellar's size can now be changed from Settings" over "You can now change your cellar's size". Use flowing, complete sentences with normal punctuation, and go straight to the essential: cut filler ("at any time", "simply", "à tout moment", "également"). **Never use an em-dash or en-dash (`—`, `–`) in the copy** — it reads as machine-written; reword, or use a period, comma, or colon. These rules are about the user-facing changelog copy, not this instruction file.
+
 ## Build & Verification Commands
 
 - **Backend typecheck**: `bun tsc --noEmit`
