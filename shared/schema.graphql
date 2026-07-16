@@ -237,6 +237,14 @@ type CellarPosition {
   rowLabel: String!
 }
 
+"""
+Reconfiguration refused: bottles are placed beyond the requested dimensions
+"""
+type CellarReconfigureBlocked {
+  """How many placed bottles would fall outside the new grid"""
+  outOfBoundsCount: Int!
+}
+
 """A temperature in degrees Celsius"""
 scalar Celsius
 
@@ -567,6 +575,20 @@ type Mutation {
     row: Int!
   ): CellarBottle!
 
+  """
+  Resize or retune the cellar grid (settings). Refuses to strand placed bottles
+  """
+  reconfigureCellar(
+    """Number of slots per row (1..100)"""
+    cols: Int!
+
+    """Number of rows, labelled A.. (1..100)"""
+    rows: Int!
+
+    """Number of temperature zones (1..3)"""
+    zones: Int!
+  ): ReconfigureCellarResult!
+
   """Record a tasting note (rating, notes, favorite flag) for a wine"""
   recordTasting(
     """Wine being tasted"""
@@ -761,6 +783,9 @@ input RecommendationInput {
   comment: String
   recommenderName: PersonName
 }
+
+"""Outcome of reconfiguring the cellar grid"""
+union ReconfigureCellarResult = CellarInfo | CellarReconfigureBlocked
 
 """Beverage region (e.g. Bordeaux, Bourgogne)"""
 scalar Region

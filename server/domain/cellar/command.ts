@@ -40,6 +40,24 @@ export namespace CellarCommand {
     return repository.saveConfig(key, { rows, cols, zones }, batch)
   }
 
+  // Resize/retune an already-configured cellar from the settings screen. Unlike
+  // configureFor's onboarding no-op, this is a deliberate action, so it OVERWRITES
+  // the shared grid. Refuses to shrink below a placed bottle: positions are 0-based,
+  // so any bottle at row >= rows or col >= cols would fall outside the new grid and
+  // be stranded. The check spans every household member's bottles via findAllByUsers.
+  export const reconfigure = async (
+    userId: UserId,
+    rows: CellarRows,
+    cols: CellarCols,
+    zones: CellarZones,
+  ) => {
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const bottles = await repository.findAllByUsers(scope.memberIds)
+    const outOfBounds = bottles.filter((b) => b.row >= rows || b.col >= cols).length
+    if (outOfBounds > 0) return { outOfBounds } as const
+    return repository.saveConfig(await cellarConfigKey(userId), { rows, cols, zones })
+  }
+
   export const placeBeverage = async (
     userId: UserId,
     beverageId: BeverageId,

@@ -1,6 +1,13 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { BeverageId } from '~/domain/beverage/types'
-import type { CellarBottle, CellarCol, CellarRow } from '~/domain/cellar/types'
+import type {
+  CellarBottle,
+  CellarCol,
+  CellarCols,
+  CellarRow,
+  CellarRows,
+  CellarZones,
+} from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
@@ -228,5 +235,60 @@ describe('CellarCommand.moveBottle (household)', () => {
     const w2Entries = journal.filter((entry) => entry.beverageId === 'w2')
     expect(w1Entries.every((entry) => entry.userId === userId)).toBe(true)
     expect(w2Entries.every((entry) => entry.userId === 'marie')).toBe(true)
+  })
+})
+
+describe('CellarCommand.reconfigure', () => {
+  const rows = (value: number) => value as CellarRows
+  const cols = (value: number) => value as CellarCols
+  const zones = (value: number) => value as CellarZones
+
+  test('overwrites the config for a solo cellar (usr_ key)', async () => {
+    fake.seed('cellar-configs', `usr_${userId}`, { rows: 6, cols: 8, zones: 1 })
+
+    const result = await CellarCommand.reconfigure(userId, rows(10), cols(5), zones(2))
+
+    expect(result).toEqual({ rows: 10, cols: 5, zones: 2 })
+    expect(fake.snapshot('cellar-configs').get(`usr_${userId}`)).toEqual({
+      rows: 10,
+      cols: 5,
+      zones: 2,
+    })
+  })
+
+  test('shrinks when every placed bottle still fits the new grid', async () => {
+    fake.seed('cellar-configs', `usr_${userId}`, { rows: 10, cols: 10, zones: 1 })
+    fake.seed('cellar', `${userId}_w1`, bottle('w1', 3, 4))
+
+    const result = await CellarCommand.reconfigure(userId, rows(4), cols(5), zones(1))
+
+    expect(result).toEqual({ rows: 4, cols: 5, zones: 1 })
+    expect(fake.snapshot('cellar-configs').get(`usr_${userId}`)).toMatchObject({ rows: 4, cols: 5 })
+  })
+
+  test('refuses to shrink below a placed bottle and leaves the config untouched', async () => {
+    fake.seed('cellar-configs', `usr_${userId}`, { rows: 10, cols: 10, zones: 1 })
+    fake.seed('cellar', `${userId}_w1`, bottle('w1', 0, 0))
+    fake.seed('cellar', `${userId}_w2`, bottle('w2', 8, 2)) // row out of a 4-row grid
+    fake.seed('cellar', `${userId}_w3`, bottle('w3', 1, 7)) // col out of a 5-col grid
+
+    const result = await CellarCommand.reconfigure(userId, rows(4), cols(5), zones(1))
+
+    expect(result).toEqual({ outOfBounds: 2 })
+    expect(fake.snapshot('cellar-configs').get(`usr_${userId}`)).toMatchObject({
+      rows: 10,
+      cols: 10,
+    })
+  })
+
+  test("a housemate's out-of-bounds bottle blocks the resize on the shared (hh_) config", async () => {
+    seedHousehold()
+    fake.seed('cellar-configs', 'hh_h1', { rows: 10, cols: 10, zones: 1 })
+    fake.seed('cellar', 'marie_w2', marieBottle('w2', 9, 1)) // row out of a 4-row grid
+
+    const result = await CellarCommand.reconfigure(userId, rows(4), cols(5), zones(1))
+
+    expect(result).toEqual({ outOfBounds: 1 })
+    expect(fake.snapshot('cellar-configs').get('hh_h1')).toMatchObject({ rows: 10, cols: 10 })
   })
 })

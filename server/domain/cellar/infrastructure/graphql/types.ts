@@ -80,6 +80,24 @@ export const CellarInfoType = builder
     }),
   })
 
+export const CellarReconfigureBlockedType = builder
+  .objectRef<{ outOfBounds: number }>('CellarReconfigureBlocked')
+  .implement({
+    description: 'Reconfiguration refused: bottles are placed beyond the requested dimensions',
+    fields: (t) => ({
+      outOfBoundsCount: t.exposeInt('outOfBounds', {
+        description: 'How many placed bottles would fall outside the new grid',
+      }),
+    }),
+  })
+
+// Success returns the updated grid; refusal returns the count of stranded bottles.
+export const ReconfigureCellarResultUnion = builder.unionType('ReconfigureCellarResult', {
+  description: 'Outcome of reconfiguring the cellar grid',
+  types: [CellarInfoType, CellarReconfigureBlockedType],
+  resolveType: (value) => ('outOfBounds' in value ? 'CellarReconfigureBlocked' : 'CellarInfo'),
+})
+
 export const CellarPositionType = builder
   .objectRef<{
     row: CellarBottle['row']
