@@ -1,6 +1,7 @@
 fragment WineListFields on Beverage {
   id
   name
+  ownerName
   beverageType
   subtype
   alcoholContent

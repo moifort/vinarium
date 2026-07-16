@@ -30,6 +30,7 @@ struct ContentView: View {
     @State private var lastContentTab: TabSelection = .home
     @State private var showScanner = false
     @State private var cellarRefreshTrigger = UUID()
+    @State private var wineListRefreshTrigger = UUID()
     @State private var showFavorites = false
     @State private var showRecommended = false
     @State private var searchPresenter = SearchPresenter()
@@ -60,7 +61,11 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("tab-cellar")
             Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
-                WineListView(showFavorites: $showFavorites, showRecommended: $showRecommended)
+                WineListView(
+                    showFavorites: $showFavorites,
+                    showRecommended: $showRecommended,
+                    refreshTrigger: wineListRefreshTrigger
+                )
             }
             .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: scanTabRole) {
@@ -102,9 +107,11 @@ struct ContentView: View {
         }
         .sheet(item: $joinRequest) { request in
             JoinHouseholdSheet(code: request.code) {
-                // The guest now shares the cave: refresh it so the joined
-                // household's bottles appear without a manual reload.
+                // The guest now shares the cave: refresh both the grid and the wine
+                // list so the joined household's bottles appear without a manual
+                // reload (the list and search now span the shared cellar too).
                 cellarRefreshTrigger = UUID()
+                wineListRefreshTrigger = UUID()
             }
         }
     }

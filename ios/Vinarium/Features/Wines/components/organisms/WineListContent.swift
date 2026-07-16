@@ -42,7 +42,8 @@ struct WineListContent: View {
                                     subtitle: item.subtitle,
                                     rating: item.rating,
                                     isFavorite: item.isFavorite,
-                                    isInCellar: item.isInCellar
+                                    isInCellar: item.isInCellar,
+                                    ownerName: item.ownerName
                                 )
                             }
                             .tint(.primary)
@@ -100,6 +101,8 @@ extension WineListContent {
         let rating: Int?
         let isFavorite: Bool
         var isInCellar: Bool = false
+        /// The household member this wine belongs to; nil for the viewer's own.
+        var ownerName: String? = nil
     }
 }
 
@@ -113,6 +116,7 @@ extension WineListContent {
             ]),
             .init(label: "2021", items: [
                 .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
+                .init(id: "4", color: .red, name: "Pauillac Grand Cru", subtitle: "2021 \u{2022} Bordeaux", rating: 4, isFavorite: false, isInCellar: true, ownerName: "Marie"),
             ]),
         ],
         onWineTapped: { _ in }

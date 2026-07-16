@@ -34,7 +34,7 @@ struct JoinHouseholdSheet: View {
                 } header: {
                     Text("Code d'invitation")
                 } footer: {
-                    Text("Rejoignez ce foyer pour partager la cave commune. Votre bibliothèque, vos notes et votre journal restent personnels.")
+                    Text("Rejoignez ce foyer pour partager la cave commune : les vins placés en cave sont visibles par tous ses membres. Votre bibliothèque, vos notes et votre journal restent personnels.")
                 }
 
                 if joined {

@@ -73,6 +73,9 @@ struct Wine: Codable, Identifiable, Sendable {
     var consumedDate: Date? = nil
     var isGifted: Bool = false
     var isRecommended: Bool = false
+    /// The household member this wine belongs to; nil when it is the viewer's own.
+    /// Set for shared-cellar wines a housemate placed, so the list can badge them.
+    var ownerName: String? = nil
     let createdAt: Date
     let updatedAt: Date
 }

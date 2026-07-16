@@ -110,7 +110,8 @@ final class SearchViewModel {
             subtitle: wine.listSubtitle,
             rating: wine.rating,
             isFavorite: wine.isFavorite,
-            isInCellar: wine.isInCellar
+            isInCellar: wine.isInCellar,
+            ownerName: wine.ownerName
         )
     }
 }

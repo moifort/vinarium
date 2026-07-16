@@ -8,6 +8,8 @@ struct WineListRow: View {
     let rating: Int?
     let isFavorite: Bool
     var isInCellar: Bool = false
+    /// The household member this wine belongs to; nil for the viewer's own.
+    var ownerName: String? = nil
 
     var body: some View {
         HStack(alignment: .top) {
@@ -19,6 +21,18 @@ struct WineListRow: View {
                     Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
+                }
+                if let ownerName {
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                        Text(ownerName)
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.quaternary, in: Capsule())
+                    .padding(.top, 2)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -56,6 +70,15 @@ struct WineListRow: View {
             rating: 5,
             isFavorite: true,
             isInCellar: true
+        )
+        WineListRow(
+            color: .red,
+            name: "Pauillac Grand Cru",
+            subtitle: "2016 \u{2022} Bordeaux",
+            rating: 4,
+            isFavorite: false,
+            isInCellar: true,
+            ownerName: "Marie"
         )
         WineListRow(
             beverageType: .cider,

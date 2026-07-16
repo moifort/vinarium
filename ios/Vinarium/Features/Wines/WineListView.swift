@@ -3,6 +3,9 @@ import SwiftUI
 struct WineListView: View {
     @Binding var showFavorites: Bool
     @Binding var showRecommended: Bool
+    /// Bumped after joining a household so the list reloads and the newly shared
+    /// cellar wines appear without a manual pull-to-refresh.
+    var refreshTrigger: UUID = UUID()
 
     @State private var viewModel = WineListViewModel()
     @State private var selectedWineId: String?
@@ -28,9 +31,10 @@ struct WineListView: View {
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
                 onLoadMore: { await viewModel.loadMore() }
             )
-            // Chargement initial ; les changements de vue/tri/filtre passent par les
-            // didSet du ViewModel (scheduleReload).
-            .task {
+            // Chargement initial, et rechargement quand refreshTrigger change (après
+            // avoir rejoint un foyer) ; les changements de vue/tri/filtre passent par
+            // les didSet du ViewModel (scheduleReload).
+            .task(id: refreshTrigger) {
                 await viewModel.load()
             }
             .sheet(item: Binding(
@@ -84,7 +88,8 @@ struct WineListView: View {
                     subtitle: wine.listSubtitle,
                     rating: wine.rating,
                     isFavorite: wine.isFavorite,
-                    isInCellar: wine.isInCellar
+                    isInCellar: wine.isInCellar,
+                    ownerName: wine.ownerName
                 )
             })
         }

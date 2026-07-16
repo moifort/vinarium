@@ -41,6 +41,7 @@ extension Wine {
             // (la facette given, elle, représente un vin donné à quelqu'un).
             isGifted: w.gift?.received != nil,
             isRecommended: w.recommendation != nil,
+            ownerName: w.ownerName,
             createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date()
         )
