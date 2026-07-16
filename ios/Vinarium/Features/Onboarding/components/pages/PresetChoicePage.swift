@@ -5,6 +5,12 @@ struct PresetChoicePage: View {
     var onSelect: (PresetChoice) -> Void
     var onNext: () -> Void
     var onBack: () -> Void
+    /// Leading button. Defaults to a "Retour" back-chevron (onboarding, where
+    /// onBack navigates to the previous step); a sheet-first step passes a
+    /// "Fermer" xmark so the icon matches its dismiss behavior.
+    var backTitle: String = "Retour"
+    var backSystemImage: String = "chevron.left"
+    var backRole: ButtonRole? = nil
 
     @State private var searchText = ""
 
@@ -73,7 +79,12 @@ struct PresetChoicePage: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                ToolbarIconButton(title: "Retour", systemImage: "chevron.left", action: onBack)
+                ToolbarIconButton(
+                    title: backTitle,
+                    systemImage: backSystemImage,
+                    role: backRole,
+                    action: onBack
+                )
             }
         }
     }

@@ -64,7 +64,10 @@ struct CellarReconfigureView: View {
                 presets: CellarPreset.all,
                 onSelect: { viewModel.select($0) },
                 onNext: { viewModel.step = .dimensions },
-                onBack: { dismiss() }
+                onBack: { dismiss() },
+                backTitle: "Fermer",
+                backSystemImage: "xmark",
+                backRole: .cancel
             )
         case .dimensions:
             DimensionsPage(
