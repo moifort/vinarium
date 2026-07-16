@@ -22,8 +22,10 @@ struct LocationEditorSheet: View {
     @State private var isClearing = false
     @FocusState private var searchFocused: Bool
 
-    /// Scales with Dynamic Type so the badge always wraps the glyph, which tracks `.subheadline`.
+    /// The badge box scales with Dynamic Type; the glyph is sized to a fixed
+    /// fraction of it, so its inset stays constant at every text size.
     @ScaledMetric(relativeTo: .subheadline) private var iconBadgeSize: CGFloat = 28
+    private var glyphSize: CGFloat { iconBadgeSize * 0.5 }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -115,7 +117,7 @@ struct LocationEditorSheet: View {
                 } label: {
                     HStack(spacing: 12) {
                         Image(systemName: "mappin.slash")
-                            .font(.subheadline.weight(.semibold))
+                            .font(.system(size: glyphSize, weight: .semibold))
                             .foregroundStyle(.white)
                             .frame(width: iconBadgeSize, height: iconBadgeSize)
                             .background(Circle().fill(.red))
@@ -210,14 +212,16 @@ private struct SuggestionRow: View {
     let isResolving: Bool
     let action: () -> Void
 
-    /// Scales with Dynamic Type so the badge always wraps the glyph, which tracks `.subheadline`.
+    /// The badge box scales with Dynamic Type; the glyph is sized to a fixed
+    /// fraction of it, so its inset stays constant at every text size.
     @ScaledMetric(relativeTo: .subheadline) private var iconBadgeSize: CGFloat = 28
+    private var glyphSize: CGFloat { iconBadgeSize * 0.5 }
 
     var body: some View {
         Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: "mappin")
-                    .font(.subheadline.weight(.semibold))
+                    .font(.system(size: glyphSize, weight: .semibold))
                     .foregroundStyle(.white)
                     .frame(width: iconBadgeSize, height: iconBadgeSize)
                     .background(Circle().fill(.blue))
