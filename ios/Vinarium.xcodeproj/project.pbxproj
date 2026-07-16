@@ -31,9 +31,19 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E10000050000000000000002 /* Vinarium */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Vinarium; sourceTree = "<group>"; };
+		E10000050000000000000002 /* Vinarium */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (E100000A0000000000000001 /* Exceptions for "Vinarium" folder in "Vinarium" target */, ); explicitFileTypes = {}; explicitFolders = (); path = Vinarium; sourceTree = "<group>"; };
 		E20000050000000000000001 /* VinariumUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = VinariumUITests; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E100000A0000000000000001 /* Exceptions for "Vinarium" folder in "Vinarium" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = E10000060000000000000001 /* Vinarium */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		E10000040000000000000001 /* Frameworks */ = {
@@ -343,6 +353,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Vinarium/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Vinarium;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";
@@ -381,6 +392,7 @@
 				DEVELOPMENT_TEAM = 46C337T7YN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Vinarium/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Vinarium;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.food-and-drink";

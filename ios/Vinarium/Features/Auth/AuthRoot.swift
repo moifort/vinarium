@@ -2,8 +2,9 @@ import SwiftUI
 
 /// Top-level gate: shows LoginView when no Firebase user is signed in; once signed
 /// in, reads the onboarding state and shows the wizard until it is completed,
-/// otherwise the main TabView (`ContentView`). Also catches invitation universal
-/// links (`https://vinarium-prod.web.app/rejoindre/<CODE>`) and presents the join sheet.
+/// otherwise the main TabView (`ContentView`). Also catches invitation links, both
+/// the universal link (`https://vinarium-prod.web.app/rejoindre/<CODE>`) and the
+/// custom scheme (`vinarium://rejoindre/<CODE>`), and presents the join sheet.
 struct AuthRoot: View {
     @State private var session = AuthSession()
     @State private var gate = OnboardingGate()
@@ -57,8 +58,17 @@ struct AuthRoot: View {
         }
     }
 
-    /// Extracts an invitation code from a `/rejoindre/<CODE>` universal link.
+    /// Extracts an invitation code from either the universal link
+    /// (`https://<host>/rejoindre/<CODE>`) or the custom scheme
+    /// (`vinarium://rejoindre/<CODE>`, the web page's "open in app" fallback).
     private static func joinCode(from url: URL) -> String? {
+        // Custom scheme: "rejoindre" is the host, the code the single path segment.
+        if url.scheme == InvitationLink.scheme {
+            guard url.host == "rejoindre" else { return nil }
+            let code = url.pathComponents.filter { $0 != "/" }.first?.uppercased() ?? ""
+            return code.isEmpty ? nil : code
+        }
+        // Universal link: "rejoindre" and the code are both path segments.
         guard url.host == InvitationLink.host else { return nil }
         let parts = url.pathComponents.filter { $0 != "/" }
         guard parts.count == 2, parts[0] == "rejoindre" else { return nil }

@@ -69,23 +69,32 @@
         padding: 14px 24px;
         border-radius: 12px;
       }
+      a.secondary {
+        display: inline-block;
+        margin-top: 16px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <main class="card">
       <h1>Rejoindre un foyer sur Vinarium</h1>
       <p>
-        Ouvrez ce lien depuis votre iPhone pour rejoindre automatiquement la cave
-        partagée. Sinon, saisissez ce code dans l'app :
+        Ouvrez l'application pour rejoindre la cave partagée. Si le bouton
+        n'ouvre pas l'app, installez-la puis saisissez ce code :
       </p>
       <div class="code" id="code" hidden></div>
-      <a class="button" id="download" href="https://apps.apple.com/app/vinarium/" hidden
-        >Télécharger Vinarium</a
+      <a class="button" id="open" href="#" hidden>Ouvrir dans l'app</a>
+      <br />
+      <a class="secondary" id="download" href="https://apps.apple.com/app/vinarium/" hidden
+        >Télécharger sur l'App Store</a
       >
     </main>
     <script>
       // App Store id for Vinarium (com.polyforms.vinarium.app). Drives the download
-      // button and the Smart App Banner ("Open in the app"). Leave empty only if the
+      // link and the Smart App Banner ("Open in the app"). Leave empty only if the
       // app is ever unpublished, so the page never ships a link that 404s.
       var APP_STORE_ID = '6789688303'
 
@@ -93,20 +102,29 @@
       var parts = window.location.pathname.split('/').filter(Boolean)
       var code = parts.length > 1 ? decodeURIComponent(parts[1]).toUpperCase() : ''
       var el = document.getElementById('code')
-      var dl = null
-      var banner = null
       if (code && el) {
         el.textContent = code
         el.hidden = false
       }
 
+      // Primary CTA: reopen the installed app via the custom scheme. Universal
+      // Links won't re-trigger from this page (same domain), so the scheme is the
+      // only reliable way back into the app once this fallback page is shown.
+      if (code) {
+        var open = document.getElementById('open')
+        open.href = 'vinarium://rejoindre/' + encodeURIComponent(code)
+        open.hidden = false
+      }
+
       if (APP_STORE_ID) {
-        dl = document.getElementById('download')
+        var dl = document.getElementById('download')
         dl.href = 'https://apps.apple.com/app/vinarium/id' + APP_STORE_ID
         dl.hidden = false
-        banner = document.createElement('meta')
+        // app-argument hands the invitation URL to the app when the user taps
+        // "Open" on the Smart App Banner, so the join sheet gets the code.
+        var banner = document.createElement('meta')
         banner.name = 'apple-itunes-app'
-        banner.content = 'app-id=' + APP_STORE_ID
+        banner.content = 'app-id=' + APP_STORE_ID + ', app-argument=' + window.location.href
         document.head.appendChild(banner)
       }
     </script>

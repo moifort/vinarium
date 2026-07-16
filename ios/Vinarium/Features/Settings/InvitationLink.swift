@@ -8,6 +8,12 @@ enum InvitationLink {
     /// deep-link host check in `AuthRoot`.
     static let host = "vinarium-prod.web.app"
 
+    /// Custom URL scheme the invitation web page uses to reopen the installed app
+    /// (`vinarium://rejoindre/<CODE>`) when the universal link can't re-trigger from
+    /// that page. Declared in `Info.plist` (`CFBundleURLSchemes`) and handled in
+    /// `AuthRoot`.
+    static let scheme = "vinarium"
+
     /// The universal link that opens the app on `/rejoindre/<CODE>` (and falls back
     /// to the web landing page when the app is not installed).
     static func url(code: String) -> URL {
