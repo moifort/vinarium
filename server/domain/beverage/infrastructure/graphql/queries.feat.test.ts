@@ -255,7 +255,8 @@ describe('wines list query', () => {
     // cellar loader reads each wine's own slot, so a household never fans out here.
     // If a loader ever stopped batching, per-wine fallbacks would double the reads.
     expect(fake.queryReads - before.queryReads).toBe(1)
-    expect(fake.docReads - before.docReads).toBe(8)
+    // 8 satellite doc reads + the household-scope membership probe (one doc get).
+    expect(fake.docReads - before.docReads).toBe(9)
   })
 
   test('history is batched: one journal query for the whole page, not one per wine', async () => {
@@ -287,6 +288,55 @@ describe('wines list query', () => {
     for (const item of items) expect(item.history).toHaveLength(1)
     // 1 page query + 1 batched `in` query over the 5 wine ids — never 5 queries.
     expect(fake.queryReads - before.queryReads).toBe(2)
-    expect(fake.docReads - before.docReads).toBe(0)
+    // Plus the household-scope membership probe (one bounded doc get).
+    expect(fake.docReads - before.docReads).toBe(1)
+  })
+
+  test('a household member’s in-cellar wine appears in the list, tagged with its owner', async () => {
+    // The viewer (user-1) shares a household with 'marie'; her wid(2) is placed
+    // in the shared cellar, so it must surface in the viewer's list with her name.
+    fake.seed('household-members', userId, {
+      userId,
+      householdId: 'h1',
+      displayName: 'Me',
+      role: 'owner',
+      joinedAt: new Date('2026-01-01'),
+    })
+    fake.seed('household-members', 'marie', {
+      userId: 'marie',
+      householdId: 'h1',
+      displayName: 'Marie',
+      role: 'member',
+      joinedAt: new Date('2026-01-02'),
+    })
+    seedWine(wid(1)) // the viewer's own wine
+    fake.seed('beverages', wid(2), {
+      id: wid(2),
+      userId: 'marie',
+      name: `Beverage ${wid(2)}`,
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-02'),
+      updatedAt: new Date('2026-01-02'),
+    })
+    fake.seed('cellar', `marie_${wid(2)}`, {
+      userId: 'marie',
+      beverageId: wid(2),
+      row: 0,
+      col: 0,
+      createdAt: new Date('2026-01-15'),
+      updatedAt: new Date('2026-01-15'),
+    })
+
+    const result = await execute(`query { beverages(limit: 10) { items { id isMine ownerName } } }`)
+
+    expect(result.errors).toBeUndefined()
+    const items = (
+      result.data as {
+        beverages: { items: Array<{ id: string; isMine: boolean; ownerName: string | null }> }
+      }
+    ).beverages.items
+    const byId = new Map(items.map((item) => [item.id, item]))
+    expect(byId.get(wid(1))).toEqual({ id: wid(1), isMine: true, ownerName: null })
+    expect(byId.get(wid(2))).toEqual({ id: wid(2), isMine: false, ownerName: 'Marie' })
   })
 })

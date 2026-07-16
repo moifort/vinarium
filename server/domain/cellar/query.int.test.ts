@@ -83,6 +83,20 @@ describe('CellarQuery.bottlesPage (household)', () => {
   })
 })
 
+describe('CellarQuery.householdPlacements', () => {
+  test('merges every member’s placed bottles', async () => {
+    seedHousehold()
+    const placements = await CellarQuery.householdPlacements(user('owner'))
+    expect(placements.map((bottle) => String(bottle.beverageId)).toSorted()).toEqual(['w1', 'w2'])
+  })
+
+  test('a solo user sees only their own bottles', async () => {
+    fake.seed('cellar', 'solo_w1', bottle('solo', 'w1', 0, 0))
+    const placements = await CellarQuery.householdPlacements(user('solo'))
+    expect(placements.map((bottle) => String(bottle.beverageId))).toEqual(['w1'])
+  })
+})
+
 describe('CellarQuery.householdBottleCount', () => {
   test('counts bottles across the whole household', async () => {
     seedHousehold()

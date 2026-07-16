@@ -10,7 +10,9 @@ builder.queryField('searchBeverages', (t) =>
     type: SearchResultsType,
     description:
       'Search the whole collection by name, producer, subtype, region, vintage or person, ' +
-      'ranked by relevance. An empty query with facet filters browses by filters alone; ' +
+      'ranked by relevance. Spans the viewer’s wines plus household members’ wines placed ' +
+      'in the shared cellar; tastings, gifts and recommendations stay the viewer’s own. ' +
+      'An empty query with facet filters browses by filters alone; ' +
       'an empty query with no filter returns nothing.',
     args: {
       query: t.arg.string({ description: 'Free text — case- and accent-insensitive' }),

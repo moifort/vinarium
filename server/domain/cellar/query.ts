@@ -94,6 +94,15 @@ export namespace CellarQuery {
     return bottles.map(bottleView)
   }
 
+  // Every placed bottle in the viewer's cellar scope — the household-wide
+  // counterpart of placements(), degenerating to it (same memoized scan) when
+  // solo. Widens the wine list and search so a shared-cellar bottle is visible
+  // to every member, not only its owner.
+  export const householdPlacements = async (userId: UserId) => {
+    const scope = await HouseholdQuery.cellarScope(userId)
+    return (await repository.findAllByUsers(scope.memberIds)).map(bottleView)
+  }
+
   // Raw bottle records (no grid labels) — the read half of an account export.
   export const allRecords = async (userId: UserId) => repository.findAllByUser(userId)
 

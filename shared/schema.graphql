@@ -670,7 +670,7 @@ type Query {
   ): Beverage
 
   """
-  A page of the current user’s beverage list, filtered and sorted per view
+  A page of the viewer’s beverage list, filtered and sorted per view, plus any household member’s wine currently placed in the shared cellar
   """
   beverages(
     """Cursor: return the page following this beverage id"""
@@ -742,7 +742,7 @@ type Query {
   myHousehold: Household
 
   """
-  Search the whole collection by name, producer, subtype, region, vintage or person, ranked by relevance. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
+  Search the whole collection by name, producer, subtype, region, vintage or person, ranked by relevance. Spans the viewer’s wines plus household members’ wines placed in the shared cellar; tastings, gifts and recommendations stay the viewer’s own. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
   """
   searchBeverages(
     """Combinable facet filters"""

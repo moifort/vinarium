@@ -14,7 +14,9 @@ import { BeveragesType, BeverageType } from './types'
 builder.queryField('beverages', (t) =>
   t.field({
     type: BeveragesType,
-    description: 'A page of the current user’s beverage list, filtered and sorted per view',
+    description:
+      'A page of the viewer’s beverage list, filtered and sorted per view, plus any ' +
+      'household member’s wine currently placed in the shared cellar',
     args: {
       mode: t.arg({
         type: BeverageListModeEnum,

@@ -13,13 +13,16 @@ export namespace SearchQuery {
   // (the per-request cache dedupes these reads with any other resolver), joined
   // per wine, then matched and ranked in memory — same pattern as the filtered
   // wine list views, which Firestore's lack of full-text search imposes.
+  // Wines and cellar placements span the whole household (the cellar is shared),
+  // while tastings, gifts and recommendations stay the viewer's own — a
+  // housemate's notes and journal never surface here.
   export const acrossCollections = async (
     userId: UserId,
     { query, filters, limit }: { query: string; filters: SearchFilters; limit: number },
   ) => {
     const [wines, placements, tastings, gifts, recommendations] = await Promise.all([
-      BeverageQuery.findAll(userId),
-      CellarQuery.placements(userId),
+      BeverageQuery.allVisibleTo(userId),
+      CellarQuery.householdPlacements(userId),
       TastingQuery.all(userId),
       GiftQuery.all(userId),
       RecommendationQuery.all(userId),

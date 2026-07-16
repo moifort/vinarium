@@ -141,7 +141,62 @@ describe('SearchQuery.acrossCollections', () => {
 
   test('reads each collection once (5 scans, no per-wine fallback)', async () => {
     seed()
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     await run('margaux')
-    expect(fake.reads).toBe(5)
+    // Five collection scans: beverages, cellar, tasting, gift, recommendation.
+    expect(fake.queryReads - before.queryReads).toBe(5)
+    // Plus the memoized household-scope probe: one bounded membership doc get,
+    // shared by allVisibleTo and householdPlacements within the request.
+    expect(fake.docReads - before.docReads).toBe(1)
+  })
+})
+
+describe('SearchQuery.acrossCollections — household visibility', () => {
+  const householdMember = (id: string) => ({
+    userId: id,
+    householdId: 'h1',
+    displayName: id,
+    role: id === userId ? 'owner' : 'member',
+    joinedAt: new Date('2026-01-01'),
+  })
+
+  // The viewer shares a household with 'marie'. Her m-in wine is in the shared
+  // cellar; her m-out wine is not; she has a gift record naming a person.
+  const seedHousehold = () => {
+    fake.seed('household-members', userId, householdMember(userId))
+    fake.seed('household-members', 'marie', householdMember('marie'))
+    fake.seed('beverages', 'm-in', {
+      id: 'm-in',
+      userId: 'marie',
+      name: 'Clos Marie',
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-02'),
+      updatedAt: new Date('2026-01-02'),
+    })
+    fake.seed('beverages', 'm-out', {
+      id: 'm-out',
+      userId: 'marie',
+      name: 'Clos Cachet',
+      beverageType: 'wine',
+      createdAt: new Date('2026-01-01'),
+      updatedAt: new Date('2026-01-01'),
+    })
+    fake.seed('cellar', 'marie_m-in', { userId: 'marie', beverageId: 'm-in', row: 0, col: 0 })
+    fake.seed('gift', 'marie_m-in', {
+      userId: 'marie',
+      beverageId: 'm-in',
+      received: { from: 'Sofia Rossi' },
+    })
+  }
+
+  test('finds a housemate’s in-cellar wine but not their out-of-cellar one', async () => {
+    seedHousehold()
+    expect((await run('clos')).hits.map((hit) => String(hit.item.id))).toEqual(['m-in'])
+  })
+
+  test('a housemate’s own gift/journal never produces a person match', async () => {
+    seedHousehold()
+    // 'Sofia' only appears in Marie's private gift record — off-limits to the viewer.
+    expect((await run('sofia')).hits).toEqual([])
   })
 })

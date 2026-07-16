@@ -16,6 +16,7 @@ import { HouseholdQuery } from '~/domain/household/query'
 import { RecommendationQuery } from '~/domain/recommendation/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
+import { memoizedPerRequest } from '~/system/request-cache'
 
 export type BeverageListCriteria = {
   mode: BeverageListMode
@@ -37,6 +38,27 @@ const CURSOR_SAFE_SORTS: readonly BeverageSort[] = ['createdAt', 'updatedAt']
 
 export namespace BeverageQuery {
   export const findAll = async (userId: UserId) => repository.findAllByUser(userId)
+
+  // The wines the viewer may see in their library and search: their own full
+  // library, plus any household member's wine currently placed in the shared
+  // cellar. A housemate's out-of-cellar wines (consumed, wishlist) stay private.
+  // Memoized so the list, search and count paths share one merge per request.
+  export const allVisibleTo = (userId: UserId): Promise<Beverage[]> =>
+    memoizedPerRequest(`beverages:visible:${userId}`, async () => {
+      const scope = await HouseholdQuery.cellarScope(userId)
+      const own = await repository.findAllByUser(userId)
+      if (scope.memberIds.length === 1) return own
+      const housemates = scope.memberIds.filter((id) => id !== userId)
+      const housemateSet = new Set(housemates)
+      const placedByHousemates = (await CellarQuery.householdPlacements(userId))
+        .filter((bottle) => housemateSet.has(bottle.userId))
+        .map((bottle) => bottle.beverageId)
+      const housemateWines = await repository.findManyByBeverageIdsForUsers(
+        housemates,
+        placedByHousemates,
+      )
+      return [...own, ...housemateWines]
+    })
 
   export const byId = async (userId: UserId, id: BeverageId) => {
     const beverage = await repository.findBy(userId, id)
@@ -78,17 +100,29 @@ export namespace BeverageQuery {
       status === 'all' &&
       CURSOR_SAFE_SORTS.includes(criteria.sort)
     ) {
-      const { beverages, hasMore } = await repository.findPage(userId, criteria)
-      return { items: beverages, hasMore, totalCount: beverages.length }
+      const scope = await HouseholdQuery.cellarScope(userId)
+      // Solo viewers keep Firestore-level pagination: a bounded limit+1 read.
+      if (scope.memberIds.length === 1) {
+        const { beverages, hasMore } = await repository.findPage(userId, criteria)
+        return { items: beverages, hasMore, totalCount: beverages.length }
+      }
+      // Household viewers merge their library with housemates' in-cellar wines,
+      // then sort and slice in memory: Firestore can't page across owners on a
+      // shared sort with a stable cursor (its implicit __name__ tiebreak would
+      // drop or repeat rows). The slice keeps the response and the satellite
+      // loaders bounded to the page size.
+      return paginateInMemory(await allVisibleTo(userId), criteria)
     }
 
     // Everything else (satellite views, facet filters, sorts on optional
-    // fields): filter the full collection in memory — facets first, on fields
-    // the beverages carry themselves (color lives in the wine details), then the
+    // fields): filter the visible set in memory — facets first, on fields the
+    // beverages carry themselves (color lives in the wine details), then the
     // satellite-backed status — and serve the subset in full. The client sorts
     // and groups. Every collection touched here is a memoized full scan, so the
-    // request never pays it twice.
-    const beverages = await repository.findAllByUser(userId)
+    // request never pays it twice. Satellite modes (favorites/gifted/recommended)
+    // filter by the VIEWER's own satellites, so a housemate's cellar wine only
+    // surfaces there once the viewer has favorited/received it themselves.
+    const beverages = await allVisibleTo(userId)
     const candidates = await ofMode(userId, beverages, mode)
     const facetted = candidates.filter(
       (beverage) =>
@@ -98,6 +132,26 @@ export namespace BeverageQuery {
     )
     const items = await ofStatus(userId, facetted, status)
     return { items, hasMore: false, totalCount: items.length }
+  }
+
+  // Sort/slice a merged (multi-owner) set the way findPage pages a single owner.
+  // Only CURSOR_SAFE_SORTS (createdAt/updatedAt, present on every document) reach
+  // here; id breaks ties for a stable cursor. A missing `after` (its wine left
+  // the cellar between pages) restarts from the top — parity with findPage.
+  const paginateInMemory = (beverages: Beverage[], criteria: BeverageListCriteria) => {
+    const { sort, order, limit, after } = criteria
+    const time = (beverage: Beverage) =>
+      (sort === 'updatedAt' ? beverage.updatedAt : beverage.createdAt).getTime()
+    const sorted = [...beverages].sort((a, b) => {
+      const delta = time(a) - time(b) || String(a.id).localeCompare(String(b.id))
+      return order === 'desc' ? -delta : delta
+    })
+    const start = after ? sorted.findIndex((beverage) => beverage.id === after) + 1 : 0
+    return {
+      items: sorted.slice(start, start + limit),
+      hasMore: start + limit < sorted.length,
+      totalCount: sorted.length,
+    }
   }
 
   const ofMode = async (userId: UserId, beverages: Beverage[], mode: BeverageListMode) => {
@@ -130,7 +184,7 @@ export namespace BeverageQuery {
   const ofStatus = async (userId: UserId, beverages: Beverage[], status: BeverageStatusFilter) => {
     if (status === 'in-cellar') {
       const placed = new Set(
-        (await CellarQuery.placements(userId)).map((bottle) => bottle.beverageId),
+        (await CellarQuery.householdPlacements(userId)).map((bottle) => bottle.beverageId),
       )
       return beverages.filter((beverage) => placed.has(beverage.id))
     }
