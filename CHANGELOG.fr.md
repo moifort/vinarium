@@ -3,48 +3,48 @@
 ## 1.2 (2026.07.16)
 
 ### Nouveautés
-- Vous pouvez maintenant changer la taille de votre cave quand vous voulez, depuis les Réglages. Ajoutez ou enlevez des rangées et des emplacements — vos bouteilles restent à leur place.
-- Cave partagée : les bouteilles de toutes les personnes de votre foyer apparaissent maintenant ensemble dans votre liste et votre recherche, chacune avec le nom de son propriétaire. Elles s'affichent tout de suite, même juste après avoir rejoint le foyer.
-- Votre prénom s'affiche maintenant sur votre profil.
+- La taille de la cave peut maintenant être modifiée depuis les Réglages, en repartant d'un modèle ou en définissant le nombre de rangées et d'emplacements. Les bouteilles restent à leur place.
+- Les bouteilles de la cave partagée sont maintenant accessibles à la recherche. Celles de tout le foyer apparaissent dans la liste et la recherche, avec le nom de leur propriétaire.
+- Le prénom apparaît sur le profil.
 
 ### Corrections
-- Ouvrir un lien d'invitation ouvre bien l'application à chaque fois.
+- Les liens d'invitation ouvrent maintenant l'application de façon fiable.
 
 ## 1.1 (2026.07.15)
 
 ### Nouveautés
-- Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez votre modèle dans un catalogue de caves à vin du commerce (recherche par marque ou modèle, classées par marque) pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure ; le nombre de zones de température est aussi enregistré.
-- La taille de la cave n'est plus figée : elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
-- Barre d'onglets : elle se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste épinglé et séparé à droite.
-- Écran de connexion : le logo s'anime à l'ouverture — une mosaïque de capsules aux couleurs de l'app apparaît en cascade.
-- Liens d'invitation : ouvrir un lien de partage lance désormais directement l'application sur l'écran pour rejoindre le foyer ; si l'app n'est pas installée, la page propose de la télécharger depuis l'App Store.
-- Partage : chaque code d'invitation affiche un badge « En attente ».
+- Un parcours de configuration au premier lancement demande le prénom, puis les dimensions de la cave (nombre de rangées et d'emplacements). Le modèle peut être choisi dans un catalogue de caves à vin du commerce, avec une recherche par marque ou par modèle, pour un dimensionnement automatique, ou les dimensions saisies à la main. Le nombre de zones de température est aussi enregistré.
+- La taille de la cave n'est plus figée. Elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
+- La barre d'onglets se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste en place à droite.
+- Sur l'écran de connexion, le logo s'anime à l'ouverture, avec une mosaïque de capsules aux couleurs de l'application qui apparaît en cascade.
+- Ouvrir un lien d'invitation lance maintenant directement l'application sur l'écran qui permet de rejoindre le foyer. Si l'application n'est pas installée, la page propose de la télécharger depuis l'App Store.
+- Chaque code d'invitation affiche un badge « En attente ».
 
 ### Corrections
-- Partage : les actions Copier le lien, E-mail et Révoquer se déclenchent désormais indépendamment — un appui n'active plus les trois à la fois.
+- Les actions Copier le lien, E-mail et Révoquer se déclenchent maintenant indépendamment. Un seul appui n'active plus les trois à la fois.
 
 ## 1.0 (2026.07.11)
 
 ### Nouveautés
-- Partage de cave : invitez les personnes de votre foyer avec un code, et partagez une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal ; seules les bouteilles en cave sont mises en commun.
-- Cave partagée : toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille ; la sortie est enregistrée dans le journal du propriétaire du vin, et votre note de dégustation reste la vôtre.
-- Fiche d'un vin d'un autre membre : le nom du propriétaire est affiché et les actions réservées (modifier, supprimer, conseiller) sont masquées.
-- Recherche globale : une loupe dans la barre d'outils ouvre une recherche plein écran. Tapez un nom de vin, un producteur, un millésime ou une personne — les résultats sont classés par pertinence et regroupés clairement (en cave, déjà bus, cadeaux, conseillés…). Filtres combinables (couleur, type, favori, en cave, cadeaux) proposés au-dessus des résultats.
-- Les listes signalent d'un coup d'œil les bouteilles en cave (icône armoire).
-- Vues Offerts et Conseillés : nouveau tri « Par personne » qui regroupe la liste par donateur ou par conseiller.
-- Scan : la popup d'ajout ne propose plus que « Ranger en cave » et « Juste enregistrer » — favori et conseil se règlent directement dans la fiche.
-- Sous-types structurés pour toutes les boissons (rhum, porto, bière blonde, saké pétillant…), proposés dans les formulaires et remplis par l'analyse IA.
-- La couleur d'un vin redevient sa robe (rouge, blanc ou rosé) : Pétillant et Moelleux deviennent des sous-types du vin.
-- Tableau de bord : le widget « En cave » affiche l'occupation de la cave — bouteilles placées sur capacité totale (ex. 41/48), le total en plus petit.
-- Écran Réglages accessible depuis le tableau de bord (icône en haut à gauche).
-- Profil utilisateur avec déconnexion.
-- Version de l'application et historique du changelog.
-- Informations de la cave (dimensions et nombre de bouteilles placées).
-- Export et import des données au format JSON.
+- Partage de la cave : les personnes du foyer sont invitées avec un code pour partager une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal, et seules les bouteilles en cave sont mises en commun.
+- Dans une cave partagée, toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille. La sortie est enregistrée dans le journal du propriétaire du vin, et chaque note de dégustation reste celle de son auteur.
+- Sur la fiche d'un vin appartenant à un autre membre, le nom du propriétaire est affiché et les actions réservées comme modifier, supprimer ou conseiller sont masquées.
+- Une loupe dans la barre d'outils ouvre une recherche plein écran. Un nom de vin, un producteur, un millésime ou une personne peut y être saisi, et les résultats sont classés par pertinence et regroupés clairement, par exemple en cave, déjà bus, cadeaux ou conseillés. Des filtres combinables (couleur, type, favori, en cave, cadeaux) sont proposés au-dessus des résultats.
+- Les listes signalent d'un coup d'œil les bouteilles en cave grâce à une icône d'armoire.
+- Les vues Offerts et Conseillés proposent un nouveau tri « Par personne » qui regroupe la liste par donateur ou par conseiller.
+- Au moment du scan, la fenêtre d'ajout ne propose plus que « Ranger en cave » et « Juste enregistrer ». Le favori et le conseil se règlent maintenant directement dans la fiche.
+- Toutes les boissons ont maintenant des sous-types structurés (rhum, porto, bière blonde, saké pétillant, etc.), proposés dans les formulaires et remplis par l'analyse IA.
+- La couleur d'un vin redevient sa robe (rouge, blanc ou rosé). Pétillant et Moelleux deviennent des sous-types du vin.
+- Sur le tableau de bord, le widget « En cave » affiche l'occupation de la cave, avec le nombre de bouteilles placées sur la capacité totale (par exemple 41/48) et le total en plus petit.
+- L'écran Réglages est accessible depuis le tableau de bord grâce à une icône en haut à gauche.
+- Un profil utilisateur permet de se déconnecter.
+- La version de l'application et l'historique du changelog sont consultables.
+- Les informations de la cave sont affichées (dimensions et nombre de bouteilles placées).
+- Les données peuvent être exportées et importées au format JSON.
 
 ### Corrections
 - La liste « Mes Vins » s'affiche de nouveau au lieu d'un message d'erreur.
 
 ### Performance
-- Listes, recherche et tableau de bord plus rapides : le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un filtre.
-- Ouverture de la fiche détail nettement plus rapide : le serveur lit désormais uniquement les informations du vin consulté au lieu de parcourir toute la cave.
+- Les listes, la recherche et le tableau de bord sont plus rapides. Le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un simple filtre.
+- L'ouverture de la fiche détaillée est nettement plus rapide. Le serveur lit maintenant uniquement les informations du vin consulté au lieu de parcourir toute la cave.
