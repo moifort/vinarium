@@ -7,7 +7,12 @@ struct SignOutButton: View {
         Button(role: .destructive, action: action) {
             HStack {
                 Spacer()
-                Label("Se déconnecter", systemImage: "rectangle.portrait.and.arrow.right")
+                Label {
+                    Text("Se déconnecter")
+                } icon: {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                        .foregroundStyle(.red)
+                }
                 Spacer()
             }
         }
