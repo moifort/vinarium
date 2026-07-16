@@ -31,11 +31,6 @@ struct CellarReconfigureView: View {
         NavigationStack {
             content
                 .animation(.default, value: viewModel.step)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) { dismiss() }
-                    }
-                }
         }
         .alert(
             "Une erreur est survenue",
