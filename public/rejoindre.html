@@ -86,7 +86,7 @@
         n'ouvre pas l'app, installez-la puis saisissez ce code :
       </p>
       <div class="code" id="code" hidden></div>
-      <a class="button" id="open" href="#" hidden>Ouvrir dans l'app</a>
+      <a class="button" id="open" href="vinarium://rejoindre/" hidden>Ouvrir dans l'app</a>
       <br />
       <a class="secondary" id="download" href="https://apps.apple.com/app/vinarium/" hidden
         >Télécharger sur l'App Store</a
@@ -110,21 +110,21 @@
       // Primary CTA: reopen the installed app via the custom scheme. Universal
       // Links won't re-trigger from this page (same domain), so the scheme is the
       // only reliable way back into the app once this fallback page is shown.
-      if (code) {
-        var open = document.getElementById('open')
-        open.href = 'vinarium://rejoindre/' + encodeURIComponent(code)
-        open.hidden = false
+      var openBtn = document.getElementById('open')
+      if (code && openBtn) {
+        openBtn.href = `vinarium://rejoindre/${encodeURIComponent(code)}`
+        openBtn.hidden = false
       }
 
-      if (APP_STORE_ID) {
-        var dl = document.getElementById('download')
-        dl.href = 'https://apps.apple.com/app/vinarium/id' + APP_STORE_ID
+      var dl = document.getElementById('download')
+      var banner = document.createElement('meta')
+      if (APP_STORE_ID && dl) {
+        dl.href = `https://apps.apple.com/app/vinarium/id${APP_STORE_ID}`
         dl.hidden = false
         // app-argument hands the invitation URL to the app when the user taps
         // "Open" on the Smart App Banner, so the join sheet gets the code.
-        var banner = document.createElement('meta')
         banner.name = 'apple-itunes-app'
-        banner.content = 'app-id=' + APP_STORE_ID + ', app-argument=' + window.location.href
+        banner.content = `app-id=${APP_STORE_ID}, app-argument=${window.location.href}`
         document.head.appendChild(banner)
       }
     </script>
