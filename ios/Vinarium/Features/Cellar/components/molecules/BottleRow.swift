@@ -35,13 +35,16 @@ struct BottleRow<Title: View, Subtitle: View>: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 if let ownerName {
-                    Label(ownerName, systemImage: "person.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(.quaternary, in: Capsule())
-                        .padding(.top, 2)
+                    HStack(spacing: 4) {
+                        Image(systemName: "person.fill")
+                        Text(ownerName)
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(.quaternary, in: Capsule())
+                    .padding(.top, 2)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

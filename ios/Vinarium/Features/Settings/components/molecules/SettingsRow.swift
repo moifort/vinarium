@@ -6,6 +6,9 @@ struct SettingsRow: View {
     let subtitle: String?
     let tint: Color
 
+    /// Scales with Dynamic Type so the badge always wraps the glyph, which tracks `.body`.
+    @ScaledMetric(relativeTo: .body) private var iconBadgeSize: CGFloat = 28
+
     init(icon: String, title: String, subtitle: String? = nil, tint: Color = .accentColor) {
         self.icon = icon
         self.title = title
@@ -27,8 +30,11 @@ struct SettingsRow: View {
             Image(systemName: icon)
                 .font(.body)
                 .foregroundStyle(.white)
-                .frame(width: 28, height: 28)
-                .background(tint, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .frame(width: iconBadgeSize, height: iconBadgeSize)
+                .background(
+                    tint,
+                    in: RoundedRectangle(cornerRadius: iconBadgeSize * 6 / 28, style: .continuous)
+                )
         }
     }
 }
