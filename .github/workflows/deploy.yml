@@ -27,31 +27,20 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_DEPLOY_SA }}
 
-      - name: Stamp CHANGELOG.md with deploy date
+      - name: Stamp the served changelog with the deploy date
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import datetime, pathlib
-          p = pathlib.Path("CHANGELOG.md")
+          # CHANGELOG.fr.md is the French copy served to the app (CHANGELOG.md stays the English source).
+          p = pathlib.Path("CHANGELOG.fr.md")
           text = p.read_text()
           date = datetime.datetime.utcnow().strftime("%Y.%m.%d")
-          if f"## {date}" in text:
-              raise SystemExit(0)
+          # Only stamp a pending "## Unreleased" section; when there is none, leave the file
+          # untouched so a plain deploy never injects a spurious dated block.
           if "## Unreleased" in text:
               text = text.replace("## Unreleased", f"## {date}", 1)
-          else:
-              lines = text.splitlines()
-              out = []
-              inserted = False
-              for line in lines:
-                  out.append(line)
-                  if not inserted and line.startswith("# "):
-                      out.append("")
-                      out.append(f"## {date}")
-                      out.append("- Mise à jour automatique.")
-                      inserted = True
-              text = "\n".join(out) + "\n"
-          p.write_text(text)
+              p.write_text(text)
           PY
 
       - name: Build the Nitro bundle (firebase preset)

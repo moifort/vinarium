@@ -2,7 +2,9 @@
 
 ## Language
 
-Everything versioned and technical is written in **English**: commit messages, code, code comments, and documentation (README, this file). The **only** French in the repo is user-facing copy — `CHANGELOG.md` entries and the iOS app's on-screen text. Never mix languages in a commit message or a comment.
+Everything versioned and technical is written in **English**: commit messages, code, code comments, and documentation (README, this file). This now includes `CHANGELOG.md`, which is the **English source of truth**. The **only** French in the repo is user-facing copy — `CHANGELOG.fr.md` (the served French translation) and the iOS app's on-screen text. Never mix languages in a commit message or a comment.
+
+The changelog lives in two files, each organized newest-version-first with three sub-sections (only those that have content): `CHANGELOG.md` uses `### New` / `### Fixes` / `### Performance`, and `CHANGELOG.fr.md` mirrors it with `### Nouveautés` / `### Corrections` / `### Performance`. Only log **consequential** changes — cosmetic tweaks (renaming a label, changing a subtitle, dropping a counter) have no impact and are excluded. Note: the server parser only reads `## ` headings and bullets, so `###` sub-headings are ignored and the app renders a flat list — the sections are organizational for the repo.
 
 ## Build & Verification Commands
 
@@ -32,7 +34,7 @@ Before pushing, update the user-facing surfaces, then push:
 
 1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
 2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
-3. **Changelog** (`CHANGELOG.md`): add user-facing entries (in French) under `## Unreleased`, then run `bun run generate:assets` to regenerate `server/system/changelog-content.ts` (the iOS-facing asset served via GraphQL — never edit it by hand).
+3. **Changelog** (`CHANGELOG.md` + `CHANGELOG.fr.md`): add the English entries under `## Unreleased` in `CHANGELOG.md` (source of truth), then add the French translation under `## Unreleased` in `CHANGELOG.fr.md` (the served copy). Use the `### New`/`### Fixes`/`### Performance` (EN) and `### Nouveautés`/`### Corrections`/`### Performance` (FR) sub-sections, and only log consequential changes (exclude renames, subtitle changes, and other cosmetic tweaks). Then run `bun run generate:assets` to regenerate `server/system/changelog-content.ts` from `CHANGELOG.fr.md` (the iOS-facing asset served via GraphQL — never edit it by hand).
 4. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
 5. Push.
 

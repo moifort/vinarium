@@ -1,32 +1,40 @@
 # Changelog
 
-## Unreleased
-- Partage : chaque code d'invitation affiche un badge « En attente », et les actions Copier le lien, E-mail et Révoquer se déclenchent désormais indépendamment — un appui n'active plus les trois à la fois. Le bouton « Générer un nouveau code » est séparé dans son propre bloc.
-- Écran de connexion : le logo s'anime à l'ouverture — une mosaïque de capsules aux couleurs de l'app apparaît en cascade.
-- Tableau de bord : les en-têtes de sections (Prêt à déguster, Mes favoris, Journal) n'affichent plus de compteur, pour un rendu plus épuré.
-- Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez votre modèle dans un catalogue de caves à vin du commerce (recherche par marque ou modèle, classées par marque) pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure ; le nombre de zones de température est aussi enregistré.
-- Le résumé de configuration affiche des icônes et le nombre total de bouteilles que peut contenir votre cave.
-- La taille de la cave n'est plus figée : elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
-- Barre d'onglets : elle se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste épinglé et séparé à droite.
-- Partage de cave : invitez les personnes de votre foyer avec un code, et partagez une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal ; seules les bouteilles en cave sont mises en commun.
-- Cave partagée : toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille ; la sortie est enregistrée dans le journal du propriétaire du vin, et votre note de dégustation reste la vôtre.
-- Fiche d'un vin d'un autre membre : le nom du propriétaire est affiché et les actions réservées (modifier, supprimer, conseiller) sont masquées.
-- Réglages : l'entrée « Partage » (auparavant « Bientôt disponible ») permet désormais de créer ou rejoindre un foyer, gérer les membres et révoquer les codes d'invitation.
-- Liens d'invitation : ouvrir un lien de partage lance désormais directement l'application sur l'écran pour rejoindre le foyer ; si l'app n'est pas installée, la page propose de la télécharger depuis l'App Store.
-- Tableau de bord : le widget « En cave » affiche l'occupation de la cave — bouteilles placées sur capacité totale (ex. 41/48), le total en plus petit.
-- Correction : la liste « Mes Vins » s'affiche de nouveau au lieu d'un message d'erreur.
-- Listes, recherche et tableau de bord plus rapides : le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un filtre.
-- Ouverture de la fiche détail nettement plus rapide : le serveur lit désormais uniquement les informations du vin consulté au lieu de parcourir toute la cave.
-- Fiche détail : le sous-titre ne répète plus la maison et le millésime, déjà affichés dans les informations juste en dessous.
-- Fiche détail : le sous-titre affiche uniquement le sous-type de la boisson (Porto, Blonde…) ; à défaut, la couleur pour un vin et le type pour les autres boissons.
-- Recherche globale : une loupe dans la barre d'outils ouvre une recherche plein écran. Tapez un nom de vin, un producteur, un millésime ou une personne — les résultats sont classés par pertinence et regroupés clairement (en cave, déjà bus, cadeaux, conseillés…). Filtres combinables (couleur, type, favori, en cave, cadeaux) proposés au-dessus des résultats.
-- Les listes signalent d'un coup d'œil les bouteilles en cave (icône armoire).
-- Vues Offerts et Conseillés : nouveau tri « Par personne » qui regroupe la liste par donateur ou par conseiller.
-- Scan : la popup d'ajout ne propose plus que « Ranger en cave » et « Juste enregistrer » — favori et conseil se règlent directement dans la fiche.
-- Sous-types structurés pour toutes les boissons (rhum, porto, bière blonde, saké pétillant…), proposés dans les formulaires et remplis par l'analyse IA.
-- La couleur d'un vin redevient sa robe (rouge, blanc ou rosé) : Pétillant et Moelleux deviennent des sous-types du vin.
-- Écran Réglages accessible depuis le tableau de bord (icône en haut à gauche).
-- Profil utilisateur avec déconnexion.
-- Version de l'application et historique du changelog.
-- Informations de la cave (dimensions et nombre de bouteilles placées).
-- Export et import des données au format JSON.
+## 2026.07.15
+
+### New
+- First-launch onboarding: a setup flow greets you — enter your first name, then size your cellar (A→Z rows and slots per row). Pick your model from a catalog of retail wine coolers (search by brand or model, grouped by brand) for automatic sizing, or enter custom dimensions; the number of temperature zones is saved too.
+- Cellar size is no longer fixed: it matches the dimensions chosen during setup, and both the placement grid and the displayed capacity adapt to them.
+- Tab bar: it collapses automatically on scroll to enlarge the content area, and the Scan button stays pinned and separated on the right.
+- Login screen: the logo animates on open — a mosaic of caps in the app's colors cascades in.
+- Invitation links: opening a share link now launches the app straight onto the screen to join the household; if the app isn't installed, the page offers to download it from the App Store.
+- Sharing: each invitation code shows a "Pending" badge.
+
+### Fixes
+- Sharing: the Copy link, Email and Revoke actions now trigger independently — one tap no longer fires all three at once.
+
+## 2026.07.11
+
+### New
+- Cellar sharing: invite the people in your household with a code and share a single common cellar. Everyone keeps their own library, tasting notes and journal; only the bottles in the cellar are pooled.
+- Shared cellar: every household bottle appears in the same grid, with the owner's name on other people's bottles. Any member can place, move, consume or gift any bottle; the removal is recorded in the wine owner's journal, and your tasting note stays yours.
+- Another member's wine detail: the owner's name is shown and the reserved actions (edit, delete, recommend) are hidden.
+- Global search: a magnifier in the toolbar opens a full-screen search. Type a wine name, producer, vintage or person — results are ranked by relevance and clearly grouped (in cellar, already drunk, gifts, recommended…). Combinable filters (color, type, favorite, in cellar, gifts) are offered above the results.
+- Lists flag at a glance the bottles that are in the cellar (cabinet icon).
+- Gifted and Recommended views: a new "By person" sort that groups the list by giver or recommender.
+- Scan: the add popup now offers only "Store in cellar" and "Just record" — favorite and recommendation are set directly in the wine detail.
+- Structured subtypes for every beverage (rum, port, blonde beer, sparkling sake…), offered in the forms and filled in by the AI analysis.
+- A wine's color is once again its robe (red, white or rosé): Sparkling and Sweet become wine subtypes.
+- Dashboard: the "In cellar" widget shows cellar occupancy — placed bottles over total capacity (e.g. 41/48), the total in smaller type.
+- Settings screen reachable from the dashboard (top-left icon).
+- User profile with sign-out.
+- App version and changelog history.
+- Cellar information (dimensions and number of placed bottles).
+- JSON data export and import.
+
+### Fixes
+- The "My Wines" list shows again instead of an error message.
+
+### Performance
+- Faster lists, search and dashboard: the server batches and shares its reads, never loading the same wines several times nor scanning the whole cellar for a filter.
+- Much faster detail view: the server now reads only the consulted wine's information instead of scanning the whole cellar.
