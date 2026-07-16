@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.07.15
+## 1.1 (2026.07.15)
 
 ### Nouveautés
 - Premier lancement : un parcours de configuration vous accueille — indiquez votre prénom, puis dimensionnez votre cave (nombre de rangées A→Z et d'emplacements par rangée). Choisissez votre modèle dans un catalogue de caves à vin du commerce (recherche par marque ou modèle, classées par marque) pour un dimensionnement automatique, ou saisissez vos dimensions sur mesure ; le nombre de zones de température est aussi enregistré.
@@ -13,7 +13,7 @@
 ### Corrections
 - Partage : les actions Copier le lien, E-mail et Révoquer se déclenchent désormais indépendamment — un appui n'active plus les trois à la fois.
 
-## 2026.07.11
+## 1.0 (2026.07.11)
 
 ### Nouveautés
 - Partage de cave : invitez les personnes de votre foyer avec un code, et partagez une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal ; seules les bouteilles en cave sont mises en commun.

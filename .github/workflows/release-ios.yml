@@ -205,13 +205,14 @@ jobs:
             gh release create "$GITHUB_REF_NAME" --title "iOS $MARKETING" --notes-file "$NOTES"
           fi
 
-      - name: Build the "What's New" notes from CHANGELOG.md
+      - name: Build the "What's New" notes from CHANGELOG.fr.md
         run: |
           set -euo pipefail
           mkdir -p infra/fastlane/metadata/fr-FR
+          # French App Store listing → read the served French changelog (CHANGELOG.md is English).
           # Bullets under the first "## " section become the release notes. App Store caps
           # "What's New" at 4000 chars, so keep whole bullets until ~3900 (drop the rest).
-          awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.md \
+          awk '/^## /{n++; if (n==2) exit} n==1 && /^- /{print}' CHANGELOG.fr.md \
             | awk 'BEGIN{max=3900; total=0} {len=length($0)+1; if (total+len>max) exit; total+=len; print}' \
             > infra/fastlane/metadata/fr-FR/release_notes.txt
           echo "---- What's New (fr-FR), $(wc -c < infra/fastlane/metadata/fr-FR/release_notes.txt) chars ----"

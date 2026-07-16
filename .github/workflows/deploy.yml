@@ -27,21 +27,8 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
           service_account: ${{ secrets.GCP_DEPLOY_SA }}
 
-      - name: Stamp the served changelog with the deploy date
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import datetime, pathlib
-          # CHANGELOG.fr.md is the French copy served to the app (CHANGELOG.md stays the English source).
-          p = pathlib.Path("CHANGELOG.fr.md")
-          text = p.read_text()
-          date = datetime.datetime.utcnow().strftime("%Y.%m.%d")
-          # Only stamp a pending "## Unreleased" section; when there is none, leave the file
-          # untouched so a plain deploy never injects a spurious dated block.
-          if "## Unreleased" in text:
-              text = text.replace("## Unreleased", f"## {date}", 1)
-              p.write_text(text)
-          PY
+      # No changelog date-stamping: entries are versioned by hand at each iOS release
+      # with a "## <version> (YYYY.MM.DD)" heading in CHANGELOG.md / CHANGELOG.fr.md.
 
       - name: Build the Nitro bundle (firebase preset)
         run: |

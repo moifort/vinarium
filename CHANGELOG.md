@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.07.15
+## 1.1 (2026.07.15)
 
 ### New
 - First-launch onboarding: a setup flow greets you — enter your first name, then size your cellar (A→Z rows and slots per row). Pick your model from a catalog of retail wine coolers (search by brand or model, grouped by brand) for automatic sizing, or enter custom dimensions; the number of temperature zones is saved too.
@@ -13,7 +13,7 @@
 ### Fixes
 - Sharing: the Copy link, Email and Revoke actions now trigger independently — one tap no longer fires all three at once.
 
-## 2026.07.11
+## 1.0 (2026.07.11)
 
 ### New
 - Cellar sharing: invite the people in your household with a code and share a single common cellar. Everyone keeps their own library, tasting notes and journal; only the bottles in the cellar are pooled.
