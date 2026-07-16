@@ -128,4 +128,10 @@ When the user asks to look at a Sentry error (usually with an issue URL or ID), 
 
 - Device: iPhone 17, OS 26.2
 
+## iOS Physical Device Install
+
+- After finishing a task (especially one touching iOS), **offer** to install it on the physical iPhone "TiPhone junior" (UDID `00008130-000A2068029A001C`, automatic dev signing, team `46C337T7YN`). Never install automatically — ask first, run only after a yes.
+- On a yes, run `scripts/install-device.sh` to build → install → launch.
+- The device must be connected, unlocked, and trusted. Relay the raw `xcodebuild`/`devicectl` output — don't claim success without it.
+
 
