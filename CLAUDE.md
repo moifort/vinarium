@@ -37,7 +37,8 @@ Before pushing, update the user-facing surfaces, then push:
 1. **README** (`README.md`): update the Features list / Tech Stack if the pushed work changed them.
 2. **README previews** (`screenshots/*.png`): regenerate the affected screenshots if the touched UI changed visually.
 3. **iOS GraphQL API** (if the GraphQL schema changed): run `bun run generate:graphql`, then `cd ios && apollo-ios-cli generate`, and commit the regenerated `shared/schema.graphql` and `ios/Vinarium/Generated/GraphQL/` so the app's typed operations stay in sync with the deployed schema.
-4. Push.
+4. **Linter**: run `bun run lint:fix` (`biome check --write`) and commit what it fixes. CI is not a linter — a lint error must never be discovered from a red pipeline. Biome scans the whole repo, `ios/` included; when it flags a **generated** artifact, exclude it in `biome.json` rather than let the linter reformat it.
+5. Push.
 
 **Not at push time — the changelog.** Do **not** touch `CHANGELOG.md` / `CHANGELOG.fr.md` when pushing. The changelog is written only at the moment of an iOS App Store release, as part of the release flow (see [App Store Distribution](#app-store-distribution)) — a normal `main` push carries no changelog change.
 
