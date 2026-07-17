@@ -1,0 +1,57 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  # The app never compiled outside a release until now: release-ios.yml only fires on
+  # an `ios-v*` tag, so a broken build (or a schema change the generated Apollo code
+  # no longer matches) surfaced while shipping to the App Store. This builds the same
+  # way, on the same runner, minus signing and uploading.
+  ios:
+    name: 📱 iOS build
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select the latest final Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Materialize gitignored build files
+        run: |
+          set -euo pipefail
+          printf '%s' "${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}" \
+            | openssl base64 -d -A > ios/Vinarium/GoogleService-Info.plist
+          cp ios/Vinarium/Shared/Secrets.swift.example ios/Vinarium/Shared/Secrets.swift
+
+      - name: Generate Apollo GraphQL code (gitignored, regenerated per build)
+        run: |
+          set -euo pipefail
+          # Resolve SPM so the apollo-ios checkout (and its bundled CLI) exists.
+          xcodebuild -resolvePackageDependencies \
+            -project ios/Vinarium.xcodeproj -scheme Vinarium
+          # Apollo 2.x ships the CLI as a tarball inside the checkout — extract it.
+          CLI_DIR=$(find "$HOME/Library/Developer/Xcode/DerivedData" -type d \
+            -path "*/SourcePackages/checkouts/apollo-ios/CLI" | head -1)
+          tar -xzf "$CLI_DIR/apollo-ios-cli.tar.gz" -C "$CLI_DIR"
+          chmod +x "$CLI_DIR/apollo-ios-cli"
+          (cd ios && "$CLI_DIR/apollo-ios-cli" generate)
+
+      - name: Build the app
+        run: |
+          set -euo pipefail
+          # A generic simulator destination: the check is that the app compiles, so it
+          # needs no booted device and no signing identity (the release job owns those).
+          xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
