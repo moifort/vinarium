@@ -515,6 +515,7 @@ private let mockImageData: Data = {
 
 #Preview("Vin") {
     let mockScanResult = ScanResult(
+        recognized: true,
         name: "Château Margaux",
         beverageType: .wine,
         domain: "Château Margaux",
@@ -543,6 +544,7 @@ private let mockImageData: Data = {
 
 #Preview("Bière") {
     let mockScanResult = ScanResult(
+        recognized: true,
         name: "La Chouffe",
         beverageType: .beer,
         domain: "Brasserie d'Achouffe",

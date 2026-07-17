@@ -101,6 +101,7 @@ enum WineAPI {
         )
         let s = data.scanBeverage
         return ScanResult(
+            recognized: s.recognized,
             name: s.name,
             beverageType: BeverageType(graphql: s.beverageType),
             domain: s.domain,

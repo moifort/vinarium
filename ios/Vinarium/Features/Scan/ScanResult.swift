@@ -1,6 +1,9 @@
 import Foundation
 
 struct ScanResult: Decodable, Sendable {
+    /// Faux quand l'image n'était pas une étiquette identifiable : déclenche
+    /// l'écran « aucun résultat » plutôt qu'une fiche vide à remplir.
+    let recognized: Bool
     let name: String
     let beverageType: BeverageType
     let domain: String?

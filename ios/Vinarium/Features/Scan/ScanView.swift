@@ -105,6 +105,10 @@ struct ScanView: View {
                 ScanAnalyzingPage(imageData: imageData)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
+            case .noResult(let imageData):
+                ScanNoResultPage(imageData: imageData) { viewModel.reset() }
+                    .transition(.opacity)
+
             case .review(let result, let imageData):
                 NavigationStack {
                     ScanReviewPage(
