@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3 (2026.07.18)
+
+### Nouveautés
+- Pendant un scan, l'étiquette photographiée reste à l'écran avec une animation le temps de l'analyse, au lieu d'un écran de chargement vide.
+- Quand un scan ne reconnaît pas d'étiquette, un écran clair l'indique et propose de réessayer, au lieu d'ouvrir une fiche vide.
+- La cave partagée réunit maintenant sa valeur totale, ses alertes de bouteilles prêtes à boire et son journal pour tout le foyer. Chaque mouvement du journal indique le membre qui en est à l'origine.
+
 ## 1.2 (2026.07.16)
 
 ### Nouveautés

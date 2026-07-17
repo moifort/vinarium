@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3 (2026.07.18)
+
+### New
+- During a scan, the photographed label stays on screen with an animated indicator while the analysis runs, instead of a blank loading screen.
+- When a scan does not recognize a label, a clear screen now says so and offers to try again, instead of opening an empty form.
+- The shared cellar now pools its total value, its ready-to-drink alerts and its journal across the household. Each journal movement shows the member behind it.
+
 ## 1.2 (2026.07.16)
 
 ### New
