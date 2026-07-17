@@ -86,7 +86,7 @@ let glyphs: [Glyph] = [
     name: "tab.scan.fill", halfWidth: 197,
     elements: viewfinderCorners().map { .stroked($0) }
       + [.filled(bottlePath(sx: 0.66, sy: 0.66), evenOdd: false)],
-    extraScale: 1.60),
+    extraScale: 1.44),
 ]
 
 // MARK: - SVG emission
