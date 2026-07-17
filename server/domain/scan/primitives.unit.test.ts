@@ -108,6 +108,17 @@ describe('parseScanResponse', () => {
       expect(result.color).toBeUndefined()
     })
 
+    test('defaults recognized to true when absent — legacy cache entries predate the field', () => {
+      const result = parseScanResponse(validGeminiResponse)
+      expect(result.recognized).toBe(true)
+    })
+
+    test('preserves recognized=false for an unidentifiable image', () => {
+      const result = parseScanResponse(JSON.stringify({ recognized: false, name: '' }))
+      expect(result.recognized).toBe(false)
+      expect(result.name).toBe('')
+    })
+
     test('accepts explicit nulls — the Gemini schema marks absent fields as null', () => {
       // Reproduces the production payload that crashed the scan: the prompt
       // instructs Gemini to set unknown fields to null, not to omit them.

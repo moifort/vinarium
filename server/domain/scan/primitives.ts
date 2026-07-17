@@ -30,6 +30,9 @@ const lenientSubtype = z
 // free-text style) and normalizes it to the current model in the transform.
 export const ScanResultSchema = z
   .object({
+    // Legacy cache entries predate this field; absent means the scan succeeded,
+    // so they default to recognized.
+    recognized: z.boolean().default(true),
     name: z.string(),
     // Absent on results cached before multi-beverage support: those are all wines.
     beverageType: z.enum(['wine', 'spirit', 'beer', 'sake', 'cider', 'other']).default('wine'),

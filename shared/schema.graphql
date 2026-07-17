@@ -812,6 +812,9 @@ type ScanResult {
   estimatedPrice: Float
   grapeVarieties: [String!]
   name: String!
+
+  """False when the image was not a recognizable beverage label."""
+  recognized: Boolean!
   region: String
   subtype: BeverageSubtype
   vintage: Int

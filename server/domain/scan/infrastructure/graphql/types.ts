@@ -9,6 +9,9 @@ import type { ScanResult } from '../../types'
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({
   description: 'Structured beverage info extracted from a label image (Gemini).',
   fields: (t) => ({
+    recognized: t.exposeBoolean('recognized', {
+      description: 'False when the image was not a recognizable beverage label.',
+    }),
     name: t.exposeString('name'),
     beverageType: t.expose('beverageType', { type: BeverageTypeEnum }),
     color: t.expose('color', { type: WineColorEnum, nullable: true }),
