@@ -105,10 +105,6 @@ struct ScanView: View {
                 ScanAnalyzingPage(imageData: imageData)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
-            case .noResult(let imageData):
-                ScanNoResultPage(imageData: imageData) { viewModel.reset() }
-                    .transition(.opacity)
-
             case .review(let result, let imageData):
                 NavigationStack {
                     ScanReviewPage(
@@ -178,6 +174,10 @@ struct ScanView: View {
             }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.step)
+        .sheet(isPresented: $viewModel.noResultShown) {
+            ScanNoResultPage()
+                .presentationDetents([.medium])
+        }
         .onChange(of: selectedPhoto) {
             guard let item = selectedPhoto else { return }
             selectedPhoto = nil

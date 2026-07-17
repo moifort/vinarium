@@ -1,51 +1,54 @@
 import SwiftUI
 
-/// Écran affiché quand l'IA n'a rien reconnu sur la photo. Garde la photo prise
-/// en fond (floutée et assombrie, comme l'écran d'analyse) pour la continuité,
-/// et propose de réessayer. Pas de saisie manuelle depuis cet écran.
+/// Sheet présentée quand l'IA n'a rien reconnu sur la photo. La caméra reste
+/// visible derrière ; fermer ou réessayer ramène directement dessus.
 struct ScanNoResultPage: View {
-    /// Photo qui a échoué à la reconnaissance ; `nil` retombe sur un fond noir.
-    let imageData: Data?
-    let onRetry: () -> Void
-
-    private var image: UIImage? {
-        imageData.flatMap(UIImage.init(data:))
-    }
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ZStack {
-            Color.black
+        VStack(spacing: 24) {
+            Image(systemName: "text.magnifyingglass")
+                .font(.system(size: 34, weight: .medium))
+                .foregroundStyle(.secondary)
+                .frame(width: 88, height: 88)
+                .background(Color(.secondarySystemBackground), in: .circle)
 
-            if let image {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFill()
-                    .blur(radius: 30)
-                    .overlay(Color.black.opacity(0.55))
-            }
+            Text("Aucun résultat")
+                .font(.title2.weight(.semibold))
 
-            ContentUnavailableView {
-                Label("Aucun résultat n'a été trouvé", systemImage: "wineglass")
-            } actions: {
-                Button("Réessayer", action: onRetry)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
+            Button {
+                dismiss()
+            } label: {
+                Text("Réessayer")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
             }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.large)
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
         }
-        .ignoresSafeArea()
-        // The backdrop is always dark, so resolve semantic colors light
-        // regardless of the device appearance.
-        .environment(\.colorScheme, .dark)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .topTrailing) {
+            Button {
+                dismiss()
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 30, height: 30)
+                    .background(Color(.secondarySystemBackground), in: .circle)
+            }
+            .padding()
+        }
     }
 }
 
-#Preview("Avec photo") {
-    ScanNoResultPage(
-        imageData: UIImage(named: "etiquette")?.jpegData(compressionQuality: 0.8),
-        onRetry: {}
-    )
-}
-
-#Preview("Sans photo") {
-    ScanNoResultPage(imageData: nil, onRetry: {})
+#Preview {
+    Color.black
+        .ignoresSafeArea()
+        .sheet(isPresented: .constant(true)) {
+            ScanNoResultPage()
+                .presentationDetents([.medium])
+        }
 }

@@ -7,9 +7,6 @@ enum ScanStep {
     /// l'écran d'attente la garde affichée en fond : le picker photo bascule ici
     /// avec `nil` le temps de charger/redimensionner, puis la photo est fournie.
     case scanning(Data?)
-    /// L'IA n'a rien reconnu sur la photo. Porte l'image pour réafficher le
-    /// même fond flouté que l'écran d'analyse sous le message « aucun résultat ».
-    case noResult(Data?)
     case review(ScanResult, Data)
     case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
     case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
@@ -37,6 +34,9 @@ struct ScanSubmission {
 final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
+    /// L'IA n'a rien reconnu sur la photo : le flux retombe sur la caméra et
+    /// une sheet « aucun résultat » se présente par-dessus.
+    var noResultShown = false
     var isSaving = false
     var pendingLocation: DiscoveryLocationDraft?
     /// Vin déjà créé pendant cette session de review : si une écriture
@@ -51,7 +51,12 @@ final class ScanViewModel {
         Task {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
-                self.step = result.recognized ? .review(result, imageData) : .noResult(imageData)
+                if result.recognized {
+                    self.step = .review(result, imageData)
+                } else {
+                    self.step = .camera
+                    self.noResultShown = true
+                }
             } catch {
                 self.error = reportError(error)
                 self.step = .camera
@@ -158,6 +163,7 @@ final class ScanViewModel {
     func reset() {
         step = .camera
         error = nil
+        noResultShown = false
         pendingLocation = nil
         createdWine = nil
     }
@@ -166,7 +172,7 @@ final class ScanViewModel {
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning), (.noResult, .noResult), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved), (.saved, .saved): return true
+        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved), (.saved, .saved): return true
         case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }
