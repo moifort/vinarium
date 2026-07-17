@@ -42,7 +42,7 @@ struct CellarPage: View {
             }
         }
         .toolbar {
-            ToolbarItemGroup {
+            ToolbarItemGroup(placement: .topBarTrailing) {
                 ForEach(CellarDisplayMode.allCases) { mode in
                     Button {
                         displayMode = mode
@@ -54,6 +54,8 @@ struct CellarPage: View {
                     .accessibilityIdentifier("cellar-mode-\(mode.rawValue)")
                 }
             }
+            // Détache la loupe des bascules de mode dans sa propre capsule.
+            ToolbarSpacer(.fixed, placement: .topBarTrailing)
         }
         .searchToolbarButton()
         .navigationTitle(displayMode.title)
