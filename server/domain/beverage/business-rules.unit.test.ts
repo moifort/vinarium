@@ -112,15 +112,12 @@ describe('wineDetails', () => {
     expect(wineDetails(wine)?.color).toBe('red')
   })
 
-  test.each([
-    'spirit',
-    'beer',
-    'sake',
-    'cider',
-    'other',
-  ] as const)('a %s has no wine details', (beverageType) => {
-    expect(wineDetails({ beverageType } as Beverage)).toBeUndefined()
-  })
+  test.each(['spirit', 'beer', 'sake', 'cider', 'other'] as const)(
+    'a %s has no wine details',
+    (beverageType) => {
+      expect(wineDetails({ beverageType } as Beverage)).toBeUndefined()
+    },
+  )
 })
 
 describe('subtypeAllowed', () => {
@@ -150,16 +147,12 @@ describe('subtypeAllowed', () => {
     expect(subtypeAllowed(beverageType, subtype)).toBe(false)
   })
 
-  test.each([
-    'wine',
-    'spirit',
-    'beer',
-    'sake',
-    'cider',
-    'other',
-  ] as const)("every type accepts 'other'", (beverageType) => {
-    expect(subtypeAllowed(beverageType, 'other')).toBe(true)
-  })
+  test.each(['wine', 'spirit', 'beer', 'sake', 'cider', 'other'] as const)(
+    "every type accepts 'other'",
+    (beverageType) => {
+      expect(subtypeAllowed(beverageType, 'other')).toBe(true)
+    },
+  )
 
   test('the allowance table only contains known subtype values', () => {
     for (const subtypes of Object.values(SUBTYPES_BY_BEVERAGE)) {
@@ -192,13 +185,10 @@ describe('requiresColor', () => {
     expect(requiresColor('wine')).toBe(true)
   })
 
-  test.each([
-    'spirit',
-    'beer',
-    'sake',
-    'cider',
-    'other',
-  ] as const)('%s does not require a color', (beverageType) => {
-    expect(requiresColor(beverageType)).toBe(false)
-  })
+  test.each(['spirit', 'beer', 'sake', 'cider', 'other'] as const)(
+    '%s does not require a color',
+    (beverageType) => {
+      expect(requiresColor(beverageType)).toBe(false)
+    },
+  )
 })
