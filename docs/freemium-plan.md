@@ -1,12 +1,14 @@
 # Freemium / Paid Model + On-Device Scan — Feasibility & Macro Plan
 
 > Status: **decision document** (feasibility + macro). No implementation yet.
+> Economics (Q4) revised 2026.07.17: VAT-corrected proceeds, no-deficit quota structure,
+> dev-funding milestones.
 
 ## Context
 
 Vinarium wants a **freemium** model. Goal: offset the AI scan cost (today fully borne by the app)
 by reserving the Google AI scan for paying subscribers, while offering free users an **on-device**
-scan (Apple Intelligence / Vision) at zero server cost, plus limits (AI quota, bottle cap). This
+scan (Apple Intelligence / Vision) at zero server cost, plus limits (AI trial, bottle cap). This
 document answers four questions: freemium ideas, on-device scan feasibility, subscription
 feasibility, and a price estimate that yields a margin.
 
@@ -49,15 +51,15 @@ AI" but **which AI steps are paid**. That enables a finer split than "all AI = p
 | # | Lever | Free | Paid | Note |
 |---|-------|------|------|------|
 | A | **Scan** (original idea) | On-device: Apple Intelligence if available, else Vision OCR | Gemini vision + web enrichment | Core of the proposal. |
-| B | **Cloud AI quota** | N free Gemini scans / month, then on-device | Unlimited | Lets users taste cloud quality. `N ≈ 5–10`. |
+| B | **Cloud AI trial** | 5 full Gemini scans **once** (lifetime), then on-device / vision-only | Unlimited vision scans; enrichment hard-capped (fair use, see Q4) | Lets users taste cloud quality. Lifetime, not monthly: a monthly grounded quota is a structural deficit once grounding is billed (Q4). |
 | C | **Bottle cap** | Cap on the **library** (`beverages`), e.g. 25–50 | Unlimited | Capping the library is enough: the cellar is included (see ⚠️). Needs a new `.count()` aggregate. |
 | D | **Market enrichment** | ❌ (only name/vintage/type via OCR) | ✅ estimated price, grapes, appellation, drinking window | Elegant: isolates *exactly* the cost (grounding). Free still gets a useful scan. |
 | E | **Shared household** | Solo | Shared family cellar (`household`) | Household infra already present; simple gate. |
 | F | **Advanced stats / dashboard, export** | Basic | Full (cellar value, tasting history, CSV/PDF export) | Zero server cost, high perceived value. |
 
 **Recommendation**: combine **A + B + C + D** as the backbone, keep **E/F** in reserve to enrich the
-paid tier at no extra cost. The **B (quota) + D (paid enrichment)** pair is the most profitable
-because it targets the real cost source rather than blocking everything.
+paid tier at no extra cost. The **B (lifetime trial) + D (paid enrichment)** pair is the most
+profitable because it targets the real cost source rather than blocking everything.
 
 ---
 
@@ -137,7 +139,7 @@ custom claim**.
 - **`EntitlementStore`** (`@Observable`, app scope next to `AuthSession`): reads the tier from
   (a) the ID token custom claim AND (b) local StoreKit; exposes `tier` to the rest of the app.
 - **Paywall**: new `Features/Paywall/` feature (coordinator + previewable `*Page`), shown when a
-  free user hits a limit (AI quota, bottle cap) or from settings.
+  free user hits a limit (trial exhausted, bottle cap) or from settings.
 - **Scan routing**: `ScannerFactory` (Q2) reads `EntitlementStore.tier`.
 
 **Increments**: (B1) `entitlement` domain + collection + claim → (B2) iOS StoreKit 2 +
@@ -146,7 +148,26 @@ gating (`beverages.count` aggregate) → (B5) paywall UI.
 
 ---
 
-## Q4 — Price estimate for a margin
+## Q4 — Economics: no-deficit model & dev-funding milestones
+
+> Revised 2026.07.17. Priorities set with the owner: **phase 1 = cover AI + infra (no deficit)**;
+> funding future devs is a phase-2 milestone, quantified below. Target audience: **< 1,000 MAU**
+> at 12–18 months. USD→EUR conversions use ≈ 1.10 throughout.
+
+### Net revenue per subscriber (the previous estimate was ~20% too high)
+
+Apple computes its commission on the price **excluding VAT** (20% in France), not on the sticker
+price. With the Small Business Program (15% — enrollment is not automatic, see Risks):
+
+| Sticker price | Net proceeds / month | Previous estimate (wrong) |
+|---|---|---|
+| €4.99/month | **€3.53** | €4.24 |
+| €34.99/year | **€2.07** | €2.48 |
+| €39.99/year (new recommendation) | **€2.36** | — |
+
+€34.99/year was the weak spot (€2.07 net/month). **Keep monthly at €4.99, move annual to €39.99**
+(still well under Vivino ≈ €50/year). Price is not the deficit risk (see below); raising the
+monthly price is a phase-2 lever only.
 
 ### Real cost per scan (cache miss, Gemini path)
 
@@ -163,32 +184,66 @@ grounding **1,500 req/day free** then **$35/1,000** (= $0.035/req) for 2.x model
 **Firestore / Cloud Run per user/month**: read-optimized architecture (loaders, aggregates) →
 **< $0.02/user/month**, negligible vs AI. Storage: negligible (no images stored).
 
-### Monthly cost of a paying subscriber (unlimited cloud scans)
+### Costs at the target scale (< 1,000 MAU): AI is nearly free
 
-| Profile | Scans/month | AI cost at scale |
+- Even the absolute worst case (1,000 MAU all scanning 30×/month **on the cloud path**) stays
+  under the free grounding tier (~1,000 scans/day) and costs 30,000 × $0.003 ≈ **$90/month**
+  (tokens only). The realistic bill is far lower: with the recommended structure only subscribers
+  and lifetime trials hit Gemini (~30–50 subs × 30 scans ≈ 1,500 scans/month) → **< $10/month**.
+  Weekend bursts past 1,500 grounded req/day are marginal.
+- Fixed costs: Apple Developer ~€8/mo, domain ~€2/mo, GCP (Cloud Run scales to zero, Firestore
+  read-optimized) ~€5–15/mo, Sentry free tier → **floor ≈ €15–30/month**. (Hygiene: lower Sentry
+  `tracesSampleRate: 1.0` before any growth — 100% transaction tracing is a per-event billing
+  driver.)
+
+**Phase-1 break-even: ~6–12 subscribers** (€15–30 fixed floor at ~€2.50/month blended net
+margin). Very reachable.
+
+### The real deficit risk: a monthly free quota with grounding
+
+An earlier draft gave free users 5–10 **full** Gemini scans (with grounding) per month. Free while
+the grounding free tier holds — but once grounding is billed (growth, or a forced migration when
+2.5 is deprecated): 10 scans × $0.037 = $0.37 per free user per month. At 3% conversion each
+subscriber "carries" ~33 free users → **~€11/month of cost against €3.53 of net revenue: a 3×
+structural deficit.** Structural fixes (no deficit by construction, at any volume):
+
+- **Free quota = one-time lifetime trial** (5 full scans), not monthly. Afterwards: **on-device**
+  (lever A — Apple Intelligence, else Vision OCR: zero server cost, no unbounded free-tier
+  spend); market enrichment stays the paid differentiator (lever D unchanged). A cloud
+  vision-only fallback (~$0.0016/scan) would work too, but it reintroduces an uncapped
+  per-free-user cost — prefer on-device.
+- **Paid tier: hard cap on enrichment, not on scans** — ~60 enrichments/month; vision scans stay
+  unlimited for subscribers (negligible cost). Worst billed case: 60 × $0.035 ≈ €1.90, under the
+  lowest recommended net (€2.36, the €39.99 annual) → no subscriber can ever be unprofitable.
+  Replaces the earlier 300-scan soft cap (300 × $0.035 ≈ €10: a guaranteed loss on abusers).
+
+Gemini 3.x sensitivity: grounding moves to $14/1,000 queries with 5,000/month free → ~$0.014 per
+enriched scan, **cheaper** than billed 2.5. A future migration does not worsen the model.
+
+### Phase 2 — dev-funding milestones (honest numbers)
+
+Blended net margin ≈ €2.50/subscriber/month (40% monthly / 60% annual at €39.99, AI and infra
+deducted). At < 1,000 MAU with 3–5% conversion: 30–50 subscribers → **~€75–130/month**. That
+covers costs and validates willingness to pay; **it pays no dev.** The milestones:
+
+| Dev budget | Subscribers needed | MAU needed (3–5% conv.) |
 |---|---|---|
-| Occasional | 10 | ~$0.37 |
-| Regular | 30 | ~$1.11 |
-| Heavy | 100 | ~$3.70 |
+| Freelance ~€2,000/mo | ~800 | ~16,000–27,000 |
+| 1 full-time dev ~€6,000/mo | ~2,400 | ~48,000–80,000 |
 
-Free (on-device) costs **~$0** server-side — the whole point of the model.
-
-### Recommended price
-
-- **Monthly: €4.99** — **Annual: €34.99** (≈ 2 months free, nudges toward annual).
-- Apple commission **15%** (Small Business Program, < $1M/year) → net ≈ **€4.24/month** or
-  **€29.74/year**.
-- **Margin**: even a *heavy* subscriber (100 scans, ~$3.70 ≈ €3.4) stays profitable monthly; the
-  median subscriber (10–30 scans) leaves **> €3/month**. Abuse risk (hundreds of scans) is covered
-  by (a) scanning one's cellar being a one-off act, (b) an optional documented fair-use soft cap
-  (e.g. 300 scans/month).
+These tiers are the phase-2 growth targets; the price lever (monthly €5.99–6.99) cuts the required
+subscribers by ~30% and will be reassessed with real `scan-usage` data. Sensitivity: at those
+scales grounding is billed, so a subscriber using ~15 enrichments/month costs ~€0.50; if the real
+blended margin lands at €2.00 instead of €2.50, the milestones become ~1,000 and ~3,000
+subscribers.
 
 **Market benchmarks**: Vivino Premium ≈ €50/year, competing cellar apps €3–5/month → **€4.99/month
-/ €34.99/year** is consistent and leaves a healthy margin.
+/ €39.99/year** stays consistent with the market.
 
-**Recommendation**: launch at **€4.99/month** and **€34.99/year**, free quota **5–10 Gemini
-scans/month** then on-device, free cap **~30 bottles** (library). Adjust after observing real costs
-(the `scan-usage` counter provides the data).
+**Recommendation**: launch at **€4.99/month** and **€39.99/year**; free tier = **5 full scans
+lifetime** then vision-only / on-device, free cap **~30 bottles** (library); paid tier = unlimited
+vision scans + **60 enrichments/month** hard cap. Adjust after observing real costs (the
+`scan-usage` counter provides the data).
 
 ---
 
@@ -209,6 +264,14 @@ scans/month** then on-device, free cap **~30 bottles** (library). Adjust after o
 
 - **App Store Review**: Apple requires paid features to go through IAP (no external payment). The
   "cloud AI = paid" model is compliant.
+- **Small Business Program**: the 15% rate requires **explicit enrollment** in App Store Connect
+  (it is not automatic); without it, subscriptions pay 30% their first year and every net figure
+  in Q4 drops accordingly. Enroll before launch.
+- **Gemini 2.5 deprecation**: the cost model survives a forced migration to 3.x (grounding
+  $14/1,000 queries, 5,000/month free → ~$0.014 per enriched scan, cheaper than billed 2.5), but
+  re-run the Q4 numbers at migration time.
+- **Sentry tracing**: `tracesSampleRate: 1.0` (100% of transactions) is fine today but becomes a
+  billing driver with traffic; lower it before any growth push.
 - **On-device quality**: free without web enrichment has no price or drinking window; present it as
   a differentiator, not a bug.
 - **Migration**: introducing `entitlements`/`scan-usage` = new collections → **no Firestore
