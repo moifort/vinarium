@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3300" height="2200">
+ <!--glyph: "tab.wines.fill", point size: 100.0, template writer version: "8"-->
+ <g id="Notes">
+  <rect height="2200" id="artboard" style="fill:white;opacity:1" width="3300" x="0" y="0"/>
+  <line id="" style="fill:none;stroke:black;opacity:0.5;stroke-width:0.5;" x1="263" x2="3036" y1="292" y2="292"/>
+  <text id="template-version" style="stroke:none;fill:black;font-family:sans-serif;font-size:13px;font-weight:bold;" transform="matrix(1 0 0 1 263 322)">Template v.3.0</text>
+  <text id="descriptive-name" style="stroke:none;fill:black;font-family:sans-serif;font-size:13px;" transform="matrix(1 0 0 1 263 1953)">tab.wines.fill</text>
+  <text style="stroke:none;fill:black;font-family:sans-serif;font-size:13px;" transform="matrix(1 0 0 1 559.219 1993)">Ultralight</text>
+  <text style="stroke:none;fill:black;font-family:sans-serif;font-size:13px;" transform="matrix(1 0 0 1 1575.99 1993)">Regular</text>
+  <text style="stroke:none;fill:black;font-family:sans-serif;font-size:13px;" transform="matrix(1 0 0 1 2592.28 1993)">Black</text>
+ </g>
+ <g id="Guides">
+  <line id="Capline-S" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Baseline-S" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="1088" y2="1088"/>
+  <line id="Capline-M" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Baseline-M" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="1088" y2="1088"/>
+  <line id="Capline-L" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="696" y2="696"/>
+  <line id="Baseline-L" style="fill:none;stroke:#27AAE1;opacity:1;stroke-width:0.5;" x1="263" x2="3036" y1="1088" y2="1088"/>
+  <line id="left-margin" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1281.89" x2="1281.89" y1="600.785" y2="1183.21"/>
+  <line id="right-margin" style="fill:none;stroke:#00AEEF;stroke-width:0.5;" x1="1870.09" x2="1870.09" y1="600.785" y2="1183.21"/>
+ </g>
+ <g id="Symbols">
+  <g id="Ultralight-M" transform="matrix(1 0 0 1 559.219 892.0)">
+   <path d="M -241.67,-323.00 L -241.67,-127.50 C -241.67,-76.50 -293.08,-64.60 -293.08,-8.50 L -293.08,282.20 Q -293.08,323.00 -263.70,323.00 L -151.10,323.00 Q -121.72,323.00 -121.72,282.20 L -121.72,-8.50 C -121.72,-64.60 -173.13,-76.50 -173.13,-127.50 L -173.13,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M -34.27,-323.00 L -34.27,-127.50 C -34.27,-76.50 -85.68,-64.60 -85.68,-8.50 L -85.68,282.20 Q -85.68,323.00 -56.30,323.00 L 56.30,323.00 Q 85.68,323.00 85.68,282.20 L 85.68,-8.50 C 85.68,-64.60 34.27,-76.50 34.27,-127.50 L 34.27,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M 173.13,-323.00 L 173.13,-127.50 C 173.13,-76.50 121.72,-64.60 121.72,-8.50 L 121.72,282.20 Q 121.72,323.00 151.10,323.00 L 263.70,323.00 Q 293.08,323.00 293.08,282.20 L 293.08,-8.50 C 293.08,-64.60 241.67,-76.50 241.67,-127.50 L 241.67,-323.00 Z" style="fill:black;stroke:none;"/>
+  </g>
+  <g id="Regular-M" transform="matrix(1 0 0 1 1575.99 892.0)">
+   <path d="M -241.67,-323.00 L -241.67,-127.50 C -241.67,-76.50 -293.08,-64.60 -293.08,-8.50 L -293.08,282.20 Q -293.08,323.00 -263.70,323.00 L -151.10,323.00 Q -121.72,323.00 -121.72,282.20 L -121.72,-8.50 C -121.72,-64.60 -173.13,-76.50 -173.13,-127.50 L -173.13,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M -34.27,-323.00 L -34.27,-127.50 C -34.27,-76.50 -85.68,-64.60 -85.68,-8.50 L -85.68,282.20 Q -85.68,323.00 -56.30,323.00 L 56.30,323.00 Q 85.68,323.00 85.68,282.20 L 85.68,-8.50 C 85.68,-64.60 34.27,-76.50 34.27,-127.50 L 34.27,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M 173.13,-323.00 L 173.13,-127.50 C 173.13,-76.50 121.72,-64.60 121.72,-8.50 L 121.72,282.20 Q 121.72,323.00 151.10,323.00 L 263.70,323.00 Q 293.08,323.00 293.08,282.20 L 293.08,-8.50 C 293.08,-64.60 241.67,-76.50 241.67,-127.50 L 241.67,-323.00 Z" style="fill:black;stroke:none;"/>
+  </g>
+  <g id="Black-M" transform="matrix(1 0 0 1 2592.28 892.0)">
+   <path d="M -241.67,-323.00 L -241.67,-127.50 C -241.67,-76.50 -293.08,-64.60 -293.08,-8.50 L -293.08,282.20 Q -293.08,323.00 -263.70,323.00 L -151.10,323.00 Q -121.72,323.00 -121.72,282.20 L -121.72,-8.50 C -121.72,-64.60 -173.13,-76.50 -173.13,-127.50 L -173.13,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M -34.27,-323.00 L -34.27,-127.50 C -34.27,-76.50 -85.68,-64.60 -85.68,-8.50 L -85.68,282.20 Q -85.68,323.00 -56.30,323.00 L 56.30,323.00 Q 85.68,323.00 85.68,282.20 L 85.68,-8.50 C 85.68,-64.60 34.27,-76.50 34.27,-127.50 L 34.27,-323.00 Z" style="fill:black;stroke:none;"/>
+   <path d="M 173.13,-323.00 L 173.13,-127.50 C 173.13,-76.50 121.72,-64.60 121.72,-8.50 L 121.72,282.20 Q 121.72,323.00 151.10,323.00 L 263.70,323.00 Q 293.08,323.00 293.08,282.20 L 293.08,-8.50 C 293.08,-64.60 241.67,-76.50 241.67,-127.50 L 241.67,-323.00 Z" style="fill:black;stroke:none;"/>
+  </g>
+ </g>
+</svg>

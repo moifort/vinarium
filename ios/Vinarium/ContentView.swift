@@ -11,14 +11,6 @@ enum TabSelection: Int, CaseIterable, Identifiable {
         case .scan: "Scanner"
         }
     }
-    var icon: String {
-        switch self {
-        case .home: "house"
-        case .cellar: "square.grid.3x3"
-        case .wines: "list.bullet"
-        case .scan: "camera"
-        }
-    }
 }
 
 struct ContentView: View {
@@ -52,26 +44,32 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            Tab(TabSelection.home.label, systemImage: TabSelection.home.icon, value: .home) {
+            Tab(value: .home) {
                 DashboardView(selectedTab: $selectedTab)
+            } label: {
+                tabLabel(for: .home)
             }
             .accessibilityIdentifier("tab-home")
-            Tab(TabSelection.cellar.label, systemImage: TabSelection.cellar.icon, value: .cellar) {
+            Tab(value: .cellar) {
                 CellarView(refreshTrigger: cellarRefreshTrigger)
+            } label: {
+                tabLabel(for: .cellar)
             }
             .accessibilityIdentifier("tab-cellar")
-            Tab(TabSelection.wines.label, systemImage: TabSelection.wines.icon, value: .wines) {
+            Tab(value: .wines) {
                 WineListView(
                     showFavorites: $showFavorites,
                     showRecommended: $showRecommended,
                     refreshTrigger: wineListRefreshTrigger
                 )
+            } label: {
+                tabLabel(for: .wines)
             }
             .accessibilityIdentifier("tab-wines")
             Tab(value: .scan, role: scanTabRole) {
                 Color.clear
             } label: {
-                Label(TabSelection.scan.label, systemImage: TabSelection.scan.icon)
+                tabLabel(for: .scan)
             }
             .accessibilityIdentifier("tab-scan")
         }
@@ -114,6 +112,27 @@ struct ContentView: View {
                 wineListRefreshTrigger = UUID()
             }
         }
+    }
+
+    /// Tab bar label with a pinned Dynamic Type size, so the symbols keep a
+    /// fixed size whatever the user's text size setting. Accueil and Cave use
+    /// native symbols; Vins and Scanner use the custom wine-themed symbols,
+    /// always in their filled form.
+    @ViewBuilder
+    private func tabLabel(for tab: TabSelection) -> some View {
+        Group {
+            switch tab {
+            case .home:
+                Label(tab.label, systemImage: "house")
+            case .cellar:
+                Label(tab.label, systemImage: "square.grid.3x3")
+            case .wines:
+                Label(tab.label, image: "tab.wines.fill")
+            case .scan:
+                Label(tab.label, image: "tab.scan.fill")
+            }
+        }
+        .dynamicTypeSize(.large)
     }
 
     /// After the scan cover closes, leave the empty scan tab and return to the
