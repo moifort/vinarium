@@ -69,8 +69,11 @@ describe('completeOnboarding mutation', () => {
     [6, 101, 1],
     [6, 8, 0],
     [6, 8, 4],
-  ])('rejects out-of-range dimensions %p x %p / %p zones with BAD_USER_INPUT', async (rows, cols, zones) => {
-    const result = await execute(completeOnboarding(rows, cols, zones))
-    expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
-  })
+  ])(
+    'rejects out-of-range dimensions %p x %p / %p zones with BAD_USER_INPUT',
+    async (rows, cols, zones) => {
+      const result = await execute(completeOnboarding(rows, cols, zones))
+      expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    },
+  )
 })
