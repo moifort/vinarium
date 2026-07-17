@@ -76,10 +76,6 @@ export namespace BeverageQuery {
     return scope.memberIds.includes(beverage.userId) ? beverage : ('not-found' as const)
   }
 
-  // Batch-load the beverages of a page by id (no full-collection scan).
-  export const byBeverageIds = async (userId: UserId, beverageIds: BeverageId[]) =>
-    repository.findManyByBeverageIds(userId, beverageIds)
-
   // Batch-load a page of shared-cellar wines owned by any household member.
   export const byBeverageIdsForUsers = async (memberIds: UserId[], beverageIds: BeverageId[]) =>
     repository.findManyByBeverageIdsForUsers(memberIds, beverageIds)

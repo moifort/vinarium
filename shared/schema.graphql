@@ -405,6 +405,7 @@ type ImportResult {
 
 """A timestamped cellar entry/exit event for a wine"""
 type JournalEvent {
+  actor: JournalEventActor!
   beverageId: BeverageId!
   beverageName: BeverageName!
   date: DateTime!
@@ -412,6 +413,15 @@ type JournalEvent {
   type: JournalEventType!
   wineBeverageType: BeverageType!
   wineColor: WineColor
+}
+
+"""The household member who moved the bottle"""
+type JournalEventActor {
+  displayName: PersonName
+
+  """Whether the viewer moved the bottle themselves (no badge shown)"""
+  isMine: Boolean!
+  userId: UserId!
 }
 
 """
@@ -724,9 +734,7 @@ type Query {
   """JSON-encoded export of every record belonging to the current user"""
   exportData: String!
 
-  """
-  A page of cellar entry/exit events for the current user, most recent first
-  """
+  """A page of entry/exit events for the shared cellar, most recent first"""
   journalEvents(
     """Maximum events returned in the page"""
     limit: Int = 15

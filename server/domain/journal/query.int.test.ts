@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { UserId } from '~/domain/shared/types'
+import type { HouseholdId, HouseholdMember } from '~/domain/household/types'
+import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -7,6 +8,14 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 const { JournalQuery } = await import('~/domain/journal/query')
 
 const userId = 'user-1' as UserId
+
+const member = (id: string, role: 'owner' | 'member'): HouseholdMember => ({
+  userId: id as UserId,
+  householdId: 'h1' as HouseholdId,
+  displayName: `${id} name` as PersonName,
+  role,
+  joinedAt: new Date('2026-01-01'),
+})
 
 let fake = resetFakeFirestore()
 beforeEach(() => {
@@ -27,6 +36,42 @@ const seed = () => {
   }
 }
 
+// The viewer (user-1) shares a cellar with marie. She owns 'm1', still placed, and
+// 'm2', which she has already drunk — so it is out of cellar and out of the
+// viewer's visible library, yet its exit belongs to the shared journal.
+const seedHousehold = () => {
+  fake.seed('household-members', userId, member(userId, 'owner'))
+  fake.seed('household-members', 'marie', member('marie', 'member'))
+  fake.seed('beverages', 'w1', { id: 'w1', userId, name: 'W1', beverageType: 'wine' })
+  fake.seed('beverages', 'm1', { id: 'm1', userId: 'marie', name: 'M1', beverageType: 'wine' })
+  fake.seed('beverages', 'm2', { id: 'm2', userId: 'marie', name: 'M2', beverageType: 'wine' })
+  fake.seed('cellar', 'marie_m1', { userId: 'marie', beverageId: 'm1', row: 0, col: 1 })
+  fake.seed('journal', 'j-mine', {
+    type: 'in',
+    userId,
+    beverageId: 'w1',
+    row: 0,
+    col: 0,
+    date: new Date('2026-01-01'),
+  })
+  fake.seed('journal', 'j-hers', {
+    type: 'in',
+    userId: 'marie',
+    beverageId: 'm1',
+    row: 0,
+    col: 1,
+    date: new Date('2026-01-02'),
+  })
+  fake.seed('journal', 'j-hers-out', {
+    type: 'out',
+    userId: 'marie',
+    beverageId: 'm2',
+    row: 1,
+    col: 1,
+    date: new Date('2026-01-03'),
+  })
+}
+
 describe('JournalQuery.page', () => {
   test('returns a bounded page most-recent-first with hasMore', async () => {
     seed()
@@ -42,5 +87,92 @@ describe('JournalQuery.page', () => {
     const page = await JournalQuery.page(userId, { limit: 2, offset: 4 })
     expect(page.items.length).toBe(1)
     expect(page.hasMore).toBe(false)
+  })
+
+  test('merges every member’s movements, each naming who moved the bottle', async () => {
+    seedHousehold()
+
+    const { items } = await JournalQuery.page(userId, { limit: 15, offset: 0 })
+
+    expect(items.map(({ beverageId }) => String(beverageId))).toEqual(['m2', 'm1', 'w1'])
+    const byBeverage = new Map(items.map((item) => [String(item.beverageId), item]))
+    expect(byBeverage.get('w1')?.actor).toMatchObject({ userId, isMine: true })
+    expect(byBeverage.get('w1')?.actor.displayName).toBeUndefined()
+    expect(byBeverage.get('m1')?.actor).toMatchObject({
+      userId: 'marie',
+      displayName: 'marie name',
+      isMine: false,
+    })
+  })
+
+  test('keeps a housemate’s exit even though its wine left the shared cellar', async () => {
+    seedHousehold()
+
+    const { items } = await JournalQuery.page(userId, { limit: 15, offset: 0 })
+
+    expect(items.find(({ beverageId }) => beverageId === 'm2')).toMatchObject({
+      type: 'out',
+      beverageName: 'M2',
+    })
+  })
+})
+
+describe('JournalQuery.all', () => {
+  test('spans the household, most recent first', async () => {
+    seedHousehold()
+
+    const events = await JournalQuery.all(userId)
+
+    expect(events.map(({ beverageId }) => String(beverageId))).toEqual(['m2', 'm1', 'w1'])
+    expect(events.map(({ actor }) => actor.isMine)).toEqual([false, false, true])
+  })
+
+  test('naming the members costs no read beyond the memoized scope', async () => {
+    seedHousehold()
+
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
+    await JournalQuery.all(userId)
+
+    // journal scan + own wines scan + the shared cellar scan (which wines of
+    // marie's are visible) + the household members query = 4. The display names
+    // ride along on the scope already read for the member ids.
+    expect(fake.queryReads - before.queryReads).toBe(4)
+    // The membership doc, marie's in-cellar wine (m1) and her drunk one (m2),
+    // each read by id — never a scan of a housemate's library.
+    expect(fake.docReads - before.docReads).toBe(3)
+  })
+})
+
+describe('JournalQuery.historyOf', () => {
+  test('names the member behind each movement of a shared wine', async () => {
+    seedHousehold()
+    const wine = { id: 'm1', userId: 'marie', name: 'M1', beverageType: 'wine' }
+    const entries = await JournalQuery.entriesByBeverageIds(userId, ['m1'] as never)
+
+    // biome-ignore lint/suspicious/noExplicitAny: the wine shape is a test fixture
+    const history = await JournalQuery.historyOf(userId, wine as any, entries)
+
+    expect(history).toHaveLength(1)
+    expect(history[0]?.actor).toMatchObject({
+      userId: 'marie',
+      displayName: 'marie name',
+      isMine: false,
+    })
+  })
+
+  test('entries stay scoped to the household, never another cellar', async () => {
+    seedHousehold()
+    fake.seed('journal', 'j-stranger', {
+      type: 'in',
+      userId: 'stranger',
+      beverageId: 'm1',
+      row: 2,
+      col: 2,
+      date: new Date('2026-01-04'),
+    })
+
+    const entries = await JournalQuery.entriesByBeverageIds(userId, ['m1'] as never)
+
+    expect(entries.map(({ userId: actor }) => String(actor))).toEqual(['marie'])
   })
 })

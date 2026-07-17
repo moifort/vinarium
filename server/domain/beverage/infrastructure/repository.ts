@@ -2,7 +2,7 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import type { Beverage, BeverageId, BeverageSort, SortOrder } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
-import { isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
+import { memoizedPerRequest } from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const beverages = () => db().collection('beverages').withConverter(genericDataConverter<Beverage>())
@@ -73,26 +73,6 @@ export const findPage = async (userId: UserId, args: PageArgs): Promise<Beverage
   const docs = snap.docs.map((doc) => doc.data())
   const hasMore = docs.length > args.limit
   return { beverages: hasMore ? docs.slice(0, args.limit) : docs, hasMore }
-}
-
-// Batch-load a page of beverages by id with a single getAll — no full-collection
-// scan. When the full scan already ran in this request, reuse it: zero extra reads.
-export const findManyByBeverageIds = async (
-  userId: UserId,
-  beverageIds: BeverageId[],
-): Promise<Beverage[]> => {
-  if (beverageIds.length === 0) return []
-  if (isInRequestCache(allCacheKey(userId))) {
-    const wanted = new Set(beverageIds)
-    return (await findAllByUser(userId)).filter((beverage) => wanted.has(beverage.id))
-  }
-  const refs = beverageIds.map((id) => beverages().doc(id))
-  const snaps = await db().getAll(...refs)
-  return snaps
-    .map((snap) => snap.data())
-    .filter(
-      (beverage): beverage is Beverage => beverage !== undefined && beverage.userId === userId,
-    )
 }
 
 export const save = async (beverage: Beverage): Promise<Beverage> => {

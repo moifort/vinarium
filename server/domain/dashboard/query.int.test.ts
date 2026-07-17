@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { UserId } from '~/domain/shared/types'
+import type { HouseholdId, HouseholdMember } from '~/domain/household/types'
+import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
@@ -65,6 +66,91 @@ const seedDashboardData = () => {
     date: new Date('2026-02-01'),
   })
 }
+
+const member = (id: string, role: 'owner' | 'member'): HouseholdMember => ({
+  userId: id as UserId,
+  householdId: 'h1' as HouseholdId,
+  displayName: `${id} name` as PersonName,
+  role,
+  joinedAt: new Date('2026-01-01'),
+})
+
+// A member who joined an existing cellar: they own nothing yet, everything on
+// screen is the owner's. This is the shape the invited user sees on first launch.
+const seedInvitedMember = () => {
+  fake.seed('household-members', 'owner', member('owner', 'owner'))
+  fake.seed('household-members', 'guest', member('guest', 'member'))
+  fake.seed('beverages', 'o1', {
+    id: 'o1',
+    userId: 'owner',
+    name: 'Château Partagé',
+    beverageType: 'wine',
+    purchase: { price: 42 },
+    wine: { color: 'red', drinkWindow: { from: currentYear - 1, until: currentYear + 5 } },
+    createdAt: new Date('2026-01-10'),
+  })
+  fake.seed('cellar', 'owner_o1', {
+    userId: 'owner',
+    beverageId: 'o1',
+    row: 0,
+    col: 0,
+    createdAt: new Date('2026-01-10'),
+    updatedAt: new Date('2026-01-10'),
+  })
+  fake.seed('journal', 'j-owner', {
+    userId: 'owner',
+    beverageId: 'o1',
+    type: 'in',
+    row: 0,
+    col: 0,
+    date: new Date('2026-01-10'),
+  })
+  fake.seed('tasting', 'owner_o1', {
+    userId: 'owner',
+    beverageId: 'o1',
+    favorite: true,
+    rating: 5,
+    consumedDate: new Date('2026-02-01'),
+  })
+}
+
+describe('DashboardQuery.view (household)', () => {
+  test('an invited member sees the cellar they were shared', async () => {
+    seedInvitedMember()
+
+    const view = await DashboardQuery.view('guest' as UserId)
+
+    expect(view.bottleCount).toBe(1)
+    expect(view.totalValue).toBe(42)
+    expect(view.readyToDrink).toMatchObject([{ id: 'o1', position: 'A1' }])
+    expect(view.lastBottle).toMatchObject({ wine: { id: 'o1' }, position: 'A1' })
+    expect(view.history).toHaveLength(1)
+    expect(view.history[0]?.actor).toMatchObject({ displayName: 'owner name', isMine: false })
+  })
+
+  test('favorites stay personal: a housemate’s tasting note is not the viewer’s', async () => {
+    seedInvitedMember()
+
+    const view = await DashboardQuery.view('guest' as UserId)
+
+    expect(view.favorites).toEqual([])
+  })
+
+  test('a member’s own favorite counts even on a bottle the household shares', async () => {
+    seedInvitedMember()
+    fake.seed('tasting', 'guest_o1', {
+      userId: 'guest',
+      beverageId: 'o1',
+      favorite: true,
+      rating: 4,
+      consumedDate: new Date('2026-03-01'),
+    })
+
+    const view = await DashboardQuery.view('guest' as UserId)
+
+    expect(view.favorites).toMatchObject([{ id: 'o1', name: 'Château Partagé', rating: 4 }])
+  })
+})
 
 describe('DashboardQuery.view', () => {
   test('assembles the dashboard view', async () => {

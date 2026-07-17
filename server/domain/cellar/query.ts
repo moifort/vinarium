@@ -71,12 +71,14 @@ export namespace CellarQuery {
     return repository.countByUsers(scope.memberIds)
   }
 
-  // The viewer's own placed bottles joined with their wine — the personal shape
-  // the dashboard reads (household bottles never enter the dashboard sections).
-  export const bottlesWithWine = async (userId: UserId) => {
-    const [bottles, wines] = await Promise.all([
-      repository.findAllByUser(userId),
-      BeverageQuery.findAll(userId),
+  // Every bottle standing in the shared cellar, joined with its wine and tagged
+  // with its owner — what the dashboard sums, sorts and dates. A placed bottle's
+  // wine is always visible to the viewer, housemates included, so the join holds.
+  export const householdBottlesWithWine = async (userId: UserId) => {
+    const [scope, bottles, wines] = await Promise.all([
+      HouseholdQuery.cellarScope(userId),
+      householdPlacements(userId),
+      BeverageQuery.allVisibleTo(userId),
     ])
     const beverageMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {
@@ -85,7 +87,7 @@ export namespace CellarQuery {
         const at = `${bottle.row},${bottle.col}`
         throw new Error(`Beverage ${bottle.beverageId} not found for bottle at ${at}`)
       }
-      return { ...bottleView(bottle), wine, owner: { userId, isMine: true } }
+      return { ...bottle, wine, owner: ownerOf(bottle, userId, scope) }
     })
   }
 

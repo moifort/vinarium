@@ -21,13 +21,15 @@ const DASHBOARD_SECTION_LIMIT = 5
 export namespace DashboardQuery {
   export const view = async (userId: UserId): Promise<DashboardView> => {
     // The per-request cache dedupes the shared wines read across these queries.
-    // bottleCount reflects the whole shared cellar (occupancy is a household fact);
-    // every other section below stays personal, computed from the viewer's bottles.
+    // Sharing a cellar shares what the cellar holds: its bottles, their value and
+    // every movement span the whole household. Favorites stay personal — they are
+    // filtered by the viewer's own tasting notes; the wines they name are looked up
+    // in the visible set, so favoriting a housemate's shared bottle still shows it.
     const [allBottles, history, allTastings, wines, bottleCount, cellarConfig] = await Promise.all([
-      CellarQuery.bottlesWithWine(userId),
+      CellarQuery.householdBottlesWithWine(userId),
       JournalQuery.all(userId),
       TastingQuery.all(userId),
-      BeverageQuery.findAll(userId),
+      BeverageQuery.allVisibleTo(userId),
       CellarQuery.householdBottleCount(userId),
       CellarQuery.config(userId),
     ])

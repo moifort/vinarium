@@ -2,12 +2,25 @@ import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructur
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import { JournalQuery } from '../../query'
-import type { JournalEventView } from '../../types'
+import type { JournalEventActor, JournalEventView } from '../../types'
 
 export const JournalEventTypeEnum = builder.enumType('JournalEventType', {
   description: 'Whether a journal entry records a bottle entering or leaving the cellar',
   values: { IN: { value: 'in' }, OUT: { value: 'out' } } as const,
 })
+
+export const JournalEventActorType = builder
+  .objectRef<JournalEventActor>('JournalEventActor')
+  .implement({
+    description: 'The household member who moved the bottle',
+    fields: (t) => ({
+      userId: t.expose('userId', { type: 'UserId' }),
+      displayName: t.expose('displayName', { type: 'PersonName', nullable: true }),
+      isMine: t.exposeBoolean('isMine', {
+        description: 'Whether the viewer moved the bottle themselves (no badge shown)',
+      }),
+    }),
+  })
 
 export const JournalEventType = builder.objectRef<JournalEventView>('JournalEvent').implement({
   description: 'A timestamped cellar entry/exit event for a wine',
@@ -19,6 +32,7 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
     wineBeverageType: t.expose('wineBeverageType', { type: BeverageTypeEnum }),
     wineColor: t.expose('wineColor', { type: WineColorEnum, nullable: true }),
     position: t.exposeString('position'),
+    actor: t.field({ type: JournalEventActorType, resolve: (event) => event.actor }),
   }),
 })
 
@@ -40,7 +54,7 @@ builder.objectField(BeverageType, 'history', (t) =>
   t.field({
     type: [JournalEventType],
     description: 'Cellar entry/exit history for this wine, most recent first',
-    resolve: async (wine, _, { loaders }) =>
-      JournalQuery.historyOf(wine, (await loaders.history.load(wine.id)) ?? []),
+    resolve: async (wine, _, { loaders, userId }) =>
+      JournalQuery.historyOf(userId, wine, (await loaders.history.load(wine.id)) ?? []),
   }),
 )

@@ -75,15 +75,6 @@
       ]
     },
     {
-      "collectionGroup": "journal",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "userId", "order": "ASCENDING" },
-        { "fieldPath": "wineId", "order": "ASCENDING" },
-        { "fieldPath": "date", "order": "DESCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "tasting",
       "queryScope": "COLLECTION",
       "fields": [
