@@ -5,7 +5,6 @@ struct GradientWidget: View {
     let value: String
     var denominator: String? = nil
     let subtitle: String
-    let icon: String
     let gradient: [Color]
     var backgroundImage: String?
 
@@ -33,16 +32,10 @@ struct GradientWidget: View {
 
             Spacer()
 
-            HStack(alignment: .bottom) {
-                Text(subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.8))
-                Spacer()
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(.white.opacity(0.7))
-                    .accessibilityHidden(true)
-            }
+            Text(subtitle)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.8))
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(16)
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .leading)
@@ -71,14 +64,12 @@ struct GradientWidget: View {
             value: "41",
             denominator: "/48",
             subtitle: "Bouteilles",
-            icon: "wineglass",
             gradient: [Color(red: 0.55, green: 0.25, blue: 0.8), Color(red: 0.75, green: 0.45, blue: 0.95)]
         )
         GradientWidget(
             title: "Valeur",
             value: "450 \u{20AC}",
             subtitle: "Total",
-            icon: "eurosign.circle",
             gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)]
         )
     }
