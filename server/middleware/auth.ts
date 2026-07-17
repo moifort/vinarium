@@ -16,6 +16,9 @@ export default defineEventHandler(async (event) => {
     return
   }
 
+  // Public app configuration: read by the update gate, possibly signed out.
+  if (path === '/app-config' || path.startsWith('/app-config?')) return
+
   // Everything else (incl. /graphql): require a valid Firebase ID token.
   const auth = getHeader(event, 'authorization')
   const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null

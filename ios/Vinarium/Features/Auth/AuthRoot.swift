@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Top-level gate: shows LoginView when no Firebase user is signed in; once signed
+/// Top-level gate: shows the blocking update screen when the backend no longer
+/// supports this build; otherwise LoginView when no Firebase user is signed in; once signed
 /// in, reads the onboarding state and shows the wizard until it is completed,
 /// otherwise the main TabView (`ContentView`). Also catches invitation links, both
 /// the universal link (`https://vinarium-prod.web.app/rejoindre/<CODE>`) and the
@@ -8,6 +9,8 @@ import SwiftUI
 struct AuthRoot: View {
     @State private var session = AuthSession()
     @State private var gate = OnboardingGate()
+    @State private var supportGate = AppSupportGate()
+    @Environment(\.scenePhase) private var scenePhase
 
     /// A pending invitation code, kept until the app is ready to present the join
     /// sheet (a link opened while signed out surfaces after sign-in + onboarding).
@@ -16,13 +19,19 @@ struct AuthRoot: View {
 
     var body: some View {
         Group {
-            if session.user == nil {
+            if case .updateRequired(let appStoreURL) = supportGate.state {
+                UpdateRequiredView(appStoreURL: appStoreURL)
+            } else if session.user == nil {
                 LoginView()
             } else {
                 signedIn
             }
         }
         .environment(session)
+        .task { await supportGate.check() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await supportGate.check() } }
+        }
         .task(id: session.user?.uid) {
             if session.user != nil {
                 await gate.refresh()
