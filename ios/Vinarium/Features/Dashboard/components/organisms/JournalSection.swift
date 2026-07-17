@@ -30,7 +30,8 @@ struct JournalSection: View {
                                 isEntry: true,
                                 wineName: entry.wineName,
                                 label: "Dernière entrée le \(entry.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
-                                position: entry.position
+                                position: entry.position,
+                                memberName: entry.memberName
                             )
                         }
                         .tint(.primary)
@@ -41,7 +42,8 @@ struct JournalSection: View {
                                 isEntry: false,
                                 wineName: exit.wineName,
                                 label: "Dernière sortie le \(exit.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
-                                position: exit.position
+                                position: exit.position,
+                                memberName: exit.memberName
                             )
                         }
                         .tint(.primary)
@@ -61,6 +63,8 @@ extension JournalSection {
         let position: String
         let wineId: String
         let date: Date
+        /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+        var memberName: String? = nil
     }
 }
 
@@ -68,7 +72,7 @@ extension JournalSection {
     JournalSection(
         events: [
             .init(isEntry: true, wineName: "Château Margaux 2018", position: "A3", wineId: "1", date: Date()),
-            .init(isEntry: false, wineName: "Pouilly-Fumé 2021", position: "B1", wineId: "2", date: Date()),
+            .init(isEntry: false, wineName: "Pouilly-Fumé 2021", position: "B1", wineId: "2", date: Date(), memberName: "Marie"),
         ],
         onEventTapped: { _ in }
     )

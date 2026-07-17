@@ -3,11 +3,13 @@ import SwiftUI
 struct JournalEventRow<Title: View>: View {
     let isEntry: Bool
     let position: String
+    let memberName: String?
     let title: Title
 
-    init(isEntry: Bool, position: String, @ViewBuilder title: () -> Title) {
+    init(isEntry: Bool, position: String, memberName: String? = nil, @ViewBuilder title: () -> Title) {
         self.isEntry = isEntry
         self.position = position
+        self.memberName = memberName
         self.title = title()
     }
 
@@ -27,6 +29,10 @@ struct JournalEventRow<Title: View>: View {
                 Text(isEntry ? "Entrée" : "Sortie")
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let memberName {
+                    MemberBadge(name: memberName)
+                        .padding(.top, 2)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -43,6 +49,9 @@ struct JournalEventRow<Title: View>: View {
         }
         JournalEventRow(isEntry: false, position: "C5") {
             Text("Cotes de Provence 2022")
+        }
+        JournalEventRow(isEntry: true, position: "B2", memberName: "Marie") {
+            Text("Sancerre 2021")
         }
     }
 }

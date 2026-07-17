@@ -41,6 +41,10 @@ query Dashboard {
       wineBeverageType
       wineColor
       position
+      actor {
+        displayName
+        isMine
+      }
     }
     history {
       type
@@ -50,6 +54,10 @@ query Dashboard {
       wineBeverageType
       wineColor
       position
+      actor {
+        displayName
+        isMine
+      }
     }
   }
 }

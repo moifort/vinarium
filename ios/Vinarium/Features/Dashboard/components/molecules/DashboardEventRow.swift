@@ -5,6 +5,8 @@ struct DashboardEventRow: View {
     let wineName: String
     let label: String
     let position: String
+    /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+    var memberName: String? = nil
 
     var body: some View {
         // Même recette que les autres rows : icône alignée en haut, colonne texte
@@ -23,6 +25,10 @@ struct DashboardEventRow: View {
                 Text(label)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                if let memberName {
+                    MemberBadge(name: memberName)
+                        .padding(.top, 2)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -45,7 +51,8 @@ struct DashboardEventRow: View {
             isEntry: false,
             wineName: "Pouilly-Fum\u{00E9} 2021",
             label: "Derni\u{00E8}re sortie",
-            position: "B1"
+            position: "B1",
+            memberName: "Marie"
         )
     }
     .background(Color(.systemGray6))

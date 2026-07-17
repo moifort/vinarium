@@ -50,6 +50,10 @@ query CellarHistory($limit: Int, $offset: Int) {
       wineBeverageType
       wineColor
       position
+      actor {
+        displayName
+        isMine
+      }
     }
     hasMore
   }

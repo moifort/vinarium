@@ -36,6 +36,8 @@ struct HistoryEvent: Codable, Identifiable, Sendable {
     let wineBeverageType: BeverageType
     let wineColor: WineColor?
     let position: String
+    /// Le membre du foyer qui a fait le mouvement, nil quand c'est soi-même.
+    let memberName: String?
 
     var id: String { "\(wineId)-\(type.rawValue)-\(date.timeIntervalSince1970)" }
 }

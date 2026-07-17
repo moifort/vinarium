@@ -33,7 +33,11 @@ struct JournalEventList: View {
                             Button {
                                 onEventTapped(event.wineId)
                             } label: {
-                                JournalEventRow(isEntry: event.isEntry, position: event.position) {
+                                JournalEventRow(
+                                    isEntry: event.isEntry,
+                                    position: event.position,
+                                    memberName: event.memberName
+                                ) {
                                     Text(event.title)
                                 }
                             }
@@ -63,6 +67,8 @@ extension JournalEventList {
         let wineId: String
         let title: String
         let position: String
+        /// Le membre qui a fait le mouvement, nil quand c'est soi-même.
+        var memberName: String? = nil
     }
 }
 
@@ -71,7 +77,7 @@ extension JournalEventList {
         events: [
             .init(id: "1-in", date: .now, isEntry: true, wineId: "1", title: "Chateau Margaux 2018", position: "A1"),
             .init(id: "2-in", date: .now, isEntry: true, wineId: "2", title: "Pouilly-Fume 2021", position: "B3"),
-            .init(id: "3-out", date: .now.addingTimeInterval(-86400), isEntry: false, wineId: "3", title: "Cotes de Provence 2022", position: "C5"),
+            .init(id: "3-out", date: .now.addingTimeInterval(-86400), isEntry: false, wineId: "3", title: "Cotes de Provence 2022", position: "C5", memberName: "Marie"),
         ],
         onEventTapped: { _ in }
     )

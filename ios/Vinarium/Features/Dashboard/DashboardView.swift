@@ -63,7 +63,7 @@ struct DashboardView: View {
                 .init(id: favorite.id, beverageType: favorite.beverageType, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice, rating: favorite.rating)
             },
             events: data.history.map { event in
-                .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId, date: event.date)
+                .init(isEntry: event.isEntry, wineName: event.wineName, position: event.position, wineId: event.wineId, date: event.date, memberName: event.memberName)
             }
         )
     }

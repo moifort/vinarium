@@ -138,7 +138,8 @@ struct CellarView: View {
                 isEntry: event.type == .entry,
                 wineId: event.wineId,
                 title: event.wineName,
-                position: event.position
+                position: event.position,
+                memberName: event.memberName
             )
         }
     }

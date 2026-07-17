@@ -79,7 +79,8 @@ enum CellarAPI {
                 wineName: e.beverageName,
                 wineBeverageType: BeverageType(graphql: e.wineBeverageType),
                 wineColor: e.wineColor.map { WineColor(graphql: $0) },
-                position: e.position
+                position: e.position,
+                memberName: e.actor.isMine ? nil : e.actor.displayName
             )
         }
         return HistoryPage(events: events, hasMore: data.journalEvents.hasMore)
