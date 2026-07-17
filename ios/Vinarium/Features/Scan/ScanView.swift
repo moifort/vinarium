@@ -176,7 +176,6 @@ struct ScanView: View {
         .animation(.easeInOut(duration: 0.3), value: viewModel.step)
         .sheet(isPresented: $viewModel.noResultShown) {
             ScanNoResultPage()
-                .presentationDetents([.medium])
         }
         .onChange(of: selectedPhoto) {
             guard let item = selectedPhoto else { return }

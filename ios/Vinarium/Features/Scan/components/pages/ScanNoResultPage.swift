@@ -6,40 +6,24 @@ struct ScanNoResultPage: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 24) {
-            Image(systemName: "text.magnifyingglass")
-                .font(.system(size: 34, weight: .medium))
-                .foregroundStyle(.secondary)
-                .frame(width: 88, height: 88)
-                .background(Color(.secondarySystemBackground), in: .circle)
-
-            Text("Aucun résultat")
-                .font(.title2.weight(.semibold))
-
-            Button {
-                dismiss()
-            } label: {
-                Text("Réessayer")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
+        NavigationStack {
+            ContentUnavailableView {
+                Label("Aucune étiquette détectée", systemImage: "text.magnifyingglass")
+            } description: {
+                Text("L'IA n'a rien trouvé à identifier ici. Réessaie avec une photo plus nette.")
+            } actions: {
+                Button("Réessayer") { dismiss() }
+                    .buttonStyle(.glassProminent)
+                    .controlSize(.large)
+                    .padding(.top, 44)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
-            .padding(.horizontal, 24)
-            .padding(.top, 8)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .overlay(alignment: .topTrailing) {
-            Button {
-                dismiss()
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 30, height: 30)
-                    .background(Color(.secondarySystemBackground), in: .circle)
+            .navigationTitle("Analyse")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Fermer", systemImage: "xmark") { dismiss() }
+                }
             }
-            .padding()
         }
     }
 }
@@ -49,6 +33,5 @@ struct ScanNoResultPage: View {
         .ignoresSafeArea()
         .sheet(isPresented: .constant(true)) {
             ScanNoResultPage()
-                .presentationDetents([.medium])
         }
 }
