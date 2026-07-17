@@ -101,8 +101,8 @@ struct ScanView: View {
                     }
                 }
 
-            case .scanning:
-                ScanAnalyzingPage()
+            case .scanning(let imageData):
+                ScanAnalyzingPage(imageData: imageData)
                     .transition(.opacity.combined(with: .scale(scale: 0.95)))
 
             case .review(let result, let imageData):
@@ -177,7 +177,7 @@ struct ScanView: View {
         .onChange(of: selectedPhoto) {
             guard let item = selectedPhoto else { return }
             selectedPhoto = nil
-            viewModel.step = .scanning
+            viewModel.step = .scanning(nil)
             Task {
                 guard let data = try? await item.loadTransferable(type: Data.self) else {
                     viewModel.step = .camera
@@ -236,7 +236,6 @@ struct ScanView: View {
                 return image.resized(maxDimension: 800).jpegData(compressionQuality: 0.6)
             }.value
             guard let jpeg else { return }
-            viewModel.step = .scanning
             viewModel.capturePhoto(jpeg)
         }
     }

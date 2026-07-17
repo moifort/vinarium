@@ -3,7 +3,10 @@ import SwiftUI
 
 enum ScanStep {
     case camera
-    case scanning
+    /// Analyse IA en cours. Porte la photo (JPEG déjà redimensionné) pour que
+    /// l'écran d'attente la garde affichée en fond : le picker photo bascule ici
+    /// avec `nil` le temps de charger/redimensionner, puis la photo est fournie.
+    case scanning(Data?)
     case review(ScanResult, Data)
     case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
     case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
@@ -39,7 +42,7 @@ final class ScanViewModel {
     private var createdWine: Wine?
 
     func capturePhoto(_ imageData: Data) {
-        step = .scanning
+        step = .scanning(imageData)
         error = nil
 
         Task {
