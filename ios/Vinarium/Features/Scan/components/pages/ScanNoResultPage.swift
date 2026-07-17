@@ -25,12 +25,11 @@ struct ScanNoResultPage: View {
             }
 
             ContentUnavailableView {
-                Label("Aucun résultat", systemImage: "wineglass")
-            } description: {
-                Text("L'étiquette n'a pas pu être identifiée. Réessaie avec une photo plus nette et bien cadrée.")
+                Label("Aucun résultat n'a été trouvé", systemImage: "wineglass")
             } actions: {
                 Button("Réessayer", action: onRetry)
                     .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
             }
         }
         .ignoresSafeArea()
