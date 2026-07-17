@@ -1,4 +1,4 @@
-name: Tests
+name: Build
 
 on:
   push:
@@ -13,9 +13,10 @@ jobs:
   # The app never compiled outside a release until now: release-ios.yml only fires on
   # an `ios-v*` tag, so a broken build (or a schema change the generated Apollo code
   # no longer matches) surfaced while shipping to the App Store. This builds the same
-  # way, on the same runner, minus signing and uploading.
+  # way, on the same runner, minus signing and uploading. macos-26 is a standard
+  # runner, so this costs nothing: Actions is free on public repositories.
   ios:
-    name: 📱 iOS build
+    name: 📱 iOS
     runs-on: macos-26
     timeout-minutes: 30
     steps:
