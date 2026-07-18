@@ -8,11 +8,16 @@ builder.mutationField('scanBeverage', (t) =>
   t.field({
     type: ScanResultType,
     description:
-      'Analyze a beverage label image (base64-encoded JPEG) and return structured fields. The result is cached server-side by SHA-256, so the same label scanned twice avoids re-calling Claude / Gemini.',
+      'Extract structured beverage details from a bottle-label photo using AI.\n\n' +
+      'Reads a base64-encoded JPEG with a vision model (Gemini) and, when a beverage is ' +
+      'recognized, enriches it with a web search. The result is cached server-side by SHA-256, so ' +
+      'scanning the same label twice avoids re-calling the models. Check `recognized` on the ' +
+      'result: false means no beverage was identified. Fails with `IMAGE_TOO_LARGE` above the ' +
+      '10 MB limit or `SCAN_FAILED` when the model call errors.',
     args: {
       imageBase64: t.arg.string({
         required: true,
-        description: 'JPEG image, base64-encoded (no data URL prefix)',
+        description: 'Bottle-label JPEG, base64-encoded (no data URL prefix), up to 10 MB',
       }),
     },
     resolve: async (_root, { imageBase64 }) => {

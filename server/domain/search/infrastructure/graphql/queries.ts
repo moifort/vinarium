@@ -9,15 +9,23 @@ builder.queryField('searchBeverages', (t) =>
   t.field({
     type: SearchResultsType,
     description:
-      'Search the whole collection by name, producer, subtype, region, vintage or person, ' +
-      'ranked by relevance. Spans the viewer’s wines plus household members’ wines placed ' +
-      'in the shared cellar; tastings, gifts and recommendations stay the viewer’s own. ' +
-      'An empty query with facet filters browses by filters alone; ' +
-      'an empty query with no filter returns nothing.',
+      'Relevance-ranked faceted search across the whole collection.\n\n' +
+      'Matches on name, producer, subtype, region, vintage or associated person, ranked by ' +
+      "relevance. Spans the viewer's own wines plus household members' wines placed in the " +
+      "shared cellar; tastings, gifts and recommendations stay the viewer's own. An empty query " +
+      'with facet filters browses by filters alone; an empty query with no filter returns nothing.',
     args: {
-      query: t.arg.string({ description: 'Free text — case- and accent-insensitive' }),
-      filters: t.arg({ type: SearchFiltersInput, description: 'Combinable facet filters' }),
-      limit: t.arg.int({ defaultValue: 50, description: 'Max hits returned' }),
+      query: t.arg.string({
+        description: 'Free-text query, case- and accent-insensitive; empty to browse by filters',
+      }),
+      filters: t.arg({
+        type: SearchFiltersInput,
+        description: 'Combinable facet filters applied on top of the text query',
+      }),
+      limit: t.arg.int({
+        defaultValue: 50,
+        description: 'Maximum number of hits returned (defaults to 50)',
+      }),
     },
     resolve: async (_root, args, { userId }) => {
       const filters: SearchFilters = {

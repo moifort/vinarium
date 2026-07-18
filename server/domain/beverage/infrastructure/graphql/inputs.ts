@@ -2,66 +2,89 @@ import { builder } from '~/domain/shared/graphql/builder'
 import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
 
 export const AddBeverageInput = builder.inputType('AddBeverageInput', {
-  description: 'Manually add a beverage to the catalog',
+  description:
+    'The fields accepted when manually adding a beverage.\n\n' +
+    'Only `name` is required. The wine, purchase and place fields are flat here and get ' +
+    'nested into the stored `Beverage`; the wine fields are ignored for a non-wine type. ' +
+    'A wine requires a `color`, and any `subtype` must be valid for the `beverageType`.',
   fields: (t) => ({
-    name: t.field({ type: 'BeverageName', required: true }),
+    name: t.field({ type: 'BeverageName', required: true, description: 'Display name; required' }),
     beverageType: t.field({
       type: BeverageTypeEnum,
-      description: 'Kind of beverage — defaults to WINE when absent',
+      description: 'Kind of beverage; defaults to WINE when absent',
     }),
     color: t.field({
       type: WineColorEnum,
-      description: 'Beverage color — required when the beverage is a wine',
+      description: 'Wine color; required when the beverage is a wine',
     }),
     subtype: t.field({
       type: BeverageSubtypeEnum,
-      description: 'Structured subtype — must be valid for the beverage type',
+      description: 'Structured subtype; must be valid for the beverage type',
     }),
     alcoholContent: t.field({ type: 'Percentage', description: 'Alcohol by volume (% vol)' }),
-    vintage: t.field({ type: 'Year' }),
-    producer: t.field({ type: 'Producer' }),
-    appellation: t.field({ type: 'Appellation' }),
-    region: t.field({ type: 'Region' }),
-    country: t.field({ type: 'Country' }),
-    grapeVarieties: t.field({ type: ['GrapeVariety'] }),
-    classification: t.field({ type: 'Classification' }),
-    purchasePrice: t.field({ type: 'Eur' }),
-    purchaseDate: t.field({ type: 'DateTime' }),
-    drinkFrom: t.field({ type: 'Year' }),
-    drinkUntil: t.field({ type: 'Year' }),
-    notes: t.field({ type: 'Notes' }),
-    giftedBy: t.field({ type: 'PersonName' }),
-    servingTemperature: t.field({ type: 'Celsius' }),
-    latitude: t.field({ type: 'Latitude' }),
-    longitude: t.field({ type: 'Longitude' }),
-    placeName: t.field({ type: 'PlaceName' }),
+    vintage: t.field({ type: 'Year', description: 'Wine harvest year' }),
+    producer: t.field({ type: 'Producer', description: 'Maker of the beverage' }),
+    appellation: t.field({ type: 'Appellation', description: 'Wine appellation' }),
+    region: t.field({ type: 'Region', description: 'Region the beverage comes from' }),
+    country: t.field({ type: 'Country', description: 'Country the beverage comes from' }),
+    grapeVarieties: t.field({ type: ['GrapeVariety'], description: 'Grape varieties of the wine' }),
+    classification: t.field({ type: 'Classification', description: 'Wine classification' }),
+    purchasePrice: t.field({ type: 'Eur', description: 'Price paid for the bottle, in euros' }),
+    purchaseDate: t.field({ type: 'DateTime', description: 'Date the bottle was acquired' }),
+    drinkFrom: t.field({ type: 'Year', description: 'First year the wine is ready to drink' }),
+    drinkUntil: t.field({ type: 'Year', description: 'Last year the wine is at its best' }),
+    notes: t.field({ type: 'Notes', description: 'Free-form personal notes' }),
+    giftedBy: t.field({
+      type: 'PersonName',
+      description: 'Name of the person who gave the bottle',
+    }),
+    servingTemperature: t.field({
+      type: 'Celsius',
+      description: 'Recommended serving temperature, in degrees Celsius',
+    }),
+    latitude: t.field({ type: 'Latitude', description: 'Latitude of the purchase place' }),
+    longitude: t.field({ type: 'Longitude', description: 'Longitude of the purchase place' }),
+    placeName: t.field({ type: 'PlaceName', description: 'Name of the place of purchase' }),
   }),
 })
 
 export const UpdateBeverageInput = builder.inputType('UpdateBeverageInput', {
-  description: 'Update an existing beverage. Absent fields keep their current value.',
+  description:
+    'The fields accepted when updating an existing beverage.\n\n' +
+    'Every field is optional; an absent field keeps its current value. The same wine, ' +
+    'purchase and place flattening and the same color and subtype validity rules as ' +
+    '`AddBeverageInput` apply.',
   fields: (t) => ({
-    name: t.field({ type: 'BeverageName' }),
-    beverageType: t.field({ type: BeverageTypeEnum }),
-    color: t.field({ type: WineColorEnum }),
-    subtype: t.field({ type: BeverageSubtypeEnum }),
+    name: t.field({ type: 'BeverageName', description: 'New display name' }),
+    beverageType: t.field({ type: BeverageTypeEnum, description: 'New kind of beverage' }),
+    color: t.field({ type: WineColorEnum, description: 'New wine color' }),
+    subtype: t.field({
+      type: BeverageSubtypeEnum,
+      description: 'New structured subtype; must be valid for the beverage type',
+    }),
     alcoholContent: t.field({ type: 'Percentage', description: 'Alcohol by volume (% vol)' }),
-    vintage: t.field({ type: 'Year' }),
-    producer: t.field({ type: 'Producer' }),
-    appellation: t.field({ type: 'Appellation' }),
-    region: t.field({ type: 'Region' }),
-    country: t.field({ type: 'Country' }),
-    grapeVarieties: t.field({ type: ['GrapeVariety'] }),
-    classification: t.field({ type: 'Classification' }),
-    purchasePrice: t.field({ type: 'Eur' }),
-    purchaseDate: t.field({ type: 'DateTime' }),
-    drinkFrom: t.field({ type: 'Year' }),
-    drinkUntil: t.field({ type: 'Year' }),
-    notes: t.field({ type: 'Notes' }),
-    giftedBy: t.field({ type: 'PersonName' }),
-    servingTemperature: t.field({ type: 'Celsius' }),
-    latitude: t.field({ type: 'Latitude' }),
-    longitude: t.field({ type: 'Longitude' }),
-    placeName: t.field({ type: 'PlaceName' }),
+    vintage: t.field({ type: 'Year', description: 'Wine harvest year' }),
+    producer: t.field({ type: 'Producer', description: 'Maker of the beverage' }),
+    appellation: t.field({ type: 'Appellation', description: 'Wine appellation' }),
+    region: t.field({ type: 'Region', description: 'Region the beverage comes from' }),
+    country: t.field({ type: 'Country', description: 'Country the beverage comes from' }),
+    grapeVarieties: t.field({ type: ['GrapeVariety'], description: 'Grape varieties of the wine' }),
+    classification: t.field({ type: 'Classification', description: 'Wine classification' }),
+    purchasePrice: t.field({ type: 'Eur', description: 'Price paid for the bottle, in euros' }),
+    purchaseDate: t.field({ type: 'DateTime', description: 'Date the bottle was acquired' }),
+    drinkFrom: t.field({ type: 'Year', description: 'First year the wine is ready to drink' }),
+    drinkUntil: t.field({ type: 'Year', description: 'Last year the wine is at its best' }),
+    notes: t.field({ type: 'Notes', description: 'Free-form personal notes' }),
+    giftedBy: t.field({
+      type: 'PersonName',
+      description: 'Name of the person who gave the bottle',
+    }),
+    servingTemperature: t.field({
+      type: 'Celsius',
+      description: 'Recommended serving temperature, in degrees Celsius',
+    }),
+    latitude: t.field({ type: 'Latitude', description: 'Latitude of the purchase place' }),
+    longitude: t.field({ type: 'Longitude', description: 'Longitude of the purchase place' }),
+    placeName: t.field({ type: 'PlaceName', description: 'Name of the place of purchase' }),
   }),
 })

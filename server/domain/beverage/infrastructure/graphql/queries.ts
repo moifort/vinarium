@@ -15,23 +15,25 @@ builder.queryField('beverages', (t) =>
   t.field({
     type: BeveragesType,
     description:
-      'A page of the viewer’s beverage list, filtered and sorted per view, plus any ' +
-      'household member’s wine currently placed in the shared cellar',
+      'A page of the viewer beverage list, filtered and sorted per view.\n\n' +
+      'The list also includes any household member wine currently placed in the shared ' +
+      'cellar. Pagination is cursor-less: read `hasMore`, then pass the last id as ' +
+      '`after` to fetch the next page.',
     args: {
       mode: t.arg({
         type: BeverageListModeEnum,
         defaultValue: 'all',
-        description: 'List preset: all beverages or the favorites shortlist',
+        description: 'List preset: all beverages, favorites, gifted or recommended',
       }),
       status: t.arg({
         type: BeverageStatusFilterEnum,
         defaultValue: 'all',
-        description: 'Restrict to a cellar status (in-cellar, consumed, …)',
+        description: 'Restrict to a cellar status (in-cellar, consumed)',
       }),
       color: t.arg({ type: WineColorEnum, description: 'Facet: keep only this wine color' }),
       beverageType: t.arg({
         type: BeverageTypeEnum,
-        description: 'Facet: keep only this beverage type (wine, beer, …)',
+        description: 'Facet: keep only this beverage type (wine, beer, ...)',
       }),
       subtype: t.arg({ type: BeverageSubtypeEnum, description: 'Facet: keep only this subtype' }),
       sort: t.arg({
@@ -69,9 +71,11 @@ builder.queryField('beverage', (t) =>
   t.field({
     type: BeverageType,
     nullable: true,
-    description: 'Get a single beverage by ID — the viewer’s own or a household member’s',
+    description:
+      'Fetch a single beverage by id, the viewer own or a household member one.\n\n' +
+      'Returns null when no such beverage is visible to the viewer.',
     args: {
-      id: t.arg({ type: 'BeverageId', required: true, description: 'Beverage to fetch' }),
+      id: t.arg({ type: 'BeverageId', required: true, description: 'Id of the beverage to fetch' }),
     },
     resolve: async (_root, { id }, { userId }) => {
       const beverage = await BeverageQuery.byIdForViewer(userId, id)

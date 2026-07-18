@@ -35,7 +35,11 @@ export type GraphQLContext = {
 
 const DateTimeScalar = new GraphQLScalarType({
   name: 'DateTime',
-  description: 'ISO 8601 date-time string',
+  description:
+    'A date and time serialized as an ISO 8601 string in UTC.\n\n' +
+    'On output a JavaScript `Date` is rendered as an ISO string; on input an ISO ' +
+    'string is parsed back into a `Date`. Used for record timestamps (`createdAt`, ' +
+    '`updatedAt`) and for a purchase date. Example: "2026-07-18T09:30:00.000Z".',
   serialize: (value: unknown) => (value instanceof Date ? value.toISOString() : value),
   parseValue: (value: unknown) => new Date(value as string),
 })

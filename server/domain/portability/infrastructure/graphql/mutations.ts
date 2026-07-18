@@ -6,11 +6,16 @@ import { ImportResultType } from './types'
 builder.mutationField('importData', (t) =>
   t.field({
     type: ImportResultType,
-    description: 'Replace all the current user records with the contents of a JSON envelope',
+    description:
+      'Restore a full account from an export envelope, replacing existing records.\n\n' +
+      'Consumes the JSON string produced by `exportData` and rewrites every domain from it, so ' +
+      'the operation is destructive: prior records are replaced, not merged. The envelope ' +
+      "`schemaVersion` must match the server's supported version. Returns the per-domain counts " +
+      'written.',
     args: {
       payload: t.arg.string({
         required: true,
-        description: 'JSON export envelope to restore for the current user',
+        description: 'JSON export envelope (from `exportData`) to restore for the current user',
       }),
     },
     resolve: async (_root, { payload }, { userId }) => {

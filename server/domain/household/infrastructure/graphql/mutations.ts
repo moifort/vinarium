@@ -52,12 +52,13 @@ builder.mutationField('createHouseholdInvitation', (t) =>
   t.field({
     type: HouseholdInvitationType,
     description:
-      'Generate an invitation code for the current user’s household, creating the household on first use',
+      "Generate an open invitation code for the signed-in user's household.\n\n" +
+      'The first call creates the household (the caller becomes its owner) and starts the sharing flow. Others redeem the returned code with `joinHousehold`; codes expire, and the owner can revoke them with `revokeHouseholdInvitation`.',
     args: {
       displayName: t.arg({
         type: 'PersonName',
         required: true,
-        description: 'Name the inviter is shown as in the household',
+        description: 'The name the inviter is shown as inside the household.',
       }),
     },
     resolve: async (_root, { displayName }, { userId }) => {
@@ -70,13 +71,18 @@ builder.mutationField('createHouseholdInvitation', (t) =>
 builder.mutationField('joinHousehold', (t) =>
   t.field({
     type: HouseholdType,
-    description: 'Join a household with an invitation code',
+    description:
+      'Redeem an invitation code to join its household and share the one cellar.\n\n' +
+      'On success the caller becomes a member and gets pooled access to the shared bottles; the updated household is returned. Fails when the code is invalid, expired, already used, revoked, or the user is already in a household.',
     args: {
-      code: t.arg.string({ required: true, description: 'Invitation code to redeem' }),
+      code: t.arg.string({
+        required: true,
+        description: 'The invitation code to redeem, as issued by createHouseholdInvitation.',
+      }),
       displayName: t.arg({
         type: 'PersonName',
         required: true,
-        description: 'Name the joining member is shown as',
+        description: 'The name the joining member is shown as inside the household.',
       }),
     },
     resolve: async (_root, { code, displayName }, { userId }) => {
@@ -92,7 +98,9 @@ builder.mutationField('joinHousehold', (t) =>
 builder.mutationField('leaveHousehold', (t) =>
   t.field({
     type: 'Boolean',
-    description: 'Leave the current household',
+    description:
+      'Leave the household the signed-in user belongs to.\n\n' +
+      'The user loses shared access and reverts to a solo cellar of their own bottles. Returns true on success; fails when the user is in no household.',
     resolve: async (_root, _args, { userId }) => {
       const result = await HouseholdCommand.leave(userId)
       return match(result)
@@ -106,9 +114,15 @@ builder.mutationField('leaveHousehold', (t) =>
 builder.mutationField('removeHouseholdMember', (t) =>
   t.field({
     type: HouseholdType,
-    description: 'Remove a member from the household (owner only)',
+    description:
+      'Remove another member from the household. Owner only.\n\n' +
+      'The removed member loses shared access and returns to a solo cellar; the updated household is returned. Fails when the caller is not the owner, the target is not a member, or the owner targets themselves (use leaveHousehold instead).',
     args: {
-      userId: t.arg({ type: 'UserId', required: true, description: 'Member to remove' }),
+      userId: t.arg({
+        type: 'UserId',
+        required: true,
+        description: 'The member to remove from the household.',
+      }),
     },
     resolve: async (_root, args, { userId }) => {
       const result = await HouseholdCommand.removeMember(userId, args.userId)
@@ -123,8 +137,15 @@ builder.mutationField('removeHouseholdMember', (t) =>
 builder.mutationField('revokeHouseholdInvitation', (t) =>
   t.field({
     type: 'Boolean',
-    description: 'Revoke an open invitation code',
-    args: { code: t.arg.string({ required: true, description: 'Invitation code to revoke' }) },
+    description:
+      'Revoke an open invitation code so it can no longer be redeemed.\n\n' +
+      'Used to cancel a code shared by mistake before anyone joins with it. Returns true on success; fails when the caller is not the owner or the code is invalid.',
+    args: {
+      code: t.arg.string({
+        required: true,
+        description: 'The still-open invitation code to invalidate.',
+      }),
+    },
     resolve: async (_root, { code }, { userId }) => {
       const result = await HouseholdCommand.revokeInvitation(userId, parseCode(code))
       return match(result)

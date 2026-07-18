@@ -5,7 +5,10 @@ import { ChangelogEntryType } from './types'
 builder.queryField('changelog', (t) =>
   t.field({
     type: [ChangelogEntryType],
-    description: 'Application changelog, most recent versions first',
+    description:
+      'Application release notes, one entry per version, most recent first.\n\n' +
+      'Served from the published changelog asset. Global (not user-scoped); the app uses it to ' +
+      'show what changed in each release.',
     resolve: () => ChangelogQuery.list(),
   }),
 )

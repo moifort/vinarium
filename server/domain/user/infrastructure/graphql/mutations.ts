@@ -9,12 +9,14 @@ import { MeType } from './types'
 builder.mutationField('completeOnboarding', (t) =>
   t.field({
     type: MeType,
-    description: 'Finish onboarding: save the user’s prénom and cellar dimensions',
+    description:
+      'Finish onboarding in one step: save the profile and provision the cellar grid.\n\n' +
+      'Writes the first name and creates the cellar from the given rows, columns, and zones, then returns the updated `Me` (with `onboardingCompleted` now true). Rejects out-of-range dimensions as BAD_USER_INPUT.',
     args: {
       input: t.arg({
         type: CompleteOnboardingInput,
         required: true,
-        description: 'The prénom and cellar dimensions to persist',
+        description: 'The first name and cellar dimensions to persist.',
       }),
     },
     resolve: async (_root, { input }, { userId }) => {

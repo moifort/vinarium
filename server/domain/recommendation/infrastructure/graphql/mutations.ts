@@ -6,17 +6,19 @@ import { RecommendationInput } from './inputs'
 builder.mutationField('addRecommendation', (t) =>
   t.field({
     type: 'Boolean',
-    description: 'Record a recommendation for a wine',
+    description:
+      'Attach a recommendation to a wine, recording who suggested it and an optional comment.\n\n' +
+      'Surfaces afterwards as the `Beverage.recommendation` satellite field. Returns true on success.',
     args: {
       beverageId: t.arg({
         type: 'BeverageId',
         required: true,
-        description: 'Wine being recommended',
+        description: 'The wine the recommendation is attached to.',
       }),
       input: t.arg({
         type: RecommendationInput,
         required: true,
-        description: 'Recommendation fields',
+        description: 'The recommender name and/or comment to save.',
       }),
     },
     resolve: async (_root, { beverageId, input }, { userId }) => {

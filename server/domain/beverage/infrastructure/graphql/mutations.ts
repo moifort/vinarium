@@ -80,9 +80,16 @@ const subtypeInvalid = () => badUserInput('This subtype does not fit the beverag
 builder.mutationField('addBeverage', (t) =>
   t.field({
     type: BeverageType,
-    description: 'Add a new beverage to the catalog',
+    description:
+      'Add a new beverage to the collection and return it.\n\n' +
+      'Fails with a bad-user-input error when a wine is missing its color, or when the ' +
+      'subtype does not fit the beverage type.',
     args: {
-      input: t.arg({ type: AddBeverageInput, required: true, description: 'New beverage fields' }),
+      input: t.arg({
+        type: AddBeverageInput,
+        required: true,
+        description: 'Fields of the new beverage',
+      }),
     },
     resolve: async (_root, { input }, { userId }) => {
       const clean = stripNulls(input)
@@ -105,9 +112,17 @@ builder.mutationField('addBeverage', (t) =>
 builder.mutationField('updateBeverage', (t) =>
   t.field({
     type: BeverageType,
-    description: 'Update an existing beverage',
+    description:
+      'Update an existing beverage and return it.\n\n' +
+      'Absent input fields keep their current value. Fails with not-found when the ' +
+      'beverage does not exist, or with bad-user-input when a wine is missing its color ' +
+      'or the subtype does not fit the beverage type.',
     args: {
-      id: t.arg({ type: 'BeverageId', required: true, description: 'Beverage to update' }),
+      id: t.arg({
+        type: 'BeverageId',
+        required: true,
+        description: 'Id of the beverage to update',
+      }),
       input: t.arg({
         type: UpdateBeverageInput,
         required: true,
@@ -132,8 +147,16 @@ builder.mutationField('deleteBeverage', (t) =>
   t.field({
     type: 'Boolean',
     description:
-      'Delete a beverage and all related data (cellar, tasting, gift, recommendation, journal)',
-    args: { id: t.arg({ type: 'BeverageId', required: true, description: 'Beverage to delete' }) },
+      'Delete a beverage and every related satellite record, then return true.\n\n' +
+      'Cascades to the cellar slot, tasting note, gift, recommendation and journal. ' +
+      'Fails with not-found when the beverage does not exist.',
+    args: {
+      id: t.arg({
+        type: 'BeverageId',
+        required: true,
+        description: 'Id of the beverage to delete',
+      }),
+    },
     resolve: async (_root, { id }, { userId }) => {
       const result = await BeverageUseCase.removeCompletely(userId, id)
       return match(result)

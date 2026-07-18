@@ -18,7 +18,7 @@ builder.queryField('cellarBottles', (t) =>
       limit: t.arg.int({ defaultValue: 15, description: 'Maximum bottles returned in the page' }),
       after: t.arg({
         type: 'BeverageId',
-        description: 'Cursor: return the page following this bottle’s beverage id',
+        description: "Cursor: return the page following this bottle's beverage id.",
       }),
     },
     resolve: (_root, args, { userId }) =>
