@@ -12,7 +12,9 @@ struct UpdateRequiredView: View {
             Text("Cette version de Vinarium n'est plus compatible avec le serveur. La dernière version est disponible sur l'App Store.")
         } actions: {
             Link("Mettre à jour", destination: appStoreURL)
+                .font(.headline)
                 .buttonStyle(.borderedProminent)
+                .controlSize(.large)
         }
     }
 }
