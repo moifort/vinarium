@@ -21,6 +21,20 @@ export default defineEventHandler(async (event) => {
 
   // Everything else (incl. /graphql): require a valid Firebase ID token.
   const auth = getHeader(event, 'authorization')
+
+  // Dev-only: let a browser reach Apollo Sandbox without a Firebase token.
+  // import.meta.dev is compile-time, so this block is tree-shaken out of prod builds.
+  if (import.meta.dev && !auth) {
+    const devUserId = config().devUserId
+    if (!devUserId)
+      throw createError({
+        statusCode: 401,
+        statusMessage: 'Dev auth bypass needs NITRO_DEV_USER_ID in .env (a Firebase UID)',
+      })
+    event.context.userId = UserId(devUserId)
+    return
+  }
+
   const token = auth?.startsWith('Bearer ') ? auth.slice(7) : null
   if (!token) throw createError({ statusCode: 401, statusMessage: 'Missing bearer token' })
 

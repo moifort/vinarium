@@ -12,6 +12,15 @@ const context = async () => ({ event, userId, loaders: beverageSatelliteLoaders(
 
 A missing `userId` yields a `401` before Apollo runs.
 
+## Local Development: Apollo Sandbox
+
+In dev (`bun run dev`), opening http://localhost:3000/graphql in a browser loads the embedded Apollo Sandbox: schema browser, docs, and a query runner. Two dev-only pieces make this work:
+
+- `server/plugins/02-graphql.ts` registers `ApolloServerPluginLandingPageLocalDefault({ embed: true })` under `import.meta.dev`.
+- `server/middleware/auth.ts` has a dev-only bypass: a request to `/graphql` with **no** `Authorization` header is authenticated as the Firebase UID from `NITRO_DEV_USER_ID` (set it in the gitignored `.env`). A request that does carry a `Bearer` token is still verified normally, and the whole bypass is tree-shaken out of production builds (`import.meta.dev`).
+
+Be aware that local dev talks to the **real `vinarium-prod` Firestore** through ADC: Sandbox queries read the actual data of that UID, and mutations run for real.
+
 ## Query — List
 
 Delegate to the domain `Query` namespace. Args carry `defaultValue`s and Pothos descriptions (visible in Apollo Sandbox):

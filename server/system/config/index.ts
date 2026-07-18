@@ -7,5 +7,6 @@ export const config = () => {
     adminToken: runtimeConfig.adminToken ? AdminToken(runtimeConfig.adminToken) : undefined,
     googleApiKey: GoogleApiKey(runtimeConfig.googleApiKey),
     sentryDsn: runtimeConfig.sentryDsn ? SentryDsn(runtimeConfig.sentryDsn) : undefined,
+    devUserId: runtimeConfig.devUserId || undefined,
   }
 }

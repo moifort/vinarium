@@ -1,4 +1,5 @@
-import { ApolloServer } from '@apollo/server'
+import { ApolloServer, type ApolloServerPlugin } from '@apollo/server'
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import * as Sentry from '@sentry/node'
 import { GraphQLError } from 'graphql'
 import type { GraphQLContext } from '~/domain/shared/graphql/builder'
@@ -24,10 +25,13 @@ const sentryErrorCapture = {
 }
 
 export default defineNitroPlugin(async () => {
+  const plugins: ApolloServerPlugin<GraphQLContext>[] = [sentryErrorCapture]
+  // Dev-only: serve the embedded Apollo Sandbox on GET /graphql (Accept: text/html).
+  if (import.meta.dev) plugins.push(ApolloServerPluginLandingPageLocalDefault({ embed: true }))
   const apollo = new ApolloServer<GraphQLContext>({
     schema,
     introspection: true,
-    plugins: [sentryErrorCapture],
+    plugins,
   })
   await apollo.start()
   setApollo(apollo)

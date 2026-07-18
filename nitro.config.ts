@@ -28,5 +28,6 @@ export default defineNitroConfig({
     googleApiKey: '',
     adminToken: '',
     sentryDsn: '',
+    devUserId: '',
   },
 })
