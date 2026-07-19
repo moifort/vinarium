@@ -117,7 +117,7 @@ Required environment variables (`.env`) :
 ```
 NITRO_GOOGLE_API_KEY=...
 NITRO_ADMIN_TOKEN=...
-NITRO_SENTRY_DSN=...    # optional
+NITRO_SENTRY_DSN=...    # optional, and ignored in dev: Sentry only runs in a built bundle
 ```
 
 ## iOS App

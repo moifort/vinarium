@@ -32,6 +32,10 @@ export default defineNitroPlugin(async () => {
     schema,
     introspection: true,
     plugins,
+    // Apollo is externalized in the bundle, so it would otherwise decide this from the
+    // runtime NODE_ENV, which nothing in infra/function.tf sets. Pin it to the
+    // compile-time flag so prod never returns stack traces to a client.
+    includeStacktraceInErrorResponses: import.meta.dev,
   })
   await apollo.start()
   setApollo(apollo)

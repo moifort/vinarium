@@ -3,12 +3,18 @@ import { instrumentDomains } from '#domain-instrumentation'
 import { config } from '~/system/config/index'
 
 export default defineNitroPlugin((nitroApp) => {
+  // Mirrors the iOS `#if DEBUG` gate in VinariumApp.startSentry: only the deployed
+  // build reports, so a local run never pollutes the production project.
+  // import.meta.dev is compile-time, so the guard costs nothing in the prod bundle
+  // and everything below it is tree-shaken out of dev builds.
+  if (import.meta.dev) return
+
   const { sentryDsn } = config()
   if (!sentryDsn) return
 
   Sentry.init({
     dsn: sentryDsn,
-    environment: process.env.NODE_ENV ?? 'development',
+    environment: 'production',
     tracesSampleRate: 1.0,
   })
 

@@ -73,7 +73,7 @@ variable "google_api_key" {
 }
 
 variable "sentry_dsn" {
-  description = "Sentry DSN for error reporting and tracing (empty disables Sentry). Exposed to the function as NITRO_SENTRY_DSN, read via runtimeConfig in the Nitro plugin."
+  description = "Sentry DSN for error reporting and tracing (empty disables Sentry). Exposed to the function as NITRO_SENTRY_DSN, read via runtimeConfig in the Nitro plugin. The plugin also skips Sentry entirely in dev builds, so this only ever takes effect in the deployed function."
   type        = string
   sensitive   = true
   default     = ""
