@@ -29,5 +29,8 @@ export default defineNitroConfig({
     adminToken: '',
     sentryDsn: '',
     devUserId: '',
+    appleAppId: '',
+    appleEnvironment: '',
+    premiumUserIds: '',
   },
 })

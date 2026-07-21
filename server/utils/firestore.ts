@@ -3,6 +3,7 @@ import type {
   DocumentReference,
   FirestoreDataConverter,
   QueryDocumentSnapshot,
+  Transaction,
   WriteBatch,
 } from 'firebase-admin/firestore'
 import { chunk } from 'lodash-es'
@@ -32,6 +33,12 @@ const toDate = (value: unknown): unknown => {
   }
   return obj
 }
+
+// Firestore rejects `undefined` field values outright. An absent domain field is
+// meant to disappear from the document, which is exactly what dropping the key
+// does on a full `set`.
+export const withoutAbsentFields = <T extends DocumentData>(data: T): T =>
+  Object.fromEntries(Object.entries(data).filter(([, value]) => value !== undefined)) as T
 
 // Firestore batches accept at most 500 operations.
 const BATCH_LIMIT = 400
@@ -114,3 +121,11 @@ export const atomically = async <T>(enlist: (batch: WriteBatch) => Promise<T>): 
   await batch.commit()
   return result
 }
+
+// Read-then-write in one go, with the read protected against a concurrent writer.
+// A batch cannot do this: its reads see pre-batch state, so two callers
+// incrementing the same counter would both read the same value and one increment
+// would be lost. Firestore retries the body on contention, so it must stay pure
+// beyond its own reads and writes.
+export const transactionally = <T>(run: (tx: Transaction) => Promise<T>): Promise<T> =>
+  db().runTransaction(run)
