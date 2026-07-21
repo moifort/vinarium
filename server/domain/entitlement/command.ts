@@ -1,0 +1,30 @@
+import * as repository from '~/domain/entitlement/infrastructure/repository'
+import { AppAccountToken, OriginalTransactionId, ProductId } from '~/domain/entitlement/primitives'
+import type { Entitlement } from '~/domain/entitlement/types'
+import type { UserId } from '~/domain/shared/types'
+import type { AppleTransaction } from '~/system/apple/types'
+
+export namespace EntitlementCommand {
+  // Write down what the App Store sold, from a transaction whose signature has
+  // already been checked. Overwrites in place: a renewal is the same entitlement
+  // with a later date, not a second one.
+  export const record = async (
+    userId: UserId,
+    transaction: AppleTransaction & { expiresAt: Date; appAccountToken: string },
+  ): Promise<Entitlement> =>
+    repository.save({
+      userId,
+      productId: ProductId(transaction.productId),
+      originalTransactionId: OriginalTransactionId(transaction.originalTransactionId),
+      appAccountToken: AppAccountToken(transaction.appAccountToken),
+      expiresAt: transaction.expiresAt,
+      ...(transaction.revokedAt ? { revokedAt: transaction.revokedAt } : {}),
+      updatedAt: new Date(),
+    })
+
+  // Everything this domain holds on one account, erased. The subscription itself
+  // is Apple's to end: deleting the entitlement stops the app believing in it, it
+  // does not stop the billing, which only the subscriber can from the App Store
+  // settings.
+  export const forget = (userId: UserId): Promise<void> => repository.removeBy(userId)
+}
