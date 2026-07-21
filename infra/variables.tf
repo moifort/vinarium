@@ -44,6 +44,19 @@ variable "ios_bundle_id" {
   default     = "com.polyforms.vinarium.app"
 }
 
+# In-app purchase — public values, not credentials
+variable "apple_app_id" {
+  description = "The app's numeric App Store id, needed to verify a Production App Store signature. Blank until the app has one, which pins verification to Sandbox."
+  type        = string
+  default     = ""
+}
+
+variable "premium_user_ids" {
+  description = "Comma-separated Firebase uids granted Premium without paying (the maker's own, a reviewer's). Not a credential, but a personal identifier, so it is passed in rather than defaulted."
+  type        = string
+  default     = ""
+}
+
 # Apple Sign-In — all required, comes from Apple Developer
 variable "apple_team_id" {
   description = "Apple Developer Team ID (10-char alphanum)"

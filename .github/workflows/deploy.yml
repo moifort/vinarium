@@ -60,6 +60,8 @@ jobs:
           google_api_key         = "${{ secrets.GEMINI_API_KEY }}"
           sentry_dsn             = "${{ secrets.SENTRY_DSN }}"
           admin_token            = "${{ secrets.ADMIN_TOKEN }}"
+          apple_app_id           = "${{ vars.APPLE_APP_ID }}"
+          premium_user_ids       = "${{ vars.PREMIUM_USER_IDS }}"
           EOF
 
       - name: Terraform init + apply
