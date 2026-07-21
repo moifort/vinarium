@@ -14,36 +14,42 @@ import { config } from '~/system/config/index'
 // to `Xcode` for the local StoreKit configuration file, whose payloads are signed
 // by a throwaway local certificate and cannot chain to Apple's roots).
 const environments = (): Environment[] => {
-  const pinned = config().appleEnvironment
-  return pinned ? [pinned] : [Environment.PRODUCTION, Environment.SANDBOX]
+  const { appleEnvironment, appleAppId } = config()
+  if (appleEnvironment) return [appleEnvironment]
+  // Apple's verifier refuses to be built for Production without the app's
+  // numeric id, and it could not check a Production signature without it
+  // anyway. Until App Store Connect has handed it over, Sandbox is all there
+  // is — which is exactly what TestFlight and review sign in.
+  return appleAppId ? [Environment.PRODUCTION, Environment.SANDBOX] : [Environment.SANDBOX]
 }
 
 // One verifier per environment, rebuilt per call: they are cheap, and a cached
 // one would outlive a configuration change in a long-running instance.
-const verifiers = () =>
-  environments().map(
-    (environment) =>
-      new SignedDataVerifier(
-        appleRootCertificates(),
-        // Online revocation checks call out to Apple on every verification. Off:
-        // a revoked receipt reaches us through the notification webhook, which is
-        // the channel built for it.
-        false,
-        environment,
-        BUNDLE_ID,
-        config().appleAppId,
-      ),
+const verifierFor = (environment: Environment) =>
+  new SignedDataVerifier(
+    appleRootCertificates(),
+    // Online revocation checks call out to Apple on every verification. Off: a
+    // revoked receipt reaches us through the notification webhook, which is the
+    // channel built for it.
+    false,
+    environment,
+    BUNDLE_ID,
+    config().appleAppId,
   )
 
 // Apple's library throws on an unverifiable payload; the domain speaks in
 // sentinels, so the boundary converts. Every environment is tried before giving
 // up — a payload signed for Sandbox simply fails the Production verifier.
+//
+// Building the verifier is inside the try as well: it throws on a configuration
+// it cannot honour, and a misconfiguration must read as "this did not verify",
+// never as a crash on the purchase path.
 const verifyAcrossEnvironments = async <T>(
   verify: (verifier: SignedDataVerifier) => Promise<T>,
 ): Promise<T | 'invalid-signature'> => {
-  for (const verifier of verifiers()) {
+  for (const environment of environments()) {
     try {
-      return await verify(verifier)
+      return await verify(verifierFor(environment))
     } catch {
       // Try the next environment.
     }
