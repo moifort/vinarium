@@ -177,6 +177,9 @@ struct ScanView: View {
         .sheet(isPresented: $viewModel.noResultShown) {
             ScanNoResultPage()
         }
+        .sheet(isPresented: $viewModel.paywallShown) {
+            PremiumSheet(trigger: .scanAllowanceSpent)
+        }
         .onChange(of: selectedPhoto) {
             guard let item = selectedPhoto else { return }
             selectedPhoto = nil

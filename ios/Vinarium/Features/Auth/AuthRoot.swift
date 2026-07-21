@@ -10,6 +10,9 @@ struct AuthRoot: View {
     @State private var session = AuthSession()
     @State private var gate = OnboardingGate()
     @State private var supportGate = AppSupportGate()
+    /// App-scoped: it listens to `Transaction.updates` for the whole lifetime of
+    /// the app, so a renewal landing mid-session is picked up wherever the user is.
+    @State private var subscriptions = SubscriptionStore()
     @Environment(\.scenePhase) private var scenePhase
 
     /// A pending invitation code, kept until the app is ready to present the join
@@ -28,7 +31,12 @@ struct AuthRoot: View {
             }
         }
         .environment(session)
+        .environment(subscriptions)
         .task { await supportGate.check() }
+        .task(id: session.user?.uid) {
+            // The plan is the server's answer, and it needs a signed-in caller.
+            if session.user != nil { await subscriptions.refresh() }
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await supportGate.check() } }
         }

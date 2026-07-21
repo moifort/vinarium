@@ -2,7 +2,9 @@ import SwiftUI
 
 struct SettingsHomeView: View {
     @Environment(AuthSession.self) private var authSession
+    @Environment(SubscriptionStore.self) private var subscriptions
     @Environment(\.dismiss) private var dismiss
+    @State private var premiumShown = false
 
     var body: some View {
         NavigationStack {
@@ -18,6 +20,20 @@ struct SettingsHomeView: View {
                             tint: .blue
                         )
                     }
+                }
+
+                Section {
+                    Button {
+                        premiumShown = true
+                    } label: {
+                        SettingsRow(
+                            icon: "sparkles",
+                            title: subscriptions.isPremium == true ? "Vinarium Premium" : "Découvrir Premium",
+                            subtitle: subscriptionSubtitle,
+                            tint: .orange
+                        )
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 Section("Application") {
@@ -68,6 +84,9 @@ struct SettingsHomeView: View {
             }
             .navigationTitle("Réglages")
             .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $premiumShown) {
+                PremiumSheet(trigger: .discover)
+            }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
@@ -78,6 +97,18 @@ struct SettingsHomeView: View {
 
     private var profileSubtitle: String? {
         authSession.user?.displayName ?? authSession.user?.email
+    }
+
+    /// Ce que l'abonnement donne aujourd'hui : le nombre de scans restants pour
+    /// un compte gratuit, la date d'échéance pour un abonné.
+    private var subscriptionSubtitle: String? {
+        guard let quota = subscriptions.quota else { return nil }
+        if quota.isPremium {
+            return "Scans illimités"
+        }
+        return quota.remaining == 0
+            ? "Aucun scan restant ce mois-ci"
+            : "\(quota.remaining) scan\(quota.remaining > 1 ? "s" : "") restant\(quota.remaining > 1 ? "s" : "") ce mois-ci"
     }
 
     private var appVersion: String {

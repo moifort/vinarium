@@ -21,6 +21,13 @@ enum GraphQLHelpers {
     /// missing data as `APIError`.
     private static func unwrap<O: GraphQLOperation>(_ response: GraphQLResponse<O>) throws -> O.Data {
         if let errors = response.errors, !errors.isEmpty {
+            // The server names what went wrong in `extensions.code`. Screens that
+            // react to a specific outcome (a spent scan allowance opening the
+            // paywall) match on the code; everything else falls back to the
+            // message, as before.
+            if let code = errors.compactMap({ $0.extensions?["code"] as? String }).first {
+                throw APIError.domain(code: code, messages: errors.compactMap(\.message))
+            }
             throw APIError.graphQL(messages: errors.compactMap(\.message))
         }
         guard let data = response.data else {
@@ -59,6 +66,15 @@ enum APIError: LocalizedError {
     case invalidResponse
     case httpError(Int)
     case graphQL(messages: [String])
+    /// A refusal the server named, e.g. `QUOTA_EXHAUSTED`. Carries the code so a
+    /// screen can act on it rather than only show its message.
+    case domain(code: String, messages: [String])
+
+    /// The code the server named, when it named one.
+    var domainCode: String? {
+        if case .domain(let code, _) = self { return code }
+        return nil
+    }
 
     var errorDescription: String? {
         switch self {
@@ -66,7 +82,7 @@ enum APIError: LocalizedError {
             return "Réponse invalide du serveur"
         case .httpError(let code):
             return "Erreur serveur (\(code))"
-        case .graphQL(let messages):
+        case .graphQL(let messages), .domain(_, let messages):
             return messages.joined(separator: " — ")
         }
     }

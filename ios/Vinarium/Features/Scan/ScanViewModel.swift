@@ -37,6 +37,9 @@ final class ScanViewModel {
     /// L'IA n'a rien reconnu sur la photo : le flux retombe sur la caméra et
     /// une sheet « aucun résultat » se présente par-dessus.
     var noResultShown = false
+    /// L'allocation de scans du mois est épuisée : le flux retombe sur la caméra
+    /// et le paywall se présente par-dessus, plutôt qu'une alerte d'erreur.
+    var paywallShown = false
     var isSaving = false
     var pendingLocation: DiscoveryLocationDraft?
     /// Vin déjà créé pendant cette session de review : si une écriture
@@ -57,6 +60,10 @@ final class ScanViewModel {
                     self.step = .camera
                     self.noResultShown = true
                 }
+            } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
+                // Ce n'est pas une panne : c'est l'offre qui s'arrête là.
+                self.step = .camera
+                self.paywallShown = true
             } catch {
                 self.error = reportError(error)
                 self.step = .camera
@@ -164,6 +171,7 @@ final class ScanViewModel {
         step = .camera
         error = nil
         noResultShown = false
+        paywallShown = false
         pendingLocation = nil
         createdWine = nil
     }
