@@ -744,6 +744,31 @@ type DrinkWindow {
 }
 
 """
+What the account is entitled to, and what the App Store sold to get there.
+
+Read it before starting a purchase: `appAccountToken` is what ties the payment back to this account, and a purchase made without it cannot be matched to anyone.
+"""
+type Entitlement {
+  """
+  The UUID to pass to StoreKit as the purchase’s account token, e.g. `"20099a54-f027-5426-b2f0-79d90a5050f1"`. Without it a purchase cannot be matched to this account, and syncing it will be refused.
+  """
+  appAccountToken: String!
+
+  """
+  When the paid period ends, e.g. `"2027-07-21T09:12:00.000Z"` — null when there is no subscription. A cancelled subscription keeps its Premium until this date.
+  """
+  expiresOn: DateTime
+
+  """The plan in force right now, e.g. `PREMIUM`"""
+  plan: Plan!
+
+  """
+  The subscription bought, e.g. `"com.polyforms.vinarium.app.premium.yearly"` — null when there is none
+  """
+  productId: String
+}
+
+"""
 An amount in euros, a non-negative number.
 
 Used for a bottle purchase price. Example: 24.9.
@@ -1307,12 +1332,37 @@ type Mutation {
   """
   Extract structured beverage details from a bottle-label photo using AI.
   
-  Reads a base64-encoded JPEG with a vision model (Gemini) and, when a beverage is recognized, enriches it with a web search. The result is cached server-side by SHA-256, so scanning the same label twice avoids re-calling the models. Check `recognized` on the result: false means no beverage was identified. Fails with `IMAGE_TOO_LARGE` above the 10 MB limit or `SCAN_FAILED` when the model call errors.
+  Reads a base64-encoded JPEG with a vision model (Gemini) and, when a beverage is recognized, enriches it with a web search. The result is cached server-side by SHA-256, so scanning the same label twice avoids re-calling the models. Check `recognized` on the result: false means no beverage was identified.
+  
+  Spends one scan of the monthly allowance (see `me.quota`), and only when the models are really called: a cached label is free. Fails with `QUOTA_EXHAUSTED` once the allowance is used up, `IMAGE_TOO_LARGE` above the 10 MB limit, or `SCAN_FAILED` when the model call errors.
   """
   scanBeverage(
     """Bottle-label JPEG, base64-encoded (no data URL prefix), up to 10 MB"""
     imageBase64: String!
   ): ScanResult!
+
+  """
+  Hand over a transaction the App Store signed: after a purchase, after a restore, and on every launch while a subscription is running.
+  
+  The signature is verified against Apple’s root certificates and the purchase must carry this account’s `appAccountToken`, so this is what grants Premium: nothing else does.
+  
+  Fails with `INVALID_TRANSACTION` when the signature does not check out, and `TRANSACTION_NOT_YOURS` when the purchase belongs to another account.
+  
+  ```graphql
+  mutation {
+    syncEntitlement(signedTransaction: "eyJhbGciOi...") {
+      plan
+      expiresOn
+    }
+  }
+  ```
+  """
+  syncEntitlement(
+    """
+    The JWS representation of the StoreKit transaction, e.g. the `jwsRepresentation` of a verified entitlement
+    """
+    signedTransaction: String!
+  ): Entitlement!
 
   """
   Update an existing beverage and return it.
@@ -1371,6 +1421,23 @@ A place name, a string of 1 to 200 characters.
 The name of the shop or place where a bottle was bought. Example: "La Cave du Marais".
 """
 scalar PlaceName
+
+"""
+What an account is entitled to.
+
+Everyone starts on `FREE`, and `PREMIUM` is only ever the result of a purchase the App Store signed: an expired, refunded or cancelled-and-elapsed subscription reads back as `FREE`.
+"""
+enum Plan {
+  """
+  The plan every account starts on. The app is fully usable; only the AI scan is metered against a monthly allowance.
+  """
+  FREE
+
+  """
+  A running subscription. Scanning is unlimited, within a fair-use ceiling.
+  """
+  PREMIUM
+}
 
 """
 The maker of a beverage, a non-empty string: a chateau, domaine, distillery or brewery.
@@ -1466,6 +1533,22 @@ type Query {
   dashboard: Dashboard!
 
   """
+  What the account is entitled to today, and the account token to start a purchase with. The app reads this before showing the subscription sheet.
+  
+  ```graphql
+  query {
+    entitlement {
+      plan
+      appAccountToken
+      productId
+      expiresOn
+    }
+  }
+  ```
+  """
+  entitlement: Entitlement!
+
+  """
   GDPR-style full export of the current user account as a JSON string.
   
   Serializes every record the user owns (wines, cellar placements, tastings, recommendations, gifts, journal) into one envelope stamped with a `schemaVersion`. The string is the exact payload `importData` consumes, enabling a lossless export/import round-trip.
@@ -1496,6 +1579,23 @@ type Query {
   myHousehold: Household
 
   """
+  This month’s scan allowance for the signed-in account. The scan screen reads it to show what is left, and the paywall to explain what a subscription lifts.
+  
+  ```graphql
+  query {
+    quota {
+      plan
+      used
+      limit
+      remaining
+      renewsOn
+    }
+  }
+  ```
+  """
+  quota: Quota!
+
+  """
   Relevance-ranked faceted search across the whole collection.
   
   Matches on name, producer, subtype, region, vintage or associated person, ranked by relevance. Spans the viewer's own wines plus household members' wines placed in the shared cellar; tastings, gifts and recommendations stay the viewer's own. An empty query with facet filters browses by filters alone; an empty query with no filter returns nothing.
@@ -1515,6 +1615,32 @@ type Query {
 
   """Suggest the next free cellar position (null if cellar is full)"""
   suggestCellarPosition: CellarPosition
+}
+
+"""
+The monthly scan allowance: what has been spent, what is left, and when it renews.
+
+Only the AI scan is metered. Adding a bottle by hand, the cellar, tastings and sharing are unlimited on every plan, so a spent allowance never stops the app being used.
+"""
+type Quota {
+  """How many the plan allows in a month, e.g. `5`"""
+  limit: Int!
+
+  """The plan the allowance is read for, e.g. `FREE`"""
+  plan: Plan!
+
+  """
+  How many are left, e.g. `3`. Never negative: an allowance already overspent reads as `0`.
+  """
+  remaining: Int!
+
+  """
+  When the counter goes back to zero: midnight UTC on the 1st of the next month, e.g. `"2026-08-01T00:00:00.000Z"`
+  """
+  renewsOn: DateTime!
+
+  """How many scans were spent this month, e.g. `2`"""
+  used: Int!
 }
 
 """

@@ -19,6 +19,11 @@ export default defineEventHandler(async (event) => {
   // Public app configuration: read by the update gate, possibly signed out.
   if (path === '/app-config' || path.startsWith('/app-config?')) return
 
+  // App Store Server Notifications. Apple calls this with no bearer token of
+  // ours; its proof of origin is the JWS signature on the payload, which the
+  // route verifies against Apple's root certificates before acting on anything.
+  if (path.startsWith('/apple/notifications')) return
+
   // Everything else (incl. /graphql): require a valid Firebase ID token.
   const auth = getHeader(event, 'authorization')
 

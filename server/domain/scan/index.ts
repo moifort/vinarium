@@ -10,25 +10,51 @@ import {
 } from '~/domain/scan/primitives'
 import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
 import { config } from '~/system/config/index'
+import { createLogger } from '~/system/logger'
 
 const GEMINI_API_URL =
   'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
 
+const logger = createLogger('scan')
+
+// What Gemini says the call cost. Thinking tokens bill at the output rate and are
+// the largest line on a scan, so they are logged apart: the free allowance and
+// the price are sized on these numbers (docs/freemium-economics.md), and they
+// were estimated, never measured.
+type GeminiUsage = {
+  promptTokenCount?: number
+  candidatesTokenCount?: number
+  thoughtsTokenCount?: number
+  totalTokenCount?: number
+}
+
+const recordUsage = (step: 'vision' | 'enrichment', usage: GeminiUsage | undefined) => {
+  if (!usage) return
+  logger.info(
+    `${step}: ${usage.promptTokenCount ?? 0} in, ${usage.candidatesTokenCount ?? 0} out, ${usage.thoughtsTokenCount ?? 0} thinking`,
+  )
+}
+
 export namespace Scan {
-  export const scanWithCache = async (imageBuffer: Buffer) => {
+  // `cacheHit` is what the quota is metered on: a cached label costs nothing, so
+  // it must not spend anyone's allowance. Only a scan that really reached Gemini
+  // is billed to us, and only that one is billed to the caller.
+  export const scanWithCache = async (
+    imageBuffer: Buffer,
+  ): Promise<{ result: ScanResult; cacheHit: boolean }> => {
     const imageHash = hashImage(imageBuffer)
     const cached = await repository.findBy(imageHash)
     // Re-parse cached results: entries written before multi-beverage support
     // have no beverageType and get the wine default.
-    if (cached) return ScanResultSchema.parse(cached.result)
+    if (cached) return { result: ScanResultSchema.parse(cached.result), cacheHit: true }
     const scanResult = await scanLabel(imageBuffer)
     // Nothing recognized: skip the enrichment search (pointless) and skip caching
     // so a fresh attempt on the same image starts over rather than reusing a miss.
-    if (!scanResult.recognized) return scanResult
+    if (!scanResult.recognized) return { result: scanResult, cacheHit: false }
     const enriched = await enrichWithSearch(scanResult)
     // Best-effort cache: a failed write only costs a re-scan on the next hit.
     repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
-    return enriched
+    return { result: enriched, cacheHit: false }
   }
 
   const scanLabel = async (imageBuffer: Buffer): Promise<ScanResult> => {
@@ -37,6 +63,7 @@ export namespace Scan {
 
     const response = await $fetch<{
       candidates: { content: { parts: { text?: string }[] } }[]
+      usageMetadata?: GeminiUsage
     }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -159,6 +186,8 @@ export namespace Scan {
       },
     })
 
+    recordUsage('vision', response.usageMetadata)
+
     const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
     if (!text) throw new Error('Gemini did not return structured wine data')
 
@@ -218,6 +247,7 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
 
     const response = await $fetch<{
       candidates: { content: { parts: { text?: string }[] } }[]
+      usageMetadata?: GeminiUsage
     }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -226,6 +256,8 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
         tools: [{ google_search: {} }],
       },
     })
+
+    recordUsage('enrichment', response.usageMetadata)
 
     const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
     if (!text) return scanResult

@@ -35,10 +35,3 @@ export const save = async (entitlement: Entitlement): Promise<Entitlement> => {
   evictFromRequestCache(cacheKey(entitlement.userId))
   return entitlement
 }
-
-// Keyed by account, so one delete by key — no query. Nothing else references the
-// document: the App Store keeps its own record of the subscription regardless.
-export const removeBy = async (userId: UserId): Promise<void> => {
-  await entitlements().doc(userId).delete()
-  evictFromRequestCache(cacheKey(userId))
-}

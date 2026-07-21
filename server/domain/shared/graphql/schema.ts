@@ -68,6 +68,16 @@ import '~/domain/portability/infrastructure/graphql/types'
 import '~/domain/portability/infrastructure/graphql/queries'
 import '~/domain/portability/infrastructure/graphql/mutations'
 
+// Entitlement domain (what the App Store sold, and the plan it grants)
+import '~/domain/entitlement/infrastructure/graphql/enums'
+import '~/domain/entitlement/infrastructure/graphql/types'
+import '~/domain/entitlement/infrastructure/graphql/queries'
+import '~/domain/entitlement/infrastructure/graphql/mutations'
+
+// Quota domain (the monthly scan allowance, read against the plan)
+import '~/domain/quota/infrastructure/graphql/types'
+import '~/domain/quota/infrastructure/graphql/queries'
+
 // Scan IA (label OCR via Claude + Gemini)
 import '~/domain/scan/infrastructure/graphql/types'
 import '~/domain/scan/infrastructure/graphql/mutations'

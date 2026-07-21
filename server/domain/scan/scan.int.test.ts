@@ -23,7 +23,7 @@ describe('scanWithCache', () => {
       cachedAt: new Date('2026-01-01'),
     })
 
-    const result = await Scan.scanWithCache(imageBuffer)
+    const { result } = await Scan.scanWithCache(imageBuffer)
 
     expect(result.beverageType).toBe('wine')
     expect(result.name).toBe('Château Margaux')
@@ -39,7 +39,7 @@ describe('scanWithCache', () => {
       cachedAt: new Date('2026-01-01'),
     })
 
-    const result = await Scan.scanWithCache(imageBuffer)
+    const { result } = await Scan.scanWithCache(imageBuffer)
 
     expect(result.beverageType).toBe('beer')
     expect(result.subtype).toBe('blonde')
@@ -54,7 +54,7 @@ describe('scanWithCache', () => {
       cachedAt: new Date('2026-01-01'),
     })
 
-    const result = await Scan.scanWithCache(imageBuffer)
+    const { result } = await Scan.scanWithCache(imageBuffer)
 
     expect(result.color).toBe('white')
     expect(result.subtype).toBe('sparkling')

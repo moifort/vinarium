@@ -11,8 +11,4 @@ export namespace QuotaCommand {
   // read-then-set counted one.
   export const record = async (userId: UserId): Promise<Quota> =>
     repository.consume(userId, monthOf(new Date()), consumed)
-
-  // Everything this domain holds on one account, erased. Called only when the
-  // account itself goes: there is no other reason to forget what the AI cost.
-  export const forget = (userId: UserId): Promise<void> => repository.removeAllByUser(userId)
 }

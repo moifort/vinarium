@@ -67,15 +67,3 @@ describe('reading the month s quota', () => {
     expect((await QuotaQuery.ofCurrentMonth(user('u1'))).scans as number).toBe(1)
   })
 })
-
-describe('forgetting an account', () => {
-  test('erases every month it ever spent anything in', async () => {
-    await QuotaCommand.record(user('u1'))
-    await QuotaCommand.record(user('u2'))
-
-    await QuotaCommand.forget(user('u1'))
-
-    expect((await QuotaQuery.ofCurrentMonth(user('u1'))).scans as number).toBe(0)
-    expect((await QuotaQuery.ofCurrentMonth(user('u2'))).scans as number).toBe(1)
-  })
-})
