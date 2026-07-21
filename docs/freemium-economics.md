@@ -1,0 +1,127 @@
+# Freemium economics — what a user costs, what the subscription must be worth
+
+> Written 2026.07.21, before any monetization code. Supersedes the Q4 economics of
+> [freemium-plan.md](./freemium-plan.md): that pass costed a scan at ~$0.003 by counting only the
+> visible tokens. Gemini 2.5 Flash is a **reasoning** model and neither scan call pins a thinking
+> budget, so the thinking tokens — billed at the output rate — are the largest line on a scan.
+> The corrected figure is **~4x higher**, which is what moves the price.
+
+The model decided here: **AI scans are metered monthly, everything else stays free and
+unlimited**. Adding a bottle by hand, the cellar, the tastings, the dashboard and the shared
+household cost a rounding error to serve, and gating them would cost acquisition for nothing.
+
+## 1. What is actually billed
+
+### The fixed floor
+
+| Component | Configuration | Cost / month |
+|---|---|---|
+| Apple Developer Program | $99 / year | **~€7.70** |
+| Secret Manager | 3 secrets (`google-api-key`, `admin-token`, `sentry-dsn`) | ~€0.20 |
+| Cloud Functions gen2 / Cloud Run | `europe-west3`, 512 MiB, min 0, max 100 | ~€0, scale-to-zero under the 2M-request free tier |
+| Firestore | `eur3` multi-region, free tier 50K reads + 20K writes / day | ~€0 below ~1,000 users |
+| Firebase Auth | Sign in with Apple only, no SMS | €0 |
+| Sentry | free tier | €0 |
+
+**Floor ≈ €8 / month.** Apple is the whole of it.
+
+Two notes that only matter later. Firestore `eur3` is **multi-region**, so past the free tier it
+bills ~$0.09 / 100K reads and ~$0.27 / 100K writes: about 50% more than a regional database. And
+`server/plugins/00-sentry.ts` traces at `tracesSampleRate: 1.0`; 100% transaction sampling is
+harmless today and becomes a per-event bill with traffic. Lower it before any growth push.
+
+### The variable cost: one scan
+
+`server/domain/scan/index.ts` makes **two** Gemini 2.5 Flash calls per cache miss. Rates: $0.30
+per M input tokens, $2.50 per M output tokens, Google Search grounding free for the first 1,500
+requests a day then $35 per 1,000.
+
+The image reaches the server at 800 px max / JPEG q0.6 (`ScanView.swift`, `CameraView.swift`),
+which Gemini tiles into roughly 800 image tokens. Neither call sets `thinkingConfig`, so dynamic
+thinking runs and its tokens bill as output.
+
+| | Input | Output (incl. thinking) | Cost |
+|---|---|---|---|
+| Vision (image + prompt + 3.3 KB response schema) | ~2.6K tok | ~250 tok + ~1.5K thinking | **~$0.005** |
+| Enrichment (`google_search` grounding) | ~5K tok (prompt + retrieved pages) | ~200 tok + ~1.5K thinking | ~$0.006 |
+| Grounding request | | | $0 under 1,500/day, then **$0.035** |
+
+**Per scan: ~$0.011 (≈ €0.010) while grounding is free, ~$0.046 (≈ €0.042) once it is billed.**
+
+Order of magnitude, not a measurement: dynamic thinking varies with how confusing the label is.
+The scan refactor should capture `usageMetadata` from both responses (ignored today) so the caps
+and the price can be recalibrated against real tokens.
+
+Two dampeners already exist: the SHA-256 `scan-cache` (rarely hits, since lossy recompression
+changes the hash) and the early exit that skips enrichment when nothing was recognized.
+
+## 2. What a subscriber is worth
+
+Apple commissions the price **excluding VAT** (20% in France), and the Small Business Program cuts
+its share from 30% to 15% — **enrollment is manual and is worth ~15% of every figure below**.
+
+| Sticker | Net proceeds / month |
+|---|---|
+| €4.99 / month | **€3.53** |
+| €39.99 / year | **€2.36** |
+| €2.99 / month | €2.12 |
+| €24.99 / year | €1.48 |
+
+## 3. The numbers that decide the quota
+
+Cost of a free user who empties their monthly allowance, and of a subscriber who scans hard:
+
+| Profile | Scans / month | While grounding is free | Once grounding is billed |
+|---|---|---|---|
+| Free at the cap (3) | 3 | €0.03 | €0.13 |
+| Free at the cap (5) | 5 | €0.05 | €0.21 |
+| Subscriber, stocking a cellar | 30 | €0.30 | €1.26 |
+| Subscriber, abusive | 100 | €1.00 | €4.20 |
+
+The first three rows are comfortable against €2.36 of net revenue. The last one is not: past
+~55 scans a month with grounding billed, a subscriber on the annual plan costs more than they
+bring. Unlimited must therefore mean *fair use with a ceiling*, not literally unlimited.
+
+Scenarios at 5% conversion, a free base averaging 2 scans a month, subscribers 15:
+
+| Base | Subscribers | Scans / month | Cost / month | Net revenue | Result |
+|---|---|---|---|---|---|
+| 100 free | 5 | ~265 | ~€12 | ~€15 | **+€3** |
+| 1,000 free | 50 | ~2,650 | ~€37 | ~€145 | **+€108** |
+| 10,000 free | 500 | ~26,500 | ~€305 | ~€1,450 | **+€1,145** |
+
+**Break-even: 3 to 4 subscribers.** The grounding free tier (1,500 requests a day, i.e. ~45,000 a
+month) only runs out around 17,000 monthly active users, so the €0.042 scan stays a distant
+scenario. When it arrives, pinning `thinkingConfig.thinkingBudget` low or off halves the token
+half of the bill without any expected loss on a structured extraction.
+
+## 4. What is recommended
+
+| | **Free** | **Premium — €4.99 / month · €39.99 / year** |
+|---|---|---|
+| AI scans | **5 / month** | unlimited (fair use, safety ceiling ~100 / month) |
+| Bottles, cellar, tastings, dashboard, sharing | unlimited | unlimited |
+| Manual entry | unlimited | unlimited |
+
+Why these numbers:
+
+- **5 scans a month** caps the free tier at €0.05 per user (€0.21 in the worst case) and is enough
+  to judge whether the scan is any good. The wall it creates is the conversion moment.
+- **Manual entry stays free and unlimited.** This is what keeps the wall from being a wall: a free
+  user who has run out of scans can still fill their cellar, just by typing. Gating the bottles
+  themselves would have turned a monetization limit into a reason to uninstall.
+- **€4.99 / €39.99** sits under Vivino Premium (~€50 / year) and above the €3–5 monthly of
+  competing cellar apps, and it carries the corrected scan cost with ~90% margin. A 7-day free
+  trial on the annual plan, which is the plan worth pushing for cash flow and retention.
+- The **safety ceiling on Premium** is not a product feature and does not need to be shown; it
+  exists so no single account can ever cost more than it pays.
+
+## 5. Guard rails to put in place
+
+1. Enforce the quota **server-side**, on the caller's identity — never in the app alone.
+2. A cache hit costs nothing and must never consume a scan.
+3. Count only calls that really reached Gemini: a failed scan must not bill the user their quota.
+4. Capture `usageMetadata` on both calls and recalibrate this document against real tokens.
+5. Enroll in the **Small Business Program** before launch.
+6. Lower `tracesSampleRate` before any growth push.
+7. GCP budget alerts at ~€10 / €25 / €50.

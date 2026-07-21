@@ -1,10 +1,12 @@
 # Freemium / Paid Model + On-Device Scan — Feasibility & Macro Plan
 
-> Status: **decision document + implementation plan**. No implementation yet.
-> Economics (Q4) revised 2026.07.17: VAT-corrected proceeds, no-deficit quota structure,
-> dev-funding milestones.
-> Implementation plan added 2026.07.17, scoped to **release 1: monetization only** (on-device
-> scanning postponed) — see the final section.
+> Status: **partly superseded, 2026.07.21**. The economics (Q4) are replaced by
+> [freemium-economics.md](./freemium-economics.md), which corrects the cost of a scan (thinking
+> tokens were not counted) and settles on a monthly scan quota rather than a lifetime trial plus
+> a bottle cap. The entitlement mechanism shipped is the one proven in the sibling project: a
+> Firestore entitlement read per request and an `appAccountToken` derived from the user id, not
+> the Firebase custom claim described in Q3. **Q2 (on-device scanning) is still the reference**
+> for that postponed release, and the Q1 lever table still reads true.
 
 ## Context
 

@@ -22,6 +22,10 @@ The changelog lives in two files, each organized newest-version-first. Each vers
 - **Runtime**: always use `bun`/`bunx`, never `npm`/`npx`
 - **GraphQL codegen** (if the schema changed): `bun run generate:graphql` (regenerates `shared/schema.graphql`), then `cd ios && apollo-ios-cli generate` (config `ios/apollo-codegen-config.json`)
 
+## Collaboration
+
+- **Work inline, never through subagents**: exploration, review, debugging and planning all happen in the main conversation — never `Task`/`Agent`, never a parallel-worker or subagent-driven skill, plan mode included.
+
 ## Development Workflow
 
 1. Always verify the build before committing (backend `bun tsc --noEmit` + `xcodebuild` depending on what was touched)
