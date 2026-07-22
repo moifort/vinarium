@@ -122,7 +122,11 @@ Why these numbers:
   saving the paywall displays, and it carries the 7-day free trial: the plan worth pushing for
   cash flow and retention.
 - The **safety ceiling on Premium** is not a product feature and does not need to be shown; it
-  exists so no single account can ever cost more than it pays.
+  exists so no single account can ever cost more than it pays. Its sizing rule: a month at the
+  ceiling may cost at most **70% of the cheapest plan's net proceeds** — the annual plan's
+  €1.48 / month, so a €1.03 budget, i.e. ~100 scans at the current ~€0.01 scan
+  (`PREMIUM_MONTHLY_SCANS` in `server/domain/quota/business-rules.ts`). Recompute it when the
+  scan cost moves, e.g. once grounding is billed.
 
 ## 5. Guard rails to put in place
 

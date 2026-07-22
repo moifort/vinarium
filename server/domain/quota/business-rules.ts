@@ -11,8 +11,11 @@ export const FREE_MONTHLY_SCANS: CountType = Count(5)
 
 // A subscriber is not metered, but no single account may cost more than it pays:
 // past this, a month's scans are refused as abuse rather than served at a loss.
-// High enough that stocking a whole cellar in one sitting never reaches it.
-export const PREMIUM_MONTHLY_SCANS: CountType = Count(200)
+// Sized so a month at the ceiling costs at most 70% of the cheapest plan's net
+// proceeds (the annual one, ~1.48 EUR/month) at the current ~0.01 EUR scan cost,
+// while staying far above real use: stocking a whole cellar is ~30 scans. To
+// recalibrate when the scan cost changes, see docs/freemium-economics.md.
+export const PREMIUM_MONTHLY_SCANS: CountType = Count(100)
 
 // The month a moment belongs to, `"2026-07"`. UTC on purpose: the window must not
 // move with the caller's timezone, and someone scanning near midnight on the 1st
