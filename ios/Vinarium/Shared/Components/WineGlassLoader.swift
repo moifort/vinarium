@@ -19,16 +19,19 @@ struct WineGlassLoader: View {
     private let period: TimeInterval = 1.4
 
     // Design space: the glass is drawn in a fixed 100 x 125 coordinate box,
-    // then scaled to fit the canvas.
+    // then scaled to fit the canvas. The geometry and the uniform stroke
+    // weight are traced from the native SF Symbol `wineglass` so the loader
+    // reads as the same icon, with wine inside.
     private static let designWidth: CGFloat = 100
-    private static let designHeight: CGFloat = 125
+    private static let designHeight: CGFloat = 112
     private static let cx: CGFloat = 50
-    private static let rimY: CGFloat = 8
-    private static let rimHalfWidth: CGFloat = 27
-    private static let bowlBottomY: CGFloat = 78
-    private static let stemBottomY: CGFloat = 107
-    private static let footY: CGFloat = 110
-    private static let wineLevelY: CGFloat = 48
+    private static let rimY: CGFloat = 10
+    private static let rimHalfWidth: CGFloat = 26
+    private static let bowlBottomY: CGFloat = 66
+    private static let footY: CGFloat = 99
+    private static let wineLevelY: CGFloat = 44
+    /// SF-like uniform stroke weight, in design units.
+    private static let strokeWidth: CGFloat = 6
 
     var body: some View {
         TimelineView(.animation(paused: reduceMotion)) { context in
@@ -82,8 +85,8 @@ struct WineGlassLoader: View {
             let x = Self.cx - 40 + CGFloat(step) * 4
             liquid.addLine(to: CGPoint(x: x, y: surfaceY(x)))
         }
-        liquid.addLine(to: CGPoint(x: Self.cx + 40, y: 95))
-        liquid.addLine(to: CGPoint(x: Self.cx - 40, y: 95))
+        liquid.addLine(to: CGPoint(x: Self.cx + 40, y: 80))
+        liquid.addLine(to: CGPoint(x: Self.cx - 40, y: 80))
         liquid.closeSubpath()
 
         wine.fill(
@@ -100,7 +103,7 @@ struct WineGlassLoader: View {
 
         // Elliptical sheen on the surface, rotated with the tilt: sells the
         // slightly-from-above perspective of a glass being swirled.
-        let sheen = Path(ellipseIn: CGRect(x: Self.cx - 26, y: Self.wineLevelY - 3, width: 52, height: 6))
+        let sheen = Path(ellipseIn: CGRect(x: Self.cx - 25, y: Self.wineLevelY - 3, width: 50, height: 6))
         let rotation = CGAffineTransform(translationX: Self.cx, y: Self.wineLevelY)
             .rotated(by: atan(tilt))
             .translatedBy(x: -Self.cx, y: -Self.wineLevelY)
@@ -110,73 +113,68 @@ struct WineGlassLoader: View {
         )
     }
 
-    /// The inside of the bowl, inset from the walls by the glass thickness;
+    /// The inside of the bowl, inset from the walls by the stroke thickness;
     /// the wine is clipped to it.
     private func bowlInterior() -> Path {
         var path = Path()
-        path.move(to: CGPoint(x: Self.cx - 25, y: Self.rimY + 1))
+        path.move(to: CGPoint(x: Self.cx - 22.5, y: Self.rimY + 2))
         path.addCurve(
-            to: CGPoint(x: Self.cx, y: Self.bowlBottomY - 2.5),
-            control1: CGPoint(x: Self.cx - 33, y: 30),
-            control2: CGPoint(x: Self.cx - 31, y: 60)
+            to: CGPoint(x: Self.cx, y: Self.bowlBottomY - 4.5),
+            control1: CGPoint(x: Self.cx - 33, y: 25),
+            control2: CGPoint(x: Self.cx - 31, y: 58)
         )
         path.addCurve(
-            to: CGPoint(x: Self.cx + 25, y: Self.rimY + 1),
-            control1: CGPoint(x: Self.cx + 31, y: 60),
-            control2: CGPoint(x: Self.cx + 33, y: 30)
+            to: CGPoint(x: Self.cx + 22.5, y: Self.rimY + 2),
+            control1: CGPoint(x: Self.cx + 31, y: 58),
+            control2: CGPoint(x: Self.cx + 33, y: 25)
         )
         path.closeSubpath()
         return path
     }
 
     private func drawGlass(_ ctx: GraphicsContext) {
-        let glass = Color.primary.opacity(0.3)
+        let glass = Color.primary
+        let style = StrokeStyle(lineWidth: Self.strokeWidth, lineCap: .round)
 
-        // Bowl walls, rim to rim through the bottom of the cup.
+        // Balloon bowl, rim to rim through a rounded bottom that tapers into
+        // the stem. Butt caps: the ends sit on the rim ellipse, and round caps
+        // would leave visible lumps there.
         var bowl = Path()
         bowl.move(to: CGPoint(x: Self.cx - Self.rimHalfWidth, y: Self.rimY))
         bowl.addCurve(
             to: CGPoint(x: Self.cx, y: Self.bowlBottomY),
-            control1: CGPoint(x: Self.cx - 36, y: 30),
-            control2: CGPoint(x: Self.cx - 34, y: 63)
+            control1: CGPoint(x: Self.cx - 37, y: 24),
+            control2: CGPoint(x: Self.cx - 36, y: 62)
         )
         bowl.addCurve(
             to: CGPoint(x: Self.cx + Self.rimHalfWidth, y: Self.rimY),
-            control1: CGPoint(x: Self.cx + 34, y: 63),
-            control2: CGPoint(x: Self.cx + 36, y: 30)
+            control1: CGPoint(x: Self.cx + 36, y: 62),
+            control2: CGPoint(x: Self.cx + 37, y: 24)
         )
-        ctx.stroke(bowl, with: .color(glass), style: StrokeStyle(lineWidth: 2, lineCap: .round))
+        ctx.stroke(bowl, with: .color(glass), style: StrokeStyle(lineWidth: Self.strokeWidth, lineCap: .butt))
 
-        // Rim opening, hinted as a flat ellipse.
+        // The opening, a full stroked ellipse like the SF Symbol's.
         ctx.stroke(
             Path(ellipseIn: CGRect(
-                x: Self.cx - Self.rimHalfWidth, y: Self.rimY - 4,
-                width: Self.rimHalfWidth * 2, height: 8
+                x: Self.cx - Self.rimHalfWidth, y: Self.rimY - 6,
+                width: Self.rimHalfWidth * 2, height: 12
             )),
-            with: .color(glass.opacity(0.55)),
-            lineWidth: 1
+            with: .color(glass),
+            style: style
         )
 
-        // Stem and foot.
+        // Stem, ending in the round dot the symbol shows at the foot's center.
         var stem = Path()
         stem.move(to: CGPoint(x: Self.cx, y: Self.bowlBottomY))
-        stem.addLine(to: CGPoint(x: Self.cx, y: Self.stemBottomY))
-        ctx.stroke(stem, with: .color(glass), style: StrokeStyle(lineWidth: 3, lineCap: .round))
+        stem.addLine(to: CGPoint(x: Self.cx, y: Self.footY))
+        ctx.stroke(stem, with: .color(glass), style: style)
 
+        // Foot, a wide stroked ellipse.
         ctx.stroke(
-            Path(ellipseIn: CGRect(x: Self.cx - 22, y: Self.footY - 4.5, width: 44, height: 9)),
+            Path(ellipseIn: CGRect(x: Self.cx - 23, y: Self.footY - 6.5, width: 46, height: 13)),
             with: .color(glass),
-            lineWidth: 2
+            style: style
         )
-
-        // Light catch on the left wall, above the wine line.
-        var shine = Path()
-        shine.move(to: CGPoint(x: Self.cx - 26, y: 22))
-        shine.addQuadCurve(
-            to: CGPoint(x: Self.cx - 27.5, y: 44),
-            control: CGPoint(x: Self.cx - 29, y: 33)
-        )
-        ctx.stroke(shine, with: .color(.white.opacity(0.35)), style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
     }
 }
 
