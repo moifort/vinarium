@@ -112,16 +112,15 @@ jobs:
           printf '%s' "$IOS_PROVISION_PROFILE" | base64 -d \
             > "$PROFILES_DIR/555cefe2-ee65-486b-a86c-b811434d3b09.mobileprovision"
 
-      - name: Archive (Release, automatic signing via ASC key)
+      - name: Archive (Release, manual signing with the installed cert and profile)
         run: |
           set -euo pipefail
+          # The Release configuration signs manually with the imported distribution
+          # certificate and the installed App Store profile, so the archive never talks
+          # to App Store Connect (its provisioning endpoint intermittently answers 401).
           xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium \
             -destination 'generic/platform=iOS' \
             -archivePath build/Vinarium.xcarchive \
-            -allowProvisioningUpdates \
-            -authenticationKeyPath "$HOME/.appstoreconnect/private_keys/AuthKey_${ASC_KEY_ID}.p8" \
-            -authenticationKeyID "$ASC_KEY_ID" \
-            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
             MARKETING_VERSION="$MARKETING" \
             CURRENT_PROJECT_VERSION="$BUILD" \
             archive
