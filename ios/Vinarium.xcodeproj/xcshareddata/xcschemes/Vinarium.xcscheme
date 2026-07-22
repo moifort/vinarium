@@ -93,7 +93,7 @@
          </CommandLineArgument>
       </CommandLineArguments>
       <StoreKitConfigurationFileReference
-         identifier = "../../../Vinarium/Vinarium.storekit">
+         identifier = "../../Vinarium/Vinarium.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
