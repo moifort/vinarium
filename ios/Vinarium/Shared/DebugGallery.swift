@@ -15,6 +15,17 @@ struct DebugGallery: View {
                     Button("Paywall, découverte") { paywallTrigger = .discover }
                     Button("Paywall, scans épuisés") { paywallTrigger = .scanAllowanceSpent }
                 }
+                Section("Chargement") {
+                    NavigationLink("Verre de vin (premier chargement)") {
+                        VStack(spacing: 20) {
+                            WineGlassLoader()
+                            Text("Chargement...")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
             }
             .navigationTitle("Debug")
         }
