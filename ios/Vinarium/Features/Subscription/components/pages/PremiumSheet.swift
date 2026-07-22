@@ -103,7 +103,11 @@ struct PremiumSheet: View {
             VStack(spacing: 12) {
                 // Yearly first: it is the offer put forward.
                 ForEach(sortedProducts, id: \.id) { product in
-                    OfferButton(product: product, isPurchasing: store.isPurchasing) {
+                    OfferButton(
+                        product: product,
+                        savings: product.id == SubscriptionProducts.yearly ? yearlySavings : nil,
+                        isPurchasing: store.isPurchasing
+                    ) {
                         if await store.purchase(product) { dismiss() }
                     }
                 }
@@ -114,6 +118,21 @@ struct PremiumSheet: View {
     /// The order the products are declared in, not whatever the App Store returns.
     private var sortedProducts: [Product] {
         SubscriptionProducts.all.compactMap { id in store.products.first { $0.id == id } }
+    }
+
+    /// What the yearly plan saves against twelve months of the monthly plan,
+    /// computed from the store's own prices so the label can never contradict
+    /// them. Nil while either product is missing, or if the yearly plan does
+    /// not actually save anything.
+    private var yearlySavings: Decimal? {
+        guard
+            let yearly = store.products.first(where: { $0.id == SubscriptionProducts.yearly }),
+            let monthly = store.products.first(where: { $0.id == SubscriptionProducts.monthly }),
+            monthly.price > 0
+        else { return nil }
+        let twelveMonths = monthly.price * 12
+        let savings = (twelveMonths - yearly.price) / twelveMonths
+        return savings > 0 ? savings : nil
     }
 
     private var legal: some View {
@@ -163,8 +182,10 @@ private struct BenefitRow: View {
 
 /// One offer. The price and the period come from the `Product`, never from a
 /// string in the app: Apple shows the storefront's own currency and amount.
+/// The optional savings ratio is computed by the sheet from the loaded prices.
 private struct OfferButton: View {
     let product: Product
+    var savings: Decimal?
     let isPurchasing: Bool
     let buy: () async -> Void
 
@@ -182,8 +203,8 @@ private struct OfferButton: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(product.displayName)
                         .font(.headline)
-                    if let offer = introductoryOffer {
-                        Text(offer)
+                    if let caption {
+                        Text(caption)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -205,11 +226,34 @@ private struct OfferButton: View {
         .disabled(isPurchasing)
     }
 
+    /// The introductory offer and the annual saving, on one line: the caption
+    /// stays a single quiet row under the plan's name.
+    private var caption: String? {
+        var parts: [String] = []
+        if let introductoryOffer { parts.append(introductoryOffer) }
+        if let savingsLabel { parts.append(savingsLabel) }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
     private var introductoryOffer: String? {
         guard let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial
         else { return nil }
         return "\(offer.period.value) \(offer.period.unit == .day ? "jours" : "mois") offerts"
     }
+
+    private var savingsLabel: String? {
+        guard let savings,
+            let percent = Self.percentFormatter.string(from: savings as NSDecimalNumber)
+        else { return nil }
+        return "\(percent) d’économie"
+    }
+
+    private static let percentFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .percent
+        formatter.maximumFractionDigits = 0
+        return formatter
+    }()
 }
 
 #Preview("Allocation épuisée") {
