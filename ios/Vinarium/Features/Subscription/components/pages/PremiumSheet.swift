@@ -201,10 +201,20 @@ private struct OfferButton: View {
         } label: {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(product.displayName)
-                        .font(.headline)
-                    if let caption {
-                        Text(caption)
+                    HStack(spacing: 8) {
+                        Text(product.displayName)
+                            .font(.headline)
+                        if let savingsBadge {
+                            Text(savingsBadge)
+                                .font(.caption2.bold())
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 7)
+                                .padding(.vertical, 3)
+                                .background(.tint, in: Capsule())
+                        }
+                    }
+                    if let introductoryOffer {
+                        Text(introductoryOffer)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -226,26 +236,18 @@ private struct OfferButton: View {
         .disabled(isPurchasing)
     }
 
-    /// The introductory offer and the annual saving, on one line: the caption
-    /// stays a single quiet row under the plan's name.
-    private var caption: String? {
-        var parts: [String] = []
-        if let introductoryOffer { parts.append(introductoryOffer) }
-        if let savingsLabel { parts.append(savingsLabel) }
-        return parts.isEmpty ? nil : parts.joined(separator: " · ")
-    }
-
     private var introductoryOffer: String? {
         guard let offer = product.subscription?.introductoryOffer, offer.paymentMode == .freeTrial
         else { return nil }
         return "\(offer.period.value) \(offer.period.unit == .day ? "jours" : "mois") offerts"
     }
 
-    private var savingsLabel: String? {
+    /// The saving as a tinted capsule next to the plan's name, `-30 %`.
+    private var savingsBadge: String? {
         guard let savings,
             let percent = Self.percentFormatter.string(from: savings as NSDecimalNumber)
         else { return nil }
-        return "\(percent) d’économie"
+        return "-\(percent)"
     }
 
     private static let percentFormatter: NumberFormatter = {
