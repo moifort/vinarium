@@ -88,10 +88,10 @@ describe('wine(id) detail query', () => {
     })
   })
 
-  test('costs 5 keyed doc reads and never scans a collection', async () => {
+  test('costs 3 keyed doc reads plus the two sparse-satellite scans', async () => {
     seedWine(wid(1))
     seedSatellites(wid(1))
-    // A busy cellar: the read budget must not grow with collection sizes.
+    // A busy cellar: the doc-read budget must not grow with collection sizes.
     for (let i = 2; i <= 20; i++) {
       seedWine(wid(i))
       seedSatellites(wid(i))
@@ -101,10 +101,12 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    // 1 wine + 4 satellites, each a keyed get on doc `${userId}_${beverageId}`.
+    // 1 wine + cellar + consumption, each a keyed get on the composed doc id.
     // The viewer owns the wine, so no household scope is resolved.
-    expect(fake.docReads - before.docReads).toBe(5)
-    expect(fake.queryReads - before.queryReads).toBe(0)
+    expect(fake.docReads - before.docReads).toBe(3)
+    // Gift and recommendation are sparse collections served by one memoized
+    // scan each, whatever the page size.
+    expect(fake.queryReads - before.queryReads).toBe(2)
   })
 
   test('resolves absent satellites to null, at the same read budget', async () => {
@@ -122,9 +124,10 @@ describe('wine(id) detail query', () => {
       gift: null,
       recommendation: null,
     })
-    // 1 wine + 4 satellite probes, all on the viewer's own docs.
-    expect(fake.docReads - before.docReads).toBe(5)
-    expect(fake.queryReads - before.queryReads).toBe(0)
+    // 1 wine + the cellar and consumption probes, all on the viewer's own docs;
+    // gift and recommendation probe their memoized scans instead.
+    expect(fake.docReads - before.docReads).toBe(3)
+    expect(fake.queryReads - before.queryReads).toBe(2)
   })
 
   test('returns null for a wine owned by another user', async () => {
@@ -251,12 +254,13 @@ describe('wines list query', () => {
       recommendation: null,
     })
     // Budget guard: 1 page query returning the full wine docs (never re-read),
-    // plus one batched getAll of 2 refs per selected satellite collection. The
-    // cellar loader reads each wine's own slot, so a household never fans out here.
-    // If a loader ever stopped batching, per-wine fallbacks would double the reads.
-    expect(fake.queryReads - before.queryReads).toBe(1)
-    // 8 satellite doc reads + the household-scope membership probe (one doc get).
-    expect(fake.docReads - before.docReads).toBe(9)
+    // plus one memoized scan each for the sparse gift and recommendation
+    // collections — a flat cost however long the page. If a loader ever stopped
+    // batching, per-wine fallbacks would blow these numbers up.
+    expect(fake.queryReads - before.queryReads).toBe(3)
+    // One batched getAll of 2 refs for cellar and for consumption (the dense
+    // satellites) + the household-scope membership probe (one doc get).
+    expect(fake.docReads - before.docReads).toBe(5)
   })
 
   test('history is batched: one journal query for the whole page, not one per wine', async () => {
