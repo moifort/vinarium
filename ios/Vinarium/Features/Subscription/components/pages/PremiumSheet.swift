@@ -17,9 +17,9 @@ enum PremiumTrigger {
     var message: String {
         switch self {
         case .scanAllowanceSpent:
-            return "L’allocation de scans du mois est utilisée. Premium la lève, et les bouteilles peuvent toujours être ajoutées à la main."
+            return "Votre quota du mois a été atteint. Passez en Premium pour profiter du scan illimité."
         case .discover:
-            return "Le scan d’étiquette reconnaît la bouteille, estime son prix et sa période de garde. Premium le rend illimité."
+            return "Le scan d’étiquette reconnaît vos bouteilles et enrichit leur fiche. Passez en Premium pour scanner sans limite."
         }
     }
 }
@@ -82,9 +82,12 @@ struct PremiumSheet: View {
 
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 14) {
-            BenefitRow(icon: "camera.viewfinder", text: "Scans d’étiquette illimités")
-            BenefitRow(icon: "eurosign.circle", text: "Prix estimé et période de garde à chaque scan")
-            BenefitRow(icon: "heart", text: "Le développement de l’app reste financé")
+            BenefitRow(icon: "camera.viewfinder", text: "Scans illimités")
+            BenefitRow(
+                icon: "eurosign.circle",
+                text: "Données supplémentaires sur la bouteille : estimation du prix, période de garde, région"
+            )
+            BenefitRow(icon: "heart", text: "Soutenez l’application pour qu’elle puisse s’autofinancer")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
