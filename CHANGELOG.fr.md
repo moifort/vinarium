@@ -5,11 +5,9 @@
 ### Nouveautés
 - Le scan d'étiquette dispose maintenant d'un quota mensuel de cinq scans gratuits. Quand le quota du mois est atteint, l'écran de scan propose Vinarium Premium. Tout le reste de l'application reste gratuit et sans limite.
 - Vinarium Premium débloque le scan illimité, avec une formule mensuelle ou une formule annuelle qui commence par sept jours offerts. L'offre se trouve dans les Réglages, et l'abonnement se gère depuis le compte App Store.
-- Les attentes en plein écran affichent maintenant un verre de vin qui tournoie, à la place d'un simple indicateur.
 
 ### Performance
-- Le tableau de bord s'ouvre plus vite : ses lectures en base sont maintenant bornées, quelle que soit la taille de la cave.
-- Les listes qui montrent cadeaux et recommandations réutilisent des données déjà chargées et s'affichent plus vite.
+- Le tableau de bord s'ouvre plus vite.
 
 ## 1.3 (2026.07.18)
 
