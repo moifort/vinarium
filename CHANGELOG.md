@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4 (2026.07.22)
+
+### New
+- The label scan now draws on a monthly allowance of five free scans. When the month's allowance is spent, the scan screen presents Vinarium Premium. Everything else in the app stays free and unlimited.
+- Vinarium Premium unlocks unlimited scans, as a monthly plan or a yearly plan that starts with seven days free. The offer can be found in Settings, and the subscription is managed from the App Store account.
+- Full screen waits now show a swirling wine glass instead of a plain spinner.
+
+### Performance
+- The dashboard opens faster: its database reads are now bounded, whatever the size of the cellar.
+- Lists showing gifts and recommendations reuse data already loaded and display faster.
+
 ## 1.3 (2026.07.18)
 
 ### New
