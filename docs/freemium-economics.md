@@ -62,10 +62,15 @@ its share from 30% to 15% — **enrollment is manual and is worth ~15% of every 
 
 | Sticker | Net proceeds / month |
 |---|---|
-| €4.99 / month | **€3.53** |
-| €39.99 / year | **€2.36** |
-| €2.99 / month | €2.12 |
-| €24.99 / year | €1.48 |
+| €2.99 / month | **€2.12** |
+| €24.99 / year | **€1.48** |
+| €4.99 / month | €3.53 |
+| €39.99 / year | €2.36 |
+
+Prices were lowered from €4.99 / €39.99 to €2.99 / €24.99 on 2026.07.22, before launch: the
+monthly sits inside the €3–5 band of competing cellar apps rather than above it, and the annual
+carries a visible 30% discount against twelve months of it. The figures below use the current
+prices.
 
 ## 3. The numbers that decide the quota
 
@@ -78,26 +83,27 @@ Cost of a free user who empties their monthly allowance, and of a subscriber who
 | Subscriber, stocking a cellar | 30 | €0.30 | €1.26 |
 | Subscriber, abusive | 100 | €1.00 | €4.20 |
 
-The first three rows are comfortable against €2.36 of net revenue. The last one is not: past
-~55 scans a month with grounding billed, a subscriber on the annual plan costs more than they
+The first three rows are comfortable against €1.48 of net revenue. The last one is not: past
+~35 scans a month with grounding billed, a subscriber on the annual plan costs more than they
 bring. Unlimited must therefore mean *fair use with a ceiling*, not literally unlimited.
 
 Scenarios at 5% conversion, a free base averaging 2 scans a month, subscribers 15:
 
 | Base | Subscribers | Scans / month | Cost / month | Net revenue | Result |
 |---|---|---|---|---|---|
-| 100 free | 5 | ~265 | ~€12 | ~€15 | **+€3** |
-| 1,000 free | 50 | ~2,650 | ~€37 | ~€145 | **+€108** |
-| 10,000 free | 500 | ~26,500 | ~€305 | ~€1,450 | **+€1,145** |
+| 100 free | 5 | ~265 | ~€12 | ~€9 | **-€3** |
+| 1,000 free | 50 | ~2,650 | ~€37 | ~€87 | **+€50** |
+| 10,000 free | 500 | ~26,500 | ~€305 | ~€870 | **+€565** |
 
-**Break-even: 3 to 4 subscribers.** The grounding free tier (1,500 requests a day, i.e. ~45,000 a
+**Break-even: about 5 subscribers** against the fixed floor; the 100-free scenario dips slightly
+negative because the free base's scans outweigh five subscriptions at the lowered price. The grounding free tier (1,500 requests a day, i.e. ~45,000 a
 month) only runs out around 17,000 monthly active users, so the €0.042 scan stays a distant
 scenario. When it arrives, pinning `thinkingConfig.thinkingBudget` low or off halves the token
 half of the bill without any expected loss on a structured extraction.
 
 ## 4. What is recommended
 
-| | **Free** | **Premium — €4.99 / month · €39.99 / year** |
+| | **Free** | **Premium — €2.99 / month · €24.99 / year** |
 |---|---|---|
 | AI scans | **5 / month** | unlimited (fair use, safety ceiling ~100 / month) |
 | Bottles, cellar, tastings, dashboard, sharing | unlimited | unlimited |
@@ -110,9 +116,11 @@ Why these numbers:
 - **Manual entry stays free and unlimited.** This is what keeps the wall from being a wall: a free
   user who has run out of scans can still fill their cellar, just by typing. Gating the bottles
   themselves would have turned a monetization limit into a reason to uninstall.
-- **€4.99 / €39.99** sits under Vivino Premium (~€50 / year) and above the €3–5 monthly of
-  competing cellar apps, and it carries the corrected scan cost with ~90% margin. A 7-day free
-  trial on the annual plan, which is the plan worth pushing for cash flow and retention.
+- **€2.99 / €24.99** sits well under Vivino Premium (~€50 / year) and inside the €3–5 monthly
+  band of competing cellar apps, and it still carries the corrected scan cost with ~80% margin
+  while grounding is free. The annual plan is 30% off twelve months of the monthly one, the
+  saving the paywall displays, and it carries the 7-day free trial: the plan worth pushing for
+  cash flow and retention.
 - The **safety ceiling on Premium** is not a product feature and does not need to be shown; it
   exists so no single account can ever cost more than it pays.
 

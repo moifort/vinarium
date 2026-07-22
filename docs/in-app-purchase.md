@@ -58,8 +58,8 @@ them:
 
 | Product id | Duration | Price | Introductory offer |
 |---|---|---|---|
-| `com.polyforms.vinarium.app.premium.monthly` | 1 month | 4,99 € | — |
-| `com.polyforms.vinarium.app.premium.yearly` | 1 year | 39,99 € | 7 days free |
+| `com.polyforms.vinarium.app.premium.monthly` | 1 month | 2,99 € | — |
+| `com.polyforms.vinarium.app.premium.yearly` | 1 year | 24,99 € | 7 days free |
 
 The ids are declared in `ios/Vinarium/Features/Subscription/SubscriptionProducts.swift` and in
 `ios/Vinarium/Vinarium.storekit`; they must match App Store Connect exactly.
@@ -85,10 +85,10 @@ Credential-gated; none of it is scriptable.
 
 1. **App Store Connect → Vinarium → Subscriptions** → create a subscription group
    `Vinarium Premium`.
-2. Add **`com.polyforms.vinarium.app.premium.yearly`**, duration 1 year, price 39,99 € (France;
+2. Add **`com.polyforms.vinarium.app.premium.yearly`**, duration 1 year, price 24,99 € (France;
    Apple fills the other storefronts). Add a **localized display name and description** in French:
    both are shown on Apple's payment sheet.
-3. Add **`com.polyforms.vinarium.app.premium.monthly`**, duration 1 month, price 4,99 €, same
+3. Add **`com.polyforms.vinarium.app.premium.monthly`**, duration 1 month, price 2,99 €, same
    localization.
 4. On the yearly product → **Introductory Offer** → Free trial, 7 days, all territories.
 5. **Agreements, Tax and Banking** must be complete (Paid Apps agreement signed, bank and tax
