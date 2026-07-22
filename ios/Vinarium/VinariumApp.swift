@@ -11,7 +11,17 @@ struct VinariumApp: App {
 
     var body: some Scene {
         WindowGroup {
+            #if DEBUG
+            // The gallery bypasses sign-in on purpose: it exists to show a
+            // screen on a simulator that has no session, e.g. from simctl.
+            if ProcessInfo.processInfo.arguments.contains("-debugGallery") {
+                DebugGallery()
+            } else {
+                AuthRoot()
+            }
+            #else
             AuthRoot()
+            #endif
         }
     }
 
