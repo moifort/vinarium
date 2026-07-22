@@ -117,29 +117,41 @@ describe('JournalQuery.page', () => {
   })
 })
 
-describe('JournalQuery.all', () => {
-  test('spans the household, most recent first', async () => {
+describe('JournalQuery.latestExit', () => {
+  test('returns the household’s most recent exit, skipping newer entries', async () => {
     seedHousehold()
+    // A later 'in' must not shadow the exit: only 'out' events qualify.
+    fake.seed('journal', 'j-mine-in-later', {
+      type: 'in',
+      userId,
+      beverageId: 'w1',
+      row: 0,
+      col: 2,
+      date: new Date('2026-01-05'),
+    })
 
-    const events = await JournalQuery.all(userId)
+    const exit = await JournalQuery.latestExit(userId)
 
-    expect(events.map(({ beverageId }) => String(beverageId))).toEqual(['m2', 'm1', 'w1'])
-    expect(events.map(({ actor }) => actor.isMine)).toEqual([false, false, true])
+    expect(exit).toMatchObject({ type: 'out', beverageName: 'M2' })
+    expect(exit?.actor).toMatchObject({ userId: 'marie', isMine: false })
   })
 
-  test('naming the members costs no read beyond the memoized scope', async () => {
+  test('undefined when no bottle ever left the cellar', async () => {
+    seed()
+
+    expect(await JournalQuery.latestExit(userId)).toBeUndefined()
+  })
+
+  test('costs one bounded query plus the exit’s wine, never a journal scan', async () => {
     seedHousehold()
 
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
-    await JournalQuery.all(userId)
+    await JournalQuery.latestExit(userId)
 
-    // journal scan + own wines scan + the shared cellar scan (which wines of
-    // marie's are visible) + the household members query = 4. The display names
-    // ride along on the scope already read for the member ids.
-    expect(fake.queryReads - before.queryReads).toBe(4)
-    // The membership doc, marie's in-cellar wine (m1) and her drunk one (m2),
-    // each read by id — never a scan of a housemate's library.
-    expect(fake.docReads - before.docReads).toBe(3)
+    // The household members query and the limit(1) exit query.
+    expect(fake.queryReads - before.queryReads).toBe(2)
+    // The membership doc and the exit's wine (m2), read by id.
+    expect(fake.docReads - before.docReads).toBe(2)
   })
 })
 

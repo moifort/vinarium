@@ -1,7 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
   beverageStatus,
-  isFavorite,
   readyToDrink,
   requiresColor,
   retainedSubtype,
@@ -82,24 +81,6 @@ describe('urgentToDrink', () => {
 
   test('false when drinkUntil is 2+ years away', () => {
     expect(urgentToDrink({ until: 2030 }, 2026)).toBe(false)
-  })
-})
-
-describe('isFavorite', () => {
-  test('true when favorite flag is true', () => {
-    expect(isFavorite({ favorite: true })).toBe(true)
-  })
-
-  test('false when favorite flag is false', () => {
-    expect(isFavorite({ favorite: false })).toBe(false)
-  })
-
-  test('false when favorite flag is missing', () => {
-    expect(isFavorite({})).toBe(false)
-  })
-
-  test('false when tasting is undefined', () => {
-    expect(isFavorite(undefined)).toBe(false)
   })
 })
 

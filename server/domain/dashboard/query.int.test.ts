@@ -168,17 +168,49 @@ describe('DashboardQuery.view', () => {
     expect(view.history).toHaveLength(2)
   })
 
-  test('reads each collection exactly once (wines is shared, not re-fetched)', async () => {
+  test('every read is bounded: no library or journal scan', async () => {
     seedDashboardData()
 
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     await DashboardQuery.view(userId)
 
-    // wines + cellar + journal + tasting = 4 collection reads, no duplicates, plus
-    // the household occupancy pair: the scope membership doc and a count aggregation.
-    expect(fake.queryReads - before.queryReads).toBe(5)
-    // Two keyed doc reads: the scope membership doc, and the cellar-config doc that
-    // sizes the capacity (both memoized — the membership is not re-read for config).
-    expect(fake.docReads - before.docReads).toBe(2)
+    // The cellar scan, the journal page, the limit(1) latest exit and the
+    // favorites query — never a scan of the beverages or the whole journal.
+    expect(fake.queryReads - before.queryReads).toBe(4)
+    // Keyed doc reads: the scope membership doc, the cellar-config doc, the
+    // placed bottle's wine (w1), the page's wines (w1+w2), the exit's wine (w2)
+    // and the favorite's wine (w2) — each batch bounded by its section cap.
+    expect(fake.docReads - before.docReads).toBe(7)
+  })
+
+  test('the read budget stays flat as the journal and library grow', async () => {
+    seedDashboardData()
+    // A mature account: hundreds of wines and journal entries beyond the caps.
+    for (let i = 0; i < 200; i++) {
+      fake.seed('beverages', `extra-${i}`, {
+        id: `extra-${i}`,
+        userId,
+        name: `Extra ${i}`,
+        beverageType: 'wine',
+        createdAt: new Date('2025-01-01'),
+      })
+      fake.seed('journal', `extra-j-${i}`, {
+        userId,
+        beverageId: 'w1',
+        type: 'in',
+        row: 0,
+        col: 0,
+        date: new Date('2025-01-01'),
+      })
+    }
+
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.bottleCount).toBe(1)
+    expect(view.lastExit).toMatchObject({ beverageId: 'w2', type: 'out' })
+    // Identical to the small-account budget: growth costs nothing.
+    expect(fake.queryReads - before.queryReads).toBe(4)
+    expect(fake.docReads - before.docReads).toBe(7)
   })
 })

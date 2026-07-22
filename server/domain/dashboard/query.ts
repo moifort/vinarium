@@ -1,6 +1,5 @@
 import { keyBy, sortBy } from 'lodash-es'
 import {
-  isFavorite,
   readyToDrink as isReadyToDrink,
   urgentToDrink,
   wineDetails,
@@ -9,6 +8,7 @@ import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottleWithWine } from '~/domain/cellar/types'
+import { HouseholdQuery } from '~/domain/household/query'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
 import { TastingQuery } from '~/domain/tasting/query'
@@ -20,22 +20,21 @@ const DASHBOARD_SECTION_LIMIT = 5
 
 export namespace DashboardQuery {
   export const view = async (userId: UserId): Promise<DashboardView> => {
-    // The per-request cache dedupes the shared wines read across these queries.
-    // Sharing a cellar shares what the cellar holds: its bottles, their value and
-    // every movement span the whole household. Favorites stay personal — they are
-    // filtered by the viewer's own tasting notes; the wines they name are looked up
-    // in the visible set, so favoriting a housemate's shared bottle still shows it.
-    const [allBottles, history, allTastings, wines, bottleCount, cellarConfig] = await Promise.all([
+    // Every read here is bounded: the placed bottles (with their wines by id), a
+    // page of the journal, the single latest exit and the viewer's favorited
+    // notes — never a scan of the whole library or journal. Sharing a cellar
+    // shares what the cellar holds: its bottles, their value and every movement
+    // span the whole household. Favorites stay personal — they are filtered by
+    // the viewer's own tasting notes.
+    const [allBottles, historyPage, lastExit, favoriteTastings, cellarConfig] = await Promise.all([
       CellarQuery.householdBottlesWithWine(userId),
-      JournalQuery.all(userId),
-      TastingQuery.all(userId),
-      BeverageQuery.allVisibleTo(userId),
-      CellarQuery.householdBottleCount(userId),
+      JournalQuery.page(userId, { limit: DASHBOARD_SECTION_LIMIT, offset: 0 }),
+      JournalQuery.latestExit(userId),
+      TastingQuery.favorites(userId),
       CellarQuery.config(userId),
     ])
 
     const currentYear = new Date().getFullYear()
-    const beverageMap = keyBy(wines, 'id')
 
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchase?.price ?? 0), 0)
 
@@ -50,22 +49,17 @@ export namespace DashboardQuery {
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
 
-    const lastExit = history.find((event) => event.type === 'out')
-
-    const favorites = loadFavorites(allTastings.filter(isFavorite), beverageMap).slice(
-      0,
-      DASHBOARD_SECTION_LIMIT,
-    )
+    const favorites = await loadFavorites(userId, favoriteTastings, allBottles)
 
     return {
-      bottleCount,
+      bottleCount: allBottles.length,
       capacity: cellarConfig.rows * cellarConfig.cols,
       totalValue,
       readyToDrink,
       favorites,
       lastBottle,
       lastExit,
-      history: history.slice(0, DASHBOARD_SECTION_LIMIT),
+      history: historyPage.items,
     }
   }
 
@@ -101,13 +95,32 @@ export namespace DashboardQuery {
     }
   }
 
-  const loadFavorites = (
+  // The wines the viewer's favorite notes point at, loaded by id and kept only
+  // when visible to them: their own wine, or a housemate's currently in the
+  // shared cellar (already loaded with the bottles) — the same visibility rule
+  // as the wine list, without its library scan. Truncated before the wine load
+  // so the section never costs more than its display cap in reads; a favorite
+  // whose wine is gone leaves a shorter section rather than widening the read.
+  const loadFavorites = async (
+    userId: UserId,
     tastings: TastingNote[],
-    beverageMap: Record<string, Beverage>,
-  ): FavoriteWine[] =>
-    tastings
+    allBottles: CellarBottleWithWine[],
+  ): Promise<FavoriteWine[]> => {
+    const favorites = tastings.slice(0, DASHBOARD_SECTION_LIMIT)
+    if (favorites.length === 0) return []
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const wines = await BeverageQuery.byBeverageIdsForUsers(
+      scope.memberIds,
+      favorites.map(({ beverageId }) => beverageId),
+    )
+    const placed = new Set(allBottles.map(({ beverageId }) => beverageId))
+    const visible = keyBy(
+      wines.filter((wine) => wine.userId === userId || placed.has(wine.id)),
+      'id',
+    )
+    return favorites
       .map((tasting): FavoriteWine | undefined => {
-        const wine = beverageMap[tasting.beverageId]
+        const wine: Beverage | undefined = visible[tasting.beverageId]
         if (!wine) return undefined
         const details = wineDetails(wine)
         return {
@@ -122,4 +135,5 @@ export namespace DashboardQuery {
         }
       })
       .filter((favorite): favorite is FavoriteWine => favorite !== undefined)
+  }
 }

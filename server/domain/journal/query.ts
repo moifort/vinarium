@@ -21,13 +21,19 @@ const actorOf = (entry: JournalEntry, viewerId: UserId, scope: CellarScope): Jou
 }
 
 export namespace JournalQuery {
-  // The whole shared journal: a cellar's movements belong to every member, so the
-  // events of each one merge here, most recent first.
-  export const all = async (userId: UserId) => {
+  // The household's most recent exit — the dashboard's "last exit" tile. One
+  // limit(1) query plus the wine it names, never a journal scan.
+  export const latestExit = async (userId: UserId) => {
     const scope = await HouseholdQuery.cellarScope(userId)
-    const entries = await repository.findAllByUsers(scope.memberIds)
-    const beverageMap = await winesOfEntries(userId, scope, entries)
-    return sortBy(toViews(entries, beverageMap, userId, scope), ({ date }) => -date.getTime())
+    const entry = await repository.findLatestExitForUsers(scope.memberIds)
+    if (!entry) return undefined
+    const wines = await BeverageQuery.byBeverageIdsForUsers(scope.memberIds, [entry.beverageId])
+    return toViews(
+      [entry],
+      keyBy(wines, ({ id }) => id),
+      userId,
+      scope,
+    )[0]
   }
 
   // One page of journal events (offset-based). Loads only the page's wines by id.
@@ -70,18 +76,6 @@ export namespace JournalQuery {
     const scope = await HouseholdQuery.cellarScope(viewerId)
     const beverageMap = keyBy([wine], ({ id }) => id)
     return sortBy(toViews(entries, beverageMap, viewerId, scope), ({ date }) => -date.getTime())
-  }
-
-  // The wines a set of entries points at. The visible set already covers the
-  // viewer's library and housemates' in-cellar wines (one memoized scan the
-  // dashboard shares); the rest — a housemate's bottle that left the cellar — is
-  // read by id, so their exits never drop out of the shared journal.
-  const winesOfEntries = async (userId: UserId, scope: CellarScope, entries: JournalEntry[]) => {
-    const visible = keyBy(await BeverageQuery.allVisibleTo(userId), ({ id }) => id)
-    const missing = uniq(entries.map(({ beverageId }) => beverageId).filter((id) => !visible[id]))
-    if (missing.length === 0) return visible
-    const extra = await BeverageQuery.byBeverageIdsForUsers(scope.memberIds, missing)
-    return { ...visible, ...keyBy(extra, ({ id }) => id) }
   }
 
   // A wine deleted with its journal left behind has no event to show: skip it

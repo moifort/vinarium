@@ -97,13 +97,6 @@ describe('CellarQuery.householdPlacements', () => {
   })
 })
 
-describe('CellarQuery.householdBottleCount', () => {
-  test('counts bottles across the whole household', async () => {
-    seedHousehold()
-    expect(await CellarQuery.householdBottleCount(user('owner'))).toBe(2)
-  })
-})
-
 describe('CellarQuery.info (household)', () => {
   test('placedCount spans the household', async () => {
     seedHousehold()

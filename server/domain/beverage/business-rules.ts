@@ -71,7 +71,3 @@ export const retainedSubtype = (
   subtype?: BeverageSubtype,
 ): BeverageSubtype | undefined =>
   subtype !== undefined && subtypeAllowed(beverageType, subtype) ? subtype : undefined
-
-// Favorite is an explicit heart flag, decoupled from the star rating:
-// a beverage can be a favorite whatever its note (or with no note at all).
-export const isFavorite = (tasting?: { favorite?: boolean }) => tasting?.favorite === true

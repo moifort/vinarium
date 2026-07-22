@@ -65,21 +65,19 @@ export namespace CellarQuery {
     }
   }
 
-  // How many bottles fill the shared cellar — the dashboard occupancy numerator.
-  export const householdBottleCount = async (userId: UserId) => {
-    const scope = await HouseholdQuery.cellarScope(userId)
-    return repository.countByUsers(scope.memberIds)
-  }
-
   // Every bottle standing in the shared cellar, joined with its wine and tagged
-  // with its owner — what the dashboard sums, sorts and dates. A placed bottle's
-  // wine is always visible to the viewer, housemates included, so the join holds.
+  // with its owner — what the dashboard sums, sorts and dates. The wines are
+  // loaded by id (one read per bottle), never through a library scan: a placed
+  // bottle's wine always belongs to a household member, so the keyed batch holds.
   export const householdBottlesWithWine = async (userId: UserId) => {
-    const [scope, bottles, wines] = await Promise.all([
+    const [scope, bottles] = await Promise.all([
       HouseholdQuery.cellarScope(userId),
       householdPlacements(userId),
-      BeverageQuery.allVisibleTo(userId),
     ])
+    const wines = await BeverageQuery.byBeverageIdsForUsers(
+      scope.memberIds,
+      bottles.map(({ beverageId }) => beverageId),
+    )
     const beverageMap = keyBy(wines, 'id')
     return bottles.map((bottle) => {
       const wine = beverageMap[bottle.beverageId]
