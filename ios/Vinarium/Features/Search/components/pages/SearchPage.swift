@@ -27,7 +27,7 @@ struct SearchPage: View {
                 description: Text("Un nom de vin, un producteur, un millésime ou une personne — ou affinez avec les filtres ci-dessus.")
             )
         } else if isLoading && sections.isEmpty {
-            ProgressView("Recherche…")
+            LoadingStateView(label: "Recherche…")
         } else if let errorMessage, sections.isEmpty {
             ContentUnavailableView(
                 "Erreur",

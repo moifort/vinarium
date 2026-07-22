@@ -15,7 +15,7 @@ struct SharingSettingsView: View {
     var body: some View {
         Group {
             if isLoading {
-                CenteredProgressView()
+                LoadingStateView()
             } else {
                 Form {
                     if let household {

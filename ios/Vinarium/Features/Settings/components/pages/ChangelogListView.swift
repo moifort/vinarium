@@ -8,7 +8,7 @@ struct ChangelogListView: View {
     var body: some View {
         Group {
             if isLoading {
-                ProgressView("Chargement…")
+                LoadingStateView()
             } else if let error {
                 ContentUnavailableView(
                     "Erreur",

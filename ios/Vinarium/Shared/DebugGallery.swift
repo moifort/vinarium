@@ -17,13 +17,7 @@ struct DebugGallery: View {
                 }
                 Section("Chargement") {
                     NavigationLink("Verre de vin (premier chargement)") {
-                        VStack(spacing: 20) {
-                            WineGlassLoader()
-                            Text("Chargement...")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        LoadingStateView()
                     }
                 }
             }

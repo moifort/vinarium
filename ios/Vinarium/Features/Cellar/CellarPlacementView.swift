@@ -26,8 +26,7 @@ struct CellarPlacementView: View {
     var body: some View {
         Group {
             if isLoading {
-                ProgressView("Chargement de la cave...")
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                LoadingStateView(label: "Chargement de la cave...")
             } else if let error {
                 ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
             } else {

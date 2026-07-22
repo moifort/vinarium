@@ -95,7 +95,7 @@ struct PremiumSheet: View {
     @ViewBuilder
     private var offers: some View {
         if store.isLoading && store.products.isEmpty {
-            CenteredProgressView()
+            LoadingStateView()
                 .frame(height: 120)
         } else if store.products.isEmpty {
             Text("Les offres ne sont pas disponibles pour le moment.")

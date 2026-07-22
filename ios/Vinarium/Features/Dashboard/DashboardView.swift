@@ -20,15 +20,7 @@ struct DashboardView: View {
                 } else if let error = viewModel.error {
                     ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
                 } else {
-                    // First-load screen: cold-started backend functions make this
-                    // wait noticeable, so it gets the swirling-glass loader.
-                    VStack(spacing: 20) {
-                        WineGlassLoader()
-                        Text("Chargement...")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    LoadingStateView()
                 }
             }
             .refreshable { await viewModel.load() }

@@ -14,8 +14,7 @@ struct CellarView: View {
         NavigationStack {
             Group {
                 if viewModel.isLoading && viewModel.bottles.isEmpty {
-                    ProgressView("Chargement...")
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    LoadingStateView()
                 } else if let error = viewModel.error, viewModel.bottles.isEmpty {
                     ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
                 } else {

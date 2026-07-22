@@ -27,7 +27,7 @@ struct WineDetailView: View {
         NavigationStack {
             Group {
                 if isLoading {
-                    ProgressView()
+                    LoadingStateView()
                 } else if let detail {
                     if isEditing {
                         WineEditForm(

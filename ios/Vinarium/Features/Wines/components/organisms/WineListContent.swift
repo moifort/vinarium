@@ -15,8 +15,7 @@ struct WineListContent: View {
 
     var body: some View {
         if isEmpty && isLoading {
-            ProgressView("Chargement...")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            LoadingStateView()
         } else if isEmpty, let errorMessage {
             // Un échec réseau ne doit pas se déguiser en « Aucun vin ».
             ContentUnavailableView(

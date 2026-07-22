@@ -58,8 +58,7 @@ struct AuthRoot: View {
     private var signedIn: some View {
         switch gate.state {
         case .loading:
-            ProgressView("Chargement…")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            LoadingStateView()
         case .required:
             OnboardingView(onCompleted: { gate.markCompleted() })
         case .ready:
