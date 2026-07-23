@@ -32,6 +32,7 @@ struct AuthRoot: View {
         }
         .environment(session)
         .environment(subscriptions)
+        .environment(\.isAdmin, gate.isAdmin)
         .task { await supportGate.check() }
         .task(id: session.user?.uid) {
             // The plan is the server's answer, and it needs a signed-in caller.

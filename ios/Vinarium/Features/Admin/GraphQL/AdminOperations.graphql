@@ -1,0 +1,27 @@
+query AdminMetrics {
+  adminMetrics {
+    aiCostEur
+    infraEur
+    totalCostEur
+    gcpCostEur
+    totalUsers
+    premiumTotal
+    premiumMonthly
+    premiumYearly
+    revenueProceedsEur
+    revenueGrossEur
+    scans
+    cacheHits
+    vision {
+      promptTokens
+      outputTokens
+      thinkingTokens
+    }
+    enrichment {
+      promptTokens
+      outputTokens
+      thinkingTokens
+    }
+    refreshedAt
+  }
+}

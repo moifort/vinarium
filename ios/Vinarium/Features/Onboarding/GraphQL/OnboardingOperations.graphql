@@ -3,6 +3,7 @@ query Me {
     firstName
     onboardingCompleted
     onboardingCompletedAt
+    isAdmin
   }
 }
 

@@ -1,9 +1,11 @@
 import Foundation
 
 /// The signed-in user's onboarding state, read at launch to decide routing.
+/// `isAdmin` rides the same query so the admin surfaces cost no extra call.
 struct MeState {
     let firstName: String?
     let onboardingCompleted: Bool
+    let isAdmin: Bool
 }
 
 enum OnboardingAPI {
@@ -14,7 +16,8 @@ enum OnboardingAPI {
         )
         return MeState(
             firstName: data.me.firstName,
-            onboardingCompleted: data.me.onboardingCompleted
+            onboardingCompleted: data.me.onboardingCompleted,
+            isAdmin: data.me.isAdmin
         )
     }
 

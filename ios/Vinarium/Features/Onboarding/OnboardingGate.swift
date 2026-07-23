@@ -14,11 +14,16 @@ final class OnboardingGate {
     }
 
     private(set) var state: State = .loading
+    /// Whether the signed-in account may see the admin surfaces. Rides the same
+    /// launch `me` query, so non-admins cost no extra call: the banner and the
+    /// Réglages row are simply absent for them.
+    private(set) var isAdmin = false
 
     func refresh() async {
         state = .loading
         do {
             let me = try await OnboardingAPI.loadMe()
+            isAdmin = me.isAdmin
             state = me.onboardingCompleted ? .ready : .required
         } catch {
             state = .failed(reportError(error))
@@ -34,5 +39,6 @@ final class OnboardingGate {
     /// never sees the previous user's state for a frame before `refresh()` runs.
     func reset() {
         state = .loading
+        isAdmin = false
     }
 }

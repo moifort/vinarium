@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsHomeView: View {
     @Environment(AuthSession.self) private var authSession
     @Environment(SubscriptionStore.self) private var subscriptions
+    @Environment(\.isAdmin) private var isAdmin
     @Environment(\.dismiss) private var dismiss
     @State private var premiumShown = false
 
@@ -79,6 +80,23 @@ struct SettingsHomeView: View {
                             title: "Importer / Exporter",
                             tint: .teal
                         )
+                    }
+                }
+
+                // Deuxième point d'entrée admin, avec le bandeau. Absent pour
+                // tout autre compte.
+                if isAdmin {
+                    Section {
+                        NavigationLink {
+                            AdminView()
+                        } label: {
+                            SettingsRow(
+                                icon: "chart.bar.fill",
+                                title: "Admin",
+                                subtitle: "Coûts, revenus et comptes du mois",
+                                tint: .red
+                            )
+                        }
                     }
                 }
             }

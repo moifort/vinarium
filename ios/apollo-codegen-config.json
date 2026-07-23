@@ -10,7 +10,8 @@
       "Vinarium/Features/Dashboard/GraphQL/*.graphql",
       "Vinarium/Features/Scan/GraphQL/*.graphql",
       "Vinarium/Features/Settings/GraphQL/*.graphql",
-      "Vinarium/Features/Subscription/GraphQL/*.graphql"
+      "Vinarium/Features/Subscription/GraphQL/*.graphql",
+      "Vinarium/Features/Admin/GraphQL/*.graphql"
     ]
   },
   "output": {

@@ -17,6 +17,13 @@ struct ContentView: View {
     /// A pending invitation from a universal link, presented once the app is ready.
     @Binding var joinRequest: HouseholdJoinRequest?
 
+    /// Admin only: the metrics banner pinned above every tab. Absent (and never
+    /// fetched) for everyone else.
+    @Environment(\.isAdmin) private var isAdmin
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var adminViewModel = AdminViewModel()
+    @State private var showAdminSheet = false
+
     @State private var selectedTab: TabSelection = .home
     /// The last real content tab, restored when the scan cover is dismissed.
     @State private var lastContentTab: TabSelection = .home
@@ -74,6 +81,38 @@ struct ContentView: View {
             .accessibilityIdentifier("tab-scan")
         }
         .tabBarMinimizeBehavior(.onScrollDown)
+        .safeAreaInset(edge: .top, spacing: 0) {
+            if isAdmin {
+                AdminBanner(
+                    aiCost: bannerEuro(adminViewModel.metrics?.aiCostEur),
+                    infra: bannerEuro(adminViewModel.metrics?.infraEur),
+                    users: bannerCount(adminViewModel.metrics?.totalUsers),
+                    premium: bannerCount(adminViewModel.metrics?.premiumTotal),
+                    isLoading: adminViewModel.isLoading,
+                    onTap: { showAdminSheet = true }
+                )
+            }
+        }
+        .task {
+            if isAdmin { await adminViewModel.load() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active && isAdmin {
+                Task { await adminViewModel.load() }
+            }
+        }
+        .sheet(isPresented: $showAdminSheet) {
+            NavigationStack {
+                AdminView(viewModel: adminViewModel)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {
+                                showAdminSheet = false
+                            }
+                        }
+                    }
+            }
+        }
         .onChange(of: selectedTab) { _, newValue in
             if newValue == .scan {
                 showScanner = true
@@ -140,6 +179,14 @@ struct ContentView: View {
     /// the selection elsewhere).
     private func restoreContentTab() {
         if selectedTab == .scan { selectedTab = lastContentTab }
+    }
+
+    private func bannerEuro(_ value: Double?) -> String {
+        value.map { $0.formatted(.currency(code: "EUR").precision(.fractionLength(2))) } ?? "…"
+    }
+
+    private func bannerCount(_ value: Int?) -> String {
+        value.map(String.init) ?? "…"
     }
 }
 
