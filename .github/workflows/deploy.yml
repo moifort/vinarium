@@ -46,6 +46,12 @@ jobs:
           printf '%s' "${{ secrets.APPLE_PRIVATE_KEY_P8 }}" > infra/apple.p8
           chmod 600 infra/apple.p8
 
+          # App Store Connect API .p8 (same key the iOS release workflow uses),
+          # for the admin metrics' sales reports. An empty file simply leaves
+          # the revenue figure unavailable.
+          printf '%s' "${{ secrets.ASC_KEY_P8 }}" > infra/asc.p8
+          chmod 600 infra/asc.p8
+
           cat > infra/terraform.tfvars <<EOF
           project_id             = "${{ vars.GCP_PROJECT_ID }}"
           billing_account_id     = "${{ secrets.GCP_BILLING_ACCOUNT }}"
@@ -62,6 +68,11 @@ jobs:
           admin_token            = "${{ secrets.ADMIN_TOKEN }}"
           apple_app_id           = "${{ vars.APPLE_APP_ID }}"
           premium_user_ids       = "${{ vars.PREMIUM_USER_IDS }}"
+          asc_issuer_id          = "${{ secrets.ASC_ISSUER_ID }}"
+          asc_key_id             = "${{ secrets.ASC_KEY_ID }}"
+          asc_private_key_path   = "./asc.p8"
+          asc_vendor_number      = "${{ vars.ASC_VENDOR_NUMBER }}"
+          gcp_billing_table      = "${{ vars.GCP_BILLING_TABLE }}"
           EOF
 
       - name: Terraform init + apply

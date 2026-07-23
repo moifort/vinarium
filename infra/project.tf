@@ -30,6 +30,8 @@ resource "google_project_service" "apis" {
     "cloudresourcemanager.googleapis.com",
     "firebaserules.googleapis.com",
     "orgpolicy.googleapis.com",
+    "cloudscheduler.googleapis.com",
+    "bigquery.googleapis.com",
   ])
 
   project            = google_project.this.project_id

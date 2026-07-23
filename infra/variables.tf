@@ -99,6 +99,38 @@ variable "admin_token" {
   default     = null
 }
 
+# Admin metrics — all optional: any of them blank simply leaves the matching
+# figure unavailable in the admin screen, nothing crashes.
+variable "asc_issuer_id" {
+  description = "App Store Connect API key issuer id, for the sales reports the admin metrics read"
+  type        = string
+  default     = ""
+}
+
+variable "asc_key_id" {
+  description = "App Store Connect API key id (matches the .p8 filename)"
+  type        = string
+  default     = ""
+}
+
+variable "asc_private_key_path" {
+  description = "Path to the App Store Connect API .p8 private key. Blank disables the revenue figure."
+  type        = string
+  default     = ""
+}
+
+variable "asc_vendor_number" {
+  description = "Vendor number the sales reports are filed under (App Store Connect, Payments and Financial Reports)"
+  type        = string
+  default     = ""
+}
+
+variable "gcp_billing_table" {
+  description = "Fully qualified BigQuery billing export table (project.dataset.table). Blank disables the measured GCP cost."
+  type        = string
+  default     = ""
+}
+
 variable "github_repo" {
   description = "GitHub repository (owner/name) allowed to deploy via Workload Identity Federation"
   type        = string

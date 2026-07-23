@@ -10,6 +10,22 @@ resource "google_project_iam_member" "function_firestore" {
   member  = "serviceAccount:${google_service_account.function.email}"
 }
 
+# The admin metrics read actual GCP spend from the billing export dataset in
+# BigQuery: the function needs to run a query job and read that dataset. The
+# project holds no other BigQuery data, so project-scoped viewer is as narrow
+# as it is useful.
+resource "google_project_iam_member" "function_bigquery_job_user" {
+  project = google_project.this.project_id
+  role    = "roles/bigquery.jobUser"
+  member  = "serviceAccount:${google_service_account.function.email}"
+}
+
+resource "google_project_iam_member" "function_bigquery_data_viewer" {
+  project = google_project.this.project_id
+  role    = "roles/bigquery.dataViewer"
+  member  = "serviceAccount:${google_service_account.function.email}"
+}
+
 # Cloud Functions Gen 2 builds run in Cloud Build under the default Compute
 # service account. In a fresh project that role binding is not granted by
 # default, so the first deploy fails with "missing permission on the build
@@ -87,6 +103,12 @@ resource "google_cloudfunctions2_function" "server" {
       # environment variables, so Secret Manager holds only real secrets.
       NITRO_APPLE_APP_ID     = var.apple_app_id
       NITRO_PREMIUM_USER_IDS = var.premium_user_ids
+      # Admin metrics identifiers — the only real secret of the set, the .p8
+      # key, rides the secret_environment_variables block below.
+      NITRO_ASC_ISSUER_ID     = var.asc_issuer_id
+      NITRO_ASC_KEY_ID        = var.asc_key_id
+      NITRO_ASC_VENDOR_NUMBER = var.asc_vendor_number
+      NITRO_GCP_BILLING_TABLE = var.gcp_billing_table
     }
 
     dynamic "secret_environment_variables" {
