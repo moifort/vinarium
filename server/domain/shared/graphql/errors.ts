@@ -8,4 +8,6 @@ export const domainError = (code: string, message: string): never => {
 
 export const notFound = (message: string): never => domainError('NOT_FOUND', message)
 
+export const forbidden = (message: string): never => domainError('FORBIDDEN', message)
+
 export const badUserInput = (message: string): never => domainError('BAD_USER_INPUT', message)

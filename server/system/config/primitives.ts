@@ -7,6 +7,11 @@ import type {
   AdminToken as AdminTokenType,
   ApiToken as ApiTokenType,
   AppleAppId as AppleAppIdType,
+  AscIssuerId as AscIssuerIdType,
+  AscKeyId as AscKeyIdType,
+  AscPrivateKey as AscPrivateKeyType,
+  AscVendorNumber as AscVendorNumberType,
+  GcpBillingTable as GcpBillingTableType,
   GoogleApiKey as GoogleApiKeyType,
   SentryDsn as SentryDsnType,
 } from '~/system/config/types'
@@ -45,6 +50,39 @@ export const AppleAppId = (value: unknown) => {
 // Production and Sandbox are tried, which is what a shipped app needs (TestFlight
 // and review sign in Sandbox); `Xcode` is for the local StoreKit configuration file.
 export const AppleEnvironment = (value: unknown) => z.enum(Environment).parse(value) as Environment
+
+// App Store Connect API key pieces, for the sales reports the admin metrics
+// read. All-or-nothing at the call site: any of them missing simply means no
+// revenue figure, never a crash.
+export const AscIssuerId = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AscIssuerIdType>()(v)
+}
+
+export const AscKeyId = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AscKeyIdType>()(v)
+}
+
+export const AscPrivateKey = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AscPrivateKeyType>()(v)
+}
+
+export const AscVendorNumber = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AscVendorNumberType>()(v)
+}
+
+// The BigQuery billing export table, `project.dataset.table` — where actual GCP
+// spend lives. Unset means the infra cost simply is not measured.
+export const GcpBillingTable = (value: unknown) => {
+  const v = z
+    .string()
+    .regex(/^[^.]+\.[^.]+\.[^.]+$/)
+    .parse(value)
+  return make<GcpBillingTableType>()(v)
+}
 
 // The accounts granted Premium outright (the maker's own, a reviewer's), as one
 // comma-separated list of Firebase uids. An override on top of a real entitlement,

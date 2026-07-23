@@ -1,3 +1,4 @@
+import { AdminCommand } from '~/domain/admin/command'
 import { EntitlementQuery } from '~/domain/entitlement/query'
 import { exhausted } from '~/domain/quota/business-rules'
 import { QuotaCommand } from '~/domain/quota/command'
@@ -38,10 +39,13 @@ builder.mutationField('scanBeverage', (t) =>
 
       try {
         const buffer = Buffer.from(imageBase64, 'base64')
-        const { result, cacheHit } = await Scan.scanWithCache(buffer)
+        const { result, cacheHit, usage } = await Scan.scanWithCache(buffer)
         // Metered after the fact, and only on a real model call: a Gemini failure
         // must not cost the caller a scan, and a cache hit costs us nothing.
         if (!cacheHit) await QuotaCommand.record(userId)
+        // Cost telemetry for the admin metrics — never on the scan's critical
+        // path: a failed metrics write must not fail the scan that produced it.
+        await AdminCommand.recordAiUsage({ cacheHit, ...usage }).catch(() => {})
         return result
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Scan failed'

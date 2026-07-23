@@ -28,6 +28,13 @@ export const findByAppAccountToken = async (
   return snap.docs[0]?.data()
 }
 
+// The whole collection, for the admin metrics refresh. One document per
+// subscriber ever, so streaming it stays a small, single query.
+export const findAll = async (): Promise<Entitlement[]> => {
+  const snap = await entitlements().get()
+  return snap.docs.map((doc) => doc.data())
+}
+
 export const save = async (entitlement: Entitlement): Promise<Entitlement> => {
   // Full `set`, never a merge: an omitted key erases the stored field, which is
   // what an absent `revokedAt` means (a refund reversed is Premium restored).

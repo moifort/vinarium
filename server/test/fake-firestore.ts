@@ -8,7 +8,7 @@
  * does not matter:
  *   mock.module('~/system/firebase', () => ({ db: fakeDb }))
  */
-import type { Firestore } from 'firebase-admin/firestore'
+import { FieldValue, type Firestore } from 'firebase-admin/firestore'
 
 type Doc = Record<string, unknown>
 
@@ -18,7 +18,7 @@ export type FakeRef = {
   collection: string
   id: string
   get: () => Promise<FakeSnapshot>
-  set: (data: Doc) => Promise<void>
+  set: (data: Doc, options?: { merge?: boolean }) => Promise<void>
   delete: () => Promise<void>
 }
 
@@ -58,6 +58,7 @@ type FakeCollection = {
   orderBy: FakeQuery['orderBy']
   limit: FakeQuery['limit']
   get: FakeQuery['get']
+  count: FakeQuery['count']
 }
 
 export const createFakeFirestore = () => {
@@ -80,6 +81,32 @@ export const createFakeFirestore = () => {
     return created
   }
 
+  // Resolve a document write the way Firestore does: FieldValue.increment
+  // sentinels add to the stored number (`operand` is the transform's runtime
+  // field), nested maps recurse, and a merge keeps whatever the write does not
+  // name. Only direct ref.set supports this — no production code sends
+  // transforms through a batch or a transaction.
+  const resolveWrite = (existing: Doc | undefined, data: Doc, merge: boolean): Doc => {
+    const result: Doc = merge ? { ...(existing ?? {}) } : {}
+    for (const [key, value] of Object.entries(data)) {
+      const current = merge ? existing?.[key] : undefined
+      if (value instanceof FieldValue && 'operand' in value) {
+        const operand = (value as unknown as { operand: number }).operand
+        result[key] = (typeof current === 'number' ? current : 0) + operand
+      } else if (
+        value &&
+        typeof value === 'object' &&
+        !(value instanceof Date) &&
+        !Array.isArray(value)
+      ) {
+        result[key] = resolveWrite(current as Doc | undefined, value as Doc, merge)
+      } else {
+        result[key] = value
+      }
+    }
+    return result
+  }
+
   const makeRef = (collection: string, id: string): FakeRef => ({
     collection,
     id,
@@ -88,9 +115,12 @@ export const createFakeFirestore = () => {
       const doc = docsOf(collection).get(id)
       return { exists: doc !== undefined, id, data: () => doc }
     },
-    set: async (data) => {
+    set: async (data, options) => {
       directWrites.push({ type: 'set', collection, id })
-      docsOf(collection).set(id, data)
+      docsOf(collection).set(
+        id,
+        resolveWrite(docsOf(collection).get(id), data, options?.merge === true),
+      )
     },
     delete: async () => {
       directWrites.push({ type: 'delete', collection, id })
@@ -176,6 +206,7 @@ export const createFakeFirestore = () => {
     orderBy: (field, direction) => makeQuery(name, { filters: [] }).orderBy(field, direction),
     limit: (count) => makeQuery(name, { filters: [] }).limit(count),
     get: () => makeQuery(name, { filters: [] }).get(),
+    count: () => makeQuery(name, { filters: [] }).count(),
   })
 
   const makeBatch = (): FakeBatch => {

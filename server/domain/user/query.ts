@@ -1,4 +1,5 @@
-import type { UserId } from '~/domain/shared/types'
+import { Count } from '~/domain/shared/primitives'
+import type { Count as CountType, UserId } from '~/domain/shared/types'
 import * as repository from '~/domain/user/infrastructure/repository'
 import type { MeView } from '~/domain/user/types'
 
@@ -11,6 +12,10 @@ export namespace UserQuery {
       userId,
       firstName: profile?.firstName,
       onboardingCompletedAt: profile?.onboardingCompletedAt,
+      admin: profile?.admin === true,
     }
   }
+
+  // How many accounts completed onboarding — the admin metrics' user count.
+  export const total = async (): Promise<CountType> => Count(await repository.countProfiles())
 }

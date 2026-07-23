@@ -16,6 +16,13 @@ export const findProfile = (userId: UserId): Promise<UserProfile | null> =>
     return doc.data() ?? null
   })
 
+// How many accounts have a profile — a Firestore count() aggregate, one billed
+// query round-trip however large the collection grows, never a scan.
+export const countProfiles = async (): Promise<number> => {
+  const snap = await profiles().count().get()
+  return snap.data().count
+}
+
 export const saveProfile = async (
   profile: UserProfile,
   batch?: WriteBatch,

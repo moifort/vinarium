@@ -7,3 +7,13 @@ export type SentryDsn = Brand<string, 'SentryDsn'>
 /** The app's numeric App Store id, which a Production signature is verified
  *  against. Public, not a credential. */
 export type AppleAppId = Brand<number, 'AppleAppId'>
+/** App Store Connect API key issuer id (a UUID from the Users and Access page). */
+export type AscIssuerId = Brand<string, 'AscIssuerId'>
+/** App Store Connect API key id (10-char alphanum, matches the .p8 filename). */
+export type AscKeyId = Brand<string, 'AscKeyId'>
+/** App Store Connect API private key, the .p8 PEM content. */
+export type AscPrivateKey = Brand<string, 'AscPrivateKey'>
+/** The vendor number sales reports are filed under (Payments and Financial Reports). */
+export type AscVendorNumber = Brand<string, 'AscVendorNumber'>
+/** Fully qualified BigQuery billing export table, `project.dataset.table`. */
+export type GcpBillingTable = Brand<string, 'GcpBillingTable'>

@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import type { AiStepUsage } from '~/domain/admin/types'
 import { SUBTYPES_BY_BEVERAGE } from '~/domain/beverage/business-rules'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
 import * as repository from '~/domain/scan/infrastructure/repository'
@@ -9,6 +10,7 @@ import {
   ScanResultSchema,
 } from '~/domain/scan/primitives'
 import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
+import { Count } from '~/domain/shared/primitives'
 import { config } from '~/system/config/index'
 import { createLogger } from '~/system/logger'
 
@@ -17,10 +19,10 @@ const GEMINI_API_URL =
 
 const logger = createLogger('scan')
 
-// What Gemini says the call cost. Thinking tokens bill at the output rate and are
-// the largest line on a scan, so they are logged apart: the free allowance and
-// the price are sized on these numbers (docs/freemium-economics.md), and they
-// were estimated, never measured.
+// What Gemini says the call cost. Thinking tokens bill at the output rate and
+// are the largest line on a scan, so they are kept apart: the free allowance
+// and the price are sized on these numbers (docs/freemium-economics.md), and
+// the admin metrics recalibrate them against what is captured here.
 type GeminiUsage = {
   promptTokenCount?: number
   candidatesTokenCount?: number
@@ -28,36 +30,51 @@ type GeminiUsage = {
   totalTokenCount?: number
 }
 
-const recordUsage = (step: 'vision' | 'enrichment', usage: GeminiUsage | undefined) => {
-  if (!usage) return
+// What the two Gemini calls of one scan consumed, absent for a step that never
+// ran (a cache hit, an unrecognized label skipping enrichment).
+export type ScanUsage = { vision?: AiStepUsage; enrichment?: AiStepUsage }
+
+const capturedUsage = (
+  step: 'vision' | 'enrichment',
+  usage: GeminiUsage | undefined,
+): AiStepUsage | undefined => {
+  if (!usage) return undefined
   logger.info(
     `${step}: ${usage.promptTokenCount ?? 0} in, ${usage.candidatesTokenCount ?? 0} out, ${usage.thoughtsTokenCount ?? 0} thinking`,
   )
+  return {
+    promptTokens: Count(usage.promptTokenCount ?? 0),
+    outputTokens: Count(usage.candidatesTokenCount ?? 0),
+    thinkingTokens: Count(usage.thoughtsTokenCount ?? 0),
+  }
 }
 
 export namespace Scan {
   // `cacheHit` is what the quota is metered on: a cached label costs nothing, so
   // it must not spend anyone's allowance. Only a scan that really reached Gemini
-  // is billed to us, and only that one is billed to the caller.
+  // is billed to us, and only that one is billed to the caller. `usage` carries
+  // what the calls that did run consumed, for the admin cost metrics.
   export const scanWithCache = async (
     imageBuffer: Buffer,
-  ): Promise<{ result: ScanResult; cacheHit: boolean }> => {
+  ): Promise<{ result: ScanResult; cacheHit: boolean; usage: ScanUsage }> => {
     const imageHash = hashImage(imageBuffer)
     const cached = await repository.findBy(imageHash)
     // Re-parse cached results: entries written before multi-beverage support
     // have no beverageType and get the wine default.
-    if (cached) return { result: ScanResultSchema.parse(cached.result), cacheHit: true }
-    const scanResult = await scanLabel(imageBuffer)
+    if (cached) return { result: ScanResultSchema.parse(cached.result), cacheHit: true, usage: {} }
+    const { result: scanResult, usage: vision } = await scanLabel(imageBuffer)
     // Nothing recognized: skip the enrichment search (pointless) and skip caching
     // so a fresh attempt on the same image starts over rather than reusing a miss.
-    if (!scanResult.recognized) return { result: scanResult, cacheHit: false }
-    const enriched = await enrichWithSearch(scanResult)
+    if (!scanResult.recognized) return { result: scanResult, cacheHit: false, usage: { vision } }
+    const { result: enriched, usage: enrichment } = await enrichWithSearch(scanResult)
     // Best-effort cache: a failed write only costs a re-scan on the next hit.
     repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
-    return { result: enriched, cacheHit: false }
+    return { result: enriched, cacheHit: false, usage: { vision, enrichment } }
   }
 
-  const scanLabel = async (imageBuffer: Buffer): Promise<ScanResult> => {
+  const scanLabel = async (
+    imageBuffer: Buffer,
+  ): Promise<{ result: ScanResult; usage?: AiStepUsage }> => {
     const { googleApiKey } = config()
     const base64 = imageBuffer.toString('base64')
 
@@ -186,12 +203,12 @@ export namespace Scan {
       },
     })
 
-    recordUsage('vision', response.usageMetadata)
+    const usage = capturedUsage('vision', response.usageMetadata)
 
     const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
     if (!text) throw new Error('Gemini did not return structured wine data')
 
-    return parseScanResponse(text)
+    return { result: parseScanResponse(text), usage }
   }
 
   const BEVERAGE_LABELS: Record<ScanResult['beverageType'], string> = {
@@ -203,7 +220,9 @@ export namespace Scan {
     other: 'boisson',
   }
 
-  const enrichWithSearch = async (scanResult: ScanResult) => {
+  const enrichWithSearch = async (
+    scanResult: ScanResult,
+  ): Promise<{ result: ScanResult; usage?: AiStepUsage }> => {
     const { googleApiKey } = config()
 
     const description = [
@@ -257,34 +276,37 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
       },
     })
 
-    recordUsage('enrichment', response.usageMetadata)
+    const usage = capturedUsage('enrichment', response.usageMetadata)
 
     const text = response.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
-    if (!text) return scanResult
+    if (!text) return { result: scanResult, usage }
 
     try {
       const jsonMatch = text.match(/\{[\s\S]*\}/)
-      if (!jsonMatch) return scanResult
+      if (!jsonMatch) return { result: scanResult, usage }
       const enriched = EnrichSchema.parse(JSON.parse(jsonMatch[0]))
 
       return {
-        ...scanResult,
-        estimatedPrice: enriched.estimatedPrice ?? scanResult.estimatedPrice,
-        alcoholContent: enriched.alcoholContent ?? scanResult.alcoholContent,
-        subtype: enriched.subtype ?? scanResult.subtype,
-        drinkFrom: enriched.drinkFrom ?? scanResult.drinkFrom,
-        drinkUntil: enriched.drinkUntil ?? scanResult.drinkUntil,
-        grapeVarieties:
-          enriched.grapeVarieties && enriched.grapeVarieties.length > 0
-            ? enriched.grapeVarieties
-            : scanResult.grapeVarieties,
-        region: enriched.region ?? scanResult.region,
-        country: enriched.country ?? scanResult.country,
-        classification: enriched.classification ?? scanResult.classification,
-        appellation: enriched.appellation ?? scanResult.appellation,
+        result: {
+          ...scanResult,
+          estimatedPrice: enriched.estimatedPrice ?? scanResult.estimatedPrice,
+          alcoholContent: enriched.alcoholContent ?? scanResult.alcoholContent,
+          subtype: enriched.subtype ?? scanResult.subtype,
+          drinkFrom: enriched.drinkFrom ?? scanResult.drinkFrom,
+          drinkUntil: enriched.drinkUntil ?? scanResult.drinkUntil,
+          grapeVarieties:
+            enriched.grapeVarieties && enriched.grapeVarieties.length > 0
+              ? enriched.grapeVarieties
+              : scanResult.grapeVarieties,
+          region: enriched.region ?? scanResult.region,
+          country: enriched.country ?? scanResult.country,
+          classification: enriched.classification ?? scanResult.classification,
+          appellation: enriched.appellation ?? scanResult.appellation,
+        },
+        usage,
       }
     } catch {
-      return scanResult
+      return { result: scanResult, usage }
     }
   }
 

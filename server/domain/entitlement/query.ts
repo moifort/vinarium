@@ -26,6 +26,10 @@ export namespace EntitlementQuery {
     return planFrom(await of(userId), new Date())
   }
 
+  // Every entitlement ever recorded, active or not — the admin metrics refresh
+  // streams them to count who is Premium right now.
+  export const all = async (): Promise<Entitlement[]> => repository.findAll()
+
   // The UUID the app must hand StoreKit when it starts a purchase, so the signed
   // transaction comes back naming its owner. Derived here and never on the
   // client: one implementation, no algorithm to keep in sync across two languages.

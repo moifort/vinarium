@@ -82,4 +82,8 @@ import '~/domain/quota/infrastructure/graphql/queries'
 import '~/domain/scan/infrastructure/graphql/types'
 import '~/domain/scan/infrastructure/graphql/mutations'
 
+// Admin (the app's monthly economics, admin accounts only)
+import '~/domain/admin/infrastructure/graphql/types'
+import '~/domain/admin/infrastructure/graphql/queries'
+
 export const schema = builder.toSchema()

@@ -32,5 +32,10 @@ export default defineNitroConfig({
     appleAppId: '',
     appleEnvironment: '',
     premiumUserIds: '',
+    ascIssuerId: '',
+    ascKeyId: '',
+    ascPrivateKey: '',
+    ascVendorNumber: '',
+    gcpBillingTable: '',
   },
 })

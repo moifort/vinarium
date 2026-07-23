@@ -33,5 +33,11 @@ export const MeType = builder.objectRef<MeView>('Me').implement({
       description: 'Convenience flag the app routes on: true once onboarding is done.',
       resolve: (me) => me.onboardingCompletedAt != null,
     }),
+    isAdmin: t.expose('admin', {
+      type: 'Boolean',
+      description:
+        'Whether this account may open the in-app admin screen (`adminMetrics`). ' +
+        'Set by hand on the profile document, false for everyone else.',
+    }),
   }),
 })
