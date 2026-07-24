@@ -70,7 +70,11 @@ export const AscPrivateKey = (value: unknown) => {
 }
 
 export const AscVendorNumber = (value: unknown) => {
-  const v = z.string().min(1).parse(value)
+  // The vendor number is all digits, so Nitro's runtime config coerces the
+  // NITRO_ASC_VENDOR_NUMBER env var to a number before it ever reaches here.
+  // Accept that and stringify it — a bare z.string() would throw at boot, which
+  // is exactly what took the function down once the value was set.
+  const v = z.coerce.string().min(1).parse(value)
   return make<AscVendorNumberType>()(v)
 }
 
