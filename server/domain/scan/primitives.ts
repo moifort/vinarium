@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { retainedSubtype } from '~/domain/beverage/business-rules'
 import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
-import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
+import type { ImageHash as ImageHashType, ScanLanguage, ScanResult } from '~/domain/scan/types'
 
 export const ImageHash = (value: unknown) => {
   const v = z
@@ -11,6 +11,17 @@ export const ImageHash = (value: unknown) => {
     .regex(/^[0-9a-f]{64}$/)
     .parse(value)
   return make<ImageHashType>()(v)
+}
+
+export const SCAN_LANGUAGES = ['fr', 'en', 'de', 'es', 'it', 'pt', 'ja'] as const
+
+// Resolve an `Accept-Language` header to a supported scan language. Reads only the
+// primary subtag of the first listed language (`de-CH,de;q=0.9` -> `de`) and falls
+// back to English for anything unsupported, so an untranslatable locale still gets
+// a widely readable result rather than French.
+export const scanLanguageFrom = (acceptLanguage: string | undefined): ScanLanguage => {
+  const primary = acceptLanguage?.split(',')[0]?.trim().split('-')[0]?.toLowerCase()
+  return SCAN_LANGUAGES.includes(primary as ScanLanguage) ? (primary as ScanLanguage) : 'en'
 }
 
 const nullToUndefined = <T>(schema: z.ZodNullable<z.ZodType<T>>) =>

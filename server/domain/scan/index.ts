@@ -9,7 +9,7 @@ import {
   parseScanResponse,
   ScanResultSchema,
 } from '~/domain/scan/primitives'
-import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
+import type { ImageHash as ImageHashType, ScanLanguage, ScanResult } from '~/domain/scan/types'
 import { Count } from '~/domain/shared/primitives'
 import { config } from '~/system/config/index'
 import { createLogger } from '~/system/logger'
@@ -56,24 +56,41 @@ export namespace Scan {
   // what the calls that did run consumed, for the admin cost metrics.
   export const scanWithCache = async (
     imageBuffer: Buffer,
+    language: ScanLanguage,
   ): Promise<{ result: ScanResult; cacheHit: boolean; usage: ScanUsage }> => {
     const imageHash = hashImage(imageBuffer)
-    const cached = await repository.findBy(imageHash)
+    // The cache is keyed by image AND language: the same label scanned in two
+    // languages must not serve one language's text to the other.
+    const cached = await repository.findBy(imageHash, language)
     // Re-parse cached results: entries written before multi-beverage support
     // have no beverageType and get the wine default.
     if (cached) return { result: ScanResultSchema.parse(cached.result), cacheHit: true, usage: {} }
-    const { result: scanResult, usage: vision } = await scanLabel(imageBuffer)
+    const { result: scanResult, usage: vision } = await scanLabel(imageBuffer, language)
     // Nothing recognized: skip the enrichment search (pointless) and skip caching
     // so a fresh attempt on the same image starts over rather than reusing a miss.
     if (!scanResult.recognized) return { result: scanResult, cacheHit: false, usage: { vision } }
-    const { result: enriched, usage: enrichment } = await enrichWithSearch(scanResult)
+    const { result: enriched, usage: enrichment } = await enrichWithSearch(scanResult, language)
     // Best-effort cache: a failed write only costs a re-scan on the next hit.
-    repository.save({ imageHash, result: enriched, cachedAt: new Date() }).catch(() => {})
+    repository.save({ imageHash, language, result: enriched, cachedAt: new Date() }).catch(() => {})
     return { result: enriched, cacheHit: false, usage: { vision, enrichment } }
+  }
+
+  // The language name is written into the (French) prompt so Gemini emits every
+  // free-text value in the caller's language. Prices stay in euros regardless
+  // (canonical storage currency; the client converts for display).
+  const LANGUAGE_NAMES: Record<ScanLanguage, string> = {
+    fr: 'français',
+    en: 'anglais',
+    de: 'allemand',
+    es: 'espagnol',
+    it: 'italien',
+    pt: 'portugais',
+    ja: 'japonais',
   }
 
   const scanLabel = async (
     imageBuffer: Buffer,
+    language: ScanLanguage,
   ): Promise<{ result: ScanResult; usage?: AiStepUsage }> => {
     const { googleApiKey } = config()
     const base64 = imageBuffer.toString('base64')
@@ -90,7 +107,7 @@ export namespace Scan {
             parts: [
               { inline_data: { mime_type: 'image/jpeg', data: base64 } },
               {
-                text: "Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name=\"\" si l'image n'est PAS une étiquette de boisson identifiable (aucune étiquette lisible, objet quelconque, photo floue ou illisible). Sinon mets recognized=true et poursuis. Ne mets recognized=false que si tu ne peux vraiment rien identifier.\n\nÉTAPE 1 — Détermine d'abord beverageType parmi : wine (vin), spirit (spiritueux/alcool fort distillé), beer (bière), sake (saké japonais), cider (cidre/poiré), other. Indices de classification :\n- wine : mention de cépages, d'appellation (AOC/AOP/DOC), millésime, ~11-15% vol, bouteille bordelaise/bourguignonne.\n- spirit : whisky, rhum, gin, vodka, cognac, armagnac, tequila, mezcal, liqueur — souvent 37,5-50%+ vol, mention d'âge (ex : 12 ans) ou de distillerie.\n- beer : brasserie, IPA/Lager/Stout/Pils/Triple, ~4-9% vol, canette ou bouteille capsulée.\n- sake : texte japonais, mention 純米/吟醸/大吟醸 (Junmai/Ginjo/Daiginjo), kura (brasserie de saké), ~14-17% vol.\n- cider : pomme/poire, cidrerie, Brut/Doux/Fermier, ~2-8% vol.\nSi le type est réellement indéterminable, mets 'other'.\n\nÉTAPE 2 — Selon le type :\n- Pour un vin : color est OBLIGATOIRE parmi red/white/rosé — c'est la robe. Un champagne, crémant ou autre effervescent garde sa robe en color (white ou rosé) et reçoit subtype 'sparkling'. Estime drinkFrom/drinkUntil selon le type de vin, le millésime, la région et la classification.\n- Pour toute autre boisson : mets color à null et laisse les champs spécifiques au vin (grapeVarieties, appellation, classification, drinkFrom, drinkUntil) à null.\n\nÉTAPE 3 — Renseigne subtype avec une valeur COHÉRENTE avec beverageType, ou null si incertain :\n- wine → sparkling (effervescent), sweet (moelleux/liquoreux), late-harvest (vendanges tardives), vin-jaune, porto, fortified (autre vin muté : Banyuls, Madère, Xérès…)\n- spirit → rum, whisky, gin, vodka, cognac, armagnac, tequila (ou mezcal), liqueur, eau-de-vie\n- beer → blonde, blanche, amber (ambrée), brune, ipa, stout, pils (ou lager), triple\n- sake → junmai, ginjo, daiginjo, honjozo, nigori, sparkling (saké pétillant)\n- cider → brut, doux, demi-sec, poire (poiré)\n- 'other' si aucune valeur ne convient.\n\nLe champ domain désigne le producteur : domaine, distillerie, brasserie ou kura. Pour alcoholContent, indique le degré d'alcool en % vol s'il est visible. Pour estimatedPrice, estime le prix actuel du marché en euros selon le producteur et les caractéristiques. Toutes les valeurs textuelles (nom, producteur, région, pays, cépages, appellation, classification) doivent être en français. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).",
+                text: `Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name="" si l'image n'est PAS une étiquette de boisson identifiable (aucune étiquette lisible, objet quelconque, photo floue ou illisible). Sinon mets recognized=true et poursuis. Ne mets recognized=false que si tu ne peux vraiment rien identifier.\n\nÉTAPE 1 — Détermine d'abord beverageType parmi : wine (vin), spirit (spiritueux/alcool fort distillé), beer (bière), sake (saké japonais), cider (cidre/poiré), other. Indices de classification :\n- wine : mention de cépages, d'appellation (AOC/AOP/DOC), millésime, ~11-15% vol, bouteille bordelaise/bourguignonne.\n- spirit : whisky, rhum, gin, vodka, cognac, armagnac, tequila, mezcal, liqueur — souvent 37,5-50%+ vol, mention d'âge (ex : 12 ans) ou de distillerie.\n- beer : brasserie, IPA/Lager/Stout/Pils/Triple, ~4-9% vol, canette ou bouteille capsulée.\n- sake : texte japonais, mention 純米/吟醸/大吟醸 (Junmai/Ginjo/Daiginjo), kura (brasserie de saké), ~14-17% vol.\n- cider : pomme/poire, cidrerie, Brut/Doux/Fermier, ~2-8% vol.\nSi le type est réellement indéterminable, mets 'other'.\n\nÉTAPE 2 — Selon le type :\n- Pour un vin : color est OBLIGATOIRE parmi red/white/rosé — c'est la robe. Un champagne, crémant ou autre effervescent garde sa robe en color (white ou rosé) et reçoit subtype 'sparkling'. Estime drinkFrom/drinkUntil selon le type de vin, le millésime, la région et la classification.\n- Pour toute autre boisson : mets color à null et laisse les champs spécifiques au vin (grapeVarieties, appellation, classification, drinkFrom, drinkUntil) à null.\n\nÉTAPE 3 — Renseigne subtype avec une valeur COHÉRENTE avec beverageType, ou null si incertain :\n- wine → sparkling (effervescent), sweet (moelleux/liquoreux), late-harvest (vendanges tardives), vin-jaune, porto, fortified (autre vin muté : Banyuls, Madère, Xérès…)\n- spirit → rum, whisky, gin, vodka, cognac, armagnac, tequila (ou mezcal), liqueur, eau-de-vie\n- beer → blonde, blanche, amber (ambrée), brune, ipa, stout, pils (ou lager), triple\n- sake → junmai, ginjo, daiginjo, honjozo, nigori, sparkling (saké pétillant)\n- cider → brut, doux, demi-sec, poire (poiré)\n- 'other' si aucune valeur ne convient.\n\nLe champ domain désigne le producteur : domaine, distillerie, brasserie ou kura. Pour alcoholContent, indique le degré d'alcool en % vol s'il est visible. Pour estimatedPrice, estime le prix actuel du marché en euros selon le producteur et les caractéristiques. Toutes les valeurs textuelles (nom, producteur, région, pays, cépages, appellation, classification) doivent être en ${LANGUAGE_NAMES[language]}. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).`,
               },
             ],
           },
@@ -139,12 +156,12 @@ export namespace Scan {
               region: {
                 type: 'string',
                 nullable: true,
-                description: 'Région viticole (en français)',
+                description: 'Région viticole',
               },
               country: {
                 type: 'string',
                 nullable: true,
-                description: "Pays d'origine (en français, ex : France, Espagne, Italie)",
+                description: "Pays d'origine (ex : France, Espagne, Italie)",
               },
               color: {
                 type: 'string',
@@ -155,7 +172,7 @@ export namespace Scan {
               grapeVarieties: {
                 type: 'array',
                 items: { type: 'string' },
-                description: 'Cépages mentionnés (en français)',
+                description: 'Cépages mentionnés',
               },
               classification: {
                 type: 'string',
@@ -222,6 +239,7 @@ export namespace Scan {
 
   const enrichWithSearch = async (
     scanResult: ScanResult,
+    language: ScanLanguage,
   ): Promise<{ result: ScanResult; usage?: AiStepUsage }> => {
     const { googleApiKey } = config()
 
@@ -261,7 +279,7 @@ ${scanResult.beverageType === 'wine' ? wineFields : otherFields}
   "country": string ou null (pays)
 }
 
-Toutes les valeurs textuelles doivent être en français (noms de pays, régions, cépages, etc.).
+Toutes les valeurs textuelles doivent être en ${LANGUAGE_NAMES[language]} (noms de pays, régions, cépages, etc.).
 Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves pas une information, mets null.`
 
     const response = await $fetch<{
