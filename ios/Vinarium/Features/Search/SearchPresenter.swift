@@ -18,7 +18,7 @@ private struct SearchToolbarButton: View {
             Image(systemName: "magnifyingglass")
         }
         .accessibilityIdentifier("search-button")
-        .accessibilityLabel("Rechercher")
+        .accessibilityLabel(Text("Rechercher"))
     }
 }
 

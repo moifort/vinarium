@@ -32,7 +32,7 @@ struct ReadyToDrinkSection: View {
                                     .font(.subheadline)
                                     .lineLimit(1)
                                 if item.urgent, let year = item.drinkUntil {
-                                    Text(verbatim: "Avant \(year)")
+                                    Text("Avant \(String(year))")
                                         .font(.caption)
                                         .fontWeight(.medium)
                                         .foregroundStyle(.white)

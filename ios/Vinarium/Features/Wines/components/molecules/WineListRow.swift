@@ -43,7 +43,7 @@ struct WineListRow: View {
                 Image(systemName: "cabinet")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .accessibilityLabel("En cave")
+                    .accessibilityLabel(Text("En cave"))
             }
             if isFavorite {
                 Image(systemName: "heart.fill")

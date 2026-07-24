@@ -12,12 +12,12 @@ enum BeverageType: String, Codable, CaseIterable, Identifiable, Sendable {
 
     var label: String {
         switch self {
-        case .wine: "Vin"
-        case .spirit: "Spiritueux"
-        case .beer: "Bière"
-        case .sake: "Saké"
-        case .cider: "Cidre"
-        case .other: "Autre"
+        case .wine: String(localized: "Vin")
+        case .spirit: String(localized: "Spiritueux")
+        case .beer: String(localized: "Bière")
+        case .sake: String(localized: "Saké")
+        case .cider: String(localized: "Cidre")
+        case .other: String(localized: "Autre")
         }
     }
 
@@ -49,12 +49,12 @@ enum BeverageType: String, Codable, CaseIterable, Identifiable, Sendable {
     /// Le producteur change de nom selon la boisson — pilote le libellé du formulaire.
     var producerLabel: String {
         switch self {
-        case .wine: "Domaine"
-        case .spirit: "Distillerie"
-        case .beer: "Brasserie"
-        case .sake: "Kura"
-        case .cider: "Cidrerie"
-        case .other: "Producteur"
+        case .wine: String(localized: "Domaine")
+        case .spirit: String(localized: "Distillerie")
+        case .beer: String(localized: "Brasserie")
+        case .sake: String(localized: "Kura")
+        case .cider: String(localized: "Cidrerie")
+        case .other: String(localized: "Producteur")
         }
     }
 }

@@ -7,7 +7,7 @@ struct ChangelogEntryRow: View {
 
     private static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "fr_FR")
+        formatter.locale = Locale.autoupdatingCurrent
         formatter.dateStyle = .medium
         return formatter
     }()

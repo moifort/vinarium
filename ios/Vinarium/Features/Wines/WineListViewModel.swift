@@ -5,10 +5,10 @@ enum WineListMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .all: "Tous"
-        case .favorites: "Favoris"
-        case .gifted: "Offerts"
-        case .recommended: "Conseillés"
+        case .all: String(localized: "Tous")
+        case .favorites: String(localized: "Favoris")
+        case .gifted: String(localized: "Offerts")
+        case .recommended: String(localized: "Conseillés")
         }
     }
     var icon: String {
@@ -22,19 +22,19 @@ enum WineListMode: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .all: "Mes Vins"
-        case .favorites: "Favoris"
-        case .gifted: "Offerts"
-        case .recommended: "Conseillés"
+        case .all: String(localized: "Mes Vins")
+        case .favorites: String(localized: "Favoris")
+        case .gifted: String(localized: "Offerts")
+        case .recommended: String(localized: "Conseillés")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .all: "Tous vos vins ajoutés"
-        case .favorites: "Vos coups de cœur"
-        case .gifted: "Vins qu'on vous a offerts"
-        case .recommended: "Vins recommandés par vos proches"
+        case .all: String(localized: "Tous vos vins ajoutés")
+        case .favorites: String(localized: "Vos coups de cœur")
+        case .gifted: String(localized: "Vins qu'on vous a offerts")
+        case .recommended: String(localized: "Vins recommandés par vos proches")
         }
     }
 
@@ -52,12 +52,12 @@ enum WineSort: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .updatedAt: "Date de modification"
-        case .vintage: "Millésime"
-        case .region: "Région"
-        case .color: "Couleur"
-        case .price: "Prix"
-        case .person: "Par personne"
+        case .updatedAt: String(localized: "Date de modification")
+        case .vintage: String(localized: "Millésime")
+        case .region: String(localized: "Région")
+        case .color: String(localized: "Couleur")
+        case .price: String(localized: "Prix")
+        case .person: String(localized: "Par personne")
         }
     }
     var icon: String {
@@ -83,9 +83,9 @@ enum WineStatusFilter: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .all: "Tous"
-        case .inCellar: "En cave"
-        case .consumed: "Consommés"
+        case .all: String(localized: "Tous")
+        case .inCellar: String(localized: "En cave")
+        case .consumed: String(localized: "Consommés")
         }
     }
     var icon: String {
@@ -99,7 +99,7 @@ enum WineStatusFilter: String, CaseIterable, Identifiable {
 
 private let wineMonthYearFormatter: DateFormatter = {
     let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "fr_FR")
+    formatter.locale = Locale.autoupdatingCurrent
     formatter.dateFormat = "MMMM yyyy"
     return formatter
 }()

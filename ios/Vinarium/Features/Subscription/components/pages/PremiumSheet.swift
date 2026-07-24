@@ -9,17 +9,17 @@ enum PremiumTrigger {
 
     var title: String {
         switch self {
-        case .scanAllowanceSpent: return "Scans épuisés ce mois-ci"
-        case .discover: return "Vinarium Premium"
+        case .scanAllowanceSpent: return String(localized: "Scans épuisés ce mois-ci")
+        case .discover: return String(localized: "Vinarium Premium")
         }
     }
 
     var message: String {
         switch self {
         case .scanAllowanceSpent:
-            return "Votre quota du mois a été atteint. Passez en Premium pour profiter du scan illimité."
+            return String(localized: "Votre quota du mois a été atteint. Passez en Premium pour profiter du scan illimité.")
         case .discover:
-            return "Le scan d’étiquette reconnaît vos bouteilles et enrichit leur fiche. Passez en Premium pour scanner sans limite."
+            return String(localized: "Le scan d’étiquette reconnaît vos bouteilles et enrichit leur fiche. Passez en Premium pour scanner sans limite.")
         }
     }
 }

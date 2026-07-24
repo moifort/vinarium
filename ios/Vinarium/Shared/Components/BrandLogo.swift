@@ -30,7 +30,7 @@ struct BrandLogo: View {
         }
         .onAppear { appeared = true }
         .accessibilityElement()
-        .accessibilityLabel("Vinarium")
+        .accessibilityLabel(Text(verbatim: "Vinarium"))
     }
 
     private var spacing: CGFloat { capsuleSize * 0.28 }

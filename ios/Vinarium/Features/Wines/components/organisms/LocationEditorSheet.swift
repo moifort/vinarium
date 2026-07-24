@@ -60,7 +60,7 @@ struct LocationEditorSheet: View {
                         .background(Circle().fill(Color(.tertiarySystemFill)))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Fermer")
+                .accessibilityLabel(Text("Fermer"))
 
                 Spacer()
 
@@ -96,7 +96,7 @@ struct LocationEditorSheet: View {
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("Effacer la recherche")
+                .accessibilityLabel(Text("Effacer la recherche"))
             }
         }
         .padding(.horizontal, 12)

@@ -23,7 +23,7 @@ struct InteractiveStarRating: View {
         .frame(maxWidth: .infinity, alignment: .center)
         .padding(.vertical, 4)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Note : \(rating) sur \(total)")
+        .accessibilityLabel(Text("Note : \(rating) sur \(total)"))
         .accessibilityAdjustableAction { direction in
             switch direction {
             case .increment: if rating < total { rating += 1 }

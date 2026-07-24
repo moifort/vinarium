@@ -11,7 +11,8 @@
       "**",
       "!shared",
       "!server/system/changelog-content.ts",
-      "!ios/Vinarium/Assets.xcassets"
+      "!ios/Vinarium/Assets.xcassets",
+      "!ios/Vinarium/Resources/Localizable.xcstrings"
     ]
   },
   "formatter": {

@@ -50,7 +50,7 @@ struct ScanConfirmationPage: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .accessibilityLabel("Terminé")
+                .accessibilityLabel(Text("Terminé"))
                 .accessibilityIdentifier("done-button")
             }
             .padding(.horizontal)

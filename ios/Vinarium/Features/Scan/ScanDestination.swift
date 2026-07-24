@@ -11,8 +11,8 @@ enum ScanDestination: String, CaseIterable, Identifiable, Sendable {
 
     var label: String {
         switch self {
-        case .cellar: "Ranger en cave"
-        case .justSave: "Juste enregistrer"
+        case .cellar: String(localized: "Ranger en cave")
+        case .justSave: String(localized: "Juste enregistrer")
         }
     }
 

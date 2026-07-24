@@ -47,6 +47,7 @@ struct AuthenticatedInterceptorProvider: InterceptorProvider {
     ) -> [any HTTPInterceptor] {
         [
             FirebaseTokenInterceptor(),
+            AcceptLanguageInterceptor(),
             ResponseCodeInterceptor(),
         ]
     }

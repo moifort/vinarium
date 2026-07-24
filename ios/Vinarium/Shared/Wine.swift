@@ -9,9 +9,9 @@ enum WineColor: String, Codable, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .red: "Rouge"
-        case .white: "Blanc"
-        case .rosé: "Rosé"
+        case .red: String(localized: "Rouge")
+        case .white: String(localized: "Blanc")
+        case .rosé: String(localized: "Rosé")
         }
     }
 

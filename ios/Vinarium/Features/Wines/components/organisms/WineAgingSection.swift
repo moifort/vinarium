@@ -14,7 +14,7 @@ struct WineAgingSection: View {
                     LabeledInfoRow(title: "Jusqu'\u{00E0}", value: "\(until)", icon: "hourglass.tophalf.filled")
                     if until <= Calendar.current.component(.year, from: Date()) + 1 {
                         Label {
-                            Text(verbatim: "\u{00C0} d\u{00E9}guster rapidement")
+                            Text("À déguster rapidement")
                                 .font(.subheadline)
                                 .foregroundStyle(.orange)
                                 .fontWeight(.medium)

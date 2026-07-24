@@ -14,7 +14,7 @@ struct StarRatingView: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Note : \(rating) sur \(total)")
+        .accessibilityLabel(Text("Note : \(rating) sur \(total)"))
     }
 }
 

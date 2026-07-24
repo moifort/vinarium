@@ -5,10 +5,10 @@ enum TabSelection: Int, CaseIterable, Identifiable {
     var id: Int { rawValue }
     var label: String {
         switch self {
-        case .home: "Accueil"
-        case .cellar: "Cave"
-        case .wines: "Vins"
-        case .scan: "Scanner"
+        case .home: String(localized: "Accueil")
+        case .cellar: String(localized: "Cave")
+        case .wines: String(localized: "Vins")
+        case .scan: String(localized: "Scanner")
         }
     }
 }

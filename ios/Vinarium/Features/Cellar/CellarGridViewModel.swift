@@ -13,19 +13,24 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
         }
     }
 
-    var label: String { rawValue }
+    var label: String {
+        switch self {
+        case .cave: String(localized: "Cave")
+        case .journal: String(localized: "Journal")
+        }
+    }
 
     var title: String {
         switch self {
-        case .cave: "Ma Cave"
-        case .journal: "Journal"
+        case .cave: String(localized: "Ma Cave")
+        case .journal: String(localized: "Journal")
         }
     }
 
     var subtitle: String {
         switch self {
-        case .cave: "Vos bouteilles en cave"
-        case .journal: "Historique des entrées et sorties"
+        case .cave: String(localized: "Vos bouteilles en cave")
+        case .journal: String(localized: "Historique des entrées et sorties")
         }
     }
 }
