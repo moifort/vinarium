@@ -338,13 +338,16 @@ final class WineListViewModel {
     }
 
     private static func priceRange(_ price: Double?) -> (order: Int, label: String) {
-        guard let price else { return (999, "Sans prix") }
+        guard let price else { return (999, String(localized: "Sans prix")) }
+        // Thresholds stay in euros (matching the stored price); the labels show
+        // the boundaries converted to the user's display currency.
+        func bound(_ eur: Double) -> String { Money.formattedFromEur(eur, fractionLength: 0) }
         switch price {
-        case ..<10: return (0, "0-10 €")
-        case ..<20: return (1, "10-20 €")
-        case ..<50: return (2, "20-50 €")
-        case ..<100: return (3, "50-100 €")
-        default: return (4, "100+ €")
+        case ..<10: return (0, "< \(bound(10))")
+        case ..<20: return (1, "\(bound(10))–\(bound(20))")
+        case ..<50: return (2, "\(bound(20))–\(bound(50))")
+        case ..<100: return (3, "\(bound(50))–\(bound(100))")
+        default: return (4, "\(bound(100))+")
         }
     }
 }

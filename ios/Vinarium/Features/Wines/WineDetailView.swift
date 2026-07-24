@@ -462,7 +462,7 @@ struct WineDetailView: View {
             country: detail.country ?? "",
             classification: detail.classification ?? "",
             grapeVarieties: detail.grapeVarieties.joined(separator: ", "),
-            purchasePrice: detail.purchasePrice.map { String(format: "%.0f", $0) } ?? "",
+            purchasePrice: detail.purchasePrice.map { String(format: "%.0f", Money.fromEur($0)) } ?? "",
             purchaseDate: parsedPurchaseDate,
             drinkFrom: detail.drinkFrom.map(String.init) ?? "",
             drinkUntil: detail.drinkUntil.map(String.init) ?? "",

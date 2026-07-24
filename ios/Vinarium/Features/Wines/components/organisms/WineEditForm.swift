@@ -155,7 +155,7 @@ struct WineEditForm: View {
                         TextField("0", text: $purchasePrice)
                             .keyboardType(.decimalPad)
                             .multilineTextAlignment(.trailing)
-                        Text("€")
+                        Text(Money.displayCurrencySymbol)
                             .foregroundStyle(.secondary)
                     }
                 } label: {
@@ -293,7 +293,8 @@ struct WineEditForm: View {
             country: country.isEmpty ? nil : country,
             grapeVarieties: isWine && !varieties.isEmpty ? varieties : nil,
             classification: isWine && !classification.isEmpty ? classification : nil,
-            purchasePrice: Double(purchasePrice),
+            // The field is shown and typed in the display currency; store euros.
+            purchasePrice: Double(purchasePrice).map(Money.toEur),
             purchaseDate: purchaseDate.map { ISO8601DateFormatter().string(from: $0) },
             drinkFrom: Int(drinkFrom),
             drinkUntil: Int(drinkUntil),

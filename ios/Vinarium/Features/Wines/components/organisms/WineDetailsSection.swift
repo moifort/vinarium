@@ -13,7 +13,7 @@ struct WineDetailsSection: View {
                     LabeledInfoRow(title: "Alcool", value: String(format: "%.1f %% vol", alcohol), icon: "drop")
                 }
                 if let price = purchasePrice {
-                    LabeledInfoRow(title: "Prix d'achat", value: String(format: "%.0f \u{20AC}", price), icon: "eurosign.circle")
+                    LabeledInfoRow(title: "Prix d'achat", value: Money.formattedFromEur(price, fractionLength: 0), icon: "eurosign.circle")
                 }
                 if let date = purchaseDate {
                     LabeledInfoRow(title: "Date d'achat", value: date, icon: "calendar.badge.clock")

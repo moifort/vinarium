@@ -68,7 +68,7 @@ struct ScanReviewPage: View {
         _country = State(initialValue: scanResult.country ?? "")
         _grapeVarieties = State(initialValue: scanResult.grapeVarieties.joined(separator: ", "))
         _classification = State(initialValue: scanResult.classification ?? "")
-        _estimatedPrice = State(initialValue: scanResult.estimatedPrice.map { String(format: "%.0f", $0) } ?? "")
+        _estimatedPrice = State(initialValue: scanResult.estimatedPrice.map { String(format: "%.0f", Money.fromEur($0)) } ?? "")
         _drinkFrom = State(initialValue: scanResult.drinkFrom.map(String.init) ?? "")
         _drinkUntil = State(initialValue: scanResult.drinkUntil.map(String.init) ?? "")
         _location = State(initialValue: initialLocation)
@@ -394,7 +394,7 @@ struct ScanReviewPage: View {
                         .keyboardType(.decimalPad)
                         .multilineTextAlignment(.trailing)
                         .accessibilityIdentifier("review-price-field")
-                    Text("€")
+                    Text(Money.displayCurrencySymbol)
                         .foregroundStyle(.secondary)
                 }
             } label: {
@@ -484,7 +484,8 @@ struct ScanReviewPage: View {
             grapeVarieties: isWine && !varieties.isEmpty ? varieties : nil,
             alcoholContent: Double(alcoholContent.replacingOccurrences(of: ",", with: ".")),
             classification: isWine && !classification.isEmpty ? classification : nil,
-            purchasePrice: Double(estimatedPrice),
+            // Shown and typed in the display currency; store euros.
+            purchasePrice: Double(estimatedPrice).map(Money.toEur),
             drinkFrom: isWine ? Int(drinkFrom) : nil,
             drinkUntil: isWine ? Int(drinkUntil) : nil,
             giftedBy: giftedBy.isEmpty ? nil : giftedBy,

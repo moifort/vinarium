@@ -22,7 +22,7 @@ struct DashboardStatsRow: View {
             Button { onTapped() } label: {
                 GradientWidget(
                     title: "Valeur",
-                    value: String(format: "%.0f \u{20AC}", stats.totalValue),
+                    value: Money.formattedFromEur(stats.totalValue, fractionLength: 0),
                     subtitle: "Total",
                     gradient: [Color(red: 0.15, green: 0.65, blue: 0.45), Color(red: 0.3, green: 0.8, blue: 0.55)],
                     backgroundImage: "widget-valeur"

@@ -52,7 +52,7 @@ struct FavoritesSection: View {
                                 if let rating = item.rating {
                                     StarRatingView(rating: rating)
                                 } else if let price = item.estimatedPrice {
-                                    Text(String(format: "%.0f \u{20AC}", price))
+                                    Text(Money.formattedFromEur(price, fractionLength: 0))
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }

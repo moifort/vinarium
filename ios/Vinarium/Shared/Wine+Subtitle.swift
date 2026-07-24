@@ -7,10 +7,10 @@ extension Wine {
         let parts: [String] = [
             vintage.map { "\($0)" },
             region,
-            purchasePrice.map { String(format: "%.0f €", $0) },
-            giftedBy.map { "Offert par \(Self.abbreviated($0))" },
-            giftedTo.map { "Offert à \(Self.abbreviated($0))" },
-            recommendedBy.map { "Conseillé par \(Self.abbreviated($0))" },
+            purchasePrice.map { Money.formattedFromEur($0, fractionLength: 0) },
+            giftedBy.map { String(localized: "Offert par \(Self.abbreviated($0))") },
+            giftedTo.map { String(localized: "Offert à \(Self.abbreviated($0))") },
+            recommendedBy.map { String(localized: "Conseillé par \(Self.abbreviated($0))") },
         ].compactMap { $0 }
         return parts.isEmpty ? nil : parts.joined(separator: " • ")
     }

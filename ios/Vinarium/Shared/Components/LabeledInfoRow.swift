@@ -1,13 +1,17 @@
 import SwiftUI
 
 struct LabeledInfoRow: View {
-    let title: String
+    let title: LocalizedStringKey
     let value: String
     let icon: String
 
     var body: some View {
         Label {
-            LabeledContent(title, value: value)
+            LabeledContent {
+                Text(value)
+            } label: {
+                Text(title)
+            }
         } icon: {
             Image(systemName: icon)
                 .foregroundStyle(.secondary)

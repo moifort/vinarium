@@ -420,6 +420,17 @@ T = {
     "Vins qu'on vous a offerts": ("Wines you were given", "Dir geschenkte Weine", "Vinos que te han regalado", "Vini che ti sono stati regalati", "Vinhos que lhe ofereceram", "贈られたワイン"),
     "Vins recommandés par vos proches": ("Wines recommended by people close to you", "Von deinen Nächsten empfohlene Weine", "Vinos recomendados por tus allegados", "Vini consigliati dai tuoi cari", "Vinhos recomendados pelos seus próximos", "身近な人からのおすすめワイン"),
     "Note : %lld sur %lld": ("Rating: %lld out of %lld", "Bewertung: %lld von %lld", "Nota: %lld de %lld", "Voto: %lld su %lld", "Nota: %lld de %lld", "評価: %lld 中 %lld"),
+    "Alcool": ("Alcohol", "Alkohol", "Alcohol", "Alcol", "Álcool", "アルコール"),
+    "Prix d'achat": ("Purchase price", "Kaufpreis", "Precio de compra", "Prezzo d'acquisto", "Preço de compra", "購入価格"),
+    "Propriétaire": ("Owner", "Eigentümer", "Propietario", "Proprietario", "Proprietário", "所有者"),
+    "Sans prix": ("No price", "Ohne Preis", "Sin precio", "Senza prezzo", "Sem preço", "価格なし"),
+    "Identifiant": ("Identifier", "Kennung", "Identificador", "Identificativo", "Identificador", "識別子"),
+    "Email": ("Email", "E-Mail", "Correo", "E-mail", "E-mail", "メール"),
+    "Colonnes": ("Columns", "Spalten", "Columnas", "Colonne", "Colunas", "列"),
+    "Bouteilles placées": ("Bottles placed", "Platzierte Flaschen", "Botellas colocadas", "Bottiglie posizionate", "Garrafas colocadas", "配置済みボトル"),
+    "Conseillé par %@": ("Recommended by %@", "Empfohlen von %@", "Recomendado por %@", "Consigliato da %@", "Recomendado por %@", "%@ のおすすめ"),
+    "Offert par %@": ("Gifted by %@", "Geschenkt von %@", "Regalado por %@", "Regalato da %@", "Oferecido por %@", "%@ より贈呈"),
+    "Offert à %@": ("Gifted to %@", "Geschenkt an %@", "Regalado a %@", "Regalato a %@", "Oferecido a %@", "%@ へ贈呈"),
 
     # --- Toggles / hints ---
     "Un cœur pour vos coups de cœur, des étoiles pour la note — les deux sont indépendants.": (

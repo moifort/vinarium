@@ -28,7 +28,7 @@ struct WineDetailHeader: View {
                 LabeledInfoRow(title: "Propri\u{00E9}taire", value: ownerName, icon: "person")
             }
             if let domain {
-                LabeledInfoRow(title: producerLabel, value: domain, icon: "building.2")
+                LabeledInfoRow(title: "\(producerLabel)", value: domain, icon: "building.2")
             }
             if let vintage {
                 LabeledInfoRow(title: "Mill\u{00E9}sime", value: "\(vintage)", icon: "calendar")
