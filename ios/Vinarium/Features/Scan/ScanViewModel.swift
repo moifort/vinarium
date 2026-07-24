@@ -3,10 +3,6 @@ import SwiftUI
 
 enum ScanStep {
     case camera
-    /// Analyse IA en cours. Porte la photo (JPEG déjà redimensionné) pour que
-    /// l'écran d'attente la garde affichée en fond : le picker photo bascule ici
-    /// avec `nil` le temps de charger/redimensionner, puis la photo est fournie.
-    case scanning(Data?)
     case review(ScanResult, Data)
     case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
     case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
@@ -34,12 +30,18 @@ struct ScanSubmission {
 final class ScanViewModel {
     var step: ScanStep = .camera
     var error: String?
+    /// L'analyse IA est en cours : une sheet la présente par-dessus la caméra
+    /// restée vivante. Vraie tant que la photo se charge et que l'IA répond.
+    var isAnalyzing = false
     /// L'IA n'a rien reconnu sur la photo : le flux retombe sur la caméra et
     /// une sheet « aucun résultat » se présente par-dessus.
     var noResultShown = false
     /// L'allocation de scans du mois est épuisée : le flux retombe sur la caméra
     /// et le paywall se présente par-dessus, plutôt qu'une alerte d'erreur.
     var paywallShown = false
+    /// Issue à présenter une fois la sheet d'analyse fermée. Présenter une sheet
+    /// pendant qu'une autre se ferme échoue, donc on diffère au `onDismiss`.
+    private var pendingOutcome: PendingOutcome?
     var isSaving = false
     var pendingLocation: DiscoveryLocationDraft?
     /// Vin déjà créé pendant cette session de review : si une écriture
@@ -48,27 +50,54 @@ final class ScanViewModel {
     private var createdWine: Wine?
 
     func capturePhoto(_ imageData: Data) {
-        step = .scanning(imageData)
+        isAnalyzing = true
         error = nil
 
         Task {
             do {
                 let result = try await WineAPI.scan(imageData: imageData)
                 if result.recognized {
+                    // Dans la sheet du flux, l'overlay d'analyse se fond pour
+                    // révéler la review : la sheet reste ouverte (étape ≠ caméra).
                     self.step = .review(result, imageData)
+                    self.isAnalyzing = false
                 } else {
-                    self.step = .camera
-                    self.noResultShown = true
+                    self.finishAnalysis(with: .noResult)
                 }
             } catch let apiError as APIError where apiError.domainCode == "QUOTA_EXHAUSTED" {
                 // Ce n'est pas une panne : c'est l'offre qui s'arrête là.
-                self.step = .camera
-                self.paywallShown = true
+                self.finishAnalysis(with: .paywall)
             } catch {
                 self.error = reportError(error)
-                self.step = .camera
+                self.isAnalyzing = false
             }
         }
+    }
+
+    /// Ferme la sheet d'analyse en gardant l'issue en attente : la caméra
+    /// réapparaît, puis `flushPendingOutcome()` (appelé au `onDismiss`) présente
+    /// la sheet correspondante sans chevaucher la fermeture.
+    private func finishAnalysis(with outcome: PendingOutcome) {
+        pendingOutcome = outcome
+        isAnalyzing = false
+    }
+
+    /// Présente l'issue différée une fois la sheet d'analyse totalement fermée.
+    func flushPendingOutcome() {
+        switch pendingOutcome {
+        case .noResult: noResultShown = true
+        case .paywall: paywallShown = true
+        case nil: break
+        }
+        pendingOutcome = nil
+    }
+
+    /// Vrai dès qu'on a dépassé la caméra : la sheet du flux (analyse, review,
+    /// placement, confirmation) est alors présentée par-dessus l'aperçu caméra.
+    var isFlowActive: Bool {
+        if isAnalyzing { return true }
+        if case .camera = step { return false }
+        return true
     }
 
     func attachLocation(_ draft: DiscoveryLocationDraft?) {
@@ -170,17 +199,26 @@ final class ScanViewModel {
     func reset() {
         step = .camera
         error = nil
+        isAnalyzing = false
         noResultShown = false
         paywallShown = false
+        pendingOutcome = nil
         pendingLocation = nil
         createdWine = nil
     }
 }
 
+/// Issue d'une analyse qui retombe sur la caméra, présentée après la fermeture
+/// de la sheet d'analyse.
+private enum PendingOutcome {
+    case noResult
+    case paywall
+}
+
 extension ScanStep: Equatable {
     static func == (lhs: ScanStep, rhs: ScanStep) -> Bool {
         switch (lhs, rhs) {
-        case (.camera, .camera), (.scanning, .scanning), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved), (.saved, .saved): return true
+        case (.camera, .camera), (.favoriteSaved, .favoriteSaved), (.recommendationSaved, .recommendationSaved), (.saved, .saved): return true
         case (.review, .review), (.placing, .placing), (.confirmed, .confirmed): return true
         default: return false
         }
