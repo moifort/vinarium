@@ -1,12 +1,13 @@
 import type { Brand } from 'ts-brand'
 import type { BeverageSubtype, BeverageType, WineColor } from '~/domain/beverage/types'
+import type { Language } from '~/domain/shared/language'
 
 export type ImageHash = Brand<string, 'ImageHash'>
 
 // The language the AI writes its free-text values in. Driven by the caller's
 // `Accept-Language`, it also partitions the scan cache: the same label scanned
 // in two languages yields two entries (see infrastructure/repository).
-export type ScanLanguage = 'fr' | 'en' | 'de' | 'es' | 'it' | 'pt' | 'ja'
+export type ScanLanguage = Language
 
 export type ScanResult = {
   // Whether the image was a recognizable beverage label. False signals the

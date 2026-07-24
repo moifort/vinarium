@@ -1,16 +1,32 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 
 const root = resolve(import.meta.dir, '..')
-// CHANGELOG.md is the English source; CHANGELOG.fr.md is the French copy served to the app.
-const source = resolve(root, 'CHANGELOG.fr.md')
 const target = resolve(root, 'server/system/changelog-content.ts')
 
-const markdown = readFileSync(source, 'utf8')
+// CHANGELOG.md is the English source; every other language is served to the app
+// in its own file, picked at request time from `Accept-Language`. Keep this list
+// in sync with SUPPORTED_LANGUAGES in server/domain/shared/language.ts.
+const files: Record<string, string> = {
+  en: 'CHANGELOG.md',
+  fr: 'CHANGELOG.fr.md',
+  de: 'CHANGELOG.de.md',
+  es: 'CHANGELOG.es.md',
+  it: 'CHANGELOG.it.md',
+  pt: 'CHANGELOG.pt.md',
+  ja: 'CHANGELOG.ja.md',
+}
+
+const byLanguage: Record<string, string> = {}
+for (const [language, file] of Object.entries(files)) {
+  const path = resolve(root, file)
+  if (!existsSync(path)) continue
+  byLanguage[language] = readFileSync(path, 'utf8')
+}
 
 const banner =
-  '// Generated from CHANGELOG.fr.md by scripts/generate-changelog-asset.ts. Do not edit.\n'
-const body = `export const changelogMarkdown: string = ${JSON.stringify(markdown)}\n`
+  '// Generated from the CHANGELOG.*.md files by scripts/generate-changelog-asset.ts. Do not edit.\n'
+const body = `export const changelogMarkdownByLanguage: Record<string, string> = ${JSON.stringify(byLanguage, null, 2)}\n`
 
 mkdirSync(dirname(target), { recursive: true })
 writeFileSync(target, banner + body)
