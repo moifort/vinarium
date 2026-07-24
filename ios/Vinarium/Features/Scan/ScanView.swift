@@ -26,9 +26,6 @@ struct ScanView: View {
             .sheet(isPresented: flowPresented, onDismiss: viewModel.flushPendingOutcome) {
                 flowSheet
             }
-            .sheet(isPresented: $viewModel.noResultShown) {
-                ScanNoResultPage()
-            }
             .sheet(isPresented: $viewModel.paywallShown) {
                 PremiumSheet(trigger: .scanAllowanceSpent)
             }
@@ -70,6 +67,18 @@ struct ScanView: View {
     /// du flux (analyse, review, placement, confirmation) se présente en sheet
     /// par-dessus, si bien que la caméra ne disparaît jamais du fond.
     private var cameraScreen: some View {
+        ZStack {
+            if case .camera = viewModel.step {
+                liveCamera
+            } else {
+                // Caméra coupée dès qu'une proposition arrive : la review et la
+                // suite du flux s'affichent sur un fond neutre, plus sur l'aperçu.
+                Color.black.ignoresSafeArea()
+            }
+        }
+    }
+
+    private var liveCamera: some View {
         ZStack {
             CameraView(onCapture: { data in
                 viewModel.capturePhoto(data)
@@ -158,9 +167,15 @@ struct ScanView: View {
         ZStack {
             NavigationStack {
                 ZStack {
-                    stepContent
+                    if viewModel.scanNotRecognized {
+                        ScanNoResultPage(onClose: { viewModel.dismissNotRecognized() })
+                            .transition(.opacity)
+                    } else {
+                        stepContent
+                    }
                 }
                 .animation(.easeInOut(duration: 0.35), value: viewModel.step)
+                .animation(.easeInOut(duration: 0.35), value: viewModel.scanNotRecognized)
             }
 
             if viewModel.isAnalyzing {
