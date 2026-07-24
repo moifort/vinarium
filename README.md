@@ -19,6 +19,7 @@ A purely functional approach to wine cellar management.
 - **Household sharing** — share one cellar with the people you live with via an invite code: a common grid where any member can place, move, drink or gift any bottle. Sharing the cellar shares what it holds — its bottles, their total value, the ready-to-drink alerts and every movement in the journal, each one badged with the member behind it. Shared-cellar bottles also surface in every member's wine list and search, badged with their owner's name, while each person's out-of-cellar catalog and tasting notes stay private
 - **Onboarding** — a first-launch wizard that collects the user's first name and sizes the cellar (rows A→Z × slots per row), with a searchable catalog of real consumer wine coolers (grouped by brand) for automatic dimensioning and the temperature-zone count; the grid dimensions are configurable per scope rather than fixed
 - **Premium** — the app is free and the cellar, journal, sharing and manual entry stay unlimited; only the AI scan is metered (5 a month). Vinarium Premium lifts the meter, sold as an auto-renewable subscription (monthly, or yearly with a 7-day free trial and a discount badge computed from the store's own prices), purchased through StoreKit 2 and verified server-side against Apple's signed transactions
+- **Admin metrics** — an admin-only banner and screen showing the month's economics: measured AI cost from real Gemini tokens, the measured GCP bill (BigQuery billing export), App Store revenue (App Store Connect Sales Reports), user and subscriber counts. AI usage is metered live at each scan; the rest is a projection a daily scheduler refreshes. Gated by a flag on the user profile
 
 <p align="center">
   <img src="screenshots/wine-detail.png" width="250" alt="Wine detail">
@@ -38,6 +39,7 @@ A purely functional approach to wine cellar management.
 | Backend  | Nitro on Firebase Cloud Functions Gen 2, Apollo Server 5, Pothos          |
 | Storage  | Firestore (multi-user, isolated by `userId`, shared cellars via households) |
 | AI       | Gemini 2.5 Flash (vision + Google Search grounding)                       |
+| Metrics  | App Store Connect Sales Reports API + BigQuery billing export (admin economics) |
 | Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
 | Observability | Sentry (backend namespace tracing + iOS crash/error reporting)       |
 
