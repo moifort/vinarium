@@ -14,11 +14,6 @@ const OUTPUT_USD_PER_TOKEN = 2.5 / 1_000_000
 // not close books. Revised by hand when the rate drifts far enough to matter.
 const USD_TO_EUR = 0.91
 
-// The one infrastructure line no API measures: the Apple Developer Program at
-// $99/year. Everything GCP (Firestore, Cloud Functions, Secret Manager) is
-// measured for real from the billing export instead — see infraEur below.
-export const APPLE_DEVELOPER_EUR_PER_MONTH: EurType = Eur(7.7)
-
 // The month a moment belongs to, `"2026-07"`, also the ai-usage document id.
 // UTC on purpose, mirroring the quota month: the window must not move with
 // anyone's timezone.
@@ -51,11 +46,6 @@ export const aiCostEur = (usage: AiUsage): EurType => {
   const usd = promptTokens * INPUT_USD_PER_TOKEN + billedAsOutput * OUTPUT_USD_PER_TOKEN
   return Eur(usd * USD_TO_EUR)
 }
-
-// The month's infrastructure bill: the fixed Apple line plus whatever GCP
-// measured, when the billing export has answered at least once.
-export const infraEur = (gcpCostEur: EurType | undefined): EurType =>
-  Eur(APPLE_DEVELOPER_EUR_PER_MONTH + (gcpCostEur ?? 0))
 
 // Who is Premium right now, split by the billing period the product id names.
 // `total` counts every active entitlement, so an unexpected product id still

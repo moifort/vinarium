@@ -89,14 +89,9 @@ type AdminMetrics {
   enrichment: AiTokenUsage!
 
   """
-  What GCP billed this month, from the billing export; null while the export is not configured or has never answered.
+  This month's measured GCP bill for the project, from the billing export, e.g. `0.19`; null while the export is not configured or has never answered. Carries no fixed line: the Apple Developer fee is shared across projects and deliberately left out.
   """
-  gcpCostEur: Eur
-
-  """
-  The monthly infrastructure bill: the fixed Apple Developer line plus the measured GCP cost when available, e.g. `7.9`
-  """
-  infraEur: Eur!
+  infraEur: Eur
 
   """Of them, on the monthly plan, e.g. `2`"""
   premiumMonthly: Int!
@@ -123,7 +118,7 @@ type AdminMetrics {
   """Scans that really reached Gemini this month, e.g. `37`"""
   scans: Int!
 
-  """AI plus infrastructure, e.g. `8.32`"""
+  """AI plus the measured infrastructure bill, e.g. `0.61`"""
   totalCostEur: Eur!
 
   """How many accounts completed onboarding, e.g. `42`"""

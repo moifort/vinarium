@@ -37,20 +37,15 @@ export const AdminMetricsType = builder.objectRef<AdminMetricsView>('AdminMetric
     }),
     infraEur: t.expose('infraEur', {
       type: 'Eur',
+      nullable: true,
       description:
-        'The monthly infrastructure bill: the fixed Apple Developer line plus the measured GCP ' +
-        'cost when available, e.g. `7.9`',
+        "This month's measured GCP bill for the project, from the billing export, e.g. `0.19`; " +
+        'null while the export is not configured or has never answered. Carries no fixed line: ' +
+        'the Apple Developer fee is shared across projects and deliberately left out.',
     }),
     totalCostEur: t.expose('totalCostEur', {
       type: 'Eur',
-      description: 'AI plus infrastructure, e.g. `8.32`',
-    }),
-    gcpCostEur: t.expose('gcpCostEur', {
-      type: 'Eur',
-      nullable: true,
-      description:
-        'What GCP billed this month, from the billing export; null while the export is not ' +
-        'configured or has never answered.',
+      description: 'AI plus the measured infrastructure bill, e.g. `0.61`',
     }),
     totalUsers: t.int({
       description: 'How many accounts completed onboarding, e.g. `42`',

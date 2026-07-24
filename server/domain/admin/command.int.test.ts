@@ -188,8 +188,9 @@ describe('reading the metrics view', () => {
 
     expect(view.scans as number).toBe(1)
     expect(view.aiCostEur as number).toBeCloseTo(0.3 * 0.91, 10)
-    expect(view.infraEur as number).toBeCloseTo(7.7 + 0.5, 10)
-    expect(view.totalCostEur as number).toBeCloseTo((view.aiCostEur as number) + 7.7 + 0.5, 10)
+    // Infra is the measured GCP bill alone, no fixed Apple line added.
+    expect(view.infraEur as number).toBeCloseTo(0.5, 10)
+    expect(view.totalCostEur as number).toBeCloseTo((view.aiCostEur as number) + 0.5, 10)
     expect(view.refreshedAt).toBeInstanceOf(Date)
   })
 
@@ -199,8 +200,9 @@ describe('reading the metrics view', () => {
     expect(view.totalUsers as number).toBe(0)
     expect(view.premium).toMatchObject({ total: 0, monthly: 0, yearly: 0 })
     expect(view.revenue).toBeUndefined()
-    expect(view.gcpCostEur).toBeUndefined()
     expect(view.refreshedAt).toBeUndefined()
-    expect(view.infraEur as number).toBe(7.7)
+    // No billing export yet: infra is unavailable and the total is AI only.
+    expect(view.infraEur).toBeUndefined()
+    expect(view.totalCostEur as number).toBe(0)
   })
 })

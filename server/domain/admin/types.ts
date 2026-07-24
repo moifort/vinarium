@@ -56,16 +56,18 @@ export type AdminMetricsProjection = {
 }
 
 /** What the admin screen shows: the projection joined with the current month's
- *  live AI usage and priced in euros. `refreshedAt` is absent until the daily
- *  refresh has run once. */
+ *  live AI usage and priced in euros. `infraEur` is the measured GCP bill for
+ *  this project, absent until the billing export is configured and has answered
+ *  (the Apple Developer fee is deliberately excluded: it is shared across
+ *  several projects, so imputing it here would overstate this app's cost).
+ *  `refreshedAt` is absent until the daily refresh has run once. */
 export type AdminMetricsView = {
   aiCostEur: Eur
-  infraEur: Eur
+  infraEur?: Eur
   totalCostEur: Eur
   totalUsers: Count
   premium: PremiumBreakdown
   revenue?: Revenue
-  gcpCostEur?: Eur
   scans: Count
   cacheHits: Count
   vision: AiStepUsage

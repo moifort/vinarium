@@ -46,8 +46,7 @@ struct AdminPage: View {
             Section("Coûts du mois") {
                 LabeledContent("Total", value: euro(metrics.totalCostEur))
                 LabeledContent("Consommation IA", value: euro(metrics.aiCostEur))
-                LabeledContent("Infra", value: euro(metrics.infraEur))
-                LabeledContent("dont GCP mesuré", value: euroOrUnavailable(metrics.gcpCostEur))
+                LabeledContent("Infra (GCP)", value: euroOrUnavailable(metrics.infraEur))
             }
 
             Section("Scans du mois") {
@@ -70,7 +69,7 @@ struct AdminPage: View {
     private func keyTiles(_ metrics: AdminMetrics) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             tile(title: "Consommation IA", value: euro(metrics.aiCostEur), icon: "sparkles", tint: .purple)
-            tile(title: "Infra", value: euro(metrics.infraEur), icon: "server.rack", tint: .gray)
+            tile(title: "Infra", value: euroOrUnavailable(metrics.infraEur), icon: "server.rack", tint: .gray)
             tile(title: "Comptes", value: "\(metrics.totalUsers)", icon: "person.2.fill", tint: .blue)
             tile(title: "Premium", value: "\(metrics.premiumTotal)", icon: "crown.fill", tint: .orange)
         }
@@ -123,9 +122,8 @@ struct AdminPage: View {
         AdminPage(
             metrics: AdminMetrics(
                 aiCostEur: 0.42,
-                infraEur: 8.12,
-                totalCostEur: 8.54,
-                gcpCostEur: 0.42,
+                infraEur: 0.19,
+                totalCostEur: 0.61,
                 totalUsers: 42,
                 premiumTotal: 5,
                 premiumMonthly: 2,
@@ -148,9 +146,8 @@ struct AdminPage: View {
         AdminPage(
             metrics: AdminMetrics(
                 aiCostEur: 0,
-                infraEur: 7.7,
-                totalCostEur: 7.7,
-                gcpCostEur: nil,
+                infraEur: nil,
+                totalCostEur: 0,
                 totalUsers: 0,
                 premiumTotal: 0,
                 premiumMonthly: 0,

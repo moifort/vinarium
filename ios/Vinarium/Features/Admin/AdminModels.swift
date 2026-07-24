@@ -10,10 +10,11 @@ struct AdminMetrics {
     }
 
     let aiCostEur: Double
-    let infraEur: Double
+    /// Facture GCP mesurée du projet, nil tant que l'export de facturation n'est
+    /// pas configuré ou n'a pas encore répondu. Aucune ligne fixe : l'abonnement
+    /// Apple Developer, partagé entre plusieurs projets, en est volontairement exclu.
+    let infraEur: Double?
     let totalCostEur: Double
-    /// Facture GCP mesurée via l'export de facturation, nil tant qu'il n'est pas configuré.
-    let gcpCostEur: Double?
     let totalUsers: Int
     let premiumTotal: Int
     let premiumMonthly: Int

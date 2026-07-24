@@ -1,15 +1,8 @@
 import { describe, expect, test } from 'bun:test'
-import {
-  APPLE_DEVELOPER_EUR_PER_MONTH,
-  aiCostEur,
-  freshUsage,
-  infraEur,
-  monthOf,
-  premiumBreakdown,
-} from '~/domain/admin/business-rules'
+import { aiCostEur, freshUsage, monthOf, premiumBreakdown } from '~/domain/admin/business-rules'
 import type { AiStepUsage, AiUsage } from '~/domain/admin/types'
 import type { Entitlement, ProductId } from '~/domain/entitlement/types'
-import type { Count, Eur, Month, UserId } from '~/domain/shared/types'
+import type { Count, Month, UserId } from '~/domain/shared/types'
 
 const month = '2026-07' as Month
 
@@ -58,19 +51,6 @@ describe('pricing the month s AI consumption', () => {
     const cost = aiCostEur(usage(step(2600, 250, 1500), step(5000, 200, 1500)))
     expect(cost as number).toBeGreaterThan(0.005)
     expect(cost as number).toBeLessThan(0.02)
-  })
-})
-
-describe('the month s infrastructure bill', () => {
-  test('is the fixed Apple line alone while GCP is unmeasured', () => {
-    expect(infraEur(undefined) as number).toBe(APPLE_DEVELOPER_EUR_PER_MONTH as number)
-  })
-
-  test('adds the measured GCP cost when the billing export answered', () => {
-    expect(infraEur(0.42 as Eur) as number).toBeCloseTo(
-      (APPLE_DEVELOPER_EUR_PER_MONTH as number) + 0.42,
-      10,
-    )
   })
 })
 

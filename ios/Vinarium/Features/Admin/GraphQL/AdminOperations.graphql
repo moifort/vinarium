@@ -3,7 +3,6 @@ query AdminMetrics {
     aiCostEur
     infraEur
     totalCostEur
-    gcpCostEur
     totalUsers
     premiumTotal
     premiumMonthly

@@ -12,7 +12,6 @@ enum AdminAPI {
             aiCostEur: m.aiCostEur,
             infraEur: m.infraEur,
             totalCostEur: m.totalCostEur,
-            gcpCostEur: m.gcpCostEur,
             totalUsers: m.totalUsers,
             premiumTotal: m.premiumTotal,
             premiumMonthly: m.premiumMonthly,

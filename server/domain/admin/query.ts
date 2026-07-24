@@ -1,4 +1,4 @@
-import { aiCostEur, infraEur, monthOf } from '~/domain/admin/business-rules'
+import { aiCostEur, monthOf } from '~/domain/admin/business-rules'
 import * as repository from '~/domain/admin/infrastructure/repository'
 import type { AdminMetricsView } from '~/domain/admin/types'
 import { Count, Eur } from '~/domain/shared/primitives'
@@ -14,11 +14,14 @@ export namespace AdminQuery {
       repository.findProjection(),
     ])
     const ai = aiCostEur(usage)
-    const infra = infraEur(projection?.infra?.gcpCostEur)
+    // Infra is the measured GCP bill alone: absent until the export answers,
+    // and it does not carry any fixed line (the Apple fee is shared with other
+    // projects, so it is not this app's cost to show).
+    const infra = projection?.infra?.gcpCostEur
     return {
       aiCostEur: ai,
       infraEur: infra,
-      totalCostEur: Eur(ai + infra),
+      totalCostEur: Eur(ai + (infra ?? 0)),
       totalUsers: projection?.totalUsers ?? Count(0),
       premium: projection?.premium ?? {
         total: Count(0),
@@ -26,7 +29,6 @@ export namespace AdminQuery {
         yearly: Count(0),
       },
       revenue: projection?.revenue,
-      gcpCostEur: projection?.infra?.gcpCostEur,
       scans: usage.scans,
       cacheHits: usage.cacheHits,
       vision: usage.vision,

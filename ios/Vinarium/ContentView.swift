@@ -50,6 +50,29 @@ struct ContentView: View {
     }
 
     var body: some View {
+        // The admin banner is stacked ABOVE the TabView, not injected as a top
+        // safe-area inset: an inset leaves each tab's navigation bar drawing at
+        // the true top, so its title and toolbar buttons end up clipped behind
+        // the banner. Stacking gives the TabView the room below the banner and
+        // its nav bars lay out cleanly.
+        if isAdmin {
+            VStack(spacing: 0) {
+                AdminBanner(
+                    aiCost: bannerEuro(adminViewModel.metrics?.aiCostEur),
+                    infra: bannerEuro(adminViewModel.metrics?.infraEur),
+                    users: bannerCount(adminViewModel.metrics?.totalUsers),
+                    premium: bannerCount(adminViewModel.metrics?.premiumTotal),
+                    isLoading: adminViewModel.isLoading,
+                    onTap: { showAdminSheet = true }
+                )
+                tabs
+            }
+        } else {
+            tabs
+        }
+    }
+
+    private var tabs: some View {
         TabView(selection: $selectedTab) {
             Tab(value: .home) {
                 DashboardView(selectedTab: $selectedTab)
@@ -81,18 +104,6 @@ struct ContentView: View {
             .accessibilityIdentifier("tab-scan")
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .safeAreaInset(edge: .top, spacing: 0) {
-            if isAdmin {
-                AdminBanner(
-                    aiCost: bannerEuro(adminViewModel.metrics?.aiCostEur),
-                    infra: bannerEuro(adminViewModel.metrics?.infraEur),
-                    users: bannerCount(adminViewModel.metrics?.totalUsers),
-                    premium: bannerCount(adminViewModel.metrics?.premiumTotal),
-                    isLoading: adminViewModel.isLoading,
-                    onTap: { showAdminSheet = true }
-                )
-            }
-        }
         .task {
             if isAdmin { await adminViewModel.load() }
         }
@@ -181,12 +192,24 @@ struct ContentView: View {
         if selectedTab == .scan { selectedTab = lastContentTab }
     }
 
+    /// Un montant du bandeau : « … » tant que rien n'est chargé, sinon la valeur.
     private func bannerEuro(_ value: Double?) -> String {
-        value.map { $0.formatted(.currency(code: "EUR").precision(.fractionLength(2))) } ?? "…"
+        value.map(euroString) ?? "…"
     }
 
     private func bannerCount(_ value: Int?) -> String {
         value.map(String.init) ?? "…"
+    }
+
+    /// L'infra du bandeau distingue le chargement (« … ») de la mesure encore
+    /// indisponible (« — », export de facturation pas branché).
+    private var bannerInfra: String {
+        guard let metrics = adminViewModel.metrics else { return "…" }
+        return metrics.infraEur.map(euroString) ?? "—"
+    }
+
+    private func euroString(_ value: Double) -> String {
+        value.formatted(.currency(code: "EUR").precision(.fractionLength(2)))
     }
 }
 
