@@ -112,11 +112,28 @@ jobs:
           xcode-version: latest-stable
 
       - name: Materialize gitignored build files
+        env:
+          IOS_SENTRY_DSN: ${{ secrets.IOS_SENTRY_DSN }}
         run: |
           set -euo pipefail
           printf '%s' "${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}" \
             | openssl base64 -d -A > ios/Vinarium/GoogleService-Info.plist
-          cp ios/Vinarium/Shared/Secrets.swift.example ios/Vinarium/Shared/Secrets.swift
+          # The archived build is the only one that reports to Sentry, and it reads the
+          # DSN from this gitignored file. Copying the example here would ship a build
+          # that reports nothing at all — no crash, no error, no user feedback — and
+          # nothing on the way would say so. Refuse to archive that build.
+          if [ -z "$IOS_SENTRY_DSN" ]; then
+            echo "::error::IOS_SENTRY_DSN is unset — this build could not report anything to Sentry"
+            exit 1
+          fi
+          cat > ios/Vinarium/Shared/Secrets.swift <<SWIFT
+          import Foundation
+
+          enum Secrets {
+              static let apiToken = ""
+              static let sentryDsn = "$IOS_SENTRY_DSN"
+          }
+          SWIFT
 
       - name: Install the App Store Connect API key
         run: |
