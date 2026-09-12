@@ -4,10 +4,10 @@ import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 
-// Attaching is an owner's act. Reading follows the bottle (a housemate sees the
-// files of a bottle standing in the shared cellar), but writing to someone else's
-// wine is refused here, once, for both halves of the upload — which is why the
-// beverage check lives in a use case rather than in the command.
+// Attaching is an owner's act, on any beverage. Reading follows the bottle (a
+// housemate sees the files of one standing in the shared cellar), but writing to
+// someone else's is refused here, once, for both halves of the upload — which is
+// why the beverage check lives in a use case rather than in the command.
 export namespace AttachmentUseCase {
   export const reserveSlot = async (
     userId: UserId,

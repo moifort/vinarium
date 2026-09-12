@@ -157,7 +157,7 @@ scalar Appellation
 """
 A file kept alongside a bottle: a label photo, a shot of the cellar it came from, the purchase invoice.
 
-A wine holds at most five, each up to 10 MB. Only the owner of the wine may add or delete one; anyone who can see the wine can read them, which includes a household member looking at a bottle standing in the shared cellar. Exposed as `Beverage.attachments`.
+Hangs on any beverage, not only a wine. A beverage holds at most five, each up to 10 MB. Only its owner may add or delete one; anyone who can see the beverage can read them, which includes a household member looking at a bottle standing in the shared cellar. Exposed as `Beverage.attachments`.
 """
 type Attachment {
   """The media type the file was stored with."""
@@ -224,9 +224,9 @@ type Beverage {
   alcoholContent: Percentage
 
   """
-  The files attached to the wine, oldest first.
+  The files attached to the beverage, oldest first.
   
-  Empty when nothing was ever attached. Resolved through a per-request loader (no N+1), so a page of wines costs one keyed read rather than one per row.
+  Empty when nothing was ever attached. Resolved through a per-request loader (no N+1), so a page of beverages costs one keyed read rather than one per row.
   """
   attachments: [Attachment!]!
 
@@ -1494,12 +1494,12 @@ type Mutation {
   ): CellarBottle!
 
   """
-  Reserve an upload slot for a file to attach to a wine.
+  Reserve an upload slot for a file to attach to a beverage.
   
-  Accepts image/jpeg, image/png, image/heic, image/heif, image/webp, application/pdf, up to 10485760 bytes, and at most 5 files per wine. Only the owner of the wine may attach to it. Fails with `NOT_FOUND` on a wine that is not yours, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE` or `TOO_MANY_ATTACHMENTS`.
+  Accepts image/jpeg, image/png, image/heic, image/heif, image/webp, application/pdf, up to 10485760 bytes, and at most 5 files per beverage. Any beverage takes them, not only a wine, and only its owner may attach to it. Fails with `NOT_FOUND` on a beverage that is not yours, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE` or `TOO_MANY_ATTACHMENTS`.
   """
   prepareAttachmentUpload(
-    """The wine the file will hang on."""
+    """The beverage the file will hang on."""
     beverageId: BeverageId!
 
     """Media type of the file about to be sent."""
@@ -1535,7 +1535,7 @@ type Mutation {
   ): Boolean!
 
   """
-  Turn an uploaded file into an attachment on the wine.
+  Turn an uploaded file into an attachment on the beverage.
   
   Call this after the `PUT` to the upload URL succeeded. The stored object is read back for its real type and size, so the limits hold whatever the client announced earlier. Fails with `UPLOAD_MISSING` when no file was received at that slot.
   """
@@ -1543,7 +1543,7 @@ type Mutation {
     """The identifier returned by `prepareAttachmentUpload`."""
     attachmentId: AttachmentId!
 
-    """The wine the slot was reserved on."""
+    """The beverage the slot was reserved on."""
     beverageId: BeverageId!
 
     """The name to display next to the file."""

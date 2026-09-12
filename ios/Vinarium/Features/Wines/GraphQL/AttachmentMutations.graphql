@@ -16,7 +16,7 @@ mutation RegisterAttachment(
   $fileName: FileName!
 ) {
   registerAttachment(beverageId: $beverageId, attachmentId: $attachmentId, fileName: $fileName) {
-    ...WineAttachmentFields
+    ...BeverageAttachmentFields
   }
 }
 
@@ -24,7 +24,7 @@ mutation DeleteAttachment($attachmentId: AttachmentId!) {
   deleteAttachment(attachmentId: $attachmentId)
 }
 
-fragment WineAttachmentFields on Attachment {
+fragment BeverageAttachmentFields on Attachment {
   id
   kind
   contentType

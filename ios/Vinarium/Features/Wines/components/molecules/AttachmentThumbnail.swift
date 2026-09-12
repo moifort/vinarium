@@ -3,7 +3,7 @@ import SwiftUI
 /// One tile in the attachment gallery: the photo itself, or the name of a
 /// document under a page icon.
 struct AttachmentThumbnail: View {
-    let kind: WineAttachment.Kind
+    let kind: BeverageAttachment.Kind
     let fileName: String
     let url: URL
 

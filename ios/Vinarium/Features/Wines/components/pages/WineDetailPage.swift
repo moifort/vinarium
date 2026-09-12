@@ -5,8 +5,8 @@ struct WineDetailPage: View {
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
     var onAddAttachment: () -> Void = {}
-    var onOpenAttachment: (WineAttachment) -> Void = { _ in }
-    var onDeleteAttachment: (WineAttachment) -> Void = { _ in }
+    var onOpenAttachment: (BeverageAttachment) -> Void = { _ in }
+    var onDeleteAttachment: (BeverageAttachment) -> Void = { _ in }
     var onRefresh: () async -> Void = {}
 
     var body: some View {

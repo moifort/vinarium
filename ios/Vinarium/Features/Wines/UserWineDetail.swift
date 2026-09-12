@@ -37,7 +37,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let ownerName: String?
     /// The files hung on the sheet, oldest first. Readable on a housemate's
     /// bottle, editable only on one's own.
-    let attachments: [WineAttachment]
+    let attachments: [BeverageAttachment]
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -72,7 +72,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         placeName = try container.decodeIfPresent(String.self, forKey: .placeName)
         isMine = try container.decodeIfPresent(Bool.self, forKey: .isMine) ?? true
         ownerName = try container.decodeIfPresent(String.self, forKey: .ownerName)
-        attachments = try container.decodeIfPresent([WineAttachment].self, forKey: .attachments) ?? []
+        attachments = try container.decodeIfPresent([BeverageAttachment].self, forKey: .attachments) ?? []
     }
 
     init(
@@ -87,7 +87,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         recommendation: RecommendationInfo?,
         latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil,
         isMine: Bool = true, ownerName: String? = nil,
-        attachments: [WineAttachment] = []
+        attachments: [BeverageAttachment] = []
     ) {
         self.id = id
         self.name = name

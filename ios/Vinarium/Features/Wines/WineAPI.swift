@@ -320,7 +320,7 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Beverage) -> Us
         isMine: w.isMine,
         ownerName: w.ownerName,
         attachments: w.attachments.compactMap {
-            WineAttachment(fields: $0.fragments.wineAttachmentFields)
+            BeverageAttachment(fields: $0.fragments.beverageAttachmentFields)
         }
     )
 }

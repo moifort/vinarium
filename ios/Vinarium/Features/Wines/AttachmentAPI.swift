@@ -10,7 +10,7 @@ enum AttachmentAPI {
         data: Data,
         fileName: String,
         contentType: String
-    ) async throws -> WineAttachment {
+    ) async throws -> BeverageAttachment {
         let prepared = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
             mutation: VinariumGraphQL.PrepareAttachmentUploadMutation(
@@ -39,7 +39,7 @@ enum AttachmentAPI {
             )
         ).registerAttachment
 
-        guard let attachment = WineAttachment(fields: registered.fragments.wineAttachmentFields)
+        guard let attachment = BeverageAttachment(fields: registered.fragments.beverageAttachmentFields)
         else { throw APIError.invalidResponse }
         return attachment
     }
@@ -54,7 +54,7 @@ enum AttachmentAPI {
     /// Pull a file down to a temporary location so the document viewer can open
     /// it. The signed URL is short-lived, so the copy is made when it is needed
     /// and left to the system to clean up.
-    static func download(_ attachment: WineAttachment) async throws -> URL {
+    static func download(_ attachment: BeverageAttachment) async throws -> URL {
         let (temporary, response) = try await URLSession.shared.download(from: attachment.url)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
             throw APIError.httpError(http.statusCode)

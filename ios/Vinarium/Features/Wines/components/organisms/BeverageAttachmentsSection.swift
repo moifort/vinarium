@@ -1,15 +1,16 @@
 import SwiftUI
 
-/// The gallery on the wine sheet. Presentational: it shows what it is given and
+/// The gallery on the beverage sheet, shown for a wine as for a whisky or a beer.
+/// Presentational: it shows what it is given and
 /// reports taps. The pickers, the upload and the viewer belong to the coordinator.
-struct WineAttachmentsSection: View {
-    let attachments: [WineAttachment]
+struct BeverageAttachmentsSection: View {
+    let attachments: [BeverageAttachment]
     /// False on a housemate's bottle: their files are readable, not editable.
     let canEdit: Bool
     let isUploading: Bool
     var onAdd: () -> Void = {}
-    var onOpen: (WineAttachment) -> Void = { _ in }
-    var onDelete: (WineAttachment) -> Void = { _ in }
+    var onOpen: (BeverageAttachment) -> Void = { _ in }
+    var onDelete: (BeverageAttachment) -> Void = { _ in }
 
     /// Mirrors the server ceiling, so the button disappears at the same moment
     /// the server would start refusing.
@@ -51,7 +52,7 @@ struct WineAttachmentsSection: View {
                 .scrollClipDisabled()
 
                 if canEdit && attachments.count >= Self.maximum {
-                    Text("Cinq pièces jointes par vin, le maximum est atteint.")
+                    Text("Cinq pièces jointes au maximum, la limite est atteinte.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -88,9 +89,9 @@ struct WineAttachmentsSection: View {
 
 #Preview("With files") {
     List {
-        WineAttachmentsSection(
+        BeverageAttachmentsSection(
             attachments: [
-                WineAttachment(
+                BeverageAttachment(
                     id: "1",
                     kind: .image,
                     fileName: "etiquette.jpg",
@@ -99,7 +100,7 @@ struct WineAttachmentsSection: View {
                     url: URL(string: "https://example.com/1.jpg")!,
                     createdAt: Date()
                 ),
-                WineAttachment(
+                BeverageAttachment(
                     id: "2",
                     kind: .document,
                     fileName: "facture-margaux-2018.pdf",
@@ -117,6 +118,6 @@ struct WineAttachmentsSection: View {
 
 #Preview("Empty, read only") {
     List {
-        WineAttachmentsSection(attachments: [], canEdit: false, isUploading: false)
+        BeverageAttachmentsSection(attachments: [], canEdit: false, isUploading: false)
     }
 }

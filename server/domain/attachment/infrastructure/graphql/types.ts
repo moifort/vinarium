@@ -14,7 +14,7 @@ const AttachmentKindEnum = builder.enumType('AttachmentKind', {
 export const AttachmentType = builder.objectRef<Attachment>('Attachment').implement({
   description:
     'A file kept alongside a bottle: a label photo, a shot of the cellar it came from, the purchase invoice.\n\n' +
-    'A wine holds at most five, each up to 10 MB. Only the owner of the wine may add or delete one; anyone who can see the wine can read them, which includes a household member looking at a bottle standing in the shared cellar. Exposed as `Beverage.attachments`.',
+    'Hangs on any beverage, not only a wine. A beverage holds at most five, each up to 10 MB. Only its owner may add or delete one; anyone who can see the beverage can read them, which includes a household member looking at a bottle standing in the shared cellar. Exposed as `Beverage.attachments`.',
   fields: (t) => ({
     id: t.expose('id', { type: 'AttachmentId', description: 'Unique identifier of the file.' }),
     kind: t.expose('kind', {
@@ -51,8 +51,9 @@ builder.objectField(BeverageType, 'attachments', (t) =>
   t.field({
     type: [AttachmentType],
     description:
-      'The files attached to the wine, oldest first.\n\n' +
-      'Empty when nothing was ever attached. Resolved through a per-request loader (no N+1), so a page of wines costs one keyed read rather than one per row.',
-    resolve: async (wine, _, { loaders }) => (await loaders.attachments.load(wine.id)) ?? [],
+      'The files attached to the beverage, oldest first.\n\n' +
+      'Empty when nothing was ever attached. Resolved through a per-request loader (no N+1), so a page of beverages costs one keyed read rather than one per row.',
+    resolve: async (beverage, _, { loaders }) =>
+      (await loaders.attachments.load(beverage.id)) ?? [],
   }),
 )

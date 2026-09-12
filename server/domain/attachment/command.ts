@@ -94,8 +94,8 @@ export namespace AttachmentCommand {
     return undefined
   }
 
-  /** Called when the bottle itself goes. The documents are enlisted in the
-   *  caller's batch so they vanish with the wine; the bytes follow right after,
+  /** Called when the beverage itself goes. The documents are enlisted in the
+   *  caller's batch so they vanish with the beverage; the bytes follow right after,
    *  outside the batch, because a bucket cannot join a Firestore transaction. */
   export const removeBeverage = async (
     userId: UserId,

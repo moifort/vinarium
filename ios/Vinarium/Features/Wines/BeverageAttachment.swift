@@ -1,7 +1,8 @@
 import Foundation
 
-/// A file hung on a wine sheet: a label photo, the cellar it came from, an invoice.
-struct WineAttachment: Identifiable, Codable, Sendable, Equatable {
+/// A file hung on a beverage sheet, whatever the bottle is: a label photo, the
+/// cellar it came from, an invoice.
+struct BeverageAttachment: Identifiable, Codable, Sendable, Equatable {
     /// How to present the file. A photo is shown inline in the gallery, anything
     /// else is opened in the document viewer.
     enum Kind: String, Codable, Sendable {
@@ -24,8 +25,8 @@ struct WineAttachment: Identifiable, Codable, Sendable, Equatable {
     }
 }
 
-extension WineAttachment {
-    init?(fields: VinariumGraphQL.WineAttachmentFields) {
+extension BeverageAttachment {
+    init?(fields: VinariumGraphQL.BeverageAttachmentFields) {
         guard let url = URL(string: fields.url) else { return nil }
         self.id = fields.id
         self.kind = Kind(rawValue: fields.kind.rawValue) ?? .document

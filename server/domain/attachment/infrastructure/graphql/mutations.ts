@@ -40,15 +40,15 @@ builder.mutationField('prepareAttachmentUpload', (t) =>
   t.field({
     type: PendingUploadType,
     description:
-      'Reserve an upload slot for a file to attach to a wine.\n\n' +
+      'Reserve an upload slot for a file to attach to a beverage.\n\n' +
       `Accepts ${acceptedContentTypes.join(', ')}, up to ${MAX_ATTACHMENT_BYTES} bytes, ` +
-      `and at most ${MAX_ATTACHMENTS_PER_BEVERAGE} files per wine. Only the owner of the wine may attach to it. ` +
-      'Fails with `NOT_FOUND` on a wine that is not yours, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE` or `TOO_MANY_ATTACHMENTS`.',
+      `and at most ${MAX_ATTACHMENTS_PER_BEVERAGE} files per beverage. Any beverage takes them, not only a wine, and only its owner may attach to it. ` +
+      'Fails with `NOT_FOUND` on a beverage that is not yours, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE` or `TOO_MANY_ATTACHMENTS`.',
     args: {
       beverageId: t.arg({
         type: 'BeverageId',
         required: true,
-        description: 'The wine the file will hang on.',
+        description: 'The beverage the file will hang on.',
       }),
       contentType: t.arg({
         type: 'ContentType',
@@ -65,7 +65,7 @@ builder.mutationField('prepareAttachmentUpload', (t) =>
     resolve: async (_root, { beverageId, contentType, size }, { userId }) => {
       const result = await AttachmentUseCase.reserveSlot(userId, beverageId, contentType, size)
       return match(result)
-        .with('beverage-not-found', () => notFound('Wine not found'))
+        .with('beverage-not-found', () => notFound('Beverage not found'))
         .with('unsupported-type', () =>
           domainError(
             'UNSUPPORTED_MEDIA_TYPE',
@@ -78,7 +78,7 @@ builder.mutationField('prepareAttachmentUpload', (t) =>
         .with('too-many', () =>
           domainError(
             'TOO_MANY_ATTACHMENTS',
-            `A wine holds at most ${MAX_ATTACHMENTS_PER_BEVERAGE} attachments`,
+            `A beverage holds at most ${MAX_ATTACHMENTS_PER_BEVERAGE} attachments`,
           ),
         )
         .otherwise((pending) => pending)
@@ -90,13 +90,13 @@ builder.mutationField('registerAttachment', (t) =>
   t.field({
     type: AttachmentType,
     description:
-      'Turn an uploaded file into an attachment on the wine.\n\n' +
+      'Turn an uploaded file into an attachment on the beverage.\n\n' +
       'Call this after the `PUT` to the upload URL succeeded. The stored object is read back for its real type and size, so the limits hold whatever the client announced earlier. Fails with `UPLOAD_MISSING` when no file was received at that slot.',
     args: {
       beverageId: t.arg({
         type: 'BeverageId',
         required: true,
-        description: 'The wine the slot was reserved on.',
+        description: 'The beverage the slot was reserved on.',
       }),
       attachmentId: t.arg({
         type: 'AttachmentId',
@@ -112,7 +112,7 @@ builder.mutationField('registerAttachment', (t) =>
     resolve: async (_root, { beverageId, attachmentId, fileName }, { userId }) => {
       const result = await AttachmentUseCase.register(userId, beverageId, attachmentId, fileName)
       return match(result)
-        .with('beverage-not-found', () => notFound('Wine not found'))
+        .with('beverage-not-found', () => notFound('Beverage not found'))
         .with('upload-missing', () =>
           domainError('UPLOAD_MISSING', 'No file was uploaded to that slot'),
         )
@@ -128,7 +128,7 @@ builder.mutationField('registerAttachment', (t) =>
         .with('too-many', () =>
           domainError(
             'TOO_MANY_ATTACHMENTS',
-            `A wine holds at most ${MAX_ATTACHMENTS_PER_BEVERAGE} attachments`,
+            `A beverage holds at most ${MAX_ATTACHMENTS_PER_BEVERAGE} attachments`,
           ),
         )
         .otherwise((attachment) => attachment)

@@ -3,8 +3,9 @@ import type { AttachmentKind, ByteSize, ContentType } from '~/domain/attachment/
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 
-/** Five files per bottle. A cellar is a long-lived thing and storage is billed by
- *  the month forever, so the ceiling is part of the product, not a safety valve. */
+/** Five files per beverage, whatever it is: a wine, a whisky, a beer. A cellar is
+ *  a long-lived thing and storage is billed by the month forever, so the ceiling
+ *  is part of the product, not a safety valve. */
 export const MAX_ATTACHMENTS_PER_BEVERAGE = 5
 
 /** Ten megabytes, the same ceiling the label scan already enforces. The app
@@ -35,7 +36,7 @@ export const roomForAnother = (alreadyAttached: number) =>
 export const withinSizeLimit = (size: ByteSize) => size > 0 && size <= MAX_ATTACHMENT_BYTES
 
 /** Where a bottle's files live. The owner leads the path so an account deletion
- *  is one prefix to wipe, and the beverage follows so a wine's files go together. */
+ *  is one prefix to wipe, and the beverage follows so one bottle's files go together. */
 export const prefixOf = (userId: UserId, beverageId: BeverageId) =>
   ObjectPath(`${userPrefixOf(userId)}${beverageId}/`)
 

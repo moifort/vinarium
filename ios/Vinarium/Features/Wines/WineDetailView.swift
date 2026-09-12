@@ -507,7 +507,7 @@ struct WineDetailView: View {
         }
     }
 
-    private func deleteAttachment(_ attachment: WineAttachment) async {
+    private func deleteAttachment(_ attachment: BeverageAttachment) async {
         await actionError.run {
             try await AttachmentAPI.delete(attachmentId: attachment.id)
         } onSuccess: {
@@ -520,7 +520,7 @@ struct WineDetailView: View {
 
     /// The file is pulled down before it is shown: QuickLook renders photos and
     /// PDFs alike, but only from a local file.
-    private func openAttachment(_ attachment: WineAttachment) async {
+    private func openAttachment(_ attachment: BeverageAttachment) async {
         await actionError.run {
             let url = try await AttachmentAPI.download(attachment)
             await MainActor.run { previewedFile = PreviewedFile(id: attachment.id, url: url) }

@@ -5,8 +5,8 @@ struct WineDetailContent: View {
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
     var onAddAttachment: () -> Void = {}
-    var onOpenAttachment: (WineAttachment) -> Void = { _ in }
-    var onDeleteAttachment: (WineAttachment) -> Void = { _ in }
+    var onOpenAttachment: (BeverageAttachment) -> Void = { _ in }
+    var onDeleteAttachment: (BeverageAttachment) -> Void = { _ in }
 
     var body: some View {
         List {
@@ -94,7 +94,7 @@ struct WineDetailContent: View {
                 )
             }
 
-            WineAttachmentsSection(
+            BeverageAttachmentsSection(
                 attachments: content.attachments,
                 canEdit: content.canAttach,
                 isUploading: content.isUploadingAttachment,
@@ -167,7 +167,7 @@ extension WineDetailContent {
         let gift: GiftSection?
         let recommendation: RecommendationSection?
         var ownerName: String? = nil
-        var attachments: [WineAttachment] = []
+        var attachments: [BeverageAttachment] = []
         /// Only the owner attaches; a housemate's bottle shows its files read-only.
         var canAttach: Bool = false
         var isUploadingAttachment: Bool = false
