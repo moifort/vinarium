@@ -17,6 +17,7 @@ struct ScanReviewPage: View {
     @State private var domain: String
     @State private var vintage: String
     @State private var appellation: String
+    @State private var cuvee: String
     @State private var region: String
     @State private var country: String
     @State private var grapeVarieties: String
@@ -65,6 +66,7 @@ struct ScanReviewPage: View {
         _domain = State(initialValue: scanResult.domain ?? "")
         _vintage = State(initialValue: scanResult.vintage.map(String.init) ?? "")
         _appellation = State(initialValue: scanResult.appellation ?? "")
+        _cuvee = State(initialValue: scanResult.cuvee ?? "")
         _region = State(initialValue: scanResult.region ?? "")
         _country = State(initialValue: scanResult.country ?? "")
         _grapeVarieties = State(initialValue: scanResult.grapeVarieties.joined(separator: ", "))
@@ -213,6 +215,15 @@ struct ScanReviewPage: View {
                     .multilineTextAlignment(.trailing)
             } label: {
                 Label(beverageType.producerLabel, systemImage: "building.2")
+            }
+
+            if isWine {
+                LabeledContent {
+                    TextField("Cuvée", text: $cuvee)
+                        .multilineTextAlignment(.trailing)
+                } label: {
+                    Label("Cuvée", systemImage: "signature")
+                }
             }
 
             LabeledContent {
@@ -484,6 +495,7 @@ struct ScanReviewPage: View {
             domain: domain.isEmpty ? nil : domain,
             vintage: Int(vintage),
             appellation: isWine && !appellation.isEmpty ? appellation : nil,
+            cuvee: isWine && !cuvee.isEmpty ? cuvee : nil,
             region: region.isEmpty ? nil : region,
             country: country.isEmpty ? nil : country,
             grapeVarieties: isWine && !varieties.isEmpty ? varieties : nil,
@@ -527,6 +539,7 @@ private let mockImageData: Data = {
         domain: "Château Margaux",
         vintage: 2018,
         appellation: "Margaux",
+        cuvee: "Pavillon Rouge",
         region: "Bordeaux",
         country: "France",
         color: .red,
@@ -556,6 +569,7 @@ private let mockImageData: Data = {
         domain: "Brasserie d'Achouffe",
         vintage: nil,
         appellation: nil,
+        cuvee: nil,
         region: "Wallonie",
         country: "Belgique",
         color: nil,

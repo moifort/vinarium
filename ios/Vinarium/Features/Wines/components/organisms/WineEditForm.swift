@@ -38,6 +38,7 @@ struct WineEditForm: View {
     @State private var color: WineColor
     @State private var subtype: BeverageSubtype?
     @State private var domain: String
+    @State private var cuvee: String
     @State private var vintage: String
     @State private var appellation: String
     @State private var region: String
@@ -75,6 +76,7 @@ struct WineEditForm: View {
         _color = State(initialValue: initial.color)
         _subtype = State(initialValue: initial.subtype)
         _domain = State(initialValue: initial.domain)
+        _cuvee = State(initialValue: initial.cuvee)
         _vintage = State(initialValue: initial.vintage)
         _appellation = State(initialValue: initial.appellation)
         _region = State(initialValue: initial.region)
@@ -136,6 +138,15 @@ struct WineEditForm: View {
                         .multilineTextAlignment(.trailing)
                 } label: {
                     Label(beverageType.producerLabel, systemImage: "building.2")
+                }
+
+                if beverageType == .wine {
+                    LabeledContent {
+                        TextField("Cuvée", text: $cuvee)
+                            .multilineTextAlignment(.trailing)
+                    } label: {
+                        Label("Cuvée", systemImage: "signature")
+                    }
                 }
 
                 LabeledContent {
@@ -487,6 +498,7 @@ struct WineEditForm: View {
             domain: domain.isEmpty ? nil : domain,
             vintage: Int(vintage),
             appellation: isWine && !appellation.isEmpty ? appellation : nil,
+            cuvee: isWine && !cuvee.isEmpty ? cuvee : nil,
             region: region.isEmpty ? nil : region,
             country: country.isEmpty ? nil : country,
             grapeVarieties: isWine && !varieties.isEmpty ? varieties : nil,
@@ -539,6 +551,7 @@ struct WineEditForm: View {
         // erasure computed from a form that hides the field would be a guess.
         if isWine {
             if appellation.isEmpty { emptied.insert(.appellation) }
+            if cuvee.isEmpty { emptied.insert(.cuvee) }
             if classification.isEmpty { emptied.insert(.classification) }
             if varieties.isEmpty { emptied.insert(.grapeVarieties) }
             if drinkFrom.isEmpty { emptied.insert(.drinkFrom) }
@@ -555,6 +568,7 @@ extension WineEditForm {
         var color: WineColor
         var subtype: BeverageSubtype? = nil
         var domain: String
+        var cuvee: String = ""
         var vintage: String
         var appellation: String
         var region: String
@@ -582,6 +596,7 @@ extension WineEditForm {
                 name: "Château Margaux",
                 color: .red,
                 domain: "Château Margaux",
+                cuvee: "Pavillon Rouge",
                 vintage: "2018",
                 appellation: "Margaux",
                 region: "Bordeaux",

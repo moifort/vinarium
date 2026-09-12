@@ -2,7 +2,7 @@ import Foundation
 
 /// Which wine field the query matched — drives how a hit is grouped into a section.
 enum SearchMatchedField: Sendable {
-    case name, producer, subtype, color, beverageType, appellation, region, vintage
+    case name, producer, subtype, color, beverageType, appellation, cuvee, region, vintage
     case giftedBy, giftRecipient, recommender, tastingContact
 
     init(graphql: GraphQLEnum<VinariumGraphQL.SearchMatchedField>) {
@@ -15,6 +15,7 @@ enum SearchMatchedField: Sendable {
             case .color: self = .color
             case .beverageType: self = .beverageType
             case .appellation: self = .appellation
+            case .cuvee: self = .cuvee
             case .region: self = .region
             case .vintage: self = .vintage
             case .giftedBy: self = .giftedBy

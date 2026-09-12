@@ -25,6 +25,7 @@ query WineDetail($id: BeverageId!) {
         color
         vintage
         appellation
+        cuvee
         classification
         drinkWindow {
           from

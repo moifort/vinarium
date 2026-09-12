@@ -18,6 +18,7 @@ struct WineDetailContent: View {
                 subtitle: headerSubtitle,
                 producerLabel: content.beverageType.producerLabel,
                 domain: content.domain,
+                cuvee: content.cuvee,
                 vintage: content.vintage,
                 ownerName: content.ownerName
             )
@@ -131,6 +132,8 @@ extension WineDetailContent {
         var subtype: BeverageSubtype? = nil
         let name: String
         let domain: String?
+        /// Wine only: it comes from the wine details, so it is nil for anything else.
+        var cuvee: String? = nil
         let vintage: Int?
         let appellation: String?
         let region: String?
@@ -185,6 +188,7 @@ extension WineDetailContent {
             color: .red,
             name: "Château Margaux",
             domain: "Château Margaux",
+            cuvee: "Pavillon Rouge",
             vintage: 2018,
             appellation: "Margaux",
             region: "Bordeaux",

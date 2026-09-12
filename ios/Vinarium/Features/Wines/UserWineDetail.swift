@@ -9,6 +9,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let domain: String?
     let vintage: Int?
     let appellation: String?
+    let cuvee: String?
     let region: String?
     let country: String?
     let grapeVarieties: [String]
@@ -45,6 +46,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         domain = try container.decodeIfPresent(String.self, forKey: .domain)
         vintage = try container.decodeIfPresent(Int.self, forKey: .vintage)
         appellation = try container.decodeIfPresent(String.self, forKey: .appellation)
+        cuvee = try container.decodeIfPresent(String.self, forKey: .cuvee)
         region = try container.decodeIfPresent(String.self, forKey: .region)
         country = try container.decodeIfPresent(String.self, forKey: .country)
         grapeVarieties = try container.decode([String].self, forKey: .grapeVarieties)
@@ -72,7 +74,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     init(
         id: String, name: String, beverageType: BeverageType = .wine, color: WineColor?,
         subtype: BeverageSubtype? = nil, domain: String?, vintage: Int?,
-        appellation: String?, region: String?, country: String?, grapeVarieties: [String],
+        appellation: String?, cuvee: String? = nil, region: String?, country: String?,
+        grapeVarieties: [String],
         alcoholContent: Double?, classification: String?, purchasePrice: Double?,
         purchaseDate: String?, drinkFrom: Int?, drinkUntil: Int?, notes: String?,
         giftedBy: String?, createdAt: Date, updatedAt: Date,
@@ -89,6 +92,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.domain = domain
         self.vintage = vintage
         self.appellation = appellation
+        self.cuvee = cuvee
         self.region = region
         self.country = country
         self.grapeVarieties = grapeVarieties

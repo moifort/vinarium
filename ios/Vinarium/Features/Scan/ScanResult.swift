@@ -9,6 +9,7 @@ struct ScanResult: Decodable, Sendable {
     let domain: String?
     let vintage: Int?
     let appellation: String?
+    let cuvee: String?
     let region: String?
     let country: String?
     let color: WineColor?

@@ -9,6 +9,7 @@ mutation ScanWine($imageBase64: String!) {
     domain
     vintage
     appellation
+    cuvee
     region
     country
     classification

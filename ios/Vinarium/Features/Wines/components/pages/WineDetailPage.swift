@@ -23,6 +23,7 @@ struct WineDetailPage: View {
                 color: .red,
                 name: "Château Margaux",
                 domain: "Château Margaux",
+                cuvee: "Pavillon Rouge",
                 vintage: 2018,
                 appellation: "Margaux",
                 region: "Bordeaux",

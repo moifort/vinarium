@@ -88,6 +88,7 @@ struct CreateWineRequest: Encodable, Sendable {
     var domain: String?
     var vintage: Int?
     var appellation: String?
+    var cuvee: String?
     var region: String?
     var country: String?
     var grapeVarieties: [String]?
@@ -117,6 +118,7 @@ struct UpdateWineRequest: Encodable, Sendable {
     var domain: String?
     var vintage: Int?
     var appellation: String?
+    var cuvee: String?
     var region: String?
     var country: String?
     var grapeVarieties: [String]?
@@ -141,6 +143,6 @@ enum ClearedWineField: String, Encodable, Sendable {
     case producer, region, country, notes, subtype, alcoholContent
     case purchasePrice, purchaseDate
     case latitude, longitude, placeName
-    case vintage, appellation, classification, grapeVarieties
+    case vintage, appellation, cuvee, classification, grapeVarieties
     case drinkFrom, drinkUntil
 }
