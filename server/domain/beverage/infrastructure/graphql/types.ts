@@ -86,6 +86,11 @@ const WineDetailsType = builder.objectRef<WineDetails>('WineDetails').implement(
       nullable: true,
       description: 'Appellation of the wine',
     }),
+    cuvee: t.expose('cuvee', {
+      type: 'Cuvee',
+      nullable: true,
+      description: 'Cuvee of the wine, the bottling the producer names on the label',
+    }),
     classification: t.expose('classification', {
       type: 'Classification',
       nullable: true,

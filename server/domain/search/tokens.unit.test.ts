@@ -65,6 +65,13 @@ describe('searchIndexOf', () => {
     expect(tokens).not.toContain('marg')
   })
 
+  // A wine is often looked up by its bottling rather than by its estate: the
+  // cuvee has to be found on its own words, "pucelles" without "leflaive".
+  test('holds the words of the cuvee', () => {
+    const tokens = searchIndexOf(aWine({ wine: { cuvee: 'Les Pucelles' } }))
+    expect(tokens).toContain('pucelle')
+  })
+
   test('holds the vintage and its prefixes from two digits', () => {
     const tokens = searchIndexOf(aWine({ wine: { vintage: 2015 } }))
     expect(tokens).toContain('2015')

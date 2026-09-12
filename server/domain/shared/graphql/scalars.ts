@@ -6,6 +6,7 @@ import {
   BeverageName,
   Celsius,
   Classification,
+  Cuvee,
   GrapeVariety,
   Notes,
   Producer,
@@ -100,6 +101,15 @@ builder.scalarType('Appellation', {
     'Example: "Saint-Emilion Grand Cru".',
   serialize: (value) => value as string,
   parseValue: validatedParse('Appellation', Appellation),
+})
+
+builder.scalarType('Cuvee', {
+  description:
+    'The cuvee of a wine, a non-empty string.\n\n' +
+    'The particular bottling the producer names on the label, apart from the estate ' +
+    'and from the appellation. Example: "Les Pucelles".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('Cuvee', Cuvee),
 })
 
 builder.scalarType('Classification', {

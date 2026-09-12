@@ -21,6 +21,7 @@ export type ScanResult = {
   domain?: string
   vintage?: number
   appellation?: string
+  cuvee?: string
   region?: string
   country?: string
   grapeVarieties?: string[]

@@ -37,6 +37,7 @@ const fieldLocation: Record<ErasableField, readonly string[]> = {
   color: ['wine', 'color'],
   vintage: ['wine', 'vintage'],
   appellation: ['wine', 'appellation'],
+  cuvee: ['wine', 'cuvee'],
   classification: ['wine', 'classification'],
   grapeVarieties: ['wine', 'grapeVarieties'],
   servingTemperature: ['wine', 'servingTemperature'],

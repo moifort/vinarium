@@ -50,6 +50,7 @@ export const ScanResultSchema = z
     domain: nullToUndefined(z.string().nullable()).optional(),
     vintage: nullToUndefined(z.number().int().nullable()).optional(),
     appellation: nullToUndefined(z.string().nullable()).optional(),
+    cuvee: nullToUndefined(z.string().nullable()).optional(),
     region: nullToUndefined(z.string().nullable()).optional(),
     country: nullToUndefined(z.string().nullable()).optional(),
     grapeVarieties: nullToUndefined(z.array(z.string()).nullable()).optional(),
@@ -71,6 +72,8 @@ export const ScanResultSchema = z
 
 export const EnrichSchema = z.object({
   subtype: lenientSubtype.optional(),
+  domain: nullToUndefined(z.string().nullable()).optional(),
+  cuvee: nullToUndefined(z.string().nullable()).optional(),
   alcoholContent: nullToUndefined(z.number().nullable()).optional(),
   estimatedPrice: nullToUndefined(z.number().nullable()).optional(),
   drinkFrom: nullToUndefined(z.number().int().nullable()).optional(),

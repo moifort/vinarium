@@ -19,6 +19,7 @@ const WINE_DETAIL_KEYS = [
   'color',
   'vintage',
   'appellation',
+  'cuvee',
   'classification',
   'grapeVarieties',
   'drinkWindow',
@@ -170,6 +171,18 @@ describe('searchHit', () => {
     expect(searchHit(wine, 'margaux chateau')?.matchedFields).toEqual(['name'])
     expect(searchHit(wine, 'chateau bordeaux')?.matchedFields).toEqual(['name', 'region'])
     expect(searchHit(wine, 'chateau petrus')).toBeNull()
+  })
+
+  // The cuvee names this very bottling, so it outranks the estate that makes it:
+  // searching "pucelles" is searching for that wine, not for Leflaive's range.
+  test('a word on the cuvee matches, and outweighs the same word on the producer', () => {
+    const wine = aWine({ name: 'Puligny-Montrachet', producer: 'Leflaive', cuvee: 'Les Pucelles' })
+    expect(searchHit(wine, 'pucelles')?.matchedFields).toEqual(['cuvee'])
+
+    const onCuvee = searchHit(aWine({ name: 'Autre', cuvee: 'Pucelles' }), 'pucelles')?.score ?? 0
+    const onProducer =
+      searchHit(aWine({ name: 'Autre', producer: 'Pucelles' }), 'pucelles')?.score ?? 0
+    expect(onCuvee).toBeGreaterThan(onProducer)
   })
 
   test('a word on the vintage combines with a word on the name', () => {

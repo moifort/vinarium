@@ -22,6 +22,9 @@ input AddBeverageInput {
   """Country the beverage comes from"""
   country: Country
 
+  """Wine cuvee, the bottling named on the label"""
+  cuvee: Cuvee
+
   """First year the wine is ready to drink"""
   drinkFrom: Year
 
@@ -768,6 +771,13 @@ A country name, a non-empty string.
 The country a beverage comes from. Example: "France".
 """
 scalar Country
+
+"""
+The cuvee of a wine, a non-empty string.
+
+The particular bottling the producer names on the label, apart from the estate and from the appellation. Example: "Les Pucelles".
+"""
+scalar Cuvee
 
 """
 Read-only home-screen summary of the current user cellar and activity.
@@ -1922,6 +1932,11 @@ type ScanResult {
   """Country of origin; null when unknown"""
   country: String
 
+  """
+  Cuvee: the bottling the producer names on the label, apart from the estate and the appellation; null for a non-wine or when the label names none
+  """
+  cuvee: String
+
   """Producer (domain, distillery, brewery or kura); null when unknown"""
   domain: String
 
@@ -2006,6 +2021,9 @@ enum SearchMatchedField {
 
   """Matched the robe of a wine"""
   COLOR
+
+  """Matched the cuvee"""
+  CUVEE
 
   """Matched the person who gave the wine as a gift"""
   GIFTED_BY
@@ -2115,6 +2133,9 @@ input UpdateBeverageInput {
   """Country the beverage comes from"""
   country: Country
 
+  """Wine cuvee, the bottling named on the label"""
+  cuvee: Cuvee
+
   """First year the wine is ready to drink"""
   drinkFrom: Year
 
@@ -2201,6 +2222,9 @@ type WineDetails {
 
   """Wine color (red, white, rose)"""
   color: WineColor
+
+  """Cuvee of the wine, the bottling the producer names on the label"""
+  cuvee: Cuvee
 
   """Years the wine is at its best to drink"""
   drinkWindow: DrinkWindow

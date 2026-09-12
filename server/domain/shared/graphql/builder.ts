@@ -7,6 +7,7 @@ import type {
   BeverageName,
   Celsius,
   Classification,
+  Cuvee,
   GrapeVariety,
   Notes,
   Producer,
@@ -56,6 +57,7 @@ export const builder = new SchemaBuilder<{
     Producer: { Input: Producer; Output: Producer }
     Notes: { Input: Notes; Output: Notes }
     Appellation: { Input: Appellation; Output: Appellation }
+    Cuvee: { Input: Cuvee; Output: Cuvee }
     Classification: { Input: Classification; Output: Classification }
     GrapeVariety: { Input: GrapeVariety; Output: GrapeVariety }
     Celsius: { Input: Celsius; Output: Celsius }

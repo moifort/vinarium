@@ -13,6 +13,7 @@ export const SearchMatchedFieldEnum = builder.enumType('SearchMatchedField', {
     COLOR: { value: 'color', description: 'Matched the robe of a wine' },
     BEVERAGE_TYPE: { value: 'beverage-type', description: 'Matched the kind of beverage' },
     APPELLATION: { value: 'appellation', description: 'Matched the appellation' },
+    CUVEE: { value: 'cuvee', description: 'Matched the cuvee' },
     REGION: { value: 'region', description: 'Matched the region' },
     VINTAGE: { value: 'vintage', description: 'Matched the vintage year' },
     GIFTED_BY: {

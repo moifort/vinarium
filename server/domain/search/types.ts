@@ -29,6 +29,7 @@ export type SearchMatchedField =
   | 'color'
   | 'beverage-type'
   | 'appellation'
+  | 'cuvee'
   | 'region'
   | 'vintage'
   | 'gifted-by'

@@ -24,6 +24,7 @@ type BeverageFlatInput = {
   color?: unknown
   vintage?: unknown
   appellation?: unknown
+  cuvee?: unknown
   classification?: unknown
   grapeVarieties?: unknown
   servingTemperature?: unknown
@@ -48,6 +49,7 @@ const toData = (input: BeverageFlatInput): BeverageData => {
     color: input.color,
     vintage: input.vintage,
     appellation: input.appellation,
+    cuvee: input.cuvee,
     classification: input.classification,
     grapeVarieties: input.grapeVarieties,
     drinkWindow,
@@ -95,6 +97,7 @@ const ERASABLE: Record<ErasableField, true> = {
   color: true,
   vintage: true,
   appellation: true,
+  cuvee: true,
   classification: true,
   grapeVarieties: true,
   servingTemperature: true,

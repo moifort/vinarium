@@ -83,14 +83,15 @@ export const vintageStrength = (vintage: number | undefined, query: string) => {
   return 0
 }
 
-// What the search result should surface first: the wine itself (name), then who
-// makes it, where it comes from, when, what kind of thing it is, and finally who
-// it relates to. The three facet fields sit below region and appellation on
-// purpose: a champagne is not a synonym for a sparkling wine, so on "champagne" a
-// bottle from the Champagne region has to outrank a crémant that merely shares
-// the kind.
+// What the search result should surface first: the wine itself (name), then the
+// cuvee that names this very bottling, then who makes it, where it comes from,
+// when, what kind of thing it is, and finally who it relates to. The three facet
+// fields sit below region and appellation on purpose: a champagne is not a
+// synonym for a sparkling wine, so on "champagne" a bottle from the Champagne
+// region has to outrank a crémant that merely shares the kind.
 const FIELD_WEIGHTS: Record<SearchMatchedField, number> = {
   name: 100,
+  cuvee: 90,
   producer: 80,
   appellation: 60,
   region: 60,
@@ -114,6 +115,7 @@ const textStrengths = (item: SearchableWine, token: string) => {
     ['producer', matchStrength(item.producer, token)],
     ['subtype', matchStrength(item.subtype, token)],
     ['appellation', matchStrength(details?.appellation, token)],
+    ['cuvee', matchStrength(details?.cuvee, token)],
     ['region', matchStrength(item.region, token)],
     ['vintage', vintageStrength(details?.vintage, token)],
     ['gifted-by', matchStrength(item.gift?.received?.from, token)],

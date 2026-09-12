@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test'
-import { scanLanguageFrom } from '~/domain/scan/primitives'
+import { parseScanResponse, scanLanguageFrom } from '~/domain/scan/primitives'
 
 describe('scanLanguageFrom', () => {
   test('reads the primary subtag of the first listed language', () => {
@@ -17,5 +17,18 @@ describe('scanLanguageFrom', () => {
     expect(scanLanguageFrom('nl-NL')).toBe('en')
     expect(scanLanguageFrom('')).toBe('en')
     expect(scanLanguageFrom(undefined)).toBe('en')
+  })
+})
+
+describe('parseScanResponse', () => {
+  // Gemini answers an absent field with an explicit null, which the model must
+  // not carry: an absent cuvee is no cuvee at all.
+  test('keeps the cuvee read on the label and drops an absent one', () => {
+    expect(
+      parseScanResponse('{"name":"Puligny","beverageType":"wine","cuvee":"Les Pucelles"}').cuvee,
+    ).toBe('Les Pucelles')
+    expect(
+      parseScanResponse('{"name":"Margaux","beverageType":"wine","cuvee":null}').cuvee,
+    ).toBeUndefined()
   })
 })

@@ -147,3 +147,47 @@ describe('saveBeverageSheet', () => {
     expect(stored()?.region).toBe('Bordeaux')
   })
 })
+
+// The cuvee is the wine's own name for this bottling, told apart from the estate
+// that makes it. Both travel on the same sheet, so both have to survive the round
+// trip and be erasable on their own.
+describe('the cuvee of a wine', () => {
+  const wineOf = () => stored()?.wine as { cuvee?: string; appellation?: string } | undefined
+
+  test('is stored alongside the producer and read back with it', async () => {
+    const written = await execute(`
+      mutation {
+        updateBeverage(id: "${wineId}", input: {
+          producer: "Domaine Leflaive", cuvee: "Les Pucelles"
+        }) { id }
+      }
+    `)
+
+    expect(written.errors).toBeUndefined()
+    expect(stored()?.producer).toBe('Domaine Leflaive')
+    expect(wineOf()?.cuvee).toBe('Les Pucelles')
+
+    const read = await execute(`
+      query { beverage(id: "${wineId}") { producer details { ... on WineDetails { cuvee } } } }
+    `)
+
+    expect(read.data?.beverage).toMatchObject({
+      producer: 'Domaine Leflaive',
+      details: { cuvee: 'Les Pucelles' },
+    })
+  })
+
+  test('is erased on its own, leaving the appellation in place', async () => {
+    await execute(`
+      mutation { updateBeverage(id: "${wineId}", input: { cuvee: "Les Pucelles" }) { id } }
+    `)
+
+    const result = await execute(`
+      mutation { updateBeverage(id: "${wineId}", input: { cuvee: null }) { id } }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(wineOf()).not.toHaveProperty('cuvee')
+    expect(wineOf()?.appellation).toBe('Margaux')
+  })
+})

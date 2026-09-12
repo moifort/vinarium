@@ -82,6 +82,7 @@ export const searchIndexOf = (wine: IndexableWine): string[] => {
     ...wordTokens(wine.producer),
     ...wordTokens(wine.subtype),
     ...wordTokens(details?.appellation),
+    ...wordTokens(details?.cuvee),
     ...wordTokens(wine.region),
     ...(details?.vintage === undefined ? [] : withPrefixes(String(details.vintage), 2)),
     `type:${wine.beverageType}`,

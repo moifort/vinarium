@@ -66,6 +66,12 @@ export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implem
       nullable: true,
       description: 'Appellation (e.g. Bordeaux, Bourgogne); null when unknown',
     }),
+    cuvee: t.exposeString('cuvee', {
+      nullable: true,
+      description:
+        'Cuvee: the bottling the producer names on the label, apart from the estate and ' +
+        'the appellation; null for a non-wine or when the label names none',
+    }),
     region: t.exposeString('region', {
       nullable: true,
       description: 'Production region; null when unknown',

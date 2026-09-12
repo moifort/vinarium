@@ -10,6 +10,7 @@ import type {
   BeverageType as BeverageTypeType,
   Celsius as CelsiusType,
   Classification as ClassificationType,
+  Cuvee as CuveeType,
   GrapeVariety as GrapeVarietyType,
   Notes as NotesType,
   Producer as ProducerType,
@@ -42,6 +43,11 @@ export const Notes = (value: unknown) => {
 export const Appellation = (value: unknown) => {
   const v = z.string().min(1).parse(value)
   return make<AppellationType>()(v)
+}
+
+export const Cuvee = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<CuveeType>()(v)
 }
 
 export const Classification = (value: unknown) => {

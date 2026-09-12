@@ -29,6 +29,7 @@ export type ErasableField =
   | 'color'
   | 'vintage'
   | 'appellation'
+  | 'cuvee'
   | 'classification'
   | 'grapeVarieties'
   | 'servingTemperature'
@@ -41,6 +42,10 @@ export type Producer = Brand<string, 'Producer'>
 export type Notes = Brand<string, 'Notes'>
 // Beverage-scoped branded values.
 export type Appellation = Brand<string, 'Appellation'>
+// The specific bottling a producer names on the label, told apart from the
+// estate and from the appellation: a "Domaine Leflaive, Puligny-Montrachet
+// 1er Cru Les Pucelles" is the cuvee "Les Pucelles".
+export type Cuvee = Brand<string, 'Cuvee'>
 export type Classification = Brand<string, 'Classification'>
 export type GrapeVariety = Brand<string, 'GrapeVariety'>
 export type Celsius = Brand<number, 'Celsius'>
@@ -124,6 +129,7 @@ export type WineDetails = {
   color?: WineColor
   vintage?: Year
   appellation?: Appellation
+  cuvee?: Cuvee
   classification?: Classification
   grapeVarieties?: GrapeVariety[]
   drinkWindow?: DrinkWindow
