@@ -1,3 +1,5 @@
+import { AttachmentQuery } from '~/domain/attachment/query'
+import type { Attachment } from '~/domain/attachment/types'
 import type { BeverageId } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { CellarBottleView, OwnedBeverage } from '~/domain/cellar/types'
@@ -77,6 +79,7 @@ export type BeverageSatelliteLoaders = {
   gift: BeverageLoader<Gift>
   recommendation: BeverageLoader<Recommendation>
   history: BeverageLoader<JournalEntry[]>
+  attachments: BeverageLoader<Attachment[]>
 }
 
 export const beverageSatelliteLoaders = (userId: UserId): BeverageSatelliteLoaders => ({
@@ -93,6 +96,14 @@ export const beverageSatelliteLoaders = (userId: UserId): BeverageSatelliteLoade
   recommendation: batchedByBeverageId(identity, async (beverageIds) =>
     indexByBeverageId(await RecommendationQuery.byBeverageIds(userId, beverageIds)),
   ),
+  attachments: batchedByBeverageId(identity, async (beverageIds) => {
+    const files = await AttachmentQuery.byBeverageIds(beverageIds)
+    const grouped = new Map<BeverageId, Attachment[]>(
+      beverageIds.map((beverageId) => [beverageId, []]),
+    )
+    for (const file of files) grouped.get(file.beverageId)?.push(file)
+    return grouped
+  }),
   history: batchedByBeverageId(identity, async (beverageIds) => {
     const entries = await JournalQuery.entriesByBeverageIds(userId, beverageIds)
     const grouped = new Map<BeverageId, JournalEntry[]>(

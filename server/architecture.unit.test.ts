@@ -189,12 +189,14 @@ describe('architecture', () => {
   })
 
   describe('Firestore is reached only through the storage layer', () => {
-    // db()/firebase-admin belong to repositories and the shared Firestore utils.
-    // Everything else must go through a domain's command/query namespace. The
-    // auth middleware is the sole exception: it side-effect-imports the module to
-    // initialize firebase-admin before verifyIdToken — it never touches db().
+    // db()/firebase-admin belong to a domain's infrastructure layer and to the
+    // shared Firestore utils: repository.ts for documents, object-store.ts for the
+    // bytes in Cloud Storage. Everything else must go through a domain's
+    // command/query namespace. The auth middleware is the sole exception: it
+    // side-effect-imports the module to initialize firebase-admin before
+    // verifyIdToken — it never touches db().
     const allowedFirebaseImporters =
-      /^server\/(domain\/\w+\/infrastructure\/repository\.ts|utils\/firestore\.ts|system\/migration\/runner\.ts|middleware\/auth\.ts)$/
+      /^server\/(domain\/\w+\/infrastructure\/(repository|object-store)\.ts|utils\/firestore\.ts|system\/migration\/runner\.ts|middleware\/auth\.ts)$/
     const serverFiles = glob('server/**/*.ts').filter((f) => !f.endsWith('.test.ts'))
     // Catches both `import { db } from …` and side-effect `import '…'`.
     const importsFirebase = /import\s+(?:[^'"]*\s+from\s+)?['"]~\/system\/firebase['"]/

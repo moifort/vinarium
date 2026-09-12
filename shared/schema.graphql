@@ -155,6 +155,54 @@ Example: "Saint-Emilion Grand Cru".
 scalar Appellation
 
 """
+A file kept alongside a bottle: a label photo, a shot of the cellar it came from, the purchase invoice.
+
+A wine holds at most five, each up to 10 MB. Only the owner of the wine may add or delete one; anyone who can see the wine can read them, which includes a household member looking at a bottle standing in the shared cellar. Exposed as `Beverage.attachments`.
+"""
+type Attachment {
+  """The media type the file was stored with."""
+  contentType: ContentType!
+
+  """When the file was attached."""
+  createdAt: DateTime!
+
+  """The name to display next to the file."""
+  fileName: FileName!
+
+  """Unique identifier of the file."""
+  id: AttachmentId!
+
+  """Whether to show the file inline or open it in a viewer."""
+  kind: AttachmentKind!
+
+  """Size in bytes, as measured on the stored object rather than announced."""
+  size: ByteSize!
+
+  """
+  A one-hour download URL, signed for this file only.
+  
+  Signed on demand: a caller that does not select this field triggers no signature at all. Do not store it, it expires.
+  """
+  url: SignedUrl!
+}
+
+"""
+The unique identifier of an `Attachment`, formatted as a UUID v4.
+
+Handed out when an upload slot is reserved, then used to register or delete the file. Example: "b2f1c0de-7a44-4e1b-9c3f-6d0a1f7e2b55".
+"""
+scalar AttachmentId
+
+"""How the app is meant to present an attached file."""
+enum AttachmentKind {
+  """A PDF, opened in a document viewer."""
+  document
+
+  """A photo, shown inline in the gallery."""
+  image
+}
+
+"""
 A beverage in a collection (wine, spirit, beer, sake, cider or other), the aggregate root of the schema.
 
 The base fields (name, producer, region, purchase, ...) live here. Type-specific fields hang off the `details` union, non-null only for a wine.
@@ -174,6 +222,13 @@ query {
 type Beverage {
   """Alcohol content by volume, in percent"""
   alcoholContent: Percentage
+
+  """
+  The files attached to the wine, oldest first.
+  
+  Empty when nothing was ever attached. Resolved through a per-request loader (no N+1), so a page of wines costs one keyed read rather than one per row.
+  """
+  attachments: [Attachment!]!
 
   """Kind of beverage; the discriminant that governs subtype and details"""
   beverageType: BeverageType!
@@ -528,6 +583,13 @@ type Beverages {
 }
 
 """
+A size in bytes, a non-negative integer.
+
+An attachment may not exceed 10485760 bytes (10 MB). Example: 248312.
+"""
+scalar ByteSize
+
+"""
 A bottle occupying a single slot of the cellar grid.
 
 Identifies the wine plus its 0-based `row`/`col` coordinates and the human-facing `rowLabel`/`colLabel` derived from them. Exposed as `Beverage.cellar` (the bottle's physical slot), resolved through a per-request loader so a page of wines costs one cellar read, not one per wine.
@@ -766,6 +828,13 @@ input ConsumptionInput {
 }
 
 """
+An IANA media type, lowercased.
+
+Only the types an attachment may carry are accepted (JPEG, PNG, HEIC, HEIF, WebP and PDF); anything else is refused. Example: "image/jpeg".
+"""
+scalar ContentType
+
+"""
 A country name, a non-empty string.
 
 The country a beverage comes from. Example: "France".
@@ -907,6 +976,13 @@ type FavoriteWine {
   """Vintage year; null when unknown or not applicable"""
   vintage: Year
 }
+
+"""
+The display name of an attached file, 1 to 255 characters.
+
+Shown next to a document in the app; path separators are stripped, so this never designates a location. Example: "facture-margaux-2018.pdf".
+"""
+scalar FileName
 
 """
 How a wine relates to gifting, as one record per (user, wine).
@@ -1322,6 +1398,16 @@ type Mutation {
   deleteAccount: Boolean!
 
   """
+  Delete an attachment and the file behind it.
+  
+  Only the owner may. Fails with `NOT_FOUND` on an attachment that is not yours.
+  """
+  deleteAttachment(
+    """The attachment to remove."""
+    attachmentId: AttachmentId!
+  ): Boolean!
+
+  """
   Delete a beverage and every related satellite record, then return true.
   
   Cascades to the cellar slot, tasting note, gift, recommendation and journal. Fails with not-found when the beverage does not exist.
@@ -1408,6 +1494,24 @@ type Mutation {
   ): CellarBottle!
 
   """
+  Reserve an upload slot for a file to attach to a wine.
+  
+  Accepts image/jpeg, image/png, image/heic, image/heif, image/webp, application/pdf, up to 10485760 bytes, and at most 5 files per wine. Only the owner of the wine may attach to it. Fails with `NOT_FOUND` on a wine that is not yours, `UNSUPPORTED_MEDIA_TYPE`, `FILE_TOO_LARGE` or `TOO_MANY_ATTACHMENTS`.
+  """
+  prepareAttachmentUpload(
+    """The wine the file will hang on."""
+    beverageId: BeverageId!
+
+    """Media type of the file about to be sent."""
+    contentType: ContentType!
+
+    """
+    Size of the file about to be sent. Checked again against the stored object at registration, so an understated value gains nothing.
+    """
+    size: ByteSize!
+  ): PendingUpload!
+
+  """
   Resize or retune the cellar grid (settings). Refuses to strand placed bottles
   """
   reconfigureCellar(
@@ -1429,6 +1533,22 @@ type Mutation {
     """Tasting note fields"""
     input: TastingInput!
   ): Boolean!
+
+  """
+  Turn an uploaded file into an attachment on the wine.
+  
+  Call this after the `PUT` to the upload URL succeeded. The stored object is read back for its real type and size, so the limits hold whatever the client announced earlier. Fails with `UPLOAD_MISSING` when no file was received at that slot.
+  """
+  registerAttachment(
+    """The identifier returned by `prepareAttachmentUpload`."""
+    attachmentId: AttachmentId!
+
+    """The wine the slot was reserved on."""
+    beverageId: BeverageId!
+
+    """The name to display next to the file."""
+    fileName: FileName!
+  ): Attachment!
 
   """Remove a bottle from the cellar without recording why"""
   removeBottle(
@@ -1537,6 +1657,27 @@ Free-form notes attached to a beverage, a non-empty string.
 Personal remarks about the bottle. Example: "Bought on our trip to Bordeaux".
 """
 scalar Notes
+
+"""
+An upload slot: where to send one file, and until when.
+
+Nothing is stored yet. Send the bytes with a `PUT` to `uploadUrl`, carrying exactly the `Content-Type` given here, then call `registerAttachment` with the same `attachmentId`. An upload never registered leaves no attachment and is swept from storage on its own.
+"""
+type PendingUpload {
+  """Identifier to pass back to `registerAttachment` once the bytes are in."""
+  attachmentId: AttachmentId!
+
+  """
+  The `Content-Type` header the `PUT` must carry. The signature covers it, so a value that differs at all is rejected.
+  """
+  contentType: ContentType!
+
+  """When the upload URL stops being accepted (15 minutes out)."""
+  expiresAt: DateTime!
+
+  """The `PUT` target, signed for this single object."""
+  uploadUrl: SignedUrl!
+}
 
 """
 A percentage, a number between 0 and 100.
@@ -2077,6 +2218,13 @@ type SearchResults {
   """Total number of matches before the limit was applied"""
   totalCount: Int!
 }
+
+"""
+A time-limited URL, signed by the server for exactly one file.
+
+An upload URL lasts 15 minutes and expects a `PUT` carrying the exact `Content-Type` it was signed with; a download URL lasts one hour. Neither survives its window, and the bucket is unreachable by any other means.
+"""
+scalar SignedUrl
 
 """The direction a sorted list runs in."""
 enum SortOrder {

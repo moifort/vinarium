@@ -1,3 +1,4 @@
+import { AttachmentCommand } from '~/domain/attachment/command'
 import { BeverageCommand } from '~/domain/beverage/command'
 import { CellarCommand } from '~/domain/cellar/command'
 import type { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/types'
@@ -58,6 +59,7 @@ export namespace UserUseCase {
       JournalCommand.deleteAllForUser(userId),
       EntitlementCommand.deleteForUser(userId),
       QuotaCommand.deleteAllForUser(userId),
+      AttachmentCommand.deleteAllForUser(userId),
     ])
     await UserCommand.deleteProfile(userId)
     await UserCommand.deleteAuthAccount(userId)

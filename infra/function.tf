@@ -108,6 +108,8 @@ resource "google_cloudfunctions2_function" "server" {
       NITRO_ASC_KEY_ID        = var.asc_key_id
       NITRO_ASC_VENDOR_NUMBER = var.asc_vendor_number
       NITRO_GCP_BILLING_TABLE = var.gcp_billing_table
+      # The private bucket holding wine attachments (see storage.tf).
+      NITRO_ATTACHMENTS_BUCKET = google_storage_bucket.attachments.name
     }
 
     dynamic "secret_environment_variables" {
@@ -123,6 +125,8 @@ resource "google_cloudfunctions2_function" "server" {
 
   depends_on = [
     google_project_iam_member.function_firestore,
+    google_storage_bucket_iam_member.function_attachments,
+    google_service_account_iam_member.function_token_creator,
     google_project_iam_member.compute_default_builder,
     google_secret_manager_secret_iam_member.function,
   ]

@@ -24,6 +24,10 @@ export default defineEventHandler(async (event) => {
   // route verifies against Apple's root certificates before acting on anything.
   if (path.startsWith('/apple/notifications')) return
 
+  // Development object store: the signed URL is the credential, exactly as it is
+  // on the real bucket, and the routes behind it only exist in a dev build.
+  if (import.meta.dev && path.startsWith('/dev/storage/')) return
+
   // Everything else (incl. /graphql): require a valid Firebase ID token.
   const auth = getHeader(event, 'authorization')
 

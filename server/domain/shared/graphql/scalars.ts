@@ -11,6 +11,13 @@ import {
   Notes,
   Producer,
 } from '~/domain/beverage/primitives'
+import {
+  AttachmentId,
+  ByteSize,
+  ContentType,
+  FileName,
+  SignedUrl,
+} from '~/domain/attachment/primitives'
 import { HouseholdId } from '~/domain/household/primitives'
 import {
   Country,
@@ -212,4 +219,49 @@ builder.scalarType('Rating', {
     'Set on a consumed beverage. Example: 4.',
   serialize: (value) => value as number,
   parseValue: validatedParse('Rating', Rating),
+})
+
+builder.scalarType('AttachmentId', {
+  description:
+    'The unique identifier of an `Attachment`, formatted as a UUID v4.\n\n' +
+    'Handed out when an upload slot is reserved, then used to register or delete ' +
+    'the file. Example: "b2f1c0de-7a44-4e1b-9c3f-6d0a1f7e2b55".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('AttachmentId', AttachmentId),
+})
+
+builder.scalarType('FileName', {
+  description:
+    'The display name of an attached file, 1 to 255 characters.\n\n' +
+    'Shown next to a document in the app; path separators are stripped, so this ' +
+    'never designates a location. Example: "facture-margaux-2018.pdf".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('FileName', FileName),
+})
+
+builder.scalarType('ContentType', {
+  description:
+    'An IANA media type, lowercased.\n\n' +
+    'Only the types an attachment may carry are accepted (JPEG, PNG, HEIC, HEIF, ' +
+    'WebP and PDF); anything else is refused. Example: "image/jpeg".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('ContentType', ContentType),
+})
+
+builder.scalarType('ByteSize', {
+  description:
+    'A size in bytes, a non-negative integer.\n\n' +
+    'An attachment may not exceed 10485760 bytes (10 MB). Example: 248312.',
+  serialize: (value) => value as number,
+  parseValue: validatedParse('ByteSize', ByteSize),
+})
+
+builder.scalarType('SignedUrl', {
+  description:
+    'A time-limited URL, signed by the server for exactly one file.\n\n' +
+    'An upload URL lasts 15 minutes and expects a `PUT` carrying the exact ' +
+    '`Content-Type` it was signed with; a download URL lasts one hour. Neither ' +
+    'survives its window, and the bucket is unreachable by any other means.',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('SignedUrl', SignedUrl),
 })

@@ -12,6 +12,13 @@ import type {
   Notes,
   Producer,
 } from '~/domain/beverage/types'
+import type {
+  AttachmentId,
+  ByteSize,
+  ContentType,
+  FileName,
+  SignedUrl,
+} from '~/domain/attachment/types'
 import type { HouseholdId } from '~/domain/household/types'
 import type {
   Country,
@@ -71,6 +78,11 @@ export const builder = new SchemaBuilder<{
     Latitude: { Input: Latitude; Output: Latitude }
     Longitude: { Input: Longitude; Output: Longitude }
     Rating: { Input: Rating; Output: Rating }
+    AttachmentId: { Input: AttachmentId; Output: AttachmentId }
+    FileName: { Input: FileName; Output: FileName }
+    ContentType: { Input: ContentType; Output: ContentType }
+    ByteSize: { Input: ByteSize; Output: ByteSize }
+    SignedUrl: { Input: SignedUrl; Output: SignedUrl }
   }
 }>({
   defaultFieldNullability: false,

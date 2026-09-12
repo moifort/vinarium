@@ -1,3 +1,4 @@
+import { AttachmentCommand } from '~/domain/attachment/command'
 import { BeverageCommand } from '~/domain/beverage/command'
 import type { BeverageId, BeverageName, BeverageType } from '~/domain/beverage/types'
 import { CellarCommand } from '~/domain/cellar/command'
@@ -106,6 +107,9 @@ export namespace BeverageUseCase {
         GiftCommand.removeBeverage(userId, id, batch),
         RecommendationCommand.removeBeverage(userId, id, batch),
         JournalCommand.removeBeverage(userId, id, batch),
+        // The files ride the same batch for their documents; the bytes go right
+        // after, since a bucket cannot enlist in a Firestore batch.
+        AttachmentCommand.removeBeverage(userId, id, batch),
       ])
       return undefined
     })

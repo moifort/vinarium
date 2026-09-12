@@ -39,3 +39,8 @@ output "wif_provider" {
   description = "Full resource name of the WIF provider (GitHub secret GCP_WIF_PROVIDER)"
 }
 
+
+output "attachments_bucket" {
+  value       = google_storage_bucket.attachments.name
+  description = "Private bucket holding the files attached to wine sheets."
+}

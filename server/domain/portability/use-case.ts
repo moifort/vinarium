@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { AttachmentCommand } from '~/domain/attachment/command'
 import { BeverageCommand } from '~/domain/beverage/command'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
@@ -96,6 +97,10 @@ export namespace PortabilityUseCase {
       RecommendationCommand.replaceAllForUser(userId, recommendation),
       GiftCommand.replaceAllForUser(userId, gift),
       JournalCommand.replaceAllForUser(userId, journal),
+      // An export carries no bytes, so a restore cannot bring the files back.
+      // Leaving them would attach the previous cellar's photos to whatever wine
+      // reuses an id, so the restore takes them with the wines they described.
+      AttachmentCommand.deleteAllForUser(userId),
     ])
 
     return {

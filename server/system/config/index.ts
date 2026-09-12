@@ -6,9 +6,11 @@ import {
   AscKeyId,
   AscPrivateKey,
   AscVendorNumber,
+  AttachmentsBucket,
   GcpBillingTable,
   GoogleApiKey,
   PremiumUserIds,
+  PublicBaseUrl,
   SentryDsn,
   SentryRelease,
 } from '~/system/config/primitives'
@@ -40,5 +42,9 @@ export const config = () => {
     gcpBillingTable: runtimeConfig.gcpBillingTable
       ? GcpBillingTable(runtimeConfig.gcpBillingTable)
       : undefined,
+    attachmentsBucket: runtimeConfig.attachmentsBucket
+      ? AttachmentsBucket(runtimeConfig.attachmentsBucket)
+      : undefined,
+    publicBaseUrl: PublicBaseUrl(runtimeConfig.publicBaseUrl),
   }
 }

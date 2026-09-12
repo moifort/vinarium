@@ -10,8 +10,10 @@ import type {
   AscKeyId as AscKeyIdType,
   AscPrivateKey as AscPrivateKeyType,
   AscVendorNumber as AscVendorNumberType,
+  AttachmentsBucket as AttachmentsBucketType,
   GcpBillingTable as GcpBillingTableType,
   GoogleApiKey as GoogleApiKeyType,
+  PublicBaseUrl as PublicBaseUrlType,
   SentryDsn as SentryDsnType,
   SentryRelease as SentryReleaseType,
 } from '~/system/config/types'
@@ -97,3 +99,13 @@ export const PremiumUserIds = (value: unknown): UserIdType[] =>
     .map((id) => id.trim())
     .filter((id) => id.length > 0)
     .map((id) => UserId(id))
+
+export const AttachmentsBucket = (value: unknown) => {
+  const v = z.string().min(1).parse(value)
+  return make<AttachmentsBucketType>()(v)
+}
+
+export const PublicBaseUrl = (value: unknown) => {
+  const v = z.string().url().parse(value)
+  return make<PublicBaseUrlType>()(v)
+}

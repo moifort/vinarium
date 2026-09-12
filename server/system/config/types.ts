@@ -16,3 +16,8 @@ export type AscPrivateKey = Brand<string, 'AscPrivateKey'>
 export type AscVendorNumber = Brand<string, 'AscVendorNumber'>
 /** Fully qualified BigQuery billing export table, `project.dataset.table`. */
 export type GcpBillingTable = Brand<string, 'GcpBillingTable'>
+/** The private bucket holding beverage attachments, e.g. `vinarium-prod-attachments`. */
+export type AttachmentsBucket = Brand<string, 'AttachmentsBucket'>
+/** Development only: the origin this server is reachable at, used to address the
+ *  local object store from the simulator. */
+export type PublicBaseUrl = Brand<string, 'PublicBaseUrl'>

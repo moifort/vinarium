@@ -44,5 +44,9 @@ export default defineNitroConfig({
     ascPrivateKey: '',
     ascVendorNumber: '',
     gcpBillingTable: '',
+    attachmentsBucket: '',
+    // Dev only: the origin the local object store points its URLs at, so the
+    // simulator downloads an attachment from the same server it queried.
+    publicBaseUrl: 'http://127.0.0.1:3000',
   },
 })
