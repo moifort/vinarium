@@ -36,6 +36,7 @@ type Bottle = {
   region?: string
   country?: string
   appellation?: string
+  cuvee?: string
   grapeVarieties?: string[]
   drinkFrom?: number
   drinkUntil?: number
@@ -356,19 +357,23 @@ const BOTTLES: Bottle[] = [
   // Seeded last, and the most complete record of the lot: the wine list sorts
   // newest first, so this is the bottle the detail screenshot opens on. Every
   // section the screen can show is filled — drink window, origin, discovery
-  // place, price, grapes — because an empty section photographs as a gap.
+  // place, price, grapes, cuvee — because an empty section photographs as a gap.
+  // Hence the second wine rather than the grand vin: the estate's own name says
+  // nothing about a cuvee, "Pavillon Rouge" tells the row apart from the domain
+  // right above it.
   {
-    name: 'Château Margaux',
+    name: 'Pavillon Rouge du Château Margaux',
     producer: 'Château Margaux',
     vintage: 2015,
     color: 'RED',
     region: 'Bordeaux',
     country: 'France',
     appellation: 'Margaux',
+    cuvee: 'Pavillon Rouge',
     grapeVarieties: ['Cabernet Sauvignon', 'Merlot'],
     drinkFrom: 2025,
     drinkUntil: 2045,
-    purchasePrice: 690,
+    purchasePrice: 250,
     alcoholContent: 13.5,
     at: { row: 0, col: 0 },
     favorite: true,
