@@ -3,8 +3,11 @@ import type { CellarCols, CellarRows, CellarZones } from '~/domain/cellar/types'
 import type { HouseholdId, HouseholdMember, HouseholdRole } from '~/domain/household/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
+import { mockObjectStore } from '~/test/fake-object-store'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
+// Deleting a beverage or an account reaches the attachment store.
+const fakeStorage = mockObjectStore()
 
 // The account deletion deletes the Firebase Auth user through the identity module;
 // the mock records the calls instead of hitting Firebase.
@@ -169,6 +172,8 @@ describe('UserUseCase.deleteAccount', () => {
     fake.seed('ai-credits', id, { userId: user(id), scans: 20 })
     fake.seed('user-profiles', id, { userId: user(id), firstName: id })
     fake.seed('cellar-configs', `usr_${id}`, { rows: 8, cols: 6, zones: 1 })
+    fake.seed('attachments', `${id}_a`, { id: `${id}_a`, userId: user(id), beverageId: `${id}_b` })
+    fakeStorage.put(`attachments/${user(id)}/${id}_b/${id}_a`)
   }
 
   const ownedCollections = [
@@ -199,6 +204,10 @@ describe('UserUseCase.deleteAccount', () => {
     expect(fake.snapshot('cellar-configs').has('usr_u1')).toBe(false)
     expect((await UserQuery.me(user('u1'))).firstName).toBeUndefined()
     expect(deletedAuthUsers).toEqual(['u1'])
+    // The attached files go with the account: a user who asked to be forgotten
+    // must not leave photos behind, billed by the month, forever. Scoped to the
+    // leaver, which is what putting the owner first in the object path buys.
+    expect([...fakeStorage.objects.keys()]).toEqual([`attachments/${user('u2')}/u2_b/u2_a`])
 
     // The other account is fully intact.
     expect(fake.snapshot('beverages').has('u2_b')).toBe(true)

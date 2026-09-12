@@ -94,15 +94,18 @@ export namespace AttachmentCommand {
     return undefined
   }
 
-  /** Called when the beverage itself goes. The documents are enlisted in the
-   *  caller's batch so they vanish with the beverage; the bytes follow right after,
-   *  outside the batch, because a bucket cannot join a Firestore transaction. */
-  export const removeBeverage = async (
-    userId: UserId,
-    beverageId: BeverageId,
-    batch?: WriteBatch,
-  ) => {
+  /** Called when the beverage itself goes: enlists the records in the caller's
+   *  batch so they vanish with it. The bytes are deliberately left alone. A bucket
+   *  cannot join a Firestore batch, and erasing the files before the commit would
+   *  destroy them for good the day the commit fails and the beverage stays. */
+  export const removeBeverage = async (beverageId: BeverageId, batch?: WriteBatch) => {
     await repository.removeAllByBeverage(beverageId, batch)
+  }
+
+  /** The second half of the above, to be called once the deletion is committed.
+   *  Keyed on the prefix rather than on the records, so a retry after a half-done
+   *  deletion still clears everything. */
+  export const eraseFiles = async (userId: UserId, beverageId: BeverageId) => {
     await objectStore().removeByPrefix(prefixOf(userId, beverageId))
   }
 

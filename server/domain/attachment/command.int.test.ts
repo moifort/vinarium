@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import type { ObjectStore } from '~/domain/attachment/infrastructure/object-store'
 import type {
   Attachment,
   AttachmentId,
@@ -7,40 +6,15 @@ import type {
   ContentType,
   FileName,
   ObjectPath,
-  SignedUrl,
-  StoredObject,
 } from '~/domain/attachment/types'
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
-
-// A bucket standing in for Cloud Storage: objects in a map, with the age the
-// orphan sweep reads. Nothing here touches the network or the disk.
-const bucket = new Map<string, StoredObject & { storedAt: Date }>()
-const removed: string[] = []
-
-const fakeStore: ObjectStore = {
-  uploadUrl: async (path) => `https://upload.test/${path}` as SignedUrl,
-  downloadUrl: async (path) => `https://download.test/${path}` as SignedUrl,
-  stat: async (path) => bucket.get(path) ?? null,
-  remove: async (path) => {
-    removed.push(path)
-    bucket.delete(path)
-  },
-  removeByPrefix: async (prefix) => {
-    for (const path of [...bucket.keys()]) if (path.startsWith(prefix)) bucket.delete(path)
-    removed.push(`${prefix}*`)
-  },
-  list: async (prefix) =>
-    [...bucket.entries()]
-      .filter(([path]) => path.startsWith(prefix))
-      .map(([path, { storedAt }]) => ({ path: path as ObjectPath, storedAt })),
-}
+import { mockObjectStore } from '~/test/fake-object-store'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
-mock.module('~/domain/attachment/infrastructure/object-store', () => ({
-  objectStore: () => fakeStore,
-}))
+const fakeStorage = mockObjectStore()
+const { objects: bucket, removed, put: store } = fakeStorage
 
 const { AttachmentCommand } = await import('~/domain/attachment/command')
 
@@ -51,14 +25,6 @@ const fileName = 'etiquette.jpg' as FileName
 const oneMegabyte = 1_000_000 as ByteSize
 
 let fake = resetFakeFirestore()
-
-const store = (path: string, stored: Partial<StoredObject & { storedAt: Date }> = {}) =>
-  bucket.set(path, {
-    contentType: jpeg,
-    size: oneMegabyte,
-    storedAt: new Date(),
-    ...stored,
-  })
 
 const seedAttachments = (count: number) => {
   for (let i = 0; i < count; i++) {
@@ -79,8 +45,7 @@ const seedAttachments = (count: number) => {
 
 beforeEach(() => {
   fake = resetFakeFirestore()
-  bucket.clear()
-  removed.length = 0
+  fakeStorage.reset()
 })
 
 describe('AttachmentCommand.reserveSlot', () => {
@@ -219,13 +184,27 @@ describe('AttachmentCommand.remove', () => {
 })
 
 describe('cascading deletions', () => {
-  test('a deleted wine takes its files', async () => {
+  // Deleting a beverage happens in two moves on purpose: the records go in the
+  // caller's batch, the bytes only once that batch committed. A bucket cannot be
+  // rolled back, so a single move would destroy the files of a bottle that a
+  // failed commit left standing.
+  test('a deleted beverage releases its records without touching the bytes yet', async () => {
     seedAttachments(3)
     store(`attachments/${userId}/${beverageId}/existing-0`)
 
-    await AttachmentCommand.removeBeverage(userId, beverageId)
+    await AttachmentCommand.removeBeverage(beverageId)
 
     expect(fake.snapshot('attachments').size).toBe(0)
+    expect(bucket.size).toBe(1)
+  })
+
+  test('erasing the files is the second move, keyed on the prefix so a retry finishes it', async () => {
+    store(`attachments/${userId}/${beverageId}/existing-0`)
+    store(`attachments/${userId}/${beverageId}/never-registered`)
+
+    await AttachmentCommand.eraseFiles(userId, beverageId)
+    await AttachmentCommand.eraseFiles(userId, beverageId)
+
     expect(bucket.size).toBe(0)
   })
 

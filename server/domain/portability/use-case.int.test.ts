@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
+import { mockObjectStore } from '~/test/fake-object-store'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
+// Deleting a beverage or an account reaches the attachment store.
+const fakeStorage = mockObjectStore()
 
 const { PortabilityUseCase } = await import('./use-case')
 const { EXPORT_SCHEMA_VERSION } = await import('./types')
@@ -53,6 +56,8 @@ describe('PortabilityUseCase.importAll', () => {
   test('replaces the collections and re-stamps the importing user', async () => {
     // Pre-existing data under this account must be wiped by the restore.
     seedWine(wid(99))
+    fake.seed('attachments', 'a1', { id: 'a1', userId, beverageId: wid(99) })
+    fakeStorage.put(`attachments/${userId}/${wid(99)}/a1`)
 
     const envelope = {
       schemaVersion: EXPORT_SCHEMA_VERSION,
@@ -77,6 +82,10 @@ describe('PortabilityUseCase.importAll', () => {
 
     const result = await PortabilityUseCase.importAll(userId, JSON.stringify(envelope))
 
+    // An export carries no bytes, so a restore cannot bring the files back: the
+    // previous cellar's photos go rather than hang on whatever reuses an id.
+    expect(fake.snapshot('attachments').size).toBe(0)
+    expect(fakeStorage.objects.size).toBe(0)
     expect(result).toEqual({
       wines: 1,
       cellar: 0,

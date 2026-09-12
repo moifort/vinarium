@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { BeverageId } from '~/domain/beverage/types'
 import type { UserId } from '~/domain/shared/types'
 import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
+import { mockObjectStore } from '~/test/fake-object-store'
 
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
+// Deleting a beverage or an account reaches the attachment store.
+const fakeStorage = mockObjectStore()
 
 const { BeverageUseCase } = await import('~/domain/beverage/use-case')
 
@@ -22,12 +25,16 @@ const seedWineWithRelatedData = (fake: ReturnType<typeof resetFakeFirestore>) =>
   fake.seed('beverages', 'w2', { id: 'w2', userId, name: 'Survivor', color: 'white' })
   fake.seed('journal', 'j3', { type: 'in', userId, beverageId: 'w2', row: 1, col: 1 })
   fake.seed('tasting', `${userId}_w2`, { userId, beverageId: 'w2', rating: 5 })
+  // A photo on the wine about to be removed, so the deletion can be watched
+  // reaching the bucket — or, on a failed commit, not reaching it.
+  fakeStorage.put(`attachments/${userId}/w1/a1`)
 }
 
 let fake = resetFakeFirestore()
 
 beforeEach(() => {
   fake = resetFakeFirestore()
+  fakeStorage.reset()
 })
 
 describe('BeverageUseCase.removeCompletely', () => {
@@ -67,6 +74,7 @@ describe('BeverageUseCase.removeCompletely', () => {
     expect(fake.snapshot('cellar').size).toBe(0)
     expect(fake.snapshot('gift').size).toBe(0)
     expect(fake.snapshot('recommendation').size).toBe(0)
+    expect(fakeStorage.objects.size).toBe(0)
   })
 
   test('returns not-found and deletes nothing when the wine does not exist', async () => {
@@ -95,5 +103,8 @@ describe('BeverageUseCase.removeCompletely', () => {
     expect(fake.snapshot('gift').size).toBe(1)
     expect(fake.snapshot('recommendation').size).toBe(1)
     expect(fake.snapshot('journal').size).toBe(3)
+    // The files above all: a bucket cannot be rolled back, so erasing them before
+    // the commit would destroy photos the surviving bottle still points at.
+    expect(fakeStorage.objects.size).toBe(1)
   })
 })

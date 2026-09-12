@@ -93,7 +93,7 @@ export namespace BeverageUseCase {
     })
   }
 
-  export const removeCompletely = async (userId: UserId, id: BeverageId) =>
+  const eraseRecords = async (userId: UserId, id: BeverageId) =>
     await atomically(async (batch) => {
       const error = await BeverageCommand.remove(userId, id, batch)
       if (error === 'not-found') return 'not-found' as const
@@ -107,10 +107,18 @@ export namespace BeverageUseCase {
         GiftCommand.removeBeverage(userId, id, batch),
         RecommendationCommand.removeBeverage(userId, id, batch),
         JournalCommand.removeBeverage(userId, id, batch),
-        // The files ride the same batch for their documents; the bytes go right
-        // after, since a bucket cannot enlist in a Firestore batch.
-        AttachmentCommand.removeBeverage(userId, id, batch),
+        AttachmentCommand.removeBeverage(id, batch),
       ])
       return undefined
     })
+
+  export const removeCompletely = async (userId: UserId, id: BeverageId) => {
+    const outcome = await eraseRecords(userId, id)
+    if (outcome === 'not-found') return outcome
+    // Only now. A bucket cannot enlist in the batch above, so the files are
+    // erased once the records are gone for good: a commit that fails has to
+    // leave the beverage exactly as it was, photos included.
+    await AttachmentCommand.eraseFiles(userId, id)
+    return undefined
+  }
 }
