@@ -318,7 +318,10 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Beverage) -> Us
         longitude: w.place?.longitude,
         placeName: w.place?.name,
         isMine: w.isMine,
-        ownerName: w.ownerName
+        ownerName: w.ownerName,
+        attachments: w.attachments.compactMap {
+            WineAttachment(fields: $0.fragments.wineAttachmentFields)
+        }
     )
 }
 

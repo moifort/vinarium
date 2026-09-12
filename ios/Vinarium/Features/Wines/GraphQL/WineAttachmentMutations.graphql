@@ -1,0 +1,35 @@
+mutation PrepareAttachmentUpload(
+  $beverageId: BeverageId!
+  $contentType: ContentType!
+  $size: ByteSize!
+) {
+  prepareAttachmentUpload(beverageId: $beverageId, contentType: $contentType, size: $size) {
+    attachmentId
+    uploadUrl
+    contentType
+  }
+}
+
+mutation RegisterAttachment(
+  $beverageId: BeverageId!
+  $attachmentId: AttachmentId!
+  $fileName: FileName!
+) {
+  registerAttachment(beverageId: $beverageId, attachmentId: $attachmentId, fileName: $fileName) {
+    ...WineAttachmentFields
+  }
+}
+
+mutation DeleteAttachment($attachmentId: AttachmentId!) {
+  deleteAttachment(attachmentId: $attachmentId)
+}
+
+fragment WineAttachmentFields on Attachment {
+  id
+  kind
+  contentType
+  fileName
+  size
+  url
+  createdAt
+}

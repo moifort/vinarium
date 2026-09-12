@@ -92,7 +92,8 @@ const gcs: ObjectStore = {
 // Both it and those routes are compiled out of a production bundle.
 const LOCAL_ROOT = '.data/attachments'
 const localFile = (path: ObjectPathValue) => join(LOCAL_ROOT, path)
-const localUrl = (path: ObjectPathValue) => SignedUrl(`${config().publicBaseUrl}/dev/storage/${path}`)
+const localUrl = (path: ObjectPathValue) =>
+  SignedUrl(`${config().publicBaseUrl}/dev/storage/${path}`)
 
 const local: ObjectStore = {
   uploadUrl: async (path) => localUrl(path),

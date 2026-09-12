@@ -4,13 +4,19 @@ struct WineDetailPage: View {
     let content: WineDetailContent.Content
     var onRemoveRequested: () -> Void = {}
     var onEditLocation: () -> Void = {}
+    var onAddAttachment: () -> Void = {}
+    var onOpenAttachment: (WineAttachment) -> Void = { _ in }
+    var onDeleteAttachment: (WineAttachment) -> Void = { _ in }
     var onRefresh: () async -> Void = {}
 
     var body: some View {
         WineDetailContent(
             content: content,
             onRemoveRequested: onRemoveRequested,
-            onEditLocation: onEditLocation
+            onEditLocation: onEditLocation,
+            onAddAttachment: onAddAttachment,
+            onOpenAttachment: onOpenAttachment,
+            onDeleteAttachment: onDeleteAttachment
         )
         .refreshable { await onRefresh() }
     }

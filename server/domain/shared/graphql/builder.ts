@@ -2,6 +2,13 @@ import SchemaBuilder from '@pothos/core'
 import { GraphQLScalarType } from 'graphql'
 import type { H3Event } from 'h3'
 import type {
+  AttachmentId,
+  ByteSize,
+  ContentType,
+  FileName,
+  SignedUrl,
+} from '~/domain/attachment/types'
+import type {
   Appellation,
   BeverageId,
   BeverageName,
@@ -12,13 +19,6 @@ import type {
   Notes,
   Producer,
 } from '~/domain/beverage/types'
-import type {
-  AttachmentId,
-  ByteSize,
-  ContentType,
-  FileName,
-  SignedUrl,
-} from '~/domain/attachment/types'
 import type { HouseholdId } from '~/domain/household/types'
 import type {
   Country,

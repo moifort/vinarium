@@ -1,6 +1,13 @@
 import { GraphQLError } from 'graphql'
 import { ZodError } from 'zod'
 import {
+  AttachmentId,
+  ByteSize,
+  ContentType,
+  FileName,
+  SignedUrl,
+} from '~/domain/attachment/primitives'
+import {
   Appellation,
   BeverageId,
   BeverageName,
@@ -11,13 +18,6 @@ import {
   Notes,
   Producer,
 } from '~/domain/beverage/primitives'
-import {
-  AttachmentId,
-  ByteSize,
-  ContentType,
-  FileName,
-  SignedUrl,
-} from '~/domain/attachment/primitives'
 import { HouseholdId } from '~/domain/household/primitives'
 import {
   Country,

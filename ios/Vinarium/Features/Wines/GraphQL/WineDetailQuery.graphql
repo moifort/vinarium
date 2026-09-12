@@ -65,6 +65,9 @@ query WineDetail($id: BeverageId!) {
       recommenderName
       comment
     }
+    attachments {
+      ...WineAttachmentFields
+    }
     history {
       type
       date

@@ -1,4 +1,6 @@
+import PhotosUI
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct WineDetailView: View {
     let wineId: String
@@ -22,6 +24,14 @@ struct WineDetailView: View {
     @State private var showLocationEditor = false
     @State private var sheetError = ErrorPresenter()
     @State private var actionError = ErrorPresenter()
+    @State private var showAttachmentChoice = false
+    @State private var showCamera = false
+    @State private var showPhotoPicker = false
+    @State private var pickedPhoto: PhotosPickerItem?
+    @State private var showFileImporter = false
+    @State private var isUploadingAttachment = false
+    @State private var previewedFile: PreviewedFile?
+    @State private var attachmentError = ErrorPresenter()
 
     var body: some View {
         NavigationStack {
@@ -42,9 +52,19 @@ struct WineDetailView: View {
                         )
                     } else {
                         WineDetailPage(
-                            content: Self.mapContent(detail),
+                            content: Self.mapContent(
+                                detail,
+                                isUploadingAttachment: isUploadingAttachment
+                            ),
                             onRemoveRequested: { showRemovalChoice = true },
                             onEditLocation: { showLocationEditor = true },
+                            onAddAttachment: { showAttachmentChoice = true },
+                            onOpenAttachment: { attachment in
+                                Task { await openAttachment(attachment) }
+                            },
+                            onDeleteAttachment: { attachment in
+                                Task { await deleteAttachment(attachment) }
+                            },
                             onRefresh: { await loadData() }
                         )
                     }
@@ -75,6 +95,33 @@ struct WineDetailView: View {
             }
             .disabled(actionError.isRunning || isRefreshing)
             .errorAlert(actionError)
+            .errorAlert(attachmentError)
+            .attachmentPickers(
+                showChoice: $showAttachmentChoice,
+                showCamera: $showCamera,
+                showPhotoPicker: $showPhotoPicker,
+                pickedPhoto: $pickedPhoto,
+                showFileImporter: $showFileImporter,
+                onImage: { image in Task { await upload(image) } },
+                onFile: { url in Task { await upload(fileAt: url) } },
+                onFailure: { message in error = message }
+            )
+            .fullScreenCover(item: $previewedFile) { file in
+                NavigationStack {
+                    DocumentPreview(url: file.url)
+                        .ignoresSafeArea(edges: .bottom)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                ToolbarIconButton(
+                                    title: "Fermer",
+                                    systemImage: "xmark",
+                                    role: .cancel
+                                ) { previewedFile = nil }
+                            }
+                        }
+                }
+            }
             .task {
                 await loadData()
             }
@@ -415,7 +462,75 @@ struct WineDetailView: View {
         )
     }
 
-    private static func mapContent(_ detail: UserWineDetail) -> WineDetailContent.Content {
+    // MARK: - Attachments
+
+    /// A photo is recompressed before it leaves: a 12-megapixel capture is four
+    /// megabytes of detail nobody will look at on a wine sheet, and every one of
+    /// them is billed for as long as the bottle exists.
+    private func upload(_ image: UIImage) async {
+        guard let data = image.resized(maxDimension: 2048).jpegData(compressionQuality: 0.8) else {
+            error = String(localized: "Photo illisible")
+            return
+        }
+        await upload(data: data, fileName: "photo-\(Int(Date().timeIntervalSince1970)).jpg", contentType: "image/jpeg")
+    }
+
+    private func upload(fileAt url: URL) async {
+        // A file handed over by the Files app lives outside our sandbox and is
+        // only readable while the scope is open.
+        let scoped = url.startAccessingSecurityScopedResource()
+        defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+        guard let data = try? Data(contentsOf: url) else {
+            error = String(localized: "Fichier illisible")
+            return
+        }
+        let contentType = UTType(filenameExtension: url.pathExtension)?.preferredMIMEType
+            ?? "application/octet-stream"
+        await upload(data: data, fileName: url.lastPathComponent, contentType: contentType)
+    }
+
+    private func upload(data: Data, fileName: String, contentType: String) async {
+        isUploadingAttachment = true
+        defer { isUploadingAttachment = false }
+        await attachmentError.run {
+            _ = try await AttachmentAPI.upload(
+                beverageId: wineId,
+                data: data,
+                fileName: fileName,
+                contentType: contentType
+            )
+        } onSuccess: {
+            Task {
+                await loadData()
+                onUpdated?()
+            }
+        }
+    }
+
+    private func deleteAttachment(_ attachment: WineAttachment) async {
+        await actionError.run {
+            try await AttachmentAPI.delete(attachmentId: attachment.id)
+        } onSuccess: {
+            Task {
+                await loadData()
+                onUpdated?()
+            }
+        }
+    }
+
+    /// The file is pulled down before it is shown: QuickLook renders photos and
+    /// PDFs alike, but only from a local file.
+    private func openAttachment(_ attachment: WineAttachment) async {
+        await actionError.run {
+            let url = try await AttachmentAPI.download(attachment)
+            await MainActor.run { previewedFile = PreviewedFile(id: attachment.id, url: url) }
+        }
+    }
+
+    private static func mapContent(
+        _ detail: UserWineDetail,
+        isUploadingAttachment: Bool
+    ) -> WineDetailContent.Content {
         let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
         return WineDetailContent.Content(
             beverageType: detail.beverageType,
@@ -462,7 +577,10 @@ struct WineDetailView: View {
             recommendation: detail.recommendation.map { reco in
                 .init(recommenderName: reco.recommenderName, comment: reco.comment)
             },
-            ownerName: detail.ownerName
+            ownerName: detail.ownerName,
+            attachments: detail.attachments,
+            canAttach: detail.isMine,
+            isUploadingAttachment: isUploadingAttachment
         )
     }
 
@@ -519,4 +637,72 @@ struct WineDetailView: View {
 
 #Preview("Recommend") {
     WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
+}
+
+
+/// The local copy being shown in the document viewer.
+private struct PreviewedFile: Identifiable {
+    let id: String
+    let url: URL
+}
+
+private extension View {
+    /// The three ways a file gets in, kept together so the sheet itself stays
+    /// about the wine. The camera is offered only where there is one — on a
+    /// simulator the picker would open on a black screen.
+    func attachmentPickers(
+        showChoice: Binding<Bool>,
+        showCamera: Binding<Bool>,
+        showPhotoPicker: Binding<Bool>,
+        pickedPhoto: Binding<PhotosPickerItem?>,
+        showFileImporter: Binding<Bool>,
+        onImage: @escaping (UIImage) -> Void,
+        onFile: @escaping (URL) -> Void,
+        onFailure: @escaping (String) -> Void
+    ) -> some View {
+        confirmationDialog(
+            "Ajouter une pièce jointe",
+            isPresented: showChoice,
+            titleVisibility: .visible
+        ) {
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button("Prendre une photo") { showCamera.wrappedValue = true }
+                    .accessibilityIdentifier("attachment-source-camera")
+            }
+            Button("Choisir une photo") { showPhotoPicker.wrappedValue = true }
+                .accessibilityIdentifier("attachment-source-library")
+            Button("Importer un fichier") { showFileImporter.wrappedValue = true }
+                .accessibilityIdentifier("attachment-source-file")
+        }
+        .fullScreenCover(isPresented: showCamera) {
+            CameraPicker(
+                onCapture: { image in
+                    showCamera.wrappedValue = false
+                    onImage(image)
+                },
+                onCancel: { showCamera.wrappedValue = false }
+            )
+            .ignoresSafeArea()
+        }
+        .photosPicker(isPresented: showPhotoPicker, selection: pickedPhoto, matching: .images)
+        .onChange(of: pickedPhoto.wrappedValue) { _, item in
+            guard let item else { return }
+            Task {
+                defer { pickedPhoto.wrappedValue = nil }
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data)
+                else {
+                    onFailure(String(localized: "Photo illisible"))
+                    return
+                }
+                onImage(image)
+            }
+        }
+        .fileImporter(isPresented: showFileImporter, allowedContentTypes: [.pdf, .image]) { result in
+            switch result {
+            case .success(let url): onFile(url)
+            case .failure(let error): onFailure(error.localizedDescription)
+            }
+        }
+    }
 }

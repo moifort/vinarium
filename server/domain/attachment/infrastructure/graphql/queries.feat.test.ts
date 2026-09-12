@@ -78,10 +78,12 @@ describe('Beverage.attachments', () => {
     `)
 
     expect(result.errors).toBeUndefined()
-    const attachments = (result.data as any).beverage.attachments
-    expect(attachments.map((a: any) => a.id)).toEqual([aid(1), aid(2)])
-    expect(attachments[0].url).toContain(`attachments/${userId}/${wid(1)}/${aid(1)}`)
-    expect(attachments[0].kind).toBe('image')
+    const { attachments } = (
+      result.data as { beverage: { attachments: { id: string; kind: string; url: string }[] } }
+    ).beverage
+    expect(attachments.map(({ id }) => id)).toEqual([aid(1), aid(2)])
+    expect(attachments[0]?.url).toContain(`attachments/${userId}/${wid(1)}/${aid(1)}`)
+    expect(attachments[0]?.kind).toBe('image')
   })
 
   test('comes back empty on a wine nothing was attached to', async () => {
@@ -90,7 +92,7 @@ describe('Beverage.attachments', () => {
     const result = await execute(`{ beverage(id: "${wid(1)}") { attachments { id } } }`)
 
     expect(result.errors).toBeUndefined()
-    expect((result.data as any).beverage.attachments).toEqual([])
+    expect(result.data?.beverage).toEqual({ attachments: [] })
   })
 
   // A signature is an API call. Selecting the list without the URL must cost none,
@@ -117,8 +119,9 @@ describe('Beverage.attachments', () => {
     `)
 
     expect(result.errors).toBeUndefined()
-    const items = (result.data as any).beverages.items
-    expect(items.every((item: any) => item.attachments.length === 1)).toBe(true)
+    const { items } = (result.data as { beverages: { items: { attachments: { id: string }[] }[] } })
+      .beverages
+    expect(items.every(({ attachments }) => attachments.length === 1)).toBe(true)
     // One `in` query for the three wines, whatever the page size below 30.
     expect(fake.queryReads - before).toBeLessThanOrEqual(3)
   })

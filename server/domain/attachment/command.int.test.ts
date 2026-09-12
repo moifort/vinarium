@@ -64,14 +64,14 @@ const seedAttachments = (count: number) => {
   for (let i = 0; i < count; i++) {
     const id = `existing-${i}`
     fake.seed('attachments', id, {
-      id,
+      id: id as AttachmentId,
       userId,
       beverageId,
       kind: 'image',
       contentType: jpeg,
       fileName,
       size: oneMegabyte,
-      objectPath: `attachments/${userId}/${beverageId}/${id}`,
+      objectPath: `attachments/${userId}/${beverageId}/${id}` as ObjectPath,
       createdAt: new Date(),
     } satisfies Attachment)
   }

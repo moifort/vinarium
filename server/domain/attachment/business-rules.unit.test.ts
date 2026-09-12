@@ -63,9 +63,11 @@ describe('withinSizeLimit', () => {
 
 describe('object paths', () => {
   test('put the owner first so an account deletion is one prefix', () => {
-    expect(userPrefixOf(userId)).toBe('attachments/user-1/')
-    expect(prefixOf(userId, beverageId)).toBe('attachments/user-1/wine-1/')
-    expect(objectPathOf(userId, beverageId, 'file-1')).toBe('attachments/user-1/wine-1/file-1')
+    expect(String(userPrefixOf(userId))).toBe('attachments/user-1/')
+    expect(String(prefixOf(userId, beverageId))).toBe('attachments/user-1/wine-1/')
+    expect(String(objectPathOf(userId, beverageId, 'file-1'))).toBe(
+      'attachments/user-1/wine-1/file-1',
+    )
   })
 })
 
