@@ -1,5 +1,8 @@
 # Adding a New Domain
 
+> The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
+
+
 Step-by-step guide to adding a new domain to the backend. Each step corresponds to a DDD building block from Evans (*Domain-Driven Design*) or Wlashin (*Domain Modeling Made Functional*).
 
 ## 1. Create the Domain Directory

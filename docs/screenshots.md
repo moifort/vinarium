@@ -1,5 +1,8 @@
 # Screenshots
 
+> The portable rules live in [playbook/93-annexe-captures-e2e.md](../playbook/93-annexe-captures-e2e.md). This guide keeps the project-specific detail.
+
+
 Two audiences read the same captures: the README, and the App Store. Both come
 from one pipeline, so a screen that changes is re-photographed once.
 

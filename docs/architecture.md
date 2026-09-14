@@ -1,5 +1,8 @@
 # Backend Architecture
 
+> The portable rules live in [playbook/09-backend.md](../playbook/09-backend.md), [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
+
+
 ## Overview
 
 The backend follows a Domain-Driven Design (DDD) architecture built on [Nitro](https://nitro.build/) with TypeScript, native Firestore storage, and branded types. The public API is GraphQL only (a single `POST /graphql`), plus one operational route (`POST /admin/migrate`).

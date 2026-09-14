@@ -1,0 +1,52 @@
+# Application iOS
+
+Forme longue dans [92-annexe-ios.md](92-annexe-ios.md).
+
+## Structure
+
+Un dossier par feature. À sa racine, la vue coordinatrice : elle possède le modèle de vue, la
+navigation, les feuilles modales et la conversion du domaine vers les types d'affichage. En
+dessous, les pages, qui sont pures et prévisualisables, puis les organismes, molécules et atomes.
+
+Les vues feuilles prennent des valeurs primitives, pas des objets de domaine. Les organismes sont
+la frontière où la conversion se fait. Les previews servent de catalogue : chaque composant a la
+sienne.
+
+Concurrence stricte : les modèles de vue sont sur l'acteur principal, les types de modèle sont
+transmissibles.
+
+## Chargements
+
+Tout appel réseau affiche un retour visuel, sans exception. Les listes montrent un indicateur
+dans leur corps, pas en plein écran. Les boutons qui déclenchent une mutation affichent une
+progression et se désactivent pendant l'appel. Les sections d'un tableau de bord chargent
+visiblement.
+
+Comme il n'y a pas de cache client, chaque action est un aller-retour : l'absence d'indicateur se
+voit immédiatement.
+
+## Client d'API
+
+Opérations typées, générées depuis le schéma du serveur. Les opérations vivent dans leur feature,
+les types générés dans un dossier dédié qu'on ne modifie jamais à la main.
+
+Lecture sans cache et mutations sans publication dans un magasin local, conformément à
+[09-backend.md](09-backend.md).
+
+## Build
+
+Ne jamais purger le cache de build pour débloquer une compilation cassée. La résolution des
+dépendances qui suit est fragile, et son cache est partagé entre sessions : deux résolutions
+simultanées se corrompent. On diagnostique la vraie cause, souvent une ligne parasite dans le
+fichier de projet, et on la reverte.
+
+## Assets générés
+
+Les icônes et symboles produits par un script ne s'éditent jamais à la main : on modifie le
+script et on régénère. Ils sont exclus du linter.
+
+## Appareil physique
+
+À la fin d'une tâche qui touche l'application, proposer l'installation sur l'appareil de test
+`{{DEVICE_NAME}}`. Ne jamais la lancer sans accord. Relayer la sortie brute des outils de build
+et d'installation : pas d'annonce de succès sans elle.

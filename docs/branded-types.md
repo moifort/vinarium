@@ -1,5 +1,8 @@
 # Branded Types + Zod
 
+> The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
+
+
 ## Overview
 
 We use [ts-brand](https://github.com/kourge/ts-brand) to create nominal types that prevent accidental mixing of semantically different values (e.g. `BeverageId` vs `UserId`, `Eur` vs `Year`), combined with [Zod](https://zod.dev/) for runtime validation.

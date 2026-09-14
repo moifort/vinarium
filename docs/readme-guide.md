@@ -1,5 +1,8 @@
 # Writing the Project README
 
+> The portable rules live in [playbook/08-copywriting.md](../playbook/08-copywriting.md). This guide keeps the project-specific detail.
+
+
 Guide for writing and maintaining the top-level `README.md`. The README is the first thing someone reads — it should answer "what is this, how do I install it, how do I run it" without requiring prior knowledge of the codebase. Deep architecture belongs in `docs/`, not here.
 
 ## Principles

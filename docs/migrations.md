@@ -1,5 +1,8 @@
 # Migration System
 
+> The portable rules live in [playbook/11-ops.md](../playbook/11-ops.md). This guide keeps the project-specific detail.
+
+
 ## Overview
 
 Forward-only sequential migrations for the Firestore database. The current version is tracked in the Firestore collection `migration-meta`, document `state`. Migrations are **not** run at boot — there is no boot-time plugin. They run only when `POST /admin/migrate` is called, which `scripts/bootstrap.sh` invokes during provisioning (and CI invokes on deploy).

@@ -1,5 +1,8 @@
 # End-to-End Tests
 
+> The portable rules live in [playbook/93-annexe-captures-e2e.md](../playbook/93-annexe-captures-e2e.md). This guide keeps the project-specific detail.
+
+
 ## Overview
 
 One scenario, replayed against the whole product before every App Store release: the real app on a simulator, the real Nitro backend, and Firebase emulators standing in for Firestore and Auth.

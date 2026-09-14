@@ -1,5 +1,8 @@
 # API Patterns (GraphQL)
 
+> The portable rules live in [playbook/91-annexe-graphql.md](../playbook/91-annexe-graphql.md). This guide keeps the project-specific detail.
+
+
 The public API is **GraphQL only** — a single `POST /graphql` served by Apollo Server, plus the operational `POST /admin/migrate`. There are no REST resource routes. The schema is code-first with [Pothos](https://pothos-graphql.dev/); each domain contributes its types/queries/mutations from `server/domain/{domain}/infrastructure/graphql/`, all registered on the shared `builder` and assembled in `server/domain/shared/graphql/schema.ts`.
 
 ## The Endpoint

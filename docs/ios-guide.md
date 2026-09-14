@@ -1,5 +1,8 @@
 # iOS Development Guide
 
+> The portable rules live in [playbook/92-annexe-ios.md](../playbook/92-annexe-ios.md). This guide keeps the project-specific detail.
+
+
 ## Tech Stack
 
 - **SwiftUI** with iOS 26.0 deployment target

@@ -8,6 +8,8 @@
     "test": "bun run generate:assets && bun test",
     "test:coverage": "bun run generate:assets && bun test --coverage",
     "lint": "bunx biome check",
+    "typecheck": "bunx nitro prepare && bun tsc --noEmit",
+    "preflight": "bun run lint && bun run typecheck && bun test",
     "lint:fix": "bunx biome check --write",
     "generate:assets": "bun scripts/generate-changelog-asset.ts",
     "generate:graphql": "bun scripts/export-graphql-schema.ts",

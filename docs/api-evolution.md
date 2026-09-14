@@ -1,5 +1,8 @@
 # API Evolution — Force-Update Strategy
 
+> The portable rules live in [playbook/91-annexe-graphql.md](../playbook/91-annexe-graphql.md). This guide keeps the project-specific detail.
+
+
 The GraphQL schema is **not** versioned and carries no deprecation cycle. Old iOS builds
 in the wild are handled by a single mechanism: a **force-update gate**. The backend
 publishes a minimum supported iOS build; any older build is blocked at launch (and on
