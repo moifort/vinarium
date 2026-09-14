@@ -63,6 +63,11 @@ projet neuf, on remplit les placeholders, et le projet hérite de la méthode.
 | `{{REVIEW_LANGUAGE}}` | Langue dont les notes sont validées par l'humain |
 | `{{DEVICE_NAME}}` | Appareil de test physique |
 | `{{RUNTIME}}` | Gestionnaire de paquets et runtime |
+| `{{APP_BUILD_COMMAND}}` | Build de l'application cliente |
+| `{{CODEGEN_COMMAND}}` | Régénération du code depuis le schéma |
+| `{{TARGET_PLATFORM}}` | Cible de déploiement de l'application |
+| `{{SIMULATOR}}` | Simulateur de référence |
+| `{{TOOLCHAIN}}` | Outil de build et version exigée |
 
 ## Règles d'écriture du socle
 
