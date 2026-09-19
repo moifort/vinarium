@@ -210,6 +210,8 @@ struct WineEditForm: View {
                     } label: {
                         Label("Lieu de dégustation", systemImage: "mappin.and.ellipse")
                     }
+                    // The gap between the label and the place is part of the row too.
+                    .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
             } header: {

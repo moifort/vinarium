@@ -283,6 +283,13 @@ Render every toolbar CTA through the two shared atoms in `Shared/Components/` â€
 For a `Button`/`Menu`/mode-toggle that can't use these atoms, force `.labelStyle(.iconOnly)` yourself
 and keep the `Label`'s text for accessibility.
 
+### Tappable rows
+
+A row that opens or triggers something is a `.plain` `Button` whose label carries
+`.contentShape(.rect)`, stretched to the full width when its content is not: the whole row answers
+the tap, never only its title. Set it in the row view itself (`SettingsRow`, `SuggestionRow`) so
+every caller inherits it. Rule: [playbook/10-ios.md](../playbook/10-ios.md#zones-de-tap).
+
 ### Previews as Storybook
 
 **Every view has a `#Preview`** â€” pages, organisms, molecules, shared atoms, private

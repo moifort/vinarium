@@ -45,6 +45,10 @@ struct SettingsRow: View {
                     in: RoundedRectangle(cornerRadius: iconBadgeSize * 6 / 28, style: .continuous)
                 )
         }
+        // A plain button only answers where something is drawn: stretched and shaped,
+        // the whole row is the target, not just its title.
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(.rect)
     }
 }
 

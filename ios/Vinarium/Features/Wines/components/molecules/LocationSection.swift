@@ -27,6 +27,9 @@ struct LocationSection: View {
                 Button(action: onTap) {
                     Label("Ajouter un lieu", systemImage: "mappin.and.ellipse")
                         .foregroundStyle(.tint)
+                        // The whole row is the target, not just its label.
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
             }

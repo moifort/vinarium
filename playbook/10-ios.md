@@ -25,6 +25,19 @@ visiblement.
 Comme il n'y a pas de cache client, chaque action est un aller-retour : l'absence d'indicateur se
 voit immédiatement.
 
+## Zones de tap
+
+Une ligne qui ouvre ou déclenche quelque chose répond au tap sur toute sa largeur, pas seulement
+sur son texte. L'utilisateur vise la ligne, pas les mots : un tap dans le blanc qui ne fait rien
+passe pour une application figée, et le tap suivant, sur le titre, pour une réponse en retard.
+
+Un bouton au style `plain` ne répond que là où quelque chose est dessiné : le vide laissé par un
+`Spacer`, ou entre le libellé et la valeur d'un `LabeledContent`, est mort. On donne une forme au
+label, `.contentShape(.rect)`, étiré sur la largeur si son contenu ne l'est pas. La forme se pose
+dans la vue de ligne elle-même, pour que chaque appelant en hérite. Une ligne à fond plein, une
+carte, est déjà cliquable partout. Jamais de `onTapGesture` à la place du bouton : il perd le
+trait d'accessibilité et l'état pressé.
+
 ## Client d'API
 
 Opérations typées, générées depuis le schéma du serveur. Les opérations vivent dans leur feature,
