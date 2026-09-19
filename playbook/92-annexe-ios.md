@@ -100,7 +100,10 @@ une façade qui retourne les types de modèle de l'application, jamais les types
 opérations vivent dans la feature, les types générés dans leur dossier dédié, qu'on ne modifie
 jamais à la main.
 
-Lecture sans cache, mutations sans publication dans un magasin local.
+Lecture sans cache, mutations sans publication dans un magasin local. La page d'ouverture d'une
+liste gardée sur disque n'est pas un cache du client d'API : c'est un instantané de ce que l'écran
+montrait, relu au lancement puis remplacé par la réponse du serveur. Voir
+[10-ios.md](10-ios.md#chargements).
 
 ## Secrets
 
