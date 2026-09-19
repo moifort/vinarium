@@ -54,10 +54,11 @@ struct AttachmentSourceSheet: View {
             .accessibilityLabel("Fermer")
             .accessibilityIdentifier("attachment-sheet-close")
 
-            Text("Ajouter une pièce jointe")
+            // Short on purpose: the title and "Toutes les photos" share one line,
+            // and the longer wording pushed the button off the screen.
+            Text("Pièce jointe")
                 .font(.title3.weight(.semibold))
                 .lineLimit(1)
-                .minimumScaleFactor(0.8)
 
             Spacer(minLength: 8)
 
