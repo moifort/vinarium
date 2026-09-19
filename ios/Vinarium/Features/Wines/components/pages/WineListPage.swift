@@ -10,12 +10,15 @@ struct WineListPage: View {
     let groups: [WineListContent.Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
+    var isRefreshing: Bool = false
+    var refreshFailed: Bool = false
     var loadMoreFailed: Bool = false
     var errorMessage: String?
     var onWineTapped: (String) -> Void
     var onRefresh: () async -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
+    var onRetryRefresh: () async -> Void = {}
 
     var body: some View {
         WineListContent(
@@ -23,11 +26,14 @@ struct WineListPage: View {
             groups: groups,
             hasMore: hasMore,
             isLoading: isLoading,
+            isRefreshing: isRefreshing,
+            refreshFailed: refreshFailed,
             loadMoreFailed: loadMoreFailed,
             errorMessage: errorMessage,
             onWineTapped: onWineTapped,
             onPrefetch: onPrefetch,
-            onLoadMore: onLoadMore
+            onLoadMore: onLoadMore,
+            onRetryRefresh: onRetryRefresh
         )
         .navigationTitle(mode.title)
         .navigationSubtitle(mode.subtitle)

@@ -20,6 +20,12 @@ struct DebugGallery: View {
                     NavigationLink("Verre de vin (premier chargement)") {
                         LoadingStateView()
                     }
+                    NavigationLink("Liste en cache, mise à jour") {
+                        cachedList(refreshFailed: false)
+                    }
+                    NavigationLink("Liste en cache, échec de la mise à jour") {
+                        cachedList(refreshFailed: true)
+                    }
                 }
                 Section("Retours") {
                     Button("Nous écrire") { feedbackShown = true }
@@ -34,6 +40,29 @@ struct DebugGallery: View {
         .sheet(isPresented: $feedbackShown) {
             FeedbackSheet()
         }
+    }
+}
+
+extension DebugGallery {
+    /// What a relaunch looks like: last session's wines readable at once, the spinner
+    /// row leading them while the server answers — or the retry when it never did.
+    private func cachedList(refreshFailed: Bool) -> some View {
+        WineListContent(
+            mode: .all,
+            groups: [
+                .init(label: "Septembre 2026", items: [
+                    .init(id: "1", color: .red, name: "Château La Sauvageonne", subtitle: "2018 • Languedoc", rating: 4, isFavorite: true, isInCellar: true),
+                    .init(id: "2", color: .white, name: "Pouilly-Fumé", subtitle: "2021 • Loire", rating: 5, isFavorite: false),
+                ]),
+                .init(label: "Août 2026", items: [
+                    .init(id: "3", color: .rosé, name: "Domaine Tempier", subtitle: "2022 • Bandol", rating: 3, isFavorite: false, isInCellar: true, ownerName: "Marie"),
+                ]),
+            ],
+            isRefreshing: !refreshFailed,
+            refreshFailed: refreshFailed,
+            onWineTapped: { _ in }
+        )
+        .navigationTitle("Mes Vins")
     }
 }
 

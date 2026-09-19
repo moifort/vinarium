@@ -36,7 +36,10 @@ final class AuthSession {
         }
     }
 
+    /// Leave the session, taking the cached wine list along: the rows on disk belong to
+    /// the account that just left. Account deletion ends here too.
     func signOut() throws {
         try Auth.auth().signOut()
+        WineListCache.clear()
     }
 }

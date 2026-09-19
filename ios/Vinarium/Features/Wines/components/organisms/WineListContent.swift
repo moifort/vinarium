@@ -5,11 +5,17 @@ struct WineListContent: View {
     let groups: [Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
+    /// The list is on screen from the cache and a fresher one is on its way: a spinner
+    /// row leads the list rather than a loader replacing it.
+    var isRefreshing: Bool = false
+    /// That refresh failed — the leading row becomes a retry.
+    var refreshFailed: Bool = false
     var loadMoreFailed: Bool = false
     var errorMessage: String?
     var onWineTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
+    var onRetryRefresh: () async -> Void = {}
 
     private var isEmpty: Bool { groups.allSatisfy { $0.items.isEmpty } }
 
@@ -28,6 +34,14 @@ struct WineListContent: View {
             emptyState
         } else {
             List {
+                // Leads the rows it is refreshing, never replaces them.
+                if isRefreshing || refreshFailed {
+                    RefreshRow(
+                        failed: refreshFailed,
+                        loadingLabel: "Mise à jour de la liste",
+                        onRetry: onRetryRefresh
+                    )
+                }
                 ForEach(groups) { group in
                     Section {
                         ForEach(group.items) { item in
@@ -118,6 +132,35 @@ extension WineListContent {
                 .init(id: "4", color: .red, name: "Pauillac Grand Cru", subtitle: "2021 \u{2022} Bordeaux", rating: 4, isFavorite: false, isInCellar: true, ownerName: "Marie"),
             ]),
         ],
+        onWineTapped: { _ in }
+    )
+}
+
+#Preview("Refreshing") {
+    WineListContent(
+        mode: .all,
+        groups: [
+            .init(label: "2018", items: [
+                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isInCellar: true),
+            ]),
+            .init(label: "2021", items: [
+                .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
+            ]),
+        ],
+        isRefreshing: true,
+        onWineTapped: { _ in }
+    )
+}
+
+#Preview("Refresh failed") {
+    WineListContent(
+        mode: .all,
+        groups: [
+            .init(label: "2018", items: [
+                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isInCellar: true),
+            ]),
+        ],
+        refreshFailed: true,
         onWineTapped: { _ in }
     )
 }

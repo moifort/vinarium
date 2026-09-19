@@ -80,6 +80,33 @@ Key conventions:
 - `private(set)` for published state
 - Error reporting via `reportError()` (Sentry)
 
+### The wine list's opening page, on disk
+
+A relaunch used to face an empty screen and a loader over a cellar that had barely changed.
+`WineListCache` (`Features/Wines/WineListCache.swift`) keeps the list's first page as JSON in the
+caches directory, and `WineListViewModel.init` reads it **synchronously** before anything is asked
+of the network — the wines are on screen in the first frame. The rule is in
+[playbook/10-ios.md](../playbook/10-ios.md#chargements).
+
+- **What is written**: page 0 of the opening view — every wine, newest first, no status, colour or
+  type filter — and only that: `saveCache()` bails out on anything else, and writes at most one
+  page however far the list was scrolled. Written off the main actor after each successful
+  `load()`.
+- **What is read**: nothing unless the file decodes, carries the current `version` and holds at
+  least one wine — an empty cellar must show its empty state. Bump `WineListCache.version`
+  whenever `Wine` changes shape.
+- **The refresh that follows** is `isRefreshing`, never `isLoading`: `RefreshRow`
+  (`Shared/Components/RefreshRow.swift`) leads the list with the pull-to-refresh circle, on the
+  list's own background, and flips to "Réessayer" on `refreshFailed`. It is the mirror of
+  `LoadMoreRow` minus the `.task`: the fetch is already in flight when the row appears.
+- **`loadOnAppear()`** picks between the two on every appearance: the cached-rows refresh the
+  first time, the silent `load()` it always did afterwards.
+- **Cleared** by `AuthSession.signOut()` (account deletion goes through it) and by
+  `UITestEnvironment` before a scenario signs in, so no run starts on the previous one's cellar.
+
+Debug gallery (`-debugGallery`): "Liste en cache, mise à jour" and "Liste en cache, échec de la mise
+à jour".
+
 ### Coordinator (`{Feature}View`)
 
 The feature-root `*View` owns the ViewModel and all side effects (loading, navigation, sheets), maps the ViewModel's domain models to the primitives its `Page` expects, and holds nothing presentational itself:

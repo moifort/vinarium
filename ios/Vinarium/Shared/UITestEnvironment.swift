@@ -32,8 +32,10 @@ enum UITestEnvironment {
         Auth.auth().useEmulator(withHost: host, port: port)
         // A previous run leaves its session in the simulator's keychain. Signing
         // out first means the app never shows the old account's cellar while the
-        // new sign-in is still in flight.
+        // new sign-in is still in flight. Its cached wine list goes with it, for the
+        // same reason: the scenario must start from what the server holds.
         try? Auth.auth().signOut()
+        WineListCache.clear()
 
         Task {
             do {

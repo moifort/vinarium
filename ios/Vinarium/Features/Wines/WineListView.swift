@@ -24,18 +24,22 @@ struct WineListView: View {
                 groups: mappedGroups,
                 hasMore: viewModel.hasMore,
                 isLoading: viewModel.isLoading,
+                isRefreshing: viewModel.isRefreshing,
+                refreshFailed: viewModel.refreshFailed,
                 loadMoreFailed: viewModel.loadMoreFailed,
                 errorMessage: viewModel.error,
                 onWineTapped: { selectedWineId = $0 },
                 onRefresh: { await viewModel.load() },
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
-                onLoadMore: { await viewModel.loadMore() }
+                onLoadMore: { await viewModel.loadMore() },
+                onRetryRefresh: { await viewModel.refresh() }
             )
-            // Initial load, plus a reload whenever refreshTrigger changes (after joining
-            // a household); view/sort/filter changes go through the ViewModel's didSet
-            // hooks (scheduleReload).
+            // Initial load — over the cached wines when the disk had them — plus a
+            // reload whenever refreshTrigger changes (after joining a household);
+            // view/sort/filter changes go through the ViewModel's didSet hooks
+            // (scheduleReload).
             .task(id: refreshTrigger) {
-                await viewModel.load()
+                await viewModel.loadOnAppear()
             }
             .sheet(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },

@@ -104,17 +104,47 @@ private let wineMonthYearFormatter: DateFormatter = {
     return formatter
 }()
 
+/// The paginated wine list. It opens on the page it closed on: `WineListCache` hands
+/// back the last visit's wines from disk before a single byte is asked of the network,
+/// so a relaunch shows the list straight away and refreshes it underneath —
+/// `isRefreshing`, the spinner row leading the list, instead of a loader taking the
+/// screen.
 @MainActor @Observable
 final class WineListViewModel {
+    init() {
+        wines = cache.read() ?? []
+        rebuildPresentation()
+        // A cached list has nothing to wait for: it is already readable.
+        isLoading = wines.isEmpty
+    }
+
     /// Pages accumulated from the server, in the current sort order.
     private(set) var wines: [Wine] = []
-    /// Starts at true to avoid an "no wine" flash before the first load().
+    /// Starts at true to avoid an "no wine" flash before the first load() — unless the
+    /// cache opened the list, in which case there is nothing to wait for.
     var isLoading = true
     var isLoadingMore = false
     var hasMore = false
     /// Last loadMore failed: the sentinel turns into a retry button instead of a
     /// spinner that would keep turning forever without a new attempt.
     private(set) var loadMoreFailed = false
+
+    /// A list already on screen is being brought up to date: the rows stay put and a
+    /// spinner row leads the list. Set only on the cached list's refresh — a
+    /// pull-to-refresh is left alone, the system's own control already spins for it.
+    private(set) var isRefreshing = false
+
+    /// That refresh failed: the rows on screen are the ones from last time, and the
+    /// leading row offers to try again — otherwise nothing would say they are stale.
+    private(set) var refreshFailed = false
+
+    /// Page 0 has come back from the server at least once, so the rows on screen are no
+    /// longer the cached ones.
+    private var loaded = false
+
+    /// The list's opening page on disk.
+    private let cache = WineListCache()
+
     var error: String?
     // Any view/sort/filter change reloads page 0 from the server.
     var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
@@ -160,6 +190,8 @@ final class WineListViewModel {
         hasMore = false
         isLoadingMore = false // stale loadMore calls bail out without touching this state
         loadMoreFailed = false
+        isRefreshing = false
+        refreshFailed = false
         isLoading = true
         reloadTask = Task { await load() }
     }
@@ -175,6 +207,9 @@ final class WineListViewModel {
             guard requested == generation else { return } // response from a stale view
             wines = page.items
             hasMore = page.hasMore
+            loaded = true
+            refreshFailed = false
+            saveCache()
         } catch is CancellationError {
             // Reload cancelled by a more recent filter change, so ignore it.
             return
@@ -184,6 +219,30 @@ final class WineListViewModel {
         }
         rebuildPresentation()
         isLoading = false
+    }
+
+    /// The list appeared, or was asked to reload: a list still showing the last
+    /// session's wines refreshes them under a leading spinner row, anything else loads
+    /// as it always did — rows already fetched this session stay on screen silently.
+    func loadOnAppear() async {
+        if !loaded, !wines.isEmpty {
+            await refresh()
+        } else {
+            await load()
+        }
+    }
+
+    /// Bring the rows already on screen up to date without taking them away — the
+    /// cached list's refresh, and the retry when that refresh failed.
+    func refresh() async {
+        isRefreshing = true
+        refreshFailed = false
+        await load()
+        // A view, sort or filter change took the list over meanwhile: it emptied the
+        // rows and reset both flags, and this refresh no longer has anything to say.
+        guard isRefreshing else { return }
+        isRefreshing = false
+        refreshFailed = !loaded
     }
 
     /// Loads the next page and appends it to the wines already loaded.
@@ -215,6 +274,19 @@ final class WineListViewModel {
         if wines.count - index <= prefetchThreshold {
             Task { await loadMore() }
         }
+    }
+
+    /// Keep the list's opening page on disk — only when the list is showing exactly
+    /// that: every wine, the default order, no filter. Another view, sort or filter is
+    /// not what the next launch opens on, and the file stays one page long however far
+    /// the user scrolled. Written off the main actor: the list is on screen already and
+    /// has nothing to gain from waiting on a file.
+    private func saveCache() {
+        guard mode == .all, sort == .updatedAt, sortDescending, statusFilter == .all,
+              colorFilter == nil, beverageTypeFilter == nil
+        else { return }
+        let (cache, page) = (cache, Array(wines.prefix(pageSize)))
+        Task.detached { cache.write(page) }
     }
 
     private func fetchPage(after: String?) async throws -> WinePage {
