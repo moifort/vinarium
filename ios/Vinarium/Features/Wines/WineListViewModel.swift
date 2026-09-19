@@ -104,7 +104,7 @@ private let wineMonthYearFormatter: DateFormatter = {
     return formatter
 }()
 
-/// The paginated wine list. It opens on the page it closed on: `WineListCache` hands
+/// The paginated wine list. It opens on the page it closed on: its `SnapshotCache` hands
 /// back the last visit's wines from disk before a single byte is asked of the network,
 /// so a relaunch shows the list straight away and refreshes it underneath —
 /// `isRefreshing`, the spinner row leading the list, instead of a loader taking the
@@ -142,8 +142,8 @@ final class WineListViewModel {
     /// longer the cached ones.
     private var loaded = false
 
-    /// The list's opening page on disk.
-    private let cache = WineListCache()
+    /// The list's opening page on disk. Bump the version whenever `Wine` changes shape.
+    private let cache = SnapshotCache<[Wine]>("wine-list", version: 1)
 
     var error: String?
     // Any view/sort/filter change reloads page 0 from the server.

@@ -80,32 +80,36 @@ Key conventions:
 - `private(set)` for published state
 - Error reporting via `reportError()` (Sentry)
 
-### The wine list's opening page, on disk
+### Screens that reopen on their snapshot
 
-A relaunch used to face an empty screen and a loader over a cellar that had barely changed.
-`WineListCache` (`Features/Wines/WineListCache.swift`) keeps the list's first page as JSON in the
-caches directory, and `WineListViewModel.init` reads it **synchronously** before anything is asked
-of the network — the wines are on screen in the first frame. The rule is in
-[playbook/10-ios.md](../playbook/10-ios.md#chargements).
+A relaunch used to face an empty screen and a loader over a cellar that had barely changed. The
+three tabs a user opens every time — the wine list, the dashboard and the cellar — now keep what
+they showed last as JSON, through `SnapshotCache<Value>` (`Shared/SnapshotCache.swift`), in one
+`snapshots/` folder of the caches directory. Each view model reads its snapshot **synchronously**
+in `init`, before anything is asked of the network, so the screen is readable in the first frame.
+The rule is in [playbook/10-ios.md](../playbook/10-ios.md#chargements).
 
-- **What is written**: page 0 of the opening view — every wine, newest first, no status, colour or
-  type filter — and only that: `saveCache()` bails out on anything else, and writes at most one
-  page however far the list was scrolled. Written off the main actor after each successful
-  `load()`.
-- **What is read**: nothing unless the file decodes, carries the current `version` and holds at
-  least one wine — an empty cellar must show its empty state. Bump `WineListCache.version`
-  whenever `Wine` changes shape.
+| Screen | Snapshot | What is written |
+|---|---|---|
+| Wine list | `[Wine]`, `wine-list` | Page 0 of the opening view only — every wine, newest first, no status, colour or type filter — capped at one page however far the list was scrolled |
+| Dashboard | `DashboardData`, `dashboard` | The whole payload, after each successful load |
+| Cellar | `CellarSnapshot`, `cellar` | The first page of bottles and of the journal, after each full reload |
+
+- **Versioned**: each cache is built with a `version`; a file carrying another one is ignored.
+  Bump it whenever the snapshot's type changes shape.
 - **The refresh that follows** is `isRefreshing`, never `isLoading`: `RefreshRow`
-  (`Shared/Components/RefreshRow.swift`) leads the list with the pull-to-refresh circle, on the
-  list's own background, and flips to "Réessayer" on `refreshFailed`. It is the mirror of
-  `LoadMoreRow` minus the `.task`: the fetch is already in flight when the row appears.
-- **`loadOnAppear()`** picks between the two on every appearance: the cached-rows refresh the
-  first time, the silent `load()` it always did afterwards.
-- **Cleared** by `AuthSession.signOut()` (account deletion goes through it) and by
-  `UITestEnvironment` before a scenario signs in, so no run starts on the previous one's cellar.
+  (`Shared/Components/RefreshRow.swift`) leads the list — or the dashboard's scroll view — with the
+  pull-to-refresh circle, on the screen's own background, and flips to "Réessayer" on
+  `refreshFailed`. It is the mirror of `LoadMoreRow` minus the `.task`: the fetch is already in
+  flight when the row appears.
+- **`loadOnAppear()`** picks between the two on every appearance: the snapshot's refresh the first
+  time, the silent `load()` each screen always did afterwards.
+- **Cleared** by `SnapshotCaches.clear()`, from `AuthSession.signOut()` (account deletion goes
+  through it) and from `UITestEnvironment` before a scenario signs in, so no run starts on the
+  previous one's cellar.
 
-Debug gallery (`-debugGallery`): "Liste en cache, mise à jour" and "Liste en cache, échec de la mise
-à jour".
+Debug gallery (`-debugGallery`), under "Chargement": the cached list refreshing and failing, the
+cached dashboard and the cached cellar.
 
 ### Coordinator (`{Feature}View`)
 

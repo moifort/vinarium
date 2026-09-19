@@ -26,6 +26,8 @@ struct CellarView: View {
                         bottlesLoadMoreFailed: viewModel.bottlesLoadMoreFailed,
                         historyHasMore: viewModel.historyHasMore,
                         historyLoadMoreFailed: viewModel.historyLoadMoreFailed,
+                        isRefreshing: viewModel.isRefreshing,
+                        refreshFailed: viewModel.refreshFailed,
                         onBottleTapped: { selectedWineId = $0 },
                         onRemoveRequested: { wineId in
                             wineForRemovalChoice = viewModel.groupedRows
@@ -37,12 +39,15 @@ struct CellarView: View {
                         onBottlesPrefetch: { viewModel.prefetchBottlesIfNeeded(for: $0) },
                         onBottlesLoadMore: { await viewModel.loadMoreBottles() },
                         onHistoryPrefetch: { viewModel.prefetchHistoryIfNeeded(for: $0) },
-                        onHistoryLoadMore: { await viewModel.loadMoreHistory() }
+                        onHistoryLoadMore: { await viewModel.loadMoreHistory() },
+                        onRetryRefresh: { await viewModel.refresh() }
                     )
                 }
             }
+            // Over last session's snapshot when the disk had one: the bottles show at
+            // once and the spinner leading them says they are being brought up to date.
             .task(id: refreshTrigger) {
-                await viewModel.load()
+                await viewModel.loadOnAppear()
             }
             // Choice raised by the "take out" swipe: drink it or give it away.
             .confirmationDialog(

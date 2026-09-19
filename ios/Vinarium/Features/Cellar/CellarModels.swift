@@ -42,6 +42,13 @@ struct HistoryEvent: Codable, Identifiable, Sendable {
     var id: String { "\(wineId)-\(type.rawValue)-\(date.timeIntervalSince1970)" }
 }
 
+/// What the cellar tab showed last time — the first page of bottles and of the
+/// journal — kept on disk so a relaunch opens on it.
+struct CellarSnapshot: Codable, Sendable {
+    let bottles: [CellarBottle]
+    let history: [HistoryEvent]
+}
+
 struct CellarRowGroup: Identifiable, Sendable {
     let row: String
     let items: [CellarRowItem]

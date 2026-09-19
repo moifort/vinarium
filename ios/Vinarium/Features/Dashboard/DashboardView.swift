@@ -13,6 +13,9 @@ struct DashboardView: View {
                 if let data = viewModel.data {
                     DashboardPage(
                         content: Self.map(data),
+                        isRefreshing: viewModel.isRefreshing,
+                        refreshFailed: viewModel.refreshFailed,
+                        onRetryRefresh: { await viewModel.refresh() },
                         onStatsTapped: { selectedTab = .cellar },
                         onWineTapped: { selectedWineId = $0 },
                         onSettingsTapped: { showSettings = true }
@@ -24,8 +27,10 @@ struct DashboardView: View {
                 }
             }
             .refreshable { await viewModel.load() }
+            // Over last session's snapshot when the disk had one: the page shows at
+            // once and the spinner at its top says it is being brought up to date.
             .task {
-                await viewModel.load()
+                await viewModel.loadOnAppear()
             }
             // The view stays alive inside the TabView: without this, coming back to the
             // home tab after a scan or a mutation would show stale stats.

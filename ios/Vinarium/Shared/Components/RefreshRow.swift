@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// The row that leads a list which is already readable while it is being brought up to
-/// date: the rows below stay in place and this one spins — the same circle a
-/// pull-to-refresh draws, on the list's own background. What a cached list shows
-/// instead of a loader taking the screen away from rows it already has.
+/// The row that leads a screen which is already readable while it is being brought up
+/// to date — a list or a scrolling page: what is below stays in place and this one
+/// spins, the same circle a pull-to-refresh draws, on the screen's own background. What
+/// a snapshot shows instead of a loader taking the screen away from what it already
+/// has. The list-row modifiers are simply ignored outside a `List`.
 ///
 /// The mirror of `LoadMoreRow`, which closes the list, with one difference: it never
 /// starts the work itself. The refresh is already in flight by the time the row

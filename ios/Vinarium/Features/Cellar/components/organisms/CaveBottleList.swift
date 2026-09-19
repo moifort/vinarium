@@ -4,16 +4,25 @@ struct CaveBottleList: View {
     let groups: [Group]
     var hasMore: Bool = false
     var loadMoreFailed: Bool = false
+    /// Last session's snapshot is on screen and a fresher one is on its way.
+    var isRefreshing: Bool = false
+    /// That refresh failed — the leading row becomes a retry.
+    var refreshFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
+    var onRetryRefresh: () async -> Void = {}
 
     var body: some View {
         if groups.isEmpty {
             ContentUnavailableView("Cave vide", systemImage: "cabinet.fill", description: Text("Ajoutez des bouteilles via le scanner"))
         } else {
             List {
+                // Leads the rows it is refreshing, never replaces them.
+                if isRefreshing || refreshFailed {
+                    RefreshRow(failed: refreshFailed, loadingLabel: "Mise à jour de la liste", onRetry: onRetryRefresh)
+                }
                 ForEach(groups) { group in
                     Section {
                         ForEach(group.items) { item in

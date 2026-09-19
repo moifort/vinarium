@@ -8,6 +8,10 @@ struct CellarPage: View {
     var bottlesLoadMoreFailed: Bool = false
     var historyHasMore: Bool = false
     var historyLoadMoreFailed: Bool = false
+    /// The cellar is last session's snapshot and a fresher one is on its way.
+    var isRefreshing: Bool = false
+    /// That refresh failed — the leading row becomes a retry.
+    var refreshFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onEventTapped: (String) -> Void
@@ -16,6 +20,7 @@ struct CellarPage: View {
     var onBottlesLoadMore: () async -> Void = {}
     var onHistoryPrefetch: (String) -> Void = { _ in }
     var onHistoryLoadMore: () async -> Void = {}
+    var onRetryRefresh: () async -> Void = {}
 
     var body: some View {
         Group {
@@ -25,19 +30,25 @@ struct CellarPage: View {
                     groups: groups,
                     hasMore: bottlesHasMore,
                     loadMoreFailed: bottlesLoadMoreFailed,
+                    isRefreshing: isRefreshing,
+                    refreshFailed: refreshFailed,
                     onBottleTapped: onBottleTapped,
                     onRemoveRequested: onRemoveRequested,
                     onPrefetch: onBottlesPrefetch,
-                    onLoadMore: onBottlesLoadMore
+                    onLoadMore: onBottlesLoadMore,
+                    onRetryRefresh: onRetryRefresh
                 )
             case .journal:
                 JournalEventList(
                     events: events,
                     hasMore: historyHasMore,
                     loadMoreFailed: historyLoadMoreFailed,
+                    isRefreshing: isRefreshing,
+                    refreshFailed: refreshFailed,
                     onEventTapped: onEventTapped,
                     onPrefetch: onHistoryPrefetch,
-                    onLoadMore: onHistoryLoadMore
+                    onLoadMore: onHistoryLoadMore,
+                    onRetryRefresh: onRetryRefresh
                 )
             }
         }

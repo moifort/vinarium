@@ -26,6 +26,12 @@ struct DebugGallery: View {
                     NavigationLink("Liste en cache, échec de la mise à jour") {
                         cachedList(refreshFailed: true)
                     }
+                    NavigationLink("Accueil en cache, mise à jour") {
+                        cachedDashboard
+                    }
+                    NavigationLink("Cave en cache, mise à jour") {
+                        cachedCellar
+                    }
                 }
                 Section("Retours") {
                     Button("Nous écrire") { feedbackShown = true }
@@ -63,6 +69,50 @@ extension DebugGallery {
             onWineTapped: { _ in }
         )
         .navigationTitle("Mes Vins")
+    }
+
+    /// The home tab reopened on last session's figures, the spinner leading them.
+    private var cachedDashboard: some View {
+        DashboardPage(
+            content: .init(
+                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
+                readyToDrink: [
+                    .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
+                ],
+                favorites: [
+                    .init(id: "3", color: .red, name: "Romanée-Conti 2015", vintage: 2015, tastingDate: Date(), estimatedPrice: 3500, rating: 5),
+                ],
+                events: [
+                    .init(isEntry: true, wineName: "Pétrus 2012", position: "C2", wineId: "5", date: Date()),
+                ]
+            ),
+            isRefreshing: true,
+            onStatsTapped: {},
+            onWineTapped: { _ in },
+            onSettingsTapped: {}
+        )
+    }
+
+    /// The cellar tab reopened on last session's bottles, the spinner leading them.
+    private var cachedCellar: some View {
+        CellarPage(
+            displayMode: .constant(.cave),
+            groups: [
+                .init(label: "A", items: [
+                    .init(id: "1", color: .red, title: "Château Margaux", subtitle: "2018", position: "A1"),
+                    .init(id: "2", color: .white, title: "Pouilly-Fumé", subtitle: "2021", position: "A2"),
+                ]),
+                .init(label: "B", items: [
+                    .init(id: "3", color: .rosé, title: "Domaine Tempier", subtitle: "2022", position: "B1"),
+                ]),
+            ],
+            events: [],
+            isRefreshing: true,
+            onBottleTapped: { _ in },
+            onRemoveRequested: { _ in },
+            onEventTapped: { _ in },
+            onRefresh: {}
+        )
     }
 }
 

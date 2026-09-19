@@ -2,6 +2,12 @@ import SwiftUI
 
 struct DashboardPage: View {
     let content: Content
+    /// The page is last session's snapshot and a fresher one is on its way: a spinner
+    /// leads the page rather than a loader replacing it.
+    var isRefreshing: Bool = false
+    /// That refresh failed — the leading row becomes a retry.
+    var refreshFailed: Bool = false
+    var onRetryRefresh: () async -> Void = {}
     var onStatsTapped: () -> Void
     var onWineTapped: (String) -> Void
     var onSettingsTapped: () -> Void
@@ -9,6 +15,14 @@ struct DashboardPage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
+                if isRefreshing || refreshFailed {
+                    RefreshRow(
+                        failed: refreshFailed,
+                        loadingLabel: "Mise à jour de l'accueil",
+                        onRetry: onRetryRefresh
+                    )
+                }
+
                 DashboardStatsRow(stats: content.stats, onTapped: onStatsTapped)
 
                 ReadyToDrinkSection(items: content.readyToDrink, onWineTapped: onWineTapped)

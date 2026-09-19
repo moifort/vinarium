@@ -35,8 +35,19 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
     }
 }
 
+/// The cellar tab: the bottles row by row, and the journal of what came in and out. It
+/// opens on what it showed last time: its `SnapshotCache` hands the first page of each
+/// back from disk before anything is asked of the network, and the first fetch runs
+/// under a spinner leading the list instead of behind a loader.
 @MainActor @Observable
 final class CellarGridViewModel {
+    init() {
+        if let snapshot = cache.read() {
+            bottles = snapshot.bottles
+            history = snapshot.history
+        }
+    }
+
     var bottles: [CellarBottle] = []
     var bottlesHasMore = false
     var isLoadingMoreBottles = false
@@ -48,6 +59,22 @@ final class CellarGridViewModel {
     var displayMode: CellarDisplayMode = .cave
     var isLoading = false
     var error: String?
+
+    /// The cellar on screen is last session's and a fresher one is on its way: a
+    /// spinner leads the list. Never set by a pull-to-refresh, whose own control spins.
+    private(set) var isRefreshing = false
+
+    /// That refresh failed: the bottles on screen are the ones from last time, and the
+    /// leading row offers to try again.
+    private(set) var refreshFailed = false
+
+    /// The server has answered at least once, so what is on screen is no longer the
+    /// snapshot.
+    private var loaded = false
+
+    /// The first page of bottles and of the journal on disk. Bump the version whenever
+    /// `CellarBottle`, `Wine` or `HistoryEvent` changes shape.
+    private let cache = SnapshotCache<CellarSnapshot>("cellar", version: 1)
 
     private let pageSize = 15
     private let prefetchThreshold = 5
@@ -95,11 +122,35 @@ final class CellarGridViewModel {
             bottlesHasMore = b.hasMore
             history = h.events
             historyHasMore = h.hasMore
+            loaded = true
+            refreshFailed = false
+            let (cache, snapshot) = (cache, CellarSnapshot(bottles: b.bottles, history: h.events))
+            Task.detached { cache.write(snapshot) }
         } catch {
             guard requested == generation else { return }
             self.error = reportError(error)
         }
         isLoading = false
+    }
+
+    /// The tab appeared: a cellar still showing last session's snapshot refreshes it
+    /// under the leading spinner, anything else loads as it always did.
+    func loadOnAppear() async {
+        if !loaded, !bottles.isEmpty || !history.isEmpty {
+            await refresh()
+        } else {
+            await load()
+        }
+    }
+
+    /// Bring the snapshot on screen up to date without taking it away — and the retry
+    /// when that failed.
+    func refresh() async {
+        isRefreshing = true
+        refreshFailed = false
+        await load()
+        isRefreshing = false
+        refreshFailed = !loaded
     }
 
     /// Loads the next page of bottles and appends it to the grid.
