@@ -25,6 +25,7 @@ struct WineDetailView: View {
     @State private var sheetError = ErrorPresenter()
     @State private var actionError = ErrorPresenter()
     @State private var showAttachmentChoice = false
+    @State private var pendingAttachmentSource: AttachmentSource?
     @State private var showCamera = false
     @State private var showPhotoPicker = false
     @State private var pickedPhoto: PhotosPickerItem?
@@ -98,6 +99,7 @@ struct WineDetailView: View {
             .errorAlert(attachmentError)
             .attachmentPickers(
                 showChoice: $showAttachmentChoice,
+                pendingSource: $pendingAttachmentSource,
                 showCamera: $showCamera,
                 showPhotoPicker: $showPhotoPicker,
                 pickedPhoto: $pickedPhoto,
@@ -647,11 +649,13 @@ private struct PreviewedFile: Identifiable {
 }
 
 private extension View {
-    /// The three ways a file gets in, kept together so the sheet itself stays
-    /// about the wine. The camera is offered only where there is one — on a
-    /// simulator the picker would open on a black screen.
+    /// The ways a file gets in, kept together so the sheet itself stays about
+    /// the wine. A source picked on the sheet is acted on once it is closed:
+    /// the camera, the system picker and the Files browser are presentations of
+    /// their own and would fight the sheet on its way out.
     func attachmentPickers(
         showChoice: Binding<Bool>,
+        pendingSource: Binding<AttachmentSource?>,
         showCamera: Binding<Bool>,
         showPhotoPicker: Binding<Bool>,
         pickedPhoto: Binding<PhotosPickerItem?>,
@@ -660,19 +664,32 @@ private extension View {
         onFile: @escaping (URL) -> Void,
         onFailure: @escaping (String) -> Void
     ) -> some View {
-        confirmationDialog(
-            "Ajouter une pièce jointe",
-            isPresented: showChoice,
-            titleVisibility: .visible
-        ) {
-            if UIImagePickerController.isSourceTypeAvailable(.camera) {
-                Button("Prendre une photo") { showCamera.wrappedValue = true }
-                    .accessibilityIdentifier("attachment-source-camera")
+        sheet(isPresented: showChoice) {
+            switch pendingSource.wrappedValue {
+            case .camera: showCamera.wrappedValue = true
+            case .library: showPhotoPicker.wrappedValue = true
+            case .files: showFileImporter.wrappedValue = true
+            case nil: break
             }
-            Button("Choisir une photo") { showPhotoPicker.wrappedValue = true }
-                .accessibilityIdentifier("attachment-source-library")
-            Button("Importer un fichier") { showFileImporter.wrappedValue = true }
-                .accessibilityIdentifier("attachment-source-file")
+            pendingSource.wrappedValue = nil
+        } content: {
+            AttachmentSourceSheet(
+                onCamera: {
+                    pendingSource.wrappedValue = .camera
+                    showChoice.wrappedValue = false
+                },
+                onAllPhotos: {
+                    pendingSource.wrappedValue = .library
+                    showChoice.wrappedValue = false
+                },
+                onFiles: {
+                    pendingSource.wrappedValue = .files
+                    showChoice.wrappedValue = false
+                },
+                onPickedPhoto: onImage
+            )
+            .presentationDetents([.height(320)])
+            .presentationDragIndicator(.visible)
         }
         .fullScreenCover(isPresented: showCamera) {
             CameraPicker(
