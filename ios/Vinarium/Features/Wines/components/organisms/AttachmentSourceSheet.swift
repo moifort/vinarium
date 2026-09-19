@@ -21,8 +21,19 @@ struct AttachmentSourceSheet: View {
     @State private var recentPhotos = RecentPhotos()
     @State private var loadingPhotoId: String?
 
-    private let tileSide: CGFloat = 116
+    /// Scaled with the text: a tile whose label grows while its frame stays
+    /// put is a tile whose label gets cut in half.
+    @ScaledMetric(relativeTo: .body) private var tileSide: CGFloat = 116
+    @ScaledMetric(relativeTo: .title3) private var closeSide: CGFloat = 36
+    @ScaledMetric(relativeTo: .body) private var filesRowHeight: CGFloat = 60
     private let tileRadius: CGFloat = 16
+    private let padding: CGFloat = 20
+
+    /// The sheet asks for exactly what it lays out, so nothing is clipped at a
+    /// larger text size. The last term is the home indicator's own room.
+    private var sheetHeight: CGFloat {
+        padding + closeSide + padding + tileSide + padding + filesRowHeight + padding + 34
+    }
 
     /// The camera is offered only where there is one: on a simulator the
     /// picker would open on a black screen.
@@ -31,13 +42,15 @@ struct AttachmentSourceSheet: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: padding) {
             header
             strip
             filesRow
         }
-        .padding(20)
+        .padding(padding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .presentationDetents([.height(sheetHeight)])
+        .presentationDragIndicator(.visible)
         .task { await recentPhotos.load() }
     }
 
@@ -47,7 +60,7 @@ struct AttachmentSourceSheet: View {
                 Image(systemName: "xmark")
                     .font(.headline)
                     .foregroundStyle(.primary)
-                    .frame(width: 36, height: 36)
+                    .frame(width: closeSide, height: closeSide)
                     .background(Color(.secondarySystemBackground), in: .circle)
             }
             .buttonStyle(.plain)
@@ -59,12 +72,15 @@ struct AttachmentSourceSheet: View {
             Text("Pièce jointe")
                 .font(.title3.weight(.semibold))
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
 
             Spacer(minLength: 8)
 
             Button("Toutes les photos") { onAllPhotos() }
                 .font(.subheadline)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .layoutPriority(1)
                 .accessibilityIdentifier("attachment-source-library")
         }
     }
@@ -99,6 +115,7 @@ struct AttachmentSourceSheet: View {
                     Text("Appareil photo")
                         .font(.footnote)
                         .lineLimit(2)
+                        .minimumScaleFactor(0.7)
                         .multilineTextAlignment(.center)
                 }
                 .padding(8)
@@ -146,6 +163,7 @@ struct AttachmentSourceSheet: View {
                     Text("Autoriser les photos")
                         .font(.footnote)
                         .lineLimit(2)
+                        .minimumScaleFactor(0.7)
                         .multilineTextAlignment(.center)
                 }
                 .padding(8)
@@ -173,11 +191,12 @@ struct AttachmentSourceSheet: View {
                 Image(systemName: "doc.badge.plus")
                     .font(.title3)
                 Text("Ajouter des fichiers")
+                    .lineLimit(2)
                 Spacer(minLength: 0)
             }
             .foregroundStyle(.primary)
             .padding(.horizontal, 16)
-            .frame(maxWidth: .infinity, minHeight: 60)
+            .frame(maxWidth: .infinity, minHeight: filesRowHeight)
             .background(Color(.secondarySystemBackground))
             .clipShape(.rect(cornerRadius: 18))
             .contentShape(.rect)
@@ -202,7 +221,5 @@ struct AttachmentSourceSheet: View {
     Color(.systemGroupedBackground)
         .sheet(isPresented: .constant(true)) {
             AttachmentSourceSheet()
-                .presentationDetents([.height(320)])
-                .presentationDragIndicator(.visible)
         }
 }

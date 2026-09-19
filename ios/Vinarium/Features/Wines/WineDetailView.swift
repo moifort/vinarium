@@ -688,8 +688,6 @@ private extension View {
                 },
                 onPickedPhoto: onImage
             )
-            .presentationDetents([.height(320)])
-            .presentationDragIndicator(.visible)
         }
         .fullScreenCover(isPresented: showCamera) {
             CameraPicker(
