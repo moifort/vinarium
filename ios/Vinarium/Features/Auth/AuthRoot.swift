@@ -60,7 +60,8 @@ struct AuthRoot: View {
     private var signedIn: some View {
         switch gate.state {
         case .loading:
-            LoadingStateView()
+            // The opening of the app: the only wait the wine glass belongs to.
+            LaunchLoadingView()
         case .required:
             OnboardingView(onCompleted: { gate.markCompleted() })
         case .ready:
