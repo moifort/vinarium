@@ -25,6 +25,11 @@ struct LoadMoreRow: View {
             }
             Spacer()
         }
+        // Like `RefreshRow`, the spinner closing the list sits on the list's own
+        // background rather than on a card of its own, which would read as one more
+        // wine still loading.
+        .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets(top: 6, leading: 0, bottom: 6, trailing: 0))
         .listRowSeparator(.hidden)
     }
 }

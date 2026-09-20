@@ -17,7 +17,10 @@ struct DebugGallery: View {
                     Button("Paywall, scans épuisés") { paywallTrigger = .scanAllowanceSpent }
                 }
                 Section("Chargement") {
-                    NavigationLink("Verre de vin (premier chargement)") {
+                    NavigationLink("Verre de vin (ouverture de l'app)") {
+                        LaunchLoadingView()
+                    }
+                    NavigationLink("Spinner système (tout le reste)") {
                         LoadingStateView()
                     }
                     NavigationLink("Liste en cache, mise à jour") {
@@ -25,6 +28,9 @@ struct DebugGallery: View {
                     }
                     NavigationLink("Liste en cache, échec de la mise à jour") {
                         cachedList(refreshFailed: true)
+                    }
+                    NavigationLink("Liste, page suivante") {
+                        paginatedList
                     }
                     NavigationLink("Accueil en cache, mise à jour") {
                         cachedDashboard
@@ -66,6 +72,23 @@ extension DebugGallery {
             ],
             isRefreshing: !refreshFailed,
             refreshFailed: refreshFailed,
+            onWineTapped: { _ in }
+        )
+        .navigationTitle("Mes Vins")
+    }
+
+    /// The bottom of a list with another page on its way: the sentinel row spins
+    /// below the last wine, on the list's background rather than on a card.
+    private var paginatedList: some View {
+        WineListContent(
+            mode: .all,
+            groups: [
+                .init(label: "Septembre 2026", items: [
+                    .init(id: "1", color: .red, name: "Château La Sauvageonne", subtitle: "2018 • Languedoc", rating: 4, isFavorite: true, isInCellar: true),
+                    .init(id: "2", color: .white, name: "Pouilly-Fumé", subtitle: "2021 • Loire", rating: 5, isFavorite: false),
+                ]),
+            ],
+            hasMore: true,
             onWineTapped: { _ in }
         )
         .navigationTitle("Mes Vins")
