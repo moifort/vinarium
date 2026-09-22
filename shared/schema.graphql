@@ -1177,6 +1177,13 @@ type ImportResult {
 }
 
 """
+The opaque identifier of a cellar journal entry, used as a page cursor.
+
+Read it from `JournalEvents.endCursor` and pass it back as `journalEvents(after:)` to fetch the next page. Example: "Xk3v9Qb2LmT0pR7sYw1a".
+"""
+scalar JournalEntryId
+
+"""
 A single audit-trail entry recording a bottle moving in or out of the cellar.
 
 Denormalized for display: it carries the wine name, type, and color alongside the grid `position`, the event `date`, and the `actor`. Pages of these form the shared cellar journal, and per-wine slices are exposed as `Beverage.history`.
@@ -1241,9 +1248,12 @@ enum JournalEventType {
 """
 A page of cellar journal events, most recent first.
 
-Offset-paginated result of `journalEvents`.
+Cursor-paginated result of `journalEvents`: pass `endCursor` back as `after`.
 """
 type JournalEvents {
+  """Cursor of the last event read for this page; null on an empty page."""
+  endCursor: JournalEntryId
+
   """Whether more events are available after this page."""
   hasMore: Boolean!
 
@@ -1786,7 +1796,7 @@ type Query {
     """Facet: keep only this wine color"""
     color: WineColor
 
-    """Maximum beverages returned in the page"""
+    """Maximum beverages returned in the page, at most 100"""
     limit: Int = 40
 
     """List preset: all beverages, favorites, gifted or recommended"""
@@ -1812,7 +1822,7 @@ type Query {
     """Cursor: return the page following this bottle's beverage id."""
     after: BeverageId
 
-    """Maximum bottles returned in the page"""
+    """Maximum bottles returned in the page, at most 1000"""
     limit: Int = 15
   ): CellarBottles!
 
@@ -1858,11 +1868,16 @@ type Query {
 
   """A page of entry/exit events for the shared cellar, most recent first"""
   journalEvents(
-    """Maximum events returned in the page"""
+    """
+    Cursor: return the page following this entry — the previous page's `endCursor`.
+    """
+    after: JournalEntryId
+
+    """Maximum events returned in the page, at most 100"""
     limit: Int = 15
 
-    """Number of events to skip"""
-    offset: Int = 0
+    """Number of events to skip. Ignored when `after` is given."""
+    offset: Int = 0 @deprecated(reason: "Every skipped event is billed as a read: page with `after` instead.")
   ): JournalEvents!
 
   """

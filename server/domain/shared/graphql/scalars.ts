@@ -19,6 +19,7 @@ import {
   Producer,
 } from '~/domain/beverage/primitives'
 import { HouseholdId } from '~/domain/household/primitives'
+import { JournalEntryId } from '~/domain/journal/primitives'
 import {
   Country,
   Eur,
@@ -68,6 +69,15 @@ builder.scalarType('BeverageId', {
     '"f47ac10b-58cc-4372-a567-0e02b2c3d479".',
   serialize: (value) => value as string,
   parseValue: validatedParse('BeverageId', BeverageId),
+})
+
+builder.scalarType('JournalEntryId', {
+  description:
+    'The opaque identifier of a cellar journal entry, used as a page cursor.\n\n' +
+    'Read it from `JournalEvents.endCursor` and pass it back as `journalEvents(after:)` ' +
+    'to fetch the next page. Example: "Xk3v9Qb2LmT0pR7sYw1a".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('JournalEntryId', JournalEntryId),
 })
 
 builder.scalarType('HouseholdId', {

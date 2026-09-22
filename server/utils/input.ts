@@ -17,3 +17,9 @@ export const stripNulls = <T extends Record<string, unknown>>(obj: T): StripNull
   }
   return out as StripNulls<T>
 }
+
+// A page size asked by a client, brought within [1, max]. Clamped rather than
+// rejected: an app already published keeps working whatever it asks, and no
+// request can make a list read more documents than the page allows.
+export const pageLimit = (requested: number | null | undefined, fallback: number, max: number) =>
+  Math.min(Math.max(requested ?? fallback, 1), max)

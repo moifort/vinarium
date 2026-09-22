@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { stripNulls } from './input'
+import { pageLimit, stripNulls } from './input'
 
 // Mirrors how Pothos types optional input fields: `T | null | undefined`.
 type FakeInput = {
@@ -39,5 +39,22 @@ describe('stripNulls', () => {
     // Every mutation input in the schema is flat; nested objects pass through.
     const nested = { meta: { inner: null } as { inner: string | null } }
     expect(stripNulls(nested)).toEqual({ meta: { inner: null } })
+  })
+})
+
+describe('pageLimit', () => {
+  it('falls back to the default when the client asks nothing', () => {
+    expect(pageLimit(undefined, 15, 100)).toBe(15)
+    expect(pageLimit(null, 15, 100)).toBe(15)
+  })
+
+  it('keeps a size within bounds', () => {
+    expect(pageLimit(40, 15, 100)).toBe(40)
+  })
+
+  it('clamps an oversized or non-positive size instead of rejecting it', () => {
+    expect(pageLimit(100_000, 15, 100)).toBe(100)
+    expect(pageLimit(0, 15, 100)).toBe(1)
+    expect(pageLimit(-5, 15, 100)).toBe(1)
   })
 })

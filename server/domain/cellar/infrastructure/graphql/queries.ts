@@ -1,4 +1,5 @@
 import { builder } from '~/domain/shared/graphql/builder'
+import { pageLimit } from '~/utils/input'
 import { CellarQuery } from '../../query'
 import { CellarBottlesType, CellarInfoType, CellarPositionType } from './types'
 
@@ -15,7 +16,10 @@ builder.queryField('cellarBottles', (t) =>
     type: CellarBottlesType,
     description: 'A page of bottles currently in the cellar, in grid order, with the joined wine',
     args: {
-      limit: t.arg.int({ defaultValue: 15, description: 'Maximum bottles returned in the page' }),
+      limit: t.arg.int({
+        defaultValue: 15,
+        description: 'Maximum bottles returned in the page, at most 1000',
+      }),
       after: t.arg({
         type: 'BeverageId',
         description: "Cursor: return the page following this bottle's beverage id.",
@@ -23,7 +27,8 @@ builder.queryField('cellarBottles', (t) =>
     },
     resolve: (_root, args, { userId }) =>
       CellarQuery.bottlesPage(userId, {
-        limit: args.limit ?? 15,
+        // The full grid is read in one page to place or move a bottle.
+        limit: pageLimit(args.limit, 15, 1000),
         after: args.after ?? undefined,
       }),
   }),

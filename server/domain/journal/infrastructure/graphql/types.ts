@@ -2,7 +2,7 @@ import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructur
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import { JournalQuery } from '../../query'
-import type { JournalEventActor, JournalEventView } from '../../types'
+import type { JournalEntryId, JournalEventActor, JournalEventView } from '../../types'
 
 export const JournalEventTypeEnum = builder.enumType('JournalEventType', {
   description:
@@ -75,11 +75,13 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
 })
 
 export const JournalEventsType = builder
-  .objectRef<{ items: JournalEventView[]; hasMore: boolean }>('JournalEvents')
+  .objectRef<{ items: JournalEventView[]; hasMore: boolean; endCursor?: JournalEntryId }>(
+    'JournalEvents',
+  )
   .implement({
     description:
       'A page of cellar journal events, most recent first.\n\n' +
-      'Offset-paginated result of `journalEvents`.',
+      'Cursor-paginated result of `journalEvents`: pass `endCursor` back as `after`.',
     fields: (t) => ({
       items: t.field({
         type: [JournalEventType],
@@ -88,6 +90,11 @@ export const JournalEventsType = builder
       }),
       hasMore: t.exposeBoolean('hasMore', {
         description: 'Whether more events are available after this page.',
+      }),
+      endCursor: t.expose('endCursor', {
+        type: 'JournalEntryId',
+        nullable: true,
+        description: 'Cursor of the last event read for this page; null on an empty page.',
       }),
     }),
   })

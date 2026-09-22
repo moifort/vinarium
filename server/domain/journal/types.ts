@@ -1,6 +1,10 @@
+import type { Brand } from 'ts-brand'
 import type { BeverageId, BeverageName, BeverageType, WineColor } from '~/domain/beverage/types'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
+
+// The storage id of a journal entry, handed to the client as a page cursor.
+export type JournalEntryId = Brand<string, 'JournalEntryId'>
 
 export type JournalEntryIn = {
   type: 'in'

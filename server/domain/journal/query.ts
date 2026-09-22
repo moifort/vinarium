@@ -6,7 +6,12 @@ import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
 import { HouseholdQuery } from '~/domain/household/query'
 import type { CellarScope } from '~/domain/household/types'
 import * as repository from '~/domain/journal/infrastructure/repository'
-import type { JournalEntry, JournalEventActor, JournalEventView } from '~/domain/journal/types'
+import type {
+  JournalEntry,
+  JournalEntryId,
+  JournalEventActor,
+  JournalEventView,
+} from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 
 // Who moved the bottle, as seen by the viewer: their own movements carry no name
@@ -36,16 +41,17 @@ export namespace JournalQuery {
     )[0]
   }
 
-  // One page of journal events (offset-based). Loads only the page's wines by id.
+  // One page of journal events, resumed after the previous page's `endCursor`
+  // (or skipped by `offset`, for older clients). Loads only the page's wines by id.
   export const page = async (
     userId: UserId,
-    { limit, offset }: { limit: number; offset: number },
+    window: { limit: number; offset?: number; after?: JournalEntryId },
   ) => {
     const scope = await HouseholdQuery.cellarScope(userId)
-    const { entries, hasMore } = await repository.findPageForUsers(scope.memberIds, {
-      limit,
-      offset,
-    })
+    const { entries, hasMore, endCursor } = await repository.findPageForUsers(
+      scope.memberIds,
+      window,
+    )
     const wines = await BeverageQuery.byBeverageIdsForUsers(
       scope.memberIds,
       uniq(entries.map(({ beverageId }) => beverageId)),
@@ -56,7 +62,7 @@ export namespace JournalQuery {
       userId,
       scope,
     )
-    return { items, hasMore }
+    return { items, hasMore, endCursor }
   }
 
   // Raw entries for a page of wines, batched (for the per-request history loader).

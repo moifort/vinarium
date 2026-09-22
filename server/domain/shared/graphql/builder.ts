@@ -20,6 +20,7 @@ import type {
   Producer,
 } from '~/domain/beverage/types'
 import type { HouseholdId } from '~/domain/household/types'
+import type { JournalEntryId } from '~/domain/journal/types'
 import type {
   Country,
   Eur,
@@ -59,6 +60,7 @@ export const builder = new SchemaBuilder<{
     DateTime: { Input: Date; Output: Date }
     UserId: { Input: UserId; Output: UserId }
     HouseholdId: { Input: HouseholdId; Output: HouseholdId }
+    JournalEntryId: { Input: JournalEntryId; Output: JournalEntryId }
     BeverageId: { Input: BeverageId; Output: BeverageId }
     BeverageName: { Input: BeverageName; Output: BeverageName }
     Producer: { Input: Producer; Output: Producer }

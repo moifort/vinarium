@@ -1,7 +1,7 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import { chunk } from 'lodash-es'
 import type { BeverageId } from '~/domain/beverage/types'
-import type { JournalEntry } from '~/domain/journal/types'
+import type { JournalEntry, JournalEntryId } from '~/domain/journal/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
 import { memoizedPerRequest } from '~/system/request-cache'
@@ -60,21 +60,28 @@ export const findLatestExitForUsers = async (
   return snap.docs[0]?.data()
 }
 
-// One page of the shared journal, most recent first. Offset-based: the journal
-// grows slowly and its events carry no stable id to use as a cursor.
+// One page of the shared journal, most recent first. `after` is the id of the
+// last entry of the previous page: Firestore resumes right after it and bills
+// only the page. `offset` stays for the app versions that page by count — every
+// skipped entry is billed as a read, so a deep page costs the whole way down.
 export const findPageForUsers = async (
   memberIds: UserId[],
-  { limit, offset }: { limit: number; offset: number },
-): Promise<{ entries: JournalEntry[]; hasMore: boolean }> => {
-  const snap = await journal()
-    .where('userId', 'in', memberIds)
-    .orderBy('date', 'desc')
-    .offset(offset)
-    .limit(limit + 1)
-    .get()
-  const entries = snap.docs.map((doc) => doc.data())
-  const hasMore = entries.length > limit
-  return { entries: hasMore ? entries.slice(0, limit) : entries, hasMore }
+  { limit, offset, after }: { limit: number; offset?: number; after?: JournalEntryId },
+): Promise<{ entries: JournalEntry[]; hasMore: boolean; endCursor?: JournalEntryId }> => {
+  let query = journal().where('userId', 'in', memberIds).orderBy('date', 'desc')
+  if (after) {
+    const cursor = await journal().doc(after).get()
+    if (cursor.exists) query = query.startAfter(cursor)
+  } else if (offset) {
+    query = query.offset(offset)
+  }
+  const snap = await query.limit(limit + 1).get()
+  const docs = snap.docs.slice(0, limit)
+  return {
+    entries: docs.map((doc) => doc.data()),
+    hasMore: snap.docs.length > limit,
+    endCursor: docs.at(-1)?.id as JournalEntryId | undefined,
+  }
 }
 
 export const removeByBeverageId = async (

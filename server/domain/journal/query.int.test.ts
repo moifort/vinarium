@@ -89,6 +89,37 @@ describe('JournalQuery.page', () => {
     expect(page.hasMore).toBe(false)
   })
 
+  test('resumes after the previous page’s cursor without re-reading it', async () => {
+    seed()
+    const first = await JournalQuery.page(userId, { limit: 2 })
+    expect(first.endCursor).toBe('e3' as never)
+
+    const second = await JournalQuery.page(userId, { limit: 2, after: first.endCursor })
+    expect(second.items.map((i) => i.position)).toEqual(['A3', 'A2'])
+    expect(second.hasMore).toBe(true)
+
+    const last = await JournalQuery.page(userId, { limit: 2, after: second.endCursor })
+    expect(last.items.map((i) => i.position)).toEqual(['A1'])
+    expect(last.hasMore).toBe(false)
+  })
+
+  test('a cursor page is billed for its own entries, where an offset pays for every skipped one', async () => {
+    seed()
+    const first = await JournalQuery.page(userId, { limit: 2 })
+
+    const beforeCursor = fake.queryDocReads
+    await JournalQuery.page(userId, { limit: 2, after: first.endCursor })
+    const cursorCost = fake.queryDocReads - beforeCursor
+
+    const beforeOffset = fake.queryDocReads
+    await JournalQuery.page(userId, { limit: 2, offset: 2 })
+    const offsetCost = fake.queryDocReads - beforeOffset
+
+    // The events after the cursor, limit + 1 (the scope is memoized by then).
+    expect(cursorCost).toBe(3)
+    expect(offsetCost).toBe(cursorCost + 2)
+  })
+
   test('merges every member’s movements, each naming who moved the bottle', async () => {
     seedHousehold()
 

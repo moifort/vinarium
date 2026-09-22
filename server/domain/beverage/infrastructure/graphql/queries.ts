@@ -1,4 +1,5 @@
 import { builder } from '~/domain/shared/graphql/builder'
+import { pageLimit } from '~/utils/input'
 import { BeverageQuery } from '../../query'
 import {
   BeverageListModeEnum,
@@ -46,7 +47,10 @@ builder.queryField('beverages', (t) =>
         defaultValue: 'desc',
         description: 'Sort direction',
       }),
-      limit: t.arg.int({ defaultValue: 40, description: 'Maximum beverages returned in the page' }),
+      limit: t.arg.int({
+        defaultValue: 40,
+        description: 'Maximum beverages returned in the page, at most 100',
+      }),
       after: t.arg({
         type: 'BeverageId',
         description: 'Cursor: return the page following this beverage id',
@@ -58,7 +62,7 @@ builder.queryField('beverages', (t) =>
         status: args.status ?? 'all',
         sort: args.sort ?? 'updatedAt',
         order: args.order ?? 'desc',
-        limit: args.limit ?? 40,
+        limit: pageLimit(args.limit, 40, 100),
         after: args.after ?? undefined,
         color: args.color ?? undefined,
         beverageType: args.beverageType ?? undefined,
