@@ -1353,6 +1353,46 @@
         }
       }
     },
+    "Ajouter un vin": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wein hinzufügen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a wine"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir un vino"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi un vino"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワインを追加"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar um vinho"
+          }
+        }
+      }
+    },
     "Ajouter à la cave": {
       "localizations": {
         "de": {
@@ -2516,6 +2556,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sem atividade recente"
+          }
+        }
+      }
+    },
+    "Aucune bouteille reconnue": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keine Flasche erkannt"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No bottle recognized"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ninguna botella reconocida"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nessuna bottiglia riconosciuta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ボトルが見つかりませんでした"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nenhuma garrafa reconhecida"
           }
         }
       }
@@ -6890,6 +6970,46 @@
         }
       }
     },
+    "Envoyé seul avec la flèche, ou joint à la photo choisie.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Allein mit dem Pfeil gesendet oder dem gewählten Foto beigefügt."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent on its own with the arrow, or added to the chosen photo."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Se envía solo con la flecha o junto a la foto elegida."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inviato da solo con la freccia, o allegato alla foto scelta."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "矢印で単独送信、または選んだ写真に添えて送信されます。"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enviado sozinho com a seta, ou junto à foto escolhida."
+          }
+        }
+      }
+    },
     "Erreur": {
       "localizations": {
         "de": {
@@ -8257,6 +8377,46 @@
       }
     },
     "Kura": {},
+    "L'IA n'a reconnu aucune bouteille dans ce texte. Un domaine, une cuvée ou un millésime l'aident à la trouver.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Die KI hat in diesem Text keine Flasche erkannt. Ein Weingut, eine Cuvée oder ein Jahrgang helfen ihr, sie zu finden."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The AI recognized no bottle in this text. An estate, a cuvée or a vintage helps it find one."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La IA no reconoció ninguna botella en este texto. Una bodega, una cuvée o una añada la ayudan a encontrarla."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "L'IA non ha riconosciuto alcuna bottiglia in questo testo. Una tenuta, una cuvée o un'annata la aiutano a trovarla."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このテキストからボトルを認識できませんでした。生産者、キュヴェ、ヴィンテージがあると見つけやすくなります。"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A IA não reconheceu nenhuma garrafa neste texto. Um produtor, uma cuvée ou uma colheita ajudam a encontrá-la."
+          }
+        }
+      }
+    },
     "L'IA n'a rien trouvé à identifier ici. Réessaie avec une photo plus nette.": {
       "localizations": {
         "de": {
@@ -12878,6 +13038,46 @@
         }
       }
     },
+    "Scanner l'étiquette": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etikett scannen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan the label"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escanear la etiqueta"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scansiona l'etichetta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラベルをスキャン"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digitalizar o rótulo"
+          }
+        }
+      }
+    },
     "Scans Gemini": {},
     "Scans ce mois-ci": {
       "localizations": {
@@ -14173,6 +14373,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Um nome de vinho, um produtor, uma colheita ou uma pessoa, ou refine com os filtros acima."
+          }
+        }
+      }
+    },
+    "Un vin, l'IA trouve le reste": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Wein, die KI findet den Rest"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A wine, the AI finds the rest"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un vino, la IA encuentra el resto"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un vino, l'IA trova il resto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ワイン名を入力、残りはAIが検索"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um vinho, a IA encontra o resto"
           }
         }
       }

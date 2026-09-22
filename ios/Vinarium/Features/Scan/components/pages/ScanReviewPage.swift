@@ -2,7 +2,8 @@ import SwiftUI
 
 struct ScanReviewPage: View {
     let scanResult: ScanResult
-    let imageData: Data
+    /// The photo read, absent when the beverage was named in words.
+    let imageData: Data?
     var isSaving: Bool = false
     let onSubmit: (ScanSubmission) async -> Void
     let onCancel: () -> Void
@@ -42,7 +43,7 @@ struct ScanReviewPage: View {
 
     init(
         scanResult: ScanResult,
-        imageData: Data,
+        imageData: Data?,
         isSaving: Bool = false,
         initialLocation: TastingLocationDraft? = nil,
         onSubmit: @escaping (ScanSubmission) async -> Void,
@@ -153,7 +154,7 @@ struct ScanReviewPage: View {
 
     @ViewBuilder
     private var photoSection: some View {
-        if let uiImage = UIImage(data: imageData) {
+        if let imageData, let uiImage = UIImage(data: imageData) {
             Section {
                 Image(uiImage: uiImage)
                     .resizable()

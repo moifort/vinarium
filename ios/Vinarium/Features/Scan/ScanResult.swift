@@ -21,3 +21,28 @@ struct ScanResult: Decodable, Sendable {
     let drinkUntil: Int?
     let estimatedPrice: Double?
 }
+
+extension ScanResult {
+    /// The server's answer, the same shape for a photo and a description.
+    init(_ s: VinariumGraphQL.ScanResultFields) {
+        self.init(
+            recognized: s.recognized,
+            name: s.name,
+            beverageType: BeverageType(graphql: s.beverageType),
+            domain: s.domain,
+            vintage: s.vintage,
+            appellation: s.appellation,
+            cuvee: s.cuvee,
+            region: s.region,
+            country: s.country,
+            color: s.color.map { WineColor(graphql: $0) },
+            subtype: s.subtype.flatMap { BeverageSubtype(graphql: $0) },
+            grapeVarieties: s.grapeVarieties ?? [],
+            alcoholContent: s.alcoholContent,
+            classification: s.classification,
+            drinkFrom: s.drinkFrom,
+            drinkUntil: s.drinkUntil,
+            estimatedPrice: s.estimatedPrice
+        )
+    }
+}

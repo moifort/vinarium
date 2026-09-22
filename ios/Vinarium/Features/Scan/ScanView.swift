@@ -10,12 +10,48 @@ enum ScanFlowResult {
 }
 
 struct ScanView: View {
-    var onFlowCompleted: (ScanFlowResult) -> Void = { _ in }
+    /// What the scanner opens on: the camera, or what was already chosen on the
+    /// add-a-wine sheet, which goes straight to analysis.
+    enum Start {
+        case camera
+        /// The image bytes, and where it was shot when the library knows it.
+        /// Without a coordinate, the place is read from the image's EXIF.
+        case photo(Data, coordinate: CLLocationCoordinate2D?)
+        /// A beverage named in words, identified without a photo.
+        case text(String)
+    }
+
+    let start: Start
+    let onFlowCompleted: (ScanFlowResult) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel = ScanViewModel()
+    @State private var viewModel: ScanViewModel
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var shouldCapture = false
+
+    /// `description` is what was typed on the sheet: it goes with every photo
+    /// read in this scanner, taken with the camera or picked.
+    init(
+        start: Start = .camera,
+        description: String? = nil,
+        onFlowCompleted: @escaping (ScanFlowResult) -> Void = { _ in }
+    ) {
+        self.start = start
+        self.onFlowCompleted = onFlowCompleted
+        let viewModel = ScanViewModel()
+        viewModel.description = description
+        // A photo or a text start opens on the analysis step from the first
+        // frame: the camera never comes on for a scan that does not need it.
+        if case .camera = start {} else { viewModel.isAnalyzing = true }
+        _viewModel = State(initialValue: viewModel)
+    }
+
+    /// Started from words: there is no photo to retake, so leaving the flow
+    /// leaves the scanner too.
+    private var isTextStart: Bool {
+        if case .text = start { return true }
+        return false
+    }
 
     private var isUITest: Bool {
         ProcessInfo.processInfo.arguments.contains("-UITestPhoto")
@@ -23,10 +59,10 @@ struct ScanView: View {
 
     var body: some View {
         cameraScreen
-            .sheet(isPresented: flowPresented, onDismiss: viewModel.flushPendingOutcome) {
+            .sheet(isPresented: flowPresented, onDismiss: flowDismissed) {
                 flowSheet
             }
-            .sheet(isPresented: $viewModel.paywallShown) {
+            .sheet(isPresented: $viewModel.paywallShown, onDismiss: { if isTextStart { dismiss() } }) {
                 PremiumSheet(trigger: .scanAllowanceSpent)
             }
             .onChange(of: selectedPhoto) {
@@ -40,22 +76,25 @@ struct ScanView: View {
                         viewModel.isAnalyzing = false
                         return
                     }
-                    attachLocationFromExif(in: data)
-                    let jpeg = await Task.detached(priority: .userInitiated) {
-                        UIImage(data: data).flatMap { $0.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) }
-                    }.value
-                    if let jpeg {
-                        viewModel.capturePhoto(jpeg)
-                    } else {
-                        viewModel.isAnalyzing = false
-                    }
+                    await scan(imageData: data, coordinate: nil)
+                }
+            }
+            .task {
+                switch start {
+                case .camera: break
+                case let .photo(data, coordinate): await scan(imageData: data, coordinate: coordinate)
+                case let .text(text): viewModel.identify(text)
                 }
             }
             .alert("Erreur", isPresented: .init(
                 get: { viewModel.error != nil },
                 set: { if !$0 { viewModel.error = nil } }
             )) {
-                Button("OK") { viewModel.error = nil }
+                Button("OK") {
+                    viewModel.error = nil
+                    // A text start kept the scanner up only to show this.
+                    if isTextStart { dismiss() }
+                }
             } message: {
                 Text(viewModel.error ?? "")
             }
@@ -68,7 +107,9 @@ struct ScanView: View {
     /// on top of it.
     private var cameraScreen: some View {
         ZStack {
-            if viewModel.isCameraLive {
+            // A text start never wants the camera, even for the instant between
+            // the flow closing and the scanner leaving.
+            if viewModel.isCameraLive && !isTextStart {
                 liveCamera
             } else {
                 // The camera is closed as soon as the shot leaves for analysis: the
@@ -169,7 +210,7 @@ struct ScanView: View {
             NavigationStack {
                 ZStack {
                     if viewModel.scanNotRecognized {
-                        ScanNoResultPage(onClose: { viewModel.dismissNotRecognized() })
+                        ScanNoResultPage(fromDescription: isTextStart, onClose: { viewModel.dismissNotRecognized() })
                             .transition(.opacity)
                     } else {
                         stepContent
@@ -269,6 +310,32 @@ struct ScanView: View {
             get: { viewModel.isFlowActive },
             set: { if !$0 { viewModel.reset() } }
         )
+    }
+
+    /// Sends a photo that did not come from the shutter: its place is attached,
+    /// then it is downsized to what the scan needs before it leaves.
+    private func scan(imageData data: Data, coordinate: CLLocationCoordinate2D?) async {
+        if let coordinate {
+            attachLocation(coordinate)
+        } else {
+            attachLocationFromExif(in: data)
+        }
+        let jpeg = await Task.detached(priority: .userInitiated) {
+            UIImage(data: data).flatMap { $0.resized(maxDimension: 800).jpegData(compressionQuality: 0.6) }
+        }.value
+        if let jpeg {
+            viewModel.capturePhoto(jpeg)
+        } else {
+            viewModel.isAnalyzing = false
+        }
+    }
+
+    /// The flow sheet is gone: the deferred paywall comes up, or, for a scan
+    /// started from words, the scanner closes rather than show a camera nobody
+    /// asked for. Not while an error is up: the alert closes it instead.
+    private func flowDismissed() {
+        viewModel.flushPendingOutcome()
+        if isTextStart && !viewModel.paywallShown && viewModel.error == nil { dismiss() }
     }
 
     // MARK: - Location

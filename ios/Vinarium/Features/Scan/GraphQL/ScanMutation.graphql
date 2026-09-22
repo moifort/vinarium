@@ -1,21 +1,5 @@
-mutation ScanWine($imageBase64: String!) {
-  scanBeverage(imageBase64: $imageBase64) {
-    recognized
-    name
-    beverageType
-    color
-    subtype
-    alcoholContent
-    domain
-    vintage
-    appellation
-    cuvee
-    region
-    country
-    classification
-    grapeVarieties
-    drinkFrom
-    drinkUntil
-    estimatedPrice
+mutation ScanWine($imageBase64: String!, $description: BottleDescription) {
+  scanBeverage(imageBase64: $imageBase64, description: $description) {
+    ...ScanResultFields
   }
 }

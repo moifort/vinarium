@@ -1,8 +1,9 @@
+import CoreLocation
 import Photos
 import SwiftUI
 
-/// The last photos of the library, loaded for the attachment sheet so the
-/// common case — a label or a receipt shot a minute ago — is one tap away
+/// The last photos of the library, loaded for the attachment and add-a-wine
+/// sheets so the common case — a label or a receipt shot a minute ago — is one tap away
 /// instead of a trip through the system picker.
 @MainActor
 @Observable
@@ -62,6 +63,12 @@ final class RecentPhotos {
     func fullImage(id: String) async -> UIImage? {
         guard let asset = assets[id] else { return nil }
         return await requestImage(for: asset, targetSize: PHImageManagerMaximumSize)
+    }
+
+    /// Where the photo behind a tile was shot. The image handed back by
+    /// `fullImage` carries no EXIF, so the place comes from the asset itself.
+    func coordinate(id: String) -> CLLocationCoordinate2D? {
+        assets[id]?.location?.coordinate
     }
 
     private func fetchRecentAssets() -> [PHAsset] {

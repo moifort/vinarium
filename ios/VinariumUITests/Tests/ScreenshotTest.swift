@@ -122,6 +122,7 @@ final class ScreenshotTest: XCTestCase {
             .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)))
 
         try open("scan", at: 3)
+        try app.buttons["add-wine-camera"].tapOrFail()
         try app.buttons["scan-photo-picker"].waitOrFail()
         save("scan")
 

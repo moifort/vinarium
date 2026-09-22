@@ -1,0 +1,19 @@
+fragment ScanResultFields on ScanResult {
+  recognized
+  name
+  beverageType
+  color
+  subtype
+  alcoholContent
+  domain
+  vintage
+  appellation
+  cuvee
+  region
+  country
+  classification
+  grapeVarieties
+  drinkFrom
+  drinkUntil
+  estimatedPrice
+}

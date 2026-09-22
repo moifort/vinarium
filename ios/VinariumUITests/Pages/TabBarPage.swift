@@ -28,8 +28,11 @@ struct TabBarPage {
         return WineListPage(app: app)
     }
 
+    /// The scan tab opens the add-a-wine sheet first; its camera tile opens
+    /// the scanner once the sheet is gone.
     func openScanner() throws -> ScanFlowPage {
         try app.tabBars.buttons["Scan"].tapOrFail()
+        try app.buttons["add-wine-camera"].tapOrFail()
         return ScanFlowPage(app: app)
     }
 }

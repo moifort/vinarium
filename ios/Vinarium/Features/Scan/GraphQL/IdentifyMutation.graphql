@@ -1,0 +1,5 @@
+mutation IdentifyWine($description: BottleDescription!) {
+  identifyBeverage(description: $description) {
+    ...ScanResultFields
+  }
+}

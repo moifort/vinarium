@@ -82,32 +82,28 @@ enum WineAPI {
         )
     }
 
-    static func scan(imageData: Data) async throws -> ScanResult {
+    /// Reads a label photo. A description typed alongside is read with it and
+    /// settles what the label does not show.
+    static func scan(imageData: Data, description: String? = nil) async throws -> ScanResult {
         let base64 = imageData.base64EncodedString()
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.ScanWineMutation(imageBase64: base64)
+            mutation: VinariumGraphQL.ScanWineMutation(
+                imageBase64: base64,
+                description: description.map { .some($0) } ?? .none
+            )
         )
-        let s = data.scanBeverage
-        return ScanResult(
-            recognized: s.recognized,
-            name: s.name,
-            beverageType: BeverageType(graphql: s.beverageType),
-            domain: s.domain,
-            vintage: s.vintage,
-            appellation: s.appellation,
-            cuvee: s.cuvee,
-            region: s.region,
-            country: s.country,
-            color: s.color.map { WineColor(graphql: $0) },
-            subtype: s.subtype.flatMap { BeverageSubtype(graphql: $0) },
-            grapeVarieties: s.grapeVarieties ?? [],
-            alcoholContent: s.alcoholContent,
-            classification: s.classification,
-            drinkFrom: s.drinkFrom,
-            drinkUntil: s.drinkUntil,
-            estimatedPrice: s.estimatedPrice
+        return ScanResult(data.scanBeverage.fragments.scanResultFields)
+    }
+
+    /// Names a beverage from what is typed about it, without a photo. Same
+    /// answer, same allowance as a scan.
+    static func identify(description: String) async throws -> ScanResult {
+        let data = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.IdentifyWineMutation(description: description)
         )
+        return ScanResult(data.identifyBeverage.fragments.scanResultFields)
     }
 
     /// Toggle the favorite (heart) flag without clobbering an existing tasting note.

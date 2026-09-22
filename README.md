@@ -10,7 +10,7 @@ A purely functional approach to wine cellar management.
 
 ## Features
 
-- **AI scan** — photograph a label, get structured wine data + price estimate (Gemini 2.5 Flash vision + Google Search grounding). The reading tells the three names a label crowds together apart: the estate, the cuvée it bottled and the wine's own name, so "Domaine Leflaive, Puligny-Montrachet 1er Cru Les Pucelles" lands in three fields instead of one
+- **AI scan** — photograph a label, get structured wine data + price estimate (Gemini 2.5 Flash vision + Google Search grounding). The reading tells the three names a label crowds together apart: the estate, the cuvée it bottled and the wine's own name, so "Domaine Leflaive, Puligny-Montrachet 1er Cru Les Pucelles" lands in three fields instead of one. The scan button opens a sheet with the camera and the last photos of the library, and a text field: typed on its own it names the wine without a photo ("Grange des Pères 2016 rouge"), typed before a photo it settles what the label leaves out
 - **Cellar grid** — physical position tracking by row and column
 - **Journal** — entry/exit history with tasting notes and ratings
 - **Dashboard** — cellar stats, total value, ready-to-drink alerts, recent activity

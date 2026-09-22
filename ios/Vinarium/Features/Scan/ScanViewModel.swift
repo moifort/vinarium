@@ -3,7 +3,8 @@ import SwiftUI
 
 enum ScanStep {
     case camera
-    case review(ScanResult, Data)
+    /// The photo read, absent when the beverage was named in words.
+    case review(ScanResult, Data?)
     case placing(id: String, name: String, beverageType: BeverageType, color: WineColor?, vintage: Int?)
     case confirmed(name: String, beverageType: BeverageType, color: WineColor?, position: String)
     case favoriteSaved
@@ -45,8 +46,25 @@ final class ScanViewModel {
     private var pendingPaywall = false
     var isSaving = false
     var pendingLocation: TastingLocationDraft?
+    /// Typed on the add-a-wine sheet before the camera opened: it goes with
+    /// every photo taken in this scanner and settles what the label leaves out.
+    var description: String?
 
     func capturePhoto(_ imageData: Data) {
+        let description = description
+        analyze(imageData: imageData) {
+            try await WineAPI.scan(imageData: imageData, description: description)
+        }
+    }
+
+    /// Names the beverage from the typed description alone, no photo.
+    func identify(_ description: String) {
+        analyze(imageData: nil) {
+            try await WineAPI.identify(description: description)
+        }
+    }
+
+    private func analyze(imageData: Data?, request: @escaping () async throws -> ScanResult) {
         isAnalyzing = true
         scanNotRecognized = false
         error = nil
@@ -54,7 +72,7 @@ final class ScanViewModel {
 
         Task {
             do {
-                let result = try await WineAPI.scan(imageData: imageData)
+                let result = try await request()
                 if result.recognized {
                     track(.scanSucceeded)
                     // Inside the flow sheet, the analysis overlay fades out to reveal

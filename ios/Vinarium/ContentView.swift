@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 enum TabSelection: Int, CaseIterable, Identifiable {
@@ -25,9 +26,15 @@ struct ContentView: View {
     @State private var showAdminSheet = false
 
     @State private var selectedTab: TabSelection = .home
-    /// The last real content tab, restored when the scan cover is dismissed.
+    /// The last real content tab, handed straight back when the scan tab is tapped.
     @State private var lastContentTab: TabSelection = .home
-    @State private var showScanner = false
+    @State private var showAddSheet = false
+    @State private var pendingSource: AddWineSource?
+    /// Typed on the add sheet: sent alone, or carried by the photo chosen there.
+    @State private var addDescription = ""
+    @State private var scanStart: ScanStart?
+    @State private var showPhotoPicker = false
+    @State private var pickedPhoto: PhotosPickerItem?
     @State private var cellarRefreshTrigger = UUID()
     @State private var wineListRefreshTrigger = UUID()
     @State private var showFavorites = false
@@ -47,6 +54,14 @@ struct ContentView: View {
         }
         #endif
         return .search
+    }
+
+    /// Keys the scanner cover, so each opening starts from what was chosen.
+    private struct ScanStart: Identifiable {
+        let id = UUID()
+        let start: ScanView.Start
+        /// Goes with every photo read in this scanner.
+        var description: String?
     }
 
     var body: some View {
@@ -125,19 +140,43 @@ struct ContentView: View {
             }
         }
         .onChange(of: selectedTab) { _, newValue in
+            // The scan tab is a button, not a destination: it opens the add
+            // sheet (the camera, and the photos the camera alone would not
+            // reach) and hands the selection straight back, so the tab bar
+            // never shows a selected "Scanner" with nothing behind it.
             if newValue == .scan {
-                showScanner = true
+                addDescription = ""
+                showAddSheet = true
+                selectedTab = lastContentTab
             } else {
                 lastContentTab = newValue
+            }
+        }
+        .sheet(isPresented: $showAddSheet, onDismiss: actOnPendingSource) {
+            AddWineSheet(
+                description: $addDescription,
+                onCamera: { choose(.camera) },
+                onAllPhotos: { choose(.library) },
+                onPickedPhoto: { choose(.photo($0, coordinate: $1)) },
+                onText: { choose(.text($0)) }
+            )
+        }
+        .photosPicker(isPresented: $showPhotoPicker, selection: $pickedPhoto, matching: .images)
+        .onChange(of: pickedPhoto) { _, item in
+            guard let item else { return }
+            pickedPhoto = nil
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self) else { return }
+                scanStart = ScanStart(start: .photo(data, coordinate: nil), description: typedDescription)
             }
         }
         .environment(searchPresenter)
         .fullScreenCover(isPresented: $searchPresenter.isPresented) {
             SearchView()
         }
-        .fullScreenCover(isPresented: $showScanner, onDismiss: restoreContentTab) {
-            ScanView { result in
-                showScanner = false
+        .fullScreenCover(item: $scanStart) { boxed in
+            ScanView(start: boxed.start, description: boxed.description) { result in
+                scanStart = nil
                 switch result {
                 case .addedToCellar:
                     selectedTab = .cellar
@@ -185,11 +224,31 @@ struct ContentView: View {
         .dynamicTypeSize(.large)
     }
 
-    /// After the scan cover closes, leave the empty scan tab and return to the
-    /// content tab the user came from (unless a successful scan already routed
-    /// the selection elsewhere).
-    private func restoreContentTab() {
-        if selectedTab == .scan { selectedTab = lastContentTab }
+    private func choose(_ source: AddWineSource) {
+        pendingSource = source
+        showAddSheet = false
+    }
+
+    /// The sheet is gone: open what it chose.
+    private func actOnPendingSource() {
+        guard let source = pendingSource else { return }
+        pendingSource = nil
+        switch source {
+        case .camera:
+            scanStart = ScanStart(start: .camera, description: typedDescription)
+        case let .photo(data, coordinate):
+            scanStart = ScanStart(start: .photo(data, coordinate: coordinate), description: typedDescription)
+        case .library:
+            showPhotoPicker = true
+        case let .text(text):
+            scanStart = ScanStart(start: .text(text))
+        }
+    }
+
+    /// What was typed on the add sheet, if anything, to send with the photo.
+    private var typedDescription: String? {
+        let text = addDescription.trimmingCharacters(in: .whitespacesAndNewlines)
+        return text.isEmpty ? nil : text
     }
 
     /// One amount of the banner: an ellipsis while nothing is loaded, the value otherwise.
