@@ -77,6 +77,9 @@ export const createFakeFirestore = () => {
   let generatedIds = 0
   let docReads = 0
   let queryReads = 0
+  // What a query is billed: every document it returns and every one an offset
+  // skipped, with a floor of one read for a query that matched nothing.
+  let queryDocReads = 0
 
   const docsOf = (collection: string) => {
     const existing = store.get(collection)
@@ -153,7 +156,7 @@ export const createFakeFirestore = () => {
     order?: { field: string; direction: 'asc' | 'desc' }
     limit?: number
     offset?: number
-    startAfterId?: string
+    startAfter?: { id: string; data: Doc }
   }
 
   // Only the operators production code actually uses — fail loudly otherwise.
@@ -180,31 +183,43 @@ export const createFakeFirestore = () => {
       makeQuery(collection, { ...state, order: { field, direction } }),
     limit: (count) => makeQuery(collection, { ...state, limit: count }),
     offset: (count) => makeQuery(collection, { ...state, offset: count }),
-    startAfter: (cursor) => makeQuery(collection, { ...state, startAfterId: cursor.id }),
+    // Like Firestore, the cursor is the snapshot's position (its sort value then
+    // its id), so it works for a document the query itself would not return.
+    startAfter: (cursor) =>
+      makeQuery(collection, {
+        ...state,
+        startAfter: { id: cursor.id, data: cursor.data() ?? {} },
+      }),
     get: async () => {
       queryReads += 1
       let matching = [...docsOf(collection).entries()].filter(([, data]) =>
         state.filters.every((filter) => matchesFilter(data, filter)),
       )
-      if (state.order) {
+      const compare = ([idA, a]: [string, Doc], [idB, b]: [string, Doc]) => {
+        if (!state.order) return idA < idB ? -1 : idA > idB ? 1 : 0
         const { field, direction } = state.order
         // Firestore uses the document id as an implicit tie-break — mirror it.
-        matching.sort(([idA, a], [idB, b]) => {
-          const left = sortValue(a[field])
-          const right = sortValue(b[field])
-          const primary = left < right ? -1 : left > right ? 1 : 0
-          const comparison = primary !== 0 ? primary : idA < idB ? -1 : idA > idB ? 1 : 0
-          return direction === 'desc' ? -comparison : comparison
-        })
+        const left = sortValue(a[field])
+        const right = sortValue(b[field])
+        const primary = left < right ? -1 : left > right ? 1 : 0
+        const comparison = primary !== 0 ? primary : idA < idB ? -1 : idA > idB ? 1 : 0
+        return direction === 'desc' ? -comparison : comparison
       }
-      if (state.startAfterId) {
-        const cursorIndex = matching.findIndex(([id]) => id === state.startAfterId)
-        if (cursorIndex >= 0) matching = matching.slice(cursorIndex + 1)
-      }
+      if (state.order) matching.sort(compare)
+      const cursor = state.startAfter
+      if (cursor)
+        matching = matching.filter((entry) => compare(entry, [cursor.id, cursor.data]) > 0)
+      const before = matching.length
       if (state.offset !== undefined) matching = matching.slice(state.offset)
+      const skipped = before - matching.length
       if (state.limit !== undefined) matching = matching.slice(0, state.limit)
+      queryDocReads += Math.max(1, skipped + matching.length)
       return {
-        docs: matching.map(([id, data]) => ({ data: () => data, ref: makeRef(collection, id) })),
+        docs: matching.map(([id, data]) => ({
+          id,
+          data: () => data,
+          ref: makeRef(collection, id),
+        })),
       }
     },
     // Aggregation count: like Firestore, one billed query round-trip, no documents.
@@ -345,6 +360,11 @@ export const createFakeFirestore = () => {
     // so asserting queryReads === 0 is the proof that a path never scans a collection
     get queryReads() {
       return queryReads
+    },
+    // Documents billed by collection queries (returned + skipped by an offset) —
+    // the cost that grows with the data, where queryReads only counts round-trips
+    get queryDocReads() {
+      return queryDocReads
     },
     failCommitsWith: (error: Error) => {
       commitError = error
