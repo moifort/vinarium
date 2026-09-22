@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test'
-import { parseScanResponse, scanLanguageFrom } from '~/domain/scan/primitives'
+import {
+  BottleDescription,
+  MAX_BOTTLE_DESCRIPTION_LENGTH,
+  parseScanResponse,
+  scanLanguageFrom,
+} from '~/domain/scan/primitives'
 
 describe('scanLanguageFrom', () => {
   test('reads the primary subtag of the first listed language', () => {
@@ -30,5 +35,25 @@ describe('parseScanResponse', () => {
     expect(
       parseScanResponse('{"name":"Margaux","beverageType":"wine","cuvee":null}').cuvee,
     ).toBeUndefined()
+  })
+})
+
+describe('BottleDescription', () => {
+  test('keeps what was typed, without the surrounding blanks', () => {
+    expect<string>(BottleDescription('  Grange des Pères 2016 rouge \n')).toBe(
+      'Grange des Pères 2016 rouge',
+    )
+  })
+
+  test('refuses a description with nothing in it', () => {
+    expect(() => BottleDescription('')).toThrow()
+    expect(() => BottleDescription('   ')).toThrow()
+  })
+
+  test('refuses a description past the length a description needs', () => {
+    expect(BottleDescription('a'.repeat(MAX_BOTTLE_DESCRIPTION_LENGTH))).toHaveLength(
+      MAX_BOTTLE_DESCRIPTION_LENGTH,
+    )
+    expect(() => BottleDescription('a'.repeat(MAX_BOTTLE_DESCRIPTION_LENGTH + 1))).toThrow()
   })
 })

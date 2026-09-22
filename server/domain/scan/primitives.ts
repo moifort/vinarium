@@ -3,7 +3,11 @@ import { z } from 'zod'
 import { retainedSubtype } from '~/domain/beverage/business-rules'
 import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
 import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
-import type { ImageHash as ImageHashType, ScanResult } from '~/domain/scan/types'
+import type {
+  BottleDescription as BottleDescriptionType,
+  ImageHash as ImageHashType,
+  ScanResult,
+} from '~/domain/scan/types'
 import { languageFrom } from '~/domain/shared/language'
 
 export const ImageHash = (value: unknown) => {
@@ -12,6 +16,15 @@ export const ImageHash = (value: unknown) => {
     .regex(/^[0-9a-f]{64}$/)
     .parse(value)
   return make<ImageHashType>()(v)
+}
+
+// Long enough for a name, a vintage and a few words of context; short enough
+// that it stays a description and not a document pasted into the prompt.
+export const MAX_BOTTLE_DESCRIPTION_LENGTH = 300
+
+export const BottleDescription = (value: unknown) => {
+  const v = z.string().trim().min(1).max(MAX_BOTTLE_DESCRIPTION_LENGTH).parse(value)
+  return make<BottleDescriptionType>()(v)
 }
 
 // The scan's output language is the app's shared language, resolved from

@@ -20,6 +20,7 @@ import {
 } from '~/domain/beverage/primitives'
 import { HouseholdId } from '~/domain/household/primitives'
 import { JournalEntryId } from '~/domain/journal/primitives'
+import { BottleDescription } from '~/domain/scan/primitives'
 import {
   Country,
   Eur,
@@ -274,4 +275,14 @@ builder.scalarType('SignedUrl', {
     'survives its window, and the bucket is unreachable by any other means.',
   serialize: (value) => value as string,
   parseValue: validatedParse('SignedUrl', SignedUrl),
+})
+
+builder.scalarType('BottleDescription', {
+  description:
+    'What someone types about a bottle, 1 to 300 characters once trimmed.\n\n' +
+    'On its own it names the beverage for the AI to identify ' +
+    '(example: "Grange des Pères 2016 rouge"); sent with a label photo it adds what ' +
+    'the label does not show (example: "magnum, bought at the estate").',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('BottleDescription', BottleDescription),
 })

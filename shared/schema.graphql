@@ -591,6 +591,13 @@ type Beverages {
 }
 
 """
+What someone types about a bottle, 1 to 300 characters once trimmed.
+
+On its own it names the beverage for the AI to identify (example: "Grange des Pères 2016 rouge"); sent with a label photo it adds what the label does not show (example: "magnum, bought at the estate").
+"""
+scalar BottleDescription
+
+"""
 A size in bytes, a non-negative integer.
 
 An attachment may not exceed 10485760 bytes (10 MB). Example: 248312.
@@ -1445,6 +1452,18 @@ type Mutation {
   ): Boolean!
 
   """
+  Identify a beverage from a typed description, without a photo.
+  
+  The description ("Grange des Pères 2016 rouge") is read by the same model as a label and the answer has the same shape as `scanBeverage`, enriched with a web search when a beverage is recognized. Cached server-side regardless of case and spacing. Check `recognized` on the result: false means the text names no identifiable beverage.
+  
+  Spends one scan of the allowance, on the same terms as `scanBeverage`. Fails with `QUOTA_EXHAUSTED` once nothing is left anywhere, or `SCAN_FAILED` when the model call errors.
+  """
+  identifyBeverage(
+    """The beverage as remembered: name, producer, vintage, colour"""
+    description: BottleDescription!
+  ): ScanResult!
+
+  """
   Restore a full account from an export envelope, replacing existing records.
   
   Consumes the JSON string produced by `exportData` and rewrites every domain from it, so the operation is destructive: prior records are replaced, not merged. The envelope `schemaVersion` must match the server's supported version. Returns the per-domain counts written.
@@ -1612,11 +1631,14 @@ type Mutation {
   """
   Extract structured beverage details from a bottle-label photo using AI.
   
-  Reads a base64-encoded JPEG with a vision model (Gemini) and, when a beverage is recognized, enriches it with a web search. The result is cached server-side by SHA-256, so scanning the same label twice avoids re-calling the models. Check `recognized` on the result: false means no beverage was identified.
+  Reads a base64-encoded JPEG with a vision model (Gemini) and, when a beverage is recognized, enriches it with a web search. A `description` typed alongside is read with the label and settles what it does not show. The result is cached server-side by SHA-256 of the image and the description, so scanning the same label twice avoids re-calling the models. Check `recognized` on the result: false means no beverage was identified.
   
   Spends one scan of the allowance (see the `quota` query): the month first, then the scans granted at onboarding. Only a real model call is charged, a cached label is free. Fails with `QUOTA_EXHAUSTED` once nothing is left anywhere, `IMAGE_TOO_LARGE` above the 10 MB limit, or `SCAN_FAILED` when the model call errors.
   """
   scanBeverage(
+    """What the label does not show, typed by the photographer (optional)"""
+    description: BottleDescription
+
     """Bottle-label JPEG, base64-encoded (no data URL prefix), up to 10 MB"""
     imageBase64: String!
   ): ScanResult!
@@ -2061,9 +2083,9 @@ Example: "Bourgogne".
 scalar Region
 
 """
-Structured beverage details extracted by AI from a bottle-label image.
+Structured beverage details extracted by AI from a bottle-label image or a typed description.
 
-Produced by `scanBeverage`: the label photo is read by a vision model (Gemini) and, when a beverage is identified, enriched with a web search. All fields except `recognized`, `name` and `beverageType` are best-effort and may be null. Check `recognized` first: when false the extraction failed to identify a beverage and the other fields are placeholders, so the client should show a "no result" screen instead of a review form.
+Produced by `scanBeverage`, where the label photo is read by a vision model (Gemini), or by `identifyBeverage`, where a typed description is; when a beverage is identified, it is enriched with a web search. All fields except `recognized`, `name` and `beverageType` are best-effort and may be null. Check `recognized` first: when false the extraction failed to identify a beverage and the other fields are placeholders, so the client should show a "no result" screen instead of a review form.
 
 ```graphql
 mutation {

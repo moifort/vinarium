@@ -5,6 +5,7 @@ import { fakeDb, resetFakeFirestore } from '~/test/fake-firestore'
 mock.module('~/system/firebase', () => ({ db: fakeDb }))
 
 const { Scan } = await import('~/domain/scan/index')
+const { BottleDescription } = await import('~/domain/scan/primitives')
 
 describe('scanWithCache', () => {
   let fake = resetFakeFirestore()
@@ -88,5 +89,65 @@ describe('scanWithCache', () => {
     expect(ja.cacheHit).toBe(true)
     expect(fr.result.country).toBe('France')
     expect(ja.result.country).toBe('フランス')
+  })
+
+  test('keys a photo sent with a description apart from the same photo alone', async () => {
+    const imageBuffer = Buffer.from('label-with-a-note')
+    const alone = createHash('sha256').update(imageBuffer).digest('hex')
+    const withNote = createHash('sha256')
+      .update(imageBuffer)
+      .update('\u0000')
+      .update('magnum')
+      .digest('hex')
+    fake.seed('scan-cache', `${alone}_fr`, {
+      imageHash: alone,
+      language: 'fr',
+      result: { name: 'Château Margaux', beverageType: 'wine' },
+      cachedAt: new Date('2026-01-01'),
+    })
+    fake.seed('scan-cache', `${withNote}_fr`, {
+      imageHash: withNote,
+      language: 'fr',
+      result: { name: 'Château Margaux (magnum)', beverageType: 'wine' },
+      cachedAt: new Date('2026-01-01'),
+    })
+
+    const plain = await Scan.scanWithCache(imageBuffer, 'fr')
+    const noted = await Scan.scanWithCache(imageBuffer, 'fr', BottleDescription('magnum'))
+
+    expect(plain.result.name).toBe('Château Margaux')
+    expect(noted.result.name).toBe('Château Margaux (magnum)')
+    expect(noted.cacheHit).toBe(true)
+  })
+})
+
+describe('identifyWithCache', () => {
+  let fake = resetFakeFirestore()
+
+  beforeEach(() => {
+    fake = resetFakeFirestore()
+  })
+
+  test('serves the same entry whatever the case and spacing of the description', async () => {
+    const key = createHash('sha256')
+      .update('text:')
+      .update('\u0000')
+      .update('grange des pères 2016')
+      .digest('hex')
+    fake.seed('scan-cache', `${key}_fr`, {
+      imageHash: key,
+      language: 'fr',
+      result: { name: 'Grange des Pères', beverageType: 'wine', vintage: 2016 },
+      cachedAt: new Date('2026-01-01'),
+    })
+
+    const { result, cacheHit } = await Scan.identifyWithCache(
+      BottleDescription('Grange  des Pères\n2016'),
+      'fr',
+    )
+
+    expect(result.name).toBe('Grange des Pères')
+    expect(result.vintage).toBe(2016)
+    expect(cacheHit).toBe(true)
   })
 })

@@ -10,14 +10,21 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 // is allowed to reach it and what reaching it costs the caller.
 let cacheHit = false
 let scanFails = false
-const scanned = { calls: 0 }
+const scanned = { calls: 0, description: undefined as string | undefined }
 
 const aScanResult = { recognized: true, name: 'Château Margaux', beverageType: 'wine' }
 
 mock.module('~/domain/scan', () => ({
   Scan: {
-    scanWithCache: async () => {
+    scanWithCache: async (_image: Buffer, _language: string, description?: string) => {
       scanned.calls += 1
+      scanned.description = description
+      if (scanFails) throw new Error('Gemini is down')
+      return { result: aScanResult as unknown as ScanResult, cacheHit }
+    },
+    identifyWithCache: async (description: string) => {
+      scanned.calls += 1
+      scanned.description = description
       if (scanFails) throw new Error('Gemini is down')
       return { result: aScanResult as unknown as ScanResult, cacheHit }
     },
@@ -43,6 +50,7 @@ beforeEach(() => {
   cacheHit = false
   scanFails = false
   scanned.calls = 0
+  scanned.description = undefined
   compedUserIds = []
 })
 
@@ -54,6 +62,9 @@ const execute = (source: string) =>
   })
 
 const scan = () => execute(`mutation { scanBeverage(imageBase64: "aGVsbG8=") { name recognized } }`)
+
+const identify = (description = 'Château Margaux 2015') =>
+  execute(`mutation { identifyBeverage(description: "${description}") { name recognized } }`)
 
 const errorCodeOf = (result: Awaited<ReturnType<typeof execute>>) =>
   result.errors?.[0]?.extensions?.code
@@ -229,5 +240,63 @@ describe('the reads a gated scan pays for', () => {
     expect(errorCodeOf(await scan())).toBe('QUOTA_EXHAUSTED')
     expect(fake.docReads).toBe(3)
     expect(fake.queryReads).toBe(0)
+  })
+})
+
+describe('a photo sent with a description', () => {
+  test('hands the description, trimmed, to the scan', async () => {
+    const result = await execute(
+      `mutation { scanBeverage(imageBase64: "aGVsbG8=", description: "  magnum ") { name } }`,
+    )
+
+    expect(result.errors).toBeUndefined()
+    expect(scanned.description).toBe('magnum')
+  })
+
+  test('is refused when the description is blank, before the model is reached', async () => {
+    const result = await execute(
+      `mutation { scanBeverage(imageBase64: "aGVsbG8=", description: "   ") { name } }`,
+    )
+
+    expect(errorCodeOf(result)).toBe('BAD_USER_INPUT')
+    expect(scanned.calls).toBe(0)
+  })
+})
+
+describe('identifying a beverage from a description', () => {
+  test('returns the beverage and spends one scan', async () => {
+    const result = await identify()
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.identifyBeverage).toMatchObject({ name: 'Château Margaux' })
+    expect(scanned.description).toBe('Château Margaux 2015')
+    expect((await execute(`query { quota { used } }`)).data?.quota).toMatchObject({ used: 1 })
+  })
+
+  test('is refused with QUOTA_EXHAUSTED once the allowance is spent, like a scan', async () => {
+    await spendFreeAllowance()
+
+    expect(errorCodeOf(await identify())).toBe('QUOTA_EXHAUSTED')
+    expect(scanned.calls).toBe(0)
+  })
+
+  test('a cached description spends nothing', async () => {
+    cacheHit = true
+
+    await identify()
+
+    expect((await execute(`query { quota { used } }`)).data?.quota).toMatchObject({ used: 0 })
+  })
+
+  test('a failed model call spends nothing', async () => {
+    scanFails = true
+
+    expect(errorCodeOf(await identify())).toBe('SCAN_FAILED')
+    expect((await execute(`query { quota { used } }`)).data?.quota).toMatchObject({ used: 0 })
+  })
+
+  test('is refused past the length a description needs', async () => {
+    expect(errorCodeOf(await identify('a'.repeat(301)))).toBe('BAD_USER_INPUT')
+    expect(scanned.calls).toBe(0)
   })
 })

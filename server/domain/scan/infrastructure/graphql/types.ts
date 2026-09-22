@@ -8,9 +8,10 @@ import type { ScanResult } from '../../types'
 
 export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implement({
   description:
-    'Structured beverage details extracted by AI from a bottle-label image.\n\n' +
-    'Produced by `scanBeverage`: the label photo is read by a vision model (Gemini) ' +
-    'and, when a beverage is identified, enriched with a web search. All fields except ' +
+    'Structured beverage details extracted by AI from a bottle-label image or a typed description.\n\n' +
+    'Produced by `scanBeverage`, where the label photo is read by a vision model (Gemini), ' +
+    'or by `identifyBeverage`, where a typed description is; when a beverage is identified, ' +
+    'it is enriched with a web search. All fields except ' +
     '`recognized`, `name` and `beverageType` are best-effort and may be null. Check `recognized` ' +
     'first: when false the extraction failed to identify a beverage and the other fields are ' +
     'placeholders, so the client should show a "no result" screen instead of a review form.\n\n' +

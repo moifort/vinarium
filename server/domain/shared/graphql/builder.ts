@@ -21,6 +21,7 @@ import type {
 } from '~/domain/beverage/types'
 import type { HouseholdId } from '~/domain/household/types'
 import type { JournalEntryId } from '~/domain/journal/types'
+import type { BottleDescription } from '~/domain/scan/types'
 import type {
   Country,
   Eur,
@@ -85,6 +86,7 @@ export const builder = new SchemaBuilder<{
     ContentType: { Input: ContentType; Output: ContentType }
     ByteSize: { Input: ByteSize; Output: ByteSize }
     SignedUrl: { Input: SignedUrl; Output: SignedUrl }
+    BottleDescription: { Input: BottleDescription; Output: BottleDescription }
   }
 }>({
   defaultFieldNullability: false,
