@@ -1,29 +1,38 @@
-query Entitlement {
+fragment EntitlementFields on Entitlement {
+  plan
+  appAccountToken
+  productId
+  expiresOn
+}
+
+fragment QuotaFields on Quota {
+  plan
+  used
+  limit
+  remaining
+  welcomeRemaining
+  totalRemaining
+  renewsOn
+}
+
+# The plan and the allowance, read together.
+query SubscriptionState {
   entitlement {
-    plan
-    appAccountToken
-    productId
-    expiresOn
+    ...EntitlementFields
+  }
+  quota {
+    ...QuotaFields
   }
 }
 
 query Quota {
   quota {
-    plan
-    used
-    limit
-    remaining
-    welcomeRemaining
-    totalRemaining
-    renewsOn
+    ...QuotaFields
   }
 }
 
 mutation SyncEntitlement($signedTransaction: String!) {
   syncEntitlement(signedTransaction: $signedTransaction) {
-    plan
-    appAccountToken
-    productId
-    expiresOn
+    ...EntitlementFields
   }
 }

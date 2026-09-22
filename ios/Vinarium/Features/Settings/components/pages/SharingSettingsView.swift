@@ -137,25 +137,26 @@ struct SharingSettingsView: View {
     // MARK: - Actions
 
     private func load() async {
-        // Fetch both concurrently. The household drives the screen, so only its
-        // failure surfaces an error; the first name is best-effort (an existing member
-        // already carries a name, and the fallback covers a missing one).
-        async let me = OnboardingAPI.loadMe()
+        // The household and the first name come back together.
         do {
-            household = try await HouseholdAPI.myHousehold()
+            (household, firstName) = try await HouseholdAPI.sharingSettings()
             loadError = nil
         } catch {
             loadError = error.localizedDescription
         }
-        firstName = (try? await me)?.firstName
         isLoading = false
     }
 
     private func generateInvite() async {
         let name = currentName
         await actionError.run {
-            _ = try await HouseholdAPI.createInvitation(displayName: name)
-            household = try await HouseholdAPI.myHousehold()
+            let invite = try await HouseholdAPI.createInvitation(displayName: name)
+            // The first invitation creates the household: only then is it read back.
+            if let current = household {
+                household = current.adding(invite)
+            } else {
+                household = try await HouseholdAPI.myHousehold()
+            }
         }
     }
 
@@ -175,7 +176,7 @@ struct SharingSettingsView: View {
     private func revoke(code: String) async {
         await actionError.run {
             try await HouseholdAPI.revokeInvitation(code: code)
-            household = try await HouseholdAPI.myHousehold()
+            household = household?.revoking(code)
         }
     }
 

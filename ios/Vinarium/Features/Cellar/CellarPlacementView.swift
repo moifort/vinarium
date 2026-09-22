@@ -64,15 +64,12 @@ struct CellarPlacementView: View {
 
     private func loadData() async {
         do {
-            async let bottlesData = CellarAPI.getAllBottles()
-            async let suggestion = CellarAPI.suggest()
-            async let gridInfo = CellarAPI.info()
-            let (b, s, g) = try await (bottlesData, suggestion, gridInfo)
-            bottles = b
-            suggestedRow = s.row
-            suggestedCol = s.col
-            rows = g.rows
-            cols = g.cols
+            let grid = try await CellarAPI.grid(withSuggestion: true)
+            bottles = grid.bottles
+            suggestedRow = grid.suggestion?.row
+            suggestedCol = grid.suggestion?.col
+            rows = grid.rows
+            cols = grid.cols
             isLoading = false
         } catch {
             self.error = reportError(error)

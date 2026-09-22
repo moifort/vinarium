@@ -41,6 +41,16 @@ struct Household: Sendable, Hashable {
     let invitations: [HouseholdInvite]
 
     var iAmOwner: Bool { members.contains { $0.isMe && $0.isOwner } }
+
+    /// The same household once an invitation was opened or revoked: the mutation
+    /// says what changed, so the screen follows without reading the household again.
+    func adding(_ invite: HouseholdInvite) -> Household {
+        Household(members: members, invitations: invitations + [invite])
+    }
+
+    func revoking(_ code: String) -> Household {
+        Household(members: members, invitations: invitations.filter { $0.code != code })
+    }
 }
 
 struct ImportSummary: Sendable, Hashable {

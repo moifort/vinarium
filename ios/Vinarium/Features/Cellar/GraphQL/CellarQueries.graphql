@@ -1,76 +1,106 @@
+fragment CellarBottleFields on CellarBottleWithWine {
+  beverageId
+  row
+  col
+  rowLabel
+  colLabel
+  createdAt
+  owner {
+    displayName
+    isMine
+  }
+  wine {
+    id
+    name
+    beverageType
+    subtype
+    producer
+    region
+    country
+    purchase {
+      price
+    }
+    details {
+      ... on WineDetails {
+        color
+        vintage
+        appellation
+        classification
+        drinkWindow {
+          from
+          until
+        }
+      }
+    }
+  }
+}
+
+fragment JournalEventFields on JournalEvent {
+  type
+  date
+  beverageId
+  beverageName
+  wineBeverageType
+  wineColor
+  position
+  actor {
+    displayName
+    isMine
+  }
+}
+
+# The cellar screen as it opens: the first page of bottles and of the journal,
+# in one round trip.
+query CellarOverview($limit: Int) {
+  cellarBottles(limit: $limit) {
+    items {
+      ...CellarBottleFields
+    }
+    hasMore
+  }
+  journalEvents(limit: $limit) {
+    items {
+      ...JournalEventFields
+    }
+    hasMore
+    endCursor
+  }
+}
+
 query CellarBottles($limit: Int, $after: BeverageId) {
   cellarBottles(limit: $limit, after: $after) {
     items {
-      beverageId
-      row
-      col
-      rowLabel
-      colLabel
-      createdAt
-      owner {
-        displayName
-        isMine
-      }
-      wine {
-        id
-        name
-        beverageType
-        subtype
-        producer
-        region
-        country
-        purchase {
-          price
-        }
-        details {
-          ... on WineDetails {
-            color
-            vintage
-            appellation
-            classification
-            drinkWindow {
-              from
-              until
-            }
-          }
-        }
-      }
+      ...CellarBottleFields
     }
     hasMore
   }
 }
 
-query CellarHistory($limit: Int, $offset: Int) {
-  journalEvents(limit: $limit, offset: $offset) {
+query CellarHistory($limit: Int, $after: JournalEntryId) {
+  journalEvents(limit: $limit, after: $after) {
     items {
-      type
-      date
-      beverageId
-      beverageName
-      wineBeverageType
-      wineColor
-      position
-      actor {
-        displayName
-        isMine
-      }
+      ...JournalEventFields
     }
     hasMore
+    endCursor
   }
 }
 
-query SuggestCellarPosition {
-  suggestCellarPosition {
-    row
-    col
-    rowLabel
-    colLabel
+# The whole grid, to place or move a bottle: every bottle, the grid size and,
+# when placing, the suggested free slot — one round trip. The cellar is bounded
+# by its physical capacity, so one large page covers it all.
+query CellarGrid($withSuggestion: Boolean!) {
+  cellarBottles(limit: 1000) {
+    items {
+      ...CellarBottleFields
+    }
   }
-}
-
-query CellarGridInfo {
   cellarInfo {
     rows
     cols
+  }
+  suggestCellarPosition @include(if: $withSuggestion) {
+    rowLabel
+    colLabel
   }
 }

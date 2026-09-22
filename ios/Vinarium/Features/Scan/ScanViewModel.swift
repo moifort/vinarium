@@ -45,10 +45,6 @@ final class ScanViewModel {
     private var pendingPaywall = false
     var isSaving = false
     var pendingLocation: TastingLocationDraft?
-    /// Wine already created during this review session: if a post-creation write
-    /// (tasting / recommendation) fails, tapping again does not create a duplicate,
-    /// the existing wine is reused.
-    private var createdWine: Wine?
 
     func capturePhoto(_ imageData: Data) {
         isAnalyzing = true
@@ -131,21 +127,18 @@ final class ScanViewModel {
         error = nil
         defer { isSaving = false }
         do {
-            // Reuse the wine already created when a retry follows a post-creation failure.
-            let wine: Wine
-            if let existing = createdWine {
-                wine = existing
-            } else {
-                wine = try await WineAPI.create(submission.request)
-                createdWine = wine
-                // The activation metric, counted where the bottle is really
-                // created: a retry reuses the wine above and must not count twice.
-                // Every bottle reaches the form through a scan today; the source
-                // is carried anyway, for the day one does not.
-                track(.bottleAdded(source: .scan))
-            }
-            try await persistTasting(for: wine.id, submission)
-            try await persistRecommendation(for: wine.id, submission)
+            // The bottle, its tasting note and its recommendation land in one
+            // mutation: a failure leaves nothing behind, so a retry starts over.
+            let formatter = ISO8601DateFormatter()
+            let wine = try await WineAPI.create(
+                submission.request,
+                tasting: tastingEntry(submission, formatter: formatter),
+                recommendation: recommendationEntry(submission)
+            )
+            // The activation metric, counted where the bottle is really created.
+            // Every bottle reaches the form through a scan today; the source is
+            // carried anyway, for the day one does not.
+            track(.bottleAdded(source: .scan))
 
             switch submission.choice {
             case .cellar:
@@ -173,16 +166,13 @@ final class ScanViewModel {
         }
     }
 
-    /// Records a tasting note when the form carries one: an explicit favorite, a star
+    /// The tasting note the form carries, if any: an explicit favorite, a star
     /// rating, or notes/contacts.
-    private func persistTasting(for wineId: String, _ s: ScanSubmission) async throws {
+    private func tastingEntry(_ s: ScanSubmission, formatter: ISO8601DateFormatter) -> TastingEntry? {
         let markFavorite = s.favorite
         let hasTastingDetails = s.rating > 0 || s.tastingNotes != nil || !s.contacts.isEmpty
-        guard markFavorite || hasTastingDetails else { return }
-
-        let formatter = ISO8601DateFormatter()
-        try await WineAPI.recordTasting(
-            id: wineId,
+        guard markFavorite || hasTastingDetails else { return nil }
+        return TastingEntry(
             consumedDate: formatter.string(from: s.tastingDate),
             rating: s.rating == 0 ? nil : s.rating,
             contacts: s.contacts.isEmpty ? nil : s.contacts,
@@ -191,11 +181,12 @@ final class ScanViewModel {
         )
     }
 
-    /// Records a recommendation when a recommender name or a comment was filled in.
-    private func persistRecommendation(for wineId: String, _ s: ScanSubmission) async throws {
+    /// The recommendation the form carries, when a recommender name or a comment
+    /// was filled in.
+    private func recommendationEntry(_ s: ScanSubmission) -> RecommendationEntry? {
         let (name, comment) = recommendationFields(s)
-        guard name != nil || comment != nil else { return }
-        try await RecommendationAPI.create(wineId: wineId, recommenderName: name, comment: comment)
+        guard name != nil || comment != nil else { return nil }
+        return RecommendationEntry(recommenderName: name, comment: comment)
     }
 
     /// Does the form carry a recommendation (a name or a comment)?
@@ -223,7 +214,6 @@ final class ScanViewModel {
         isAnalyzing = false
         scanNotRecognized = false
         pendingLocation = nil
-        createdWine = nil
     }
 }
 

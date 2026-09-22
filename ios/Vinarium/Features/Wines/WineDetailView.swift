@@ -44,8 +44,7 @@ struct WineDetailView: View {
                         WineEditForm(
                             initial: Self.editFields(from: detail),
                             onSave: { submission in
-                                try await save(submission, of: detail)
-                                self.detail = try await WineAPI.getDetail(id: wineId)
+                                self.detail = try await save(submission, of: detail)
                                 isEditing = false
                                 onUpdated?()
                             },
@@ -84,8 +83,9 @@ struct WineDetailView: View {
                 }
             }
             // Menu actions (favorite, deletion, …) close the menu before the mutation
-            // leaves, and post-mutation refetches keep the content on screen: in both
-            // cases the network call is made visible by a scrim and a spinner.
+            // leaves, and a refresh keeps the content on screen: in both cases the
+            // network call is made visible by a scrim and a spinner. A mutation hands
+            // back the sheet it leaves behind, so none is followed by a second read.
             .overlay {
                 if actionError.isRunning || isRefreshing {
                     ZStack {
@@ -198,12 +198,15 @@ struct WineDetailView: View {
                         currentRow: cellar.row,
                         currentCol: cellar.col,
                         onCancel: { showMove = false }
-                    ) {
+                    ) { row, col in
                         showMove = false
-                        Task {
-                            await loadData()
-                            onUpdated?()
-                        }
+                        self.detail?.cellar = CellarInfo(
+                            row: row,
+                            col: col,
+                            dateIn: cellar.dateIn,
+                            dateOut: nil
+                        )
+                        onUpdated?()
                     }
                 }
             }
@@ -212,20 +215,19 @@ struct WineDetailView: View {
                     FavoriteSheet { date, contacts, notes, rating in
                         let formatter = ISO8601DateFormatter()
                         await sheetError.run {
-                            try await WineAPI.recordTasting(
+                            self.detail = try await WineAPI.saveNotes(
                                 id: detail.id,
-                                consumedDate: formatter.string(from: date),
-                                rating: rating == 0 ? nil : rating,
-                                contacts: contacts.isEmpty ? nil : contacts,
-                                tastingNotes: notes,
-                                favorite: true
+                                tasting: TastingEntry(
+                                    consumedDate: formatter.string(from: date),
+                                    rating: rating == 0 ? nil : rating,
+                                    contacts: contacts.isEmpty ? nil : contacts,
+                                    tastingNotes: notes,
+                                    favorite: true
+                                )
                             )
                         } onSuccess: {
                             showFavorite = false
-                            Task {
-                                await loadData()
-                                onUpdated?()
-                            }
+                            onUpdated?()
                         }
                     }
                     .presentationDetents([.medium])
@@ -236,17 +238,16 @@ struct WineDetailView: View {
                 if let detail {
                     RecommendationSheet { recommenderName, comment in
                         await sheetError.run {
-                            try await RecommendationAPI.create(
-                                wineId: detail.id,
-                                recommenderName: recommenderName,
-                                comment: comment
+                            self.detail = try await WineAPI.saveNotes(
+                                id: detail.id,
+                                recommendation: RecommendationEntry(
+                                    recommenderName: recommenderName,
+                                    comment: comment
+                                )
                             )
                         } onSuccess: {
                             showRecommendation = false
-                            Task {
-                                await loadData()
-                                onUpdated?()
-                            }
+                            onUpdated?()
                         }
                     }
                     .presentationDetents([.medium])
@@ -265,13 +266,10 @@ struct WineDetailView: View {
                             cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
                         )
                         await sheetError.run {
-                            _ = try await WineAPI.update(id: detail.id, request)
+                            self.detail = try await WineAPI.saveSheet(id: detail.id, wine: request)
                         } onSuccess: {
                             showLocationEditor = false
-                            Task {
-                                await loadData()
-                                onUpdated?()
-                            }
+                            onUpdated?()
                         }
                     }
                     .errorAlert(sheetError)
@@ -347,12 +345,12 @@ struct WineDetailView: View {
                             Button {
                                 Task {
                                     await actionError.run {
-                                        try await WineAPI.setFavorite(id: detail.id, favorite: false)
+                                        self.detail = try await WineAPI.saveNotes(
+                                            id: detail.id,
+                                            tasting: TastingEntry(favorite: false)
+                                        )
                                     } onSuccess: {
-                                        Task {
-                                            await loadData()
-                                            onUpdated?()
-                                        }
+                                        onUpdated?()
                                     }
                                 }
                             } label: {
@@ -424,7 +422,7 @@ struct WineDetailView: View {
     // MARK: - Helpers
 
     private func loadData() async {
-        // Post-mutation refresh: keep the content on screen and show the scrim rather
+        // A pull-to-refresh: keep the content on screen and show the scrim rather
         // than replacing the whole page with a spinner.
         if detail != nil { isRefreshing = true }
         defer { isRefreshing = false }
@@ -442,9 +440,12 @@ struct WineDetailView: View {
     /// records it spans land together or not at all. Only what the user touched is
     /// sent — an untouched wine must not grow an empty tasting note because its
     /// name was corrected.
-    private func save(_ submission: WineEditSubmission, of detail: UserWineDetail) async throws {
+    private func save(
+        _ submission: WineEditSubmission,
+        of detail: UserWineDetail
+    ) async throws -> UserWineDetail {
         let initial = Self.editFields(from: detail)
-        try await WineAPI.saveSheet(
+        return try await WineAPI.saveSheet(
             id: detail.id,
             wine: submission.wine,
             tasting: submission.tasting == initial.tasting ? nil : submission.tasting,
@@ -495,28 +496,24 @@ struct WineDetailView: View {
         isUploadingAttachment = true
         defer { isUploadingAttachment = false }
         await attachmentError.run {
-            _ = try await AttachmentAPI.upload(
+            let attachment = try await AttachmentAPI.upload(
                 beverageId: wineId,
                 data: data,
                 fileName: fileName,
                 contentType: contentType
             )
+            self.detail?.attachments.append(attachment)
         } onSuccess: {
-            Task {
-                await loadData()
-                onUpdated?()
-            }
+            onUpdated?()
         }
     }
 
     private func deleteAttachment(_ attachment: BeverageAttachment) async {
         await actionError.run {
             try await AttachmentAPI.delete(attachmentId: attachment.id)
+            self.detail?.attachments.removeAll { $0.id == attachment.id }
         } onSuccess: {
-            Task {
-                await loadData()
-                onUpdated?()
-            }
+            onUpdated?()
         }
     }
 

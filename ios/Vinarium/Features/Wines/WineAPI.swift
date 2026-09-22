@@ -43,11 +43,20 @@ enum WineAPI {
             query: VinariumGraphQL.WineDetailQuery(id: id)
         )
         guard let wine = data.beverage else { throw APIError.invalidResponse }
-        return mapDetail(wine)
+        return mapDetail(wine.fragments.wineDetailFields)
     }
 
-    static func create(_ request: CreateWineRequest) async throws -> Wine {
-        let input = addWineInput(from: request)
+    /// Add a bottle together with what the form already says about it: the
+    /// viewer's tasting note and the recommendation behind it land with the bottle,
+    /// in one mutation, or none of them does.
+    static func create(
+        _ request: CreateWineRequest,
+        tasting: TastingEntry? = nil,
+        recommendation: RecommendationEntry? = nil
+    ) async throws -> Wine {
+        var input = addWineInput(from: request)
+        input.tasting = tasting.map { .some($0.graphQLInput) } ?? .none
+        input.recommendation = recommendation.map { .some($0.graphQLInput) } ?? .none
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
             mutation: VinariumGraphQL.AddWineMutation(input: input)
@@ -63,26 +72,6 @@ enum WineAPI {
             vintage: createdDetails?.vintage,
             createdAt: GraphQLHelpers.parseISO8601(created.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(created.updatedAt) ?? Date()
-        )
-    }
-
-    static func update(id: String, _ request: UpdateWineRequest) async throws -> Wine {
-        let input = updateWineInput(from: request)
-        let data = try await GraphQLHelpers.perform(
-            GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.UpdateWineMutation(id: id, input: input)
-        )
-        let updated = data.updateBeverage
-        let updatedDetails = updated.details?.asWineDetails
-        return Wine(
-            id: updated.id,
-            name: updated.name,
-            beverageType: BeverageType(graphql: updated.beverageType),
-            color: updatedDetails?.color.map { WineColor(graphql: $0) },
-            subtype: updated.subtype.flatMap { BeverageSubtype(graphql: $0) },
-            vintage: updatedDetails?.vintage,
-            createdAt: Date(),
-            updatedAt: GraphQLHelpers.parseISO8601(updated.updatedAt) ?? Date()
         )
     }
 
@@ -133,90 +122,110 @@ enum WineAPI {
     /// gift and its recommendation are four records: sending them one mutation at a
     /// time meant four round trips and a half-saved sheet as soon as one failed.
     /// Only the parts the user touched are sent — an absent part is left alone.
+    /// Returns the sheet as saved, so the screen needs no second read.
     static func saveSheet(
         id: String,
         wine: UpdateWineRequest,
         tasting: TastingDraft? = nil,
         gift: GiftDraft? = nil,
         recommendation: RecommendationDraft? = nil
-    ) async throws {
+    ) async throws -> UserWineDetail {
         let formatter = ISO8601DateFormatter()
-        // The generated initialiser orders its arguments alphabetically.
-        let input = VinariumGraphQL.BeverageSheetInput(
-            beverage: .some(updateWineInput(from: wine)),
-            gift: gift.map { draft in
-                .some(
-                    VinariumGraphQL.GivenGiftInput(
-                        giftedDate: .some(formatter.string(from: draft.date)),
-                        recipientName: GraphQLHelpers.graphQLNullable(draft.recipientName)
+        return try await save(
+            id: id,
+            VinariumGraphQL.BeverageSheetInput(
+                beverage: .some(updateWineInput(from: wine)),
+                gift: gift.map { draft in
+                    .some(
+                        VinariumGraphQL.GivenGiftInput(
+                            giftedDate: .some(formatter.string(from: draft.date)),
+                            recipientName: GraphQLHelpers.graphQLNullable(draft.recipientName)
+                        )
                     )
-                )
-            } ?? .none,
-            recommendation: recommendation.map { draft in
-                .some(
-                    VinariumGraphQL.RecommendationInput(
-                        comment: GraphQLHelpers.graphQLNullable(draft.comment),
-                        recommenderName: GraphQLHelpers.graphQLNullable(draft.recommenderName)
+                } ?? .none,
+                recommendation: recommendation.map { draft in
+                    .some(
+                        RecommendationEntry(
+                            recommenderName: draft.recommenderName,
+                            comment: draft.comment
+                        ).graphQLInput
                     )
-                )
-            } ?? .none,
-            tasting: tasting.map { draft in
-                .some(
-                    VinariumGraphQL.TastingInput(
-                        consumedDate: GraphQLHelpers.graphQLNullable(
-                            draft.consumedDate.map { formatter.string(from: $0) }
-                        ),
-                        contacts: .some(draft.contacts),
-                        rating: GraphQLHelpers.graphQLNullable(
-                            draft.rating == 0 ? nil : draft.rating
-                        ),
-                        // An emptied comment travels as such: that is how it is erased.
-                        tastingNotes: .some(draft.tastingNotes)
+                } ?? .none,
+                tasting: tasting.map { draft in
+                    .some(
+                        TastingEntry(
+                            consumedDate: draft.consumedDate.map { formatter.string(from: $0) },
+                            rating: draft.rating == 0 ? nil : draft.rating,
+                            contacts: draft.contacts,
+                            // An emptied comment travels as such: that is how it is erased.
+                            tastingNotes: draft.tastingNotes
+                        ).graphQLInput
                     )
-                )
-            } ?? .none
+                } ?? .none
+            )
         )
-        _ = try await GraphQLHelpers.perform(
+    }
+
+    /// Save the viewer's own notes on a wine — a heart, a tasting, a
+    /// recommendation — leaving the bottle itself alone. Works on a housemate's
+    /// shared-cellar bottle too. Returns the sheet as saved.
+    static func saveNotes(
+        id: String,
+        tasting: TastingEntry? = nil,
+        recommendation: RecommendationEntry? = nil
+    ) async throws -> UserWineDetail {
+        try await save(
+            id: id,
+            VinariumGraphQL.BeverageSheetInput(
+                recommendation: recommendation.map { .some($0.graphQLInput) } ?? .none,
+                tasting: tasting.map { .some($0.graphQLInput) } ?? .none
+            )
+        )
+    }
+
+    private static func save(
+        id: String,
+        _ input: VinariumGraphQL.BeverageSheetInput
+    ) async throws -> UserWineDetail {
+        let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
             mutation: VinariumGraphQL.SaveWineSheetMutation(id: id, input: input)
         )
+        return mapDetail(data.saveBeverageSheet.fragments.wineDetailFields)
     }
+}
 
-    /// Correct the recipient and date of a bottle already given away. Recording a
-    /// gift is `CellarAPI.gift`, which also takes the bottle out of the cellar.
-    static func updateGift(id: String, recipientName: String?, giftedDate: String) async throws {
-        let input = VinariumGraphQL.GivenGiftInput(
-            giftedDate: .some(giftedDate),
-            recipientName: GraphQLHelpers.graphQLNullable(recipientName)
-        )
-        _ = try await GraphQLHelpers.perform(
-            GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.UpdateGiftMutation(beverageId: id, input: input)
-        )
-    }
+/// A tasting note as sent to the server. The server overlays the fields it
+/// receives onto the existing note, so an absent field leaves the previous value in
+/// place. An empty comment is sent verbatim rather than dropped: that is how the
+/// user erases what they wrote.
+struct TastingEntry {
+    var consumedDate: String?
+    var rating: Int?
+    var contacts: [String]?
+    var tastingNotes: String?
+    var favorite: Bool?
 
-    /// Record a tasting note (rating, notes, favorite flag) for a wine.
-    static func recordTasting(
-        id: String,
-        consumedDate: String? = nil,
-        rating: Int? = nil,
-        contacts: [String]? = nil,
-        tastingNotes: String? = nil,
-        favorite: Bool? = nil
-    ) async throws {
-        let input = VinariumGraphQL.TastingInput(
+    var graphQLInput: VinariumGraphQL.TastingInput {
+        VinariumGraphQL.TastingInput(
             consumedDate: GraphQLHelpers.graphQLNullable(consumedDate),
             contacts: GraphQLHelpers.graphQLNullable(contacts),
             favorite: GraphQLHelpers.graphQLNullable(favorite),
             rating: GraphQLHelpers.graphQLNullable(rating),
-            // The server overlays the fields it receives onto the existing note, so an
-            // omitted comment leaves the previous one in place. An empty comment is sent
-            // verbatim rather than dropped: that is how the user erases what they wrote.
             tastingNotes: tastingNotes.map { .some($0) } ?? .none
         )
-        _ = try await GraphQLHelpers.perform(
-            GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.RecordTastingMutation(beverageId: id, input: input)
+    }
+}
+
+/// Who recommended a wine, and what they said.
+struct RecommendationEntry {
+    var recommenderName: String?
+    var comment: String?
+
+    var graphQLInput: VinariumGraphQL.RecommendationInput {
+        VinariumGraphQL.RecommendationInput(
+            comment: GraphQLHelpers.graphQLNullable(comment),
+            recommenderName: GraphQLHelpers.graphQLNullable(recommenderName)
         )
     }
 }
@@ -258,7 +267,7 @@ private func gqlSort(_ sort: WineSort) -> VinariumGraphQL.BeverageSort {
     }
 }
 
-private func mapDetail(_ w: VinariumGraphQL.WineDetailQuery.Data.Beverage) -> UserWineDetail {
+private func mapDetail(_ w: VinariumGraphQL.WineDetailFields) -> UserWineDetail {
     let details = w.details?.asWineDetails
     return UserWineDetail(
         id: w.id,

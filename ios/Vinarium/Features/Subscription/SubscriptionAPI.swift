@@ -26,16 +26,15 @@ struct QuotaState: Sendable {
 }
 
 enum SubscriptionAPI {
-    static func load() async throws -> EntitlementState {
+    /// The plan and the allowance, read in one round trip.
+    static func load() async throws -> (EntitlementState, QuotaState) {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.EntitlementQuery()
+            query: VinariumGraphQL.SubscriptionStateQuery()
         )
-        return state(
-            plan: data.entitlement.plan,
-            token: data.entitlement.appAccountToken,
-            productId: data.entitlement.productId,
-            expiresOn: data.entitlement.expiresOn
+        return (
+            state(data.entitlement.fragments.entitlementFields),
+            quotaState(data.quota.fragments.quotaFields)
         )
     }
 
@@ -44,15 +43,7 @@ enum SubscriptionAPI {
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.QuotaQuery()
         )
-        return QuotaState(
-            isPremium: data.quota.plan.value == .premium,
-            used: data.quota.used,
-            limit: data.quota.limit,
-            remaining: data.quota.remaining,
-            welcomeRemaining: data.quota.welcomeRemaining,
-            totalRemaining: data.quota.totalRemaining,
-            renewsOn: GraphQLHelpers.parseISO8601(data.quota.renewsOn)
-        )
+        return quotaState(data.quota.fragments.quotaFields)
     }
 
     /// Hand a transaction the App Store signed to the server, which verifies it
@@ -62,25 +53,27 @@ enum SubscriptionAPI {
             GraphQLClient.shared.apollo,
             mutation: VinariumGraphQL.SyncEntitlementMutation(signedTransaction: signedTransaction)
         )
-        return state(
-            plan: data.syncEntitlement.plan,
-            token: data.syncEntitlement.appAccountToken,
-            productId: data.syncEntitlement.productId,
-            expiresOn: data.syncEntitlement.expiresOn
+        return state(data.syncEntitlement.fragments.entitlementFields)
+    }
+
+    static func state(_ entitlement: VinariumGraphQL.EntitlementFields) -> EntitlementState {
+        EntitlementState(
+            isPremium: entitlement.plan.value == .premium,
+            appAccountToken: UUID(uuidString: entitlement.appAccountToken),
+            productId: entitlement.productId,
+            expiresOn: entitlement.expiresOn.flatMap { GraphQLHelpers.parseISO8601($0) }
         )
     }
 
-    private static func state(
-        plan: GraphQLEnum<VinariumGraphQL.Plan>,
-        token: String,
-        productId: String?,
-        expiresOn: String?
-    ) -> EntitlementState {
-        EntitlementState(
-            isPremium: plan.value == .premium,
-            appAccountToken: UUID(uuidString: token),
-            productId: productId,
-            expiresOn: expiresOn.flatMap { GraphQLHelpers.parseISO8601($0) }
+    static func quotaState(_ quota: VinariumGraphQL.QuotaFields) -> QuotaState {
+        QuotaState(
+            isPremium: quota.plan.value == .premium,
+            used: quota.used,
+            limit: quota.limit,
+            remaining: quota.remaining,
+            welcomeRemaining: quota.welcomeRemaining,
+            totalRemaining: quota.totalRemaining,
+            renewsOn: GraphQLHelpers.parseISO8601(quota.renewsOn)
         )
     }
 }

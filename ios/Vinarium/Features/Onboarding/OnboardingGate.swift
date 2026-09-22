@@ -1,8 +1,8 @@
 import Observation
 
 /// Decides, once a Firebase user is signed in, whether to show the onboarding
-/// wizard or the main app. Reads `me` at launch; `onboardingCompleted` drives the
-/// choice. Lives at `AuthRoot` scope and is refreshed on sign-in / account switch.
+/// wizard or the main app. Reads `me` at launch, along with the plan and the
+/// allowance; `onboardingCompleted` drives the choice. Lives at `AuthRoot` scope and is refreshed on sign-in / account switch.
 @MainActor
 @Observable
 final class OnboardingGate {
@@ -19,14 +19,19 @@ final class OnboardingGate {
     /// settings row are simply absent for them.
     private(set) var isAdmin = false
 
-    func refresh() async {
+    /// Returns what the launch query read, so the caller can hand the plan and
+    /// the allowance on without asking the server a second time; nil on failure.
+    @discardableResult
+    func refresh() async -> LaunchState? {
         state = .loading
         do {
-            let me = try await OnboardingAPI.loadMe()
-            isAdmin = me.isAdmin
-            state = me.onboardingCompleted ? .ready : .required
+            let launch = try await OnboardingAPI.launch()
+            isAdmin = launch.me.isAdmin
+            state = launch.me.onboardingCompleted ? .ready : .required
+            return launch
         } catch {
             state = .failed(reportError(error))
+            return nil
         }
     }
 

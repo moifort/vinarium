@@ -35,16 +35,12 @@ struct AuthRoot: View {
         .environment(subscriptions)
         .environment(\.isAdmin, gate.isAdmin)
         .task { await supportGate.check() }
-        .task(id: session.user?.uid) {
-            // The plan is the server's answer, and it needs a signed-in caller.
-            if session.user != nil { await subscriptions.refresh() }
-        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { Task { await supportGate.check() } }
         }
         .task(id: session.user?.uid) {
             if session.user != nil {
-                await gate.refresh()
+                await launch()
             } else {
                 gate.reset()
             }
@@ -72,9 +68,17 @@ struct AuthRoot: View {
             } description: {
                 Text(message)
             } actions: {
-                Button("Réessayer") { Task { await gate.refresh() } }
+                Button("Réessayer") { Task { await launch() } }
             }
         }
+    }
+
+    /// The opening of the app: one query settles the onboarding gate and the plan,
+    /// then the App Store offers load without holding the screen.
+    private func launch() async {
+        guard let launch = await gate.refresh() else { return }
+        subscriptions.adopt(entitlement: launch.entitlement, quota: launch.quota)
+        await subscriptions.refreshStore()
     }
 
     /// Extracts an invitation code from either the universal link

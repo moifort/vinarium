@@ -8,16 +8,39 @@ struct MeState {
     let isAdmin: Bool
 }
 
+/// Everything the opening of the app needs, read in one round trip.
+struct LaunchState {
+    let me: MeState
+    let entitlement: EntitlementState
+    let quota: QuotaState
+}
+
 enum OnboardingAPI {
     static func loadMe() async throws -> MeState {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.MeQuery()
         )
-        return MeState(
-            firstName: data.me.firstName,
-            onboardingCompleted: data.me.onboardingCompleted,
-            isAdmin: data.me.isAdmin
+        return meState(data.me.fragments.meFields)
+    }
+
+    static func launch() async throws -> LaunchState {
+        let data = try await GraphQLHelpers.fetch(
+            GraphQLClient.shared.apollo,
+            query: VinariumGraphQL.LaunchQuery()
+        )
+        return LaunchState(
+            me: meState(data.me.fragments.meFields),
+            entitlement: SubscriptionAPI.state(data.entitlement.fragments.entitlementFields),
+            quota: SubscriptionAPI.quotaState(data.quota.fragments.quotaFields)
+        )
+    }
+
+    private static func meState(_ me: VinariumGraphQL.MeFields) -> MeState {
+        MeState(
+            firstName: me.firstName,
+            onboardingCompleted: me.onboardingCompleted,
+            isAdmin: me.isAdmin
         )
     }
 

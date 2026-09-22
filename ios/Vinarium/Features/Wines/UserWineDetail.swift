@@ -23,7 +23,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let giftedBy: String?
     let createdAt: Date
     let updatedAt: Date
-    let cellar: CellarInfo?
+    var cellar: CellarInfo?
     let consumption: ConsumptionInfo?
     let gift: GiftInfo?
     let recommendation: RecommendationInfo?
@@ -37,7 +37,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     let ownerName: String?
     /// The files hung on the sheet, oldest first. Readable on a housemate's
     /// bottle, editable only on one's own.
-    let attachments: [BeverageAttachment]
+    var attachments: [BeverageAttachment]
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

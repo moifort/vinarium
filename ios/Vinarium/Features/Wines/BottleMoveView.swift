@@ -9,7 +9,8 @@ struct BottleMoveView: View {
     let currentRow: String
     let currentCol: Int
     var onCancel: () -> Void = {}
-    let onMoved: () -> Void
+    /// Called with the slot the bottle now occupies: row label, column label.
+    let onMoved: (String, Int) -> Void
 
     @State private var bottles: [CellarBottle] = []
     @State private var rows = 6
@@ -76,10 +77,8 @@ struct BottleMoveView: View {
         do {
             // The grid is drawn at its configured size, not a fixed 6x8: a resized
             // cellar would otherwise hide the slots outside that default.
-            async let bottlesData = CellarAPI.getAllBottles()
-            async let gridInfo = CellarAPI.info()
-            let (loaded, grid) = try await (bottlesData, gridInfo)
-            bottles = loaded
+            let grid = try await CellarAPI.grid(withSuggestion: false)
+            bottles = grid.bottles
             rows = grid.rows
             cols = grid.cols
             isLoading = false
@@ -94,7 +93,7 @@ struct BottleMoveView: View {
         Task {
             do {
                 try await CellarAPI.move(wineId: wineId, rowLabel: row, colLabel: col)
-                onMoved()
+                onMoved(row, col)
             } catch {
                 self.error = reportError(error)
             }
@@ -111,6 +110,6 @@ struct BottleMoveView: View {
         wineVintage: 2018,
         currentRow: "A",
         currentCol: 1,
-        onMoved: {}
+        onMoved: { _, _ in }
     )
 }

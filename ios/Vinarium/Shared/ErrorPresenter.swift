@@ -9,7 +9,7 @@ import SwiftUI
 ///
 /// // In an action closure:
 /// await errorPresenter.run {
-///     try await WineAPI.recordTasting(...)
+///     try await WineAPI.saveNotes(...)
 /// } onSuccess: {
 ///     showFavorite = false
 /// }

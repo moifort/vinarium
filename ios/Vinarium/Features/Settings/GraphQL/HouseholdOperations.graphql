@@ -19,6 +19,17 @@ query MyHousehold {
   }
 }
 
+# The sharing screen as it opens: the household and the viewer's first name,
+# the default name for a new invitation, in one round trip.
+query SharingSettings {
+  me {
+    firstName
+  }
+  myHousehold {
+    ...HouseholdFields
+  }
+}
+
 mutation CreateHouseholdInvitation($displayName: PersonName!) {
   createHouseholdInvitation(displayName: $displayName) {
     code

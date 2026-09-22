@@ -15,22 +15,6 @@ mutation AddWine($input: AddBeverageInput!) {
   }
 }
 
-mutation UpdateWine($id: BeverageId!, $input: UpdateBeverageInput!) {
-  updateBeverage(id: $id, input: $input) {
-    id
-    name
-    beverageType
-    subtype
-    details {
-      ... on WineDetails {
-        color
-        vintage
-      }
-    }
-    updatedAt
-  }
-}
-
 mutation DeleteWine($id: BeverageId!) {
   deleteBeverage(id: $id)
 }
@@ -39,21 +23,8 @@ mutation MarkFavorite($beverageId: BeverageId!, $favorite: Boolean!) {
   markFavorite(beverageId: $beverageId, favorite: $favorite)
 }
 
-mutation RecordTasting($beverageId: BeverageId!, $input: TastingInput!) {
-  recordTasting(beverageId: $beverageId, input: $input)
-}
-
-mutation AddRecommendation($beverageId: BeverageId!, $input: RecommendationInput!) {
-  addRecommendation(beverageId: $beverageId, input: $input)
-}
-
-mutation UpdateGift($beverageId: BeverageId!, $input: GivenGiftInput!) {
-  updateGift(beverageId: $beverageId, input: $input)
-}
-
 mutation SaveWineSheet($id: BeverageId!, $input: BeverageSheetInput!) {
   saveBeverageSheet(id: $id, input: $input) {
-    id
-    updatedAt
+    ...WineDetailFields
   }
 }

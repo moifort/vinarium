@@ -54,6 +54,8 @@ final class CellarGridViewModel {
     private(set) var bottlesLoadMoreFailed = false
     var history: [HistoryEvent] = []
     var historyHasMore = false
+    /// Where the next journal page starts: right after the last event read.
+    private var historyCursor: String?
     var isLoadingMoreHistory = false
     private(set) var historyLoadMoreFailed = false
     var displayMode: CellarDisplayMode = .cave
@@ -114,14 +116,14 @@ final class CellarGridViewModel {
         isLoading = true
         error = nil
         do {
-            async let bottlesData = CellarAPI.getBottles(limit: pageSize, after: nil)
-            async let historyData = CellarAPI.getHistory(limit: pageSize, offset: 0)
-            let (b, h) = try await (bottlesData, historyData)
+            let overview = try await CellarAPI.overview(limit: pageSize)
             guard requested == generation else { return } // a more recent reload took over
+            let (b, h) = (overview.bottles, overview.history)
             bottles = b.bottles
             bottlesHasMore = b.hasMore
             history = h.events
             historyHasMore = h.hasMore
+            historyCursor = h.endCursor
             loaded = true
             refreshFailed = false
             let (cache, snapshot) = (cache, CellarSnapshot(bottles: b.bottles, history: h.events))
@@ -188,10 +190,11 @@ final class CellarGridViewModel {
         isLoadingMoreHistory = true
         historyLoadMoreFailed = false
         do {
-            let page = try await CellarAPI.getHistory(limit: pageSize, offset: history.count)
+            let page = try await CellarAPI.getHistory(limit: pageSize, after: historyCursor)
             guard requested == generation else { return } // the list was reloaded in the meantime
             history.append(contentsOf: page.events)
             historyHasMore = page.hasMore
+            historyCursor = page.endCursor
         } catch {
             guard requested == generation else { return }
             historyLoadMoreFailed = true

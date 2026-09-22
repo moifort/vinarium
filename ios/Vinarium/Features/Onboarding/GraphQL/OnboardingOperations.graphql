@@ -1,9 +1,27 @@
+fragment MeFields on Me {
+  firstName
+  onboardingCompleted
+  onboardingCompletedAt
+  isAdmin
+}
+
 query Me {
   me {
-    firstName
-    onboardingCompleted
-    onboardingCompletedAt
-    isAdmin
+    ...MeFields
+  }
+}
+
+# The opening of the app: who the user is, what their plan allows and how much
+# of it is left — everything the launch needs, in one round trip.
+query Launch {
+  me {
+    ...MeFields
+  }
+  entitlement {
+    ...EntitlementFields
+  }
+  quota {
+    ...QuotaFields
   }
 }
 

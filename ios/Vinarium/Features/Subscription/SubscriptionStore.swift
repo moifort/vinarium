@@ -50,11 +50,23 @@ final class SubscriptionStore {
         isLoading = true
         defer { isLoading = false }
 
-        if let state = try? await SubscriptionAPI.load() {
-            isPremium = state.isPremium
-            appAccountToken = state.appAccountToken
+        if let (entitlement, quota) = try? await SubscriptionAPI.load() {
+            adopt(entitlement: entitlement, quota: quota)
         }
-        quota = try? await SubscriptionAPI.quota()
+        await refreshStore()
+    }
+
+    /// Take the plan and the allowance the launch query already read, so the
+    /// opening of the app asks the server for them only once.
+    func adopt(entitlement: EntitlementState, quota: QuotaState) {
+        isPremium = entitlement.isPremium
+        appAccountToken = entitlement.appAccountToken
+        self.quota = quota
+    }
+
+    /// Load the offers and report whatever the App Store already considers ours.
+    /// StoreKit only: the server is asked nothing unless a transaction must be synced.
+    func refreshStore() async {
         products = (try? await Product.products(for: SubscriptionProducts.all)) ?? []
         // Re-arm what Apple already sold us: a reinstall, a new device, or a
         // renewal that happened while the app was closed.

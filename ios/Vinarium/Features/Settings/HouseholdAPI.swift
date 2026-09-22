@@ -10,6 +10,16 @@ enum HouseholdAPI {
         return map(household.fragments.householdFields)
     }
 
+    /// The sharing screen as it opens: the household and the viewer's first name,
+    /// in one round trip.
+    static func sharingSettings() async throws -> (household: Household?, firstName: String?) {
+        let data = try await GraphQLHelpers.fetch(
+            GraphQLClient.shared.apollo,
+            query: VinariumGraphQL.SharingSettingsQuery()
+        )
+        return (data.myHousehold.map { map($0.fragments.householdFields) }, data.me.firstName)
+    }
+
     static func createInvitation(displayName: String) async throws -> HouseholdInvite {
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,

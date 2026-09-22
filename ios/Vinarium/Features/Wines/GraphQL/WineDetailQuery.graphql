@@ -1,81 +1,79 @@
-query WineDetail($id: BeverageId!) {
-  beverage(id: $id) {
-    id
-    isMine
-    ownerName
+# Everything the wine sheet shows. Shared by the query that opens the sheet and
+# by the mutations that edit it, so an edit returns the sheet it leaves behind
+# instead of costing a second round trip to re-read it.
+fragment WineDetailFields on Beverage {
+  id
+  isMine
+  ownerName
+  name
+  beverageType
+  subtype
+  alcoholContent
+  producer
+  region
+  country
+  notes
+  purchase {
+    price
+    date
+  }
+  place {
+    latitude
+    longitude
     name
-    beverageType
-    subtype
-    alcoholContent
-    producer
-    region
-    country
-    notes
-    purchase {
-      price
-      date
-    }
-    place {
-      latitude
-      longitude
-      name
-    }
-    details {
-      ... on WineDetails {
-        color
-        vintage
-        appellation
-        cuvee
-        classification
-        drinkWindow {
-          from
-          until
-        }
-        grapeVarieties
-        servingTemperature
+  }
+  details {
+    ... on WineDetails {
+      color
+      vintage
+      appellation
+      cuvee
+      classification
+      drinkWindow {
+        from
+        until
       }
+      grapeVarieties
+      servingTemperature
     }
+  }
+  createdAt
+  updatedAt
+  cellar {
+    row
+    col
+    rowLabel
+    colLabel
     createdAt
     updatedAt
-    cellar {
-      row
-      col
-      rowLabel
-      colLabel
-      createdAt
-      updatedAt
-    }
-    consumption {
-      rating
-      favorite
-      consumedDate
-      tastingNotes
-      contacts
-    }
-    gift {
-      given {
-        recipientName
-        date
-      }
-      received {
-        from
-      }
-    }
-    recommendation {
-      recommenderName
-      comment
-    }
-    attachments {
-      ...BeverageAttachmentFields
-    }
-    history {
-      type
+  }
+  consumption {
+    rating
+    favorite
+    consumedDate
+    tastingNotes
+    contacts
+  }
+  gift {
+    given {
+      recipientName
       date
-      beverageId
-      beverageName
-      wineBeverageType
-      wineColor
-      position
     }
+    received {
+      from
+    }
+  }
+  recommendation {
+    recommenderName
+    comment
+  }
+  attachments {
+    ...BeverageAttachmentFields
+  }
+}
+
+query WineDetail($id: BeverageId!) {
+  beverage(id: $id) {
+    ...WineDetailFields
   }
 }
