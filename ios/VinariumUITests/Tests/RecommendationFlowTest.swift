@@ -14,7 +14,7 @@ final class RecommendationFlowTest: BaseUITest {
 
         // 2. REVIEW: land directly on the editable form, fill the inline recommender
         // then save — the popup no longer offers a "Conseillé" destination
-        let review = try scanner.selectPhotoFromPicker()
+        let review = try scanner.captureLabel()
         try review.verify()
 
         _ = try review.clearAndTypeName(wineName)

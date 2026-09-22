@@ -123,10 +123,10 @@ final class ScreenshotTest: XCTestCase {
 
         try open("scan", at: 3)
         try app.buttons["add-wine-camera"].tapOrFail()
-        try app.buttons["scan-photo-picker"].waitOrFail()
+        try app.buttons["scan-capture-button"].waitOrFail()
         save("scan")
 
-        try app.buttons["scan-photo-picker"].tapOrFail()
+        try app.buttons["scan-capture-button"].tapOrFail()
         // The stubbed scan still goes to the server and back; the review form is
         // there once its name field is.
         try app.textFields["review-name-field"].waitOrFail(timeout: 60)

@@ -14,7 +14,7 @@ final class FavoriteFlowTest: BaseUITest {
 
         // 2. REVIEW: land directly on the editable form, set name, toggle the inline
         // favorite then save — the popup no longer offers a "Favori" destination
-        let review = try scanner.selectPhotoFromPicker()
+        let review = try scanner.captureLabel()
         try review.verify()
 
         _ = try review.clearAndTypeName(wineName)

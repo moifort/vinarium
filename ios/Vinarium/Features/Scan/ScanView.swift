@@ -1,5 +1,4 @@
 import CoreLocation
-import PhotosUI
 import SwiftUI
 
 enum ScanFlowResult {
@@ -26,7 +25,6 @@ struct ScanView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: ScanViewModel
-    @State private var selectedPhoto: PhotosPickerItem?
     @State private var shouldCapture = false
 
     /// `description` is what was typed on the sheet: it goes with every photo
@@ -64,20 +62,6 @@ struct ScanView: View {
             }
             .sheet(isPresented: $viewModel.paywallShown, onDismiss: { if isTextStart { dismiss() } }) {
                 PremiumSheet(trigger: .scanAllowanceSpent)
-            }
-            .onChange(of: selectedPhoto) {
-                guard let item = selectedPhoto else { return }
-                selectedPhoto = nil
-                // Open the flow sheet right away (on the analysis step) while the image
-                // is loaded and resized, before the scan is fired.
-                viewModel.isAnalyzing = true
-                Task {
-                    guard let data = try? await item.loadTransferable(type: Data.self) else {
-                        viewModel.isAnalyzing = false
-                        return
-                    }
-                    await scan(imageData: data, coordinate: nil)
-                }
             }
             .task {
                 switch start {
@@ -148,51 +132,24 @@ struct ScanView: View {
                 Spacer()
             }
 
+            // The shutter alone: photos from the library are picked on the
+            // add-a-wine sheet, before the camera opens.
             VStack {
                 Spacer()
-                HStack {
-                    if isUITest {
-                        Button {
-                            loadTestImage()
-                        } label: {
-                            Image(systemName: "photo")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(.ultraThinMaterial, in: .circle)
-                        }
-                        .accessibilityIdentifier("scan-photo-picker")
-                    } else {
-                        PhotosPicker(
-                            selection: $selectedPhoto,
-                            matching: .images
-                        ) {
-                            Image(systemName: "photo")
-                                .font(.title2)
-                                .foregroundStyle(.white)
-                                .frame(width: 56, height: 56)
-                                .background(.ultraThinMaterial, in: .circle)
-                        }
-                        .accessibilityIdentifier("scan-photo-picker")
-                    }
-                    Spacer()
-                    Button {
-                        shouldCapture = true
-                    } label: {
-                        Circle()
-                            .stroke(.white, lineWidth: 4)
-                            .frame(width: 72, height: 72)
-                            .overlay(
-                                Circle()
-                                    .fill(.white)
-                                    .frame(width: 60, height: 60)
-                            )
-                    }
-                    .accessibilityIdentifier("scan-capture-button")
-                    Spacer()
-                    Color.clear.frame(width: 56, height: 56)
+                Button {
+                    // UI tests have no camera: the shutter reads the bundled label.
+                    if isUITest { loadTestImage() } else { shouldCapture = true }
+                } label: {
+                    Circle()
+                        .stroke(.white, lineWidth: 4)
+                        .frame(width: 72, height: 72)
+                        .overlay(
+                            Circle()
+                                .fill(.white)
+                                .frame(width: 60, height: 60)
+                        )
                 }
-                .padding(.horizontal, 32)
+                .accessibilityIdentifier("scan-capture-button")
                 .padding(.bottom, 32)
             }
         }
