@@ -60,54 +60,119 @@ describe('BeverageQuery.list — paginated default view', () => {
 })
 
 describe('BeverageQuery.list — filtered views', () => {
-  test('facet filters match on the wine documents alone (no satellite reads)', async () => {
-    seedWine('w1', { wine: { color: 'red' } })
-    seedWine('w2', { wine: { color: 'white' } })
-    seedWine('w3', { wine: { color: 'red' } })
+  // Filler wines that match no filter: a filtered view must not pay for them.
+  const seedShelf = (count: number) => {
+    for (let i = 0; i < count; i++) seedWine(`other-${i}`, { searchIndex: ['type:wine'] })
+  }
+  const readsOf = async (run: () => Promise<unknown>) => {
+    const before = { docs: fake.docReads, queries: fake.queryReads, billed: fake.queryDocReads }
+    await run()
+    return {
+      docReads: fake.docReads - before.docs,
+      queryReads: fake.queryReads - before.queries,
+      queryDocReads: fake.queryDocReads - before.billed,
+    }
+  }
 
-    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
-    const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, color: 'red' })
+  test('a facet view reads the wines carrying the facet, not the library', async () => {
+    seedWine('w1', { wine: { color: 'red' }, searchIndex: ['type:wine', 'color:red'] })
+    seedWine('w2', { wine: { color: 'white' }, searchIndex: ['type:wine', 'color:white'] })
+    seedWine('w3', { wine: { color: 'red' }, searchIndex: ['type:wine', 'color:red'] })
+    seedShelf(20)
 
-    expect(result.items.map(({ id }) => String(id)).toSorted()).toEqual(['w1', 'w3'])
-    expect(result.hasMore).toBe(false)
-    expect(result.totalCount).toBe(2)
-    // A pure facet view costs the single memoized wines scan, plus the
-    // household-scope membership probe (one bounded doc get).
-    expect(fake.queryReads - before.queryReads).toBe(1)
-    expect(fake.docReads - before.docReads).toBe(1)
+    let result: Awaited<ReturnType<typeof BeverageQuery.list>> | undefined
+    const reads = await readsOf(async () => {
+      result = await BeverageQuery.list(userId, { ...defaults, limit: 40, color: 'red' })
+    })
+
+    expect(result?.items.map(({ id }) => String(id)).toSorted()).toEqual(['w1', 'w3'])
+    expect(result?.hasMore).toBe(false)
+    expect(result?.totalCount).toBe(2)
+    // One facet query billed for its two matches, plus the membership probe.
+    expect(reads).toEqual({ docReads: 1, queryReads: 1, queryDocReads: 2 })
   })
 
-  test('the in-cellar status adds exactly one cellar scan', async () => {
+  test('the facet term decides membership only; the wine fields still have the last word', async () => {
+    // A stale term (the wine was recoloured) must not list the wine.
+    seedWine('w1', { wine: { color: 'white' }, searchIndex: ['type:wine', 'color:red'] })
+    const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, color: 'red' })
+    expect(result.items).toHaveLength(0)
+  })
+
+  test('the in-cellar status reads the cellar and its wines by id', async () => {
     seedWine('w1')
     seedWine('w2')
+    seedShelf(20)
     fake.seed('cellar', `${userId}_w1`, { userId, beverageId: 'w1', row: 0, col: 0 })
 
-    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
-    const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, status: 'in-cellar' })
+    let items: string[] = []
+    const reads = await readsOf(async () => {
+      const result = await BeverageQuery.list(userId, {
+        ...defaults,
+        status: 'in-cellar',
+        limit: 40,
+      })
+      items = result.items.map(({ id }) => String(id))
+    })
 
-    expect(result.items.map(({ id }) => String(id))).toEqual(['w1'])
-    expect(fake.queryReads - before.queryReads).toBe(2) // wines scan + cellar scan
-    // Plus the memoized household-scope probe (one bounded membership doc get,
-    // shared by allVisibleTo and householdPlacements within the request).
-    expect(fake.docReads - before.docReads).toBe(1)
+    expect(items).toEqual(['w1'])
+    // The cellar scan (one bottle), then the membership probe and one wine by id.
+    expect(reads).toEqual({ docReads: 2, queryReads: 1, queryDocReads: 1 })
   })
 
-  test('the favorites mode adds exactly one tasting scan', async () => {
+  test('the favorites mode reads the favorited notes and their wines by id', async () => {
     seedWine('w1')
     seedWine('w2')
+    seedShelf(20)
     fake.seed('tasting', `${userId}_w2`, { userId, beverageId: 'w2', favorite: true })
+    fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: false })
 
-    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
+    let items: string[] = []
+    const reads = await readsOf(async () => {
+      const result = await BeverageQuery.list(userId, { ...defaults, mode: 'favorites', limit: 40 })
+      items = result.items.map(({ id }) => String(id))
+    })
+
+    expect(items).toEqual(['w2'])
+    expect(reads).toEqual({ docReads: 2, queryReads: 1, queryDocReads: 1 })
+  })
+
+  test('a mode and a status intersect', async () => {
+    seedWine('w1')
+    seedWine('w2')
+    fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: true })
+    fake.seed('tasting', `${userId}_w2`, { userId, beverageId: 'w2', favorite: true })
+    fake.seed('cellar', `${userId}_w2`, { userId, beverageId: 'w2', row: 0, col: 0 })
+
     const result = await BeverageQuery.list(userId, {
       ...defaults,
-      limit: 40,
       mode: 'favorites',
+      status: 'in-cellar',
+      limit: 40,
     })
 
     expect(result.items.map(({ id }) => String(id))).toEqual(['w2'])
-    expect(fake.queryReads - before.queryReads).toBe(2) // wines scan + tasting scan
-    // Plus the household-scope membership probe (one bounded doc get).
-    expect(fake.docReads - before.docReads).toBe(1)
+  })
+
+  test('the gifted mode lists received gifts only', async () => {
+    seedWine('w1')
+    seedWine('w2')
+    fake.seed('gift', `${userId}_w1`, { userId, beverageId: 'w1', received: { from: 'Paul' } })
+    fake.seed('gift', `${userId}_w2`, { userId, beverageId: 'w2', given: { recipientName: 'Léa' } })
+
+    const result = await BeverageQuery.list(userId, { ...defaults, mode: 'gifted', limit: 40 })
+
+    expect(result.items.map(({ id }) => String(id))).toEqual(['w1'])
+  })
+
+  test('a satellite pointing at a deleted wine lists nothing for it', async () => {
+    seedWine('w1')
+    fake.seed('recommendation', `${userId}_gone`, { userId, beverageId: 'gone' })
+    fake.seed('recommendation', `${userId}_w1`, { userId, beverageId: 'w1' })
+
+    const result = await BeverageQuery.list(userId, { ...defaults, mode: 'recommended', limit: 40 })
+
+    expect(result.items.map(({ id }) => String(id))).toEqual(['w1'])
   })
 })
 
@@ -183,6 +248,43 @@ describe('BeverageQuery.list — household visibility', () => {
     seedHousehold()
     fake.seed('tasting', `${userId}_m-in`, { userId, beverageId: 'm-in', favorite: true })
     const result = await BeverageQuery.list(userId, { ...defaults, limit: 40, mode: 'favorites' })
+    expect(result.items.map(({ id }) => String(id))).toEqual(['m-in'])
+  })
+
+  test('a page read after a housemate’s wine resumes from its position', async () => {
+    seedHousehold()
+    seedWine('w0', { createdAt: new Date('2026-01-04') })
+    seedWine('w-old', { createdAt: new Date('2025-12-01') })
+    // w0 (01-04), w1 (01-03), m-in (marie, 01-02), w-old (12-01): resume after m-in.
+    const page = await BeverageQuery.list(userId, {
+      ...defaults,
+      limit: 2,
+      after: 'm-in' as BeverageId,
+    })
+    expect(page.items.map(({ id }) => String(id))).toEqual(['w-old'])
+    expect(page.hasMore).toBe(false)
+  })
+
+  test('the default view reads one page of the viewer’s library, not all of it', async () => {
+    seedHousehold()
+    for (let i = 0; i < 20; i++) seedWine(`w-extra-${i}`, { createdAt: new Date('2025-06-01') })
+
+    const before = fake.queryDocReads
+    const page = await BeverageQuery.list(userId, { ...defaults, limit: 2 })
+
+    expect(page.items.map(({ id }) => String(id))).toEqual(['w1', 'm-in'])
+    expect(page.hasMore).toBe(true)
+    // members (2) + the viewer's limit+1 page (3) + the shared cellar (1).
+    expect(fake.queryDocReads - before).toBe(6)
+  })
+
+  test('a facet view adds a housemate’s cellar wine carrying the facet', async () => {
+    seedHousehold()
+    const result = await BeverageQuery.list(userId, {
+      ...defaults,
+      limit: 40,
+      beverageType: 'wine',
+    })
     expect(result.items.map(({ id }) => String(id))).toEqual(['m-in'])
   })
 

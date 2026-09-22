@@ -18,7 +18,9 @@ const sortField = (sort: BeverageSort) =>
         ? 'wine.color'
         : sort
 
-export type BeveragePage = { beverages: Beverage[]; hasMore: boolean }
+// `cursor` is the wine the page resumed after, when it still exists: a caller
+// merging other owners' wines into the page places them relative to it.
+export type BeveragePage = { beverages: Beverage[]; hasMore: boolean; cursor?: Beverage }
 export type PageArgs = { limit: number; after?: BeverageId; sort: BeverageSort; order: SortOrder }
 
 const allCacheKey = (userId: UserId) => `beverages:all:${userId}`
@@ -82,16 +84,30 @@ export const findManyByBeverageIdsForUsers = async (
 // One page of beverages ordered by the chosen field. Reads limit+1 docs to know
 // if a next page exists, then trims. Nullable sort fields (vintage/region/color/
 // price) drop beverages missing that field — expected Firestore orderBy behaviour.
+// The cursor may be another member's wine: Firestore resumes after its position
+// (sort value, then id), whoever owns it.
 export const findPage = async (userId: UserId, args: PageArgs): Promise<BeveragePage> => {
   let query = beverages().where('userId', '==', userId).orderBy(sortField(args.sort), args.order)
+  let cursor: Beverage | undefined
   if (args.after) {
-    const cursor = await beverages().doc(args.after).get()
-    if (cursor.exists) query = query.startAfter(cursor)
+    const snapshot = await beverages().doc(args.after).get()
+    cursor = snapshot.data()
+    if (snapshot.exists) query = query.startAfter(snapshot)
   }
   const snap = await query.limit(args.limit + 1).get()
   const docs = snap.docs.map((doc) => doc.data())
   const hasMore = docs.length > args.limit
-  return { beverages: hasMore ? docs.slice(0, args.limit) : docs, hasMore }
+  return { beverages: hasMore ? docs.slice(0, args.limit) : docs, hasMore, cursor }
+}
+
+// The owner's wines carrying one exact term — a facet such as `color:red`. The
+// list filters by it at the storage, so a filtered view reads its matches only.
+export const findByTerm = async (ownerId: UserId, term: string): Promise<Beverage[]> => {
+  const snap = await beverages()
+    .where('userId', '==', ownerId)
+    .where('searchIndex', 'array-contains', term)
+    .get()
+  return snap.docs.map((doc) => doc.data())
 }
 
 export const save = async (beverage: Beverage, batch?: WriteBatch): Promise<Beverage> => {

@@ -161,13 +161,13 @@ Firestore has no full-text search, so each beverage document carries a `searchIn
 
 Terms that belong to a person rather than to the wine carry their owner's id, because a shared bottle holds the notes of several household members at once and nobody's favourites may surface in someone else's search.
 
-**The rule to remember:** any mutation that can change one of those terms must call `SearchIndexUseCase.refresh(viewerId, beverageId)` afterwards, from the GraphQL resolver. The array is rebuilt whole, never patched, so a term that no longer applies disappears on its own — but a forgotten call leaves a wine that works everywhere except in the search, with no error and no log. `server/domain/search/infrastructure/graphql/reindexing.feat.test.ts` covers each mutation; add a case there when you add one.
+**The rule to remember:** any mutation that can change one of those terms must call `SearchIndexUseCase.refresh(viewerId, beverageId)` afterwards, from the GraphQL resolver. The array is rebuilt whole, never patched, so a term that no longer applies disappears on its own — but a forgotten call leaves a wine missing from the search and from the facet views of the wine list (`type:`, `color:`, `subtype:`), with no error and no log. `server/domain/search/infrastructure/graphql/reindexing.feat.test.ts` covers each mutation; add a case there when you add one.
 
 ## Cross-Domain Reads
 
 Because there is no read-model layer, composite views are assembled in two ways:
 
-1. **In `query.ts`** — a domain query may call another domain's public `Query` namespace. Example: `BeverageQuery.list` filters by favorite/gifted/recommended/in-cellar by calling `TastingQuery`, `GiftQuery`, `RecommendationQuery`, `CellarQuery`. Each of those is a memoized full scan, so the request never pays for it twice.
+1. **In `query.ts`** — a domain query may call another domain's public `Query` namespace. Example: `BeverageQuery.list` serves the favorite/gifted/recommended/in-cellar/consumed views by asking `TastingQuery`, `GiftQuery`, `RecommendationQuery` and `CellarQuery` which wines they name, then reading just those wines by id. A facet view (colour, type, subtype) asks Firestore for the wines carrying the facet term of their `searchIndex`. Only the unfiltered view sorted on an optional field (vintage, region, colour, price) reads the whole library, because Firestore's `orderBy` drops the documents missing the field.
 2. **In GraphQL nested resolvers** — the satellite fields on `Beverage` resolve independently through the per-request loaders, so clients pay only for the fields they select.
 
 ## Observability

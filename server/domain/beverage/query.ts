@@ -1,3 +1,4 @@
+import { sortBy } from 'lodash-es'
 import * as repository from '~/domain/beverage/infrastructure/repository'
 import type {
   Beverage,
@@ -43,21 +44,28 @@ export namespace BeverageQuery {
   // library, plus any household member's wine currently placed in the shared
   // cellar. A housemate's out-of-cellar wines (consumed, wishlist) stay private.
   // Memoized so the list, search and count paths share one merge per request.
+  // Reads the whole library: reserved for the views that must see every wine.
   export const allVisibleTo = (userId: UserId): Promise<Beverage[]> =>
     memoizedPerRequest(`beverages:visible:${userId}`, async () => {
+      const [own, housemateWines] = await Promise.all([
+        repository.findAllByUser(userId),
+        housematesCellarWines(userId),
+      ])
+      return [...own, ...housemateWines]
+    })
+
+  // The housemates' wines placed in the shared cellar — bounded by the grid,
+  // never by their libraries. Empty for a solo viewer, at no read.
+  const housematesCellarWines = (userId: UserId): Promise<Beverage[]> =>
+    memoizedPerRequest(`beverages:housemates-cellar:${userId}`, async () => {
       const scope = await HouseholdQuery.cellarScope(userId)
-      const own = await repository.findAllByUser(userId)
-      if (scope.memberIds.length === 1) return own
+      if (scope.memberIds.length === 1) return []
       const housemates = scope.memberIds.filter((id) => id !== userId)
       const housemateSet = new Set(housemates)
       const placedByHousemates = (await CellarQuery.householdPlacements(userId))
         .filter((bottle) => housemateSet.has(bottle.userId))
         .map((bottle) => bottle.beverageId)
-      const housemateWines = await repository.findManyByBeverageIdsForUsers(
-        housemates,
-        placedByHousemates,
-      )
-      return [...own, ...housemateWines]
+      return repository.findManyByBeverageIdsForUsers(housemates, placedByHousemates)
     })
 
   // The owner's beverages carrying at least one of the given search terms. The
@@ -90,114 +98,136 @@ export namespace BeverageQuery {
     const { mode, status, color, beverageType, subtype } = criteria
     const facetActive = color !== undefined || beverageType !== undefined || subtype !== undefined
 
-    // The only truly paginated path: the unbounded default view, with no facet
-    // active (facets live on the beverage document: a cursor would skip matches
-    // page after page) and a sort field present on every document (see
-    // CURSOR_SAFE_SORTS). Every other view is a bounded subset served in full,
-    // so the client can sort and group it freely with no cross-page jumps.
-    if (
-      !facetActive &&
-      mode === 'all' &&
-      status === 'all' &&
-      CURSOR_SAFE_SORTS.includes(criteria.sort)
-    ) {
-      const scope = await HouseholdQuery.cellarScope(userId)
-      // Solo viewers keep Firestore-level pagination: a bounded limit+1 read.
-      if (scope.memberIds.length === 1) {
-        const { beverages, hasMore } = await repository.findPage(userId, criteria)
-        return { items: beverages, hasMore, totalCount: beverages.length }
-      }
-      // Household viewers merge their library with housemates' in-cellar wines,
-      // then sort and slice in memory: Firestore can't page across owners on a
-      // shared sort with a stable cursor (its implicit __name__ tiebreak would
-      // drop or repeat rows). The slice keeps the response and the satellite
-      // loaders bounded to the page size.
-      return paginateInMemory(await allVisibleTo(userId), criteria)
+    if (!facetActive && mode === 'all' && status === 'all') {
+      // The only truly paginated path: the unbounded default view, sorted on a
+      // field present on every document (see CURSOR_SAFE_SORTS).
+      if (CURSOR_SAFE_SORTS.includes(criteria.sort)) return pageVisibleTo(userId, criteria)
+      // A sort on an optional field (vintage, region, price…) ranks every wine,
+      // those missing the field included: Firestore's orderBy would drop them,
+      // so this view alone reads the whole library and lets the client sort.
+      const items = await allVisibleTo(userId)
+      return { items, hasMore: false, totalCount: items.length }
     }
 
-    // Everything else (satellite views, facet filters, sorts on optional
-    // fields): filter the visible set in memory — facets first, on fields the
-    // beverages carry themselves (color lives in the wine details), then the
-    // satellite-backed status — and serve the subset in full. The client sorts
-    // and groups. Every collection touched here is a memoized full scan, so the
-    // request never pays it twice. Satellite modes (favorites/gifted/recommended)
-    // filter by the VIEWER's own satellites, so a housemate's cellar wine only
-    // surfaces there once the viewer has favorited/received it themselves.
-    const beverages = await allVisibleTo(userId)
-    const candidates = await ofMode(userId, beverages, mode)
-    const facetted = candidates.filter(
-      (beverage) =>
-        (!color || (beverage.beverageType === 'wine' && beverage.wine.color === color)) &&
-        (!beverageType || beverage.beverageType === beverageType) &&
-        (!subtype || beverage.subtype === subtype),
+    // Every other view is a bounded subset served in full, so the client can
+    // sort and group it freely. It is read at the storage, never carved out of
+    // the whole library: the satellites name the wines of a mode or a status,
+    // a facet is a term written on the wine itself. Satellite modes filter by the
+    // VIEWER's own records, so a housemate's cellar wine only surfaces there once
+    // the viewer has favorited/received it themselves.
+    const subset = await subsetOf(userId, mode, status)
+    const candidates =
+      subset === undefined
+        ? await facetCandidates(userId, criteria)
+        : await visibleAmong(userId, [...subset])
+    const items = sortBy(
+      candidates.filter(
+        (beverage) =>
+          (!color || (beverage.beverageType === 'wine' && beverage.wine.color === color)) &&
+          (!beverageType || beverage.beverageType === beverageType) &&
+          (!subtype || beverage.subtype === subtype),
+      ),
+      (beverage) => -beverage.createdAt.getTime(),
     )
-    const items = await ofStatus(userId, facetted, status)
     return { items, hasMore: false, totalCount: items.length }
   }
 
-  // Sort/slice a merged (multi-owner) set the way findPage pages a single owner.
-  // Only CURSOR_SAFE_SORTS (createdAt/updatedAt, present on every document) reach
-  // here; id breaks ties for a stable cursor. A missing `after` (its wine left
-  // the cellar between pages) restarts from the top — parity with findPage.
-  const paginateInMemory = (beverages: Beverage[], criteria: BeverageListCriteria) => {
-    const { sort, order, limit, after } = criteria
+  // One page of the viewer's library merged with the housemates' cellar wines.
+  // Firestore pages the viewer's own wines (a bounded limit+1 read, resumed after
+  // the cursor whoever owns it); the housemates' wines — a handful bounded by the
+  // grid — are placed around them in memory, in the same order Firestore uses
+  // (sort value, then id). A cursor that no longer exists restarts from the top,
+  // as Firestore does.
+  const pageVisibleTo = async (userId: UserId, criteria: BeverageListCriteria) => {
+    const { sort, order, limit } = criteria
+    const [own, housemateWines] = await Promise.all([
+      repository.findPage(userId, criteria),
+      housematesCellarWines(userId),
+    ])
+    if (housemateWines.length === 0) {
+      return { items: own.beverages, hasMore: own.hasMore, totalCount: own.beverages.length }
+    }
     const time = (beverage: Beverage) =>
       (sort === 'updatedAt' ? beverage.updatedAt : beverage.createdAt).getTime()
-    const sorted = [...beverages].sort((a, b) => {
-      const delta = time(a) - time(b) || String(a.id).localeCompare(String(b.id))
+    const compare = (a: Beverage, b: Beverage) => {
+      const delta = time(a) - time(b) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)
       return order === 'desc' ? -delta : delta
-    })
-    const start = after ? sorted.findIndex((beverage) => beverage.id === after) + 1 : 0
-    return {
-      items: sorted.slice(start, start + limit),
-      hasMore: start + limit < sorted.length,
-      totalCount: sorted.length,
     }
+    const cursor = own.cursor
+    const merged = [
+      ...own.beverages,
+      ...housemateWines.filter((beverage) => !cursor || compare(beverage, cursor) > 0),
+    ].sort(compare)
+    const items = merged.slice(0, limit)
+    return { items, hasMore: own.hasMore || merged.length > limit, totalCount: items.length }
   }
 
-  const ofMode = async (userId: UserId, beverages: Beverage[], mode: BeverageListMode) => {
+  // The wines a mode and a status single out, as ids read from the satellites —
+  // the intersection when both apply, undefined when neither does.
+  const subsetOf = async (userId: UserId, mode: BeverageListMode, status: BeverageStatusFilter) => {
+    const [ofMode, ofStatus] = await Promise.all([
+      idsOfMode(userId, mode),
+      idsOfStatus(userId, status),
+    ])
+    if (!ofMode) return ofStatus
+    if (!ofStatus) return ofMode
+    return new Set([...ofMode].filter((id) => ofStatus.has(id)))
+  }
+
+  // Wines by id, kept when the viewer may see them: their own, or a housemate's
+  // placed in the shared cellar.
+  const visibleAmong = async (userId: UserId, beverageIds: BeverageId[]) => {
+    const scope = await HouseholdQuery.cellarScope(userId)
+    const wines = await repository.findManyByBeverageIdsForUsers(scope.memberIds, beverageIds)
+    if (wines.every((wine) => wine.userId === userId)) return wines
+    const placed = new Set(
+      (await CellarQuery.householdPlacements(userId)).map(({ beverageId }) => beverageId),
+    )
+    return wines.filter((wine) => wine.userId === userId || placed.has(wine.id))
+  }
+
+  // A facet-only view: the viewer's wines carrying the most selective facet term,
+  // plus the housemates' cellar wines; the other facets are settled by the caller.
+  const facetCandidates = async (userId: UserId, criteria: BeverageListCriteria) => {
+    const { color, beverageType, subtype } = criteria
+    const term = subtype ? `subtype:${subtype}` : color ? `color:${color}` : `type:${beverageType}`
+    const [own, housemateWines] = await Promise.all([
+      repository.findByTerm(userId, term),
+      housematesCellarWines(userId),
+    ])
+    return [...own, ...housemateWines]
+  }
+
+  const idsOfMode = async (userId: UserId, mode: BeverageListMode) => {
     if (mode === 'favorites') {
-      const tastings = await TastingQuery.all(userId)
-      const favorites = new Set(
-        tastings
-          .filter((tasting) => tasting.favorite === true)
-          .map((tasting) => tasting.beverageId),
-      )
-      return beverages.filter((beverage) => favorites.has(beverage.id))
+      return new Set((await TastingQuery.favorites(userId)).map(({ beverageId }) => beverageId))
     }
     if (mode === 'recommended') {
-      const recommendations = await RecommendationQuery.all(userId)
-      const recommended = new Set(
-        recommendations.map((recommendation) => recommendation.beverageId),
-      )
-      return beverages.filter((beverage) => recommended.has(beverage.id))
+      return new Set((await RecommendationQuery.all(userId)).map(({ beverageId }) => beverageId))
     }
     if (mode === 'gifted') {
-      const gifts = await GiftQuery.all(userId)
-      const received = new Set(
-        gifts.filter((gift) => gift.received !== undefined).map((gift) => gift.beverageId),
+      return new Set(
+        (await GiftQuery.all(userId))
+          .filter((gift) => gift.received !== undefined)
+          .map(({ beverageId }) => beverageId),
       )
-      return beverages.filter((beverage) => received.has(beverage.id))
     }
-    return beverages
+    return undefined
   }
 
-  const ofStatus = async (userId: UserId, beverages: Beverage[], status: BeverageStatusFilter) => {
+  const idsOfStatus = async (userId: UserId, status: BeverageStatusFilter) => {
     if (status === 'in-cellar') {
-      const placed = new Set(
-        (await CellarQuery.householdPlacements(userId)).map((bottle) => bottle.beverageId),
+      return new Set(
+        (await CellarQuery.householdPlacements(userId)).map(({ beverageId }) => beverageId),
       )
-      return beverages.filter((beverage) => placed.has(beverage.id))
     }
     if (status === 'consumed') {
-      const tastings = await TastingQuery.all(userId)
-      const consumed = new Set(
-        tastings
+      return new Set(
+        (await TastingQuery.all(userId))
           .filter((tasting) => tasting.consumedDate != null)
-          .map((tasting) => tasting.beverageId),
+          .map(({ beverageId }) => beverageId),
       )
-      return beverages.filter((beverage) => consumed.has(beverage.id))
     }
-    return beverages
+    return undefined
   }
 }
