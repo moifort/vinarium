@@ -47,9 +47,14 @@ export namespace GiftCommand {
   }
 
   // Record who gave the bottle to us, preserving any given-away facet.
-  export const receiveFrom = async (userId: UserId, beverageId: BeverageId, from: PersonName) => {
+  export const receiveFrom = async (
+    userId: UserId,
+    beverageId: BeverageId,
+    from: PersonName,
+    batch?: WriteBatch,
+  ) => {
     const existing = await repository.findBy(userId, beverageId)
-    return repository.save({ ...(existing ?? { userId, beverageId }), received: { from } })
+    return repository.save({ ...(existing ?? { userId, beverageId }), received: { from } }, batch)
   }
 
   export const removeBeverage = async (

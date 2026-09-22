@@ -29,6 +29,7 @@ export namespace BeverageCommand {
     name: BeverageName,
     beverageType: BeverageType,
     data: BeverageData,
+    batch?: WriteBatch,
   ) => {
     if (requiresColor(beverageType) && !data.wine?.color) return 'color-required' as const
     if (data.subtype && !subtypeAllowed(beverageType, data.subtype))
@@ -41,7 +42,7 @@ export namespace BeverageCommand {
       retainedSubtype(beverageType, subtype),
       wine,
     )
-    return await repository.save(beverage)
+    return await repository.save(beverage, batch)
   }
 
   // `erase` names the fields the caller emptied. Absent from `data` means "leave

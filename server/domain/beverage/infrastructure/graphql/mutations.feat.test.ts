@@ -78,6 +78,40 @@ describe('updateBeverage', () => {
   })
 })
 
+describe('addBeverage', () => {
+  test('saves the bottle, its tasting note and its recommendation in one batch', async () => {
+    const result = await execute(`
+      mutation {
+        addBeverage(input: {
+          name: "Pommard"
+          color: RED
+          tasting: { rating: 4, favorite: true }
+          recommendation: { recommenderName: "Léa" }
+        }) { id consumption { rating favorite } recommendation { recommenderName } }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.addBeverage).toMatchObject({
+      consumption: { rating: 4, favorite: true },
+      recommendation: { recommenderName: 'Léa' },
+    })
+    expect(fake.batches).toHaveLength(1)
+    expect(fake.directWrites.filter(({ type }) => type === 'set')).toHaveLength(0)
+  })
+
+  test('writes nothing when the bottle is refused', async () => {
+    const result = await execute(`
+      mutation {
+        addBeverage(input: { name: "Sans couleur", tasting: { rating: 4 } }) { id }
+      }
+    `)
+
+    expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+    expect(fake.snapshot('tasting').size).toBe(0)
+  })
+})
+
 describe('saveBeverageSheet', () => {
   const tastingDoc = () => fake.snapshot('tasting').get(`${userId}_${wineId}`)
 
@@ -131,6 +165,62 @@ describe('saveBeverageSheet', () => {
     expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
     expect(tastingDoc()).toBeUndefined()
     expect((stored()?.wine as { color?: string } | undefined)?.color).toBe('red')
+  })
+
+  describe('without the bottle part', () => {
+    const housemateWine = '00000000-0000-4000-8000-000000000002'
+    const member = (id: string, role: 'owner' | 'member') => ({
+      userId: id,
+      householdId: 'h1',
+      displayName: id,
+      role,
+      joinedAt: new Date('2026-01-01'),
+    })
+    const seedHousemateWine = (owner: string) =>
+      fake.seed('beverages', housemateWine, {
+        id: housemateWine,
+        userId: owner,
+        name: 'Chez Marie',
+        beverageType: 'wine',
+        wine: { color: 'white' },
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+      })
+    const heart = () =>
+      execute(`
+        mutation {
+          saveBeverageSheet(id: "${housemateWine}", input: { tasting: { favorite: true } }) {
+            id
+            consumption { favorite }
+          }
+        }
+      `)
+
+    test('saves the viewer’s own note on a housemate’s wine and returns it', async () => {
+      fake.seed('household-members', userId, member(userId, 'owner'))
+      fake.seed('household-members', 'marie', member('marie', 'member'))
+      seedHousemateWine('marie')
+
+      const result = await heart()
+
+      expect(result.errors).toBeUndefined()
+      expect(result.data?.saveBeverageSheet).toEqual({
+        id: housemateWine,
+        consumption: { favorite: true },
+      })
+      expect(fake.snapshot('tasting').get(`${userId}_${housemateWine}`)?.favorite).toBe(true)
+      // The housemate's bottle itself is left as it was.
+      expect(fake.snapshot('beverages').get(housemateWine)?.name).toBe('Chez Marie')
+    })
+
+    test('refuses a stranger’s wine and writes nothing', async () => {
+      seedHousemateWine('stranger')
+
+      const result = await heart()
+
+      expect(result.errors?.[0]?.extensions?.code).toBe('NOT_FOUND')
+      expect(fake.snapshot('tasting').get(`${userId}_${housemateWine}`)).toBeUndefined()
+    })
   })
 
   test('refuses a gift correction on a bottle never given away', async () => {

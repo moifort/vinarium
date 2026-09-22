@@ -129,7 +129,11 @@ builder.mutationField('addBeverage', (t) =>
         clean.name,
         clean.beverageType ?? 'wine',
         toData(clean),
-        clean.giftedBy,
+        {
+          receivedFrom: clean.giftedBy,
+          tasting: clean.tasting ? stripNulls(clean.tasting) : undefined,
+          recommendation: clean.recommendation ? stripNulls(clean.recommendation) : undefined,
+        },
       )
       if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, result.id)
       return match(result)
@@ -181,6 +185,9 @@ builder.mutationField('saveBeverageSheet', (t) =>
     type: BeverageType,
     description:
       'Save every edit made on the wine sheet at once, and return the beverage.\n\n' +
+      "Without `beverage`, the sheet carries only the caller's own records (tasting, gift, " +
+      "recommendation), and may be saved on any wine the caller can see, a housemate's " +
+      'shared-cellar bottle included.\n\n' +
       'The sheet spans four records — the beverage, its tasting note, its gift and its ' +
       'recommendation — and this writes them in one batch: either the whole sheet lands ' +
       'or none of it does. Send only the parts the user touched; an absent part is left ' +
@@ -197,16 +204,20 @@ builder.mutationField('saveBeverageSheet', (t) =>
       }),
     },
     resolve: async (_root, { id, input }, { userId }) => {
-      const beverageInput = input.beverage ?? {}
-      const clean = stripNulls(beverageInput)
+      const beverageInput = input.beverage ?? undefined
+      const clean = beverageInput ? stripNulls(beverageInput) : undefined
       const tasting = input.tasting ? stripNulls(input.tasting) : undefined
       const gift = input.gift ? stripNulls(input.gift) : undefined
       const recommendation = input.recommendation ? stripNulls(input.recommendation) : undefined
 
       const result = await BeverageUseCase.saveSheet(userId, id, {
-        beverage: { ...toData(clean), name: clean.name, beverageType: clean.beverageType },
-        erase: erasedBy(beverageInput),
-        receivedFrom: clean.giftedBy,
+        beverage: clean && {
+          ...toData(clean),
+          name: clean.name,
+          beverageType: clean.beverageType,
+        },
+        erase: beverageInput && erasedBy(beverageInput),
+        receivedFrom: clean?.giftedBy,
         tasting,
         gift: gift && { recipientName: gift.recipientName, date: gift.giftedDate },
         recommendation,

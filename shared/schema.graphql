@@ -61,6 +61,9 @@ input AddBeverageInput {
   """Price paid for the bottle, in euros"""
   purchasePrice: Eur
 
+  """Who recommended the bottle, and what they said, saved with it."""
+  recommendation: RecommendationInput
+
   """Region the beverage comes from"""
   region: Region
 
@@ -69,6 +72,11 @@ input AddBeverageInput {
 
   """Structured subtype; must be valid for the beverage type"""
   subtype: BeverageSubtype
+
+  """
+  The caller's tasting note, saved with the bottle: score, date, people, favourite.
+  """
+  tasting: TastingInput
 
   """Wine harvest year"""
   vintage: Year
@@ -1588,6 +1596,8 @@ type Mutation {
 
   """
   Save every edit made on the wine sheet at once, and return the beverage.
+  
+  Without `beverage`, the sheet carries only the caller's own records (tasting, gift, recommendation), and may be saved on any wine the caller can see, a housemate's shared-cellar bottle included.
   
   The sheet spans four records — the beverage, its tasting note, its gift and its recommendation — and this writes them in one batch: either the whole sheet lands or none of it does. Send only the parts the user touched; an absent part is left untouched, so a bottle that was never tasted grows no tasting note. Within `beverage`, absent fields keep their value and an explicit null erases. Fails with not-found when the beverage does not exist or when `gift` is sent for a bottle that was never given away, and with bad-user-input on the beverage rules.
   """

@@ -42,6 +42,15 @@ export const AddBeverageInput = builder.inputType('AddBeverageInput', {
       type: 'PersonName',
       description: 'Name of the person who gave the bottle',
     }),
+    tasting: t.field({
+      type: TastingInput,
+      description:
+        "The caller's tasting note, saved with the bottle: score, date, people, favourite.",
+    }),
+    recommendation: t.field({
+      type: RecommendationInput,
+      description: 'Who recommended the bottle, and what they said, saved with it.',
+    }),
     servingTemperature: t.field({
       type: 'Celsius',
       description: 'Recommended serving temperature, in degrees Celsius',

@@ -1,5 +1,6 @@
 import { AttachmentCommand } from '~/domain/attachment/command'
 import { BeverageCommand } from '~/domain/beverage/command'
+import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId, BeverageName, BeverageType } from '~/domain/beverage/types'
 import { CellarCommand } from '~/domain/cellar/command'
 import { GiftCommand } from '~/domain/gift/command'
@@ -15,20 +16,34 @@ import { atomically } from '~/utils/firestore'
 type BeverageData = Parameters<typeof BeverageCommand.add>[3]
 
 export namespace BeverageUseCase {
-  // Add a beverage and, when its provenance is known, record who gave it (the
-  // giftedBy field lives in the gift domain — a beverage only carries what it is).
+  // Add a beverage together with what the scan form already knows about it: who
+  // gave it (the giftedBy field lives in the gift domain — a beverage only carries
+  // what it is), the viewer's tasting note and the recommendation behind it. One
+  // batch: a failure leaves no bottle without the note the user just wrote.
   export const add = async (
     userId: UserId,
     name: BeverageName,
     beverageType: BeverageType,
     data: BeverageData,
-    receivedFrom?: PersonName,
-  ) => {
-    const result = await BeverageCommand.add(userId, name, beverageType, data)
-    if (typeof result !== 'string' && receivedFrom)
-      await GiftCommand.receiveFrom(userId, result.id, receivedFrom)
-    return result
-  }
+    extras: {
+      receivedFrom?: PersonName
+      tasting?: Omit<TastingNote, 'userId' | 'beverageId'>
+      recommendation?: Omit<Recommendation, 'userId' | 'beverageId'>
+    } = {},
+  ) =>
+    await atomically(async (batch) => {
+      const result = await BeverageCommand.add(userId, name, beverageType, data, batch)
+      if (typeof result === 'string') return result
+      const { receivedFrom, tasting, recommendation } = extras
+      if (receivedFrom) await GiftCommand.receiveFrom(userId, result.id, receivedFrom, batch)
+      if (tasting) await TastingCommand.create({ userId, beverageId: result.id, ...tasting }, batch)
+      if (recommendation)
+        await RecommendationCommand.create(
+          { userId, beverageId: result.id, ...recommendation },
+          batch,
+        )
+      return result
+    })
 
   export const update = async (
     userId: UserId,
@@ -50,12 +65,14 @@ export namespace BeverageUseCase {
   //
   // Each part is optional: what the user did not touch is not sent, so a bottle
   // that was never tasted does not grow an empty tasting note just because its
-  // name was corrected.
+  // name was corrected. Without the bottle part, the sheet only carries the
+  // viewer's own records, so it may be saved on any wine they can see — a
+  // housemate's bottle they heart or were recommended included.
   export const saveSheet = async (
     userId: UserId,
     id: BeverageId,
     sheet: {
-      beverage: Parameters<typeof BeverageCommand.update>[2]
+      beverage?: Parameters<typeof BeverageCommand.update>[2]
       erase?: Parameters<typeof BeverageCommand.update>[3]
       receivedFrom?: PersonName
       tasting?: Omit<TastingNote, 'userId' | 'beverageId'>
@@ -67,13 +84,17 @@ export namespace BeverageUseCase {
     // whatever it already holds, so a part refused halfway would leave the earlier
     // ones written — the very thing this exists to prevent. The beverage rules
     // (colour, subtype, existence) refuse before writing on their own; the gift
-    // precondition is the one that has to be read up front.
+    // precondition and the visibility of someone else's wine are read up front.
     if (sheet.gift && !(await GiftQuery.byBeverage(userId, id))?.given)
       return 'gift-not-found' as const
+    const visible = sheet.beverage ? undefined : await BeverageQuery.byIdForViewer(userId, id)
+    if (visible === 'not-found') return 'not-found' as const
 
     return await atomically(async (batch) => {
-      const updated = await BeverageCommand.update(userId, id, sheet.beverage, sheet.erase, batch)
-      if (typeof updated === 'string') return updated
+      const saved =
+        visible ??
+        (await BeverageCommand.update(userId, id, sheet.beverage ?? {}, sheet.erase, batch))
+      if (typeof saved === 'string') return saved
 
       if (sheet.gift || sheet.receivedFrom)
         await GiftCommand.correct(
@@ -89,7 +110,7 @@ export namespace BeverageUseCase {
           { userId, beverageId: id, ...sheet.recommendation },
           batch,
         )
-      return updated
+      return saved
     })
   }
 
