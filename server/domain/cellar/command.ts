@@ -2,49 +2,25 @@ import type { WriteBatch } from 'firebase-admin/firestore'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
 import * as repository from '~/domain/cellar/infrastructure/repository'
-import {
-  type CellarBottle,
-  type CellarCol,
-  type CellarCols,
-  type CellarRow,
-  type CellarRows,
-  type CellarZones,
-  DEFAULT_CELLAR_SIZE,
+import { CellarQuery } from '~/domain/cellar/query'
+import type {
+  CellarBottle,
+  CellarCol,
+  CellarCols,
+  CellarRow,
+  CellarRows,
+  CellarZones,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import { JournalCommand } from '~/domain/journal/command'
 import type { UserId } from '~/domain/shared/types'
 import { atomically, bulkSave } from '~/utils/firestore'
 
-// A solo user's own cellar config doc id. Deterministic, no membership read.
-export const soloCellarConfigKey = (userId: UserId) => `usr_${userId}`
-
-// A cellar's config doc id: the whole household shares one grid, a solo user has
-// their own. Resolve this before opening a batch — it reads the membership doc.
-export const cellarConfigKey = async (userId: UserId) => {
-  const membership = await HouseholdQuery.membershipOf(userId)
-  return membership ? `hh_${membership.householdId}` : soloCellarConfigKey(userId)
-}
-
-// The grid the app draws for this cellar scope, falling back to the default size
-// until onboarding sets it. `zones` defaults to 1 for configs written before the
-// field existed. Lives here rather than in the query so the placement guards can
-// read it without importing back into CellarQuery.
-export const cellarGrid = async (userId: UserId) => {
-  const stored = await repository.findConfig(await cellarConfigKey(userId))
-  if (!stored) return DEFAULT_CELLAR_SIZE
-  return {
-    rows: stored.rows,
-    cols: stored.cols,
-    zones: stored.zones ?? DEFAULT_CELLAR_SIZE.zones,
-  }
-}
-
 // Positions are 0-based, so the last slot of a rows x cols grid is
 // (rows - 1, cols - 1). A bottle written past that is unreachable: no screen
 // draws the slot, and it would later block a resize as out of bounds.
 const outsideGrid = async (userId: UserId, row: CellarRow, col: CellarCol) => {
-  const { rows, cols } = await cellarGrid(userId)
+  const { rows, cols } = await CellarQuery.config(userId)
   return row >= rows || col >= cols
 }
 
@@ -60,7 +36,7 @@ export namespace CellarCommand {
     zones: CellarZones,
     batch?: WriteBatch,
   ) => {
-    const key = await cellarConfigKey(userId)
+    const key = await CellarQuery.configKey(userId)
     const existing = await repository.findConfig(key)
     if (existing) return existing
     return repository.saveConfig(key, { rows, cols, zones }, batch)
@@ -81,7 +57,7 @@ export namespace CellarCommand {
     const bottles = await repository.findAllByUsers(scope.memberIds)
     const outOfBounds = bottles.filter((b) => b.row >= rows || b.col >= cols).length
     if (outOfBounds > 0) return { outOfBounds } as const
-    return repository.saveConfig(await cellarConfigKey(userId), { rows, cols, zones })
+    return repository.saveConfig(await CellarQuery.configKey(userId), { rows, cols, zones })
   }
 
   export const placeBeverage = async (
@@ -240,7 +216,7 @@ export namespace CellarCommand {
   // memoized as present, pointing back at the shared grid.
   export const deleteAllForUser = async (userId: UserId) => {
     await repository.removeAllByUser(userId)
-    await repository.removeConfig(soloCellarConfigKey(userId))
+    await repository.removeConfig(CellarQuery.soloConfigKey(userId))
   }
 
   // Wipe the user's cellar and restore the given bottles (account import).

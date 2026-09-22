@@ -1,14 +1,14 @@
 import { keyBy, range } from 'lodash-es'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { BeverageId } from '~/domain/beverage/types'
-import { cellarGrid } from '~/domain/cellar/command'
 import * as repository from '~/domain/cellar/infrastructure/repository'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
-import type {
-  CellarBottle,
-  CellarBottleOwner,
-  CellarBottleView,
-  OwnedBeverage,
+import {
+  type CellarBottle,
+  type CellarBottleOwner,
+  type CellarBottleView,
+  DEFAULT_CELLAR_SIZE,
+  type OwnedBeverage,
 } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import type { CellarScope } from '~/domain/household/types'
@@ -34,11 +34,30 @@ const ownerOf = (bottle: CellarBottle, viewerId: UserId, scope: CellarScope): Ce
 }
 
 export namespace CellarQuery {
-  // The configured grid dimensions for the caller's cellar scope, falling back to
-  // the default size until onboarding sets them.
+  // A solo user's own cellar config doc id. Deterministic, no membership read.
+  export const soloConfigKey = (userId: UserId) => `usr_${userId}`
+
+  // A cellar's config doc id: the whole household shares one grid, a solo user has
+  // their own. Resolve this before opening a batch — it reads the membership doc.
+  export const configKey = async (userId: UserId) => {
+    const membership = await HouseholdQuery.membershipOf(userId)
+    return membership ? `hh_${membership.householdId}` : soloConfigKey(userId)
+  }
+
+  // The grid the app draws for this cellar scope, falling back to the default size
+  // until onboarding sets it. `zones` defaults to 1 for configs written before the
+  // field existed.
   export const config = async (
     userId: UserId,
-  ): Promise<{ rows: number; cols: number; zones: number }> => cellarGrid(userId)
+  ): Promise<{ rows: number; cols: number; zones: number }> => {
+    const stored = await repository.findConfig(await configKey(userId))
+    if (!stored) return DEFAULT_CELLAR_SIZE
+    return {
+      rows: stored.rows,
+      cols: stored.cols,
+      zones: stored.zones ?? DEFAULT_CELLAR_SIZE.zones,
+    }
+  }
 
   export const info = async (userId: UserId) => {
     const [scope, { rows, cols, zones }] = await Promise.all([
