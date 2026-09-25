@@ -30,11 +30,12 @@ struct CapsuleField {
     /// purpose: the clearing is meant to cover the launch query, not to race
     /// it, so a cold start over a slow network still opens on the animation
     /// rather than on a mark waiting alone.
-    static let clearStagger: TimeInterval = 1.4
+    static let clearStagger: TimeInterval = 1.2
     /// The disorder added to each capsule's turn.
     static let clearJitter: TimeInterval = 0.3
-    /// One capsule's fading.
-    static let clearDuration: TimeInterval = 0.7
+    /// One capsule's fading: slow enough to be watched, a capsule dwindling
+    /// rather than blinking out.
+    static let clearDuration: TimeInterval = 1.6
     /// When the last capsule has gone and only the mark remains.
     static var clearEnd: TimeInterval { clearStart + clearStagger + clearJitter + clearDuration }
     /// Seconds for one breath to travel the mark.
