@@ -27,13 +27,14 @@ voit immédiatement.
 
 Une exception, et une seule : l'écran qu'on rouvre. Un écran qui change lentement et que
 l'utilisateur reconnaît, une liste ou un tableau de bord, garde sur disque ce qu'il montrait, dans
-le dossier des caches. Au lancement, le modèle de vue le relit de façon synchrone, avant tout appel
-réseau, et l'écran est lisible dès la première image. Le rafraîchissement qui suit ne reprend
-jamais l'écran : une ligne en tête porte le rond du tirer-pour-rafraîchir, le contenu reste
-lisible dessous, et elle devient « Réessayer » si l'appel échoue. Seul ce que l'écran montre à
-l'ouverture est écrit, jamais une vue triée ou filtrée ni plus d'une première page, et tout est
-effacé à la déconnexion. Ne s'applique pas à une donnée qui ne vaut rien périmée : un solde, un
-quota, un code.
+le dossier des caches. Au lancement, le modèle de vue le relit de façon synchrone, avant tout
+appel réseau, et l'écran est lisible dès la première image. Le rafraîchissement qui suit ne
+reprend jamais l'écran et n'affiche aucun indicateur : le contenu reste lisible, et à l'arrivée de
+la réponse les lignes se déplacent, apparaissent ou disparaissent en place, animées. Une ligne
+« Réessayer » en tête n'apparaît que si l'appel échoue. Une mutation faite depuis cet écran le
+recharge de la même façon, sans le vider. Seul ce que l'écran montre à l'ouverture est écrit,
+jamais une vue triée ou filtrée ni plus d'une première page, et tout est effacé à la déconnexion.
+Ne s'applique pas à une donnée qui ne vaut rien périmée : un solde, un quota, un code.
 
 ## Zones de tap
 
