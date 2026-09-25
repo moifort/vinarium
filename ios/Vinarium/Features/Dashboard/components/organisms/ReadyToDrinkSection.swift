@@ -57,7 +57,7 @@ struct ReadyToDrinkSection: View {
 }
 
 extension ReadyToDrinkSection {
-    struct Item: Identifiable {
+    struct Item: Identifiable, Equatable {
         let id: String
         var beverageType: BeverageType = .wine
         let color: WineColor?

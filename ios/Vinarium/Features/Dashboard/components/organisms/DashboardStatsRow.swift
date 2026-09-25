@@ -35,7 +35,7 @@ struct DashboardStatsRow: View {
 }
 
 extension DashboardStatsRow {
-    struct Stats {
+    struct Stats: Equatable {
         let bottleCount: Int
         let capacity: Int
         let totalValue: Double

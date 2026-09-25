@@ -196,6 +196,20 @@ final class WineListViewModel {
         reloadTask = Task { await load() }
     }
 
+    /// Refetches page 0 after a mutation without taking the rows away: the list stays
+    /// on screen under the leading spinner row, and the server's answer moves, inserts
+    /// or removes rows in place — an edited wine climbs to the top, a scanned one slides
+    /// in — where `scheduleReload` would empty the list behind a loader. Still
+    /// invalidates the loadMore calls in flight, which would append stale rows.
+    func reloadInPlace() {
+        guard !wines.isEmpty else { return scheduleReload() }
+        reloadTask?.cancel()
+        generation += 1
+        isLoadingMore = false
+        loadMoreFailed = false
+        reloadTask = Task { await refresh() }
+    }
+
     /// Loads the first page (on a view/sort/filter change, on appear, on pull-to-refresh
     /// and after a mutation).
     func load() async {
@@ -233,16 +247,19 @@ final class WineListViewModel {
     }
 
     /// Bring the rows already on screen up to date without taking them away — the
-    /// cached list's refresh, and the retry when that refresh failed.
+    /// cached list's refresh, a mutation's reload in place, and the retry when either
+    /// failed.
     func refresh() async {
+        let requested = generation
         isRefreshing = true
         refreshFailed = false
         await load()
-        // A view, sort or filter change took the list over meanwhile: it emptied the
-        // rows and reset both flags, and this refresh no longer has anything to say.
-        guard isRefreshing else { return }
+        // Another reload took the list over meanwhile — a view, sort or filter change,
+        // or a mutation's reload in place — and this refresh no longer has anything
+        // to say: the newer one owns both flags.
+        guard requested == generation else { return }
         isRefreshing = false
-        refreshFailed = !loaded
+        refreshFailed = error != nil
     }
 
     /// Loads the next page and appends it to the wines already loaded.

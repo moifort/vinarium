@@ -32,6 +32,10 @@ struct DashboardPage: View {
                 JournalSection(events: content.events, onEventTapped: onWineTapped)
             }
             .padding()
+            // A refresh slides the shortlists' rows and rolls the figures over, and
+            // the leading row folds away, instead of the page snapping to the answer.
+            .animation(.default, value: content)
+            .animation(.default, value: isRefreshing)
         }
         .navigationTitle("Accueil")
         .navigationBarTitleDisplayMode(.large)
@@ -46,7 +50,7 @@ struct DashboardPage: View {
 }
 
 extension DashboardPage {
-    struct Content {
+    struct Content: Equatable {
         let stats: DashboardStatsRow.Stats
         let readyToDrink: [ReadyToDrinkSection.Item]
         let favorites: [FavoritesSection.Item]

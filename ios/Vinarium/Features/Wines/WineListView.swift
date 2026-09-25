@@ -47,10 +47,10 @@ struct WineListView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
-                    // scheduleReload rather than load: it invalidates in-flight loadMore
-                    // calls so stale data is not appended after the mutation.
-                    onRemoved: { viewModel.scheduleReload() },
-                    onUpdated: { viewModel.scheduleReload() }
+                    // Reloaded in place: the rows stay and move to their new spot
+                    // instead of the list emptying behind a loader.
+                    onRemoved: { viewModel.reloadInPlace() },
+                    onUpdated: { viewModel.reloadInPlace() }
                 )
             }
             // These triggers fire after a scan (a mutation): the refetch is needed to
@@ -71,10 +71,10 @@ struct WineListView: View {
     }
 
     /// Switches to a view after a scan: changing `mode` reloads through its didSet;
-    /// when already on it, force the refetch so the freshly created wine shows up.
+    /// when already on it, refetch in place so the freshly created wine slides in.
     private func switchTo(_ mode: WineListMode) {
         if viewModel.mode == mode {
-            viewModel.scheduleReload()
+            viewModel.reloadInPlace()
         } else {
             viewModel.mode = mode
         }

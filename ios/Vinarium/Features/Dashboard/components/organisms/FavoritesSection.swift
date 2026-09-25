@@ -72,7 +72,7 @@ struct FavoritesSection: View {
 }
 
 extension FavoritesSection {
-    struct Item: Identifiable {
+    struct Item: Identifiable, Equatable {
         let id: String
         var beverageType: BeverageType = .wine
         let color: WineColor?

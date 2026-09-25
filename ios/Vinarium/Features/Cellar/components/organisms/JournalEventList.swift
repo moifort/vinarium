@@ -64,12 +64,16 @@ struct JournalEventList: View {
                     )
                 }
             }
+            // A refresh moves, inserts and removes rows in place, and the leading row
+            // folds away, instead of the whole list snapping to the server's answer.
+            .animation(.default, value: events)
+            .animation(.default, value: isRefreshing)
         }
     }
 }
 
 extension JournalEventList {
-    struct Event: Identifiable {
+    struct Event: Identifiable, Equatable {
         let id: String
         let date: Date
         let isEntry: Bool

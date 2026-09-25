@@ -20,6 +20,8 @@ struct GradientWidget: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 Text(verbatim: value)
                     .font(.largeTitle.bold())
+                    // Digits roll to the new figure when a refresh changes it.
+                    .contentTransition(.numericText())
                 if let denominator {
                     Text(verbatim: denominator)
                         .font(.title3.bold())

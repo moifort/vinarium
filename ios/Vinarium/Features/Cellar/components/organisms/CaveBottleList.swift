@@ -62,18 +62,22 @@ struct CaveBottleList: View {
                     )
                 }
             }
+            // A refresh moves, inserts and removes rows in place, and the leading row
+            // folds away, instead of the whole list snapping to the server's answer.
+            .animation(.default, value: groups)
+            .animation(.default, value: isRefreshing)
         }
     }
 }
 
 extension CaveBottleList {
-    struct Group: Identifiable {
+    struct Group: Identifiable, Equatable {
         let label: String
         let items: [Item]
         var id: String { label }
     }
 
-    struct Item: Identifiable {
+    struct Item: Identifiable, Equatable {
         let id: String
         var beverageType: BeverageType = .wine
         let color: WineColor?

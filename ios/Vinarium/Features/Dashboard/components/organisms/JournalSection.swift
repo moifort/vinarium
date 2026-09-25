@@ -57,7 +57,7 @@ struct JournalSection: View {
 }
 
 extension JournalSection {
-    struct Event {
+    struct Event: Equatable {
         let isEntry: Bool
         let wineName: String
         let position: String
