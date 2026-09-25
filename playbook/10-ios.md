@@ -25,6 +25,15 @@ visiblement.
 Comme il n'y a pas de cache client, chaque action est un aller-retour : l'absence d'indicateur se
 voit immédiatement.
 
+L'ouverture de l'app ne montre pas d'indicateur : elle montre la marque. L'écran de lancement
+système affiche l'écran pavé de capsules sur le fond de l'icône, la première image de l'app
+redessine exactement le même tableau, puis les capsules s'effacent une à une pour laisser le logo,
+qui s'anime tant que la requête de lancement court. Quand le premier écran est posé derrière, le rideau se lève
+dessus. Il tient au moins le temps de l'effacement et d'une respiration, pour qu'une réponse
+rapide ne le coupe pas, et jamais plus que la réponse. L'image de lancement est rendue depuis la
+vue par un script, jamais dessinée à part : les deux tableaux doivent rester identiques. Cette
+animation est réservée à l'ouverture ; partout ailleurs, l'indicateur système.
+
 Une exception, et une seule : l'écran qu'on rouvre. Un écran qui change lentement et que
 l'utilisateur reconnaît, une liste ou un tableau de bord, garde sur disque ce qu'il montrait, dans
 le dossier des caches. Au lancement, le modèle de vue le relit de façon synchrone, avant tout
