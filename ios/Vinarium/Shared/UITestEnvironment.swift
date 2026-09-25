@@ -20,6 +20,14 @@ enum UITestEnvironment {
     /// Any password satisfies the emulator; it verifies nothing.
     private static let password = "e2e-password"
 
+    /// Whether this run is an end-to-end scenario: both launch arguments are
+    /// there. Lets the app skip what a scenario cannot drive, such as the
+    /// opening's curtain, which would swallow the taps the tests send the moment
+    /// a screen exists.
+    static var isActive: Bool {
+        value(for: "-uiTestAuthEmulator") != nil && value(for: "-uiTestAccount") != nil
+    }
+
     /// Called from `VinariumApp.init()` right after `FirebaseApp.configure()`,
     /// before anything touches `Auth.auth()`.
     static func bootstrapIfNeeded() {

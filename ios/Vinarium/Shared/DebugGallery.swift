@@ -17,8 +17,12 @@ struct DebugGallery: View {
                     Button("Paywall, scans épuisés") { paywallTrigger = .scanAllowanceSpent }
                 }
                 Section("Chargement") {
-                    NavigationLink("Verre de vin (ouverture de l'app)") {
-                        LaunchLoadingView()
+                    NavigationLink("Rideau d'ouverture") {
+                        LaunchCurtain(revealing: false)
+                            .toolbarVisibility(.hidden, for: .navigationBar)
+                    }
+                    NavigationLink("Logo (login, onboarding)") {
+                        BrandLogo()
                     }
                     NavigationLink("Spinner système (tout le reste)") {
                         LoadingStateView()

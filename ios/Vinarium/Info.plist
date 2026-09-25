@@ -4,7 +4,19 @@
 <dict>
 	<!-- Partial Info.plist merged with the generated one (GENERATE_INFOPLIST_FILE).
 	     Declares the vinarium:// custom scheme used by the invitation web page's
-	     "Ouvrir dans l'app" CTA — Universal Links can't re-trigger from that page. -->
+	     "Ouvrir dans l'app" CTA — Universal Links can't re-trigger from that page,
+	     and the launch screen: the screen paved with capsules on the icon's
+	     charcoal, the same picture LaunchCurtain draws in the first SwiftUI
+	     frame. The image is a loose PNG in Resources, rendered by
+	     scripts/generate-launch-image.swift; a catalog image is left out of the
+	     generated launch screen. -->
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+		<key>UIImageName</key>
+		<string>LaunchField</string>
+	</dict>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

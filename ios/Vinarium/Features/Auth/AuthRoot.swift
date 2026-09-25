@@ -21,14 +21,42 @@ struct AuthRoot: View {
     /// `ContentView` owns the presentation so it can refresh the shared cave on join.
     @State private var joinRequest: HouseholdJoinRequest?
 
+    /// The opening's curtain, `LaunchCurtain`, over everything until the first
+    /// screen is laid out underneath. Comes down again when an account signs in
+    /// from the login, for that session's launch query.
+    @State private var curtain: Curtain = Self.hasCurtain ? .holding : .lifted
+    /// When the curtain last came down; it holds `LaunchCurtain.minimumHold` from there.
+    @State private var curtainLowered = Date()
+
+    private enum Curtain {
+        case holding, revealing, lifted
+    }
+
+    /// The end-to-end scenarios tap a screen the moment it exists; the curtain
+    /// would take those taps. They run without it.
+    private static var hasCurtain: Bool {
+        #if DEBUG
+        !UITestEnvironment.isActive
+        #else
+        true
+        #endif
+    }
+
     var body: some View {
-        Group {
-            if case .updateRequired(let appStoreURL) = supportGate.state {
-                UpdateRequiredView(appStoreURL: appStoreURL)
-            } else if session.user == nil {
-                LoginView()
-            } else {
-                signedIn
+        ZStack {
+            Group {
+                if case .updateRequired(let appStoreURL) = supportGate.state {
+                    UpdateRequiredView(appStoreURL: appStoreURL)
+                } else if session.user == nil {
+                    LoginView()
+                } else {
+                    signedIn
+                }
+            }
+            if curtain != .lifted {
+                LaunchCurtain(revealing: curtain == .revealing)
+                    .transition(.opacity)
+                    .zIndex(1)
             }
         }
         .environment(session)
@@ -45,6 +73,7 @@ struct AuthRoot: View {
                 gate.reset()
             }
         }
+        .task(id: isSettled) { await settleCurtain() }
         .onOpenURL { url in
             if let code = Self.joinCode(from: url) {
                 joinRequest = HouseholdJoinRequest(code: code)
@@ -56,8 +85,10 @@ struct AuthRoot: View {
     private var signedIn: some View {
         switch gate.state {
         case .loading:
-            // The opening of the app: the only wait the wine glass belongs to.
-            LaunchLoadingView()
+            // Behind the curtain, in its colour: nothing to see until the launch
+            // query answers, and no flash of another background when the curtain
+            // comes down again over the login.
+            LaunchCurtain.background.ignoresSafeArea()
         case .required:
             OnboardingView(onCompleted: { gate.markCompleted() })
         case .ready:
@@ -79,6 +110,45 @@ struct AuthRoot: View {
         guard let launch = await gate.refresh() else { return }
         subscriptions.adopt(entitlement: launch.entitlement, quota: launch.quota)
         await subscriptions.refreshStore()
+    }
+
+    /// Nothing left to wait for behind the curtain: the login, the wizard, the
+    /// app or the retry screen is laid out.
+    private var isSettled: Bool {
+        session.user == nil || gate.state != .loading
+    }
+
+    /// Lifts the curtain once the screen behind it is settled and it has held
+    /// long enough, or lowers it again when a sign-in starts a launch query.
+    /// Runs as a task keyed on `isSettled`, so a change cancels the pending one.
+    private func settleCurtain() async {
+        guard Self.hasCurtain else { return }
+        guard isSettled else {
+            if curtain == .lifted { lowerCurtain() }
+            return
+        }
+        guard curtain == .holding else { return }
+        let remaining = LaunchCurtain.minimumHold - Date().timeIntervalSince(curtainLowered)
+        if remaining > 0 {
+            try? await Task.sleep(for: .seconds(remaining))
+        }
+        if Task.isCancelled { return }
+        withAnimation(.easeIn(duration: 0.5)) {
+            curtain = .revealing
+        } completion: {
+            // A sign-in that started during the exit finds the curtain back down
+            // for its launch query, instead of a bare charcoal screen.
+            if isSettled {
+                curtain = .lifted
+            } else {
+                lowerCurtain()
+            }
+        }
+    }
+
+    private func lowerCurtain() {
+        curtainLowered = Date()
+        withAnimation(.easeOut(duration: 0.25)) { curtain = .holding }
     }
 
     /// Extracts an invitation code from either the universal link

@@ -80,6 +80,31 @@ Key conventions:
 - `private(set)` for published state
 - Error reporting via `reportError()` (Sentry)
 
+### The opening
+
+The system launch screen (`UILaunchScreen` keys in `Info.plist`, no storyboard) shows the whole
+screen paved with bottle capsules on the icon's charcoal: `Resources/LaunchField@{2,3}x.png` over
+`LaunchBackground.colorset`. The first SwiftUI frame is `LaunchCurtain`
+(`Shared/Components/LaunchCurtain.swift`), which draws the same picture at the same size on the
+same colour through `CapsuleField` (`Shared/Components/CapsuleField.swift`), so the hand-over is
+invisible. The field then clears: every capsule but the mark's nine shrinks and fades where it
+sits, the ones around the mark first, with a little disorder; the mark breathes until `AuthRoot` has something
+settled behind it: the login, the onboarding, the tabs on their snapshots, or the retry screen.
+`AuthRoot` holds the curtain at least `LaunchCurtain.minimumHold` from its first frame (the
+clearing plus one breath), then plays the exit (`revealing`) and drops the view. A sign-in from
+the login lowers it again for that account's launch query.
+
+The launch image is rendered **from the view**, by `scripts/generate-launch-image.swift`, which
+compiles `CapsuleDrawing.swift` and `CapsuleField.swift` alongside it (the command is in the
+script's header). Rerun it after any change to those files or to `LaunchCurtain.capsuleSize`. It
+is a loose PNG on purpose: the launch screen the system generates at install leaves an asset
+catalog image out and shows the bare colour, whatever the image's size or compression. The
+simulator caches launch screens: uninstall the app to see a new image.
+
+One capsule is drawn by `CapsuleDrawing` into a `GraphicsContext`, for the field and for the
+login's `BrandLogo` alike; its shadow is a gradient disc, not a shadow filter, which would render
+the whole canvas offscreen once per capsule.
+
 ### Screens that reopen on their snapshot
 
 A relaunch used to face an empty screen and a loader over a cellar that had barely changed. The

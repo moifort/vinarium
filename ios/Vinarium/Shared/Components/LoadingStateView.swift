@@ -5,8 +5,8 @@ import SwiftUI
 /// yet, instead of a bare `ProgressView` pinned inside a list row; small inline
 /// waits (buttons, toolbar items, rows) keep the plain spinner with no caption.
 ///
-/// Deliberately the stock iOS indicator: the branded wine glass belongs to the
-/// launch alone, in `LaunchLoadingView`.
+/// Deliberately the stock iOS indicator: the brand mark animates for the opening
+/// alone, in `LaunchCurtain`, and never becomes the app's way of saying "busy".
 struct LoadingStateView: View {
     var label: LocalizedStringKey = "Chargement..."
 
