@@ -24,7 +24,6 @@ struct WineListView: View {
                 groups: mappedGroups,
                 hasMore: viewModel.hasMore,
                 isLoading: viewModel.isLoading,
-                isRefreshing: viewModel.isRefreshing,
                 refreshFailed: viewModel.refreshFailed,
                 loadMoreFailed: viewModel.loadMoreFailed,
                 errorMessage: viewModel.error,

@@ -2,10 +2,7 @@ import SwiftUI
 
 struct DashboardPage: View {
     let content: Content
-    /// The page is last session's snapshot and a fresher one is on its way: a spinner
-    /// leads the page rather than a loader replacing it.
-    var isRefreshing: Bool = false
-    /// That refresh failed — the leading row becomes a retry.
+    /// Refreshing the page on screen failed — a retry row leads it.
     var refreshFailed: Bool = false
     var onRetryRefresh: () async -> Void = {}
     var onStatsTapped: () -> Void
@@ -15,12 +12,8 @@ struct DashboardPage: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                if isRefreshing || refreshFailed {
-                    RefreshRow(
-                        failed: refreshFailed,
-                        loadingLabel: "Mise à jour de l'accueil",
-                        onRetry: onRetryRefresh
-                    )
+                if refreshFailed {
+                    RefreshRow(onRetry: onRetryRefresh)
                 }
 
                 DashboardStatsRow(stats: content.stats, onTapped: onStatsTapped)
@@ -32,10 +25,10 @@ struct DashboardPage: View {
                 JournalSection(events: content.events, onEventTapped: onWineTapped)
             }
             .padding()
-            // A refresh slides the shortlists' rows and rolls the figures over, and
-            // the leading row folds away, instead of the page snapping to the answer.
+            // A refresh slides the shortlists' rows and rolls the figures over instead
+            // of the page snapping to the answer.
             .animation(.default, value: content)
-            .animation(.default, value: isRefreshing)
+            .animation(.default, value: refreshFailed)
         }
         .navigationTitle("Accueil")
         .navigationBarTitleDisplayMode(.large)

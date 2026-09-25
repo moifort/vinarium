@@ -4,9 +4,7 @@ struct JournalEventList: View {
     let events: [Event]
     var hasMore: Bool = false
     var loadMoreFailed: Bool = false
-    /// Last session's snapshot is on screen and a fresher one is on its way.
-    var isRefreshing: Bool = false
-    /// That refresh failed — the leading row becomes a retry.
+    /// Refreshing the rows on screen failed — a retry row leads them.
     var refreshFailed: Bool = false
     var onEventTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
@@ -32,9 +30,9 @@ struct JournalEventList: View {
             ContentUnavailableView("Aucun historique", systemImage: "clock", description: Text("L'historique apparaîtra ici"))
         } else {
             List {
-                // Leads the rows it is refreshing, never replaces them.
-                if isRefreshing || refreshFailed {
-                    RefreshRow(failed: refreshFailed, loadingLabel: "Mise à jour de la liste", onRetry: onRetryRefresh)
+                // Leads the rows it failed to refresh, never replaces them.
+                if refreshFailed {
+                    RefreshRow(onRetry: onRetryRefresh)
                 }
                 ForEach(groupedByDate, id: \.date) { group in
                     Section(group.date) {
@@ -64,10 +62,10 @@ struct JournalEventList: View {
                     )
                 }
             }
-            // A refresh moves, inserts and removes rows in place, and the leading row
-            // folds away, instead of the whole list snapping to the server's answer.
+            // A refresh moves, inserts and removes rows in place instead of the whole
+            // list snapping to the server's answer.
             .animation(.default, value: events)
-            .animation(.default, value: isRefreshing)
+            .animation(.default, value: refreshFailed)
         }
     }
 }

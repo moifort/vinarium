@@ -26,7 +26,6 @@ struct CellarView: View {
                         bottlesLoadMoreFailed: viewModel.bottlesLoadMoreFailed,
                         historyHasMore: viewModel.historyHasMore,
                         historyLoadMoreFailed: viewModel.historyLoadMoreFailed,
-                        isRefreshing: viewModel.isRefreshing,
                         refreshFailed: viewModel.refreshFailed,
                         onBottleTapped: { selectedWineId = $0 },
                         onRemoveRequested: { wineId in
@@ -45,7 +44,7 @@ struct CellarView: View {
                 }
             }
             // Over last session's snapshot when the disk had one: the bottles show at
-            // once and the spinner leading them says they are being brought up to date.
+            // once and move into place when the server answers.
             .task(id: refreshTrigger) {
                 await viewModel.loadOnAppear()
             }

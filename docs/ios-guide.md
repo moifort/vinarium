@@ -97,19 +97,22 @@ The rule is in [playbook/10-ios.md](../playbook/10-ios.md#chargements).
 
 - **Versioned**: each cache is built with a `version`; a file carrying another one is ignored.
   Bump it whenever the snapshot's type changes shape.
-- **The refresh that follows** is `isRefreshing`, never `isLoading`: `RefreshRow`
-  (`Shared/Components/RefreshRow.swift`) leads the list — or the dashboard's scroll view — with the
-  pull-to-refresh circle, on the screen's own background, and flips to "Réessayer" on
-  `refreshFailed`. It is the mirror of `LoadMoreRow` minus the `.task`: the fetch is already in
-  flight when the row appears.
+- **The refresh that follows** draws nothing, never `isLoading`: the rows stay readable and the
+  answer moves, inserts or removes them in place, animated by `.animation(_:value:)` on the list's
+  `Equatable` groups (the dashboard animates its `Content` and rolls its figures with
+  `.numericText()`). Only `refreshFailed` shows something: `RefreshRow`
+  (`Shared/Components/RefreshRow.swift`), a "Réessayer" row leading the list or the dashboard's
+  scroll view. After a mutation or a scan the wine list calls `reloadInPlace()`, the same refresh,
+  rather than `scheduleReload()`, which empties the list behind a loader and is kept for view,
+  sort and filter changes.
 - **`loadOnAppear()`** picks between the two on every appearance: the snapshot's refresh the first
   time, the silent `load()` each screen always did afterwards.
 - **Cleared** by `SnapshotCaches.clear()`, from `AuthSession.signOut()` (account deletion goes
   through it) and from `UITestEnvironment` before a scenario signs in, so no run starts on the
   previous one's cellar.
 
-Debug gallery (`-debugGallery`), under "Chargement": the cached list refreshing and failing, the
-cached dashboard and the cached cellar.
+Debug gallery (`-debugGallery`), under "Chargement": the cached list, dashboard and cellar whose
+refresh failed.
 
 ### Coordinator (`{Feature}View`)
 

@@ -37,8 +37,8 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
 
 /// The cellar tab: the bottles row by row, and the journal of what came in and out. It
 /// opens on what it showed last time: its `SnapshotCache` hands the first page of each
-/// back from disk before anything is asked of the network, and the first fetch runs
-/// under a spinner leading the list instead of behind a loader.
+/// back from disk before anything is asked of the network, and the first fetch replaces
+/// it silently instead of behind a loader.
 @MainActor @Observable
 final class CellarGridViewModel {
     init() {
@@ -61,10 +61,6 @@ final class CellarGridViewModel {
     var displayMode: CellarDisplayMode = .cave
     var isLoading = false
     var error: String?
-
-    /// The cellar on screen is last session's and a fresher one is on its way: a
-    /// spinner leads the list. Never set by a pull-to-refresh, whose own control spins.
-    private(set) var isRefreshing = false
 
     /// That refresh failed: the bottles on screen are the ones from last time, and the
     /// leading row offers to try again.
@@ -136,7 +132,7 @@ final class CellarGridViewModel {
     }
 
     /// The tab appeared: a cellar still showing last session's snapshot refreshes it
-    /// under the leading spinner, anything else loads as it always did.
+    /// in place, anything else loads as it always did.
     func loadOnAppear() async {
         if !loaded, !bottles.isEmpty || !history.isEmpty {
             await refresh()
@@ -148,10 +144,8 @@ final class CellarGridViewModel {
     /// Bring the snapshot on screen up to date without taking it away — and the retry
     /// when that failed.
     func refresh() async {
-        isRefreshing = true
         refreshFailed = false
         await load()
-        isRefreshing = false
         refreshFailed = !loaded
     }
 

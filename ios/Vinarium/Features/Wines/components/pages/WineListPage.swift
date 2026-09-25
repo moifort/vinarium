@@ -10,7 +10,6 @@ struct WineListPage: View {
     let groups: [WineListContent.Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
-    var isRefreshing: Bool = false
     var refreshFailed: Bool = false
     var loadMoreFailed: Bool = false
     var errorMessage: String?
@@ -26,7 +25,6 @@ struct WineListPage: View {
             groups: groups,
             hasMore: hasMore,
             isLoading: isLoading,
-            isRefreshing: isRefreshing,
             refreshFailed: refreshFailed,
             loadMoreFailed: loadMoreFailed,
             errorMessage: errorMessage,

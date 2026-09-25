@@ -23,19 +23,16 @@ struct DebugGallery: View {
                     NavigationLink("Spinner système (tout le reste)") {
                         LoadingStateView()
                     }
-                    NavigationLink("Liste en cache, mise à jour") {
-                        cachedList(refreshFailed: false)
-                    }
                     NavigationLink("Liste en cache, échec de la mise à jour") {
-                        cachedList(refreshFailed: true)
+                        cachedList
                     }
                     NavigationLink("Liste, page suivante") {
                         paginatedList
                     }
-                    NavigationLink("Accueil en cache, mise à jour") {
+                    NavigationLink("Accueil en cache, échec de la mise à jour") {
                         cachedDashboard
                     }
-                    NavigationLink("Cave en cache, mise à jour") {
+                    NavigationLink("Cave en cache, échec de la mise à jour") {
                         cachedCellar
                     }
                 }
@@ -56,9 +53,8 @@ struct DebugGallery: View {
 }
 
 extension DebugGallery {
-    /// What a relaunch looks like: last session's wines readable at once, the spinner
-    /// row leading them while the server answers — or the retry when it never did.
-    private func cachedList(refreshFailed: Bool) -> some View {
+    /// A relaunch whose refresh failed: last session's wines, the retry leading them.
+    private var cachedList: some View {
         WineListContent(
             mode: .all,
             groups: [
@@ -70,8 +66,7 @@ extension DebugGallery {
                     .init(id: "3", color: .rosé, name: "Domaine Tempier", subtitle: "2022 • Bandol", rating: 3, isFavorite: false, isInCellar: true, ownerName: "Marie"),
                 ]),
             ],
-            isRefreshing: !refreshFailed,
-            refreshFailed: refreshFailed,
+            refreshFailed: true,
             onWineTapped: { _ in }
         )
         .navigationTitle("Mes Vins")
@@ -94,7 +89,7 @@ extension DebugGallery {
         .navigationTitle("Mes Vins")
     }
 
-    /// The home tab reopened on last session's figures, the spinner leading them.
+    /// The home tab reopened on last session's figures, its refresh failed.
     private var cachedDashboard: some View {
         DashboardPage(
             content: .init(
@@ -109,14 +104,14 @@ extension DebugGallery {
                     .init(isEntry: true, wineName: "Pétrus 2012", position: "C2", wineId: "5", date: Date()),
                 ]
             ),
-            isRefreshing: true,
+            refreshFailed: true,
             onStatsTapped: {},
             onWineTapped: { _ in },
             onSettingsTapped: {}
         )
     }
 
-    /// The cellar tab reopened on last session's bottles, the spinner leading them.
+    /// The cellar tab reopened on last session's bottles, its refresh failed.
     private var cachedCellar: some View {
         CellarPage(
             displayMode: .constant(.cave),
@@ -130,7 +125,7 @@ extension DebugGallery {
                 ]),
             ],
             events: [],
-            isRefreshing: true,
+            refreshFailed: true,
             onBottleTapped: { _ in },
             onRemoveRequested: { _ in },
             onEventTapped: { _ in },

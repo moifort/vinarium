@@ -106,9 +106,8 @@ private let wineMonthYearFormatter: DateFormatter = {
 
 /// The paginated wine list. It opens on the page it closed on: its `SnapshotCache` hands
 /// back the last visit's wines from disk before a single byte is asked of the network,
-/// so a relaunch shows the list straight away and refreshes it underneath —
-/// `isRefreshing`, the spinner row leading the list, instead of a loader taking the
-/// screen.
+/// so a relaunch shows the list straight away and refreshes it silently underneath
+/// instead of behind a loader taking the screen.
 @MainActor @Observable
 final class WineListViewModel {
     init() {
@@ -128,11 +127,6 @@ final class WineListViewModel {
     /// Last loadMore failed: the sentinel turns into a retry button instead of a
     /// spinner that would keep turning forever without a new attempt.
     private(set) var loadMoreFailed = false
-
-    /// A list already on screen is being brought up to date: the rows stay put and a
-    /// spinner row leads the list. Set only on the cached list's refresh — a
-    /// pull-to-refresh is left alone, the system's own control already spins for it.
-    private(set) var isRefreshing = false
 
     /// That refresh failed: the rows on screen are the ones from last time, and the
     /// leading row offers to try again — otherwise nothing would say they are stale.
@@ -190,14 +184,13 @@ final class WineListViewModel {
         hasMore = false
         isLoadingMore = false // stale loadMore calls bail out without touching this state
         loadMoreFailed = false
-        isRefreshing = false
         refreshFailed = false
         isLoading = true
         reloadTask = Task { await load() }
     }
 
     /// Refetches page 0 after a mutation without taking the rows away: the list stays
-    /// on screen under the leading spinner row, and the server's answer moves, inserts
+    /// on screen untouched, and the server's answer moves, inserts
     /// or removes rows in place — an edited wine climbs to the top, a scanned one slides
     /// in — where `scheduleReload` would empty the list behind a loader. Still
     /// invalidates the loadMore calls in flight, which would append stale rows.
@@ -236,8 +229,8 @@ final class WineListViewModel {
     }
 
     /// The list appeared, or was asked to reload: a list still showing the last
-    /// session's wines refreshes them under a leading spinner row, anything else loads
-    /// as it always did — rows already fetched this session stay on screen silently.
+    /// session's wines refreshes them in place, anything else loads as it always did —
+    /// rows already fetched this session stay on screen silently.
     func loadOnAppear() async {
         if !loaded, !wines.isEmpty {
             await refresh()
@@ -251,14 +244,12 @@ final class WineListViewModel {
     /// failed.
     func refresh() async {
         let requested = generation
-        isRefreshing = true
         refreshFailed = false
         await load()
         // Another reload took the list over meanwhile — a view, sort or filter change,
         // or a mutation's reload in place — and this refresh no longer has anything
-        // to say: the newer one owns both flags.
+        // to say: the newer one owns the flag.
         guard requested == generation else { return }
-        isRefreshing = false
         refreshFailed = error != nil
     }
 

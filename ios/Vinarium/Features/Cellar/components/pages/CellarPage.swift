@@ -8,9 +8,7 @@ struct CellarPage: View {
     var bottlesLoadMoreFailed: Bool = false
     var historyHasMore: Bool = false
     var historyLoadMoreFailed: Bool = false
-    /// The cellar is last session's snapshot and a fresher one is on its way.
-    var isRefreshing: Bool = false
-    /// That refresh failed — the leading row becomes a retry.
+    /// Refreshing the cellar on screen failed — a retry row leads it.
     var refreshFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
@@ -30,7 +28,6 @@ struct CellarPage: View {
                     groups: groups,
                     hasMore: bottlesHasMore,
                     loadMoreFailed: bottlesLoadMoreFailed,
-                    isRefreshing: isRefreshing,
                     refreshFailed: refreshFailed,
                     onBottleTapped: onBottleTapped,
                     onRemoveRequested: onRemoveRequested,
@@ -43,7 +40,6 @@ struct CellarPage: View {
                     events: events,
                     hasMore: historyHasMore,
                     loadMoreFailed: historyLoadMoreFailed,
-                    isRefreshing: isRefreshing,
                     refreshFailed: refreshFailed,
                     onEventTapped: onEventTapped,
                     onPrefetch: onHistoryPrefetch,

@@ -13,7 +13,6 @@ struct DashboardView: View {
                 if let data = viewModel.data {
                     DashboardPage(
                         content: Self.map(data),
-                        isRefreshing: viewModel.isRefreshing,
                         refreshFailed: viewModel.refreshFailed,
                         onRetryRefresh: { await viewModel.refresh() },
                         onStatsTapped: { selectedTab = .cellar },
@@ -28,7 +27,7 @@ struct DashboardView: View {
             }
             .refreshable { await viewModel.load() }
             // Over last session's snapshot when the disk had one: the page shows at
-            // once and the spinner at its top says it is being brought up to date.
+            // once and settles on the server's figures when they arrive.
             .task {
                 await viewModel.loadOnAppear()
             }
