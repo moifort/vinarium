@@ -4,8 +4,7 @@ import SwiftUI
 /// middle row shifted by half a capsule to keep the icon's diagonal rhythm. It
 /// only lays the capsules out; callers dress each one through `capsule`, so the
 /// login's entrance (`BrandLogo`) keeps its cascade while the geometry stays in
-/// one place. The opening draws the same nine capsules, at the same rhythm, out
-/// of its field: see `CapsuleField`.
+/// one place.
 struct BrandMark<Capsule: View>: View {
     var capsuleSize: CGFloat = 34
     @ViewBuilder var capsule: (BrandCapsuleSlot) -> Capsule

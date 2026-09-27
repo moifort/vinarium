@@ -85,12 +85,14 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
   `Black-M`, toutes les lignes guides requises dès qu'un groupe porte une transformation, et le
   moteur de rendu ignore les styles de trait et la règle de remplissage : les traits doivent être
   pré-étendus et les trous enroulés en sens inverse.
-- **Image de lancement** `ios/Vinarium/Resources/LaunchField@{2,3}x.png`, rendue depuis
-  `CapsuleField` par `scripts/generate-launch-image.swift` (commande de compilation en tête du
-  script). Fond `LaunchBackground` = anthracite de l'icône, `#26272C`. Piège vérifié le
-  2026-09-25 : une image du catalogue d'assets n'apparaît jamais dans le launch screen généré
-  par le système (fond nu), quelle que soit sa taille ; un PNG en vrac dans le bundle, si. Le
-  simulateur met en cache l'écran de lancement : désinstaller l'app pour voir une nouvelle image.
+- **Écran de lancement** : fond `LaunchBackground` = anthracite de l'icône, `#26272C`, seul
+  affiché par l'écran de lancement système ; `LaunchCurtain` fait ensuite apparaître en fondu une
+  surface de vin dessinée par un shader Metal compilé sur l'appareil : le Xcode de la machine n'a
+  pas le Metal Toolchain (téléchargement à part, `xcodebuild -downloadComponent MetalToolchain`),
+  un fichier `.metal` ferait échouer le build. L'icône du rideau est `LaunchIcon.imageset`, une copie réduite (360 px)
+  de `AppIcon.png` : à refaire si l'icône change, car une icône d'app ne se charge pas comme
+  image. Le simulateur met en cache l'écran de lancement : désinstaller l'app pour en voir un
+  nouveau.
 - **Schéma GraphQL édité à la main** : `bun run generate:graphql` reformate tout le fichier et
   noie les vrais changements. On édite les changements sémantiques à la main et on vérifie
   l'équivalence en comparant les schémas triés lexicographiquement. Le binaire de génération du
