@@ -37,9 +37,11 @@ final class AuthSession {
     }
 
     /// Leave the session, taking every screen's snapshot along: what is on disk belongs
-    /// to the account that just left. Account deletion ends here too.
+    /// to the account that just left, the wine list's filters too. Account deletion ends
+    /// here too.
     func signOut() throws {
         try Auth.auth().signOut()
         SnapshotCaches.clear()
+        WineListFilters.clear()
     }
 }

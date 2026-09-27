@@ -1,6 +1,6 @@
 import Foundation
 
-enum WineListMode: String, CaseIterable, Identifiable {
+enum WineListMode: String, Codable, CaseIterable, Identifiable {
     case all, favorites, gifted, recommended
     var id: String { rawValue }
     var label: String {
@@ -47,7 +47,7 @@ enum WineListMode: String, CaseIterable, Identifiable {
     }
 }
 
-enum WineSort: String, CaseIterable, Identifiable {
+enum WineSort: String, Codable, CaseIterable, Identifiable {
     case updatedAt, vintage, region, color, price, person
     var id: String { rawValue }
     var label: String {
@@ -78,7 +78,7 @@ enum WineSort: String, CaseIterable, Identifiable {
     }
 }
 
-enum WineStatusFilter: String, CaseIterable, Identifiable {
+enum WineStatusFilter: String, Codable, CaseIterable, Identifiable {
     case all, inCellar = "in-cellar", consumed
     var id: String { rawValue }
     var label: String {
@@ -111,7 +111,16 @@ private let wineMonthYearFormatter: DateFormatter = {
 @MainActor @Observable
 final class WineListViewModel {
     init() {
-        wines = cache.read() ?? []
+        let filters = WineListFilters.stored()
+        mode = filters.mode
+        sort = filters.sort
+        sortDescending = filters.sortDescending
+        statusFilter = filters.statusFilter
+        colorFilter = filters.colorFilter
+        beverageTypeFilter = filters.beverageTypeFilter
+        // The snapshot only ever holds the standard view: under any other one it would
+        // show the wrong wines until the server answers, so that view opens on a loader.
+        wines = filters == .standard ? cache.read() ?? [] : []
         rebuildPresentation()
         // A cached list has nothing to wait for: it is already readable.
         isLoading = wines.isEmpty
@@ -140,15 +149,16 @@ final class WineListViewModel {
     private let cache = SnapshotCache<[Wine]>("wine-list", version: 1)
 
     var error: String?
-    // Any view/sort/filter change reloads page 0 from the server.
-    var sort: WineSort = .updatedAt { didSet { if oldValue != sort { scheduleReload() } } }
-    var sortDescending = true { didSet { if oldValue != sortDescending { scheduleReload() } } }
+    // Any view/sort/filter change is remembered and reloads page 0 from the server.
+    // Restored in init, where assignments do not run these observers.
+    var sort: WineSort = .updatedAt { didSet { if oldValue != sort { filtersChanged() } } }
+    var sortDescending = true { didSet { if oldValue != sortDescending { filtersChanged() } } }
     var statusFilter: WineStatusFilter = .all {
-        didSet { if oldValue != statusFilter { scheduleReload() } }
+        didSet { if oldValue != statusFilter { filtersChanged() } }
     }
-    var colorFilter: WineColor? { didSet { if oldValue != colorFilter { scheduleReload() } } }
+    var colorFilter: WineColor? { didSet { if oldValue != colorFilter { filtersChanged() } } }
     var beverageTypeFilter: BeverageType? {
-        didSet { if oldValue != beverageTypeFilter { scheduleReload() } }
+        didSet { if oldValue != beverageTypeFilter { filtersChanged() } }
     }
     var mode: WineListMode = .all {
         didSet {
@@ -157,8 +167,24 @@ final class WineListViewModel {
             // so fall back to the default sort. Its didSet schedules a reload that is
             // redundant with ours (same request, one of the two wins): harmless, no flash.
             if !WineSort.available(for: mode).contains(sort) { sort = .updatedAt }
-            scheduleReload()
+            filtersChanged()
         }
+    }
+
+    private var filters: WineListFilters {
+        WineListFilters(
+            mode: mode,
+            sort: sort,
+            sortDescending: sortDescending,
+            statusFilter: statusFilter,
+            colorFilter: colorFilter,
+            beverageTypeFilter: beverageTypeFilter
+        )
+    }
+
+    private func filtersChanged() {
+        filters.save()
+        scheduleReload()
     }
 
     private let pageSize = 15
@@ -290,9 +316,7 @@ final class WineListViewModel {
     /// the user scrolled. Written off the main actor: the list is on screen already and
     /// has nothing to gain from waiting on a file.
     private func saveCache() {
-        guard mode == .all, sort == .updatedAt, sortDescending, statusFilter == .all,
-              colorFilter == nil, beverageTypeFilter == nil
-        else { return }
+        guard filters == .standard else { return }
         let (cache, page) = (cache, Array(wines.prefix(pageSize)))
         Task.detached { cache.write(page) }
     }

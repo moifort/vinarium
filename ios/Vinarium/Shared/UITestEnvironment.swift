@@ -44,6 +44,7 @@ enum UITestEnvironment {
         // same reason: the scenario must start from what the server holds.
         try? Auth.auth().signOut()
         SnapshotCaches.clear()
+        WineListFilters.clear()
 
         Task {
             do {
