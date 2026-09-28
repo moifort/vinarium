@@ -86,16 +86,16 @@ The system launch screen (`UILaunchScreen` keys in `Info.plist`, no storyboard) 
 charcoal, `LaunchBackground.colorset`. The first SwiftUI frame is `LaunchCurtain`
 (`Shared/Components/LaunchCurtain.swift`), on the same colour, with a wine label in the middle
 (`WineLabel`): Vinarium dressed as a château on cream paper framed in a double gold rule, the app
-icon (`LaunchIcon`, a copy of the App Store icon) for its engraving, and a vintage counting up
-from 1945 to this year. Its words stay in French in every language, as on any French bottle. Behind it, `WineSurface` (`Shared/Components/WineSurface.swift`) fills the screen
+icon (`LaunchIcon`, a copy of the App Store icon) for its engraving, and this year for its
+vintage. The label holds still, as on a bottle: all the movement is the wine's. Its words stay in French in every language, as on any French bottle. Behind it, `WineSurface` (`Shared/Components/WineSurface.swift`) fills the screen
 with red wine seen from very close: a Metal fragment shader, a height field of warped noise coloured
 by its height and slope, with no reflection, drawn every frame. Its source is compiled on the device, off the main thread,
 the first time the curtain shows: the build needs no Metal toolchain, which Xcode 26 ships as a
-separate download, and the wine fades in over the charcoal once the pipeline is ready. The label breathes
+separate download, and the wine fades in over the charcoal once the pipeline is ready. The curtain holds
 until `AuthRoot` has something settled behind it: the login, the onboarding, the tabs on their
 snapshots, or the retry screen. `AuthRoot` holds the curtain at least `LaunchCurtain.minimumHold`
-from its first frame (the count plus one breath), then plays the exit (`revealing`) and drops the
-view. A sign-in from the login lowers it again for that account's launch query.
+from its first frame (long enough to see the wine move), then plays the exit (`revealing`), a dissolve
+into the screen underneath, and drops the view. A sign-in from the login lowers it again for that account's launch query.
 
 One capsule is drawn by `CapsuleDrawing` into a `GraphicsContext`, for the login's
 `BrandLogo`; its shadow is a gradient disc, not a shadow filter, which would render

@@ -133,7 +133,8 @@ struct AuthRoot: View {
             try? await Task.sleep(for: .seconds(remaining))
         }
         if Task.isCancelled { return }
-        withAnimation(.easeIn(duration: 0.5)) {
+        // A dissolve, unhurried: the screen behind shows through the wine.
+        withAnimation(.easeInOut(duration: 0.8)) {
             curtain = .revealing
         } completion: {
             // A sign-in that started during the exit finds the curtain back down

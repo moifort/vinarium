@@ -26,11 +26,11 @@ Comme il n'y a pas de cache client, chaque action est un aller-retour : l'absenc
 voit immédiatement.
 
 L'ouverture de l'app ne montre pas d'indicateur : elle montre une étiquette de vin, Vinarium
-habillé en domaine, l'icône en guise de gravure et le millésime qui monte jusqu'à l'année en
-cours. L'écran de lancement système affiche le fond nu de l'icône, la première image de l'app
+habillé en domaine, l'icône en guise de gravure et l'année en cours pour millésime. L'étiquette
+reste fixe, comme sur une bouteille : tout le mouvement est celui du vin. L'écran de lancement système affiche le fond nu de l'icône, la première image de l'app
 pose l'étiquette sur le même fond, puis la surface d'un vin rouge vue de très près apparaît en
-fondu derrière elle et ondule lentement, tandis que l'étiquette respire tant que la requête de lancement court. Quand le premier écran est posé derrière,
-le rideau se lève dessus. Il tient au moins le temps du compte et d'une respiration,
+fondu derrière elle et ondule lentement tant que la requête de lancement court. Quand le premier écran est posé derrière,
+le rideau s'efface dessus en fondu. Il tient au moins le temps de voir le vin bouger,
 pour qu'une réponse rapide ne le coupe pas, et jamais plus que la réponse. Cette animation est
 réservée à l'ouverture ; partout ailleurs, l'indicateur système.
 
