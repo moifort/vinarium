@@ -9,10 +9,13 @@ import SwiftUI
 struct WineLabel: View {
     var vintage: Int
 
-    /// Every size on the label, as a fraction of the one it was drawn at: small
-    /// enough that the wine shows all around it.
-    private static let scale: CGFloat = 0.85
-    static let width: CGFloat = 310 * scale
+    /// Every type and ornament size, as a fraction of the one it was drawn at.
+    private static let scale: CGFloat = 1.0
+    /// Every space between the lines, likewise: the air that makes the label
+    /// a tall rectangle, as on a bottle, rather than a square.
+    private static let air: CGFloat = 1.4
+    /// Narrow enough that the wine shows on either side.
+    static let width: CGFloat = 280
     private static let iconSize: CGFloat = 78 * scale
     private static let paper = Color(red: 0.95, green: 0.92, blue: 0.85)
     private static let ink = Color(red: 0.29, green: 0.05, blue: 0.10)
@@ -21,13 +24,13 @@ struct WineLabel: View {
     var body: some View {
         VStack(spacing: 0) {
             smallCaps("Grand Vin")
-                .padding(.bottom, 14 * Self.scale)
+                .padding(.bottom, 14 * Self.air)
             Image("LaunchIcon")
                 .resizable()
                 .frame(width: Self.iconSize, height: Self.iconSize)
                 .clipShape(RoundedRectangle(cornerRadius: Self.iconSize * 0.2237, style: .continuous))
                 .shadow(color: .black.opacity(0.25), radius: 4, y: 2)
-                .padding(.bottom, 16 * Self.scale)
+                .padding(.bottom, 16 * Self.air)
             Text(verbatim: "Domaine")
                 .font(.custom("Didot-Italic", size: 15 * Self.scale))
                 .foregroundStyle(Self.ink.opacity(0.8))
@@ -35,25 +38,25 @@ struct WineLabel: View {
                 .font(.custom("Didot", size: 34 * Self.scale))
                 .tracking(3 * Self.scale)
                 .foregroundStyle(Self.ink)
-                .padding(.bottom, 6 * Self.scale)
+                .padding(.bottom, 6 * Self.air)
             Text(verbatim: "Appellation Cave Contrôlée")
                 .font(.custom("Didot-Italic", size: 13 * Self.scale))
                 .foregroundStyle(Self.ink.opacity(0.75))
             rule
-                .padding(.vertical, 12 * Self.scale)
+                .padding(.vertical, 12 * Self.air)
             Text(verbatim: String(vintage))
                 .font(.custom("Didot", size: 30 * Self.scale))
                 .monospacedDigit()
                 .tracking(5 * Self.scale)
                 .foregroundStyle(Self.gold)
-                .padding(.bottom, 14 * Self.scale)
+                .padding(.bottom, 14 * Self.air)
             smallCaps("Mis en bouteille au domaine")
             Text(verbatim: "75 cl · 13,5 % vol.")
-                .font(.custom("Didot", size: 11 * Self.scale))
+                .font(.custom("Didot", size: 12 * Self.scale))
                 .foregroundStyle(Self.ink.opacity(0.6))
-                .padding(.top, 4 * Self.scale)
+                .padding(.top, 4 * Self.air)
         }
-        .padding(.vertical, 26 * Self.scale)
+        .padding(.vertical, 26 * Self.air)
         // Clear of the double rule.
         .padding(.horizontal, 22 * Self.scale)
         .frame(width: Self.width)
@@ -74,7 +77,7 @@ struct WineLabel: View {
 
     private func smallCaps(_ text: String) -> some View {
         Text(verbatim: text.uppercased())
-            .font(.custom("Didot", size: 9.5 * Self.scale))
+            .font(.custom("Didot", size: 10.5 * Self.scale))
             .tracking(1.6 * Self.scale)
             .foregroundStyle(Self.ink.opacity(0.7))
             .lineLimit(1)
