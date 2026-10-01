@@ -89,6 +89,46 @@
     "%@, sortie": {},
     "%lld": {},
     "%lld / %lld": {},
+    "%lld / %lld bouteilles": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld bottles"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld Flaschen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld botellas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld bottiglie"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld garrafas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld / %lld 本"
+          }
+        }
+      }
+    },
     "%lld bouteilles": {
       "localizations": {
         "de": {
@@ -1389,6 +1429,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adicionar um vinho"
+          }
+        }
+      }
+    },
+    "Ajouter une cave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add a cellar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weinkeller hinzufügen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Añadir una bodega"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi una cantina"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adicionar uma adega"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラーを追加"
           }
         }
       }
@@ -3522,6 +3602,46 @@
         }
       }
     },
+    "Cave principale": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Main cellar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hauptkeller"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bodega principal"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cantina principale"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adega principal"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "メインセラー"
+          }
+        }
+      }
+    },
     "Cave vide": {
       "localizations": {
         "de": {
@@ -3558,6 +3678,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Adega vazia"
+          }
+        }
+      }
+    },
+    "Caves": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cellars"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weinkeller"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bodegas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cantine"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adegas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラー"
           }
         }
       }
@@ -3678,6 +3838,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Esta versão do Vinarium já não é compatível com o servidor. A versão mais recente está disponível na App Store."
+          }
+        }
+      }
+    },
+    "Changer de cave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Switch cellar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weinkeller wechseln"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambiar de bodega"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambia cantina"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mudar de adega"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラーを切り替え"
           }
         }
       }
@@ -5284,6 +5484,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "Crescente"
+          }
+        }
+      }
+    },
+    "Créer": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Erstellen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crear"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crea"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Criar"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作成"
           }
         }
       }
@@ -7330,6 +7570,46 @@
         }
       }
     },
+    "Garage, cuisine, maison de campagne…": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garage, kitchen, country house…"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garage, Küche, Landhaus…"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garaje, cocina, casa de campo…"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garage, cucina, casa di campagna…"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Garagem, cozinha, casa de campo…"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ガレージ、キッチン、別荘…"
+          }
+        }
+      }
+    },
     "Garde": {
       "localizations": {
         "de": {
@@ -7930,46 +8210,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Não é possível reduzir a adega"
-          }
-        }
-      }
-    },
-    "Informations": {
-      "localizations": {
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Informationen"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Information"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Información"
-          }
-        },
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Informazioni"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "情報"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Informações"
           }
         }
       }
@@ -9826,6 +10066,46 @@
         }
       }
     },
+    "Nouvelle cave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New cellar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Neuer Weinkeller"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nueva bodega"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nuova cantina"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nova adega"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "新しいセラー"
+          }
+        }
+      }
+    },
     "OK": {
       "localizations": {
         "de": {
@@ -10671,6 +10951,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "Colocar em %@?"
+          }
+        }
+      }
+    },
+    "Plusieurs caves": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several cellars"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehrere Weinkeller"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varias bodegas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Più cantine"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Várias adegas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複数のセラー"
+          }
+        }
+      }
+    },
+    "Plusieurs caves sont réservées à Vinarium Premium.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several cellars are part of Vinarium Premium."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehrere Weinkeller sind Teil von Vinarium Premium."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varias bodegas forman parte de Vinarium Premium."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Più cantine fanno parte di Vinarium Premium."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Várias adegas fazem parte do Vinarium Premium."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複数のセラーは Vinarium Premium の機能です。"
+          }
+        }
+      }
+    },
+    "Plusieurs caves, chacune avec sa grille": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several cellars, each with its own grid"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mehrere Weinkeller, jeder mit eigenem Raster"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Varias bodegas, cada una con su cuadrícula"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Più cantine, ognuna con la sua griglia"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Várias adegas, cada uma com a sua grelha"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "複数のセラー、それぞれに専用のグリッド"
           }
         }
       }
@@ -11557,24 +11957,24 @@
         }
       }
     },
-    "Reconfigurer ma cave": {
+    "Reconfigurer la cave": {
       "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconfigure the cellar"
+          }
+        },
         "de": {
           "stringUnit": {
             "state": "translated",
             "value": "Weinkeller neu einrichten"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconfigure my cellar"
-          }
-        },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Reconfigurar mi bodega"
+            "value": "Reconfigurar la bodega"
           }
         },
         "it": {
@@ -11583,16 +11983,16 @@
             "value": "Riconfigura la cantina"
           }
         },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reconfigurar a adega"
+          }
+        },
         "ja": {
           "stringUnit": {
             "state": "translated",
             "value": "セラーを再設定"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reconfigurar a minha adega"
           }
         }
       }
@@ -13127,6 +13527,46 @@
       }
     },
     "Servis par le cache": {},
+    "Seule une cave vide peut être supprimée.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only an empty cellar can be deleted."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nur ein leerer Weinkeller kann gelöscht werden."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo se puede eliminar una bodega vacía."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Solo una cantina vuota può essere eliminata."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Só uma adega vazia pode ser eliminada."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "削除できるのは空のセラーだけです。"
+          }
+        }
+      }
+    },
     "Signaler un problème ou proposer une idée": {
       "localizations": {
         "de": {
@@ -13728,6 +14168,86 @@
         }
       }
     },
+    "Supprimer cette cave ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete this cellar?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Diesen Weinkeller löschen?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Eliminar esta bodega?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminare questa cantina?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar esta adega?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このセラーを削除しますか？"
+          }
+        }
+      }
+    },
+    "Supprimer la cave": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete cellar"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weinkeller löschen"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar la bodega"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Elimina la cantina"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eliminar a adega"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラーを削除"
+          }
+        }
+      }
+    },
     "Sur mesure": {
       "localizations": {
         "de": {
@@ -14217,6 +14737,46 @@
         }
       }
     },
+    "Un foyer compte au plus dix caves.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A household holds at most ten cellars."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Haushalt hat höchstens zehn Weinkeller."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Un hogar tiene como máximo diez bodegas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una famiglia può avere al massimo dieci cantine."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Um agregado tem no máximo dez adegas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1つの世帯で作成できるセラーは最大10個です。"
+          }
+        }
+      }
+    },
     "Un nom de vin, un producteur, un millésime ou une personne — ou affinez avec les filtres ci-dessus.": {
       "localizations": {
         "de": {
@@ -14293,6 +14853,126 @@
           "stringUnit": {
             "state": "translated",
             "value": "Um vinho, a IA encontra o resto"
+          }
+        }
+      }
+    },
+    "Une cave ne peut être supprimée qu'une fois vide.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A cellar can only be deleted once it is empty."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Weinkeller kann erst gelöscht werden, wenn er leer ist."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una bodega solo se puede eliminar cuando está vacía."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una cantina può essere eliminata solo quando è vuota."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma adega só pode ser eliminada quando está vazia."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラーは空になってから削除できます。"
+          }
+        }
+      }
+    },
+    "Une cave par meuble ou par pièce : chacune a sa grille. Plusieurs caves sont incluses dans Vinarium Premium.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One cellar per cabinet or per room, each with its own grid. Several cellars are included in Vinarium Premium."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Weinkeller pro Schrank oder Raum, jeder mit eigenem Raster. Mehrere Weinkeller sind in Vinarium Premium enthalten."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una bodega por mueble o por habitación, cada una con su cuadrícula. Varias bodegas están incluidas en Vinarium Premium."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una cantina per mobile o per stanza, ognuna con la sua griglia. Più cantine sono incluse in Vinarium Premium."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma adega por móvel ou por divisão, cada uma com a sua grelha. Várias adegas estão incluídas no Vinarium Premium."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家具や部屋ごとにセラーを作成でき、それぞれにグリッドがあります。複数のセラーは Vinarium Premium に含まれます。"
+          }
+        }
+      }
+    },
+    "Une cave par meuble ou par pièce, chacune avec sa grille. Passez en Premium pour ajouter des caves.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One cellar per cabinet or per room, each with its own grid. Go Premium to add cellars."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Weinkeller pro Schrank oder Raum, jeder mit eigenem Raster. Mit Premium lassen sich Weinkeller hinzufügen."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una bodega por mueble o por habitación, cada una con su cuadrícula. Pásate a Premium para añadir bodegas."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una cantina per mobile o per stanza, ognuna con la sua griglia. Passa a Premium per aggiungere cantine."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma adega por móvel ou por divisão, cada uma com a sua grelha. Mude para Premium para adicionar adegas."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家具や部屋ごとにセラーを作成でき、それぞれにグリッドがあります。セラーを追加するには Premium にアップグレードしてください。"
           }
         }
       }

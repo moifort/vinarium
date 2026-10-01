@@ -47,7 +47,7 @@ enum CellarError: LocalizedError {
         case .tooManyCellars:
             String(localized: "Un foyer compte au plus dix caves.")
         case .notEmpty:
-            String(localized: "Sortez d'abord les bouteilles de cette cave.")
+            String(localized: "Une cave ne peut être supprimée qu'une fois vide.")
         }
     }
 }
