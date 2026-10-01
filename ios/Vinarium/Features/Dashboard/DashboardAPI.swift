@@ -20,7 +20,8 @@ enum DashboardAPI {
                     name: $0.name,
                     beverageType: BeverageType(graphql: $0.beverageType),
                     color: $0.color.map { WineColor(graphql: $0) },
-                    position: CellarPositionLabel.text($0.position, cellarId: $0.cellarId, cellars: cellars),
+                    position: $0.position,
+                    cellarName: CellarPositionLabel.cellarName(cellarId: $0.cellarId, cellars: cellars),
                     urgent: $0.urgent,
                     drinkUntil: $0.drinkUntil
                 )

@@ -69,6 +69,14 @@ enum CellarPositionLabel {
         let name = cellar.name ?? String(localized: "Cave principale")
         return "\(name) · \(position)"
     }
+
+    /// The cellar's name alone, for a row that shows the slot in a badge of its
+    /// own; nil while the household has a single cellar.
+    static func cellarName(cellarId: String?, cellars: [(id: String, name: String?)]) -> String? {
+        guard cellars.count > 1, let cellar = cellars.first(where: { $0.id == cellarId })
+        else { return nil }
+        return cellar.name ?? String(localized: "Cave principale")
+    }
 }
 
 struct CellarBottle: Codable, Identifiable, Sendable {

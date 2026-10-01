@@ -28,9 +28,17 @@ struct ReadyToDrinkSection: View {
                             // Same recipe as the other rows: badge aligned to the top.
                             HStack(alignment: .top, spacing: 10) {
                                 BeverageBadge(beverageType: item.beverageType, color: item.color)
-                                Text(item.name)
-                                    .font(.subheadline)
-                                    .lineLimit(1)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.name)
+                                        .font(.subheadline)
+                                        .lineLimit(1)
+                                    if let cellarName = item.cellarName {
+                                        Text(cellarName)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                    }
+                                }
                                 if item.urgent, let year = item.drinkUntil {
                                     Text("Avant \(String(year))")
                                         .font(.caption)
@@ -65,6 +73,8 @@ extension ReadyToDrinkSection {
         let urgent: Bool
         let drinkUntil: Int?
         let position: String
+        /// Shown under the name once the household has several cellars.
+        var cellarName: String? = nil
     }
 }
 

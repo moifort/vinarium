@@ -61,7 +61,7 @@ struct DashboardView: View {
         .init(
             stats: .init(bottleCount: data.bottleCount, capacity: data.capacity, totalValue: data.totalValue),
             readyToDrink: data.readyToDrink.map { wine in
-                .init(id: wine.id, beverageType: wine.beverageType, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position)
+                .init(id: wine.id, beverageType: wine.beverageType, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position, cellarName: wine.cellarName)
             },
             favorites: data.favorites.map { favorite in
                 .init(id: favorite.id, beverageType: favorite.beverageType, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice, rating: favorite.rating)

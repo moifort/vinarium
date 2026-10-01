@@ -28,6 +28,8 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     let beverageType: BeverageType
     let color: WineColor?
     let position: String
+    /// The cellar the bottle stands in, once the household has several.
+    var cellarName: String? = nil
     let urgent: Bool
     let drinkUntil: Int?
 }

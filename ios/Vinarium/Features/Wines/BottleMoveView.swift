@@ -47,7 +47,11 @@ struct BottleMoveView: View {
                         wineBeverageType: wineBeverageType,
                         wineColor: wineColor,
                         wineVintage: wineVintage,
-                        currentPosition: showsOwnCellar ? currentPosition : "",
+                        currentPosition: CellarPositionLabel.text(
+                            currentPosition,
+                            cellarId: currentCellarId,
+                            cellars: cellars.map { ($0.id, $0.name) }
+                        ),
                         groups: mappedGroups,
                         isMoving: isMoving,
                         cellars: cellars,
