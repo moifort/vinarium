@@ -17,12 +17,12 @@ struct CellarInfoSettingsView: View {
                             LabeledInfoRow(
                                 title: "Rangées",
                                 value: "\(info.rows)",
-                                icon: "rectangle.split.3x1"
+                                icon: "rectangle.split.1x2"
                             )
                             LabeledInfoRow(
-                                title: "Colonnes",
+                                title: "Emplacements par rangée",
                                 value: "\(info.cols)",
-                                icon: "rectangle.split.1x2"
+                                icon: "rectangle.split.3x1"
                             )
                             LabeledInfoRow(
                                 title: "Capacité totale",
