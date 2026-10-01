@@ -19,6 +19,7 @@ import type {
   Notes,
   Producer,
 } from '~/domain/beverage/types'
+import type { CellarId, CellarName } from '~/domain/cellar/types'
 import type { HouseholdId } from '~/domain/household/types'
 import type { JournalEntryId } from '~/domain/journal/types'
 import type { BottleDescription } from '~/domain/scan/types'
@@ -87,6 +88,8 @@ export const builder = new SchemaBuilder<{
     ByteSize: { Input: ByteSize; Output: ByteSize }
     SignedUrl: { Input: SignedUrl; Output: SignedUrl }
     BottleDescription: { Input: BottleDescription; Output: BottleDescription }
+    CellarId: { Input: CellarId; Output: CellarId }
+    CellarName: { Input: CellarName; Output: CellarName }
   }
 }>({
   defaultFieldNullability: false,

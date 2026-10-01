@@ -60,6 +60,10 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
       nullable: true,
       description: 'Wine color; null for non-wine beverages',
     }),
+    cellarId: t.expose('cellarId', {
+      type: 'CellarId',
+      description: 'The cellar the bottle stands in, one of `cellars`.',
+    }),
     position: t.exposeString('position', {
       description: 'Cellar grid slot where the bottle is stored',
     }),
@@ -110,6 +114,10 @@ const LastBottleType = builder.objectRef<LastBottle>('LastBottle').implement({
       type: LastBottleWineType,
       description: 'The beverage this bottle holds',
       resolve: (b) => b.wine,
+    }),
+    cellarId: t.expose('cellarId', {
+      type: 'CellarId',
+      description: 'The cellar the bottle stands in, one of `cellars`.',
     }),
     position: t.exposeString('position', {
       description: 'Cellar grid slot where the bottle was placed',

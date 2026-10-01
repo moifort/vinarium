@@ -10,6 +10,12 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 const { CellarQuery } = await import('~/domain/cellar/query')
 
 const household = 'h1' as HouseholdId
+// The queries answer 'not-found' for an unknown cellar; these tests name none.
+const found = <T>(result: T | 'not-found'): T => {
+  if (result === 'not-found') throw new Error('cellar not found')
+  return result
+}
+
 const user = (id: string) => id as UserId
 const wine = (id: string) => id as BeverageId
 
@@ -59,7 +65,7 @@ describe('CellarQuery.bottlesPage (household)', () => {
   test('merges every member’s bottles, tagged with their owner', async () => {
     seedHousehold()
 
-    const { items } = await CellarQuery.bottlesPage(user('owner'), { limit: 15 })
+    const { items } = found(await CellarQuery.bottlesPage(user('owner'), { limit: 15 }))
 
     const byBeverage = new Map(items.map((item) => [item.beverageId, item]))
     const mine = byBeverage.get(wine('w1'))
@@ -76,7 +82,7 @@ describe('CellarQuery.bottlesPage (household)', () => {
     fake.seed('cellar', 'solo_w1', bottle('solo', 'w1', 0, 0))
     fake.seed('beverages', 'w1', beverage('solo', 'w1'))
 
-    const { items } = await CellarQuery.bottlesPage(user('solo'), { limit: 15 })
+    const { items } = found(await CellarQuery.bottlesPage(user('solo'), { limit: 15 }))
 
     expect(items).toHaveLength(1)
     expect(items[0].owner).toMatchObject({ isMine: true })
@@ -100,7 +106,7 @@ describe('CellarQuery.householdPlacements', () => {
 describe('CellarQuery.info (household)', () => {
   test('placedCount spans the household', async () => {
     seedHousehold()
-    const info = await CellarQuery.info(user('owner'))
+    const info = found(await CellarQuery.info(user('owner')))
     expect(info.placedCount).toBe(2)
   })
 })

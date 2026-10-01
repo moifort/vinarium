@@ -6,9 +6,10 @@ import { stripNulls } from '~/utils/input'
 import { CellarCommand } from '../../command'
 import { CellarCol, CellarCols, CellarRow, CellarRows, CellarZones } from '../../primitives'
 import { bottleView, CellarQuery } from '../../query'
+import type { CellarId } from '../../types'
 import { CellarUseCase } from '../../use-case'
 import { ConsumptionInput, GiftInput } from './inputs'
-import { CellarBottleType, ReconfigureCellarResultUnion } from './types'
+import { CellarBottleType, CellarType, ReconfigureCellarResultUnion } from './types'
 
 // Validate the grid dimensions at the resolver boundary; a Zod failure becomes a
 // user-input error rather than a 500. rows/cols are 1..100, zones 1..3.
@@ -20,6 +21,14 @@ const parseDimensions = (rows: number, cols: number, zones: number) => {
   }
 }
 
+const cellarNotFound = () => notFound('Cellar not found')
+
+// A cellar as `cellars` lists it, once a mutation has changed it.
+const listed = async (userId: Parameters<typeof CellarQuery.overview>[0], id: CellarId) => {
+  const cellar = (await CellarQuery.overview(userId)).find((c) => c.id === id)
+  return cellar ?? cellarNotFound()
+}
+
 builder.mutationField('placeBottle', (t) =>
   t.field({
     type: CellarBottleType,
@@ -28,13 +37,15 @@ builder.mutationField('placeBottle', (t) =>
       beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Wine to place' }),
       row: t.arg.int({ required: true, description: 'Target grid row (0-based)' }),
       col: t.arg.int({ required: true, description: 'Target grid column (0-based)' }),
+      cellarId: t.arg({ type: 'CellarId', description: 'Target cellar; primary if absent' }),
     },
-    resolve: async (_root, { beverageId, row, col }, { userId }) => {
+    resolve: async (_root, { beverageId, row, col, cellarId }, { userId }) => {
       const result = await CellarCommand.placeBeverage(
         userId,
         beverageId,
         CellarRow(row),
         CellarCol(col),
+        cellarId ?? undefined,
       )
       if (typeof result !== 'string') await SearchIndexUseCase.refresh(userId, beverageId)
       return match(result)
@@ -43,6 +54,7 @@ builder.mutationField('placeBottle', (t) =>
           domainError('POSITION_OCCUPIED', 'Cellar position already occupied'),
         )
         .with('out-of-grid', () => badUserInput('Cellar position outside the grid'))
+        .with('cellar-not-found', cellarNotFound)
         .with(P.not(P.string), bottleView)
         .exhaustive()
     },
@@ -52,22 +64,30 @@ builder.mutationField('placeBottle', (t) =>
 builder.mutationField('moveBottle', (t) =>
   t.field({
     type: CellarBottleType,
-    description: 'Move a bottle to a different position in the cellar',
+    description:
+      'Move a bottle to another position, in its cellar or in another one. A bottle already ' +
+      'standing there swaps places with it',
     args: {
       beverageId: t.arg({ type: 'BeverageId', required: true, description: 'Bottle to move' }),
       row: t.arg.int({ required: true, description: 'Destination grid row (0-based)' }),
       col: t.arg.int({ required: true, description: 'Destination grid column (0-based)' }),
+      cellarId: t.arg({
+        type: 'CellarId',
+        description: "Destination cellar; the bottle's own if absent",
+      }),
     },
-    resolve: async (_root, { beverageId, row, col }, { userId }) => {
+    resolve: async (_root, { beverageId, row, col, cellarId }, { userId }) => {
       const result = await CellarCommand.moveBottle(
         userId,
         beverageId,
         CellarRow(row),
         CellarCol(col),
+        cellarId ?? undefined,
       )
       return match(result)
         .with('not-in-cellar', () => notFound('Beverage not in cellar'))
         .with('out-of-grid', () => badUserInput('Cellar position outside the grid'))
+        .with('cellar-not-found', cellarNotFound)
         .with(P.not(P.string), bottleView)
         .exhaustive()
     },
@@ -134,18 +154,23 @@ builder.mutationField('giftBottle', (t) =>
 builder.mutationField('reconfigureCellar', (t) =>
   t.field({
     type: ReconfigureCellarResultUnion,
-    description: 'Resize or retune the cellar grid (settings). Refuses to strand placed bottles',
+    description:
+      'Resize or retune a cellar grid, the primary one by default (settings). Refuses to strand ' +
+      'placed bottles',
     args: {
       rows: t.arg.int({ required: true, description: 'Number of rows, labelled A.. (1..100)' }),
       cols: t.arg.int({ required: true, description: 'Number of slots per row (1..100)' }),
       zones: t.arg.int({ required: true, description: 'Number of temperature zones (1..3)' }),
+      cellarId: t.arg({ type: 'CellarId', description: 'Cellar to resize; primary if absent' }),
     },
     resolve: async (_root, args, { userId }) => {
       const { rows, cols, zones } = parseDimensions(args.rows, args.cols, args.zones)
-      const result = await CellarCommand.reconfigure(userId, rows, cols, zones)
-      return match(result)
-        .with({ outOfBounds: P.number }, (blocked) => blocked)
-        .otherwise(() => CellarQuery.info(userId))
+      const cellarId = args.cellarId ?? undefined
+      const result = await CellarCommand.reconfigure(userId, rows, cols, zones, cellarId)
+      if (result === 'not-found') return cellarNotFound()
+      if ('outOfBounds' in result) return result
+      const info = await CellarQuery.info(userId, cellarId)
+      return info === 'not-found' ? cellarNotFound() : info
     },
   }),
 )
@@ -165,5 +190,74 @@ builder.mutationField('removeBottle', (t) =>
         .with(undefined, () => true)
         .exhaustive()
     },
+  }),
+)
+
+builder.mutationField('createCellar', (t) =>
+  t.field({
+    type: CellarType,
+    description:
+      'Add a cellar to the household (Premium).\n\n' +
+      'Fails with PREMIUM_REQUIRED on the free plan, and with TOO_MANY_CELLARS past ten ' +
+      'cellars. A cellar created while subscribed stays usable once Premium ends.',
+    args: {
+      name: t.arg({ type: 'CellarName', required: true, description: 'Name of the cellar' }),
+      rows: t.arg.int({ required: true, description: 'Number of rows, labelled A.. (1..100)' }),
+      cols: t.arg.int({ required: true, description: 'Number of slots per row (1..100)' }),
+      zones: t.arg.int({
+        defaultValue: 1,
+        description: 'Number of temperature zones (1..3)',
+      }),
+    },
+    resolve: async (_root, args, { userId }) => {
+      const size = parseDimensions(args.rows, args.cols, args.zones ?? 1)
+      const result = await CellarUseCase.createCellar(userId, args.name, size)
+      return match(result)
+        .with('premium-required', () =>
+          domainError('PREMIUM_REQUIRED', 'Several cellars need Premium'),
+        )
+        .with('too-many-cellars', () =>
+          domainError('TOO_MANY_CELLARS', 'A household holds at most ten cellars'),
+        )
+        .with(P.string, (id) => listed(userId, id))
+        .exhaustive()
+    },
+  }),
+)
+
+builder.mutationField('renameCellar', (t) =>
+  t.field({
+    type: CellarType,
+    description: 'Name a cellar of the household, the primary one included',
+    args: {
+      id: t.arg({ type: 'CellarId', required: true, description: 'Cellar to name' }),
+      name: t.arg({ type: 'CellarName', required: true, description: 'New name' }),
+    },
+    resolve: async (_root, { id, name }, { userId }) => {
+      const result = await CellarCommand.rename(userId, id, name)
+      return result === 'not-found' ? cellarNotFound() : listed(userId, result)
+    },
+  }),
+)
+
+builder.mutationField('deleteCellar', (t) =>
+  t.field({
+    type: 'Boolean',
+    description:
+      'Delete an empty cellar, and return true.\n\n' +
+      'Fails with CELLAR_NOT_EMPTY while a bottle stands in it, and with PRIMARY_CELLAR for the ' +
+      'primary cellar, which cannot be deleted.',
+    args: { id: t.arg({ type: 'CellarId', required: true, description: 'Cellar to delete' }) },
+    resolve: async (_root, { id }, { userId }) =>
+      match(await CellarCommand.remove(userId, id))
+        .with('not-found', cellarNotFound)
+        .with('primary-cellar', () =>
+          domainError('PRIMARY_CELLAR', 'The primary cellar cannot be deleted'),
+        )
+        .with({ notEmpty: P.number }, () =>
+          domainError('CELLAR_NOT_EMPTY', 'Take the bottles out of the cellar first'),
+        )
+        .with(undefined, () => true)
+        .exhaustive(),
   }),
 )

@@ -4,6 +4,8 @@ import type {
   CellarColLabel as CellarColLabelType,
   CellarCols as CellarColsType,
   CellarCol as CellarColType,
+  CellarId as CellarIdType,
+  CellarName as CellarNameType,
   CellarRowLabel as CellarRowLabelType,
   CellarRows as CellarRowsType,
   CellarRow as CellarRowType,
@@ -52,3 +54,17 @@ const cellarCol = (value: unknown) => {
 export const CellarCol = Object.assign(cellarCol, {
   toLabel: (col: CellarColType) => make<CellarColLabelType>()(col + 1),
 })
+
+// A primary cellar's id is its scope key (`hh_<uuid>` or `usr_<uid>`), any other
+// cellar's a UUID: both are opaque, non-empty strings to the caller.
+export const CellarId = (value: unknown) => {
+  const v = z.string().min(1).max(200).parse(value)
+  return make<CellarIdType>()(v)
+}
+
+export const randomCellarId = () => CellarId(crypto.randomUUID())
+
+export const CellarName = (value: unknown) => {
+  const v = z.string().trim().min(1).max(40).parse(value)
+  return make<CellarNameType>()(v)
+}

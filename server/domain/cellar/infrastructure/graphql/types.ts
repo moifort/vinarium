@@ -1,10 +1,13 @@
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
+import { CellarQuery } from '~/domain/cellar/query'
 import { builder } from '~/domain/shared/graphql/builder'
 import type {
+  Cellar,
   CellarBottle,
   CellarBottleOwner,
   CellarBottleView,
   CellarBottleWithWine,
+  CellarId,
 } from '../../types'
 
 export const CellarBottleOwnerType = builder
@@ -41,6 +44,11 @@ export const CellarBottleType = builder.objectRef<CellarBottleView>('CellarBottl
       type: 'BeverageId',
       description: 'Id of the wine occupying this slot.',
     }),
+    cellarId: t.field({
+      type: 'CellarId',
+      description: 'The cellar this slot belongs to, one of `cellars`.',
+      resolve: (bottle, _, { userId }) => CellarQuery.cellarOf(userId, bottle),
+    }),
     row: t.exposeInt('row', { description: 'Grid row index, 0-based (top to bottom).' }),
     col: t.exposeInt('col', { description: 'Grid column index, 0-based (left to right).' }),
     rowLabel: t.exposeString('rowLabel', {
@@ -70,6 +78,11 @@ export const CellarBottleWithWineType = builder
       beverageId: t.expose('beverageId', {
         type: 'BeverageId',
         description: 'Id of the wine occupying this slot.',
+      }),
+      cellarId: t.field({
+        type: 'CellarId',
+        description: 'The cellar this slot belongs to, one of `cellars`.',
+        resolve: (bottle, _, { userId }) => CellarQuery.cellarOf(userId, bottle),
       }),
       row: t.exposeInt('row', { description: 'Grid row index, 0-based.' }),
       col: t.exposeInt('col', { description: 'Grid column index, 0-based.' }),
@@ -163,6 +176,7 @@ export const ReconfigureCellarResultUnion = builder.unionType('ReconfigureCellar
 
 export const CellarPositionType = builder
   .objectRef<{
+    cellarId: CellarId
     row: CellarBottle['row']
     col: CellarBottle['col']
     rowLabel: string
@@ -173,6 +187,10 @@ export const CellarPositionType = builder
       'A suggested free slot for placing the next bottle.\n\n' +
       'Returned by `suggestCellarPosition`: the first available grid coordinate with its human-facing labels, or null when the cellar is full.',
     fields: (t) => ({
+      cellarId: t.expose('cellarId', {
+        type: 'CellarId',
+        description: 'The cellar the free slot belongs to.',
+      }),
       row: t.exposeInt('row', { description: 'Grid row index, 0-based.' }),
       col: t.exposeInt('col', { description: 'Grid column index, 0-based.' }),
       rowLabel: t.exposeString('rowLabel', {
@@ -180,6 +198,40 @@ export const CellarPositionType = builder
       }),
       colLabel: t.exposeInt('colLabel', {
         description: 'Human-facing column label derived from `col` (1-based number).',
+      }),
+    }),
+  })
+
+export const CellarType = builder
+  .objectRef<Cellar & { capacity: number; placedCount: number }>('Cellar')
+  .implement({
+    description:
+      'One cellar of the household: a named grid of slots.\n\n' +
+      'Every household has a primary cellar, the one sized at onboarding; Premium adds more. ' +
+      'Listed by `cellars`, the primary first. A bottle stands in exactly one cellar ' +
+      '(`CellarBottle.cellarId`).',
+    fields: (t) => ({
+      id: t.expose('id', { type: 'CellarId', description: 'Stable id of the cellar.' }),
+      name: t.expose('name', {
+        type: 'CellarName',
+        nullable: true,
+        description:
+          'Name given by the household; null for a primary cellar never named, which the app ' +
+          "names in the reader's language.",
+      }),
+      isPrimary: t.exposeBoolean('isPrimary', {
+        description:
+          'Whether this is the primary cellar: it cannot be deleted, and receives every bottle ' +
+          'that names no cellar of the household.',
+      }),
+      rows: t.exposeInt('rows', { description: 'Number of grid rows.' }),
+      cols: t.exposeInt('cols', { description: 'Number of slots per row.' }),
+      zones: t.exposeInt('zones', { description: 'Number of temperature zones (1..3).' }),
+      capacity: t.exposeInt('capacity', {
+        description: 'Total number of slots (`rows` x `cols`).',
+      }),
+      placedCount: t.exposeInt('placedCount', {
+        description: 'How many slots currently hold a bottle.',
       }),
     }),
   })

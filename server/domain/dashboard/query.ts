@@ -7,7 +7,7 @@ import {
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
-import type { CellarBottleWithWine } from '~/domain/cellar/types'
+import type { PlacedBottleWithWine } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
 import { JournalQuery } from '~/domain/journal/query'
 import type { UserId } from '~/domain/shared/types'
@@ -26,12 +26,12 @@ export namespace DashboardQuery {
     // shares what the cellar holds: its bottles, their value and every movement
     // span the whole household. Favorites stay personal — they are filtered by
     // the viewer's own tasting notes.
-    const [allBottles, historyPage, lastExit, favoriteTastings, cellarConfig] = await Promise.all([
+    const [allBottles, historyPage, lastExit, favoriteTastings, cellars] = await Promise.all([
       CellarQuery.householdBottlesWithWine(userId),
       JournalQuery.page(userId, { limit: DASHBOARD_SECTION_LIMIT, offset: 0 }),
       JournalQuery.latestExit(userId),
       TastingQuery.favorites(userId),
-      CellarQuery.config(userId),
+      CellarQuery.cellars(userId),
     ])
 
     const currentYear = new Date().getFullYear()
@@ -53,7 +53,8 @@ export namespace DashboardQuery {
 
     return {
       bottleCount: allBottles.length,
-      capacity: cellarConfig.rows * cellarConfig.cols,
+      // Every cellar of the household counts: the bottles above span them all.
+      capacity: cellars.reduce((sum, { rows, cols }) => sum + rows * cols, 0),
       totalValue,
       readyToDrink,
       favorites,
@@ -64,7 +65,7 @@ export namespace DashboardQuery {
   }
 
   const toReadyToDrinkWine = (
-    bottle: CellarBottleWithWine,
+    bottle: PlacedBottleWithWine,
     currentYear: number,
   ): ReadyToDrinkWine => {
     const details = wineDetails(bottle.wine)
@@ -73,13 +74,14 @@ export namespace DashboardQuery {
       name: bottle.wine.name,
       beverageType: bottle.wine.beverageType,
       color: details?.color,
+      cellarId: bottle.cellarId,
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       urgent: urgentToDrink(details?.drinkWindow ?? {}, currentYear),
       drinkUntil: details?.drinkWindow?.until,
     }
   }
 
-  const toLastBottle = (bottle?: CellarBottleWithWine): LastBottle | undefined => {
+  const toLastBottle = (bottle?: PlacedBottleWithWine): LastBottle | undefined => {
     if (!bottle) return undefined
     const details = wineDetails(bottle.wine)
     return {
@@ -90,6 +92,7 @@ export namespace DashboardQuery {
         color: details?.color,
         vintage: details?.vintage,
       },
+      cellarId: bottle.cellarId,
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       date: bottle.createdAt,
     }
@@ -104,7 +107,7 @@ export namespace DashboardQuery {
   const loadFavorites = async (
     userId: UserId,
     tastings: TastingNote[],
-    allBottles: CellarBottleWithWine[],
+    allBottles: PlacedBottleWithWine[],
   ): Promise<FavoriteWine[]> => {
     const favorites = tastings.slice(0, DASHBOARD_SECTION_LIMIT)
     if (favorites.length === 0) return []

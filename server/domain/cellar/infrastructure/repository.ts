@@ -1,46 +1,62 @@
 import type { WriteBatch } from 'firebase-admin/firestore'
 import type { BeverageId } from '~/domain/beverage/types'
-import type { CellarBottle, CellarConfig, OwnedBeverage } from '~/domain/cellar/types'
+import type { CellarBottle, OwnedBeverage, StoredCellar } from '~/domain/cellar/types'
 import type { UserId } from '~/domain/shared/types'
 import { db } from '~/system/firebase'
-import { evictFromRequestCache, isInRequestCache, memoizedPerRequest } from '~/system/request-cache'
+import {
+  evictFromRequestCache,
+  evictPrefixFromRequestCache,
+  isInRequestCache,
+  memoizedPerRequest,
+} from '~/system/request-cache'
 import { deleteInBatches, genericDataConverter } from '~/utils/firestore'
 
 const cellar = () => db().collection('cellar').withConverter(genericDataConverter<CellarBottle>())
 
+// Named for what it held before a household could own several cellars: one grid
+// per scope. The primary cellar is still the document keyed by the scope; the
+// others live beside it under random ids (see StoredCellar).
 const configs = () =>
-  db().collection('cellar-configs').withConverter(genericDataConverter<CellarConfig>())
+  db().collection('cellar-configs').withConverter(genericDataConverter<StoredCellar>())
 
-const configCacheKey = (key: string) => `cellar:config:${key}`
+const configCacheKey = (id: string) => `cellar:config:${id}`
+const secondaryCacheKey = (scopeKey: string) => `cellar:secondary:${scopeKey}`
 
-// The grid dimensions for a cellar scope, keyed by `hh_<householdId>` (shared) or
-// `usr_<userId>` (solo). Memoized: every cellarInfo/dashboard read resolves it.
-export const findConfig = (key: string): Promise<CellarConfig | null> =>
-  memoizedPerRequest(configCacheKey(key), async () => {
-    const doc = await configs().doc(key).get()
+// One cellar by id — for a primary cellar, its scope key `hh_<householdId>` or
+// `usr_<userId>`. Memoized: every placement and cellarInfo read resolves it.
+export const findConfig = (id: string): Promise<StoredCellar | null> =>
+  memoizedPerRequest(configCacheKey(id), async () => {
+    const doc = await configs().doc(id).get()
     return doc.data() ?? null
   })
 
+// The cellars of a scope beyond its primary one. Memoized like the primary.
+export const findSecondary = (scopeKey: string): Promise<{ id: string; cellar: StoredCellar }[]> =>
+  memoizedPerRequest(secondaryCacheKey(scopeKey), async () => {
+    const snap = await configs().where('scopeKey', '==', scopeKey).get()
+    return snap.docs.map((doc) => ({ id: doc.id, cellar: doc.data() }))
+  })
+
 export const saveConfig = async (
-  key: string,
-  config: CellarConfig,
+  id: string,
+  cellar: StoredCellar,
   batch?: WriteBatch,
-): Promise<CellarConfig> => {
-  const ref = configs().doc(key)
-  if (batch) batch.set(ref, config)
-  else await ref.set(config)
-  // Drop the memoized config so a read later in the same request sees the new size
+): Promise<StoredCellar> => {
+  const ref = configs().doc(id)
+  if (batch) batch.set(ref, cellar)
+  else await ref.set(cellar)
+  // Drop the memoized cellars so a read later in the same request sees the write
   // rather than a pre-write miss cached by configureFor's existence check.
-  evictFromRequestCache(configCacheKey(key))
-  return config
+  evictFromRequestCache(configCacheKey(id))
+  if (cellar.scopeKey) evictFromRequestCache(secondaryCacheKey(cellar.scopeKey))
+  return cellar
 }
 
-// Delete a cellar config doc by key. Used by an account deletion to drop the
-// solo `usr_<userId>` grid; a shared `hh_<householdId>` grid is a housemate's
-// concern, never removed here. A no-op if the doc is already gone (idempotent).
-export const removeConfig = async (key: string): Promise<void> => {
-  await configs().doc(key).delete()
-  evictFromRequestCache(configCacheKey(key))
+// Delete a cellar by id. A no-op if the doc is already gone (idempotent).
+export const removeConfig = async (id: string, scopeKey?: string): Promise<void> => {
+  await configs().doc(id).delete()
+  evictFromRequestCache(configCacheKey(id))
+  if (scopeKey) evictFromRequestCache(secondaryCacheKey(scopeKey))
 }
 
 const docId = (userId: UserId, beverageId: BeverageId) => `${userId}_${beverageId}`
@@ -136,22 +152,6 @@ export const countByUsers = async (memberIds: UserId[]): Promise<number> => {
   return snap.data().count
 }
 
-// The bottle occupying a grid position anywhere in the household, if any — the
-// conflict guard for placement and moves. A targeted query, never a full scan.
-export const findByPositionForUsers = async (
-  memberIds: UserId[],
-  row: CellarBottle['row'],
-  col: CellarBottle['col'],
-): Promise<CellarBottle | null> => {
-  const snap = await cellar()
-    .where('userId', 'in', memberIds)
-    .where('row', '==', row)
-    .where('col', '==', col)
-    .limit(1)
-    .get()
-  return snap.docs[0]?.data() ?? null
-}
-
 // The bottle holding a beverage, whichever member owns it — a getAll probe over
 // the composed doc ids (one read per member), never a scan of the grid.
 export const findByForUsers = async (
@@ -161,25 +161,6 @@ export const findByForUsers = async (
   const refs = memberIds.map((userId) => cellar().doc(docId(userId, beverageId)))
   const snaps = await db().getAll(...refs)
   return snaps.map((snap) => snap.data()).find((b): b is CellarBottle => b !== undefined) ?? null
-}
-
-// One page of the shared grid in (row, col) order. The cursor bottle may belong
-// to any member, so its doc is resolved by probing the composed ids.
-export const findBottlesPageForUsers = async (
-  memberIds: UserId[],
-  { limit, after }: { limit: number; after?: BeverageId },
-): Promise<{ bottles: CellarBottle[]; hasMore: boolean }> => {
-  let query = cellar().where('userId', 'in', memberIds).orderBy('row', 'asc').orderBy('col', 'asc')
-  if (after) {
-    const refs = memberIds.map((userId) => cellar().doc(docId(userId, after)))
-    const snaps = await db().getAll(...refs)
-    const cursor = snaps.find((snap) => snap.exists)
-    if (cursor) query = query.startAfter(cursor)
-  }
-  const snap = await query.limit(limit + 1).get()
-  const bottles = snap.docs.map((doc) => doc.data())
-  const hasMore = bottles.length > limit
-  return { bottles: hasMore ? bottles.slice(0, limit) : bottles, hasMore }
 }
 
 // Bottles for a page of wines read at each wine's owner slot — one getAll of
@@ -192,10 +173,15 @@ export const findManyByExactIds = async (wines: OwnedBeverage[]): Promise<Cellar
   return snaps.map((snap) => snap.data()).filter((b): b is CellarBottle => b !== undefined)
 }
 
+// Every write drops the memoized bottle scans, whichever member set they were
+// read for: a read after a write in the same request must see it.
+const evictBottleScans = () => evictPrefixFromRequestCache('cellar:all:')
+
 export const save = async (entry: CellarBottle, batch?: WriteBatch): Promise<CellarBottle> => {
   const ref = cellar().doc(docId(entry.userId, entry.beverageId))
   if (batch) batch.set(ref, entry)
   else await ref.set(entry)
+  evictBottleScans()
   return entry
 }
 
@@ -207,9 +193,11 @@ export const remove = async (
   const ref = cellar().doc(docId(userId, beverageId))
   if (batch) batch.delete(ref)
   else await ref.delete()
+  evictBottleScans()
 }
 
 export const removeAllByUser = async (userId: UserId): Promise<void> => {
   const snap = await cellar().where('userId', '==', userId).get()
   await deleteInBatches(snap.docs.map((doc) => doc.ref))
+  evictBottleScans()
 }

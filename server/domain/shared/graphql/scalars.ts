@@ -18,6 +18,7 @@ import {
   Notes,
   Producer,
 } from '~/domain/beverage/primitives'
+import { CellarId, CellarName } from '~/domain/cellar/primitives'
 import { HouseholdId } from '~/domain/household/primitives'
 import { JournalEntryId } from '~/domain/journal/primitives'
 import { BottleDescription } from '~/domain/scan/primitives'
@@ -285,4 +286,20 @@ builder.scalarType('BottleDescription', {
     'the label does not show (example: "magnum, bought at the estate").',
   serialize: (value) => value as string,
   parseValue: validatedParse('BottleDescription', BottleDescription),
+})
+
+builder.scalarType('CellarId', {
+  description:
+    'The identifier of a cellar, an opaque non-empty string.\n\n' +
+    'Listed by `cellars`; passed to the placement and cellar mutations to designate a cellar. ' +
+    'Example: "hh_3b241101-e2bb-4255-8caf-4136c566a962".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('CellarId', CellarId),
+})
+
+builder.scalarType('CellarName', {
+  description:
+    'The name of a cellar, a string of 1 to 40 characters, trimmed.\n\n' + 'Example: "Garage".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('CellarName', CellarName),
 })

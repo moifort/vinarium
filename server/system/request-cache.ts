@@ -38,3 +38,15 @@ export const evictFromRequestCache = (key: string) => {
       delete (event.context._queryCache as Record<string, unknown>)[key]
   } catch {}
 }
+
+// Drop every memoized read whose key starts with the prefix — for a write that
+// invalidates reads keyed by a set the writer cannot name (a household's bottles
+// are memoized per member set).
+export const evictPrefixFromRequestCache = (prefix: string) => {
+  try {
+    const event = useEvent()
+    const cache = event.context._queryCache as Record<string, unknown> | undefined
+    if (!cache) return
+    for (const key of Object.keys(cache)) if (key.startsWith(prefix)) delete cache[key]
+  } catch {}
+}

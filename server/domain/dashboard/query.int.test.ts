@@ -206,9 +206,10 @@ describe('DashboardQuery.view', () => {
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
     await DashboardQuery.view(userId)
 
-    // The cellar scan, the journal page, the limit(1) latest exit and the
-    // favorites query — never a scan of the beverages or the whole journal.
-    expect(fake.queryReads - before.queryReads).toBe(4)
+    // The cellar scan, the household's extra cellars, the journal page, the
+    // limit(1) latest exit and the favorites query — never a scan of the
+    // beverages or the whole journal.
+    expect(fake.queryReads - before.queryReads).toBe(5)
     // Keyed doc reads: the scope membership doc, the cellar-config doc, the
     // placed bottle's wine (w1), the page's wines (w1+w2), the exit's wine (w2)
     // and the favorite's wine (w2) — each batch bounded by its section cap.
@@ -242,7 +243,7 @@ describe('DashboardQuery.view', () => {
     expect(view.bottleCount).toBe(1)
     expect(view.lastExit).toMatchObject({ beverageId: 'w2', type: 'out' })
     // Identical to the small-account budget: growth costs nothing.
-    expect(fake.queryReads - before.queryReads).toBe(4)
+    expect(fake.queryReads - before.queryReads).toBe(5)
     expect(fake.docReads - before.docReads).toBe(7)
   })
 })

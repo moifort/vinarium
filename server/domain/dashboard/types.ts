@@ -1,4 +1,5 @@
 import type { BeverageId, BeverageName, BeverageType, WineColor } from '~/domain/beverage/types'
+import type { CellarId } from '~/domain/cellar/types'
 import type { JournalEventView } from '~/domain/journal/types'
 import type { Eur, Year } from '~/domain/shared/types'
 
@@ -29,6 +30,7 @@ export type ReadyToDrinkWine = {
   name: BeverageName
   beverageType: BeverageType
   color?: WineColor
+  cellarId: CellarId
   position: string
   urgent: boolean
   drinkUntil?: Year
@@ -42,6 +44,7 @@ export type LastBottle = {
     color?: WineColor
     vintage?: Year
   }
+  cellarId: CellarId
   position: string
   date: Date
 }
