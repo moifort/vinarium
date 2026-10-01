@@ -22,6 +22,8 @@ struct WineDetailView: View {
     @State private var showRecommendation = false
     @State private var isEditing = false
     @State private var showLocationEditor = false
+    /// The household's cellars, to name the bottle's one once there are several.
+    @State private var cellars: [CellarSummary] = []
     @State private var sheetError = ErrorPresenter()
     @State private var actionError = ErrorPresenter()
     @State private var showAttachmentChoice = false
@@ -54,6 +56,7 @@ struct WineDetailView: View {
                         WineDetailPage(
                             content: Self.mapContent(
                                 detail,
+                                cellars: cellars,
                                 isUploadingAttachment: isUploadingAttachment
                             ),
                             onRemoveRequested: { showRemovalChoice = true },
@@ -197,15 +200,13 @@ struct WineDetailView: View {
                         wineVintage: detail.vintage,
                         currentRow: cellar.row,
                         currentCol: cellar.col,
+                        currentCellarId: cellar.cellarId,
                         onCancel: { showMove = false }
-                    ) { row, col in
+                    ) { _, _ in
                         showMove = false
-                        self.detail?.cellar = CellarInfo(
-                            row: row,
-                            col: col,
-                            dateIn: cellar.dateIn,
-                            dateOut: nil
-                        )
+                        // The bottle may have changed cellar as well as slot: the
+                        // sheet reads it back rather than guess.
+                        Task { await loadData() }
                         onUpdated?()
                     }
                 }
@@ -427,7 +428,10 @@ struct WineDetailView: View {
         if detail != nil { isRefreshing = true }
         defer { isRefreshing = false }
         do {
+            // The cellars only name the slot: the sheet opens without them.
+            async let household = try? CellarAPI.cellars()
             let loadedDetail = try await WineAPI.getDetail(id: wineId)
+            cellars = await household ?? cellars
             detail = loadedDetail
             isLoading = false
         } catch {
@@ -528,6 +532,7 @@ struct WineDetailView: View {
 
     private static func mapContent(
         _ detail: UserWineDetail,
+        cellars: [CellarSummary],
         isUploadingAttachment: Bool
     ) -> WineDetailContent.Content {
         let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
@@ -556,7 +561,11 @@ struct WineDetailView: View {
             notes: detail.notes,
             cellar: detail.cellar.map { cellar in
                 .init(
-                    position: "\(cellar.row)\(cellar.col)",
+                    position: CellarPositionLabel.text(
+                        "\(cellar.row)\(cellar.col)",
+                        cellarId: cellar.cellarId,
+                        cellars: cellars.map { ($0.id, $0.name) }
+                    ),
                     dateIn: formatter(cellar.dateIn),
                     dateOut: cellar.dateOut.map(formatter),
                     isInCellar: cellar.dateOut == nil

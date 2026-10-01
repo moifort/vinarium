@@ -6,18 +6,8 @@ query Changelog {
   }
 }
 
-query CellarInfo {
-  cellarInfo {
-    rows
-    cols
-    zones
-    capacity
-    placedCount
-  }
-}
-
-mutation ReconfigureCellar($rows: Int!, $cols: Int!, $zones: Int!) {
-  reconfigureCellar(rows: $rows, cols: $cols, zones: $zones) {
+mutation ReconfigureCellar($rows: Int!, $cols: Int!, $zones: Int!, $cellarId: CellarId) {
+  reconfigureCellar(rows: $rows, cols: $cols, zones: $zones, cellarId: $cellarId) {
     __typename
     ... on CellarInfo {
       rows

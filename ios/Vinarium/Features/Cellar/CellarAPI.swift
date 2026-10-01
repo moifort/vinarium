@@ -15,14 +15,18 @@ struct BottlesPage {
     let hasMore: Bool
 }
 
-/// What the cellar screen shows as it opens: the first page of each list.
+/// What the cellar screen shows as it opens: the household's cellars and the first
+/// page of each list.
 struct CellarOverview {
+    let cellars: [CellarSummary]
     let bottles: BottlesPage
     let history: HistoryPage
 }
 
-/// The whole grid, as the placement and move screens draw it.
+/// The whole grid of one cellar, as the placement and move screens draw it.
 struct CellarGrid {
+    /// Every cellar of the household, to switch the grid to another one.
+    let cellars: [CellarSummary]
     let bottles: [CellarBottle]
     let rows: Int
     let cols: Int
@@ -30,13 +34,78 @@ struct CellarGrid {
     let suggestion: CellarSuggestion?
 }
 
+/// The cellar refusals the user can meet, in their words rather than the server's.
+enum CellarError: LocalizedError {
+    case premiumRequired
+    case tooManyCellars
+    case notEmpty
+
+    var errorDescription: String? {
+        switch self {
+        case .premiumRequired:
+            String(localized: "Plusieurs caves sont réservées à Vinarium Premium.")
+        case .tooManyCellars:
+            String(localized: "Un foyer compte au plus dix caves.")
+        case .notEmpty:
+            String(localized: "Sortez d'abord les bouteilles de cette cave.")
+        }
+    }
+}
+
 enum CellarAPI {
-    static func overview(limit: Int) async throws -> CellarOverview {
+    /// The household's cellars, the primary first.
+    static func cellars() async throws -> [CellarSummary] {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarOverviewQuery(limit: .some(Int32(limit)))
+            query: VinariumGraphQL.CellarsQuery()
+        )
+        return data.cellars.map { CellarSummary(fields: $0.fragments.cellarFields) }
+    }
+
+    static func create(name: String, rows: Int, cols: Int, zones: Int) async throws -> CellarSummary {
+        let data = try await translatingErrors {
+            try await GraphQLHelpers.perform(
+                GraphQLClient.shared.apollo,
+                mutation: VinariumGraphQL.CreateCellarMutation(
+                    name: name,
+                    rows: Int32(rows),
+                    cols: Int32(cols),
+                    zones: .some(Int32(zones))
+                )
+            )
+        }
+        return CellarSummary(fields: data.createCellar.fragments.cellarFields)
+    }
+
+    static func rename(id: String, name: String) async throws -> CellarSummary {
+        let data = try await GraphQLHelpers.perform(
+            GraphQLClient.shared.apollo,
+            mutation: VinariumGraphQL.RenameCellarMutation(id: id, name: name)
+        )
+        return CellarSummary(fields: data.renameCellar.fragments.cellarFields)
+    }
+
+    /// Deletes an empty cellar; refused while a bottle stands in it.
+    static func delete(id: String) async throws {
+        _ = try await translatingErrors {
+            try await GraphQLHelpers.perform(
+                GraphQLClient.shared.apollo,
+                mutation: VinariumGraphQL.DeleteCellarMutation(id: id)
+            )
+        }
+    }
+
+    /// `cellarId` nil reads the primary cellar.
+    static func overview(limit: Int, cellarId: String? = nil) async throws -> CellarOverview {
+        let data = try await GraphQLHelpers.fetch(
+            GraphQLClient.shared.apollo,
+            query: VinariumGraphQL.CellarOverviewQuery(
+                limit: .some(Int32(limit)),
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
+            )
         )
         return CellarOverview(
+            cellars: data.cellars.map { CellarSummary(fields: $0.fragments.cellarFields) },
             bottles: BottlesPage(
                 bottles: data.cellarBottles.items.map { bottle($0.fragments.cellarBottleFields) },
                 hasMore: data.cellarBottles.hasMore
@@ -49,12 +118,13 @@ enum CellarAPI {
         )
     }
 
-    static func getBottles(limit: Int, after: String?) async throws -> BottlesPage {
+    static func getBottles(limit: Int, after: String?, cellarId: String? = nil) async throws -> BottlesPage {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.CellarBottlesQuery(
                 limit: .some(Int32(limit)),
-                after: GraphQLHelpers.graphQLNullable(after)
+                after: GraphQLHelpers.graphQLNullable(after),
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
             )
         )
         return BottlesPage(
@@ -78,14 +148,18 @@ enum CellarAPI {
         )
     }
 
-    /// Every bottle of the cellar with the grid size, and the suggested free slot
-    /// when placing a bottle — one round trip.
-    static func grid(withSuggestion: Bool) async throws -> CellarGrid {
+    /// Every bottle of a cellar (the primary one when `cellarId` is nil) with the
+    /// grid size, and the suggested free slot when placing a bottle — one round trip.
+    static func grid(withSuggestion: Bool, cellarId: String? = nil) async throws -> CellarGrid {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarGridQuery(withSuggestion: withSuggestion)
+            query: VinariumGraphQL.CellarGridQuery(
+                withSuggestion: withSuggestion,
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
+            )
         )
         return CellarGrid(
+            cellars: data.cellars.map { CellarSummary(fields: $0.fragments.cellarFields) },
             bottles: data.cellarBottles.items.map { bottle($0.fragments.cellarBottleFields) },
             rows: Int(data.cellarInfo.rows),
             cols: Int(data.cellarInfo.cols),
@@ -95,22 +169,57 @@ enum CellarAPI {
         )
     }
 
-    /// Place a bottle at a grid slot named the way the UI shows it: row "A", column 1.
-    static func place(wineId: String, rowLabel: String, colLabel: Int) async throws {
+    /// Place a bottle at a grid slot named the way the UI shows it: row "A", column 1,
+    /// in the given cellar or the primary one.
+    static func place(
+        wineId: String,
+        rowLabel: String,
+        colLabel: Int,
+        cellarId: String? = nil
+    ) async throws {
         let (row, col) = gridIndices(rowLabel: rowLabel, colLabel: colLabel)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.PlaceBottleMutation(beverageId: wineId, row: row, col: col)
+            mutation: VinariumGraphQL.PlaceBottleMutation(
+                beverageId: wineId,
+                row: row,
+                col: col,
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
+            )
         )
     }
 
-    /// Move a bottle to a grid slot named the way the UI shows it: row "A", column 1.
-    static func move(wineId: String, rowLabel: String, colLabel: Int) async throws {
+    /// Move a bottle to a grid slot named the way the UI shows it: row "A", column 1,
+    /// in the given cellar or its own.
+    static func move(
+        wineId: String,
+        rowLabel: String,
+        colLabel: Int,
+        cellarId: String? = nil
+    ) async throws {
         let (row, col) = gridIndices(rowLabel: rowLabel, colLabel: colLabel)
         _ = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
-            mutation: VinariumGraphQL.MoveBottleMutation(beverageId: wineId, row: row, col: col)
+            mutation: VinariumGraphQL.MoveBottleMutation(
+                beverageId: wineId,
+                row: row,
+                col: col,
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
+            )
         )
+    }
+
+    private static func translatingErrors<T>(_ operation: () async throws -> T) async throws -> T {
+        do {
+            return try await operation()
+        } catch let error as APIError {
+            switch error.domainCode {
+            case "PREMIUM_REQUIRED": throw CellarError.premiumRequired
+            case "TOO_MANY_CELLARS": throw CellarError.tooManyCellars
+            case "CELLAR_NOT_EMPTY": throw CellarError.notEmpty
+            default: throw error
+            }
+        }
     }
 
     static func remove(
@@ -162,6 +271,7 @@ private func bottle(_ b: VinariumGraphQL.CellarBottleFields) -> CellarBottle {
     let details = b.wine.details?.asWineDetails
     return CellarBottle(
         wineId: b.beverageId,
+        cellarId: b.cellarId,
         wine: Wine(
             id: b.wine.id,
             name: b.wine.name,

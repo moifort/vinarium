@@ -1,5 +1,5 @@
-mutation PlaceBottle($beverageId: BeverageId!, $row: Int!, $col: Int!) {
-  placeBottle(beverageId: $beverageId, row: $row, col: $col) {
+mutation PlaceBottle($beverageId: BeverageId!, $row: Int!, $col: Int!, $cellarId: CellarId) {
+  placeBottle(beverageId: $beverageId, row: $row, col: $col, cellarId: $cellarId) {
     beverageId
     row
     col
@@ -8,8 +8,8 @@ mutation PlaceBottle($beverageId: BeverageId!, $row: Int!, $col: Int!) {
   }
 }
 
-mutation MoveBottle($beverageId: BeverageId!, $row: Int!, $col: Int!) {
-  moveBottle(beverageId: $beverageId, row: $row, col: $col) {
+mutation MoveBottle($beverageId: BeverageId!, $row: Int!, $col: Int!, $cellarId: CellarId) {
+  moveBottle(beverageId: $beverageId, row: $row, col: $col, cellarId: $cellarId) {
     beverageId
     row
     col
@@ -28,4 +28,20 @@ mutation GiftBottle($beverageId: BeverageId!, $input: GiftInput!) {
 
 mutation RemoveBottle($beverageId: BeverageId!) {
   removeBottle(beverageId: $beverageId)
+}
+
+mutation CreateCellar($name: CellarName!, $rows: Int!, $cols: Int!, $zones: Int) {
+  createCellar(name: $name, rows: $rows, cols: $cols, zones: $zones) {
+    ...CellarFields
+  }
+}
+
+mutation RenameCellar($id: CellarId!, $name: CellarName!) {
+  renameCellar(id: $id, name: $name) {
+    ...CellarFields
+  }
+}
+
+mutation DeleteCellar($id: CellarId!) {
+  deleteCellar(id: $id)
 }

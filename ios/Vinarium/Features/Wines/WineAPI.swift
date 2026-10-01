@@ -293,7 +293,8 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailFields) -> UserWineDetail 
                 row: $0.rowLabel,
                 col: $0.colLabel,
                 dateIn: GraphQLHelpers.parseISO8601($0.createdAt) ?? Date(),
-                dateOut: nil
+                dateOut: nil,
+                cellarId: $0.cellarId
             )
         },
         consumption: w.consumption.map {

@@ -17,6 +17,9 @@ struct CellarPlacementView: View {
     @State private var isLoading = true
     @State private var error: String?
     @State private var isPlacing = false
+    @State private var cellars: [CellarSummary] = []
+    /// Opens on the cellar the cave tab was left on: the one the user is filling.
+    @State private var cellarId: String? = CellarSelection.stored()
 
     private var suggestedPosition: String? {
         guard let row = suggestedRow, let col = suggestedCol else { return nil }
@@ -38,12 +41,14 @@ struct CellarPlacementView: View {
                     groups: availableGroups,
                     suggestedPosition: suggestedPosition,
                     isPlacing: isPlacing,
+                    cellars: cellars,
+                    selectedCellarId: $cellarId,
                     onCancel: onCancel,
                     onPlaceConfirmed: { position in placeWine(position: position) }
                 )
             }
         }
-        .task {
+        .task(id: cellarId) {
             await loadData()
         }
     }
@@ -64,7 +69,15 @@ struct CellarPlacementView: View {
 
     private func loadData() async {
         do {
-            let grid = try await CellarAPI.grid(withSuggestion: true)
+            let grid: CellarGrid
+            do {
+                grid = try await CellarAPI.grid(withSuggestion: true, cellarId: cellarId)
+            } catch let error as APIError where error.domainCode == "NOT_FOUND" && cellarId != nil {
+                // The remembered cellar is gone: the primary one takes over.
+                cellarId = nil
+                return
+            }
+            cellars = grid.cellars
             bottles = grid.bottles
             suggestedRow = grid.suggestion?.row
             suggestedCol = grid.suggestion?.col
@@ -84,7 +97,12 @@ struct CellarPlacementView: View {
 
         Task {
             do {
-                try await CellarAPI.place(wineId: wineId, rowLabel: rowStr, colLabel: col)
+                try await CellarAPI.place(
+                    wineId: wineId,
+                    rowLabel: rowStr,
+                    colLabel: col,
+                    cellarId: cellarId
+                )
                 onPlaced(position)
             } catch {
                 self.error = reportError(error)

@@ -64,11 +64,11 @@ struct SettingsHomeView: View {
 
                 Section("Cave") {
                     NavigationLink {
-                        CellarInfoSettingsView()
+                        CellarsSettingsView()
                     } label: {
                         SettingsRow(
                             icon: "square.grid.3x3.fill",
-                            title: "Informations",
+                            title: "Caves",
                             tint: .brown
                         )
                     }

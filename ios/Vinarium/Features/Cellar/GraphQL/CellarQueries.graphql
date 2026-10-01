@@ -1,5 +1,6 @@
 fragment CellarBottleFields on CellarBottleWithWine {
   beverageId
+  cellarId
   row
   col
   rowLabel
@@ -35,6 +36,23 @@ fragment CellarBottleFields on CellarBottleWithWine {
   }
 }
 
+fragment CellarFields on Cellar {
+  id
+  name
+  isPrimary
+  rows
+  cols
+  zones
+  capacity
+  placedCount
+}
+
+query Cellars {
+  cellars {
+    ...CellarFields
+  }
+}
+
 fragment JournalEventFields on JournalEvent {
   type
   date
@@ -49,10 +67,13 @@ fragment JournalEventFields on JournalEvent {
   }
 }
 
-# The cellar screen as it opens: the first page of bottles and of the journal,
-# in one round trip.
-query CellarOverview($limit: Int) {
-  cellarBottles(limit: $limit) {
+# The cellar screen as it opens: the household's cellars, the first page of one
+# cellar's bottles and of the journal, in one round trip.
+query CellarOverview($limit: Int, $cellarId: CellarId) {
+  cellars {
+    ...CellarFields
+  }
+  cellarBottles(limit: $limit, cellarId: $cellarId) {
     items {
       ...CellarBottleFields
     }
@@ -67,8 +88,8 @@ query CellarOverview($limit: Int) {
   }
 }
 
-query CellarBottles($limit: Int, $after: BeverageId) {
-  cellarBottles(limit: $limit, after: $after) {
+query CellarBottles($limit: Int, $after: BeverageId, $cellarId: CellarId) {
+  cellarBottles(limit: $limit, after: $after, cellarId: $cellarId) {
     items {
       ...CellarBottleFields
     }
@@ -86,20 +107,24 @@ query CellarHistory($limit: Int, $after: JournalEntryId) {
   }
 }
 
-# The whole grid, to place or move a bottle: every bottle, the grid size and,
-# when placing, the suggested free slot — one round trip. The cellar is bounded
-# by its physical capacity, so one large page covers it all.
-query CellarGrid($withSuggestion: Boolean!) {
-  cellarBottles(limit: 1000) {
+# The whole grid of one cellar, to place or move a bottle: every bottle, the grid
+# size, the household's cellars to switch between and, when placing, the
+# suggested free slot — one round trip. A cellar is bounded by its physical
+# capacity, so one large page covers it all.
+query CellarGrid($withSuggestion: Boolean!, $cellarId: CellarId) {
+  cellars {
+    ...CellarFields
+  }
+  cellarBottles(limit: 1000, cellarId: $cellarId) {
     items {
       ...CellarBottleFields
     }
   }
-  cellarInfo {
+  cellarInfo(cellarId: $cellarId) {
     rows
     cols
   }
-  suggestCellarPosition @include(if: $withSuggestion) {
+  suggestCellarPosition(cellarId: $cellarId) @include(if: $withSuggestion) {
     rowLabel
     colLabel
   }

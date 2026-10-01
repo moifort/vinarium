@@ -16,6 +16,7 @@ struct CellarReconfigureView: View {
         rows: Int,
         cols: Int,
         zones: Int,
+        cellarId: String? = nil,
         onReconfigured: @escaping (CellarSettingsInfo) -> Void
     ) {
         initialRows = rows
@@ -23,7 +24,12 @@ struct CellarReconfigureView: View {
         initialZones = zones
         self.onReconfigured = onReconfigured
         _viewModel = State(
-            wrappedValue: CellarReconfigureViewModel(rows: rows, cols: cols, zones: zones)
+            wrappedValue: CellarReconfigureViewModel(
+                rows: rows,
+                cols: cols,
+                zones: zones,
+                cellarId: cellarId
+            )
         )
     }
 

@@ -8,6 +8,9 @@ struct CellarPlacementPage: View {
     let groups: [Group]
     let suggestedPosition: String?
     let isPlacing: Bool
+    /// The household's cellars; a switcher shows once there are two.
+    var cellars: [CellarSummary] = []
+    var selectedCellarId: Binding<String?> = .constant(nil)
     var onCancel: () -> Void = {}
     var onPlaceConfirmed: (_ position: String) -> Void
 
@@ -16,6 +19,11 @@ struct CellarPlacementPage: View {
     var body: some View {
         VStack(spacing: 0) {
             wineHeader
+            if cellars.count > 1 {
+                CellarSwitcher(cellars: cellars, selection: selectedCellarId)
+                    .disabled(isPlacing)
+                Divider()
+            }
 
             List {
                 ForEach(groups) { group in

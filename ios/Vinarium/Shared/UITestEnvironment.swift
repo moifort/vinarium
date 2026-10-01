@@ -45,6 +45,7 @@ enum UITestEnvironment {
         try? Auth.auth().signOut()
         SnapshotCaches.clear()
         WineListFilters.clear()
+        CellarSelection.clear()
 
         Task {
             do {

@@ -43,5 +43,6 @@ final class AuthSession {
         try Auth.auth().signOut()
         SnapshotCaches.clear()
         WineListFilters.clear()
+        CellarSelection.clear()
     }
 }

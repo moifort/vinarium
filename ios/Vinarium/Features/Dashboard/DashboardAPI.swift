@@ -8,6 +8,8 @@ enum DashboardAPI {
             query: VinariumGraphQL.DashboardQuery()
         )
         let d = data.dashboard
+        // A slot is named with its cellar once the household has several.
+        let cellars = data.cellars.map { (id: $0.id, name: $0.name) }
         return DashboardData(
             bottleCount: d.bottleCount,
             capacity: d.capacity,
@@ -18,7 +20,7 @@ enum DashboardAPI {
                     name: $0.name,
                     beverageType: BeverageType(graphql: $0.beverageType),
                     color: $0.color.map { WineColor(graphql: $0) },
-                    position: $0.position,
+                    position: CellarPositionLabel.text($0.position, cellarId: $0.cellarId, cellars: cellars),
                     urgent: $0.urgent,
                     drinkUntil: $0.drinkUntil
                 )
@@ -44,7 +46,7 @@ enum DashboardAPI {
                         color: $0.wine.color.map { WineColor(graphql: $0) },
                         vintage: $0.wine.vintage
                     ),
-                    position: $0.position,
+                    position: CellarPositionLabel.text($0.position, cellarId: $0.cellarId, cellars: cellars),
                     date: GraphQLHelpers.parseISO8601($0.date) ?? Date(),
                     rating: nil
                 )

@@ -6,11 +6,13 @@ import SwiftUI
 enum PremiumTrigger {
     case scanAllowanceSpent
     case discover
+    case moreCellars
 
     var title: String {
         switch self {
         case .scanAllowanceSpent: return String(localized: "Scans épuisés")
         case .discover: return String(localized: "Vinarium Premium")
+        case .moreCellars: return String(localized: "Plusieurs caves")
         }
     }
 
@@ -19,6 +21,7 @@ enum PremiumTrigger {
         switch self {
         case .scanAllowanceSpent: return "scan_allowance_spent"
         case .discover: return "discover"
+        case .moreCellars: return "more_cellars"
         }
     }
 
@@ -30,6 +33,8 @@ enum PremiumTrigger {
             return String(localized: "Tous vos scans ont été utilisés. Passez en Premium pour scanner sans limite.")
         case .discover:
             return String(localized: "Le scan d’étiquette reconnaît vos bouteilles et enrichit leur fiche. Passez en Premium pour scanner sans limite.")
+        case .moreCellars:
+            return String(localized: "Une cave par meuble ou par pièce, chacune avec sa grille. Passez en Premium pour ajouter des caves.")
         }
     }
 }
@@ -118,6 +123,7 @@ struct PremiumSheet: View {
     private var benefits: some View {
         VStack(alignment: .leading, spacing: 14) {
             BenefitRow(icon: "camera.viewfinder", text: "Scans illimités")
+            BenefitRow(icon: "square.stack.3d.up", text: "Plusieurs caves, chacune avec sa grille")
             BenefitRow(
                 icon: "eurosign.circle",
                 text: "Données supplémentaires sur la bouteille : estimation du prix, période de garde, région"

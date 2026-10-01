@@ -129,12 +129,15 @@ struct CellarInfo: Codable, Sendable {
     let col: Int
     let dateIn: Date
     let dateOut: Date?
+    /// The cellar the bottle stands in.
+    var cellarId: String? = nil
 
     enum CodingKeys: String, CodingKey {
         case row = "rowLabel"
         case col = "colLabel"
         case dateIn
         case dateOut
+        case cellarId
     }
 }
 

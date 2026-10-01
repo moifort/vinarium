@@ -20,6 +20,8 @@ struct CellarView: View {
                 } else {
                     CellarPage(
                         displayMode: $viewModel.displayMode,
+                        cellars: viewModel.cellars,
+                        selectedCellarId: $viewModel.selectedCellarId,
                         groups: mappedGroups,
                         events: mappedEvents,
                         bottlesHasMore: viewModel.bottlesHasMore,

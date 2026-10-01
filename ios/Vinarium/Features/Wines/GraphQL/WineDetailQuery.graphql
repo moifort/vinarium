@@ -40,6 +40,7 @@ fragment WineDetailFields on Beverage {
   createdAt
   updatedAt
   cellar {
+    cellarId
     row
     col
     rowLabel

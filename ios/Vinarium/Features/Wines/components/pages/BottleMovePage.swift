@@ -8,6 +8,9 @@ struct BottleMovePage: View {
     let currentPosition: String
     let groups: [Group]
     let isMoving: Bool
+    /// The household's cellars; a switcher shows once there are two.
+    var cellars: [CellarSummary] = []
+    var selectedCellarId: Binding<String?> = .constant(nil)
     var onCancel: () -> Void = {}
     var onMoveConfirmed: (_ row: String, _ col: Int) -> Void
 
@@ -16,6 +19,11 @@ struct BottleMovePage: View {
     var body: some View {
         VStack(spacing: 0) {
             wineHeader
+            if cellars.count > 1 {
+                CellarSwitcher(cellars: cellars, selection: selectedCellarId)
+                    .disabled(isMoving)
+                Divider()
+            }
 
             List {
                 ForEach(groups) { group in

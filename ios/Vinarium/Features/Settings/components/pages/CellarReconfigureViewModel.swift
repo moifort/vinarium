@@ -17,6 +17,8 @@ final class CellarReconfigureViewModel {
     var cols: Int
     var zones: Int
     var choice: PresetChoice?
+    /// The cellar being resized; nil for the primary one.
+    let cellarId: String?
 
     private(set) var isSubmitting = false
     /// Generic failure surfaced as an alert; nil when there is nothing to show.
@@ -27,7 +29,8 @@ final class CellarReconfigureViewModel {
 
     /// Seed the flow with the cellar's current dimensions so nothing is lost if the
     /// user only tweaks one value.
-    init(rows: Int, cols: Int, zones: Int) {
+    init(rows: Int, cols: Int, zones: Int, cellarId: String? = nil) {
+        self.cellarId = cellarId
         self.rows = rows
         self.cols = cols
         self.zones = zones
@@ -61,7 +64,12 @@ final class CellarReconfigureViewModel {
         blockedCount = nil
         defer { isSubmitting = false }
         do {
-            let outcome = try await SettingsAPI.reconfigureCellar(rows: rows, cols: cols, zones: zones)
+            let outcome = try await SettingsAPI.reconfigureCellar(
+                rows: rows,
+                cols: cols,
+                zones: zones,
+                cellarId: cellarId
+            )
             switch outcome {
             case .success(let info):
                 return info

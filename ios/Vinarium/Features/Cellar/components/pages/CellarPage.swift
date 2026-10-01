@@ -2,6 +2,10 @@ import SwiftUI
 
 struct CellarPage: View {
     @Binding var displayMode: CellarDisplayMode
+    /// The household's cellars: a picker shows once there are two.
+    var cellars: [CellarSummary] = []
+    /// The cellar whose bottles are listed; nil for the primary one.
+    var selectedCellarId: Binding<String?> = .constant(nil)
     let groups: [CaveBottleList.Group]
     let events: [JournalEventList.Event]
     var bottlesHasMore: Bool = false
@@ -49,6 +53,21 @@ struct CellarPage: View {
             }
         }
         .toolbar {
+            if cellars.count > 1, displayMode == .cave {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Picker("Cave", selection: selectedCellarId) {
+                            ForEach(cellars) { cellar in
+                                Text(cellar.displayName)
+                                    .tag(cellar.isPrimary ? String?.none : String?.some(cellar.id))
+                            }
+                        }
+                    } label: {
+                        Label("Changer de cave", systemImage: "square.stack.3d.up")
+                    }
+                    .accessibilityIdentifier("cellar-picker")
+                }
+            }
             ToolbarItemGroup {
                 ForEach(CellarDisplayMode.allCases) { mode in
                     Button {
@@ -67,10 +86,19 @@ struct CellarPage: View {
             ToolbarSpacer(.fixed)
         }
         .searchToolbarButton()
-        .navigationTitle(displayMode.title)
+        .navigationTitle(title)
         .navigationSubtitle(displayMode.subtitle)
         .navigationBarTitleDisplayMode(.large)
         .refreshable { await onRefresh() }
+    }
+
+    /// With several cellars, the cave reads as the one on screen; the journal spans
+    /// them all.
+    private var title: String {
+        guard displayMode == .cave, cellars.count > 1 else { return displayMode.title }
+        let selected = cellars.first { $0.id == selectedCellarId.wrappedValue && !$0.isPrimary }
+            ?? cellars.first { $0.isPrimary }
+        return selected?.displayName ?? displayMode.title
     }
 }
 

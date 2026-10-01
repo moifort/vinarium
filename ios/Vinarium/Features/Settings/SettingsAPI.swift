@@ -15,32 +15,20 @@ enum SettingsAPI {
         }
     }
 
-    static func loadCellarInfo() async throws -> CellarSettingsInfo {
-        let data = try await GraphQLHelpers.fetch(
-            GraphQLClient.shared.apollo,
-            query: VinariumGraphQL.CellarInfoQuery()
-        )
-        let info = data.cellarInfo
-        return CellarSettingsInfo(
-            rows: info.rows,
-            cols: info.cols,
-            zones: info.zones,
-            capacity: info.capacity,
-            placedCount: info.placedCount
-        )
-    }
-
+    /// Resizes a cellar, the primary one when `cellarId` is nil.
     static func reconfigureCellar(
         rows: Int,
         cols: Int,
-        zones: Int
+        zones: Int,
+        cellarId: String? = nil
     ) async throws -> ReconfigureCellarOutcome {
         let data = try await GraphQLHelpers.perform(
             GraphQLClient.shared.apollo,
             mutation: VinariumGraphQL.ReconfigureCellarMutation(
                 rows: Int32(rows),
                 cols: Int32(cols),
-                zones: Int32(zones)
+                zones: Int32(zones),
+                cellarId: GraphQLHelpers.graphQLNullable(cellarId)
             )
         )
         let result = data.reconfigureCellar

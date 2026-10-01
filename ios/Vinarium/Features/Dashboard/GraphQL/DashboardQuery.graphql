@@ -1,4 +1,8 @@
 query Dashboard {
+  cellars {
+    id
+    name
+  }
   dashboard {
     bottleCount
     capacity
@@ -8,6 +12,7 @@ query Dashboard {
       name
       beverageType
       color
+      cellarId
       position
       urgent
       drinkUntil
@@ -30,6 +35,7 @@ query Dashboard {
         color
         vintage
       }
+      cellarId
       position
       date
     }

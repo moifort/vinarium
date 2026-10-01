@@ -42,10 +42,29 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
 @MainActor @Observable
 final class CellarGridViewModel {
     init() {
-        if let snapshot = cache.read() {
+        selectedCellarId = CellarSelection.stored()
+        // The snapshot only stands for the cellar it was taken of.
+        if let snapshot = cache.read(), snapshot.cellarId == selectedCellarId {
             bottles = snapshot.bottles
             history = snapshot.history
+            cellars = snapshot.cellars
         }
+    }
+
+    /// Every cellar of the household; the picker shows once there are two.
+    private(set) var cellars: [CellarSummary] = []
+    /// The cellar on screen, nil for the primary one. Switching reloads its bottles.
+    var selectedCellarId: String? {
+        didSet {
+            guard oldValue != selectedCellarId else { return }
+            CellarSelection.save(selectedCellarId)
+            bottles = []
+            Task { await load() }
+        }
+    }
+
+    var selectedCellar: CellarSummary? {
+        cellars.first { $0.id == selectedCellarId } ?? cellars.first
     }
 
     var bottles: [CellarBottle] = []
@@ -72,7 +91,7 @@ final class CellarGridViewModel {
 
     /// The first page of bottles and of the journal on disk. Bump the version whenever
     /// `CellarBottle`, `Wine` or `HistoryEvent` changes shape.
-    private let cache = SnapshotCache<CellarSnapshot>("cellar", version: 1)
+    private let cache = SnapshotCache<CellarSnapshot>("cellar", version: 2)
 
     private let pageSize = 15
     private let prefetchThreshold = 5
@@ -112,9 +131,19 @@ final class CellarGridViewModel {
         isLoading = true
         error = nil
         do {
-            let overview = try await CellarAPI.overview(limit: pageSize)
+            let overview: CellarOverview
+            do {
+                overview = try await CellarAPI.overview(limit: pageSize, cellarId: selectedCellarId)
+            } catch let error as APIError where error.domainCode == "NOT_FOUND" && selectedCellarId != nil {
+                // The cellar left on was deleted, or left behind with a household:
+                // fall back on the primary one rather than on an error.
+                guard requested == generation else { return }
+                selectedCellarId = nil
+                return
+            }
             guard requested == generation else { return } // a more recent reload took over
             let (b, h) = (overview.bottles, overview.history)
+            cellars = overview.cellars
             bottles = b.bottles
             bottlesHasMore = b.hasMore
             history = h.events
@@ -122,7 +151,13 @@ final class CellarGridViewModel {
             historyCursor = h.endCursor
             loaded = true
             refreshFailed = false
-            let (cache, snapshot) = (cache, CellarSnapshot(bottles: b.bottles, history: h.events))
+            let snapshot = CellarSnapshot(
+                bottles: b.bottles,
+                history: h.events,
+                cellars: overview.cellars,
+                cellarId: selectedCellarId
+            )
+            let cache = cache
             Task.detached { cache.write(snapshot) }
         } catch {
             guard requested == generation else { return }
@@ -156,7 +191,11 @@ final class CellarGridViewModel {
         isLoadingMoreBottles = true
         bottlesLoadMoreFailed = false
         do {
-            let page = try await CellarAPI.getBottles(limit: pageSize, after: last.wineId)
+            let page = try await CellarAPI.getBottles(
+                limit: pageSize,
+                after: last.wineId,
+                cellarId: selectedCellarId
+            )
             guard requested == generation else { return } // the list was reloaded in the meantime
             bottles.append(contentsOf: page.bottles)
             bottlesHasMore = page.hasMore
