@@ -44,6 +44,7 @@ struct WineListContent: View {
                                 WineListRow(
                                     beverageType: item.beverageType,
                                     color: item.color,
+                                    domain: item.domain,
                                     name: item.name,
                                     subtitle: item.subtitle,
                                     rating: item.rating,
@@ -106,6 +107,7 @@ extension WineListContent {
         let id: String
         var beverageType: BeverageType = .wine
         let color: WineColor?
+        var domain: String? = nil
         let name: String
         let subtitle: String?
         let rating: Int?
@@ -125,7 +127,7 @@ extension WineListContent {
                 .init(id: "3", color: .red, name: "Chauteau Poupchette", subtitle: "2018 \u{2022} Poupchaux", rating: 4, isFavorite: false),
             ]),
             .init(label: "2021", items: [
-                .init(id: "2", color: .white, name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
+                .init(id: "2", color: .white, domain: "Didier Dagueneau", name: "Pouilly-Fum\u{00E9}", subtitle: "2021", rating: 5, isFavorite: true),
                 .init(id: "4", color: .red, name: "Pauillac Grand Cru", subtitle: "2021 \u{2022} Bordeaux", rating: 4, isFavorite: false, isInCellar: true, ownerName: "Marie"),
             ]),
         ],

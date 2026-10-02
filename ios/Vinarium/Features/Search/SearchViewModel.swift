@@ -126,6 +126,7 @@ final class SearchViewModel {
             id: wine.id,
             beverageType: wine.beverageType,
             color: wine.color,
+            domain: wine.listDomain,
             name: wine.name,
             subtitle: wine.listSubtitle,
             rating: wine.rating,

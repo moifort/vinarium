@@ -23,6 +23,8 @@ struct DebugGallery: View {
             NavigationStack { AdminDashboard() }
         case "adminSheet":
             NavigationStack { AdminDashboard(adminShown: true) }
+        case "wineList":
+            NavigationStack { wineList }
         default:
             gallery
         }
@@ -34,6 +36,11 @@ struct DebugGallery: View {
                 Section("Abonnement") {
                     Button("Paywall, découverte") { paywallTrigger = .discover }
                     Button("Paywall, scans épuisés") { paywallTrigger = .scanAllowanceSpent }
+                }
+                Section("Listes") {
+                    NavigationLink("Liste des vins, domaines en surtitre") {
+                        wineList
+                    }
                 }
                 Section("Chargement") {
                     NavigationLink("Rideau d'ouverture") {
@@ -81,6 +88,28 @@ struct DebugGallery: View {
 }
 
 extension DebugGallery {
+    /// The producer above the name, and left out where the name already says it
+    /// (Château Margaux, Domaine Tempier).
+    private var wineList: some View {
+        WineListContent(
+            mode: .all,
+            groups: [
+                .init(label: "Octobre 2026", items: [
+                    .init(id: "1", color: .white, domain: "Domaine Leflaive", name: "Les Pucelles", subtitle: "2019 • Bourgogne • 120 €", rating: 4, isFavorite: true, isInCellar: true),
+                    .init(id: "2", color: .red, name: "Château Margaux", subtitle: "2018 • Bordeaux • 450 €", rating: 5, isFavorite: false, isInCellar: true),
+                    .init(id: "3", color: .white, domain: "Didier Dagueneau", name: "Pouilly-Fumé Silex", subtitle: "2021 • Loire", rating: nil, isFavorite: false),
+                ]),
+                .init(label: "Septembre 2026", items: [
+                    .init(id: "4", color: .rosé, name: "Domaine Tempier", subtitle: "2022 • Bandol", rating: 3, isFavorite: false, isInCellar: true, ownerName: "Marie"),
+                    .init(id: "5", color: .red, domain: "Domaine Jean-Louis Chave", name: "Hermitage", subtitle: "2017 • Rhône • Offert par Paul D.", rating: 5, isFavorite: true),
+                    .init(id: "6", beverageType: .beer, color: nil, domain: "Brasserie d'Achouffe", name: "La Chouffe", subtitle: "Belgique", rating: nil, isFavorite: false),
+                ]),
+            ],
+            onWineTapped: { _ in }
+        )
+        .navigationTitle("Mes Vins")
+    }
+
     /// A relaunch whose refresh failed: last session's wines, the retry leading them.
     private var cachedList: some View {
         WineListContent(

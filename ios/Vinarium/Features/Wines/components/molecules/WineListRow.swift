@@ -3,6 +3,8 @@ import SwiftUI
 struct WineListRow: View {
     var beverageType: BeverageType = .wine
     let color: WineColor?
+    /// The producer, shown above the name like on a merchant's list.
+    var domain: String? = nil
     let name: String
     let subtitle: String?
     let rating: Int?
@@ -15,6 +17,13 @@ struct WineListRow: View {
         HStack(alignment: .top) {
             BeverageBadge(beverageType: beverageType, color: color)
             VStack(alignment: .leading, spacing: 2) {
+                if let domain {
+                    Text(domain)
+                        .font(.caption)
+                        .textCase(.uppercase)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
                 Text(name)
                     .font(.headline)
                 if let subtitle {
@@ -59,6 +68,15 @@ struct WineListRow: View {
             color: .red,
             name: "Ch\u{00E2}teau Margaux",
             subtitle: "2018 \u{2022} Bordeaux \u{2022} 45 \u{20AC}",
+            rating: 4,
+            isFavorite: false,
+            isInCellar: true
+        )
+        WineListRow(
+            color: .white,
+            domain: "Domaine Leflaive",
+            name: "Les Pucelles",
+            subtitle: "2019 \u{2022} Bourgogne \u{2022} 120 \u{20AC}",
             rating: 4,
             isFavorite: false,
             isInCellar: true
