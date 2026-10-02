@@ -22,8 +22,9 @@ struct WineListRow: View {
                 // them and get the row's full width.
                 HStack {
                     if let domain {
+                        // A fixed size, deliberately outside Dynamic Type.
                         Text(domain)
-                            .font(.caption)
+                            .font(.system(size: 14))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     } else {
