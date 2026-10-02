@@ -58,7 +58,7 @@ struct CellarsSettingsView: View {
         .task { await load() }
         .refreshable { await load() }
         .sheet(isPresented: $showCreation) {
-            NewCellarSheet(
+            NewCellarView(
                 onCreated: { created in cellars.append(created) },
                 onPremiumRequired: {
                     showCreation = false
@@ -202,72 +202,6 @@ struct CellarSettingsView: View {
             cellar = try await CellarAPI.rename(id: cellar.id, name: newName)
         } onSuccess: {
             onChanged()
-        }
-    }
-}
-
-/// Names and sizes a new cellar.
-private struct NewCellarSheet: View {
-    let onCreated: (CellarSummary) -> Void
-    let onPremiumRequired: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var name = ""
-    @State private var rows = 6
-    @State private var cols = 8
-    @State private var creation = ErrorPresenter()
-
-    private var trimmedName: String { name.trimmingCharacters(in: .whitespacesAndNewlines) }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section("Nom") {
-                    TextField("Garage, cuisine, maison de campagne…", text: $name)
-                        .textInputAutocapitalization(.sentences)
-                        .accessibilityIdentifier("new-cellar-name")
-                }
-                Section("Grille") {
-                    Stepper(value: $rows, in: 1...OnboardingLimits.maxRows) {
-                        LabeledContent("Rangées", value: "\(rows)")
-                    }
-                    Stepper(value: $cols, in: 1...OnboardingLimits.maxCols) {
-                        LabeledContent("Emplacements par rangée", value: "\(cols)")
-                    }
-                    LabeledContent("Capacité totale", value: String(localized: "\(rows * cols) bouteilles"))
-                }
-            }
-            .navigationTitle("Nouvelle cave")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    ToolbarIconButton(title: "Annuler", systemImage: "xmark", role: .cancel) {
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    AsyncToolbarButton(title: "Créer", systemImage: "checkmark") {
-                        await create()
-                    }
-                    .disabled(trimmedName.isEmpty)
-                    .accessibilityIdentifier("create-cellar-button")
-                }
-            }
-            .errorAlert(creation)
-        }
-    }
-
-    private func create() async {
-        do {
-            let created = try await CellarAPI.create(name: trimmedName, rows: rows, cols: cols, zones: 1)
-            onCreated(created)
-            dismiss()
-        } catch CellarError.premiumRequired {
-            // The store said Premium, the server disagrees (lapsed since): the
-            // server is right, the offer comes up.
-            onPremiumRequired()
-        } catch {
-            creation.message = reportError(error)
         }
     }
 }

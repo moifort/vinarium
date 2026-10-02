@@ -23,6 +23,8 @@ struct CellarPage: View {
     var onHistoryPrefetch: (String) -> Void = { _ in }
     var onHistoryLoadMore: () async -> Void = {}
     var onRetryRefresh: () async -> Void = {}
+    /// The "+" of a lone cellar, or the last entry of the cellar menu.
+    var onAddCellar: () -> Void = {}
 
     var body: some View {
         Group {
@@ -53,20 +55,32 @@ struct CellarPage: View {
             }
         }
         .toolbar {
-            if cellars.count > 1, displayMode == .cave {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Picker("Cave", selection: selectedCellarId) {
-                            ForEach(cellars) { cellar in
-                                Text(cellar.displayName)
-                                    .tag(cellar.isPrimary ? String?.none : String?.some(cellar.id))
+            // A single cellar gets a "+" so a second one is discoverable; from two on
+            // the "+" becomes the list of cellars, which still ends on adding one.
+            if displayMode == .cave {
+                ToolbarItem {
+                    if cellars.count > 1 {
+                        Menu {
+                            Picker("Cave", selection: selectedCellarId) {
+                                ForEach(cellars) { cellar in
+                                    Text(cellar.displayName)
+                                        .tag(cellar.isPrimary ? String?.none : String?.some(cellar.id))
+                                }
                             }
+                            Divider()
+                            Button("Ajouter une cave", systemImage: "plus", action: onAddCellar)
+                                .accessibilityIdentifier("cellar-picker-add")
+                        } label: {
+                            Label("Changer de cave", systemImage: "square.stack.3d.up")
                         }
-                    } label: {
-                        Label("Changer de cave", systemImage: "square.stack.3d.up")
+                        .accessibilityIdentifier("cellar-picker")
+                    } else {
+                        Button("Ajouter une cave", systemImage: "plus", action: onAddCellar)
+                            .labelStyle(.iconOnly)
+                            .accessibilityIdentifier("cellar-add")
                     }
-                    .accessibilityIdentifier("cellar-picker")
                 }
+                ToolbarSpacer(.fixed)
             }
             ToolbarItemGroup {
                 ForEach(CellarDisplayMode.allCases) { mode in

@@ -4365,6 +4365,46 @@
         }
       }
     },
+    "Comment s'appelle cette cave ?": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is this cellar called?"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wie heißt dieser Weinkeller?"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "¿Cómo se llama esta bodega?"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Come si chiama questa cantina?"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Como se chama esta adega?"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "このセラーの名前は？"
+          }
+        }
+      }
+    },
     "Comment souhaitez-vous sortir ce vin ?": {
       "localizations": {
         "de": {
@@ -5488,42 +5528,42 @@
         }
       }
     },
-    "Créer": {
+    "Créer la cave": {
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Create"
+            "value": "Create cellar"
           }
         },
         "de": {
           "stringUnit": {
             "state": "translated",
-            "value": "Erstellen"
+            "value": "Weinkeller anlegen"
           }
         },
         "es": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crear"
+            "value": "Crear la bodega"
           }
         },
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Crea"
+            "value": "Crea la cantina"
           }
         },
         "pt": {
           "stringUnit": {
             "state": "translated",
-            "value": "Criar"
+            "value": "Criar a adega"
           }
         },
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "作成"
+            "value": "セラーを作成"
           }
         }
       }
@@ -14893,6 +14933,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "セラーは空になってから削除できます。"
+          }
+        }
+      }
+    },
+    "Une cave par meuble ou par pièce : chacune a sa grille.": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One cellar per cabinet or per room, each with its own grid."
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein Weinkeller pro Schrank oder Raum, jeder mit eigenem Raster."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una bodega por mueble o por habitación, cada una con su cuadrícula."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Una cantina per mobile o per stanza, ognuna con la sua griglia."
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uma adega por móvel ou por divisão, cada uma com a sua grelha."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "家具や部屋ごとにセラーを作成でき、それぞれにグリッドがあります。"
           }
         }
       }

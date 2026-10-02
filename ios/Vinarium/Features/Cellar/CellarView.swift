@@ -3,7 +3,10 @@ import SwiftUI
 struct CellarView: View {
     var refreshTrigger: UUID = UUID()
 
+    @Environment(SubscriptionStore.self) private var subscriptions
     @State private var viewModel = CellarGridViewModel()
+    @State private var cellarCreationShown = false
+    @State private var premiumShown = false
     @State private var selectedWineId: String?
     @State private var wineForConsumption: CellarRowItem?
     @State private var wineForGift: CellarRowItem?
@@ -41,7 +44,15 @@ struct CellarView: View {
                         onBottlesLoadMore: { await viewModel.loadMoreBottles() },
                         onHistoryPrefetch: { viewModel.prefetchHistoryIfNeeded(for: $0) },
                         onHistoryLoadMore: { await viewModel.loadMoreHistory() },
-                        onRetryRefresh: { await viewModel.refresh() }
+                        onRetryRefresh: { await viewModel.refresh() },
+                        onAddCellar: {
+                            // A second cellar is Premium: the others meet the offer.
+                            if subscriptions.isPremium == true {
+                                cellarCreationShown = true
+                            } else {
+                                premiumShown = true
+                            }
+                        }
                     )
                 }
             }
@@ -49,6 +60,19 @@ struct CellarView: View {
             // once and move into place when the server answers.
             .task(id: refreshTrigger) {
                 await viewModel.loadOnAppear()
+            }
+            .sheet(isPresented: $cellarCreationShown) {
+                NewCellarView(
+                    // Opens on the new cellar; switching reloads the list of cellars.
+                    onCreated: { viewModel.selectedCellarId = $0.id },
+                    onPremiumRequired: {
+                        cellarCreationShown = false
+                        premiumShown = true
+                    }
+                )
+            }
+            .sheet(isPresented: $premiumShown) {
+                PremiumSheet(trigger: .moreCellars)
             }
             // Choice raised by the "take out" swipe: drink it or give it away.
             .confirmationDialog(
@@ -152,4 +176,5 @@ struct CellarView: View {
 
 #Preview {
     CellarView()
+        .environment(SubscriptionStore())
 }
