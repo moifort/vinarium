@@ -6,6 +6,8 @@ struct DashboardView: View {
     @State private var viewModel = DashboardViewModel()
     @State private var selectedWineId: String?
     @State private var showSettings = false
+    @State private var showAdmin = false
+    @Environment(\.isAdmin) private var isAdmin
 
     var body: some View {
         NavigationStack {
@@ -17,7 +19,8 @@ struct DashboardView: View {
                         onRetryRefresh: { await viewModel.refresh() },
                         onStatsTapped: { selectedTab = .cellar },
                         onWineTapped: { selectedWineId = $0 },
-                        onSettingsTapped: { showSettings = true }
+                        onSettingsTapped: { showSettings = true },
+                        onAdminTapped: isAdmin ? { showAdmin = true } : nil
                     )
                 } else if let error = viewModel.error {
                     ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
@@ -50,6 +53,18 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showSettings) {
                 SettingsHomeView()
+            }
+            .sheet(isPresented: $showAdmin) {
+                NavigationStack {
+                    AdminView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {
+                                    showAdmin = false
+                                }
+                            }
+                        }
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .vinariumDataDidReload)) { _ in
                 Task { await viewModel.load() }

@@ -8,6 +8,8 @@ struct DashboardPage: View {
     var onStatsTapped: () -> Void
     var onWineTapped: (String) -> Void
     var onSettingsTapped: () -> Void
+    /// Admin only: opens the metrics sheet. Nil hides the button for every other account.
+    var onAdminTapped: (() -> Void)?
 
     var body: some View {
         ScrollView {
@@ -36,6 +38,12 @@ struct DashboardPage: View {
             ToolbarItem(placement: .topBarLeading) {
                 ToolbarIconButton(title: "Réglages", systemImage: "gearshape", action: onSettingsTapped)
                     .accessibilityIdentifier("dashboard-settings-button")
+            }
+            if let onAdminTapped {
+                ToolbarItem(placement: .topBarLeading) {
+                    ToolbarIconButton(title: "Admin", systemImage: "chart.bar.fill", action: onAdminTapped)
+                        .accessibilityIdentifier("dashboard-admin-button")
+                }
             }
         }
         .searchToolbarButton()
@@ -69,7 +77,8 @@ extension DashboardPage {
             ),
             onStatsTapped: {},
             onWineTapped: { _ in },
-            onSettingsTapped: {}
+            onSettingsTapped: {},
+            onAdminTapped: {}
         )
     }
 }

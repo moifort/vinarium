@@ -1,9 +1,8 @@
 import SwiftUI
 
 /// Coordinator for the Admin screen: it owns (or receives) the ViewModel, loads on
-/// appear and delegates all rendering to `AdminPage`. The banner passes its own
-/// ViewModel so the sheet shows the figures already loaded; the settings row lets the
-/// coordinator create its own.
+/// appear and delegates all rendering to `AdminPage`. Opened as a sheet from the
+/// home screen's toolbar and pushed from the settings row.
 struct AdminView: View {
     @State private var viewModel: AdminViewModel
 

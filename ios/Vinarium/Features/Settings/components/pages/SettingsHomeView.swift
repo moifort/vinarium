@@ -95,8 +95,8 @@ struct SettingsHomeView: View {
                     }
                 }
 
-                // Second admin entry point, next to the banner. Absent for every
-                // other account.
+                // Second admin entry point, next to the home toolbar button. Absent
+                // for every other account.
                 if isAdmin {
                     Section {
                         NavigationLink {

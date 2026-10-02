@@ -18,13 +18,6 @@ struct ContentView: View {
     /// A pending invitation from a universal link, presented once the app is ready.
     @Binding var joinRequest: HouseholdJoinRequest?
 
-    /// Admin only: the metrics banner pinned above every tab. Absent (and never
-    /// fetched) for everyone else.
-    @Environment(\.isAdmin) private var isAdmin
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var adminViewModel = AdminViewModel()
-    @State private var showAdminSheet = false
-
     @State private var selectedTab: TabSelection = .home
     /// The last real content tab, handed straight back when the scan tab is tapped.
     @State private var lastContentTab: TabSelection = .home
@@ -65,29 +58,6 @@ struct ContentView: View {
     }
 
     var body: some View {
-        // The admin banner is stacked ABOVE the TabView, not injected as a top
-        // safe-area inset: an inset leaves each tab's navigation bar drawing at
-        // the true top, so its title and toolbar buttons end up clipped behind
-        // the banner. Stacking gives the TabView the room below the banner and
-        // its nav bars lay out cleanly.
-        if isAdmin {
-            VStack(spacing: 0) {
-                AdminBanner(
-                    aiCost: bannerEuro(adminViewModel.metrics?.aiCostEur),
-                    infra: bannerEuro(adminViewModel.metrics?.infraEur),
-                    users: bannerCount(adminViewModel.metrics?.totalUsers),
-                    premium: bannerCount(adminViewModel.metrics?.premiumTotal),
-                    isLoading: adminViewModel.isLoading,
-                    onTap: { showAdminSheet = true }
-                )
-                tabs
-            }
-        } else {
-            tabs
-        }
-    }
-
-    private var tabs: some View {
         TabView(selection: $selectedTab) {
             Tab(value: .home) {
                 DashboardView(selectedTab: $selectedTab)
@@ -119,26 +89,6 @@ struct ContentView: View {
             .accessibilityIdentifier("tab-scan")
         }
         .tabBarMinimizeBehavior(.onScrollDown)
-        .task {
-            if isAdmin { await adminViewModel.load() }
-        }
-        .onChange(of: scenePhase) { _, phase in
-            if phase == .active && isAdmin {
-                Task { await adminViewModel.load() }
-            }
-        }
-        .sheet(isPresented: $showAdminSheet) {
-            NavigationStack {
-                AdminView(viewModel: adminViewModel)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {
-                                showAdminSheet = false
-                            }
-                        }
-                    }
-            }
-        }
         .onChange(of: selectedTab) { _, newValue in
             // The scan tab is a button, not a destination: it opens the add
             // sheet (the camera, and the photos the camera alone would not
@@ -249,26 +199,6 @@ struct ContentView: View {
     private var typedDescription: String? {
         let text = addDescription.trimmingCharacters(in: .whitespacesAndNewlines)
         return text.isEmpty ? nil : text
-    }
-
-    /// One amount of the banner: an ellipsis while nothing is loaded, the value otherwise.
-    private func bannerEuro(_ value: Double?) -> String {
-        value.map(euroString) ?? "…"
-    }
-
-    private func bannerCount(_ value: Int?) -> String {
-        value.map(String.init) ?? "…"
-    }
-
-    /// The banner's infra figure tells loading (an ellipsis) apart from a measure that
-    /// is still unavailable (a dash, when the billing export is not wired up).
-    private var bannerInfra: String {
-        guard let metrics = adminViewModel.metrics else { return "…" }
-        return metrics.infraEur.map(euroString) ?? "—"
-    }
-
-    private func euroString(_ value: Double) -> String {
-        value.formatted(.currency(code: "EUR").precision(.fractionLength(2)))
     }
 }
 
