@@ -5,11 +5,30 @@ import SwiftUI
 /// shown instead of the app when it is launched with `-debugGallery`. It lets
 /// a screen be displayed on a simulator with no signed-in account, e.g. from
 /// `xcrun simctl launch booted com.polyforms.vinarium.app -debugGallery`.
+/// `-debugScreen <name>` opens one entry directly, so a capture needs no tap.
 struct DebugGallery: View {
     @State private var paywallTrigger: PremiumTrigger?
     @State private var feedbackShown = false
 
+    /// The value following `-debugScreen` on the launch arguments, if any.
+    private static var directScreen: String? {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-debugScreen"), index + 1 < arguments.count else { return nil }
+        return arguments[index + 1]
+    }
+
     var body: some View {
+        switch Self.directScreen {
+        case "adminHome":
+            NavigationStack { AdminDashboard() }
+        case "adminSheet":
+            NavigationStack { AdminDashboard(adminShown: true) }
+        default:
+            gallery
+        }
+    }
+
+    private var gallery: some View {
         NavigationStack {
             List {
                 Section("Abonnement") {
@@ -38,6 +57,11 @@ struct DebugGallery: View {
                     }
                     NavigationLink("Cave en cache, échec de la mise à jour") {
                         cachedCellar
+                    }
+                }
+                Section("Admin") {
+                    NavigationLink("Accueil, compte admin") {
+                        AdminDashboard()
                     }
                 }
                 Section("Retours") {
@@ -135,6 +159,59 @@ extension DebugGallery {
             onEventTapped: { _ in },
             onRefresh: {}
         )
+    }
+}
+
+/// The home tab as an admin sees it: the metrics button beside Settings, opening the
+/// Admin screen in a sheet on sample figures.
+private struct AdminDashboard: View {
+    @State var adminShown = false
+
+    var body: some View {
+        DashboardPage(
+            content: .init(
+                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
+                readyToDrink: [
+                    .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
+                ],
+                favorites: [],
+                events: []
+            ),
+            onStatsTapped: {},
+            onWineTapped: { _ in },
+            onSettingsTapped: {},
+            onAdminTapped: { adminShown = true }
+        )
+        .sheet(isPresented: $adminShown) {
+            NavigationStack {
+                AdminPage(
+                    metrics: AdminMetrics(
+                        aiCostEur: 0.42,
+                        infraEur: 0.19,
+                        totalCostEur: 0.61,
+                        totalUsers: 42,
+                        premiumTotal: 5,
+                        premiumMonthly: 2,
+                        premiumYearly: 3,
+                        revenueProceedsEur: 12.4,
+                        revenueGrossEur: 17.9,
+                        scans: 37,
+                        cacheHits: 4,
+                        vision: .init(promptTokens: 96_200, outputTokens: 9_250, thinkingTokens: 55_500),
+                        enrichment: .init(promptTokens: 185_000, outputTokens: 7_400, thinkingTokens: 51_800),
+                        refreshedAt: Date()
+                    ),
+                    onRetry: {}
+                )
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {
+                            adminShown = false
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

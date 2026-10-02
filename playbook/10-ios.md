@@ -78,6 +78,17 @@ fichier de projet, et on la reverte.
 Les icônes et symboles produits par un script ne s'éditent jamais à la main : on modifie le
 script et on régénère. Ils sont exclus du linter.
 
+## Capture de validation
+
+Toute demande qui crée, modifie ou supprime de l'interface se termine par une capture
+d'écran envoyée à Thibaut, qui valide sur l'image : pas de « c'est fait » sans elle. Une capture
+par état touché, la feuille ouverte comprise.
+
+Sans session sur le simulateur, l'écran passe par la galerie de debug :
+`xcrun simctl launch <udid> com.polyforms.vinarium.app -debugGallery -debugScreen <nom>` ouvre
+une entrée directement, sans tap. Chaque écran modifié qui n'y est pas encore y gagne son entrée.
+Utiliser un simulateur dédié plutôt que celui d'une autre session.
+
 ## Appareil physique
 
 À la fin d'une tâche qui touche l'application, proposer l'installation sur l'appareil de test
