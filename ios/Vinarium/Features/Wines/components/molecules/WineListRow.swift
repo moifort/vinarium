@@ -20,7 +20,6 @@ struct WineListRow: View {
                 if let domain {
                     Text(domain)
                         .font(.caption)
-                        .textCase(.uppercase)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
