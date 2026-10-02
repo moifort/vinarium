@@ -14,8 +14,9 @@ struct WineListRow: View {
     var ownerName: String? = nil
 
     var body: some View {
-        HStack(alignment: .top) {
+        HStack(alignment: .firstLine) {
             BeverageBadge(beverageType: beverageType, color: color)
+                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
             VStack(alignment: .leading, spacing: 2) {
                 // The marks share the first line only; the lines below run under
                 // them and get the row's full width.
@@ -31,6 +32,7 @@ struct WineListRow: View {
                     Spacer(minLength: 0)
                     marks
                 }
+                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
                 if domain != nil {
                     nameText
                 }
@@ -77,6 +79,17 @@ struct WineListRow: View {
                 .foregroundStyle(.red)
         }
     }
+}
+
+private extension VerticalAlignment {
+    /// The middle of a row's first line, where the badge sits.
+    enum FirstLine: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat {
+            context[VerticalAlignment.center]
+        }
+    }
+
+    static let firstLine = VerticalAlignment(FirstLine.self)
 }
 
 #Preview {
