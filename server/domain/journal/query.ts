@@ -106,6 +106,7 @@ export namespace JournalQuery {
     date: entry.date,
     beverageId: entry.beverageId,
     beverageName: wine.name,
+    beverageProducer: wine.producer,
     wineBeverageType: wine.beverageType,
     wineColor: wineDetails(wine)?.color,
     position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,

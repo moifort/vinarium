@@ -54,6 +54,11 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
       type: 'BeverageName',
       description: 'Name of the wine at the time of the event.',
     }),
+    beverageProducer: t.expose('beverageProducer', {
+      type: 'Producer',
+      nullable: true,
+      description: 'Producer of the wine (estate, distillery, brewery); null when unknown.',
+    }),
     wineBeverageType: t.expose('wineBeverageType', {
       type: BeverageTypeEnum,
       description: 'Kind of beverage (wine, spirit, ...) for display.',

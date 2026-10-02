@@ -1,5 +1,11 @@
 import type { Brand } from 'ts-brand'
-import type { BeverageId, BeverageName, BeverageType, WineColor } from '~/domain/beverage/types'
+import type {
+  BeverageId,
+  BeverageName,
+  BeverageType,
+  Producer,
+  WineColor,
+} from '~/domain/beverage/types'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
 import type { PersonName, UserId } from '~/domain/shared/types'
 
@@ -39,6 +45,7 @@ export type JournalEventView = {
   date: Date
   beverageId: BeverageId
   beverageName: BeverageName
+  beverageProducer?: Producer
   wineBeverageType: BeverageType
   wineColor?: WineColor
   position: string

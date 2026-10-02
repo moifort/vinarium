@@ -38,6 +38,7 @@ const seedSharedCellar = () => {
     id: 'o1',
     userId: 'owner',
     name: 'Château Partagé',
+    producer: 'Famille Partage',
     beverageType: 'wine',
     wine: { color: 'red' },
     createdAt: new Date('2026-01-01'),
@@ -68,7 +69,7 @@ describe('journalEvents query', () => {
     const result = await execute(`
       query {
         journalEvents(limit: 15, offset: 0) {
-          items { type beverageName position actor { displayName isMine } }
+          items { type beverageName beverageProducer position actor { displayName isMine } }
           hasMore
         }
       }
@@ -80,6 +81,7 @@ describe('journalEvents query', () => {
         {
           type: 'IN',
           beverageName: 'Château Partagé',
+          beverageProducer: 'Famille Partage',
           position: 'A1',
           actor: { displayName: 'owner name', isMine: false },
         },

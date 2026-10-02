@@ -1271,6 +1271,9 @@ type JournalEvent {
   """Name of the wine at the time of the event."""
   beverageName: BeverageName!
 
+  """Producer of the wine (estate, distillery, brewery); null when unknown."""
+  beverageProducer: Producer
+
   """When the movement happened."""
   date: DateTime!
 

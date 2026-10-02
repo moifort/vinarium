@@ -148,6 +148,42 @@ describe('JournalQuery.page', () => {
   })
 })
 
+describe('JournalQuery producer', () => {
+  test('carries the wine’s producer so the journal can show it above the name', async () => {
+    fake.seed('beverages', 'w1', {
+      id: 'w1',
+      userId,
+      name: 'Les Pucelles',
+      producer: 'Domaine Leflaive',
+      beverageType: 'wine',
+    })
+    fake.seed('beverages', 'w2', { id: 'w2', userId, name: 'W2', beverageType: 'wine' })
+    fake.seed('journal', 'j1', {
+      type: 'in',
+      userId,
+      beverageId: 'w1',
+      row: 0,
+      col: 0,
+      date: new Date('2026-01-02'),
+    })
+    fake.seed('journal', 'j2', {
+      type: 'in',
+      userId,
+      beverageId: 'w2',
+      row: 0,
+      col: 1,
+      date: new Date('2026-01-01'),
+    })
+
+    const { items } = await JournalQuery.page(userId, { limit: 15, offset: 0 })
+
+    expect(items.map(({ beverageProducer }) => beverageProducer as string | undefined)).toEqual([
+      'Domaine Leflaive',
+      undefined,
+    ])
+  })
+})
+
 describe('JournalQuery.latestExit', () => {
   test('returns the household’s most recent exit, skipping newer entries', async () => {
     seedHousehold()
