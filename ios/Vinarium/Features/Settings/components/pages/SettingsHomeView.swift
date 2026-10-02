@@ -103,7 +103,7 @@ struct SettingsHomeView: View {
                             AdminView()
                         } label: {
                             SettingsRow(
-                                icon: "chart.bar.fill",
+                                icon: "person.badge.shield.checkmark.fill",
                                 title: "Admin",
                                 subtitle: "Coûts, revenus et comptes du mois",
                                 tint: .red
