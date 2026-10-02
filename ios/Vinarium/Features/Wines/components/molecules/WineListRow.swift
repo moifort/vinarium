@@ -17,14 +17,23 @@ struct WineListRow: View {
         HStack(alignment: .top) {
             BeverageBadge(beverageType: beverageType, color: color)
             VStack(alignment: .leading, spacing: 2) {
-                if let domain {
-                    Text(domain)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                // The marks share the first line only; the lines below run under
+                // them and get the row's full width.
+                HStack {
+                    if let domain {
+                        Text(domain)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        nameText
+                    }
+                    Spacer(minLength: 0)
+                    marks
                 }
-                Text(name)
-                    .font(.headline)
+                if domain != nil {
+                    nameText
+                }
                 if let subtitle {
                     Text(subtitle)
                         .font(.subheadline)
@@ -44,19 +53,28 @@ struct WineListRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if let rating {
-                StarRatingView(rating: rating)
-            }
-            if isInCellar {
-                Image(systemName: "cabinet")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .accessibilityLabel(Text("En cave"))
-            }
-            if isFavorite {
-                Image(systemName: "heart.fill")
-                    .foregroundStyle(.red)
-            }
+        }
+    }
+
+    private var nameText: some View {
+        Text(name)
+            .font(.headline)
+    }
+
+    @ViewBuilder
+    private var marks: some View {
+        if let rating {
+            StarRatingView(rating: rating)
+        }
+        if isInCellar {
+            Image(systemName: "cabinet")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .accessibilityLabel(Text("En cave"))
+        }
+        if isFavorite {
+            Image(systemName: "heart.fill")
+                .foregroundStyle(.red)
         }
     }
 }
