@@ -41,7 +41,7 @@ struct DashboardPage: View {
             }
             if let onAdminTapped {
                 ToolbarItem(placement: .topBarLeading) {
-                    ToolbarIconButton(title: "Admin", systemImage: "person.badge.shield.checkmark", action: onAdminTapped)
+                    ToolbarIconButton(title: "Admin", systemImage: "shield", action: onAdminTapped)
                         .accessibilityIdentifier("dashboard-admin-button")
                 }
             }
