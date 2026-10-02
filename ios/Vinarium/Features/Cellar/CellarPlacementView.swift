@@ -30,8 +30,10 @@ struct CellarPlacementView: View {
         Group {
             if isLoading {
                 LoadingStateView(label: "Chargement de la cave...")
-            } else if let error {
-                ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+            } else if error != nil {
+                // Nothing shows, and a pull tries again.
+                PullToRefreshSpace()
+                    .refreshable { await loadData() }
             } else {
                 CellarPlacementPage(
                     wineName: wineName,
@@ -83,6 +85,7 @@ struct CellarPlacementView: View {
             suggestedCol = grid.suggestion?.col
             rows = grid.rows
             cols = grid.cols
+            error = nil
             isLoading = false
         } catch {
             self.error = reportError(error)

@@ -5,8 +5,7 @@ import SwiftUI
 struct AdminPage: View {
     let metrics: AdminMetrics?
     var isLoading = false
-    var errorMessage: String?
-    var onRetry: () async -> Void
+    var loadFailed = false
 
     var body: some View {
         Group {
@@ -14,14 +13,9 @@ struct AdminPage: View {
                 content(metrics)
             } else if isLoading {
                 LoadingStateView(label: "Chargement des métriques...")
-            } else if let errorMessage {
-                ContentUnavailableView {
-                    Label("Métriques indisponibles", systemImage: "chart.bar.xaxis")
-                } description: {
-                    Text(errorMessage)
-                } actions: {
-                    Button("Réessayer") { Task { await onRetry() } }
-                }
+            } else if loadFailed {
+                // Nothing shows, and a pull tries again.
+                PullToRefreshSpace()
             } else {
                 Color.clear
             }
@@ -135,8 +129,7 @@ struct AdminPage: View {
                 vision: .init(promptTokens: 96_200, outputTokens: 9_250, thinkingTokens: 55_500),
                 enrichment: .init(promptTokens: 185_000, outputTokens: 7_400, thinkingTokens: 51_800),
                 refreshedAt: Date()
-            ),
-            onRetry: {}
+            )
         )
     }
 }
@@ -159,18 +152,13 @@ struct AdminPage: View {
                 vision: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
                 enrichment: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
                 refreshedAt: nil
-            ),
-            onRetry: {}
+            )
         )
     }
 }
 
-#Preview("Error") {
+#Preview("Load failed") {
     NavigationStack {
-        AdminPage(
-            metrics: nil,
-            errorMessage: "Réponse invalide du serveur",
-            onRetry: {}
-        )
+        AdminPage(metrics: nil, loadFailed: true)
     }
 }

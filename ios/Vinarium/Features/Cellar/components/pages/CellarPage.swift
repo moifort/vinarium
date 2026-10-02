@@ -12,8 +12,6 @@ struct CellarPage: View {
     var bottlesLoadMoreFailed: Bool = false
     var historyHasMore: Bool = false
     var historyLoadMoreFailed: Bool = false
-    /// Refreshing the cellar on screen failed — a retry row leads it.
-    var refreshFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onEventTapped: (String) -> Void
@@ -22,7 +20,6 @@ struct CellarPage: View {
     var onBottlesLoadMore: () async -> Void = {}
     var onHistoryPrefetch: (String) -> Void = { _ in }
     var onHistoryLoadMore: () async -> Void = {}
-    var onRetryRefresh: () async -> Void = {}
     /// The "+" of a lone cellar, or the last entry of the cellar menu.
     var onAddCellar: () -> Void = {}
 
@@ -34,23 +31,19 @@ struct CellarPage: View {
                     groups: groups,
                     hasMore: bottlesHasMore,
                     loadMoreFailed: bottlesLoadMoreFailed,
-                    refreshFailed: refreshFailed,
                     onBottleTapped: onBottleTapped,
                     onRemoveRequested: onRemoveRequested,
                     onPrefetch: onBottlesPrefetch,
-                    onLoadMore: onBottlesLoadMore,
-                    onRetryRefresh: onRetryRefresh
+                    onLoadMore: onBottlesLoadMore
                 )
             case .journal:
                 JournalEventList(
                     events: events,
                     hasMore: historyHasMore,
                     loadMoreFailed: historyLoadMoreFailed,
-                    refreshFailed: refreshFailed,
                     onEventTapped: onEventTapped,
                     onPrefetch: onHistoryPrefetch,
-                    onLoadMore: onHistoryLoadMore,
-                    onRetryRefresh: onRetryRefresh
+                    onLoadMore: onHistoryLoadMore
                 )
             }
         }

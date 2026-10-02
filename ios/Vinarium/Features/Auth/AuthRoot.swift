@@ -93,14 +93,10 @@ struct AuthRoot: View {
             OnboardingView(onCompleted: { gate.markCompleted() })
         case .ready:
             ContentView(joinRequest: $joinRequest)
-        case .failed(let message):
-            ContentUnavailableView {
-                Label("Connexion impossible", systemImage: "wifi.exclamationmark")
-            } description: {
-                Text(message)
-            } actions: {
-                Button("Réessayer") { Task { await launch() } }
-            }
+        case .failed:
+            // Nothing shows: a pull runs the launch query again, behind the curtain.
+            PullToRefreshSpace()
+                .refreshable { await launch() }
         }
     }
 
@@ -113,7 +109,7 @@ struct AuthRoot: View {
     }
 
     /// Nothing left to wait for behind the curtain: the login, the wizard, the
-    /// app or the retry screen is laid out.
+    /// app or the blank screen a failed launch leaves is laid out.
     private var isSettled: Bool {
         session.user == nil || gate.state != .loading
     }

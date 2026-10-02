@@ -39,11 +39,17 @@ l'utilisateur reconnaît, une liste ou un tableau de bord, garde sur disque ce q
 le dossier des caches. Au lancement, le modèle de vue le relit de façon synchrone, avant tout
 appel réseau, et l'écran est lisible dès la première image. Le rafraîchissement qui suit ne
 reprend jamais l'écran et n'affiche aucun indicateur : le contenu reste lisible, et à l'arrivée de
-la réponse les lignes se déplacent, apparaissent ou disparaissent en place, animées. Une ligne
-« Réessayer » en tête n'apparaît que si l'appel échoue. Une mutation faite depuis cet écran le
-recharge de la même façon, sans le vider. Seul ce que l'écran montre à l'ouverture est écrit,
-jamais une vue triée ou filtrée ni plus d'une première page, et tout est effacé à la déconnexion.
+la réponse les lignes se déplacent, apparaissent ou disparaissent en place, animées. Une mutation
+faite depuis cet écran le recharge de la même façon, sans le vider. Chaque vue, tri, filtre ou
+cave garde sa propre première page : en changer affiche aussitôt ce qu'elle montrait la dernière
+fois, sans indicateur, et le loader n'apparaît que sur une liste vide. Jamais plus d'une première
+page par fichier, et tout est effacé à la déconnexion.
 Ne s'applique pas à une donnée qui ne vaut rien périmée : un solde, un quota, un code.
+
+Un chargement qui échoue ne dit rien : ni message d'erreur ni bouton « Réessayer ». Ce qui était
+affiché reste en place ; un écran qui n'avait rien reste vide. Réessayer, c'est tirer pour
+rafraîchir : tout écran qui charge est tirable, vide compris, ce qui demande une vue défilante
+même quand il n'y a rien à montrer.
 
 ## Zones de tap
 

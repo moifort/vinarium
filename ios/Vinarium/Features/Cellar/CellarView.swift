@@ -18,8 +18,11 @@ struct CellarView: View {
             Group {
                 if viewModel.isLoading && viewModel.bottles.isEmpty {
                     LoadingStateView()
-                } else if let error = viewModel.error, viewModel.bottles.isEmpty {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+                } else if viewModel.error != nil, viewModel.bottles.isEmpty {
+                    // Nothing from last time and the load failed: nothing shows, and a
+                    // pull tries again.
+                    PullToRefreshSpace()
+                        .refreshable { await viewModel.load() }
                 } else {
                     CellarPage(
                         displayMode: $viewModel.displayMode,
@@ -31,7 +34,6 @@ struct CellarView: View {
                         bottlesLoadMoreFailed: viewModel.bottlesLoadMoreFailed,
                         historyHasMore: viewModel.historyHasMore,
                         historyLoadMoreFailed: viewModel.historyLoadMoreFailed,
-                        refreshFailed: viewModel.refreshFailed,
                         onBottleTapped: { selectedWineId = $0 },
                         onRemoveRequested: { wineId in
                             wineForRemovalChoice = viewModel.groupedRows
@@ -44,7 +46,6 @@ struct CellarView: View {
                         onBottlesLoadMore: { await viewModel.loadMoreBottles() },
                         onHistoryPrefetch: { viewModel.prefetchHistoryIfNeeded(for: $0) },
                         onHistoryLoadMore: { await viewModel.loadMoreHistory() },
-                        onRetryRefresh: { await viewModel.refresh() },
                         onAddCellar: {
                             // A second cellar is Premium: the others meet the offer.
                             if subscriptions.isPremium == true {
@@ -59,7 +60,7 @@ struct CellarView: View {
             // Over last session's snapshot when the disk had one: the bottles show at
             // once and move into place when the server answers.
             .task(id: refreshTrigger) {
-                await viewModel.loadOnAppear()
+                await viewModel.load()
             }
             .sheet(isPresented: $cellarCreationShown) {
                 NewCellarView(

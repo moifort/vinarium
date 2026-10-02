@@ -14,8 +14,7 @@ struct AdminView: View {
         AdminPage(
             metrics: viewModel.metrics,
             isLoading: viewModel.isLoading,
-            errorMessage: viewModel.errorMessage,
-            onRetry: { await viewModel.load() }
+            loadFailed: viewModel.errorMessage != nil
         )
         .task {
             if viewModel.metrics == nil { await viewModel.load() }

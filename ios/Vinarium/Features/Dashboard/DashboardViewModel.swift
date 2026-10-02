@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 /// The home tab's figures and shortlists. It opens on what it showed last time: its
 /// `SnapshotCache` hands the last dashboard back from disk before anything is asked of
@@ -13,14 +14,6 @@ final class DashboardViewModel {
     var isLoading = false
     var error: String?
 
-    /// That refresh failed: the figures on screen are the ones from last time, and the
-    /// leading row offers to try again.
-    private(set) var refreshFailed = false
-
-    /// The server has answered at least once, so what is on screen is no longer the
-    /// snapshot.
-    private var loaded = false
-
     /// The last dashboard on disk. Bump the version whenever `DashboardData` changes
     /// shape.
     private let cache = SnapshotCache<DashboardData>("dashboard", version: 1)
@@ -34,9 +27,9 @@ final class DashboardViewModel {
         error = nil
         do {
             let fetched = try await DashboardAPI.getData()
-            data = fetched
-            loaded = true
-            refreshFailed = false
+            // Over the page already on screen, the shortlists' rows slide into place
+            // and the figures roll over rather than the page snapping to the answer.
+            withAnimation(data == nil ? nil : .smooth) { data = fetched }
             let cache = cache
             Task.detached { cache.write(fetched) }
             if fetched.bottleCount >= Self.stockedThreshold {
@@ -46,23 +39,5 @@ final class DashboardViewModel {
             self.error = reportError(error)
         }
         isLoading = false
-    }
-
-    /// The tab appeared: a dashboard still showing last session's snapshot refreshes it
-    /// in place, anything else loads as it always did.
-    func loadOnAppear() async {
-        if !loaded, data != nil {
-            await refresh()
-        } else {
-            await load()
-        }
-    }
-
-    /// Bring the snapshot on screen up to date without taking it away — and the retry
-    /// when that failed.
-    func refresh() async {
-        refreshFailed = false
-        await load()
-        refreshFailed = !loaded
     }
 }

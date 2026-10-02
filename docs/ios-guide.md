@@ -93,7 +93,7 @@ by its height and slope, with no reflection, drawn every frame. Its source is co
 the first time the curtain shows: the build needs no Metal toolchain, which Xcode 26 ships as a
 separate download, and the wine fades in over the charcoal once the pipeline is ready. The curtain holds
 until `AuthRoot` has something settled behind it: the login, the onboarding, the tabs on their
-snapshots, or the retry screen. `AuthRoot` holds the curtain at least `LaunchCurtain.minimumHold`
+snapshots, or the blank screen a failed launch leaves. `AuthRoot` holds the curtain at least `LaunchCurtain.minimumHold`
 from its first frame (long enough to see the wine move), then plays the exit (`revealing`), a dissolve
 into the screen underneath, and drops the view. A sign-in from the login lowers it again for that account's launch query.
 
@@ -112,22 +112,25 @@ The rule is in [playbook/10-ios.md](../playbook/10-ios.md#chargements).
 
 | Screen | Snapshot | What is written |
 |---|---|---|
-| Wine list | `[Wine]`, `wine-list` | Page 0 of the opening view only — every wine, newest first, no status, colour or type filter — capped at one page however far the list was scrolled |
+| Wine list | `[Wine]`, `WineListFilters.cacheKey` | Page 0 of each view, sort and filter combination, one file each, capped at one page however far the list was scrolled |
 | Dashboard | `DashboardData`, `dashboard` | The whole payload, after each successful load |
-| Cellar | `CellarSnapshot`, `cellar` | The first page of bottles and of the journal, after each full reload |
+| Cellar | `CellarSnapshot`, `cellar-<id>` | The first page of bottles and of the journal, one file per cellar, after each full reload |
 
 - **Versioned**: each cache is built with a `version`; a file carrying another one is ignored.
   Bump it whenever the snapshot's type changes shape.
-- **The refresh that follows** draws nothing, never `isLoading`: the rows stay readable and the
-  answer moves, inserts or removes them in place, animated by `.animation(_:value:)` on the list's
-  `Equatable` groups (the dashboard animates its `Content` and rolls its figures with
-  `.numericText()`). Only `refreshFailed` shows something: `RefreshRow`
-  (`Shared/Components/RefreshRow.swift`), a "Réessayer" row leading the list or the dashboard's
-  scroll view. After a mutation or a scan the wine list calls `reloadInPlace()`, the same refresh,
-  rather than `scheduleReload()`, which empties the list behind a loader and is kept for view,
-  sort and filter changes.
-- **`loadOnAppear()`** picks between the two on every appearance: the snapshot's refresh the first
-  time, the silent `load()` each screen always did afterwards.
+- **The refresh that follows** draws nothing: the rows stay readable and the view model assigns
+  the answer inside `withAnimation(rows.isEmpty ? nil : .smooth)`, so rows move, slide in or out
+  in place (the dashboard rolls its figures with `.numericText()`). A first fill, over an empty
+  screen, is not animated.
+- **Switching view, sort, filter or cellar** reads the new one's snapshot and shows it at once;
+  without one, the wine list keeps the rows on screen until the answer replaces them. The loader
+  only ever shows over an empty list. After a mutation or a scan the wine list calls
+  `reloadInPlace()`, which also keeps the rows.
+- **A failure says nothing**: no error message, no "Réessayer" button. Rows already on screen stay
+  as they were; an empty screen stays blank in a `PullToRefreshSpace`
+  (`Shared/Components/PullToRefreshSpace.swift`), a scroll view the size of the screen so the
+  pull-to-refresh can always be grabbed. A failed next page drops its `LoadMoreRow` until a pull
+  reloads the list.
 - **Cleared** by `SnapshotCaches.clear()`, from `AuthSession.signOut()` (account deletion goes
   through it) and from `UITestEnvironment` before a scenario signs in, so no run starts on the
   previous one's cellar.

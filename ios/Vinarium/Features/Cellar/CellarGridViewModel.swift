@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum CellarDisplayMode: String, CaseIterable, Identifiable {
     case cave = "Cave"
@@ -38,13 +39,13 @@ enum CellarDisplayMode: String, CaseIterable, Identifiable {
 /// The cellar tab: the bottles row by row, and the journal of what came in and out. It
 /// opens on what it showed last time: its `SnapshotCache` hands the first page of each
 /// back from disk before anything is asked of the network, and the first fetch replaces
-/// it silently instead of behind a loader.
+/// it silently instead of behind a loader. Every cellar keeps its own snapshot, so
+/// switching between them never empties the list either.
 @MainActor @Observable
 final class CellarGridViewModel {
     init() {
         selectedCellarId = CellarSelection.stored()
-        // The snapshot only stands for the cellar it was taken of.
-        if let snapshot = cache.read(), snapshot.cellarId == selectedCellarId {
+        if let snapshot = cache.read() {
             bottles = snapshot.bottles
             history = snapshot.history
             cellars = snapshot.cellars
@@ -58,7 +59,13 @@ final class CellarGridViewModel {
         didSet {
             guard oldValue != selectedCellarId else { return }
             CellarSelection.save(selectedCellarId)
-            bottles = []
+            // The new cellar's bottles from its last visit show at once; without any,
+            // the list empties rather than show another cellar's bottles under its name.
+            let cached = cache.read()
+            withAnimation(bottles.isEmpty ? nil : .smooth) {
+                bottles = cached?.bottles ?? []
+            }
+            bottlesHasMore = false
             Task { await load() }
         }
     }
@@ -81,17 +88,11 @@ final class CellarGridViewModel {
     var isLoading = false
     var error: String?
 
-    /// That refresh failed: the bottles on screen are the ones from last time, and the
-    /// leading row offers to try again.
-    private(set) var refreshFailed = false
-
-    /// The server has answered at least once, so what is on screen is no longer the
-    /// snapshot.
-    private var loaded = false
-
-    /// The first page of bottles and of the journal on disk. Bump the version whenever
-    /// `CellarBottle`, `Wine` or `HistoryEvent` changes shape.
-    private let cache = SnapshotCache<CellarSnapshot>("cellar", version: 2)
+    /// The first page of bottles and of the journal on disk, one file per cellar. Bump
+    /// the version whenever `CellarBottle`, `Wine` or `HistoryEvent` changes shape.
+    private var cache: SnapshotCache<CellarSnapshot> {
+        SnapshotCache("cellar-\(selectedCellarId ?? "primary")", version: 3)
+    }
 
     private let pageSize = 15
     private let prefetchThreshold = 5
@@ -145,13 +146,15 @@ final class CellarGridViewModel {
             guard requested == generation else { return } // a more recent reload took over
             let (b, h) = (overview.bottles, overview.history)
             cellars = overview.cellars
-            bottles = b.bottles
-            bottlesHasMore = b.hasMore
-            history = h.events
-            historyHasMore = h.hasMore
+            // Over rows already on screen, the new ones slide into place and push the
+            // others aside rather than the whole list redrawing at once.
+            withAnimation(bottles.isEmpty && history.isEmpty ? nil : .smooth) {
+                bottles = b.bottles
+                bottlesHasMore = b.hasMore
+                history = h.events
+                historyHasMore = h.hasMore
+            }
             historyCursor = h.endCursor
-            loaded = true
-            refreshFailed = false
             let snapshot = CellarSnapshot(
                 bottles: b.bottles,
                 history: h.events,
@@ -165,24 +168,6 @@ final class CellarGridViewModel {
             self.error = reportError(error)
         }
         isLoading = false
-    }
-
-    /// The tab appeared: a cellar still showing last session's snapshot refreshes it
-    /// in place, anything else loads as it always did.
-    func loadOnAppear() async {
-        if !loaded, !bottles.isEmpty || !history.isEmpty {
-            await refresh()
-        } else {
-            await load()
-        }
-    }
-
-    /// Bring the snapshot on screen up to date without taking it away — and the retry
-    /// when that failed.
-    func refresh() async {
-        refreshFailed = false
-        await load()
-        refreshFailed = !loaded
     }
 
     /// Loads the next page of bottles and appends it to the grid.
@@ -203,7 +188,7 @@ final class CellarGridViewModel {
         } catch {
             guard requested == generation else { return }
             bottlesLoadMoreFailed = true
-            self.error = reportError(error)
+            _ = reportError(error)
         }
         isLoadingMoreBottles = false
     }
@@ -232,7 +217,7 @@ final class CellarGridViewModel {
         } catch {
             guard requested == generation else { return }
             historyLoadMoreFailed = true
-            self.error = reportError(error)
+            _ = reportError(error)
         }
         isLoadingMoreHistory = false
     }

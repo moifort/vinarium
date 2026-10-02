@@ -15,15 +15,15 @@ struct DashboardView: View {
                 if let data = viewModel.data {
                     DashboardPage(
                         content: Self.map(data),
-                        refreshFailed: viewModel.refreshFailed,
-                        onRetryRefresh: { await viewModel.refresh() },
                         onStatsTapped: { selectedTab = .cellar },
                         onWineTapped: { selectedWineId = $0 },
                         onSettingsTapped: { showSettings = true },
                         onAdminTapped: isAdmin ? { showAdmin = true } : nil
                     )
-                } else if let error = viewModel.error {
-                    ContentUnavailableView("Erreur", systemImage: "exclamationmark.triangle", description: Text(error))
+                } else if viewModel.error != nil {
+                    // Nothing from last time and the load failed: nothing shows, and a
+                    // pull tries again.
+                    PullToRefreshSpace()
                 } else {
                     LoadingStateView()
                 }
@@ -32,7 +32,7 @@ struct DashboardView: View {
             // Over last session's snapshot when the disk had one: the page shows at
             // once and settles on the server's figures when they arrive.
             .task {
-                await viewModel.loadOnAppear()
+                await viewModel.load()
             }
             // The view stays alive inside the TabView: without this, coming back to the
             // home tab after a scan or a mutation would show stale stats.

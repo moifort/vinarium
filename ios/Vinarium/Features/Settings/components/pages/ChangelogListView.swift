@@ -9,14 +9,13 @@ struct ChangelogListView: View {
         Group {
             if isLoading {
                 LoadingStateView()
-            } else if let error {
-                ContentUnavailableView(
-                    "Erreur",
-                    systemImage: "exclamationmark.triangle",
-                    description: Text(error)
-                )
+            } else if error != nil {
+                // Nothing shows, and a pull tries again.
+                PullToRefreshSpace()
             } else if entries.isEmpty {
-                ContentUnavailableView("Aucune entrée", systemImage: "doc.text")
+                PullToRefreshSpace {
+                    ContentUnavailableView("Aucune entrée", systemImage: "doc.text")
+                }
             } else {
                 List(entries) { entry in
                     NavigationLink {

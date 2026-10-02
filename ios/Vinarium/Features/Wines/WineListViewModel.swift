@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 
 enum WineListMode: String, Codable, CaseIterable, Identifiable {
     case all, favorites, gifted, recommended
@@ -107,7 +108,8 @@ private let wineMonthYearFormatter: DateFormatter = {
 /// The paginated wine list. It opens on the page it closed on: its `SnapshotCache` hands
 /// back the last visit's wines from disk before a single byte is asked of the network,
 /// so a relaunch shows the list straight away and refreshes it silently underneath
-/// instead of behind a loader taking the screen.
+/// instead of behind a loader taking the screen. Every view, sort and filter keeps its
+/// own snapshot, so switching between them never empties the list either.
 @MainActor @Observable
 final class WineListViewModel {
     init() {
@@ -118,9 +120,7 @@ final class WineListViewModel {
         statusFilter = filters.statusFilter
         colorFilter = filters.colorFilter
         beverageTypeFilter = filters.beverageTypeFilter
-        // The snapshot only ever holds the standard view: under any other one it would
-        // show the wrong wines until the server answers, so that view opens on a loader.
-        wines = filters == .standard ? cache.read() ?? [] : []
+        wines = cache.read() ?? []
         rebuildPresentation()
         // A cached list has nothing to wait for: it is already readable.
         isLoading = wines.isEmpty
@@ -133,20 +133,13 @@ final class WineListViewModel {
     var isLoading = true
     var isLoadingMore = false
     var hasMore = false
-    /// Last loadMore failed: the sentinel turns into a retry button instead of a
-    /// spinner that would keep turning forever without a new attempt.
+    /// Last loadMore failed: the sentinel goes rather than spin forever without a new
+    /// attempt, and a pull reloads the list.
     private(set) var loadMoreFailed = false
 
-    /// That refresh failed: the rows on screen are the ones from last time, and the
-    /// leading row offers to try again — otherwise nothing would say they are stale.
-    private(set) var refreshFailed = false
-
-    /// Page 0 has come back from the server at least once, so the rows on screen are no
-    /// longer the cached ones.
-    private var loaded = false
-
-    /// The list's opening page on disk. Bump the version whenever `Wine` changes shape.
-    private let cache = SnapshotCache<[Wine]>("wine-list", version: 1)
+    /// The first page of the view on screen, on disk. Bump the version whenever `Wine`
+    /// changes shape.
+    private var cache: SnapshotCache<[Wine]> { SnapshotCache(filters.cacheKey, version: 2) }
 
     var error: String?
     // Any view/sort/filter change is remembered and reloads page 0 from the server.
@@ -199,38 +192,42 @@ final class WineListViewModel {
 
     private(set) var groupedWines: [(String, [Wine])] = []
 
-    /// Reloads page 0, cancelling a previous reload still in flight (rapid filter
-    /// changes). Clears the list and goes back to the loading state so the view shows
-    /// the loader and starts over. Called from the `didSet` hooks and from navigation.
+    /// Reloads page 0 for a new view, sort or filter, cancelling a previous reload still
+    /// in flight (rapid filter changes). The new view's rows from its last visit show at
+    /// once; without any, the rows on screen stay until the answer moves them into place.
+    /// Only an empty list falls back on the loader. Called from the `didSet` hooks.
     func scheduleReload() {
         reloadTask?.cancel()
         generation += 1
-        wines = []
-        groupedWines = []
+        if let cached = cache.read() {
+            withAnimation(wines.isEmpty ? nil : .smooth) {
+                wines = cached
+                rebuildPresentation()
+            }
+        }
         hasMore = false
         isLoadingMore = false // stale loadMore calls bail out without touching this state
         loadMoreFailed = false
-        refreshFailed = false
+        error = nil
         isLoading = true
         reloadTask = Task { await load() }
     }
 
     /// Refetches page 0 after a mutation without taking the rows away: the list stays
-    /// on screen untouched, and the server's answer moves, inserts
-    /// or removes rows in place — an edited wine climbs to the top, a scanned one slides
-    /// in — where `scheduleReload` would empty the list behind a loader. Still
+    /// on screen untouched, and the server's answer moves, inserts or removes rows in
+    /// place — an edited wine climbs to the top, a scanned one slides in. Still
     /// invalidates the loadMore calls in flight, which would append stale rows.
     func reloadInPlace() {
-        guard !wines.isEmpty else { return scheduleReload() }
         reloadTask?.cancel()
         generation += 1
         isLoadingMore = false
         loadMoreFailed = false
-        reloadTask = Task { await refresh() }
+        reloadTask = Task { await load() }
     }
 
     /// Loads the first page (on a view/sort/filter change, on appear, on pull-to-refresh
-    /// and after a mutation).
+    /// and after a mutation). The rows on screen stay while it runs; a failure leaves
+    /// them as they were and says nothing, and a pull tries again.
     func load() async {
         let requested = generation
         isLoading = true
@@ -238,10 +235,14 @@ final class WineListViewModel {
         do {
             let page = try await fetchPage(after: nil)
             guard requested == generation else { return } // response from a stale view
-            wines = page.items
-            hasMore = page.hasMore
-            loaded = true
-            refreshFailed = false
+            // Over rows already on screen, the new ones slide into place and push the
+            // others aside rather than the whole list redrawing at once.
+            withAnimation(wines.isEmpty ? nil : .smooth) {
+                wines = page.items
+                hasMore = page.hasMore
+                loadMoreFailed = false
+                rebuildPresentation()
+            }
             saveCache()
         } catch is CancellationError {
             // Reload cancelled by a more recent filter change, so ignore it.
@@ -250,33 +251,7 @@ final class WineListViewModel {
             guard requested == generation else { return }
             self.error = reportError(error)
         }
-        rebuildPresentation()
         isLoading = false
-    }
-
-    /// The list appeared, or was asked to reload: a list still showing the last
-    /// session's wines refreshes them in place, anything else loads as it always did —
-    /// rows already fetched this session stay on screen silently.
-    func loadOnAppear() async {
-        if !loaded, !wines.isEmpty {
-            await refresh()
-        } else {
-            await load()
-        }
-    }
-
-    /// Bring the rows already on screen up to date without taking them away — the
-    /// cached list's refresh, a mutation's reload in place, and the retry when either
-    /// failed.
-    func refresh() async {
-        let requested = generation
-        refreshFailed = false
-        await load()
-        // Another reload took the list over meanwhile — a view, sort or filter change,
-        // or a mutation's reload in place — and this refresh no longer has anything
-        // to say: the newer one owns the flag.
-        guard requested == generation else { return }
-        refreshFailed = error != nil
     }
 
     /// Loads the next page and appends it to the wines already loaded.
@@ -296,7 +271,7 @@ final class WineListViewModel {
         } catch {
             guard requested == generation else { return }
             loadMoreFailed = true
-            self.error = reportError(error)
+            _ = reportError(error)
         }
         isLoadingMore = false
     }
@@ -310,13 +285,11 @@ final class WineListViewModel {
         }
     }
 
-    /// Keep the list's opening page on disk — only when the list is showing exactly
-    /// that: every wine, the default order, no filter. Another view, sort or filter is
-    /// not what the next launch opens on, and the file stays one page long however far
-    /// the user scrolled. Written off the main actor: the list is on screen already and
-    /// has nothing to gain from waiting on a file.
+    /// Keep the first page of the view on screen on disk, under that view's own name.
+    /// The file stays one page long however far the user scrolled. Written off the main
+    /// actor: the list is on screen already and has nothing to gain from waiting on a
+    /// file.
     private func saveCache() {
-        guard filters == .standard else { return }
         let (cache, page) = (cache, Array(wines.prefix(pageSize)))
         Task.detached { cache.write(page) }
     }

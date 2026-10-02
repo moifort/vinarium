@@ -71,12 +71,10 @@ struct WineDetailView: View {
                             onRefresh: { await loadData() }
                         )
                     }
-                } else if let error {
-                    ContentUnavailableView(
-                        "Erreur",
-                        systemImage: "exclamationmark.triangle",
-                        description: Text(error)
-                    )
+                } else if error != nil {
+                    // Nothing shows, and a pull tries again.
+                    PullToRefreshSpace()
+                        .refreshable { await loadData() }
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
@@ -433,6 +431,7 @@ struct WineDetailView: View {
             let loadedDetail = try await WineAPI.getDetail(id: wineId)
             cellars = await household ?? cellars
             detail = loadedDetail
+            error = nil
             isLoading = false
         } catch {
             self.error = reportError(error)

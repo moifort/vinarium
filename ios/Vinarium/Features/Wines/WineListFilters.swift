@@ -14,9 +14,22 @@ struct WineListFilters: Codable, Equatable {
     var colorFilter: WineColor?
     var beverageTypeFilter: BeverageType?
 
-    /// Every wine, most recently modified first: what the list opens on the first time,
-    /// and the only state its snapshot is written for.
+    /// Every wine, most recently modified first: what the list opens on the first time.
     static let standard = WineListFilters()
+
+    /// Names the snapshot of the list under these filters: each view, sort and filter
+    /// keeps its own first page, so coming back to it shows its rows at once.
+    var cacheKey: String {
+        [
+            "wine-list",
+            mode.rawValue,
+            sort.rawValue,
+            sortDescending ? "desc" : "asc",
+            statusFilter.rawValue,
+            colorFilter?.rawValue ?? "any",
+            beverageTypeFilter?.rawValue ?? "any",
+        ].joined(separator: "-")
+    }
 
     private static let key = "wine-list-filters"
 

@@ -4,23 +4,18 @@ struct CaveBottleList: View {
     let groups: [Group]
     var hasMore: Bool = false
     var loadMoreFailed: Bool = false
-    /// Refreshing the rows on screen failed — a retry row leads them.
-    var refreshFailed: Bool = false
     var onBottleTapped: (String) -> Void
     var onRemoveRequested: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
-    var onRetryRefresh: () async -> Void = {}
 
     var body: some View {
         if groups.isEmpty {
-            ContentUnavailableView("Cave vide", systemImage: "cabinet.fill", description: Text("Ajoutez des bouteilles via le scanner"))
+            PullToRefreshSpace {
+                ContentUnavailableView("Cave vide", systemImage: "cabinet.fill", description: Text("Ajoutez des bouteilles via le scanner"))
+            }
         } else {
             List {
-                // Leads the rows it failed to refresh, never replaces them.
-                if refreshFailed {
-                    RefreshRow(onRetry: onRetryRefresh)
-                }
                 ForEach(groups) { group in
                     Section {
                         ForEach(group.items) { item in
@@ -52,18 +47,13 @@ struct CaveBottleList: View {
                     }
                 }
 
-                if hasMore {
+                if hasMore && !loadMoreFailed {
                     LoadMoreRow(
-                        failed: loadMoreFailed,
                         loadingLabel: "Chargement de plus de bouteilles",
                         onLoadMore: onLoadMore
                     )
                 }
             }
-            // A refresh moves, inserts and removes rows in place instead of the whole
-            // list snapping to the server's answer.
-            .animation(.default, value: groups)
-            .animation(.default, value: refreshFailed)
         }
     }
 }

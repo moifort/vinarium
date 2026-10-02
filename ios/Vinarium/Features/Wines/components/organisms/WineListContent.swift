@@ -5,36 +5,26 @@ struct WineListContent: View {
     let groups: [Group]
     var hasMore: Bool = false
     var isLoading: Bool = false
-    /// Refreshing the rows on screen failed — a retry row leads them.
-    var refreshFailed: Bool = false
     var loadMoreFailed: Bool = false
-    var errorMessage: String?
+    /// The first page failed: with nothing from last time, the list stays blank.
+    var loadFailed: Bool = false
     var onWineTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
-    var onRetryRefresh: () async -> Void = {}
 
     private var isEmpty: Bool { groups.allSatisfy { $0.items.isEmpty } }
 
     var body: some View {
         if isEmpty && isLoading {
             LoadingStateView()
-        } else if isEmpty, let errorMessage {
-            // A network failure must not disguise itself as an empty list.
-            ContentUnavailableView(
-                "Erreur",
-                systemImage: "exclamationmark.triangle",
-                description: Text(errorMessage)
-            )
-            .frame(maxHeight: .infinity)
+        } else if isEmpty && loadFailed {
+            // A network failure must not disguise itself as an empty list: nothing
+            // shows, and a pull tries again.
+            PullToRefreshSpace()
         } else if isEmpty && !hasMore {
-            emptyState
+            PullToRefreshSpace { emptyState }
         } else {
             List {
-                // Leads the rows it failed to refresh, never replaces them.
-                if refreshFailed {
-                    RefreshRow(onRetry: onRetryRefresh)
-                }
                 ForEach(groups) { group in
                     Section {
                         ForEach(group.items) { item in
@@ -61,19 +51,14 @@ struct WineListContent: View {
                     }
                 }
 
-                if hasMore {
+                if hasMore && !loadMoreFailed {
                     LoadMoreRow(
-                        failed: loadMoreFailed,
                         loadingLabel: "Chargement de plus de vins",
                         onLoadMore: onLoadMore
                     )
                 }
             }
             .listStyle(.insetGrouped)
-            // A refresh moves, inserts and removes rows in place instead of the whole
-            // list snapping to the server's answer.
-            .animation(.default, value: groups)
-            .animation(.default, value: refreshFailed)
         }
     }
 
@@ -82,16 +67,12 @@ struct WineListContent: View {
         switch mode {
         case .favorites:
             ContentUnavailableView("Aucun favori", systemImage: "heart", description: Text("Ajoutez vos coups de c\u{0153}ur en favoris"))
-                .frame(maxHeight: .infinity)
         case .gifted:
             ContentUnavailableView("Aucun vin offert", systemImage: "gift", description: Text("Les vins qu'on vous a offerts appara\u{00EE}tront ici"))
-                .frame(maxHeight: .infinity)
         case .recommended:
             ContentUnavailableView("Aucun vin conseillé", systemImage: "person.2.badge", description: Text("Les vins conseillés par vos amis apparaîtront ici"))
-                .frame(maxHeight: .infinity)
         case .all:
             ContentUnavailableView("Aucun vin", systemImage: "wineglass", description: Text("Aucun vin ne correspond \u{00E0} ce filtre"))
-                .frame(maxHeight: .infinity)
         }
     }
 }
@@ -135,15 +116,11 @@ extension WineListContent {
     )
 }
 
-#Preview("Refresh failed") {
+#Preview("Load failed") {
     WineListContent(
         mode: .all,
-        groups: [
-            .init(label: "2018", items: [
-                .init(id: "1", color: .red, name: "Château La Sauvageonne Cuvée Les Oliviers", subtitle: "2018 \u{2022} Bordeaux", rating: 4, isFavorite: true, isInCellar: true),
-            ]),
-        ],
-        refreshFailed: true,
+        groups: [],
+        loadFailed: true,
         onWineTapped: { _ in }
     )
 }

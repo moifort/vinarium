@@ -4,12 +4,9 @@ struct JournalEventList: View {
     let events: [Event]
     var hasMore: Bool = false
     var loadMoreFailed: Bool = false
-    /// Refreshing the rows on screen failed — a retry row leads them.
-    var refreshFailed: Bool = false
     var onEventTapped: (String) -> Void
     var onPrefetch: (String) -> Void = { _ in }
     var onLoadMore: () async -> Void = {}
-    var onRetryRefresh: () async -> Void = {}
 
     private var groupedByDate: [(date: String, events: [Event])] {
         let formatter = DateFormatter()
@@ -27,13 +24,11 @@ struct JournalEventList: View {
 
     var body: some View {
         if events.isEmpty {
-            ContentUnavailableView("Aucun historique", systemImage: "clock", description: Text("L'historique apparaîtra ici"))
+            PullToRefreshSpace {
+                ContentUnavailableView("Aucun historique", systemImage: "clock", description: Text("L'historique apparaîtra ici"))
+            }
         } else {
             List {
-                // Leads the rows it failed to refresh, never replaces them.
-                if refreshFailed {
-                    RefreshRow(onRetry: onRetryRefresh)
-                }
                 ForEach(groupedByDate, id: \.date) { group in
                     Section(group.date) {
                         ForEach(group.events) { event in
@@ -55,18 +50,13 @@ struct JournalEventList: View {
                     }
                 }
 
-                if hasMore {
+                if hasMore && !loadMoreFailed {
                     LoadMoreRow(
-                        failed: loadMoreFailed,
                         loadingLabel: "Chargement de plus d'événements",
                         onLoadMore: onLoadMore
                     )
                 }
             }
-            // A refresh moves, inserts and removes rows in place instead of the whole
-            // list snapping to the server's answer.
-            .animation(.default, value: events)
-            .animation(.default, value: refreshFailed)
         }
     }
 }

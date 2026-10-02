@@ -44,12 +44,9 @@ struct SearchPage: View {
             )
         } else if isLoading && sections.isEmpty {
             LoadingStateView(label: "Recherche…")
-        } else if let errorMessage, sections.isEmpty {
-            ContentUnavailableView(
-                "Erreur",
-                systemImage: "exclamationmark.triangle",
-                description: Text(errorMessage)
-            )
+        } else if errorMessage != nil, sections.isEmpty {
+            // Nothing shows: the next keystroke or filter searches again.
+            Color.clear
         } else if sections.isEmpty {
             ContentUnavailableView(
                 "Aucun résultat",
