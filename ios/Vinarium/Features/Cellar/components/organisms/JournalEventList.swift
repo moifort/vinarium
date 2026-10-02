@@ -43,6 +43,7 @@ struct JournalEventList: View {
                                 JournalEventRow(
                                     isEntry: event.isEntry,
                                     position: event.position,
+                                    producer: event.producer,
                                     memberName: event.memberName
                                 ) {
                                     Text(event.title)
@@ -80,6 +81,8 @@ extension JournalEventList {
         let position: String
         /// The member behind the move, nil when it was you.
         var memberName: String? = nil
+        /// The producer to set above the name, nil when the name already says it.
+        var producer: String? = nil
     }
 }
 
@@ -87,7 +90,7 @@ extension JournalEventList {
     JournalEventList(
         events: [
             .init(id: "1-in", date: .now, isEntry: true, wineId: "1", title: "Chateau Margaux 2018", position: "A1"),
-            .init(id: "2-in", date: .now, isEntry: true, wineId: "2", title: "Pouilly-Fume 2021", position: "B3"),
+            .init(id: "2-in", date: .now, isEntry: true, wineId: "2", title: "Pouilly-Fumé Silex 2021", position: "B3", producer: "Didier Dagueneau"),
             .init(id: "3-out", date: .now.addingTimeInterval(-86400), isEntry: false, wineId: "3", title: "Cotes de Provence 2022", position: "C5", memberName: "Marie"),
         ],
         onEventTapped: { _ in }

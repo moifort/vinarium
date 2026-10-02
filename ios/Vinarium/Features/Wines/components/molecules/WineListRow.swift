@@ -22,11 +22,7 @@ struct WineListRow: View {
                 // them and get the row's full width.
                 HStack {
                     if let domain {
-                        // A fixed size, deliberately outside Dynamic Type.
-                        Text(domain)
-                            .font(.system(size: 14))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
+                        ProducerOverline(producer: domain)
                     } else {
                         nameText
                     }
@@ -72,17 +68,6 @@ struct WineListRow: View {
                 .foregroundStyle(.red)
         }
     }
-}
-
-private extension VerticalAlignment {
-    /// The middle of a row's first line, where the badge sits.
-    enum FirstLine: AlignmentID {
-        static func defaultValue(in context: ViewDimensions) -> CGFloat {
-            context[VerticalAlignment.center]
-        }
-    }
-
-    static let firstLine = VerticalAlignment(FirstLine.self)
 }
 
 #Preview {

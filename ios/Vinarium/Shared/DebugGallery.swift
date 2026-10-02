@@ -25,6 +25,12 @@ struct DebugGallery: View {
             NavigationStack { AdminDashboard(adminShown: true) }
         case "wineList":
             NavigationStack { wineList }
+        case "cellar":
+            NavigationStack { producerCellar(.cave) }
+        case "journal":
+            NavigationStack { producerCellar(.journal) }
+        case "dashboard":
+            NavigationStack { producerDashboard }
         default:
             gallery
         }
@@ -40,6 +46,15 @@ struct DebugGallery: View {
                 Section("Listes") {
                     NavigationLink("Liste des vins, domaines en surtitre") {
                         wineList
+                    }
+                    NavigationLink("Cave, domaines en surtitre") {
+                        producerCellar(.cave)
+                    }
+                    NavigationLink("Journal, domaines en surtitre") {
+                        producerCellar(.journal)
+                    }
+                    NavigationLink("Accueil, journal avec domaines") {
+                        producerDashboard
                     }
                 }
                 Section("Chargement") {
@@ -108,6 +123,50 @@ extension DebugGallery {
             onWineTapped: { _ in }
         )
         .navigationTitle("Mes Vins")
+    }
+
+    /// The cellar tab on either side, the producer above the name where it adds
+    /// something (not on Château Margaux).
+    private func producerCellar(_ mode: CellarDisplayMode) -> some View {
+        CellarPage(
+            displayMode: .constant(mode),
+            groups: [
+                .init(label: "A", items: [
+                    .init(id: "1", color: .red, title: "Château Margaux", subtitle: "2018", position: "A1"),
+                    .init(id: "2", color: .white, title: "Les Pucelles", subtitle: "2019", position: "A2", producer: "Domaine Leflaive"),
+                ]),
+                .init(label: "B", items: [
+                    .init(id: "3", color: .red, title: "Hermitage", subtitle: "2017", position: "B1", ownerName: "Marie", producer: "Domaine Jean-Louis Chave"),
+                ]),
+            ],
+            events: [
+                .init(id: "2-in", date: .now, isEntry: true, wineId: "2", title: "Les Pucelles", position: "A2", producer: "Domaine Leflaive"),
+                .init(id: "1-in", date: .now, isEntry: true, wineId: "1", title: "Château Margaux", position: "A1"),
+                .init(id: "4-out", date: .now.addingTimeInterval(-86400), isEntry: false, wineId: "4", title: "Pouilly-Fumé Silex", position: "C5", memberName: "Marie", producer: "Didier Dagueneau"),
+            ],
+            onBottleTapped: { _ in },
+            onRemoveRequested: { _ in },
+            onEventTapped: { _ in },
+            onRefresh: {}
+        )
+    }
+
+    /// The home tab's journal, the producer above the name of the last entry.
+    private var producerDashboard: some View {
+        DashboardPage(
+            content: .init(
+                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
+                readyToDrink: [],
+                favorites: [],
+                events: [
+                    .init(isEntry: true, wineName: "Les Pucelles", position: "A2", wineId: "2", date: Date(), producer: "Domaine Leflaive"),
+                    .init(isEntry: false, wineName: "Château Margaux", position: "A1", wineId: "1", date: Date(), memberName: "Marie"),
+                ]
+            ),
+            onStatsTapped: {},
+            onWineTapped: { _ in },
+            onSettingsTapped: {}
+        )
     }
 
     /// A relaunch whose refresh failed: last session's wines, the retry leading them.

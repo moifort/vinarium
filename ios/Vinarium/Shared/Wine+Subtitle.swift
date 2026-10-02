@@ -1,13 +1,10 @@
 import Foundation
 
 extension Wine {
-    /// Producer shown above the name in the wine list and the global search. Nil when
-    /// the name already carries it, case and accents aside: a "Château Margaux" made by
-    /// Château Margaux needs no overline repeating it.
+    /// Producer shown above the name in the wine list and the global search; nil when
+    /// the name already carries it.
     var listDomain: String? {
-        guard let domain = domain?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !domain.isEmpty else { return nil }
-        return name.localizedStandardContains(domain) ? nil : domain
+        ProducerOverline.text(for: domain, name: name)
     }
 
     /// Row subtitle shared by the wine list and the global search: vintage, region,

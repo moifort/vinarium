@@ -2,6 +2,8 @@ import SwiftUI
 
 struct DashboardEventRow: View {
     let isEntry: Bool
+    /// The producer, shown above the name; nil when there is none or the name says it.
+    var producer: String? = nil
     let wineName: String
     let label: LocalizedStringKey
     let position: String
@@ -9,19 +11,30 @@ struct DashboardEventRow: View {
     var memberName: String? = nil
 
     var body: some View {
-        // Same recipe as the other rows: icon aligned to the top, full-width text
-        // column aligned to the left, name truncated with an ellipsis.
-        HStack(alignment: .top, spacing: 12) {
+        // Same recipe as the other rows: icon centered on the first line, which it
+        // shares with the position; the lines below run under it, full width, the
+        // name truncated with an ellipsis.
+        HStack(alignment: .firstLine, spacing: 12) {
             Image(systemName: isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(isEntry ? .green : .red)
                 .font(.title3)
                 .accessibilityLabel(isEntry ? "Entr\u{00E9}e" : "Sortie")
+                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(wineName)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
+                HStack {
+                    if let producer {
+                        ProducerOverline(producer: producer)
+                    } else {
+                        nameText
+                    }
+                    Spacer(minLength: 0)
+                    PositionBadge(position: position)
+                }
+                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
+                if producer != nil {
+                    nameText
+                }
                 Text(label)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -31,11 +44,16 @@ struct DashboardEventRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-
-            PositionBadge(position: position)
         }
         .padding(.vertical, 10)
         .padding(.horizontal, 14)
+    }
+
+    private var nameText: some View {
+        Text(wineName)
+            .font(.subheadline)
+            .fontWeight(.medium)
+            .lineLimit(1)
     }
 }
 
@@ -49,6 +67,7 @@ struct DashboardEventRow: View {
         )
         DashboardEventRow(
             isEntry: false,
+            producer: "Didier Dagueneau",
             wineName: "Pouilly-Fum\u{00E9} 2021",
             label: "Derni\u{00E8}re sortie",
             position: "B1",

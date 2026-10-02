@@ -58,6 +58,7 @@ fragment JournalEventFields on JournalEvent {
   date
   beverageId
   beverageName
+  beverageProducer
   wineBeverageType
   wineColor
   position

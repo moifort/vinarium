@@ -68,7 +68,8 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         wineColor: e.wineColorValue,
         position: e.positionString,
         rating: nil,
-        memberName: e.memberNameValue
+        memberName: e.memberNameValue,
+        producer: e.producerValue
     )
 }
 
@@ -82,6 +83,7 @@ protocol DashboardJournalEvent {
     var positionString: String { get }
     /// The household member behind the move, nil when it was you.
     var memberNameValue: String? { get }
+    var producerValue: String? { get }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJournalEvent {
@@ -95,6 +97,7 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
+    var producerValue: String? { beverageProducer }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJournalEvent {
@@ -108,4 +111,5 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
+    var producerValue: String? { beverageProducer }
 }

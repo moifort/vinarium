@@ -152,7 +152,8 @@ struct CellarView: View {
                         title: item.name,
                         subtitle: item.vintage.map { "\($0)" },
                         position: item.position,
-                        ownerName: item.ownerName
+                        ownerName: item.ownerName,
+                        producer: item.producer
                     )
                 }
             )
@@ -168,7 +169,8 @@ struct CellarView: View {
                 wineId: event.wineId,
                 title: event.wineName,
                 position: event.position,
-                memberName: event.memberName
+                memberName: event.memberName,
+                producer: ProducerOverline.text(for: event.producer, name: event.wineName)
             )
         }
     }

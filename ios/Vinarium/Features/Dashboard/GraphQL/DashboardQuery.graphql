@@ -44,6 +44,7 @@ query Dashboard {
       date
       beverageId
       beverageName
+      beverageProducer
       wineBeverageType
       wineColor
       position
@@ -57,6 +58,7 @@ query Dashboard {
       date
       beverageId
       beverageName
+      beverageProducer
       wineBeverageType
       wineColor
       position

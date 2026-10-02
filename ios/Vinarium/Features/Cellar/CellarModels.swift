@@ -119,6 +119,8 @@ struct HistoryEvent: Codable, Identifiable, Sendable {
     let position: String
     /// The household member behind the move, nil when it was you.
     let memberName: String?
+    /// The wine's producer; optional so a journal cached before it existed still decodes.
+    var producer: String? = nil
 
     var id: String { "\(wineId)-\(type.rawValue)-\(date.timeIntervalSince1970)" }
 }
@@ -142,6 +144,8 @@ struct CellarRowGroup: Identifiable, Sendable {
 struct CellarRowItem: Identifiable, Sendable {
     let id: String
     let name: String
+    /// The producer to set above the name, nil when the name already says it.
+    let producer: String?
     let beverageType: BeverageType
     let color: WineColor?
     let vintage: Int?

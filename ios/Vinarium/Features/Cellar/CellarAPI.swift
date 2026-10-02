@@ -306,7 +306,8 @@ private func event(_ e: VinariumGraphQL.JournalEventFields) -> HistoryEvent {
         wineBeverageType: BeverageType(graphql: e.wineBeverageType),
         wineColor: e.wineColor.map { WineColor(graphql: $0) },
         position: e.position,
-        memberName: e.actor.isMine ? nil : e.actor.displayName
+        memberName: e.actor.isMine ? nil : e.actor.displayName,
+        producer: e.beverageProducer
     )
 }
 

@@ -60,6 +60,8 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let rating: Int?
     /// The household member behind the move, nil when it was you.
     let memberName: String?
+    /// The wine's producer; optional so a dashboard cached before it existed still decodes.
+    var producer: String? = nil
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
 

@@ -28,6 +28,7 @@ struct JournalSection: View {
                         Button { onEventTapped(entry.wineId) } label: {
                             DashboardEventRow(
                                 isEntry: true,
+                                producer: entry.producer,
                                 wineName: entry.wineName,
                                 label: "Dernière entrée le \(entry.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
                                 position: entry.position,
@@ -40,6 +41,7 @@ struct JournalSection: View {
                         Button { onEventTapped(exit.wineId) } label: {
                             DashboardEventRow(
                                 isEntry: false,
+                                producer: exit.producer,
                                 wineName: exit.wineName,
                                 label: "Dernière sortie le \(exit.date.formatted(.dateTime.day(.twoDigits).month(.twoDigits).year()))",
                                 position: exit.position,
@@ -65,6 +67,8 @@ extension JournalSection {
         let date: Date
         /// The member behind the move, nil when it was you.
         var memberName: String? = nil
+        /// The producer to set above the name, nil when the name already says it.
+        var producer: String? = nil
     }
 }
 
@@ -72,7 +76,7 @@ extension JournalSection {
     JournalSection(
         events: [
             .init(isEntry: true, wineName: "Château Margaux 2018", position: "A3", wineId: "1", date: Date()),
-            .init(isEntry: false, wineName: "Pouilly-Fumé 2021", position: "B1", wineId: "2", date: Date(), memberName: "Marie"),
+            .init(isEntry: false, wineName: "Pouilly-Fumé 2021", position: "B1", wineId: "2", date: Date(), memberName: "Marie", producer: "Didier Dagueneau"),
         ],
         onEventTapped: { _ in }
     )
