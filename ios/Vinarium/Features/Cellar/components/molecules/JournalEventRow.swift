@@ -33,25 +33,15 @@ struct JournalEventRow<Title: View>: View {
                 .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    if let producer {
-                        ProducerOverline(producer: producer)
-                    } else {
-                        styledTitle
-                    }
-                    Spacer(minLength: 0)
+                WineRowHeading(producer: producer) {
+                    styledTitle
+                } marks: {
                     PositionBadge(position: position)
                 }
-                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
-                if producer != nil {
-                    styledTitle
-                }
-                Text(isEntry ? "Entrée" : "Sortie")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let memberName {
-                    MemberBadge(name: memberName)
-                        .padding(.top, 2)
+                MemberTagLine(name: memberName) {
+                    Text(isEntry ? "Entrée" : "Sortie")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

@@ -18,29 +18,19 @@ struct WineListRow: View {
             BeverageBadge(beverageType: beverageType, color: color)
                 .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
             VStack(alignment: .leading, spacing: 2) {
-                // The marks share the first line only; the lines below run under
-                // them and get the row's full width.
-                HStack {
-                    if let domain {
-                        ProducerOverline(producer: domain)
-                    } else {
-                        nameText
-                    }
-                    Spacer(minLength: 0)
+                WineRowHeading(producer: domain) {
+                    nameText
+                } marks: {
                     marks
                 }
-                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
-                if domain != nil {
-                    nameText
-                }
-                if let subtitle {
-                    Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                if let ownerName {
-                    MemberBadge(name: ownerName)
-                        .padding(.top, 2)
+                if subtitle != nil || ownerName != nil {
+                    MemberTagLine(name: ownerName) {
+                        if let subtitle {
+                            Text(subtitle)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

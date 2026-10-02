@@ -21,7 +21,36 @@ struct MemberBadge: View {
     }
 }
 
+/// A row's last line with the member tag at its trailing end, on the line's baseline,
+/// rather than on a line of its own.
+struct MemberTagLine<Content: View>: View {
+    let name: String?
+    let content: Content
+
+    init(name: String?, @ViewBuilder content: () -> Content) {
+        self.name = name
+        self.content = content()
+    }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            content
+            if let name {
+                Spacer(minLength: 8)
+                MemberBadge(name: name)
+            }
+        }
+    }
+}
+
 #Preview {
-    MemberBadge(name: "Marie")
-        .padding()
+    VStack(alignment: .leading) {
+        MemberBadge(name: "Marie")
+        MemberTagLine(name: "Marie") {
+            Text("2022 \u{2022} Bandol")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+    .padding()
 }

@@ -22,25 +22,15 @@ struct DashboardEventRow: View {
                 .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
 
             VStack(alignment: .leading, spacing: 2) {
-                HStack {
-                    if let producer {
-                        ProducerOverline(producer: producer)
-                    } else {
-                        nameText
-                    }
-                    Spacer(minLength: 0)
+                WineRowHeading(producer: producer) {
+                    nameText
+                } marks: {
                     PositionBadge(position: position)
                 }
-                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
-                if producer != nil {
-                    nameText
-                }
-                Text(label)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                if let memberName {
-                    MemberBadge(name: memberName)
-                        .padding(.top, 2)
+                MemberTagLine(name: memberName) {
+                    Text(label)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

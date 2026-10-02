@@ -34,29 +34,16 @@ struct BottleRow<Title: View, Subtitle: View>: View {
             BeverageBadge(beverageType: beverageType, color: color)
                 .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
             VStack(alignment: .leading, spacing: 2) {
-                // The position shares the first line only; the lines below run under
-                // it and get the row's full width.
-                HStack {
-                    if let producer {
-                        ProducerOverline(producer: producer)
-                    } else {
-                        title
-                            .font(.headline)
-                    }
-                    Spacer(minLength: 0)
-                    PositionBadge(position: position)
-                }
-                .alignmentGuide(.firstLine) { $0[VerticalAlignment.center] }
-                if producer != nil {
+                WineRowHeading(producer: producer) {
                     title
                         .font(.headline)
+                } marks: {
+                    PositionBadge(position: position)
                 }
-                subtitle
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                if let ownerName {
-                    MemberBadge(name: ownerName)
-                        .padding(.top, 2)
+                MemberTagLine(name: ownerName) {
+                    subtitle
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
