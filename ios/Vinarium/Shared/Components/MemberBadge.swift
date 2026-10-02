@@ -21,8 +21,7 @@ struct MemberBadge: View {
     }
 }
 
-/// A row's last line with the member tag at its trailing end, on the line's baseline,
-/// rather than on a line of its own.
+/// A row's last line, the member tag on its own line below it, aligned left.
 struct MemberTagLine<Content: View>: View {
     let name: String?
     let content: Content
@@ -33,11 +32,11 @@ struct MemberTagLine<Content: View>: View {
     }
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline, spacing: 0) {
+        VStack(alignment: .leading, spacing: 2) {
             content
             if let name {
-                Spacer(minLength: 8)
                 MemberBadge(name: name)
+                    .padding(.top, 2)
             }
         }
     }
