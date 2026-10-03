@@ -88,7 +88,9 @@ script et on régénère. Ils sont exclus du linter.
 
 Toute demande qui crée, modifie ou supprime de l'interface se termine par une capture
 d'écran envoyée à Thibaut, qui valide sur l'image : pas de « c'est fait » sans elle. Une capture
-par état touché, la feuille ouverte comprise.
+par état touché, la feuille ouverte comprise. La capture est envoyée en fichier dans la
+conversation, à chaque modification d'interface, même petite : l'avoir regardée soi-même ne
+compte pas, et « captures ci-dessus » sans fichier envoyé non plus.
 
 Sans session sur le simulateur, l'écran passe par la galerie de debug :
 `xcrun simctl launch <udid> com.polyforms.vinarium.app -debugGallery -debugScreen <nom>` ouvre
