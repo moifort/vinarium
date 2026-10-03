@@ -23,9 +23,9 @@ struct JournalEventRow<Title: View>: View {
     }
 
     var body: some View {
-        // Same recipe as the other rows: icon centered on the first line, which it
-        // shares with the position; the lines below run under it, full width, the
-        // name truncated with an ellipsis.
+        // Same recipe and type sizes as the wine list: icon centered on the first
+        // line, which it shares with the position; the lines below run under it,
+        // full width, the name truncated with an ellipsis.
         HStack(alignment: .firstLine, spacing: 12) {
             Image(systemName: isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(isEntry ? .green : .red)
@@ -40,7 +40,7 @@ struct JournalEventRow<Title: View>: View {
                 }
                 MemberTagLine(name: memberName) {
                     Text(isEntry ? "Entrée" : "Sortie")
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -51,8 +51,7 @@ struct JournalEventRow<Title: View>: View {
 
     private var styledTitle: some View {
         title
-            .font(.subheadline)
-            .fontWeight(.medium)
+            .font(.headline)
             .lineLimit(1)
     }
 }

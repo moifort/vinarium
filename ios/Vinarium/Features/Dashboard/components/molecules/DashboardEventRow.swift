@@ -11,9 +11,9 @@ struct DashboardEventRow: View {
     var memberName: String? = nil
 
     var body: some View {
-        // Same recipe as the other rows: icon centered on the first line, which it
-        // shares with the position; the lines below run under it, full width, the
-        // name truncated with an ellipsis.
+        // Same recipe and type sizes as the wine list: icon centered on the first
+        // line, which it shares with the position; the lines below run under it,
+        // full width, the name truncated with an ellipsis.
         HStack(alignment: .firstLine, spacing: 12) {
             Image(systemName: isEntry ? "arrow.down.circle.fill" : "arrow.up.circle.fill")
                 .foregroundStyle(isEntry ? .green : .red)
@@ -29,7 +29,7 @@ struct DashboardEventRow: View {
                 }
                 MemberTagLine(name: memberName) {
                     Text(label)
-                        .font(.caption)
+                        .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -41,8 +41,7 @@ struct DashboardEventRow: View {
 
     private var nameText: some View {
         Text(wineName)
-            .font(.subheadline)
-            .fontWeight(.medium)
+            .font(.headline)
             .lineLimit(1)
     }
 }
