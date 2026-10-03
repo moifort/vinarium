@@ -39,6 +39,9 @@ struct DebugGallery: View {
             SettingsHomeView(cellarCount: 1, sharedWithCount: 0)
                 .environment(AuthSession())
                 .environment(SubscriptionStore())
+        case "premiumPage":
+            NavigationStack { PremiumView(trigger: .discover) }
+                .environment(SubscriptionStore())
         case "profile":
             NavigationStack { ProfileSettingsView() }
                 .environment(AuthSession())

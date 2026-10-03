@@ -4,7 +4,6 @@ struct SettingsHomeView: View {
     @Environment(AuthSession.self) private var authSession
     @Environment(SubscriptionStore.self) private var subscriptions
     @Environment(\.dismiss) private var dismiss
-    @State private var premiumShown = false
     @State private var feedbackShown = false
     /// Nil until loaded: the row then shows no subtitle rather than a wrong count.
     @State private var cellarCount: Int?
@@ -30,8 +29,8 @@ struct SettingsHomeView: View {
                             tint: .blue
                         )
                     }
-                    Button {
-                        premiumShown = true
+                    NavigationLink {
+                        PremiumView(trigger: .discover)
                     } label: {
                         SettingsRow(
                             icon: "sparkles",
@@ -40,7 +39,6 @@ struct SettingsHomeView: View {
                             tint: .orange
                         )
                     }
-                    .buttonStyle(.plain)
                     NavigationLink {
                         CellarsSettingsView()
                     } label: {
@@ -92,9 +90,6 @@ struct SettingsHomeView: View {
             .onAppear { Task { await loadSummaries() } }
             .navigationTitle("Réglages")
             .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $premiumShown) {
-                PremiumSheet(trigger: .discover)
-            }
             .sheet(isPresented: $feedbackShown) {
                 FeedbackSheet()
             }

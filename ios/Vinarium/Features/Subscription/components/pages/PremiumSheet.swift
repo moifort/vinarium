@@ -39,45 +39,57 @@ enum PremiumTrigger {
     }
 }
 
+/// The offer as a sheet, for the moments that interrupt a task: scans run out,
+/// a second cellar refused. The settings push `PremiumView` instead, like their
+/// other rows.
+struct PremiumSheet: View {
+    let trigger: PremiumTrigger
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            PremiumView(trigger: trigger)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
+                    }
+                }
+        }
+    }
+}
+
 /// The offer, with its prices read from the App Store rather than written here.
 /// Carries what App Review requires: a visible restore button, the terms and the
-/// privacy policy.
-struct PremiumSheet: View {
+/// privacy policy. A purchase dismisses it: the sheet closes, a pushed page pops.
+struct PremiumView: View {
     let trigger: PremiumTrigger
     @Environment(SubscriptionStore.self) private var store
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(spacing: 28) {
-                    header
-                    allowance
-                    benefits
-                    offers
-                    legal
-                }
-                .padding(.horizontal, 20)
-                .padding(.vertical, 24)
+        ScrollView {
+            VStack(spacing: 28) {
+                header
+                allowance
+                benefits
+                offers
+                legal
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .onAppear { track(.paywallShown(trigger: trigger.analyticsName)) }
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
-                }
-            }
-            .alert(
-                "Achat impossible",
-                isPresented: Binding(
-                    get: { store.errorMessage != nil },
-                    set: { if !$0 { store.errorMessage = nil } }
-                )
-            ) {
-                Button("OK", role: .cancel) { store.errorMessage = nil }
-            } message: {
-                Text(store.errorMessage ?? "")
-            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 24)
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .onAppear { track(.paywallShown(trigger: trigger.analyticsName)) }
+        .alert(
+            "Achat impossible",
+            isPresented: Binding(
+                get: { store.errorMessage != nil },
+                set: { if !$0 { store.errorMessage = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) { store.errorMessage = nil }
+        } message: {
+            Text(store.errorMessage ?? "")
         }
         .task { await store.refresh() }
     }
