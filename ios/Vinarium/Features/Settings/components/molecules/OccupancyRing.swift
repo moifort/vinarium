@@ -18,7 +18,7 @@ struct OccupancyRing: View {
     }
 
     var body: some View {
-        HStack(spacing: 20) {
+        HStack(alignment: .top, spacing: 20) {
             ring
                 .frame(width: 96, height: 96)
             VStack(alignment: .leading, spacing: 2) {

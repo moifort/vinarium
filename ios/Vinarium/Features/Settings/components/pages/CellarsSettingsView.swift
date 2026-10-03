@@ -82,7 +82,7 @@ struct CellarsSettingsView: View {
     }
 }
 
-/// One cellar: its name, its grid, its occupation; resize it, delete it once empty.
+/// One cellar: its name, its grid and how full it is; resize it, delete it once empty.
 struct CellarSettingsView: View {
     let onChanged: () -> Void
 
@@ -110,28 +110,21 @@ struct CellarSettingsView: View {
                     .onSubmit { Task { await rename() } }
                     .accessibilityIdentifier("cellar-name-field")
             }
-            Section("Grille") {
+            Section {
+                OccupancyRing(placed: cellar.placedCount, capacity: cellar.capacity)
                 LabeledInfoRow(title: "Rangées", value: "\(cellar.rows)", icon: "rectangle.split.1x2")
                 LabeledInfoRow(
                     title: "Emplacements par rangée",
                     value: "\(cellar.cols)",
                     icon: "rectangle.split.3x1"
                 )
-                LabeledInfoRow(
-                    title: "Capacité totale",
-                    value: "\(cellar.capacity) bouteilles",
-                    icon: "square.grid.3x3.fill"
-                )
-            }
-            Section("Occupation") {
-                OccupancyRing(placed: cellar.placedCount, capacity: cellar.capacity)
-            }
-            Section {
                 Button {
                     isReconfiguring = true
                 } label: {
                     Label("Reconfigurer la cave", systemImage: "slider.horizontal.3")
                 }
+            } header: {
+                Text("Grille")
             } footer: {
                 Text("Choisissez un modèle du commerce ou ajustez les dimensions.")
             }
