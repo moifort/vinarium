@@ -31,6 +31,14 @@ struct DebugGallery: View {
             NavigationStack { producerCellar(.journal) }
         case "dashboard":
             NavigationStack { producerDashboard }
+        case "settings":
+            SettingsHomeView()
+                .environment(AuthSession())
+                .environment(SubscriptionStore())
+                .environment(\.isAdmin, true)
+        case "profile":
+            NavigationStack { ProfileSettingsView() }
+                .environment(AuthSession())
         default:
             gallery
         }

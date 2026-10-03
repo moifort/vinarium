@@ -34,6 +34,16 @@ struct ProfileSettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    ImportExportSettingsView()
+                } label: {
+                    Label("Importer / Exporter", systemImage: "square.and.arrow.up.fill")
+                }
+            } header: {
+                Text("Données")
+            }
+
+            Section {
                 SignOutButton(action: signOut)
             } footer: {
                 if let signOutError {

@@ -22,9 +22,6 @@ struct SettingsHomeView: View {
                             tint: .blue
                         )
                     }
-                }
-
-                Section {
                     Button {
                         premiumShown = true
                     } label: {
@@ -36,6 +33,38 @@ struct SettingsHomeView: View {
                         )
                     }
                     .buttonStyle(.plain)
+                    NavigationLink {
+                        CellarsSettingsView()
+                    } label: {
+                        SettingsRow(
+                            icon: "square.grid.3x3.fill",
+                            title: "Caves",
+                            tint: .brown
+                        )
+                    }
+                    NavigationLink {
+                        SharingSettingsView()
+                    } label: {
+                        SettingsRow(
+                            icon: "person.2.fill",
+                            title: "Partage",
+                            tint: .purple
+                        )
+                    }
+                    // Second admin entry point, next to the home toolbar button. Absent
+                    // for every other account.
+                    if isAdmin {
+                        NavigationLink {
+                            AdminView()
+                        } label: {
+                            SettingsRow(
+                                icon: "person.badge.shield.checkmark.fill",
+                                title: "Admin",
+                                subtitle: "Coûts, revenus et comptes du mois",
+                                tint: .red
+                            )
+                        }
+                    }
                 }
 
                 Section("Application") {
@@ -60,56 +89,6 @@ struct SettingsHomeView: View {
                         )
                     }
                     .buttonStyle(.plain)
-                }
-
-                Section("Cave") {
-                    NavigationLink {
-                        CellarsSettingsView()
-                    } label: {
-                        SettingsRow(
-                            icon: "square.grid.3x3.fill",
-                            title: "Caves",
-                            tint: .brown
-                        )
-                    }
-                    NavigationLink {
-                        SharingSettingsView()
-                    } label: {
-                        SettingsRow(
-                            icon: "person.2.fill",
-                            title: "Partage",
-                            tint: .purple
-                        )
-                    }
-                }
-
-                Section("Données") {
-                    NavigationLink {
-                        ImportExportSettingsView()
-                    } label: {
-                        SettingsRow(
-                            icon: "square.and.arrow.up.fill",
-                            title: "Importer / Exporter",
-                            tint: .teal
-                        )
-                    }
-                }
-
-                // Second admin entry point, next to the home toolbar button. Absent
-                // for every other account.
-                if isAdmin {
-                    Section {
-                        NavigationLink {
-                            AdminView()
-                        } label: {
-                            SettingsRow(
-                                icon: "person.badge.shield.checkmark.fill",
-                                title: "Admin",
-                                subtitle: "Coûts, revenus et comptes du mois",
-                                tint: .red
-                            )
-                        }
-                    }
                 }
             }
             .navigationTitle("Réglages")
