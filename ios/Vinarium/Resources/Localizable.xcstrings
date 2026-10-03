@@ -13774,6 +13774,52 @@
         }
       }
     },
+    "Scans illimités et plusieurs caves": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scans illimités et plusieurs caves"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unlimited scans and multiple cellars"
+          }
+        },
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unbegrenzte Scans und mehrere Keller"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escaneos ilimitados y varias bodegas"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scansioni illimitate e più cantine"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digitalizações ilimitadas e várias adegas"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "スキャン無制限、複数のセラー"
+          }
+        }
+      }
+    },
     "Scans épuisés": {
       "localizations": {
         "de": {

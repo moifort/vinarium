@@ -38,7 +38,7 @@ struct DebugGallery: View {
         case "settingsSingle":
             SettingsHomeView(cellarCount: 1, sharedWithCount: 0)
                 .environment(AuthSession())
-                .environment(SubscriptionStore())
+                .environment(freeAccountStore)
         case "premiumPage":
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
@@ -48,6 +48,19 @@ struct DebugGallery: View {
         default:
             gallery
         }
+    }
+
+    /// A free account with three scans left, as the launch query would hand it over.
+    private var freeAccountStore: SubscriptionStore {
+        let store = SubscriptionStore()
+        store.adopt(
+            entitlement: EntitlementState(isPremium: false, appAccountToken: nil, productId: nil, expiresOn: nil),
+            quota: QuotaState(
+                isPremium: false, used: 2, limit: 5, remaining: 3,
+                welcomeRemaining: 0, totalRemaining: 3, renewsOn: nil
+            )
+        )
+        return store
     }
 
     private var gallery: some View {

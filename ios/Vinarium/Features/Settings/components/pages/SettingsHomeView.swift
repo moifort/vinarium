@@ -106,9 +106,14 @@ struct SettingsHomeView: View {
     }
 
     /// What the subscription gives today: the number of scans left on a free account,
-    /// the renewal date for a subscriber.
-    private var subscriptionSubtitle: String? {
-        guard let quota = subscriptions.quota else { return nil }
+    /// unlimited scans for a subscriber. Before the allowance is known, the offer
+    /// itself, so the row never sits bare next to the others.
+    private var subscriptionSubtitle: String {
+        guard let quota = subscriptions.quota else {
+            return subscriptions.isPremium == true
+                ? String(localized: "Scans illimités")
+                : String(localized: "Scans illimités et plusieurs caves")
+        }
         if quota.isPremium {
             return String(localized: "Scans illimités")
         }
