@@ -32,7 +32,11 @@ struct DebugGallery: View {
         case "dashboard":
             NavigationStack { producerDashboard }
         case "settings":
-            SettingsHomeView()
+            SettingsHomeView(cellarCount: 2, sharedWithCount: 1)
+                .environment(AuthSession())
+                .environment(SubscriptionStore())
+        case "settingsSingle":
+            SettingsHomeView(cellarCount: 1, sharedWithCount: 0)
                 .environment(AuthSession())
                 .environment(SubscriptionStore())
         case "profile":

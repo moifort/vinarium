@@ -6,6 +6,15 @@ struct SettingsHomeView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var premiumShown = false
     @State private var feedbackShown = false
+    /// Nil until loaded: the row then shows no subtitle rather than a wrong count.
+    @State private var cellarCount: Int?
+    /// How many other people share the cellar; 0 outside a household.
+    @State private var sharedWithCount: Int?
+
+    init(cellarCount: Int? = nil, sharedWithCount: Int? = nil) {
+        _cellarCount = State(initialValue: cellarCount)
+        _sharedWithCount = State(initialValue: sharedWithCount)
+    }
 
     var body: some View {
         NavigationStack {
@@ -38,6 +47,7 @@ struct SettingsHomeView: View {
                         SettingsRow(
                             icon: "square.grid.3x3.fill",
                             title: "Caves",
+                            subtitle: cellarsSubtitle,
                             tint: .brown
                         )
                     }
@@ -47,6 +57,7 @@ struct SettingsHomeView: View {
                         SettingsRow(
                             icon: "person.2.fill",
                             title: "Partage",
+                            subtitle: sharingSubtitle,
                             tint: .purple
                         )
                     }
@@ -76,6 +87,9 @@ struct SettingsHomeView: View {
                     .buttonStyle(.plain)
                 }
             }
+            // On appear rather than once: coming back from Caves or Partage
+            // must show what was just added or removed there.
+            .onAppear { Task { await loadSummaries() } }
             .navigationTitle("Réglages")
             .navigationBarTitleDisplayMode(.inline)
             .sheet(isPresented: $premiumShown) {
@@ -108,6 +122,30 @@ struct SettingsHomeView: View {
         return quota.totalRemaining == 0
             ? String(localized: "Aucun scan restant")
             : String(localized: "\(quota.totalRemaining) scans restants")
+    }
+
+    private var cellarsSubtitle: String? {
+        cellarCount.map { String(localized: "\($0) caves") }
+    }
+
+    private var sharingSubtitle: String? {
+        guard let sharedWithCount else { return nil }
+        return sharedWithCount == 0
+            ? String(localized: "Non partagée")
+            : String(localized: "Partagée avec \(sharedWithCount) personnes")
+    }
+
+    /// Both counts load side by side; a failure keeps the previous value, the
+    /// pages behind the rows report their own errors.
+    private func loadSummaries() async {
+        async let cellars = try? CellarAPI.cellars()
+        async let sharing = try? HouseholdAPI.sharingSettings()
+        if let cellars = await cellars {
+            cellarCount = cellars.count
+        }
+        if let sharing = await sharing {
+            sharedWithCount = sharing.household?.members.filter { !$0.isMe }.count ?? 0
+        }
     }
 
     private var appVersion: String {

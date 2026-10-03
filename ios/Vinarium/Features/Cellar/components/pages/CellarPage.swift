@@ -50,13 +50,15 @@ struct CellarPage: View {
         .toolbar {
             // A single cellar gets a "+" so a second one is discoverable; from two on
             // the "+" becomes the list of cellars, which still ends on adding one.
+            // It sits on the leading edge, above the title it changes, so the mode
+            // toggles and the magnifier stay put when the journal hides it.
             if displayMode == .cave {
-                ToolbarItem {
+                ToolbarItem(placement: .topBarLeading) {
                     if cellars.count > 1 {
                         Menu {
                             Picker("Cave", selection: selectedCellarId) {
                                 ForEach(cellars) { cellar in
-                                    Text(cellar.displayName)
+                                    Label(cellar.displayName, systemImage: CellarDisplayMode.cave.icon)
                                         .tag(cellar.isPrimary ? String?.none : String?.some(cellar.id))
                                 }
                             }
@@ -73,7 +75,6 @@ struct CellarPage: View {
                             .accessibilityIdentifier("cellar-add")
                     }
                 }
-                ToolbarSpacer(.fixed)
             }
             ToolbarItemGroup {
                 ForEach(CellarDisplayMode.allCases) { mode in

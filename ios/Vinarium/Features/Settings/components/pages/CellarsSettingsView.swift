@@ -124,14 +124,7 @@ struct CellarSettingsView: View {
                 )
             }
             Section("Occupation") {
-                LabeledInfoRow(
-                    title: "Bouteilles placées",
-                    value: "\(cellar.placedCount) / \(cellar.capacity)",
-                    icon: "wineglass.fill"
-                )
-                if cellar.capacity > 0 {
-                    ProgressView(value: Double(cellar.placedCount), total: Double(cellar.capacity))
-                }
+                OccupancyRing(placed: cellar.placedCount, capacity: cellar.capacity)
             }
             Section {
                 Button {
