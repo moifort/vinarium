@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsHomeView: View {
     @Environment(AuthSession.self) private var authSession
     @Environment(SubscriptionStore.self) private var subscriptions
-    @Environment(\.isAdmin) private var isAdmin
     @Environment(\.dismiss) private var dismiss
     @State private var premiumShown = false
     @State private var feedbackShown = false
@@ -50,20 +49,6 @@ struct SettingsHomeView: View {
                             title: "Partage",
                             tint: .purple
                         )
-                    }
-                    // Second admin entry point, next to the home toolbar button. Absent
-                    // for every other account.
-                    if isAdmin {
-                        NavigationLink {
-                            AdminView()
-                        } label: {
-                            SettingsRow(
-                                icon: "person.badge.shield.checkmark.fill",
-                                title: "Admin",
-                                subtitle: "Coûts, revenus et comptes du mois",
-                                tint: .red
-                            )
-                        }
                     }
                 }
 

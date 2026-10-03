@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Coordinator for the Admin screen: it owns (or receives) the ViewModel, loads on
 /// appear and delegates all rendering to `AdminPage`. Opened as a sheet from the
-/// home screen's toolbar and pushed from the settings row.
+/// home screen's toolbar.
 struct AdminView: View {
     @State private var viewModel: AdminViewModel
 

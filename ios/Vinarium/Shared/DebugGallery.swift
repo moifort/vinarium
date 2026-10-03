@@ -35,7 +35,6 @@ struct DebugGallery: View {
             SettingsHomeView()
                 .environment(AuthSession())
                 .environment(SubscriptionStore())
-                .environment(\.isAdmin, true)
         case "profile":
             NavigationStack { ProfileSettingsView() }
                 .environment(AuthSession())

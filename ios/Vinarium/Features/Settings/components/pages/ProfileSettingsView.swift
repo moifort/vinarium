@@ -25,22 +25,17 @@ struct ProfileSettingsView: View {
                     value: shortUid,
                     icon: "key.fill"
                 )
-            } header: {
-                Text("Compte")
-            } footer: {
-                if let loadError {
-                    Text(loadError).foregroundStyle(.red)
-                }
-            }
-
-            Section {
                 NavigationLink {
                     ImportExportSettingsView()
                 } label: {
                     Label("Importer / Exporter", systemImage: "square.and.arrow.up.fill")
                 }
             } header: {
-                Text("Données")
+                Text("Compte")
+            } footer: {
+                if let loadError {
+                    Text(loadError).foregroundStyle(.red)
+                }
             }
 
             Section {
