@@ -432,7 +432,7 @@ cp ios/VinariumUITests/Support/TestSecrets.swift.example ios/VinariumUITests/Sup
 ```
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer \
   xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium \
-  -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' build
+  -destination 'platform=iOS Simulator,name=iPhone 17,OS=27.0' build
 ```
 
-`DEVELOPER_DIR` is required because `xcode-select` points to the CommandLineTools. The simulator is iPhone 17, OS 26.2.
+`DEVELOPER_DIR` is required because `xcode-select` points to the CommandLineTools. The simulator is iPhone 17, OS 27.0.

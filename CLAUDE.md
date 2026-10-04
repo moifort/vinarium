@@ -33,7 +33,7 @@ Les faits propres au projet (identifiants, accès, certificats, travaux en atten
 | Couverture | `bun test --coverage` |
 | Linter | `bun run lint` / `bun run lint:fix` |
 | Build backend | `bun run build` |
-| Build iOS | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.2' build` |
+| Build iOS | `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project ios/Vinarium.xcodeproj -scheme Vinarium -destination 'platform=iOS Simulator,name=iPhone 17,OS=27.0' build` |
 | Scénarios de bout en bout | `./scripts/e2e.sh` (voir [docs/e2e.md](docs/e2e.md)) |
 | Captures | `./scripts/screenshots.sh [all\|<lang>…]` puis `bun scripts/generate-appstore-previews.ts` |
 | Schéma GraphQL | `bun run generate:graphql`, puis `cd ios && apollo-ios-cli generate` |
@@ -44,8 +44,8 @@ Runtime : toujours `bun` / `bunx`, jamais `npm` / `npx`.
 ## Spécificités
 
 - Branche principale `main`, tag de release `ios-v<version>`.
-- Cible iOS 26.0, Swift 6 en concurrence stricte. Simulateur de référence : iPhone 17, iOS 26.2.
-- Build App Store avec le dernier Xcode **final** (26.6 / `17F113`, SDK `23F81a`), jamais une
+- Cible iOS 26.0, Swift 6 en concurrence stricte. Simulateur de référence : iPhone 17, iOS 27.0.
+- Build App Store avec le dernier Xcode **final** (27.0 / `27A266a`, SDK `24A430`), jamais une
   beta ni une version dépassée. `DEVELOPER_DIR` est requis parce que `xcode-select` pointe sur les
   Command Line Tools.
 - Le Mac de développement tourne sur un macOS beta : après `xcodebuild archive` et avant

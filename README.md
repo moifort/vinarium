@@ -138,4 +138,4 @@ NITRO_SENTRY_DSN=...    # optional, and ignored in dev: Sentry only runs in a bu
    [`ios/FIREBASE_SETUP.md`](ios/FIREBASE_SETUP.md).
 4. Run `apollo-ios-cli generate` (from `ios/`) to regenerate typed
    GraphQL operations from `shared/schema.graphql`.
-5. Build and run on the iPhone 17 simulator (iOS 26.2).
+5. Build and run on the iPhone 17 simulator (iOS 27.0).

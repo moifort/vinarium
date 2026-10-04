@@ -42,7 +42,7 @@ Compte utilisateur unique en production : `KyTjMU39NBhfakGxExfqLmC5OYU2`.
 - iPhone physique « TiPhone junior », UDID `00008130-000A2068029A001C`, signature de
   développement automatique, équipe `46C337T7YN`. Installation par `scripts/install-device.sh`,
   jamais sans accord.
-- Simulateur de référence : iPhone 17, iOS 26.2.
+- Simulateur de référence : iPhone 17, iOS 27.0.
 
 ## Accès serveur et données héritées
 
