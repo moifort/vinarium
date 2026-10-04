@@ -163,6 +163,9 @@ export const createFakeFirestore = () => {
   const matchesFilter = (data: Doc, [field, op, value]: Filter) => {
     if (op === '==') return data[field] === value
     if (op === '!=') return data[field] !== undefined && data[field] !== value
+    if (op === '>=')
+      // Firestore leaves out a document missing the field, as it does on order.
+      return data[field] !== undefined && sortValue(data[field]) >= sortValue(value)
     if (op === 'in') return Array.isArray(value) && value.includes(data[field])
     const held = data[field]
     if (op === 'array-contains') return Array.isArray(held) && held.includes(value)
@@ -171,7 +174,7 @@ export const createFakeFirestore = () => {
         Array.isArray(held) && Array.isArray(value) && value.some((wanted) => held.includes(wanted))
       )
     throw new Error(
-      `fake-firestore only supports '==', '!=', 'in', 'array-contains' and ` +
+      `fake-firestore only supports '==', '!=', '>=', 'in', 'array-contains' and ` +
         `'array-contains-any' queries, got '${op}'`,
     )
   }

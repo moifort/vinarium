@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   Country,
+  Day,
   Eur,
   Latitude,
   Longitude,
@@ -77,4 +78,10 @@ describe('PersonName', () => {
     expect(PersonName('a'.repeat(200)) as string).toBe('a'.repeat(200)))
   test('rejects empty string', () => expect(() => PersonName('')).toThrow())
   test('rejects over 200 chars', () => expect(() => PersonName('a'.repeat(201))).toThrow())
+})
+
+describe('Day', () => {
+  test('accepts YYYY-MM-DD format', () => expect(Day('2026-10-04') as string).toBe('2026-10-04'))
+  test('rejects a month', () => expect(() => Day('2026-10')).toThrow())
+  test('rejects DD/MM/YYYY format', () => expect(() => Day('04/10/2026')).toThrow())
 })

@@ -1,26 +1,43 @@
 query AdminMetrics {
   adminMetrics {
-    aiCostEur
-    infraEur
-    totalCostEur
+    costs {
+      geminiEur
+      infraEur
+      totalEur
+      projectedEur
+      previousMonthEur
+      changeVsPreviousMonth
+      billedThrough
+      days {
+        day
+        geminiEur
+        infraEur
+      }
+    }
+    sessions {
+      day
+      sessions
+    }
     totalUsers
+    newUsers
     premiumTotal
-    premiumMonthly
-    premiumYearly
+    newPremium
     revenueProceedsEur
     revenueGrossEur
     scans
     cacheHits
     vision {
-      promptTokens
-      outputTokens
-      thinkingTokens
+      ...AiTokenUsageFields
     }
     enrichment {
-      promptTokens
-      outputTokens
-      thinkingTokens
+      ...AiTokenUsageFields
     }
     refreshedAt
   }
+}
+
+fragment AiTokenUsageFields on AiTokenUsage {
+  promptTokens
+  outputTokens
+  thinkingTokens
 }

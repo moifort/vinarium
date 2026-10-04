@@ -7,6 +7,7 @@ import {
   AscPrivateKey,
   AscVendorNumber,
   AttachmentsBucket,
+  Ga4PropertyId,
   GcpBillingTable,
   GoogleApiKey,
   PremiumUserIds,
@@ -41,6 +42,10 @@ export const config = () => {
       : undefined,
     gcpBillingTable: runtimeConfig.gcpBillingTable
       ? GcpBillingTable(runtimeConfig.gcpBillingTable)
+      : undefined,
+    gcpProjectId: runtimeConfig.firebaseProjectId || undefined,
+    ga4PropertyId: runtimeConfig.ga4PropertyId
+      ? Ga4PropertyId(runtimeConfig.ga4PropertyId)
       : undefined,
     attachmentsBucket: runtimeConfig.attachmentsBucket
       ? AttachmentsBucket(runtimeConfig.attachmentsBucket)

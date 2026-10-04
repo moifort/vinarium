@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// The Admin screen, pure and previewable: the four key figures as tiles, then the
-/// month's breakdown (revenue, scans, tokens) and the refresh date.
+/// The admin screen, pure and previewable: the month's bill and where it is
+/// heading, the key figures as tiles, the bill and the sessions day by day, then
+/// the Gemini calls the app counted — where the bill comes from.
 struct AdminPage: View {
     let metrics: AdminMetrics?
     var isLoading = false
@@ -20,140 +21,130 @@ struct AdminPage: View {
                 Color.clear
             }
         }
-        .navigationTitle("Admin")
+        .navigationTitle(metrics.map { monthTitle($0.month) } ?? String(localized: "Admin"))
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private func content(_ metrics: AdminMetrics) -> some View {
         List {
             Section {
-                keyTiles(metrics)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
+                VStack(spacing: 12) {
+                    AdminMonthCostCard(costs: metrics.costs, previousMonth: previousMonth(metrics.month))
+                    keyTiles(metrics)
+                }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
             }
 
-            Section("CA du mois") {
-                LabeledContent("Net encaissé", value: euroOrUnavailable(metrics.revenueProceedsEur))
-                LabeledContent("Brut", value: euroOrUnavailable(metrics.revenueGrossEur))
+            Section("Coûts par jour") {
+                if let costs = metrics.costs, !costs.days.isEmpty {
+                    AdminDailyCostChart(days: costs.days, daysInMonth: metrics.daysInMonth)
+                        .padding(.vertical, 8)
+                } else {
+                    unavailable(metrics.costs == nil ? "Facturation indisponible" : "Aucun jour facturé")
+                }
             }
 
-            Section("Coûts du mois") {
-                LabeledContent("Total", value: euro(metrics.totalCostEur))
-                LabeledContent("Consommation IA", value: euro(metrics.aiCostEur))
-                LabeledContent("Infra (GCP)", value: euroOrUnavailable(metrics.infraEur))
+            Section("Sessions par jour") {
+                if let sessions = metrics.sessions, !sessions.isEmpty {
+                    AdminDailySessionsChart(days: sessions, daysInMonth: metrics.daysInMonth)
+                        .padding(.vertical, 8)
+                } else {
+                    unavailable(metrics.sessions == nil ? "Sessions indisponibles" : "Aucune session")
+                }
             }
 
-            Section("Scans du mois") {
-                LabeledContent("Scans Gemini", value: "\(metrics.scans)")
-                LabeledContent("Servis par le cache", value: "\(metrics.cacheHits)")
+            Section("Gemini du mois") {
+                LabeledContent("Scans", value: AdminFormat.count(metrics.scans))
+                LabeledContent("Servis par le cache", value: AdminFormat.count(metrics.cacheHits))
             }
 
-            Section("Tokens du mois") {
-                tokenRows(title: "Vision", usage: metrics.vision)
-                tokenRows(title: "Enrichissement", usage: metrics.enrichment)
+            Section("Tokens par étape") {
+                LabeledContent("Lecture de l'étiquette", value: AdminFormat.count(metrics.vision.total))
+                LabeledContent("Enrichissement", value: AdminFormat.count(metrics.enrichment.total))
             }
 
-            Section {
-            } footer: {
-                Text(refreshFooter(metrics.refreshedAt))
+            Section("Actualisation") {
+                LabeledContent("Facture, comptes et sessions", value: refreshed(metrics.refreshedAt))
             }
         }
     }
 
     private func keyTiles(_ metrics: AdminMetrics) -> some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-            tile(title: "Consommation IA", value: euro(metrics.aiCostEur), icon: "sparkles", tint: .purple)
-            tile(title: "Infra", value: euroOrUnavailable(metrics.infraEur), icon: "server.rack", tint: .gray)
-            tile(title: "Comptes", value: "\(metrics.totalUsers)", icon: "person.2.fill", tint: .blue)
-            tile(title: "Premium", value: "\(metrics.premiumTotal)", icon: "crown.fill", tint: .orange)
+            AdminKpiTile(
+                title: "Revenus Premium",
+                value: euroOrUnavailable(metrics.revenueProceedsEur),
+                detail: metrics.revenueGrossEur.map { String(localized: "\(AdminFormat.euro($0)) brut") },
+                icon: "banknote.fill",
+                tint: .green
+            )
+            AdminKpiTile(
+                title: "Gemini / Infra",
+                value: metrics.costs.map { AdminFormat.euro($0.geminiEur) } ?? String(localized: "Indisponible"),
+                detail: metrics.costs.map { String(localized: "\(AdminFormat.euro($0.infraEur)) d'infra") },
+                icon: "sparkles",
+                tint: .purple
+            )
+            AdminKpiTile(
+                title: "Utilisateurs",
+                value: AdminFormat.count(metrics.totalUsers),
+                detail: String(localized: "+\(metrics.newUsers) ce mois"),
+                icon: "person.2.fill",
+                tint: .blue
+            )
+            AdminKpiTile(
+                title: "Premium",
+                value: AdminFormat.count(metrics.premiumTotal),
+                detail: String(localized: "+\(metrics.newPremium) ce mois"),
+                icon: "crown.fill",
+                tint: .orange
+            )
         }
     }
 
-    private func tile(title: String, value: String, icon: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: icon)
-                .font(.caption)
-                .foregroundStyle(tint)
-            Text(value)
-                .font(.title3.weight(.semibold))
-                .monospacedDigit()
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(.fill.tertiary, in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    @ViewBuilder
-    private func tokenRows(title: String, usage: AdminMetrics.TokenUsage) -> some View {
-        LabeledContent("\(title), entrée", value: tokens(usage.promptTokens))
-        LabeledContent("\(title), sortie", value: tokens(usage.outputTokens))
-        LabeledContent("\(title), réflexion", value: tokens(usage.thinkingTokens))
-    }
-
-    private func euro(_ value: Double) -> String {
-        value.formatted(.currency(code: "EUR").precision(.fractionLength(2)))
+    private func unavailable(_ message: LocalizedStringKey) -> some View {
+        Text(message)
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 24)
     }
 
     private func euroOrUnavailable(_ value: Double?) -> String {
-        value.map(euro) ?? "Indisponible"
+        value.map(AdminFormat.euro) ?? String(localized: "Indisponible")
     }
 
-    private func tokens(_ count: Int) -> String {
-        count.formatted(.number.grouping(.automatic))
+    private func refreshed(_ refreshedAt: Date?) -> String {
+        refreshedAt?.formatted(date: .abbreviated, time: .shortened)
+            ?? String(localized: "Pas encore")
     }
 
-    private func refreshFooter(_ refreshedAt: Date?) -> String {
-        guard let refreshedAt else {
-            return "Comptes, abonnés et CA seront renseignés au premier passage du rafraîchissement quotidien."
-        }
-        let formatted = refreshedAt.formatted(date: .abbreviated, time: .shortened)
-        return "Comptes, abonnés et CA actualisés le \(formatted). Les chiffres IA sont en direct."
+    private func monthTitle(_ month: Date) -> String {
+        var style = Date.FormatStyle(timeZone: TimeZone(identifier: "UTC")!).month(.wide).year()
+        style.calendar = AdminMetrics.utc
+        return month.formatted(style).capitalized
+    }
+
+    private func previousMonth(_ month: Date) -> Date {
+        AdminMetrics.utc.date(byAdding: .month, value: -1, to: month) ?? month
     }
 }
 
-#Preview("Loaded") {
+#Preview("Mid-month") {
     NavigationStack {
-        AdminPage(
-            metrics: AdminMetrics(
-                aiCostEur: 0.42,
-                infraEur: 0.19,
-                totalCostEur: 0.61,
-                totalUsers: 42,
-                premiumTotal: 5,
-                premiumMonthly: 2,
-                premiumYearly: 3,
-                revenueProceedsEur: 12.4,
-                revenueGrossEur: 17.9,
-                scans: 37,
-                cacheHits: 4,
-                vision: .init(promptTokens: 96_200, outputTokens: 9_250, thinkingTokens: 55_500),
-                enrichment: .init(promptTokens: 185_000, outputTokens: 7_400, thinkingTokens: 51_800),
-                refreshedAt: Date()
-            )
-        )
+        AdminPage(metrics: .preview)
+    }
+}
+
+#Preview("First billed month") {
+    NavigationStack {
+        AdminPage(metrics: .previewFirstMonth)
     }
 }
 
 #Preview("Before the first refresh") {
     NavigationStack {
-        AdminPage(
-            metrics: AdminMetrics(
-                aiCostEur: 0,
-                infraEur: nil,
-                totalCostEur: 0,
-                totalUsers: 0,
-                premiumTotal: 0,
-                premiumMonthly: 0,
-                premiumYearly: 0,
-                revenueProceedsEur: nil,
-                revenueGrossEur: nil,
-                scans: 0,
-                cacheHits: 0,
-                vision: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
-                enrichment: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
-                refreshedAt: nil
-            )
-        )
+        AdminPage(metrics: .previewBeforeRefresh)
     }
 }
 

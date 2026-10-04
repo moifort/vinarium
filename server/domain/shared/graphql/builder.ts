@@ -25,6 +25,7 @@ import type { JournalEntryId } from '~/domain/journal/types'
 import type { BottleDescription } from '~/domain/scan/types'
 import type {
   Country,
+  Day,
   Eur,
   Latitude,
   Longitude,
@@ -77,6 +78,7 @@ export const builder = new SchemaBuilder<{
     PersonName: { Input: PersonName; Output: PersonName }
     PlaceName: { Input: PlaceName; Output: PlaceName }
     Year: { Input: Year; Output: Year }
+    Day: { Input: Day; Output: Day }
     Eur: { Input: Eur; Output: Eur }
     Percentage: { Input: Percentage; Output: Percentage }
     Latitude: { Input: Latitude; Output: Latitude }

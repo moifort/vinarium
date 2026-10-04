@@ -16,6 +16,8 @@ export type AscPrivateKey = Brand<string, 'AscPrivateKey'>
 export type AscVendorNumber = Brand<string, 'AscVendorNumber'>
 /** Fully qualified BigQuery billing export table, `project.dataset.table`. */
 export type GcpBillingTable = Brand<string, 'GcpBillingTable'>
+/** The numeric id of the GA4 property the app reports to, e.g. `548838755`. */
+export type Ga4PropertyId = Brand<string, 'Ga4PropertyId'>
 /** The private bucket holding beverage attachments, e.g. `vinarium-prod-attachments`. */
 export type AttachmentsBucket = Brand<string, 'AttachmentsBucket'>
 /** Development only: the origin this server is reachable at, used to address the

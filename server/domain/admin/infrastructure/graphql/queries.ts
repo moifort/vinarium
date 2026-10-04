@@ -8,7 +8,7 @@ builder.queryField('adminMetrics', (t) =>
   t.field({
     type: AdminMetricsType,
     description:
-      "The app's monthly economics: costs, revenue, users and subscribers.\n\n" +
+      "The app's month: the bill day by day, revenue, users, subscribers and sessions.\n\n" +
       'Reserved for administrator accounts (see `me.isAdmin`); anyone else is refused with ' +
       '`FORBIDDEN`.',
     resolve: async (_root, _args, { userId }) => {

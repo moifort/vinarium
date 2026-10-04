@@ -23,6 +23,10 @@ struct DebugGallery: View {
             NavigationStack { AdminDashboard() }
         case "adminSheet":
             NavigationStack { AdminDashboard(adminShown: true) }
+        case "adminSheetFirstMonth":
+            NavigationStack { AdminDashboard(adminShown: true, metrics: .previewFirstMonth) }
+        case "adminSheetBeforeRefresh":
+            NavigationStack { AdminDashboard(adminShown: true, metrics: .previewBeforeRefresh) }
         case "wineList":
             NavigationStack { wineList }
         case "cellar":
@@ -111,6 +115,12 @@ struct DebugGallery: View {
                 Section("Admin") {
                     NavigationLink("Accueil, compte admin") {
                         AdminDashboard()
+                    }
+                    NavigationLink("Admin, premier mois facturé") {
+                        AdminDashboard(adminShown: true, metrics: .previewFirstMonth)
+                    }
+                    NavigationLink("Admin, avant le premier rafraîchissement") {
+                        AdminDashboard(adminShown: true, metrics: .previewBeforeRefresh)
                     }
                 }
                 Section("Retours") {
@@ -278,6 +288,7 @@ extension DebugGallery {
 /// Admin screen in a sheet on sample figures.
 private struct AdminDashboard: View {
     @State var adminShown = false
+    var metrics: AdminMetrics = .preview
 
     var body: some View {
         DashboardPage(
@@ -296,24 +307,7 @@ private struct AdminDashboard: View {
         )
         .sheet(isPresented: $adminShown) {
             NavigationStack {
-                AdminPage(
-                    metrics: AdminMetrics(
-                        aiCostEur: 0.42,
-                        infraEur: 0.19,
-                        totalCostEur: 0.61,
-                        totalUsers: 42,
-                        premiumTotal: 5,
-                        premiumMonthly: 2,
-                        premiumYearly: 3,
-                        revenueProceedsEur: 12.4,
-                        revenueGrossEur: 17.9,
-                        scans: 37,
-                        cacheHits: 4,
-                        vision: .init(promptTokens: 96_200, outputTokens: 9_250, thinkingTokens: 55_500),
-                        enrichment: .init(promptTokens: 185_000, outputTokens: 7_400, thinkingTokens: 51_800),
-                        refreshedAt: Date()
-                    )
-                )
+                AdminPage(metrics: metrics)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) {

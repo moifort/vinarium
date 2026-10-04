@@ -11,6 +11,7 @@ import type {
   AscPrivateKey as AscPrivateKeyType,
   AscVendorNumber as AscVendorNumberType,
   AttachmentsBucket as AttachmentsBucketType,
+  Ga4PropertyId as Ga4PropertyIdType,
   GcpBillingTable as GcpBillingTableType,
   GoogleApiKey as GoogleApiKeyType,
   PublicBaseUrl as PublicBaseUrlType,
@@ -86,6 +87,14 @@ export const GcpBillingTable = (value: unknown) => {
     .regex(/^[^.]+\.[^.]+\.[^.]+$/)
     .parse(value)
   return make<GcpBillingTableType>()(v)
+}
+
+// The GA4 property the sessions are read from — digits only, as GA4 Admin shows
+// it (not the `G-…` measurement id). Unset means the sessions are not shown. A
+// number in the environment reaches here as one, hence the coercion.
+export const Ga4PropertyId = (value: unknown) => {
+  const v = z.coerce.string().regex(/^\d+$/).parse(value)
+  return make<Ga4PropertyIdType>()(v)
 }
 
 // The accounts granted Premium outright (the maker's own, a reviewer's), as one

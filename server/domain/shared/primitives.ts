@@ -3,6 +3,7 @@ import { z } from 'zod'
 import type {
   Country as CountryType,
   Count as CountType,
+  Day as DayType,
   Eur as EurType,
   Latitude as LatitudeType,
   Longitude as LongitudeType,
@@ -69,6 +70,14 @@ export const Month = (value: unknown) => {
     .regex(/^\d{4}-\d{2}$/)
     .parse(value)
   return make<MonthType>()(v)
+}
+
+export const Day = (value: unknown) => {
+  const v = z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .parse(value)
+  return make<DayType>()(v)
 }
 
 export const Count = (value: number) => make<CountType>()(value)

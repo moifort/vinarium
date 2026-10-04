@@ -31,13 +31,27 @@ const seedProfile = (admin: boolean) => {
   })
 }
 
+const month = new Date().toISOString().slice(0, 7)
+const [year, monthIndex] = month.split('-').map(Number) as [number, number]
+const daysInMonth = new Date(Date.UTC(year, monthIndex, 0)).getUTCDate()
+
 const metricsQuery = `query {
   adminMetrics {
-    aiCostEur
-    infraEur
-    totalCostEur
+    costs {
+      geminiEur
+      infraEur
+      totalEur
+      projectedEur
+      previousMonthEur
+      changeVsPreviousMonth
+      billedThrough
+      days { day geminiEur infraEur }
+    }
+    sessions { day sessions }
     totalUsers
+    newUsers
     premiumTotal
+    newPremium
     revenueProceedsEur
     scans
     cacheHits
@@ -69,10 +83,88 @@ describe('who may read the admin metrics', () => {
 
     expect(result.errors).toBeUndefined()
     expect(result.data?.adminMetrics).toMatchObject({
+      costs: null,
+      sessions: null,
       totalUsers: 0,
+      newUsers: 0,
       premiumTotal: 0,
+      newPremium: 0,
       revenueProceedsEur: null,
       refreshedAt: null,
+    })
+  })
+})
+
+describe('what the admin metrics serve', () => {
+  test('the month s bill, its projection and the sessions the projection holds', async () => {
+    seedProfile(true)
+    fake.seed('admin-metrics', 'current', {
+      totalUsers: 42,
+      newUsers: 6,
+      premium: { total: 5, monthly: 2, yearly: 3 },
+      newPremium: 2,
+      revenue: { month, proceedsEur: 12.4, grossEur: 17.9 },
+      costs: {
+        month,
+        days: [
+          { day: `${month}-02`, geminiEur: 0.5, infraEur: 0.25 },
+          { day: `${month}-01`, geminiEur: 1, infraEur: 0.25 },
+        ],
+      },
+      sessions: { month, days: [{ day: `${month}-01`, sessions: 14 }] },
+      refreshedAt: new Date(`${month}-03T04:00:00.000Z`),
+    })
+
+    const result = await execute(metricsQuery)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.adminMetrics).toMatchObject({
+      costs: {
+        geminiEur: 1.5,
+        infraEur: 0.5,
+        totalEur: 2,
+        // 2 € over the first two days, extended to every day of the month.
+        projectedEur: daysInMonth,
+        previousMonthEur: null,
+        changeVsPreviousMonth: null,
+        billedThrough: `${month}-02`,
+        days: [
+          { day: `${month}-01`, geminiEur: 1, infraEur: 0.25 },
+          { day: `${month}-02`, geminiEur: 0.5, infraEur: 0.25 },
+        ],
+      },
+      sessions: [{ day: `${month}-01`, sessions: 14 }],
+      totalUsers: 42,
+      newUsers: 6,
+      premiumTotal: 5,
+      newPremium: 2,
+      revenueProceedsEur: 12.4,
+      refreshedAt: `${month}-03T04:00:00.000Z`,
+    })
+  })
+
+  test('still answers the fields the earlier builds ask for, from the bill', async () => {
+    seedProfile(true)
+    fake.seed('admin-metrics', 'current', {
+      totalUsers: 1,
+      newUsers: 0,
+      premium: { total: 1, monthly: 0, yearly: 1 },
+      newPremium: 0,
+      costs: { month, days: [{ day: `${month}-01`, geminiEur: 1, infraEur: 0.5 }] },
+      refreshedAt: new Date(`${month}-02T04:00:00.000Z`),
+    })
+
+    const result = await execute(`query {
+      adminMetrics { aiCostEur infraEur totalCostEur premiumMonthly premiumYearly }
+    }`)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.adminMetrics).toEqual({
+      aiCostEur: 1,
+      infraEur: 0.5,
+      totalCostEur: 1.5,
+      premiumMonthly: 0,
+      premiumYearly: 1,
     })
   })
 })

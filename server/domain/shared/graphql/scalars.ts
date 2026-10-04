@@ -24,6 +24,7 @@ import { JournalEntryId } from '~/domain/journal/primitives'
 import { BottleDescription } from '~/domain/scan/primitives'
 import {
   Country,
+  Day,
   Eur,
   Latitude,
   Longitude,
@@ -191,6 +192,14 @@ builder.scalarType('Year', {
     'Used for a wine vintage and for the bounds of a drink window. Example: 2016.',
   serialize: (value) => value as number,
   parseValue: validatedParse('Year', Year),
+})
+
+builder.scalarType('Day', {
+  description:
+    'A calendar day in UTC, `YYYY-MM-DD`.\n\n' +
+    'Used for the days of the admin metrics. Example: "2026-10-04".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('Day', Day),
 })
 
 builder.scalarType('Eur', {

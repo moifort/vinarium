@@ -1,31 +1,196 @@
 import Foundation
 
-/// The monthly figures the admin surfaces display: measured costs (Gemini tokens,
-/// GCP bill), App Store revenue and account counts.
+/// The month the admin screen shows: what the bill says it costs day by day,
+/// what the App Store paid, who is here and who came, and how much the app is
+/// used.
 struct AdminMetrics {
+    /// The tokens one Gemini step consumed this month, as the API reported them:
+    /// what says where the Gemini bill comes from.
     struct TokenUsage {
         let promptTokens: Int
         let outputTokens: Int
         let thinkingTokens: Int
+
+        var total: Int { promptTokens + outputTokens + thinkingTokens }
     }
 
-    let aiCostEur: Double
-    /// The project's measured GCP bill, nil while the billing export is not configured
-    /// or has not answered yet. No fixed line item: the Apple Developer subscription,
-    /// shared across several projects, is deliberately left out.
-    let infraEur: Double?
-    let totalCostEur: Double
+    /// What the bill says one day cost. Dated at midnight UTC.
+    struct DailyCost: Identifiable {
+        let day: Date
+        let geminiEur: Double
+        let infraEur: Double
+        var id: Date { day }
+    }
+
+    /// How many sessions GA4 counted on one day. Dated at midnight UTC.
+    struct DailySessions: Identifiable {
+        let day: Date
+        let sessions: Int
+        var id: Date { day }
+    }
+
+    /// The month's bill so far, read from the billing export, which runs about
+    /// a day behind: `billedThrough` is the last day it has reached.
+    struct Costs {
+        let geminiEur: Double
+        let infraEur: Double
+        let totalEur: Double
+        /// The whole month at the daily average so far, nil before a first
+        /// billed day.
+        let projectedEur: Double?
+        /// Last month's whole bill, nil when the export does not hold all of it.
+        let previousMonthEur: Double?
+        /// The projection against last month, as a ratio: 0.12 is 12 % more.
+        let changeVsPreviousMonth: Double?
+        let billedThrough: Date?
+        let days: [DailyCost]
+    }
+
+    /// Midnight UTC on the month's first day: the month the screen shows.
+    let month: Date
+    /// Nil while the billing export has not answered this month.
+    let costs: Costs?
+    /// Nil while GA4 has not answered this month.
+    let sessions: [DailySessions]?
     let totalUsers: Int
+    let newUsers: Int
     let premiumTotal: Int
-    let premiumMonthly: Int
-    let premiumYearly: Int
-    /// Net proceeds (what Apple pays out), nil while the App Store Connect key has not answered.
+    let newPremium: Int
+    /// What Apple pays out, nil while App Store Connect has not answered.
     let revenueProceedsEur: Double?
     let revenueGrossEur: Double?
     let scans: Int
     let cacheHits: Int
     let vision: TokenUsage
     let enrichment: TokenUsage
-    /// Last run of the daily refresh, nil before its first execution.
+    /// The daily refresh's last run, nil before its first.
     let refreshedAt: Date?
+}
+
+extension AdminMetrics {
+    /// The calendar the admin figures are dated in: the bill and the sessions
+    /// count their days in UTC.
+    static let utc: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    /// `"2026-10-04"` → midnight UTC that day.
+    static func day(_ value: String) -> Date? {
+        let parts = value.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return utc.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    }
+
+    /// Midnight UTC on the first day of the month a moment falls in.
+    static func monthStart(of moment: Date) -> Date {
+        utc.date(from: utc.dateComponents([.year, .month], from: moment)) ?? moment
+    }
+
+    /// How many days the month shown has: the length of the charts' axis.
+    var daysInMonth: Int {
+        Self.utc.range(of: .day, in: .month, for: month)?.count ?? 31
+    }
+}
+
+// MARK: - Fixtures
+
+extension AdminMetrics {
+    private static let october = day("2026-10-01")!
+
+    private static func days(_ count: Int, gemini: (Int) -> Double, infra: (Int) -> Double)
+        -> [DailyCost]
+    {
+        (1...count).map { index in
+            DailyCost(
+                day: utc.date(byAdding: .day, value: index - 1, to: october)!,
+                geminiEur: gemini(index),
+                infraEur: infra(index)
+            )
+        }
+    }
+
+    private static let previewDays = days(
+        17,
+        gemini: { 0.12 + Double(($0 * 7) % 5) * 0.06 },
+        infra: { 0.01 + Double($0 % 3) * 0.005 }
+    )
+
+    private static let previewSessions: [DailySessions] = (1...18).map { index in
+        DailySessions(
+            day: utc.date(byAdding: .day, value: index - 1, to: october)!,
+            sessions: 6 + (index * 5) % 11
+        )
+    }
+
+    private static func costs(_ days: [DailyCost], previous: Double?) -> Costs {
+        let gemini = days.reduce(0) { $0 + $1.geminiEur }
+        let infra = days.reduce(0) { $0 + $1.infraEur }
+        let projected = (gemini + infra) / Double(days.count) * 31
+        return Costs(
+            geminiEur: gemini,
+            infraEur: infra,
+            totalEur: gemini + infra,
+            projectedEur: projected,
+            previousMonthEur: previous,
+            changeVsPreviousMonth: previous.map { projected / $0 - 1 },
+            billedThrough: days.last?.day,
+            days: days
+        )
+    }
+
+    /// Mid-October, last month known: every section filled.
+    static let preview = AdminMetrics(
+        month: october,
+        costs: costs(previewDays, previous: 7.4),
+        sessions: previewSessions,
+        totalUsers: 64,
+        newUsers: 11,
+        premiumTotal: 6,
+        newPremium: 2,
+        revenueProceedsEur: 20.93,
+        revenueGrossEur: 29.94,
+        scans: 152,
+        cacheHits: 9,
+        vision: .init(promptTokens: 395_200, outputTokens: 38_000, thinkingTokens: 228_000),
+        enrichment: .init(promptTokens: 760_000, outputTokens: 30_400, thinkingTokens: 212_800),
+        refreshedAt: utc.date(from: DateComponents(year: 2026, month: 10, day: 18, hour: 4))
+    )
+
+    /// The first billed month: no comparison with the month before.
+    static let previewFirstMonth = AdminMetrics(
+        month: october,
+        costs: costs(Array(previewDays.prefix(3)), previous: nil),
+        sessions: Array(previewSessions.prefix(4)),
+        totalUsers: 2,
+        newUsers: 1,
+        premiumTotal: 1,
+        newPremium: 0,
+        revenueProceedsEur: 3.49,
+        revenueGrossEur: 4.99,
+        scans: 12,
+        cacheHits: 1,
+        vision: .init(promptTokens: 31_200, outputTokens: 3_000, thinkingTokens: 18_000),
+        enrichment: .init(promptTokens: 60_000, outputTokens: 2_400, thinkingTokens: 16_800),
+        refreshedAt: utc.date(from: DateComponents(year: 2026, month: 10, day: 4, hour: 4))
+    )
+
+    /// Before the billing export, GA4 and the daily refresh have answered.
+    static let previewBeforeRefresh = AdminMetrics(
+        month: october,
+        costs: nil,
+        sessions: nil,
+        totalUsers: 0,
+        newUsers: 0,
+        premiumTotal: 0,
+        newPremium: 0,
+        revenueProceedsEur: nil,
+        revenueGrossEur: nil,
+        scans: 0,
+        cacheHits: 0,
+        vision: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
+        enrichment: .init(promptTokens: 0, outputTokens: 0, thinkingTokens: 0),
+        refreshedAt: nil
+    )
 }

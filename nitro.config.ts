@@ -44,6 +44,11 @@ export default defineNitroConfig({
     ascPrivateKey: '',
     ascVendorNumber: '',
     gcpBillingTable: '',
+    // The project the function runs in, set by Terraform: what the billing
+    // export's rows are filtered on, and where the BigQuery job runs.
+    firebaseProjectId: '',
+    // The GA4 property the app reports to, for the admin screen's sessions.
+    ga4PropertyId: '',
     attachmentsBucket: '',
     // Dev only: the origin the local object store points its URLs at, so the
     // simulator downloads an attachment from the same server it queried.

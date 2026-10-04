@@ -1,5 +1,12 @@
-import type { AdminMetricsView, AiStepUsage } from '~/domain/admin/types'
+import type {
+  AdminMetricsView,
+  AiStepUsage,
+  DailyCost,
+  DailySessions,
+  MonthCostsView,
+} from '~/domain/admin/types'
 import { builder } from '~/domain/shared/graphql/builder'
+import { Eur } from '~/domain/shared/primitives'
 
 const AiTokenUsageType = builder.objectRef<AiStepUsage>('AiTokenUsage').implement({
   description:
@@ -22,45 +29,156 @@ const AiTokenUsageType = builder.objectRef<AiStepUsage>('AiTokenUsage').implemen
   }),
 })
 
-export const AdminMetricsType = builder.objectRef<AdminMetricsView>('AdminMetrics').implement({
-  description:
-    "The app's monthly economics, for the admin screen: what the month costs (measured AI " +
-    'tokens, measured GCP billing, the fixed Apple Developer line) against what it brings in ' +
-    '(App Store sales) and who is here (accounts, subscribers).\n\n' +
-    'AI figures are live, incremented at each scan. Users, subscribers, revenue and the GCP ' +
-    'bill come from a projection a scheduler refreshes daily — `refreshedAt` says when, and is ' +
-    'null until it has run once.',
+const AdminDailyCostType = builder.objectRef<DailyCost>('AdminDailyCost').implement({
+  description: 'What the bill says one day cost the project, credits (the free tier) included.',
   fields: (t) => ({
-    aiCostEur: t.expose('aiCostEur', {
+    day: t.expose('day', { type: 'Day', description: 'The usage day, UTC, e.g. `"2026-10-03"`' }),
+    geminiEur: t.expose('geminiEur', {
       type: 'Eur',
-      description: "This month's Gemini bill, priced from the measured tokens, e.g. `0.42`",
+      description: 'The Gemini API that day, tokens and grounded searches, e.g. `0.83`',
     }),
     infraEur: t.expose('infraEur', {
       type: 'Eur',
+      description: 'Every other service of the project that day, e.g. `0.04`',
+    }),
+  }),
+})
+
+const AdminDailySessionsType = builder.objectRef<DailySessions>('AdminDailySessions').implement({
+  description: 'How many sessions GA4 counted on one day.',
+  fields: (t) => ({
+    day: t.expose('day', { type: 'Day', description: 'The day, e.g. `"2026-10-03"`' }),
+    sessions: t.int({
+      description: 'Sessions that day, e.g. `14`',
+      resolve: (entry) => entry.sessions,
+    }),
+  }),
+})
+
+const AdminMonthCostsType = builder.objectRef<MonthCostsView>('AdminMonthCosts').implement({
+  description:
+    "The month's bill so far, read from the billing export: what AI Studio's Spend page " +
+    'shows for Gemini, and the rest of the project as infrastructure.\n\n' +
+    'The export runs about a day behind, so `billedThrough` is usually yesterday or the day ' +
+    'before, and today is never in it.',
+  fields: (t) => ({
+    geminiEur: t.expose('geminiEur', {
+      type: 'Eur',
+      description: "The month's Gemini API bill so far, e.g. `4.12`",
+    }),
+    infraEur: t.expose('infraEur', {
+      type: 'Eur',
+      description: "The month's infrastructure bill so far, e.g. `0.95`",
+    }),
+    totalEur: t.expose('totalEur', {
+      type: 'Eur',
+      description: 'Both together, e.g. `5.07`',
+    }),
+    projectedEur: t.expose('projectedEur', {
+      type: 'Eur',
       nullable: true,
       description:
-        "This month's measured GCP bill for the project, from the billing export, e.g. `0.19`; " +
-        'null while the export is not configured or has never answered. Carries no fixed line: ' +
-        'the Apple Developer fee is shared across projects and deliberately left out.',
+        'The whole month at the daily average of the days billed so far, e.g. `52.4`; null ' +
+        'until a first day is billed.',
     }),
-    totalCostEur: t.expose('totalCostEur', {
+    previousMonthEur: t.expose('previousMonthEur', {
       type: 'Eur',
-      description: 'AI plus the measured infrastructure bill, e.g. `0.61`',
+      nullable: true,
+      description:
+        "Last month's whole bill, e.g. `46.8`; null when the export does not hold all of it.",
+    }),
+    changeVsPreviousMonth: t.float({
+      nullable: true,
+      description:
+        'The projection against last month, as a ratio: `0.12` is 12 % more, `-0.3` 30 % less. ' +
+        'Null without a projection or a previous month.',
+      resolve: (costs) => costs.changeVsPreviousMonth,
+    }),
+    billedThrough: t.expose('billedThrough', {
+      type: 'Day',
+      nullable: true,
+      description: 'The last day the export has reached, e.g. `"2026-10-03"`; null before any.',
+    }),
+    days: t.field({
+      type: [AdminDailyCostType],
+      description: 'One entry per billed day, in day order. A day with no line is absent.',
+      resolve: (costs) => costs.days,
+    }),
+  }),
+})
+
+const replacedByCosts = 'Use `costs`, read from the bill rather than priced from the tokens.'
+
+export const AdminMetricsType = builder.objectRef<AdminMetricsView>('AdminMetrics').implement({
+  description:
+    "The app's month, for the admin screen: what it costs (the bill, day by day), what it " +
+    'brings in (App Store sales), who is here and who came (accounts, subscribers), and how ' +
+    'much the app is used (GA4 sessions).\n\n' +
+    'The bill, the sessions, the accounts, the subscribers and the revenue come from a ' +
+    'projection a scheduler refreshes daily — `refreshedAt` says when, and is null until it ' +
+    'has run once. The Gemini call counters (scans, cache hits, tokens) are live.',
+  fields: (t) => ({
+    costs: t.field({
+      type: AdminMonthCostsType,
+      nullable: true,
+      description:
+        "This month's bill; null while the billing export is not configured or has not " +
+        'answered this month.',
+      resolve: (metrics) => metrics.costs,
+    }),
+    sessions: t.field({
+      type: [AdminDailySessionsType],
+      nullable: true,
+      description:
+        "This month's sessions per day, in day order; null while GA4 is not configured or has " +
+        'not answered this month.',
+      resolve: (metrics) => metrics.sessions,
+    }),
+    aiCostEur: t.field({
+      type: 'Eur',
+      deprecationReason: replacedByCosts,
+      description: "This month's Gemini bill so far, `0` while it is unknown.",
+      resolve: (metrics) => metrics.costs?.geminiEur ?? Eur(0),
+    }),
+    infraEur: t.field({
+      type: 'Eur',
+      nullable: true,
+      deprecationReason: replacedByCosts,
+      description: "This month's infrastructure bill so far; null while it is unknown.",
+      resolve: (metrics) => metrics.costs?.infraEur,
+    }),
+    totalCostEur: t.field({
+      type: 'Eur',
+      deprecationReason: replacedByCosts,
+      description: "This month's whole bill so far, `0` while it is unknown.",
+      resolve: (metrics) => metrics.costs?.totalEur ?? Eur(0),
     }),
     totalUsers: t.int({
       description: 'How many accounts completed onboarding, e.g. `42`',
       resolve: (metrics) => metrics.totalUsers,
     }),
+    newUsers: t.int({
+      description: 'Of them, how many completed it this month, e.g. `6`',
+      resolve: (metrics) => metrics.newUsers,
+    }),
     premiumTotal: t.int({
       description: 'Active Premium subscribers right now, e.g. `5`',
       resolve: (metrics) => metrics.premium.total,
     }),
+    newPremium: t.int({
+      description:
+        'Subscriptions that began this month, a free trial included, whether or not they are ' +
+        'still active, e.g. `2`',
+      resolve: (metrics) => metrics.newPremium,
+    }),
     premiumMonthly: t.int({
-      description: 'Of them, on the monthly plan, e.g. `2`',
+      deprecationReason: 'The admin screen no longer splits subscribers by plan.',
+      description: 'Active subscribers on the monthly plan, e.g. `2`',
       resolve: (metrics) => metrics.premium.monthly,
     }),
     premiumYearly: t.int({
-      description: 'Of them, on the yearly plan, e.g. `3`',
+      deprecationReason: 'The admin screen no longer splits subscribers by plan.',
+      description: 'Active subscribers on the yearly plan, e.g. `3`',
       resolve: (metrics) => metrics.premium.yearly,
     }),
     revenueProceedsEur: t.field({
