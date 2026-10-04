@@ -108,11 +108,6 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
 
 - Écran Admin : le flag `admin: true` se pose à la main sur `user-profiles/<uid>` en console
   Firestore.
-- Clé Gemini : elle vit encore dans le projet AI Studio partagé « Perso » (compte de facturation
-  du gmail), hors de l'export. Tant qu'une clé créée dans `vinarium-prod` n'a pas remplacé le
-  secret `GEMINI_API_KEY`, la ligne Gemini de l'écran Admin lit 0 €. `FIRST_BILLED_MONTH`
-  (`server/domain/admin/business-rules.ts`) vaut `2026-10` : aucune comparaison avec un mois
-  antérieur.
 
 ## Facturation
 
@@ -122,6 +117,11 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
   le serveur filtre sur son propre projet. Environ un jour de retard.
 - Gemini y apparaît sous `service.description = 'Gemini API'`, sans ligne de crédit en usage
   prépayé ; l'infrastructure porte les crédits du niveau gratuit.
+- Clé Gemini du serveur : clé « Vinarium server » du projet `vinarium-prod`
+  (`74856748-4e74-41d4-9a7b-75c100003fb1`), limitée à `generativelanguage.googleapis.com`, posée
+  dans le secret `GEMINI_API_KEY` le 2026-10-04. Avant, elle vivait dans le projet AI Studio
+  partagé « Perso », hors de l'export : `FIRST_BILLED_MONTH` vaut `2026-10`, aucune comparaison
+  avec un mois antérieur. L'ancienne clé « Perso » reste valide tant qu'elle n'est pas supprimée.
 - `ASC_VENDOR_NUMBER` (`94007373`) est posé : les revenus App Store remontent.
 - Sessions GA4 : `vinarium-runtime@vinarium-prod.iam.gserviceaccount.com` est Lecteur de la
   propriété `548838755` (accordé le 2026-10-04), variable GitHub `GA4_PROPERTY_ID` posée. Dans le
