@@ -9,6 +9,8 @@
  * 2026-08-07 and put every panel up twice, on a run it reported as green.
  *
  * Needs an App Store Connect API key: ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_PATH.
+ * APP_VERSION, when set, names the version a release is shipping: it is created
+ * if the store has no editable version yet.
  */
 import { createHash, createSign } from 'node:crypto'
 import { readFileSync } from 'node:fs'
@@ -81,8 +83,15 @@ const api = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
   return (response.status === 204 ? undefined : await response.json()) as T
 }
 
-/** The version the store lets us edit — the one a release is preparing. */
-const editableVersion = async () => {
+/**
+ * The version the store lets us edit — the one a release is preparing.
+ *
+ * On a release nothing has created it yet: the panels go up before the submission,
+ * and the submission is what used to open the version. So when the store has none
+ * and the release named its version, it is opened here; it starts from the previous
+ * version's localizations, which is what the panels are then filed under.
+ */
+const editableVersion = async (releasing?: string) => {
   const apps = await api<Collection<{ bundleId: string }>>(`/v1/apps?filter[bundleId]=${BUNDLE_ID}`)
   const appId = apps.data[0]?.id
   if (!appId) throw new Error(`No app for ${BUNDLE_ID}`)
@@ -91,6 +100,19 @@ const editableVersion = async () => {
   // screenshots are frozen; failing here beats uploading into a void.
   const editable = ['PREPARE_FOR_SUBMISSION', 'DEVELOPER_REJECTED', 'REJECTED', 'METADATA_REJECTED']
   const version = versions.data.find((v) => editable.includes(v.attributes.appStoreState))
+  if (!version && releasing) {
+    const created = await api<Single<Version>>('/v1/appStoreVersions', {
+      method: 'POST',
+      body: JSON.stringify({
+        data: {
+          type: 'appStoreVersions',
+          attributes: { platform: 'IOS', versionString: releasing },
+          relationships: { app: { data: { type: 'apps', id: appId } } },
+        },
+      }),
+    })
+    return created.data
+  }
   if (!version)
     throw new Error(
       `No editable version: ${versions.data
@@ -164,7 +186,7 @@ const upload = async (setId: string, path: string) => {
   return reserved.data.id
 }
 
-const version = await editableVersion()
+const version = await editableVersion(process.env.APP_VERSION || undefined)
 console.log(`Version ${version.attributes.versionString} (${version.attributes.appStoreState})`)
 
 const localizations = await api<Collection<{ locale: string }>>(

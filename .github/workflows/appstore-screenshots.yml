@@ -5,6 +5,11 @@ name: App Store screenshots
 # change outside a release (or when a release shipped without them).
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to open if the store has no editable one, e.g. 1.7 (leave empty otherwise)'
+        required: false
+        default: ''
   workflow_call:
 
 permissions:
@@ -35,6 +40,15 @@ jobs:
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
           ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          RELEASE_TAG: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
+          APP_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || '' }}
         # The version has to be editable: a version already in review refuses new
-        # screenshots, so this runs before the submission, not after it.
-        run: bun run scripts/upload-appstore-panels.ts
+        # screenshots, so this runs before the submission, not after it. On a release
+        # tag the version does not exist yet — the submission used to create it — so
+        # the script is told which one to open. A manual run can name it too.
+        run: |
+          set -euo pipefail
+          case "$RELEASE_TAG" in
+            ios-v*) export APP_VERSION="${RELEASE_TAG#ios-v}" ;;
+          esac
+          bun run scripts/upload-appstore-panels.ts
