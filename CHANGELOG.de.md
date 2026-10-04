@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### Neu
+- Mit Vinarium Premium lassen sich jetzt mehrere Weinkeller führen, einer pro Schrank oder pro Raum, jeder mit eigenem Namen und eigenem Raster. Angelegt werden sie im Tab Weinkeller oder in den Einstellungen unter „Weinkeller“, und eine Flasche kann von einem in den anderen wandern.
+- Der Scan-Tab öffnet sich jetzt mit „Wein hinzufügen“: die Kamera, die letzten Fotos und ein Textfeld. Ein Wein lässt sich auch ohne Foto hinzufügen, indem er beschrieben wird: „Chablis 2019 von William Fèvre“.
+- Das Datenblatt eines Weins nimmt jetzt „Anhänge“ auf: bis zu fünf Fotos oder Dokumente, zum Beispiel eine Rechnung oder das Datenblatt des Erzeugers.
+- Das Datenblatt eines Weins nennt jetzt seine Cuvée, unter dem Weingut. Der Scan liest sie vom Etikett, und die Suche findet sie: „pucelles“ findet einen Puligny-Montrachet „Les Pucelles“.
+- Die Suche versteht Kategorien: „Champagner“ oder „Sekt“ finden die Schaumweine, auch wenn das Wort nicht auf dem Etikett steht.
+- Das Weingut steht über dem Namen des Weins, in der Weinliste, im Weinkeller, im Verlauf und in der Suche.
+- Die Weinliste behält die Ansicht, die Sortierung und die Filter des letzten Besuchs.
+- In den Einstellungen stehen Profil, Premium, Weinkeller und Teilen jetzt in einem gemeinsamen Abschnitt, und „Import / Export“ befindet sich jetzt unter „Profil“.
+
+### Korrekturen
+- Die Zeilen der Einstellungen reagieren auf ihrer ganzen Breite und nicht mehr nur auf ihrem Titel.
+
+### Performance
+- Die Startseite, der Weinkeller und die Weinliste öffnen sich mit ihrem letzten Inhalt, ohne Ladebildschirm, und aktualisieren sich danach.
+- Die Bildschirme öffnen sich schneller, und eine gefilterte Liste erscheint zügiger, auch bei vielen Flaschen.
+
 ## 1.6 (2026.08.08)
 
 ### Neu

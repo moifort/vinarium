@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### Nouveautés
+- Vinarium Premium permet maintenant de tenir plusieurs caves, une par meuble ou par pièce, chacune avec son nom et sa grille. Elles se créent depuis l'onglet Cave ou dans les Réglages, sous « Caves », et une bouteille peut passer de l'une à l'autre.
+- L'onglet de scan s'ouvre maintenant sur « Ajouter un vin » : l'appareil photo, les dernières photos et un champ de texte. Un vin peut être ajouté sans photo, en le décrivant : « Chablis 2019 de William Fèvre ».
+- La fiche d'un vin accueille des « Pièces jointes » : jusqu'à cinq photos ou documents, par exemple une facture ou la fiche technique du producteur.
+- La fiche d'un vin indique maintenant sa cuvée, sous le domaine. Le scan la lit sur l'étiquette et la recherche la retrouve : « pucelles » trouve un Puligny-Montrachet « Les Pucelles ».
+- La recherche comprend les catégories : « champagne » ou « pétillant » trouvent les vins effervescents, même si le mot ne figure pas sur l'étiquette.
+- Le domaine s'affiche au-dessus du nom du vin dans la liste des vins, la cave, le journal et la recherche.
+- La liste des vins garde la vue, le tri et les filtres choisis lors de la dernière visite.
+- Dans les Réglages, le profil, Premium, les caves et le partage sont réunis dans une même section, et « Importer / Exporter » se trouve maintenant dans « Profil ».
+
+### Corrections
+- Les lignes des Réglages réagissent sur toute leur largeur, et non plus sur leur seul titre.
+
+### Performance
+- L'accueil, la cave et la liste des vins s'ouvrent sur leur dernier contenu, sans écran de chargement, puis se mettent à jour.
+- Les écrans s'ouvrent plus vite, et une liste filtrée s'affiche plus rapidement, même sur un grand nombre de bouteilles.
+
 ## 1.6 (2026.08.08)
 
 ### Nouveautés

@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### Novità
+- Vinarium Premium permette ora di tenere più cantine, una per mobile o per stanza, ciascuna con il suo nome e la sua griglia. Si creano dalla scheda Cantina o nelle Impostazioni, in «Cantine», e una bottiglia può passare dall'una all'altra.
+- La scheda di scansione si apre ora su «Aggiungi un vino»: la fotocamera, le ultime foto e un campo di testo. Un vino può essere aggiunto senza foto, descrivendolo: «Chablis 2019 di William Fèvre».
+- La scheda di un vino accoglie gli «Allegati»: fino a cinque foto o documenti, per esempio una fattura o la scheda tecnica del produttore.
+- La scheda di un vino indica ora la sua cuvée, sotto la tenuta. La scansione la legge sull'etichetta e la ricerca la trova: «pucelles» trova un Puligny-Montrachet «Les Pucelles».
+- La ricerca capisce le categorie: «champagne» o «spumante» trovano i vini spumanti, anche se la parola non compare sull'etichetta.
+- La tenuta compare sopra il nome del vino nella lista dei vini, nella cantina, nel diario e nella ricerca.
+- La lista dei vini conserva la vista, l'ordinamento e i filtri scelti nell'ultima visita.
+- Nelle Impostazioni il profilo, Premium, le cantine e la condivisione sono riuniti in un'unica sezione, e «Importa / Esporta» si trova ora in «Profilo».
+
+### Correzioni
+- Le righe delle Impostazioni rispondono su tutta la larghezza, e non più sul solo titolo.
+
+### Prestazioni
+- La home, la cantina e la lista dei vini si aprono sul loro ultimo contenuto, senza schermata di caricamento, poi si aggiornano.
+- Le schermate si aprono più in fretta, e una lista filtrata compare più rapidamente, anche con tante bottiglie.
+
 ## 1.6 (2026.08.08)
 
 ### Novità

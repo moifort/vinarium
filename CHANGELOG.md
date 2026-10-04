@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### New
+- Vinarium Premium now holds several cellars, one per cabinet or per room, each with its own name and grid. They are created from the Cellar tab or in Settings, under "Cellars", and a bottle can move from one to another.
+- The scan tab now opens on "Add a wine": the camera, the latest photos and a text field. A wine can be added without a photo, by describing it: "Chablis 2019 by William Fèvre".
+- A wine's sheet now takes "Attachments": up to five photos or documents, an invoice or the producer's data sheet for instance.
+- A wine's sheet now states its cuvée, under the estate. The scan reads it on the label and the search finds it: "pucelles" finds a Puligny-Montrachet "Les Pucelles".
+- The search understands categories: "champagne" or "sparkling" find the sparkling wines, even when the word is not on the label.
+- The estate is shown above the wine's name in the wine list, the cellar, the journal and the search.
+- The wine list keeps the view, the sort and the filters chosen on the last visit.
+- In Settings, the profile, Premium, the cellars and sharing now sit in one section, and "Import / Export" is now found in "Profile".
+
+### Fixes
+- The rows of the Settings respond across their whole width, and no longer on their title alone.
+
+### Performance
+- The home, the cellar and the wine list open on what they last showed, without a loading screen, then refresh.
+- Screens open faster, and a filtered list appears more quickly, even on a large number of bottles.
+
 ## 1.6 (2026.08.08)
 
 ### New

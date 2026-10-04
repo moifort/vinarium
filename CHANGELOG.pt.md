@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### Novidades
+- O Vinarium Premium permite agora ter várias adegas, uma por móvel ou por divisão, cada uma com o seu nome e a sua grelha. Criam-se no separador Adega ou nas Definições, em «Adegas», e uma garrafa pode passar de uma para outra.
+- O separador de digitalização abre agora em «Adicionar um vinho»: a câmara, as últimas fotografias e um campo de texto. Um vinho pode ser adicionado sem fotografia, descrevendo-o: «Chablis 2019 de William Fèvre».
+- A ficha de um vinho recebe «Anexos»: até cinco fotografias ou documentos, por exemplo uma fatura ou a ficha técnica do produtor.
+- A ficha de um vinho indica agora a sua cuvée, por baixo da quinta. A digitalização lê-a no rótulo e a pesquisa encontra-a: «pucelles» encontra um Puligny-Montrachet «Les Pucelles».
+- A pesquisa compreende as categorias: «champagne» ou «espumante» encontram os vinhos espumantes, mesmo que a palavra não esteja no rótulo.
+- A quinta aparece por cima do nome do vinho na lista de vinhos, na adega, no diário e na pesquisa.
+- A lista de vinhos mantém a vista, a ordenação e os filtros escolhidos na última visita.
+- Nas Definições, o perfil, o Premium, as adegas e a partilha ficam reunidos numa mesma secção, e «Importar / Exportar» encontra-se agora em «Perfil».
+
+### Correções
+- As linhas das Definições respondem em toda a largura, e já não apenas no título.
+
+### Desempenho
+- O início, a adega e a lista de vinhos abrem com o último conteúdo, sem ecrã de carregamento, e depois atualizam-se.
+- Os ecrãs abrem mais depressa, e uma lista filtrada aparece mais rapidamente, mesmo com muitas garrafas.
+
 ## 1.6 (2026.08.08)
 
 ### Novidades

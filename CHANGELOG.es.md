@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.7 (2026.10.04)
+
+### Novedades
+- Vinarium Premium permite ahora llevar varias bodegas, una por mueble o por habitación, cada una con su nombre y su cuadrícula. Se crean desde la pestaña Bodega o en los Ajustes, en «Bodegas», y una botella puede pasar de una a otra.
+- La pestaña de escaneo se abre ahora en «Añadir un vino»: la cámara, las últimas fotos y un campo de texto. Un vino puede añadirse sin foto, describiéndolo: «Chablis 2019 de William Fèvre».
+- La ficha de un vino admite «Archivos adjuntos»: hasta cinco fotos o documentos, por ejemplo una factura o la ficha técnica del productor.
+- La ficha de un vino indica ahora su cuvée, debajo de la bodega. El escaneo la lee en la etiqueta y la búsqueda la encuentra: «pucelles» encuentra un Puligny-Montrachet «Les Pucelles».
+- La búsqueda entiende las categorías: «champagne» o «espumoso» encuentran los vinos espumosos, aunque la palabra no figure en la etiqueta.
+- La bodega del vino aparece encima de su nombre en la lista de vinos, la pestaña Bodega, el diario y la búsqueda.
+- La lista de vinos conserva la vista, el orden y los filtros elegidos en la última visita.
+- En los Ajustes, el perfil, Premium, las bodegas y el uso compartido quedan reunidos en una misma sección, e «Importar / Exportar» se encuentra ahora en «Perfil».
+
+### Correcciones
+- Las filas de los Ajustes responden en toda su anchura, y ya no solo en su título.
+
+### Rendimiento
+- El inicio, la bodega y la lista de vinos se abren con su último contenido, sin pantalla de carga, y luego se actualizan.
+- Las pantallas se abren más rápido, y una lista filtrada aparece antes, incluso con muchas botellas.
+
 ## 1.6 (2026.08.08)
 
 ### Novedades
