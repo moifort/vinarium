@@ -108,8 +108,22 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
 
 - Écran Admin : le flag `admin: true` se pose à la main sur `user-profiles/<uid>` en console
   Firestore.
-- Variable GitHub `ASC_VENDOR_NUMBER` à créer pour les revenus App Store, et vérifier que la clé
-  App Store Connect porte le rôle « Sales and Reports ». Sans elle, le revenu reste indisponible
-  sans rien casser.
-- Table d'export BigQuery de facturation : activée le 2026-07-24, variable `GCP_BILLING_TABLE`
-  posée. Le coût d'infrastructure reste nul tant que l'export n'écrit pas.
+- Sessions GA4 de l'écran Admin : accorder le rôle Lecteur sur la propriété `548838755` au compte
+  de service `vinarium-runtime@vinarium-prod.iam.gserviceaccount.com` (GA4 Admin, gestion des
+  accès à la propriété, sans notification par courriel), puis poser la variable GitHub
+  `GA4_PROPERTY_ID=548838755`. Sans les deux, les sessions restent « indisponibles ».
+- Clé Gemini : elle vit encore dans le projet AI Studio partagé « Perso » (compte de facturation
+  du gmail), hors de l'export. Tant qu'une clé créée dans `vinarium-prod` n'a pas remplacé le
+  secret `GEMINI_API_KEY`, la ligne Gemini de l'écran Admin lit 0 €. `FIRST_BILLED_MONTH`
+  (`server/domain/admin/business-rules.ts`) vaut `2026-10` : aucune comparaison avec un mois
+  antérieur.
+
+## Facturation
+
+- Export BigQuery du compte de facturation `01B9B2-D51D23-1EF14D` :
+  `vinarium-prod.billing_export.gcp_billing_export_v1_01B9B2_D51D23_1EF14D`, variable GitHub
+  `GCP_BILLING_TABLE`. Il contient les lignes de tous les projets du compte (Shiori compris) :
+  le serveur filtre sur son propre projet. Environ un jour de retard.
+- Gemini y apparaît sous `service.description = 'Gemini API'`, sans ligne de crédit en usage
+  prépayé ; l'infrastructure porte les crédits du niveau gratuit.
+- `ASC_VENDOR_NUMBER` (`94007373`) est posé : les revenus App Store remontent.
