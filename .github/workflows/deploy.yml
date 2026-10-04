@@ -105,6 +105,7 @@ jobs:
           asc_private_key_path   = "./asc.p8"
           asc_vendor_number      = "${{ vars.ASC_VENDOR_NUMBER }}"
           gcp_billing_table      = "${{ vars.GCP_BILLING_TABLE }}"
+          ga4_property_id        = "${{ vars.GA4_PROPERTY_ID }}"
           EOF
 
       - name: Terraform init + apply

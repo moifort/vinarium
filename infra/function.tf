@@ -12,8 +12,9 @@ resource "google_project_iam_member" "function_firestore" {
 
 # The admin metrics read actual GCP spend from the billing export dataset in
 # BigQuery: the function needs to run a query job and read that dataset. The
-# project holds no other BigQuery data, so project-scoped viewer is as narrow
-# as it is useful.
+# export holds every project of the billing account, and the server filters it
+# on this one. The project holds no other BigQuery data, so project-scoped
+# viewer is as narrow as it is useful.
 resource "google_project_iam_member" "function_bigquery_job_user" {
   project = google_project.this.project_id
   role    = "roles/bigquery.jobUser"
@@ -108,6 +109,7 @@ resource "google_cloudfunctions2_function" "server" {
       NITRO_ASC_KEY_ID        = var.asc_key_id
       NITRO_ASC_VENDOR_NUMBER = var.asc_vendor_number
       NITRO_GCP_BILLING_TABLE = var.gcp_billing_table
+      NITRO_GA4_PROPERTY_ID   = var.ga4_property_id
       # The private bucket holding wine attachments (see storage.tf).
       NITRO_ATTACHMENTS_BUCKET = google_storage_bucket.attachments.name
     }
