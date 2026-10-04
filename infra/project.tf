@@ -34,6 +34,8 @@ resource "google_project_service" "apis" {
     "bigquery.googleapis.com",
     # The admin screen reads the daily sessions GA4 counts for the app.
     "analyticsdata.googleapis.com",
+    # Gemini, billed to this project so the admin screen's bill includes it.
+    "generativelanguage.googleapis.com",
   ])
 
   project            = google_project.this.project_id
