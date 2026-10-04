@@ -108,10 +108,6 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
 
 - Écran Admin : le flag `admin: true` se pose à la main sur `user-profiles/<uid>` en console
   Firestore.
-- Sessions GA4 de l'écran Admin : accorder le rôle Lecteur sur la propriété `548838755` au compte
-  de service `vinarium-runtime@vinarium-prod.iam.gserviceaccount.com` (GA4 Admin, gestion des
-  accès à la propriété, sans notification par courriel), puis poser la variable GitHub
-  `GA4_PROPERTY_ID=548838755`. Sans les deux, les sessions restent « indisponibles ».
 - Clé Gemini : elle vit encore dans le projet AI Studio partagé « Perso » (compte de facturation
   du gmail), hors de l'export. Tant qu'une clé créée dans `vinarium-prod` n'a pas remplacé le
   secret `GEMINI_API_KEY`, la ligne Gemini de l'écran Admin lit 0 €. `FIRST_BILLED_MONTH`
@@ -127,3 +123,7 @@ ont un `.example` à côté. `SENTRY_AUTH_TOKEN` vit dans `.env`, jamais affich�
 - Gemini y apparaît sous `service.description = 'Gemini API'`, sans ligne de crédit en usage
   prépayé ; l'infrastructure porte les crédits du niveau gratuit.
 - `ASC_VENDOR_NUMBER` (`94007373`) est posé : les revenus App Store remontent.
+- Sessions GA4 : `vinarium-runtime@vinarium-prod.iam.gserviceaccount.com` est Lecteur de la
+  propriété `548838755` (accordé le 2026-10-04), variable GitHub `GA4_PROPERTY_ID` posée. Dans le
+  navigateur intégré, la gestion des accès GA4 ne s'affiche qu'avec `?authuser=0` (l'adresse
+  `authuser=thibaut@polyforms.co` laisse le panneau vide, réponse 401).
