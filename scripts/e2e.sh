@@ -32,7 +32,6 @@ FIRESTORE_PORT=8080
 # runtime of its own Xcode.
 SIMULATOR="${E2E_SIMULATOR:-iPhone 17}"
 SIMULATOR_OS="${E2E_SIMULATOR_OS:-26.2}"
-DESTINATION="${E2E_DESTINATION:-platform=iOS Simulator,name=${SIMULATOR},OS=${SIMULATOR_OS}}"
 # The scenarios that gate a release, space-separated. They share one emulator
 # run: each test signs in with an account of its own, so they stay isolated.
 TESTS="${E2E_TESTS:-VinariumUITests/CellarFlowTest VinariumUITests/FavoriteFlowTest VinariumUITests/GiveAsGiftFlowTest VinariumUITests/RecommendationFlowTest}"
@@ -59,6 +58,26 @@ fi
 if [ -z "${DEVELOPER_DIR:-}" ] && [ -d /Applications/Xcode.app ]; then
   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 fi
+
+# The pinned runtime is not always there: an Xcode upgrade takes it away, and a
+# runtime weighs gigabytes nobody wants to download for a run. When it is missing
+# the newest installed one is used instead, and a simulator is created on it if
+# none carries that name yet. An explicit E2E_SIMULATOR_OS is never second-guessed.
+if [ -z "${E2E_DESTINATION:-}" ]; then
+  if [ -z "${E2E_SIMULATOR_OS:-}" ] && ! xcrun simctl list runtimes | grep -q "^iOS $SIMULATOR_OS "; then
+    INSTALLED_OS=$(xcrun simctl list runtimes | sed -n 's/^iOS \([0-9.]*\) .*/\1/p' | sort -V | tail -1)
+    if [ -z "$INSTALLED_OS" ]; then
+      echo "error: no iOS simulator runtime is installed." >&2
+      exit 1
+    fi
+    echo "==> iOS $SIMULATOR_OS is not installed, using iOS $INSTALLED_OS"
+    SIMULATOR_OS="$INSTALLED_OS"
+  fi
+  if ! xcrun simctl list devices available "iOS $SIMULATOR_OS" | grep -q "^ *$SIMULATOR ("; then
+    xcrun simctl create "$SIMULATOR" "$SIMULATOR" "iOS$SIMULATOR_OS" >/dev/null
+  fi
+fi
+DESTINATION="${E2E_DESTINATION:-platform=iOS Simulator,name=${SIMULATOR},OS=${SIMULATOR_OS}}"
 
 # The emulators must run under the project the app is built against: a Firebase
 # ID token carries its project as audience, and verifyIdToken rejects any other.
@@ -182,6 +201,16 @@ export NITRO_ADMIN_TOKEN=stub
 # The dev auth bypass must stay off: the app sends a real emulator token, and a
 # blank bypass would hide a broken sign-in behind a working test.
 export NITRO_DEV_USER_ID=
+
+# firebase-tools pulls re2, an optional native module of its static server. With
+# no Node on the machine bunx runs the CLI under Bun, and Bun 1.4.2 segfaults
+# loading it: the whole run dies before the emulators start. The module is only
+# an accelerator, required in a try/catch that falls back to RegExp, so it is
+# taken out of bunx's cache. With Node installed, as on CI, nothing is touched.
+if ! command -v node >/dev/null 2>&1; then
+  bunx firebase-tools --version >/dev/null
+  rm -rf "${TMPDIR:-/tmp}/bunx-$(id -u)-firebase-tools@latest/node_modules/re2"
+fi
 
 exec bunx firebase-tools emulators:exec \
   --only "auth,firestore" \
