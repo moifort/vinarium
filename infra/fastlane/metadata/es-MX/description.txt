@@ -1,0 +1,33 @@
+Vinarium es tu cava de vino en el bolsillo.
+
+Fotografía la etiqueta de una botella: la IA reconoce el vino y llena automáticamente el viñedo, la añada, la región y la denominación, e incluso estima su precio. Se acabó escribirlo todo a mano.
+
+FUNCIONES
+• Escaneo con IA: fotografía una etiqueta y obtén una ficha completa en segundos
+• Cava en cuadrícula: acomoda tus botellas por fila y columna y encuéntralas de un vistazo
+• Diario: historial de entradas y salidas, con tus notas de cata y calificaciones
+• Panel: valor de tu cava, ocupación, botellas para beber pronto, actividad reciente
+• Búsqueda potente: por nombre, productor, región, añada o persona, con filtros combinables
+• Listas para beber: Vinarium te avisa cuando una botella alcanza su madurez
+• Favoritos: marca los vinos, destilados o cervezas que te marcaron y encuéntralos con un toque
+• Dónde la encontraste: el escaneo guarda el lugar en el que estabas, para recordar dónde descubriste la botella
+• Regalos y recomendaciones: lleva la cuenta de los vinos regalados, recibidos o recomendados por un amigo
+
+NO SOLO VINO
+Un oporto, un ron, un whisky, un sake, un champán o una cerveza también tienen su lugar en la cava, con los datos propios de su tipo de botella.
+
+COMPARTIR EN FAMILIA
+Comparte una sola cava con las personas de tu casa mediante un código de invitación. Cada quien puede acomodar, mover o beber cualquier botella de la cava común, manteniendo su propia biblioteca, notas y diario en privado.
+
+RESPETO POR TU PRIVACIDAD
+Sin publicidad, sin rastreo. Tus datos siguen siendo tuyos y puedes exportarlos cuando quieras.
+
+Inicia sesión con un toque usando Iniciar sesión con Apple y empieza a construir tu cava.
+
+VINARIUM PREMIUM
+La cava, el diario y el uso compartido en casa son gratuitos e ilimitados. Solo se cuenta el escaneo de etiquetas: cinco escaneos al mes. Premium elimina ese límite y añade a cada botella escaneada el precio estimado, la ventana de consumo y la región. Premium permite además llevar varias cavas, cada una con su cuadrícula.
+
+Premium se ofrece en plan mensual o en plan anual que empieza con 7 días de prueba gratis; ambos precios se muestran en la App Store. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
+
+Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidad: https://moifort.github.io/vinarium/

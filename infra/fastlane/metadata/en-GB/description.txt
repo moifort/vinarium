@@ -1,6 +1,6 @@
 Vinarium is your wine cellar in your pocket.
 
-Photograph a bottle's label: the AI recognizes the wine and automatically fills in the estate, vintage, region, appellation, and even estimates its price. No more typing everything by hand.
+Photograph a bottle's label: the AI recognises the wine and automatically fills in the estate, vintage, region, appellation, and even estimates its price. No more typing everything by hand.
 
 FEATURES
 • AI scan: snap a label, get a complete record in seconds
@@ -9,7 +9,7 @@ FEATURES
 • Dashboard: your cellar's value, occupancy rate, bottles to drink soon, recent activity
 • Powerful search: by name, producer, region, vintage or person, with combinable filters
 • Ready to drink: Vinarium alerts you when a bottle reaches maturity
-• Favorites: mark the wines, spirits or beers that stayed with you, and find them again in one tap
+• Favourites: mark the wines, spirits or beers that stayed with you, and find them again in one tap
 • Where you found it: the scan records the place you were in, so you remember where a bottle came from
 • Gifts & recommendations: keep track of wines given, received, or recommended by a friend
 

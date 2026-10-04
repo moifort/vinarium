@@ -1,0 +1,33 @@
+O Vinarium é a sua adega no bolso.
+
+Fotografe o rótulo de uma garrafa: a IA reconhece o vinho e preenche automaticamente a vinícola, a safra, a região e a denominação, e ainda estima o preço. Chega de digitar tudo à mão.
+
+RECURSOS
+• Escaneamento com IA: fotografe um rótulo e receba uma ficha completa em segundos
+• Adega em grade: organize suas garrafas por fileira e coluna e encontre-as num piscar de olhos
+• Diário: histórico de entradas e saídas, com suas notas de degustação e avaliações
+• Painel: valor da sua adega, ocupação, garrafas para beber em breve, atividade recente
+• Busca poderosa: por nome, produtor, região, safra ou pessoa, com filtros combináveis
+• Prontas para beber: o Vinarium avisa quando uma garrafa atinge a maturidade
+• Favoritos: marque os vinhos, destilados ou cervejas que marcaram você e encontre-os de novo com um toque
+• Onde você a encontrou: o escaneamento guarda o lugar onde você estava, para lembrar onde descobriu a garrafa
+• Presentes e recomendações: acompanhe os vinhos presenteados, recebidos ou recomendados por um amigo
+
+NÃO SÓ VINHO
+Um porto, um rum, um uísque, um saquê, um champanhe ou uma cerveja também têm lugar na adega, com os dados próprios do seu tipo de garrafa.
+
+COMPARTILHAMENTO EM FAMÍLIA
+Compartilhe uma única adega com as pessoas da sua casa por meio de um código de convite. Cada um pode guardar, mover ou beber qualquer garrafa da adega comum, mantendo privados a própria biblioteca, notas e diário.
+
+RESPEITO À SUA PRIVACIDADE
+Sem publicidade, sem rastreamento. Seus dados continuam sendo seus e podem ser exportados quando você quiser.
+
+Entre com um toque usando Iniciar sessão com a Apple e comece a montar sua adega.
+
+VINARIUM PREMIUM
+A adega, o diário e o compartilhamento em família são gratuitos e ilimitados. Apenas o escaneamento de rótulos é contado: cinco escaneamentos por mês. O Premium tira esse limite e acrescenta a cada garrafa escaneada o preço estimado, a janela de consumo e a região. O Premium permite ainda ter várias adegas, cada uma com a sua grade.
+
+O Premium vem no plano mensal ou no plano anual, que começa com 7 dias de teste grátis; os dois preços aparecem na App Store. A assinatura é renovada automaticamente, salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerenciada e cancelada nos ajustes da conta App Store.
+
+Termos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
+Política de privacidade: https://moifort.github.io/vinarium/
