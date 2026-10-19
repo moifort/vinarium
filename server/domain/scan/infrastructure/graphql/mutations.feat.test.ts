@@ -9,7 +9,7 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 // Nobody pays Google in a test: the scan is stubbed, and what is asserted is who
 // is allowed to reach it and what reaching it costs the caller.
 let cacheHit = false
-let scanFails = false
+let scanFails: false | Error = false
 const scanned = { calls: 0, description: undefined as string | undefined }
 
 const aScanResult = { recognized: true, name: 'Château Margaux', beverageType: 'wine' }
@@ -19,13 +19,13 @@ mock.module('~/domain/scan', () => ({
     scanWithCache: async (_image: Buffer, _language: string, description?: string) => {
       scanned.calls += 1
       scanned.description = description
-      if (scanFails) throw new Error('Gemini is down')
+      if (scanFails) throw scanFails
       return { result: aScanResult as unknown as ScanResult, cacheHit }
     },
     identifyWithCache: async (description: string) => {
       scanned.calls += 1
       scanned.description = description
-      if (scanFails) throw new Error('Gemini is down')
+      if (scanFails) throw scanFails
       return { result: aScanResult as unknown as ScanResult, cacheHit }
     },
   },
@@ -199,12 +199,29 @@ describe('what a scan actually costs the caller', () => {
   })
 
   test('a failed model call spends nothing', async () => {
-    scanFails = true
+    scanFails = new Error('Gemini is down')
 
     const result = await scan()
 
     expect(errorCodeOf(result)).toBe('SCAN_FAILED')
     expect((await execute(`query { quota { used } }`)).data?.quota).toMatchObject({ used: 0 })
+  })
+
+  // What ofetch says when Google answers 4xx: the method, the full URL and the
+  // status. The URL names the model and carried the API key for a long time,
+  // so none of it may reach a client, nor Sentry through the client.
+  test('a failed model call never tells the caller where or how it failed', async () => {
+    scanFails = new Error(
+      '[POST] "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyFAKE": 404 Not Found',
+    )
+
+    const result = await scan()
+
+    expect(errorCodeOf(result)).toBe('SCAN_FAILED')
+    const message = result.errors?.[0]?.message ?? ''
+    expect(message).not.toContain('googleapis.com')
+    expect(message).not.toContain('key=')
+    expect(message).not.toContain('AIzaSy')
   })
 
   test('an oversized image is refused before the quota is even read', async () => {
@@ -289,7 +306,7 @@ describe('identifying a beverage from a description', () => {
   })
 
   test('a failed model call spends nothing', async () => {
-    scanFails = true
+    scanFails = new Error('Gemini is down')
 
     expect(errorCodeOf(await identify())).toBe('SCAN_FAILED')
     expect((await execute(`query { quota { used } }`)).data?.quota).toMatchObject({ used: 0 })

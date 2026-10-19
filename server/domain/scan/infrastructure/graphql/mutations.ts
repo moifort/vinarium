@@ -10,7 +10,10 @@ import type { ScanLanguage } from '~/domain/scan/types'
 import type { GraphQLContext } from '~/domain/shared/graphql/builder'
 import { builder } from '~/domain/shared/graphql/builder'
 import { domainError } from '~/domain/shared/graphql/errors'
+import { createLogger } from '~/system/logger'
 import { ScanResultType } from './types'
+
+const logger = createLogger('scan')
 
 builder.mutationField('scanBeverage', (t) =>
   t.field({
@@ -100,7 +103,9 @@ const meteredScan = async (
     await AdminCommand.recordAiUsage({ cacheHit, ...usage }).catch(() => {})
     return result
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Scan failed'
-    return domainError('SCAN_FAILED', message)
+    // The cause stays on the server: a fetch error quotes the model URL, and a
+    // deliberate GraphQLError is never captured by Sentry, so log it here.
+    logger.error('scan failed', error)
+    return domainError('SCAN_FAILED', 'The model could not read this beverage')
   }
 }

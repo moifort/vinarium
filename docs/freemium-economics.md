@@ -5,6 +5,11 @@
 > visible tokens. Gemini 2.5 Flash is a **reasoning** model and neither scan call pins a thinking
 > budget, so the thinking tokens — billed at the output rate — are the largest line on a scan.
 > The corrected figure is **~4x higher**, which is what moves the price.
+>
+> Updated 2026.10.19: Google withdrew Gemini 2.5 Flash from new API keys and the scan now runs on
+> **Gemini 3.5 Flash-Lite**, same rates but no thinking tokens. The per-scan figures below are
+> still the 2.5 Flash ones and must be recalibrated on the real `usageMetadata` the admin
+> metrics capture; the rest of the economics is left as written.
 
 The model decided here: **AI scans are metered monthly, everything else stays free and
 unlimited**. Adding a bottle by hand, the cellar, the tastings, the dashboard and the shared
@@ -32,13 +37,17 @@ harmless today and becomes a per-event bill with traffic. Lower it before any gr
 
 ### The variable cost: one scan
 
-`server/domain/scan/index.ts` makes **two** Gemini 2.5 Flash calls per cache miss. Rates: $0.30
-per M input tokens, $2.50 per M output tokens, Google Search grounding free for the first 1,500
-requests a day then $35 per 1,000.
+`server/domain/scan/index.ts` makes **two** Gemini 3.5 Flash-Lite calls per cache miss. Rates:
+$0.30 per M input tokens, $2.50 per M output tokens, Google Search grounding free for the first
+5,000 requests a month then $14 per 1,000. Flash-Lite emits no thinking tokens, so the output
+line is the visible answer only.
 
 The image reaches the server at 800 px max / JPEG q0.6 (`ScanView.swift`, `CameraView.swift`),
-which Gemini tiles into roughly 800 image tokens. Neither call sets `thinkingConfig`, so dynamic
-thinking runs and its tokens bill as output.
+which Gemini tiles into roughly 800 image tokens.
+
+**The table below was measured on Gemini 2.5 Flash and is to be recalibrated** on the real
+`usageMetadata` of 3.5 Flash-Lite, which the scan now captures: the thinking column drops to
+zero, which should put a scan nearer $0.001 than $0.01.
 
 | | Input | Output (incl. thinking) | Cost |
 |---|---|---|---|

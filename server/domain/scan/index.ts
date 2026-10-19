@@ -20,14 +20,15 @@ import { config } from '~/system/config/index'
 import { createLogger } from '~/system/logger'
 
 const GEMINI_API_URL =
-  'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent'
+  'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent'
 
 const logger = createLogger('scan')
 
 // What Gemini says the call cost. Thinking tokens bill at the output rate and
-// are the largest line on a scan, so they are kept apart: the free allowance
-// and the price are sized on these numbers (docs/freemium-economics.md), and
-// the admin metrics recalibrate them against what is captured here.
+// were the largest line on a scan with 2.5 Flash, so they are kept apart even
+// though Flash-Lite reports none: the free allowance and the price are sized
+// on these numbers (docs/freemium-economics.md), and the admin metrics
+// recalibrate them against what is captured here.
 type GeminiUsage = {
   promptTokenCount?: number
   candidatesTokenCount?: number
@@ -315,9 +316,11 @@ export namespace Scan {
     const response = await $fetch<{
       candidates: { content: { parts: { text?: string }[] } }[]
       usageMetadata?: GeminiUsage
-    }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
+    }>(GEMINI_API_URL, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      // The key travels in a header, never in the URL: a failed call's error
+      // message quotes the URL, and that message gets logged and reported.
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': googleApiKey },
       body: { contents: [{ parts }], generationConfig: EXTRACTION_CONFIG },
     })
 
@@ -393,9 +396,11 @@ Utilise les données les plus récentes disponibles sur le web. Si tu ne trouves
     const response = await $fetch<{
       candidates: { content: { parts: { text?: string }[] } }[]
       usageMetadata?: GeminiUsage
-    }>(`${GEMINI_API_URL}?key=${googleApiKey}`, {
+    }>(GEMINI_API_URL, {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      // The key travels in a header, never in the URL: a failed call's error
+      // message quotes the URL, and that message gets logged and reported.
+      headers: { 'content-type': 'application/json', 'x-goog-api-key': googleApiKey },
       body: {
         contents: [{ parts: [{ text: prompt }] }],
         tools: [{ google_search: {} }],
