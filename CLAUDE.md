@@ -59,6 +59,10 @@ Runtime : toujours `bun` / `bunx`, jamais `npm` / `npx`.
   **françaises** sont validées par Thibaut avant tout push de release.
 - Migrations : `server/system/migration/`, déclenchées par `POST /admin/migrate` depuis la CI.
   Guide : [docs/migrations.md](docs/migrations.md).
+- Sauvegardes : la base `(default)` a la protection contre la suppression et le PITR sur sept
+  jours, sans aucune copie hors de la base. En cas de perte de données (documents effacés,
+  migration ratée, base ou projet supprimés), suivre [docs/data-recovery.md](docs/data-recovery.md)
+  avant d'agir, et ne jamais restaurer toute la base par-dessus des écritures en cours.
 - Documentation technique détaillée : [docs/](docs/), notamment
   [architecture.md](docs/architecture.md), [domain-guide.md](docs/domain-guide.md),
   [ios-guide.md](docs/ios-guide.md), [screenshots.md](docs/screenshots.md).
