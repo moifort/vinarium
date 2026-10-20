@@ -9,6 +9,9 @@ struct ConsumptionSheet: View {
     @State private var tastingNotes = ""
     @State private var contacts: [String] = []
     @State private var showContactPicker = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case notes }
 
     var body: some View {
         NavigationStack {
@@ -61,9 +64,11 @@ struct ConsumptionSheet: View {
                             .foregroundStyle(.secondary)
 
                         TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
+                            .focused($focusedField, equals: .notes)
                             .lineLimit(3...6)
                     }
                     .padding(.vertical, 4)
+                    .id(Field.notes)
                 }
 
                 
@@ -95,6 +100,7 @@ struct ConsumptionSheet: View {
                 }
             }
         }
+        .keyboardRaisedDetent(resting: .height(550), editing: focusedField, text: tastingNotes)
     }
 
 }

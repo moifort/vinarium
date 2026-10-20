@@ -10,6 +10,9 @@ struct FavoriteSheet: View {
     @State private var tastingNotes = ""
     @State private var rating = 0
     @State private var showContactPicker = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case notes }
 
     var body: some View {
         NavigationStack {
@@ -67,10 +70,12 @@ struct FavoriteSheet: View {
                                 .foregroundStyle(.secondary)
 
                             TextField("Vos impressions, arômes, accords...", text: $tastingNotes, axis: .vertical)
+                                .focused($focusedField, equals: .notes)
                                 .lineLimit(3...6)
                         }
                     }
                     .padding(.vertical, 4)
+                    .id(Field.notes)
                 }
             }
             .navigationTitle("Ajouter aux favoris")
@@ -101,6 +106,7 @@ struct FavoriteSheet: View {
                 }
             }
         }
+        .keyboardRaisedDetent(resting: .medium, editing: focusedField, text: tastingNotes)
     }
 }
 

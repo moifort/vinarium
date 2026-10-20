@@ -146,7 +146,6 @@ struct WineDetailView: View {
                             onRemoved?()
                         }
                     }
-                    .presentationDetents([.height(550)])
                     .errorAlert(sheetError)
                 }
             }
@@ -229,7 +228,6 @@ struct WineDetailView: View {
                             onUpdated?()
                         }
                     }
-                    .presentationDetents([.medium])
                     .errorAlert(sheetError)
                 }
             }
@@ -249,7 +247,6 @@ struct WineDetailView: View {
                             onUpdated?()
                         }
                     }
-                    .presentationDetents([.medium])
                     .errorAlert(sheetError)
                 }
             }

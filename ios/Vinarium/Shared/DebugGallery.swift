@@ -46,6 +46,12 @@ struct DebugGallery: View {
         case "premiumPage":
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
+        case "consumptionSheet":
+            NoteSheetHost(sheet: .consumption)
+        case "favoriteSheet":
+            NoteSheetHost(sheet: .favorite)
+        case "recommendationSheet":
+            NoteSheetHost(sheet: .recommendation)
         case "profile":
             NavigationStack { ProfileSettingsView() }
                 .environment(AuthSession())
@@ -122,6 +128,11 @@ struct DebugGallery: View {
                     NavigationLink("Admin, avant le premier rafraîchissement") {
                         AdminDashboard(adminShown: true, metrics: .previewBeforeRefresh)
                     }
+                }
+                Section("Fiche vin") {
+                    NavigationLink("Feuille de consommation") { NoteSheetHost(sheet: .consumption) }
+                    NavigationLink("Feuille de favori") { NoteSheetHost(sheet: .favorite) }
+                    NavigationLink("Feuille de recommandation") { NoteSheetHost(sheet: .recommendation) }
                 }
                 Section("Retours") {
                     Button("Nous écrire") { feedbackShown = true }
@@ -317,6 +328,26 @@ private struct AdminDashboard: View {
                 }
             }
         }
+    }
+}
+
+/// The wine detail's note sheets, open over a plain screen as the detail opens
+/// them: tap the comment field to see how they make room for the keyboard.
+private struct NoteSheetHost: View {
+    enum Sheet { case consumption, favorite, recommendation }
+
+    let sheet: Sheet
+    @State private var shown = true
+
+    var body: some View {
+        Button("Rouvrir") { shown = true }
+            .sheet(isPresented: $shown) {
+                switch sheet {
+                case .consumption: ConsumptionSheet { _, _, _, _ in }
+                case .favorite: FavoriteSheet { _, _, _, _ in }
+                case .recommendation: RecommendationSheet { _, _ in }
+                }
+            }
     }
 }
 

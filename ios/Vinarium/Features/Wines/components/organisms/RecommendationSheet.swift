@@ -7,6 +7,9 @@ struct RecommendationSheet: View {
     @State private var recommenderName = ""
     @State private var comment = ""
     @State private var showContactPicker = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field { case name, comment }
 
     var body: some View {
         NavigationStack {
@@ -17,6 +20,7 @@ struct RecommendationSheet: View {
                             .foregroundStyle(.secondary)
                         TextField("Nom", text: $recommenderName)
                             .textInputAutocapitalization(.words)
+                            .focused($focusedField, equals: .name)
                             .multilineTextAlignment(.trailing)
                         Button {
                             showContactPicker = true
@@ -34,11 +38,13 @@ struct RecommendationSheet: View {
                                 .foregroundStyle(.secondary)
 
                             TextField("Vos impressions, arômes, accords...", text: $comment, axis: .vertical)
+                                .focused($focusedField, equals: .comment)
                                 .lineLimit(3...6)
                         }
                         .padding(.vertical, 4)
                     
                     }
+                    .id(Field.comment)
                 }
             }
             .navigationTitle("Conseillé par un ami")
@@ -65,6 +71,7 @@ struct RecommendationSheet: View {
                 }
             }
         }
+        .keyboardRaisedDetent(resting: .medium, editing: focusedField, text: comment)
     }
 }
 
