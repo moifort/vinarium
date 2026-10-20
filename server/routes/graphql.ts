@@ -1,13 +1,4 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
-import {
-  createError,
-  defineEventHandler,
-  getHeaders,
-  getQuery,
-  readBody,
-  setResponseHeader,
-  setResponseStatus,
-} from 'h3'
 import { beverageSatelliteLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
 

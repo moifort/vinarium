@@ -1,4 +1,3 @@
-import { defineEventHandler, setResponseHeader } from 'h3'
 import { APP_STORE_URL, MINIMUM_SUPPORTED_IOS_BUILD } from '~/system/app-support'
 
 /**

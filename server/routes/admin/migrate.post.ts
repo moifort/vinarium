@@ -1,4 +1,3 @@
-import { defineEventHandler, setResponseStatus } from 'h3'
 import { migrations } from '~/system/migration/migrations'
 import { runMigrations } from '~/system/migration/runner'
 
