@@ -1,11 +1,3 @@
-import {
-  createError,
-  defineEventHandler,
-  getHeader,
-  getRouterParam,
-  readRawBody,
-  setResponseStatus,
-} from 'h3'
 import { writeLocalObject } from '~/domain/attachment/infrastructure/object-store'
 import { ObjectPath } from '~/domain/attachment/primitives'
 

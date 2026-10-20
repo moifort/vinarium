@@ -138,7 +138,7 @@ export const objectStore = (): ObjectStore => (import.meta.dev ? local : gcs)
 /** Used by the dev-only upload route to put the bytes where `local` reads them. */
 export const writeLocalObject = async (
   path: ObjectPathValue,
-  body: Uint8Array,
+  body: Buffer,
   contentType: string,
 ) => {
   await mkdir(dirname(localFile(path)), { recursive: true })

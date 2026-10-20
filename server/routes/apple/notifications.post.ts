@@ -1,4 +1,3 @@
-import { createError, defineEventHandler, readBody } from 'h3'
 import { match } from 'ts-pattern'
 import { EntitlementUseCase } from '~/domain/entitlement/use-case'
 
