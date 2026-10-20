@@ -1,4 +1,5 @@
 import { getAuth } from 'firebase-admin/auth'
+import { createError, defineEventHandler, getHeader } from 'h3'
 import { UserId } from '~/domain/shared/primitives'
 // Side-effect import: ensures firebase-admin is initialized before verifyIdToken.
 import '~/system/firebase'
