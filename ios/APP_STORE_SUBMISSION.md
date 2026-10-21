@@ -10,7 +10,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 ## Prepared in the repo (done)
 
 - **Privacy policy** — `index.html` on the dedicated **`gh-pages`** branch (the `docs/`
-  folder is gitignored on `main`), served at **https://moifort.github.io/vinarium/** (paste
+  folder is gitignored on `main`), served at **https://vinarium.polyforms.co/** (paste
   this as the Privacy Policy URL). To edit: `git checkout gh-pages`, change `index.html`,
   `git push`; GitHub Pages redeploys automatically.
 - **Encryption declaration** — `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO` in the app
@@ -31,7 +31,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 ## Phase 2 — Metadata & privacy [ASC]
 
 - **Description / keywords / support URL** (your GitHub repo URL is fine).
-- **Privacy Policy URL**: `https://moifort.github.io/vinarium/`.
+- **Privacy Policy URL**: `https://vinarium.polyforms.co/`.
 - **Terms of Use (EULA) link in every description** — guideline 3.1.2 refuses any submission
   selling auto-renewable subscriptions whose *metadata* carries no functional link to the terms,
   and the check is automated: 1.4 was refused on it on 2026-07-22, with the subscription group

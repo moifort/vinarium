@@ -30,4 +30,4 @@ VINARIUM PREMIUM
 Premiumには月額プランと、7日間の無料トライアルから始まる年額プランがあります。価格はApp Storeに表示されます。期間終了の24時間前までに解約しない限り、サブスクリプションは自動更新されます。管理と解約はApp Storeアカウントの設定から行えます。
 
 利用規約: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-プライバシーポリシー: https://moifort.github.io/vinarium/
+プライバシーポリシー: https://vinarium.polyforms.co/

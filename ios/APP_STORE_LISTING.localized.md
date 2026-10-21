@@ -61,7 +61,7 @@ The cellar, the journal and household sharing are free and unlimited. Only the l
 Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
 
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://moifort.github.io/vinarium/
+Privacy Policy: https://vinarium.polyforms.co/
 
 ---
 
@@ -110,7 +110,7 @@ The cellar, the journal and household sharing are free and unlimited. Only the l
 Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
 
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://moifort.github.io/vinarium/
+Privacy Policy: https://vinarium.polyforms.co/
 
 ---
 
@@ -155,7 +155,7 @@ Keller, Journal und Haushaltsfreigabe sind kostenlos und unbegrenzt. Gezählt wi
 Premium monatlich: 2,99 €/Monat. Premium jährlich: 24,99 €/Jahr, nach 7 Tagen kostenloser Testphase. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der laufenden Periode gekündigt wird. Verwaltung und Kündigung erfolgen in den Einstellungen des App-Store-Accounts.
 
 Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Datenschutzrichtlinie: https://moifort.github.io/vinarium/
+Datenschutzrichtlinie: https://vinarium.polyforms.co/
 
 ---
 
@@ -200,7 +200,7 @@ La bodega, el diario y el uso compartido en el hogar son gratuitos e ilimitados.
 Premium mensual: 2,99 €/mes. Premium anual: 24,99 €/año, tras 7 días de prueba gratuita. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
 
 Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidad: https://moifort.github.io/vinarium/
+Política de privacidad: https://vinarium.polyforms.co/
 
 ---
 
@@ -249,7 +249,7 @@ La cava, el diario y el uso compartido en casa son gratuitos e ilimitados. Solo 
 Premium se ofrece en plan mensual o en plan anual que empieza con 7 días de prueba gratis; ambos precios se muestran en la App Store. La suscripción se renueva automáticamente salvo cancelación al menos 24 horas antes del final del periodo en curso. Se gestiona y se cancela desde los ajustes de la cuenta de App Store.
 
 Términos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidad: https://moifort.github.io/vinarium/
+Política de privacidad: https://vinarium.polyforms.co/
 
 ---
 
@@ -294,7 +294,7 @@ La cantina, il diario e la condivisione in famiglia sono gratuiti e illimitati. 
 Premium mensile: 2,99 €/mese. Premium annuale: 24,99 €/anno, dopo 7 giorni di prova gratuita. L'abbonamento si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine del periodo in corso. Si gestisce e si disdice dalle impostazioni dell'account App Store.
 
 Termini di utilizzo: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Informativa sulla privacy: https://moifort.github.io/vinarium/
+Informativa sulla privacy: https://vinarium.polyforms.co/
 
 ---
 
@@ -339,7 +339,7 @@ A adega, o diário e a partilha no agregado são gratuitos e ilimitados. Apenas 
 Premium mensal: 2,99 €/mês. Premium anual: 24,99 €/ano, após 7 dias de teste gratuito. A subscrição renova-se automaticamente salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerida e cancelada nas definições da conta App Store.
 
 Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidade: https://moifort.github.io/vinarium/
+Política de privacidade: https://vinarium.polyforms.co/
 
 ---
 
@@ -389,7 +389,7 @@ A adega, o diário e o compartilhamento em família são gratuitos e ilimitados.
 O Premium vem no plano mensal ou no plano anual, que começa com 7 dias de teste grátis; os dois preços aparecem na App Store. A assinatura é renovada automaticamente, salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerenciada e cancelada nos ajustes da conta App Store.
 
 Termos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidade: https://moifort.github.io/vinarium/
+Política de privacidade: https://vinarium.polyforms.co/
 
 ---
 
@@ -434,4 +434,4 @@ VINARIUM PREMIUM
 Premiumには月額プランと、7日間の無料トライアルから始まる年額プランがあります。価格はApp Storeに表示されます。期間終了の24時間前までに解約しない限り、サブスクリプションは自動更新されます。管理と解約はApp Storeアカウントの設定から行えます。
 
 利用規約: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-プライバシーポリシー: https://moifort.github.io/vinarium/
+プライバシーポリシー: https://vinarium.polyforms.co/

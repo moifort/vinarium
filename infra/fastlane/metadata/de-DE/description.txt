@@ -30,4 +30,4 @@ Keller, Journal und Haushaltsfreigabe sind kostenlos und unbegrenzt. Gezählt wi
 Premium monatlich: 2,99 €/Monat. Premium jährlich: 24,99 €/Jahr, nach 7 Tagen kostenloser Testphase. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Stunden vor Ende der laufenden Periode gekündigt wird. Verwaltung und Kündigung erfolgen in den Einstellungen des App-Store-Accounts.
 
 Nutzungsbedingungen: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Datenschutzrichtlinie: https://moifort.github.io/vinarium/
+Datenschutzrichtlinie: https://vinarium.polyforms.co/

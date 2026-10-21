@@ -42,7 +42,7 @@ La cave, le journal et le partage en foyer sont gratuits et illimités. Seul le 
 Premium mensuel : 2,99 €/mois. Premium annuel : 24,99 €/an, après 7 jours d'essai gratuit. L'abonnement se renouvelle automatiquement sauf résiliation au moins 24 h avant la fin de la période en cours. La gestion et la résiliation se font dans les réglages du compte App Store.
 
 Conditions d'utilisation : https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Politique de confidentialité : https://moifort.github.io/vinarium/
+Politique de confidentialité : https://vinarium.polyforms.co/
 
 ## Mots-clés (≤ 100 caractères, séparés par des virgules)
 cave,vin,œnologie,dégustation,sommelier,millésime,bouteille,cellier,collection,scanner,cépage
@@ -51,7 +51,7 @@ cave,vin,œnologie,dégustation,sommelier,millésime,bouteille,cellier,collectio
 https://github.com/moifort/vinarium
 
 ## URL marketing (facultative)
-https://moifort.github.io/vinarium/
+https://vinarium.polyforms.co/
 
 ## Nouveautés de cette version (si le champ apparaît en 1.0)
 Première version de Vinarium.

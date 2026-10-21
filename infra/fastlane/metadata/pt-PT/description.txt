@@ -30,4 +30,4 @@ A adega, o diário e a partilha no agregado são gratuitos e ilimitados. Apenas 
 Premium mensal: 2,99 €/mês. Premium anual: 24,99 €/ano, após 7 dias de teste gratuito. A subscrição renova-se automaticamente salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerida e cancelada nas definições da conta App Store.
 
 Termos de utilização: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidade: https://moifort.github.io/vinarium/
+Política de privacidade: https://vinarium.polyforms.co/

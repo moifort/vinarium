@@ -30,4 +30,4 @@ La cantina, il diario e la condivisione in famiglia sono gratuiti e illimitati. 
 Premium mensile: 2,99 €/mese. Premium annuale: 24,99 €/anno, dopo 7 giorni di prova gratuita. L'abbonamento si rinnova automaticamente salvo disdetta almeno 24 ore prima della fine del periodo in corso. Si gestisce e si disdice dalle impostazioni dell'account App Store.
 
 Termini di utilizzo: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Informativa sulla privacy: https://moifort.github.io/vinarium/
+Informativa sulla privacy: https://vinarium.polyforms.co/
