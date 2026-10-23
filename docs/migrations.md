@@ -80,7 +80,6 @@ export const migrations: Migration[] = [
 ## How It Works
 
 `server/system/migration/runner.ts`:
-
 1. `POST /admin/migrate` calls `runMigrations(migrations)`.
 2. The runner reads `migration-meta/state` to get the current version (defaulting to `MigrationVersion(0)` when absent).
 3. Pending migrations (version > current) are sorted by version and applied sequentially.

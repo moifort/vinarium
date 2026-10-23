@@ -38,16 +38,16 @@ A purely functional approach to wine cellar management.
 
 ## Tech Stack
 
-| Layer    | Stack                                                                     |
-| -------- | ------------------------------------------------------------------------- |
-| iOS      | SwiftUI, Swift 6, iOS 26, Apollo iOS, StoreKit 2, Firebase Auth (Sign in with Apple), Firebase Analytics |
-| Backend  | Nitro on Firebase Cloud Functions Gen 2, Apollo Server 5, Pothos          |
-| Storage  | Firestore (multi-user, isolated by `userId`, shared cellars via households), Cloud Storage for attachments (private bucket, V4 signed URLs) |
-| AI       | Gemini 2.5 Flash (vision + Google Search grounding)                       |
-| Metrics  | App Store Connect Sales Reports API + BigQuery billing export + GA4 Data API (admin dashboard) |
-| Infra    | Terraform (google + google-beta) — provisions everything from scratch    |
+| Layer         | Stack                                                                                                                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| iOS           | SwiftUI, Swift 6, iOS 26, Apollo iOS, StoreKit 2, Firebase Auth (Sign in with Apple), Firebase Analytics                                                              |
+| Backend       | Nitro on Firebase Cloud Functions Gen 2, Apollo Server 5, Pothos                                                                                                      |
+| Storage       | Firestore (multi-user, isolated by `userId`, shared cellars via households), Cloud Storage for attachments (private bucket, V4 signed URLs)                           |
+| AI            | Gemini 2.5 Flash (vision + Google Search grounding)                                                                                                                   |
+| Metrics       | App Store Connect Sales Reports API + BigQuery billing export + GA4 Data API (admin dashboard)                                                                        |
+| Infra         | Terraform (google + google-beta) — provisions everything from scratch                                                                                                 |
 | Observability | Sentry (one trace from the tap to the resolver, symbolicated iOS crashes, per-release source maps), GA4 for the activation funnel (muted in Debug and under UI tests) |
-| Testing  | `bun:test` for the backend, XCUITest against the Firebase emulators for the app ([docs/e2e.md](docs/e2e.md)) |
+| Testing       | `bun:test` for the backend, XCUITest against the Firebase emulators for the app ([docs/e2e.md](docs/e2e.md))                                                          |
 
 ## One-shot bootstrap
 
@@ -62,7 +62,7 @@ is provisioned by `bun run bootstrap`.
   `gcloud auth application-default login`
 - `bun`
 - An Apple Developer account with a Service ID + Sign in with Apple enabled
-  + a `.p8` private key (see [`ios/FIREBASE_SETUP.md`](ios/FIREBASE_SETUP.md))
+  - a `.p8` private key (see [`ios/FIREBASE_SETUP.md`](ios/FIREBASE_SETUP.md))
 - A GCP billing account id and either an `org_id` or `folder_id`
 
 > `terraform` is auto-downloaded (pinned version, checksum-verified) into
@@ -80,7 +80,6 @@ bun run bootstrap
 ```
 
 That single command :
-
 1. validates prerequisites,
 2. builds the Nitro firebase-preset bundle (`.output/server/`),
 3. `terraform init && terraform apply` — creates the GCP project, enables

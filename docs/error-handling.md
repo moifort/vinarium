@@ -34,7 +34,8 @@ export namespace BeverageCommand {
     data: BeverageData,
   ) => {
     if (requiresColor(beverageType) && !data.wine?.color) return 'color-required' as const
-    if (data.subtype && !subtypeAllowed(beverageType, data.subtype)) return 'subtype-invalid' as const
+    if (data.subtype && !subtypeAllowed(beverageType, data.subtype))
+      return 'subtype-invalid' as const
     // … assemble …
     return await repository.save(beverage) // returns the Beverage
   }
@@ -64,7 +65,9 @@ import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 builder.mutationField('updateBeverage', (t) =>
   t.field({
     type: BeverageType,
-    args: { /* … */ },
+    args: {
+      /* … */
+    },
     resolve: async (_root, { id, input }, { userId }) => {
       const result = await BeverageUseCase.update(userId, id, toData(input))
       return match(result)

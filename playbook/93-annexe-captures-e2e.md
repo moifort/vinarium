@@ -56,7 +56,6 @@ un décor qui se poursuit d'un panneau au suivant. Choisir la taille d'écran de
 qu'une capture n'ait jamais à être redimensionnée.
 
 Trois choses sont tenues à l'écart du modèle d'image, délibérément :
-
 - **L'interface de l'application.** Le modèle produit du texte plausible mais faux. On compose les
   vraies captures par-dessus.
 - **Les légendes.** Même raison, multipliée par le nombre de langues. Elles sont dessinées par le

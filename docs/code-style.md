@@ -3,7 +3,7 @@
 > The portable rules live in [playbook/09-backend.md](../playbook/09-backend.md), [playbook/10-ios.md](../playbook/10-ios.md). This guide keeps the project-specific detail.
 
 
-Many of these rules implement DDD principles from Evans (*Domain-Driven Design*) and functional modeling principles from Wlashin (*Domain Modeling Made Functional*).
+Many of these rules implement DDD principles from Evans (_Domain-Driven Design_) and functional modeling principles from Wlashin (_Domain Modeling Made Functional_).
 
 ## Formatter
 

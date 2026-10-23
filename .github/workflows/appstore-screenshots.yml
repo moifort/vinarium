@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to open if the store has no editable one, e.g. 1.7 (leave empty otherwise)'
+        description: "Version to open if the store has no editable one, e.g. 1.7 (leave empty otherwise)"
         required: false
-        default: ''
+        default: ""
   workflow_call:
 
 permissions:

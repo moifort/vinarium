@@ -13,16 +13,16 @@ conversation courante, sans déléguer à un agent, conformément à
 
 ## La grille
 
-| Axe | Ce qu'on cherche |
-|---|---|
-| Correction | Le code fait-il ce que la tâche demandait, entièrement, et rien de plus |
-| Cas limites | Vide, absent, zéro, doublon, concurrence, échec réseau, données partielles |
-| Sécurité | Entrées non validées à la frontière, secrets en clair, données d'un utilisateur accessibles à un autre |
-| Coût | Lectures en boucle, requête par ligne, travail refait à chaque appel |
-| Cohérence | Conventions du projet respectées : nommage, structure, gestion d'erreur, style |
-| Dette | Duplication introduite, abstraction prématurée, code mort laissé derrière |
-| Tests | Un test échouerait-il si la régression revenait |
-| Documentation | Une surface visible par l'utilisateur a changé sans que la documentation suive |
+| Axe           | Ce qu'on cherche                                                                                       |
+| ------------- | ------------------------------------------------------------------------------------------------------ |
+| Correction    | Le code fait-il ce que la tâche demandait, entièrement, et rien de plus                                |
+| Cas limites   | Vide, absent, zéro, doublon, concurrence, échec réseau, données partielles                             |
+| Sécurité      | Entrées non validées à la frontière, secrets en clair, données d'un utilisateur accessibles à un autre |
+| Coût          | Lectures en boucle, requête par ligne, travail refait à chaque appel                                   |
+| Cohérence     | Conventions du projet respectées : nommage, structure, gestion d'erreur, style                         |
+| Dette         | Duplication introduite, abstraction prématurée, code mort laissé derrière                              |
+| Tests         | Un test échouerait-il si la régression revenait                                                        |
+| Documentation | Une surface visible par l'utilisateur a changé sans que la documentation suive                         |
 
 ## Recevoir une critique
 

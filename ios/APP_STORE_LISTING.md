@@ -1,15 +1,19 @@
 # App Store — contenu de la fiche (à copier dans App Store Connect)
 
 ## Nom
+
 Vinarium
 
 ## Sous-titre (≤ 30 caractères)
+
 Votre cave à vin intelligente
 
 ## Texte promotionnel (≤ 170 caractères, modifiable sans revue)
+
 Scannez une étiquette, l'IA remplit tout : domaine, millésime, prix. Rangez votre cave, suivez vos dégustations et partagez-la avec votre foyer.
 
 ## Description
+
 Vinarium, c'est votre cave à vin dans votre poche.
 
 Photographiez l'étiquette d'une bouteille : l'intelligence artificielle reconnaît le vin et remplit automatiquement le domaine, le millésime, la région, l'appellation, et estime même son prix. Plus besoin de tout saisir à la main.
@@ -45,32 +49,39 @@ Conditions d'utilisation : https://www.apple.com/legal/internet-services/itunes/
 Politique de confidentialité : https://vinarium.polyforms.co/
 
 ## Mots-clés (≤ 100 caractères, séparés par des virgules)
+
 cave,vin,œnologie,dégustation,sommelier,millésime,bouteille,cellier,collection,scanner,cépage
 
 ## URL d'assistance
+
 https://github.com/moifort/vinarium
 
 ## URL marketing (facultative)
+
 https://vinarium.polyforms.co/
 
 ## Nouveautés de cette version (si le champ apparaît en 1.0)
+
 Première version de Vinarium.
 
 ## Informations pour la revue → Notes
+
 L'application nécessite Sign in with Apple. Les évaluateurs peuvent se connecter avec leur propre identifiant Apple : un compte est créé automatiquement, aucun compte de démonstration n'est nécessaire. Le backend est en production. Fonctionnalité principale : scanner une étiquette de vin (appareil photo requis) pour créer une fiche.
 
 ## Catégorie
+
 - Principale : Nourriture et boissons
 - Secondaire (facultative) : Style de vie
 
 ## Tarif
+
 Gratuit — tous pays.
 
 ---
 
 ## Confidentialité de l'app (questionnaire « Commencer »)
-Déclare la collecte des types suivants. Pour CHACUN : lié à l'utilisateur = **Oui**, utilisé pour le suivi (tracking) = **Non**, finalité = **Fonctionnement de l'app**.
 
+Déclare la collecte des types suivants. Pour CHACUN : lié à l'utilisateur = **Oui**, utilisé pour le suivi (tracking) = **Non**, finalité = **Fonctionnement de l'app**.
 - **Coordonnées** → Nom, Adresse e-mail (uniquement si l'utilisateur les partage via Sign in with Apple)
 - **Contenu utilisateur** → Photos (scans d'étiquettes) + Autre contenu (fiches de vins, notes de dégustation)
 - **Identifiants** → Identifiant utilisateur (compte)
@@ -79,11 +90,13 @@ Déclare la collecte des types suivants. Pour CHACUN : lié à l'utilisateur = *
 Aucune donnée utilisée pour le suivi entre apps. Aucune publicité tierce.
 
 ## Classification par âge
+
 Dans le questionnaire, à « Alcool, tabac ou drogues (usage ou références) » : l'app porte sur le vin → choisis le niveau qui reflète des **références fréquentes à l'alcool**. Réponds « Aucun » à tout le reste. Résultat attendu : **17+** (c'est normal pour une app d'œnologie).
 
 ---
 
 ## Captures d'écran (à produire toi-même)
+
 App Store Connect exige au moins le format **6.9"/6.7" iPhone**. Depuis le simulateur iPhone 17, une fois connecté : menu **Fichier → Enregistrer l'écran** (⌘S) enregistre une capture au bon format sur le Bureau. ASC les accepte telles quelles.
 
 5 écrans qui racontent l'app, dans cet ordre :

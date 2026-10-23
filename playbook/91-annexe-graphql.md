@@ -91,9 +91,9 @@ magasin.
 Compromis assumé : simplicité maximale du code, contre une fenêtre de blocage pendant la revue du
 magasin à chaque changement cassant.
 
-| Type de changement | Ce qu'il faut faire |
-|---|---|
-| Ajout de champ, de requête, de mutation, d'entrée optionnelle | Rien. Les anciens clients continuent de fonctionner |
+| Type de changement                                                          | Ce qu'il faut faire                                                              |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Ajout de champ, de requête, de mutation, d'entrée optionnelle               | Rien. Les anciens clients continuent de fonctionner                              |
 | Suppression, renommage, entrée plus stricte, valeurs d'énumération changées | Livrer backend et client ensemble, relever le plancher de build, pousser, taguer |
 
 La clé de comparaison est le numéro de build entier, jamais la version commerciale. Le plancher

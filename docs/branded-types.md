@@ -96,7 +96,6 @@ When you add a new branded type, also update the Apollo iOS codegen scalar mappi
 ## Shared Types
 
 Cross-domain branded types live in `server/domain/shared/types.ts`, with their constructors in `server/domain/shared/primitives.ts`:
-
 - `UserId` — Firebase Auth user identifier
 - `Eur` — Euro amount (non-negative)
 - `Year` — calendar year (integer >= 1800)

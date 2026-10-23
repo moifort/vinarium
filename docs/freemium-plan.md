@@ -52,14 +52,14 @@ feasibility, and a price estimate that yields a margin.
 (~$0.035 beyond the free tier), not tokens or Firestore. So the best lever is not just "who gets
 AI" but **which AI steps are paid**. That enables a finer split than "all AI = paid".
 
-| # | Lever | Free | Paid | Note |
-|---|-------|------|------|------|
-| A | **Scan** (original idea) | On-device: Apple Intelligence if available, else Vision OCR | Gemini vision + web enrichment | Core of the proposal. |
-| B | **Cloud AI trial** | 5 full Gemini scans **once** (lifetime), then on-device / vision-only | Unlimited vision scans; enrichment hard-capped (fair use, see Q4) | Lets users taste cloud quality. Lifetime, not monthly: a monthly grounded quota is a structural deficit once grounding is billed (Q4). |
-| C | **Bottle cap** | Cap on the **library** (`beverages`), e.g. 25–50 | Unlimited | Capping the library is enough: the cellar is included (see ⚠️). Needs a new `.count()` aggregate. |
-| D | **Market enrichment** | ❌ (only name/vintage/type via OCR) | ✅ estimated price, grapes, appellation, drinking window | Elegant: isolates *exactly* the cost (grounding). Free still gets a useful scan. |
-| E | **Shared household** | Solo | Shared family cellar (`household`) | Household infra already present; simple gate. |
-| F | **Advanced stats / dashboard, export** | Basic | Full (cellar value, tasting history, CSV/PDF export) | Zero server cost, high perceived value. |
+| #   | Lever                                  | Free                                                                  | Paid                                                              | Note                                                                                                                                   |
+| --- | -------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| A   | **Scan** (original idea)               | On-device: Apple Intelligence if available, else Vision OCR           | Gemini vision + web enrichment                                    | Core of the proposal.                                                                                                                  |
+| B   | **Cloud AI trial**                     | 5 full Gemini scans **once** (lifetime), then on-device / vision-only | Unlimited vision scans; enrichment hard-capped (fair use, see Q4) | Lets users taste cloud quality. Lifetime, not monthly: a monthly grounded quota is a structural deficit once grounding is billed (Q4). |
+| C   | **Bottle cap**                         | Cap on the **library** (`beverages`), e.g. 25–50                      | Unlimited                                                         | Capping the library is enough: the cellar is included (see ⚠️). Needs a new `.count()` aggregate.                                      |
+| D   | **Market enrichment**                  | ❌ (only name/vintage/type via OCR)                                   | ✅ estimated price, grapes, appellation, drinking window          | Elegant: isolates _exactly_ the cost (grounding). Free still gets a useful scan.                                                       |
+| E   | **Shared household**                   | Solo                                                                  | Shared family cellar (`household`)                                | Household infra already present; simple gate.                                                                                          |
+| F   | **Advanced stats / dashboard, export** | Basic                                                                 | Full (cellar value, tasting history, CSV/PDF export)              | Zero server cost, high perceived value.                                                                                                |
 
 **Recommendation**: combine **A + B + C + D** as the backbone, keep **E/F** in reserve to enrich the
 paid tier at no extra cost. The **B (lifetime trial) + D (paid enrichment)** pair is the most
@@ -76,21 +76,19 @@ profitable because it targets the real cost source rather than blocking everythi
 **Feasibility: high.** Everything is provided by iOS 26; the target is already `26.0`.
 
 On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cloud path):
-
 1. **OCR** — **Vision** framework (`RecognizeTextRequest`, iOS 26 async API) on the `UIImage`
    already captured by `CameraView` / `PhotosPicker`. Available on **all** iOS 26 devices.
 2. **Structuring** — two branches by hardware:
    - **Apple Intelligence available** (iPhone 15 Pro+, A17 Pro/A18+): `FoundationModels`
      (`SystemLanguageModel` / `LanguageModelSession`) with a `@Generable` type mirroring
      `ScanResult` → direct structured extraction (name, domain, vintage, appellation, grapes…).
-   - **Otherwise** (decision: *Vision OCR only*): local heuristic parsing of the OCR text (vintage
+   - **Otherwise** (decision: _Vision OCR only_): local heuristic parsing of the OCR text (vintage
      regex `19|20xx`, ABV `%`, appellation/grape dictionaries) → partial `ScanResult`, lower
      quality but usable, editable in `ScanReviewPage`.
 3. **Runtime detection**: `SystemLanguageModel.default.availability` picks the branch. Routing
    combines **two** conditions: entitlement (Q3) **and** hardware capability.
 
 **Macro plan (iOS)**:
-
 - **`WineScanner` abstraction** (protocol) with 3 implementations: `ServerScanner` (current
   `WineAPI.scan`), `OnDeviceIntelligenceScanner` (Vision + FoundationModels), `OnDeviceOCRScanner`
   (Vision + heuristic). A `ScannerFactory` picks based on `entitlement × availability`.
@@ -99,7 +97,7 @@ On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cl
   unchanged** (`.review(ScanResult, Data)` → `WineAPI.create`), since all 3 paths return a
   `ScanResult`.
 - **What is NOT on-device**: wine creation (`WineAPI.create`), tasting, recommendations stay
-  server-side. Only *extraction* moves on-device.
+  server-side. Only _extraction_ moves on-device.
 - **Quality limit to accept**: market enrichment (price, drinking window) comes from the web
   (grounding) — **impossible on-device**. This is precisely what becomes the paid differentiator
   (idea D). Free on-device will not fill `estimatedPrice`/`drinkFrom`/`drinkUntil`.
@@ -117,7 +115,6 @@ On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cl
 custom claim**.
 
 **Macro plan (backend, Nitro/DDD)**:
-
 - **New `server/domain/entitlement/` domain** (follow `docs/domain-guide.md` + the `ddd-architecture`
   skill): `types.ts` (`Entitlement { userId, tier: 'free'|'pro', source, expiresAt, ... }`),
   `command.ts` (`EntitlementCommand.activateFromReceipt`, `.refreshFromNotification`), `query.ts`
@@ -141,7 +138,6 @@ custom claim**.
     domain's `create` mutation.
 
 **Macro plan (iOS)**:
-
 - **StoreKit 2**: `Product.products(for:)`, `product.purchase()`, `Transaction.currentEntitlements`,
   `Transaction.updates` (listen to renewals). A `.storekit` config file for simulator testing.
 - **`EntitlementStore`** (`@Observable`, app scope next to `AuthSession`): reads the tier from
@@ -168,11 +164,11 @@ the implementation plan section (its increment numbering differs).
 Apple computes its commission on the price **excluding VAT** (20% in France), not on the sticker
 price. With the Small Business Program (15% — enrollment is not automatic, see Risks):
 
-| Sticker price | Net proceeds / month | Previous estimate (wrong) |
-|---|---|---|
-| €4.99/month | **€3.53** | €4.24 |
-| €34.99/year | **€2.07** | €2.48 |
-| €39.99/year (new recommendation) | **€2.36** | — |
+| Sticker price                    | Net proceeds / month | Previous estimate (wrong) |
+| -------------------------------- | -------------------- | ------------------------- |
+| €4.99/month                      | **€3.53**            | €4.24                     |
+| €34.99/year                      | **€2.07**            | €2.48                     |
+| €39.99/year (new recommendation) | **€2.36**            | —                         |
 
 €34.99/year was the weak spot (€2.07 net/month). **Keep monthly at €4.99, move annual to €39.99**
 (still well under Vivino ≈ €50/year). Price is not the deficit risk (see below); raising the
@@ -183,12 +179,12 @@ monthly price is a phase-2 lever only.
 Verified rates (July 2026): Gemini 2.5 Flash **$0.30/M in**, **$2.50/M out**; Google Search
 grounding **1,500 req/day free** then **$35/1,000** (= $0.035/req) for 2.x models.
 
-| Item | Small scale (<1,500 scans/day) | At scale (grounding billed) |
-|---|---|---|
-| Vision (~2k in tok + ~0.4k out tok) | ~$0.0016 | ~$0.0016 |
-| Enrichment (tokens) | ~$0.001 | ~$0.001 |
-| `google_search` grounding | **$0** (free tier) | **$0.035** |
-| **Total / scan** | **~$0.003** | **~$0.037** |
+| Item                                | Small scale (<1,500 scans/day) | At scale (grounding billed) |
+| ----------------------------------- | ------------------------------ | --------------------------- |
+| Vision (~2k in tok + ~0.4k out tok) | ~$0.0016                       | ~$0.0016                    |
+| Enrichment (tokens)                 | ~$0.001                        | ~$0.001                     |
+| `google_search` grounding           | **$0** (free tier)             | **$0.035**                  |
+| **Total / scan**                    | **~$0.003**                    | **~$0.037**                 |
 
 **Firestore / Cloud Run per user/month**: read-optimized architecture (loaders, aggregates) →
 **< $0.02/user/month**, negligible vs AI. Storage: negligible (no images stored).
@@ -215,7 +211,6 @@ the grounding free tier holds — but once grounding is billed (growth, or a for
 2.5 is deprecated): 10 scans × $0.037 = $0.37 per free user per month. At 3% conversion each
 subscriber "carries" ~33 free users → **~€11/month of cost against €3.53 of net revenue: a 3×
 structural deficit.** Structural fixes (no deficit by construction, at any volume):
-
 - **Free quota = one-time lifetime trial** (5 full scans), not monthly. Afterwards: **on-device**
   (lever A — Apple Intelligence, else Vision OCR: zero server cost, no unbounded free-tier
   spend); market enrichment stays the paid differentiator (lever D unchanged). A cloud
@@ -235,10 +230,10 @@ Blended net margin ≈ €2.50/subscriber/month (40% monthly / 60% annual at €
 deducted). At < 1,000 MAU with 3–5% conversion: 30–50 subscribers → **~€75–130/month**. That
 covers costs and validates willingness to pay; **it pays no dev.** The milestones:
 
-| Dev budget | Subscribers needed | MAU needed (3–5% conv.) |
-|---|---|---|
-| Freelance ~€2,000/mo | ~800 | ~16,000–27,000 |
-| 1 full-time dev ~€6,000/mo | ~2,400 | ~48,000–80,000 |
+| Dev budget                 | Subscribers needed | MAU needed (3–5% conv.) |
+| -------------------------- | ------------------ | ----------------------- |
+| Freelance ~€2,000/mo       | ~800               | ~16,000–27,000          |
+| 1 full-time dev ~€6,000/mo | ~2,400             | ~48,000–80,000          |
 
 These tiers are the phase-2 growth targets; the price lever (monthly €5.99–6.99) cuts the required
 subscribers by ~30% and will be reassessed with real `scan-usage` data. Sensitivity: at those
@@ -318,7 +313,7 @@ vision scans + **60 enrichments/month** hard cap. Adjust after observing real co
    auto-refresh) — fine for a monthly cap and generous for expiry.
 3. **Cache hits never touch quotas.** The Gemini call is the only cost; a `scan-cache` hit is
    free and rare (lossy recompression changes the SHA-256). Gating decides only whether the
-   *enrichment* Gemini call is made on a cache **miss**. Cache hits return as-is (a harmless
+   _enrichment_ Gemini call is made on a cache **miss**. Cache hits return as-is (a harmless
    upside for free users), and increments happen only when a real vision call occurs. Trial is
    also not decremented on cache hits.
 4. **Every increment is deploy-dark until the header arrives.** All backend enforcement sits
@@ -408,10 +403,18 @@ entitlement so the webhook picks the right verifier.
 with the bearer token, so auth/user-context is free and it returns the typed tier the UI needs):
 
 ```graphql
-enum Tier { free pro }
-type EntitlementStatus { tier: Tier!  expiresAt: DateTime }
+enum Tier {
+  free
+  pro
+}
+type EntitlementStatus {
+  tier: Tier!
+  expiresAt: DateTime
+}
 extend type Mutation {
-  """Verify a StoreKit 2 signed transaction and (re)compute the user's entitlement."""
+  """
+  Verify a StoreKit 2 signed transaction and (re)compute the user's entitlement.
+  """
   submitAppStoreTransaction(signedTransactionInfo: String!): EntitlementStatus!
 }
 ```
@@ -451,7 +454,7 @@ sentinel `{ __op: 'increment', by: n }` rather than overwrite; keep tracking `di
 ~15-line addition to `server/test/fake-firestore.ts`.
 
 **Atomic strategy**: `FieldValue.increment(1)` via `set(doc, {...}, { merge: true })` — one write
-per scan, correct under `concurrency: 80`, no transaction round-trip. The gating *read* is
+per scan, correct under `concurrency: 80`, no transaction round-trip. The gating _read_ is
 separate and eventually consistent; slight drift on a 60-cap is harmless.
 
 **Doc shapes** (collection `scan-usage`, no migration, default-deny rules unchanged)
@@ -528,11 +531,11 @@ the count costs exactly **1 queryRead** (never a full scan); pro/unenforced ⇒ 
 
 ```graphql
 type UsageStatus {
-  trialScansRemaining: Int!      # max(0, 5 - trialScansUsed); 0 for pro
+  trialScansRemaining: Int! # max(0, 5 - trialScansUsed); 0 for pro
   enrichmentsUsed: Int!
-  enrichmentsCap: Int            # 60 for pro, null (n/a) for free
+  enrichmentsCap: Int # 60 for pro, null (n/a) for free
   bottleCount: Int!
-  bottleCap: Int                 # 30 free, null = unlimited (pro)
+  bottleCap: Int # 30 free, null = unlimited (pro)
 }
 extend type Me {
   tier: Tier!
@@ -612,7 +615,6 @@ the existing screens (the app does address the user), never an em or en dash. **
 Extend `ios/Vinarium/Shared/GraphQLHelpers.swift` `unwrap` to read
 `errors.first?.extensions?["code"]` and throw a typed `APIError.domain(code:message:)` (add the
 case) — this is the enabler for paywall triggering.
-
 - **Scan flow** (`ScanViewModel.capturePhoto`, the sole `WineAPI.scan` caller): catch
   `APIError.domain(code: "QUOTA_EXCEEDED")` → set a `paywallReason` and present the Paywall
   instead of the generic error alert; other errors keep current behavior.
@@ -675,7 +677,7 @@ IDs, sandbox testers, terraform secret values, tagging the iOS release, and sett
   differs; test both verifiers; sandbox `originalTransactionId` differs from production.
 - **`scan-cache` × trial interplay**: a cache hit returns a full enriched result at zero cost and
   must not decrement the trial or monthly counters (metering only on a real Gemini call). A free
-  vision-only user can still receive an enriched *cached* result — accepted as a rare, harmless
+  vision-only user can still receive an enriched _cached_ result — accepted as a rare, harmless
   upside.
 - **peer-deps / node22**: confirm `@apple/app-store-server-library` installs cleanly under the
   strict-peer node22 pipeline (`npm ls jsonwebtoken`); fallback to `jose` + vendored root CA.

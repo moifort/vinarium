@@ -33,7 +33,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 - **Description / keywords / support URL** (your GitHub repo URL is fine).
 - **Privacy Policy URL**: `https://vinarium.polyforms.co/`.
 - **Terms of Use (EULA) link in every description** — guideline 3.1.2 refuses any submission
-  selling auto-renewable subscriptions whose *metadata* carries no functional link to the terms,
+  selling auto-renewable subscriptions whose _metadata_ carries no functional link to the terms,
   and the check is automated: 1.4 was refused on it on 2026-07-22, with the subscription group
   and both products left stuck behind the refused version. The listing files
   ([APP_STORE_LISTING.md](./APP_STORE_LISTING.md) for French,
@@ -47,10 +47,10 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
   `it`, `pt-PT`, `ja`. Content lives in the two listing files above and matches what is
   published byte for byte; re-check with a SHA-256 of the description on both sides rather
   than by eye. Three rules learned the hard way on 2026-07-26:
-  - **A locale can only be added while the version is *not* in review.** Editing existing
+  - **A locale can only be added while the version is _not_ in review.** Editing existing
     metadata works in `WAITING_FOR_REVIEW`, creating a localization answers 409 `Cannot create
     localization after the app version has been submitted for review`. Adding one means pulling
-    the version from review and resubmitting — plan locale work *before* submitting.
+    the version from review and resubmitting — plan locale work _before_ submitting.
   - **Creating the `appInfoLocalization` auto-creates the matching
     `appStoreVersionLocalization`.** Create the first, then PATCH the second; a POST on it
     answers 409 `already exists`.
@@ -61,18 +61,18 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
   per storefront and **not** shared with `en-GB`, which took the plain `Vinarium` on 2026-07-29.
 - **`en-GB`, `pt-BR` and `es-MX` were declared on 2026-07-29**, in the 1.5 cycle, from the
   content in [APP_STORE_LISTING.localized.md](./APP_STORE_LISTING.localized.md). Those three
-  stores showed the *French* listing until then. Ten locales are now declared, and the
+  stores showed the _French_ listing until then. Ten locales are now declared, and the
   release workflow writes a `release_notes.txt` for each of them: a locale `deliver` does not
   write keeps what it had, which on a new version is nothing. The translations have never had a
   native review pass — the note at the top of that file still stands.
 - **App Privacy** questionnaire — answers to select:
   - Data collected & **linked to the user**:
-    - *Contact info* → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
-    - *User Content* → the wine catalog, tasting notes, photos of labels — purpose **App Functionality**.
-    - *Identifiers* → the Apple user ID / account id — purpose **App Functionality**.
-    - *Location* → Coarse/precise location, **only** the tasting place the user opts to save — purpose **App Functionality**.
+    - _Contact info_ → Name, Email (only if the user shares them via Sign in with Apple) — purpose **App Functionality**.
+    - _User Content_ → the wine catalog, tasting notes, photos of labels — purpose **App Functionality**.
+    - _Identifiers_ → the Apple user ID / account id — purpose **App Functionality**.
+    - _Location_ → Coarse/precise location, **only** the tasting place the user opts to save — purpose **App Functionality**.
   - **Not** used for tracking. **No** third-party advertising. **No** data used for tracking across apps.
-- **Age rating**: no objectionable content → 4+ (answer "No" to everything; alcohol is *reference to*, set the alcohol/tobacco question to "Infrequent/Mild" if it appears → typically 17+ because the app is about alcohol; answer honestly).
+- **Age rating**: no objectionable content → 4+ (answer "No" to everything; alcohol is _reference to_, set the alcohol/tobacco question to "Infrequent/Mild" if it appears → typically 17+ because the app is about alcohol; answer honestly).
 - **Content rights**: you own or are licensed for all content → Yes.
 
 ## Phase 3 — Archive & upload [Xcode]
@@ -86,7 +86,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 >    maintainer and wait for an explicit approval before pushing. Corrections are applied and
 >    mirrored across the other languages, then re-submitted. Nothing is pushed on unvalidated
 >    notes.
-> 3. **Push `main`** — `deploy.yml` deploys the backend *and* stamps `## Unreleased` →
+> 3. **Push `main`** — `deploy.yml` deploys the backend _and_ stamps `## Unreleased` →
 >    `## YYYY.MM.DD`, regenerating `server/system/changelog-content.ts` (the changelog asset
 >    served to the app over GraphQL). **This versioning is required**: the app parses `##`
 >    headings — a dated `## YYYY.MM.DD` (dots) shows as a proper release, whereas
@@ -116,11 +116,11 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 >    `BuildMachineOSBuild` patch below is unnecessary there.
 > 6. **Attach the build** to the version in App Store Connect (Phase 4 below) once it finishes
 >    processing.
->
-> One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
-> Connect API key with the *App Manager* role) and `IOS_GOOGLE_SERVICE_INFO_PLIST` (base64 of
+>     >
+  One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
+> Connect API key with the _App Manager_ role) and `IOS_GOOGLE_SERVICE_INFO_PLIST` (base64 of
 > the gitignored `GoogleService-Info.plist`). Do **not** reuse the `APPLE_*` secrets — those
-> are the *Sign in with Apple* AuthKey used by Terraform.
+> are the _Sign in with Apple_ AuthKey used by Terraform.
 
 The manual archive/upload below stays as the fallback for step 5:
 
@@ -156,7 +156,7 @@ minutes; attach it to the 1.0 version.
   with `bun scripts/generate-appstore-previews.ts [1|2]` (Nano Banana Pro renders the panorama,
   real screenshots from `screenshots/` are composited onto the phone screens, then the panorama
   is sliced into panels). The panels are committed, and the release tag uploads them from the
-  checkout — so regenerate and commit them *before* tagging. To push panels between two
+  checkout — so regenerate and commit them _before_ tagging. To push panels between two
   releases, run the **App Store screenshots** workflow from the Actions tab (it replaces every
   screenshot of the editable version, so the version must not be in review).
 - **Submit for Review**. Optionally set manual release to keep control.

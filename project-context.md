@@ -7,10 +7,10 @@ Règle : ce qui est une **règle** va dans le playbook, ce qui est un **fait** r
 
 ## Environnements
 
-| Environnement | Identifiant | Notes |
-|---|---|---|
-| Production | `vinarium-prod` | Confirmé par `infra/terraform.tfvars`, `infra/backend.tf`, `ios/Vinarium/GoogleService-Info.plist` |
-| Héritage | `cave-a-vin` | Ancien nom de projet, encore présent dans `.firebaserc` à la racine. Piège classique sur toute commande `gcloud` ou `firebase` |
+| Environnement | Identifiant     | Notes                                                                                                                          |
+| ------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Production    | `vinarium-prod` | Confirmé par `infra/terraform.tfvars`, `infra/backend.tf`, `ios/Vinarium/GoogleService-Info.plist`                             |
+| Héritage      | `cave-a-vin`    | Ancien nom de projet, encore présent dans `.firebaserc` à la racine. Piège classique sur toute commande `gcloud` ou `firebase` |
 
 Pour tout script firebase-admin : `GOOGLE_CLOUD_PROJECT=vinarium-prod`. L'identifiant par défaut
 a besoin d'un projet de quota : `gcloud auth application-default set-quota-project vinarium-prod`.
@@ -55,12 +55,12 @@ Compte utilisateur unique en production : `KyTjMU39NBhfakGxExfqLmC5OYU2`.
 
 ## Certificats, clés et secrets GitHub
 
-| Secret | Rôle |
-|---|---|
-| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` | Clé App Store Connect `vinarium-ci` (`M7447599QX`, rôle Admin), téléversement et soumission |
-| `IOS_DIST_CERT_P12`, `IOS_DIST_CERT_PASSWORD`, `IOS_PROVISION_PROFILE` | Signature manuelle de l'archive, expiration du certificat le **2027-07-15** |
-| `IOS_GOOGLE_SERVICE_INFO_PLIST` | Fichier de configuration Firebase, ignoré par git |
-| `APPLE_*` | Clé Sign in with Apple utilisée par Terraform. À ne pas confondre avec les `ASC_*` |
+| Secret                                                                 | Rôle                                                                                        |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`                            | Clé App Store Connect `vinarium-ci` (`M7447599QX`, rôle Admin), téléversement et soumission |
+| `IOS_DIST_CERT_P12`, `IOS_DIST_CERT_PASSWORD`, `IOS_PROVISION_PROFILE` | Signature manuelle de l'archive, expiration du certificat le **2027-07-15**                 |
+| `IOS_GOOGLE_SERVICE_INFO_PLIST`                                        | Fichier de configuration Firebase, ignoré par git                                           |
+| `APPLE_*`                                                              | Clé Sign in with Apple utilisée par Terraform. À ne pas confondre avec les `ASC_*`          |
 
 Poser un secret sans l'exposer : `base64 -i <fichier> | tr -d '\n' | gh secret set NOM`.
 

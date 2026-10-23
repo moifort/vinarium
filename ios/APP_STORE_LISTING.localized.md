@@ -206,7 +206,7 @@ Política de privacidad: https://vinarium.polyforms.co/
 
 ## Español — México (es-MX)
 
-Mexican wording of the es-ES listing: a wine cellar is a **cava**, not a *bodega*
+Mexican wording of the es-ES listing: a wine cellar is a **cava**, not a _bodega_
 (which reads as a warehouse), and the euro amounts are dropped since the App Store
 shows the local price.
 
@@ -345,9 +345,9 @@ Política de privacidade: https://vinarium.polyforms.co/
 
 ## Português — Brasil (pt-BR)
 
-Brazilian wording of the pt-PT listing: *escaneie* rather than *digitalize*,
-*safra* rather than *colheita*, *assinatura* rather than *subscrição*, and second
-person *você* throughout. The euro amounts are dropped since the App Store shows
+Brazilian wording of the pt-PT listing: _escaneie_ rather than _digitalize_,
+_safra_ rather than _colheita_, _assinatura_ rather than _subscrição_, and second
+person _você_ throughout. The euro amounts are dropped since the App Store shows
 the local price.
 
 **Subtitle (≤30):** Sua adega inteligente

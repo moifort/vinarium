@@ -14,12 +14,12 @@ Store review whenever a breaking change ships. Acceptable for the current small 
 
 ## Moving parts
 
-| Piece | File |
-|---|---|
-| Build floor + App Store URL | `server/system/app-support.ts` |
-| Public config route (`GET /app-config`) | `server/routes/app-config.get.ts` (whitelisted in `server/middleware/auth.ts`) |
-| Launch/foreground check, fail-open | `ios/Vinarium/Shared/Services/AppSupportGate.swift` |
-| Blocking screen | `ios/Vinarium/Shared/Components/UpdateRequiredView.swift` (wired in `AuthRoot.swift`) |
+| Piece                                   | File                                                                                  |
+| --------------------------------------- | ------------------------------------------------------------------------------------- |
+| Build floor + App Store URL             | `server/system/app-support.ts`                                                        |
+| Public config route (`GET /app-config`) | `server/routes/app-config.get.ts` (whitelisted in `server/middleware/auth.ts`)        |
+| Launch/foreground check, fail-open      | `ios/Vinarium/Shared/Services/AppSupportGate.swift`                                   |
+| Blocking screen                         | `ios/Vinarium/Shared/Components/UpdateRequiredView.swift` (wired in `AuthRoot.swift`) |
 
 The comparison key is the integer build number (`CFBundleVersion`, set by CI to
 `git rev-list --count HEAD` at tag time), never the marketing version.

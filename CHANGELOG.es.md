@@ -3,6 +3,7 @@
 ## 1.7 (2026.10.04)
 
 ### Novedades
+
 - Vinarium Premium permite ahora llevar varias bodegas, una por mueble o por habitación, cada una con su nombre y su cuadrícula. Se crean desde la pestaña Bodega o en los Ajustes, en «Bodegas», y una botella puede pasar de una a otra.
 - La pestaña de escaneo se abre ahora en «Añadir un vino»: la cámara, las últimas fotos y un campo de texto. Un vino puede añadirse sin foto, describiéndolo: «Chablis 2019 de William Fèvre».
 - La ficha de un vino admite «Archivos adjuntos»: hasta cinco fotos o documentos, por ejemplo una factura o la ficha técnica del productor.
@@ -13,15 +14,18 @@
 - En los Ajustes, el perfil, Premium, las bodegas y el uso compartido quedan reunidos en una misma sección, e «Importar / Exportar» se encuentra ahora en «Perfil».
 
 ### Correcciones
+
 - Las filas de los Ajustes responden en toda su anchura, y ya no solo en su título.
 
 ### Rendimiento
+
 - El inicio, la bodega y la lista de vinos se abren con su último contenido, sin pantalla de carga, y luego se actualizan.
 - Las pantallas se abren más rápido, y una lista filtrada aparece antes, incluso con muchas botellas.
 
 ## 1.6 (2026.08.08)
 
 ### Novedades
+
 - Desde el menú Ajustes, ahora puedes informar de un error o sugerir mejoras y nuevas funciones.
 - Como regalo de bienvenida, te ofrecemos 20 escaneos al abrir tu cuenta, para que pruebes la app a fondo.
 - Toda la información sobre tu cupo está ahora disponible desde los Ajustes.
@@ -29,21 +33,25 @@
 - Desde el menú de una botella, «Editar» corrige ahora toda su ficha: la nota de cata con sus estrellas, la fecha, quién estaba y tus comentarios, y también la graduación, el lugar de la degustación, quién te recomendó la botella y a quién se la regalaste.
 
 ### Correcciones
+
 - La búsqueda encuentra tus botellas aunque olvides los acentos o los plurales: «chateaux margaux» encuentra «Château Margaux».
 - Un campo que vacías queda ahora borrado de verdad, en lugar de recuperar su valor anterior.
 - Un precio escrito con coma por fin se tiene en cuenta, y sus céntimos ya no se redondean al volver a abrir la ficha.
 - La ficha se guarda de una sola vez: si algo falla, no queda nada a medio guardar.
 
 ### Rendimiento
+
 - La búsqueda muestra ahora sus resultados más rápido, incluso con muchas botellas.
 
 ## 1.5 (2026.07.29)
 
 ### Novedades
+
 - La pantalla Premium se abre ahora con las cifras de la cuenta: los escaneos usados, los que quedan y la fecha de renovación del cupo.
 - La ficha de una botella guardada indica ahora su ubicación en la bodega.
 
 ### Correcciones
+
 - Una suscripción comprada en la App Store se activa ahora en cuanto se paga.
 - Una botella se guarda ahora en la posición elegida, y no en la de al lado.
 - La cuadrícula que se muestra al mover una botella tiene ahora las dimensiones de la bodega.
@@ -52,15 +60,18 @@
 ## 1.4 (2026.07.22)
 
 ### Novedades
+
 - El escaneo de etiquetas dispone ahora de un cupo mensual de cinco escaneos gratuitos. Cuando se agota el cupo del mes, la pantalla de escaneo propone Vinarium Premium. Todo lo demás de la aplicación sigue siendo gratuito y sin límite.
 - Vinarium Premium desbloquea el escaneo ilimitado, con una modalidad mensual o una anual que empieza con siete días gratis. La oferta se encuentra en los Ajustes, y la suscripción se gestiona desde la cuenta de App Store.
 
 ### Rendimiento
+
 - El panel se abre más rápido.
 
 ## 1.3 (2026.07.18)
 
 ### Novedades
+
 - Durante un escaneo, la etiqueta fotografiada permanece en pantalla con una animación mientras se ejecuta el análisis, en lugar de una pantalla de carga vacía.
 - Cuando un escaneo no reconoce ninguna etiqueta, una pantalla clara lo indica y propone reintentar, en lugar de abrir una ficha vacía.
 - La bodega compartida reúne ahora su valor total, sus avisos de botellas listas para beber y su diario para todo el hogar. Cada movimiento del diario muestra al miembro que lo originó.
@@ -68,16 +79,19 @@
 ## 1.2 (2026.07.16)
 
 ### Novedades
+
 - El tamaño de la bodega puede cambiarse ahora desde los Ajustes, partiendo de un modelo o definiendo el número de filas y huecos. Las botellas permanecen en su sitio.
 - Las botellas de la bodega compartida son ahora accesibles a la búsqueda. Las de todo el hogar aparecen en la lista y la búsqueda, con el nombre de su propietario.
 - El nombre aparece en el perfil.
 
 ### Correcciones
+
 - Los enlaces de invitación abren ahora la aplicación de forma fiable.
 
 ## 1.1 (2026.07.15)
 
 ### Novedades
+
 - Un flujo de configuración en el primer inicio pide el nombre y luego las dimensiones de la bodega (número de filas y huecos). El modelo puede elegirse en un catálogo de vinotecas del mercado, con búsqueda por marca o modelo, para un dimensionamiento automático, o las dimensiones se introducen a mano. También se guarda el número de zonas de temperatura.
 - El tamaño de la bodega ya no es fijo. Corresponde a las dimensiones elegidas en la configuración, y tanto la cuadrícula de colocación como la capacidad mostrada se adaptan a ellas.
 - La barra de pestañas se reduce automáticamente al desplazarse para ampliar la zona de contenido, y el botón Escanear permanece fijo a la derecha.
@@ -86,11 +100,13 @@
 - Cada código de invitación muestra una insignia «Pendiente».
 
 ### Correcciones
+
 - Las acciones Copiar enlace, Correo y Revocar se activan ahora de forma independiente. Un solo toque ya no dispara las tres a la vez.
 
 ## 1.0 (2026.07.11)
 
 ### Novedades
+
 - Compartir la bodega: se invita a las personas del hogar con un código para compartir una única bodega común. Cada uno conserva su biblioteca, sus notas de cata y su diario, y solo las botellas en bodega se ponen en común.
 - En una bodega compartida, todas las botellas del hogar aparecen en la misma cuadrícula, con el nombre del propietario en las de los demás. Cualquier miembro puede colocar, mover, consumir o regalar cualquier botella. La salida se registra en el diario del propietario del vino, y cada nota de cata sigue siendo la de su autor.
 - En la ficha de un vino de otro miembro se muestra el nombre del propietario y se ocultan las acciones reservadas como editar, eliminar o recomendar.
@@ -108,8 +124,10 @@
 - Los datos pueden exportarse e importarse en formato JSON.
 
 ### Correcciones
+
 - La lista «Mis vinos» vuelve a mostrarse en lugar de un mensaje de error.
 
 ### Rendimiento
+
 - Las listas, la búsqueda y el panel son más rápidos. El servidor agrupa y comparte sus lecturas, sin recargar nunca varias veces los mismos vinos ni recorrer toda la bodega para un simple filtro.
 - La apertura de la ficha detallada es mucho más rápida. El servidor lee ahora solo la información del vino consultado en lugar de recorrer toda la bodega.
