@@ -41,12 +41,12 @@ le contraire.
 
 ## Langues
 
-| Ce qui est produit | Langue |
-|---|---|
-| Code, commentaires, messages de commit, documentation technique | Anglais |
-| Plans et specs de travail | Voir [01-workflow.md](01-workflow.md) |
-| Playbook et directives de projet | Français : ce sont des supports de décision, pas de la documentation versionnée |
-| Copy vue par l'utilisateur final | `{{SOURCE_LANGUAGE}}` puis `{{SERVED_LANGUAGES}}` |
-| Conversation | Celle de la personne en face |
+| Ce qui est produit                                              | Langue                                                                          |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Code, commentaires, messages de commit, documentation technique | Anglais                                                                         |
+| Plans et specs de travail                                       | Voir [01-workflow.md](01-workflow.md)                                           |
+| Playbook et directives de projet                                | Français : ce sont des supports de décision, pas de la documentation versionnée |
+| Copy vue par l'utilisateur final                                | `{{SOURCE_LANGUAGE}}` puis `{{SERVED_LANGUAGES}}`                               |
+| Conversation                                                    | Celle de la personne en face                                                    |
 
 Jamais deux langues dans un même message de commit ou un même commentaire.

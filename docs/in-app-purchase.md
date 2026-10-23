@@ -56,10 +56,10 @@ the model answered, never before.
 Two auto-renewable subscriptions in one subscription group, so a subscriber can switch between
 them:
 
-| Product id | Duration | Price | Introductory offer |
-|---|---|---|---|
-| `com.polyforms.vinarium.app.premium.monthly` | 1 month | 2,99 € | — |
-| `com.polyforms.vinarium.app.premium.yearly` | 1 year | 24,99 € | 7 days free |
+| Product id                                   | Duration | Price   | Introductory offer |
+| -------------------------------------------- | -------- | ------- | ------------------ |
+| `com.polyforms.vinarium.app.premium.monthly` | 1 month  | 2,99 €  | —                  |
+| `com.polyforms.vinarium.app.premium.yearly`  | 1 year   | 24,99 € | 7 days free        |
 
 The ids are declared in `ios/Vinarium/Features/Subscription/SubscriptionProducts.swift` and in
 `ios/Vinarium/Vinarium.storekit`; they must match App Store Connect exactly.
@@ -82,7 +82,6 @@ inspector (Debug → StoreKit → Manage Transactions) fakes renewals, refunds a
 ## App Store Connect setup — to do once, by a human
 
 Credential-gated; none of it is scriptable.
-
 1. **App Store Connect → Vinarium → Subscriptions** → create a subscription group
    `Vinarium Premium`.
 2. Add **`com.polyforms.vinarium.app.premium.yearly`**, duration 1 year, price 24,99 € (France;
@@ -113,10 +112,10 @@ Credential-gated; none of it is scriptable.
 
 ## Configuration
 
-| Variable | Purpose |
-|---|---|
+| Variable                  | Purpose                                                                                                                                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `NITRO_APPLE_ENVIRONMENT` | Pins verification to one environment. Blank tries Production then Sandbox, which is what a shipped app needs since TestFlight and review sign in Sandbox. `Xcode` for the local StoreKit file |
-| `NITRO_PREMIUM_USER_IDS` | Comped accounts, granted Premium without paying. An access list, not a credential — also a plain environment variable |
+| `NITRO_PREMIUM_USER_IDS`  | Comped accounts, granted Premium without paying. An access list, not a credential — also a plain environment variable                                                                         |
 
 Terraform is applied by CI, which writes `infra/terraform.tfvars` from GitHub secrets and
 variables on every push to `main`. A value that only exists in a local `terraform.tfvars` never
@@ -133,7 +132,6 @@ build in the wild is metered, including the ones that predate the paywall and wo
 server message in a generic error alert rather than the offer.
 
 So, in order:
-
 1. Set `PREMIUM_USER_IDS` **before** the backend deploy, so the accounts in use are unaffected.
 2. Deploy the backend. The webhook is live and idle; nothing can be bought yet.
 3. Ship the iOS release carrying the paywall.

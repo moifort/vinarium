@@ -110,12 +110,11 @@ they showed last as JSON, through `SnapshotCache<Value>` (`Shared/SnapshotCache.
 in `init`, before anything is asked of the network, so the screen is readable in the first frame.
 The rule is in [playbook/10-ios.md](../playbook/10-ios.md#chargements).
 
-| Screen | Snapshot | What is written |
-|---|---|---|
+| Screen    | Snapshot                             | What is written                                                                                                       |
+| --------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
 | Wine list | `[Wine]`, `WineListFilters.cacheKey` | Page 0 of each view, sort and filter combination, one file each, capped at one page however far the list was scrolled |
-| Dashboard | `DashboardData`, `dashboard` | The whole payload, after each successful load |
-| Cellar | `CellarSnapshot`, `cellar-<id>` | The first page of bottles and of the journal, one file per cellar, after each full reload |
-
+| Dashboard | `DashboardData`, `dashboard`         | The whole payload, after each successful load                                                                         |
+| Cellar    | `CellarSnapshot`, `cellar-<id>`      | The first page of bottles and of the journal, one file per cellar, after each full reload                             |
 - **Versioned**: each cache is built with a `version`; a file carrying another one is ignored.
   Bump it whenever the snapshot's type changes shape.
 - **The refresh that follows** draws nothing: the rows stay readable and the view model assigns
@@ -259,13 +258,13 @@ struct WineListPage: View {
 
 ### Atomic Design Layers
 
-| Layer | Location | Receives | Examples |
-|-------|----------|----------|----------|
-| **Coordinator** | `Features/{F}/{F}View.swift` | Owns the ViewModel | `WineListView`, `WineDetailView` |
-| **Pages** | `Features/{F}/components/pages/` | Bindings + primitives + closures | `WineListPage`, `WineDetailPage` |
-| **Organisms** | `Features/{F}/components/organisms/` | Primitives or `Item` / domain struct at the mapping boundary | `WineListContent`, `WineEditForm`, `WineDetailContent` |
-| **Molecules** | `Features/{F}/components/molecules/` | Primitives | `WineListRow`, `LocationSection` |
-| **Atoms** | `Shared/Components/` | Primitives | `WineColorBadge`, `StarRatingView` |
+| Layer           | Location                             | Receives                                                     | Examples                                               |
+| --------------- | ------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------ |
+| **Coordinator** | `Features/{F}/{F}View.swift`         | Owns the ViewModel                                           | `WineListView`, `WineDetailView`                       |
+| **Pages**       | `Features/{F}/components/pages/`     | Bindings + primitives + closures                             | `WineListPage`, `WineDetailPage`                       |
+| **Organisms**   | `Features/{F}/components/organisms/` | Primitives or `Item` / domain struct at the mapping boundary | `WineListContent`, `WineEditForm`, `WineDetailContent` |
+| **Molecules**   | `Features/{F}/components/molecules/` | Primitives                                                   | `WineListRow`, `LocationSection`                       |
+| **Atoms**       | `Shared/Components/`                 | Primitives                                                   | `WineColorBadge`, `StarRatingView`                     |
 
 **Atoms** in `Shared/Components/` are cross-feature. A molecule used in 2+ features should be promoted to `Shared/Components/`.
 
@@ -322,17 +321,16 @@ Top-of-screen CTAs (navigation bars, sheet headers) follow one convention across
 **icon-only**, positioned by role. Never a text label — the `title` is passed only for accessibility
 (VoiceOver), never rendered.
 
-| Side | Role | Icon | Placement |
-|------|------|------|-----------|
-| Left | Cancel / Close / dismiss | `xmark` | `.cancellationAction` |
-| Left | Back (onboarding navigation) | `chevron.left` | `.topBarLeading` |
-| Right | Confirm / Save | `checkmark` | `.confirmationAction` |
-| Right | Add | `plus` | `.primaryAction` |
-| Right | Secondary actions (view modes, sort, move/remove) | domain icon | `ToolbarItemGroup` |
+| Side  | Role                                              | Icon           | Placement             |
+| ----- | ------------------------------------------------- | -------------- | --------------------- |
+| Left  | Cancel / Close / dismiss                          | `xmark`        | `.cancellationAction` |
+| Left  | Back (onboarding navigation)                      | `chevron.left` | `.topBarLeading`      |
+| Right | Confirm / Save                                    | `checkmark`    | `.confirmationAction` |
+| Right | Add                                               | `plus`         | `.primaryAction`      |
+| Right | Secondary actions (view modes, sort, move/remove) | domain icon    | `ToolbarItemGroup`    |
 
 Render every toolbar CTA through the two shared atoms in `Shared/Components/` — never an inline
 `Button` with a visible label:
-
 - **`ToolbarIconButton(title:systemImage:role:action:)`** — synchronous icon-only button for
   cancel / close / back and secondary actions. Applies `.labelStyle(.iconOnly)`; keeps `title` for VoiceOver.
 - **`AsyncToolbarButton(title:systemImage:action:)`** — async confirm button; shows a `ProgressView`
@@ -369,7 +367,6 @@ The feature-root `{Feature}View` coordinator owns the ViewModel, so its preview 
 **smoke preview**: it renders the loading or empty state the canvas can reach on its own
 and never proves the data path. Keep it cheap and never make it the place where a screen
 is designed — that stays the `Page`'s job. Two coordinators need a nudge to get there:
-
 - `AuthRoot` calls `FirebaseApp.configure()` first, because the canvas does not run
   `VinariumApp.init` and `AuthSession` traps on an unconfigured Firebase.
 - `ScanView` renders its controls over an empty preview layer: the canvas has no camera,

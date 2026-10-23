@@ -3,7 +3,7 @@
 > The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
 
 
-Step-by-step guide to adding a new domain to the backend. Each step corresponds to a DDD building block from Evans (*Domain-Driven Design*) or Wlashin (*Domain Modeling Made Functional*).
+Step-by-step guide to adding a new domain to the backend. Each step corresponds to a DDD building block from Evans (_Domain-Driven Design_) or Wlashin (_Domain Modeling Made Functional_).
 
 ## 1. Create the Domain Directory
 
@@ -143,11 +143,18 @@ import type { UserId } from '~/domain/shared/types'
 export namespace TastingCommand {
   export const rate = async (userId: UserId, beverageId: BeverageId, rating: Rating) => {
     const existing = await repository.findBy(userId, beverageId)
-    const note: TastingNote = { ...(existing ?? { userId, beverageId, createdAt: new Date() }), rating }
+    const note: TastingNote = {
+      ...(existing ?? { userId, beverageId, createdAt: new Date() }),
+      rating,
+    }
     return await repository.save(note)
   }
 
-  export const removeBeverage = async (userId: UserId, beverageId: BeverageId, batch?: WriteBatch) => {
+  export const removeBeverage = async (
+    userId: UserId,
+    beverageId: BeverageId,
+    batch?: WriteBatch,
+  ) => {
     await repository.remove(userId, beverageId, batch)
   }
 }
@@ -214,7 +221,6 @@ export const beverageStatus = (context: {
 ## Tests
 
 Co-locate tests next to the file under test (no `__test__/` directories). Suffixes, highest to lowest level:
-
 - **`*.feat.test.ts`** — feature tests: business scenarios at the GraphQL boundary (execute a query/mutation against the assembled schema).
 - **`*.int.test.ts`** — integration tests: domain queries/commands with Firestore mocked via the in-memory fake.
 - **`*.unit.test.ts`** — unit tests: primitives and pure `business-rules.ts` functions (no IO).
@@ -229,7 +235,9 @@ mock.module('~/system/firebase', () => ({ db: fakeDb }))
 const { TastingCommand } = await import('~/domain/tasting/command')
 
 let fake = resetFakeFirestore()
-beforeEach(() => { fake = resetFakeFirestore() })
+beforeEach(() => {
+  fake = resetFakeFirestore()
+})
 
 test('rating a beverage persists a note', async () => {
   const note = await TastingCommand.rate('user-1' as UserId, beverageId, Rating(4))

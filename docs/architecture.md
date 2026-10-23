@@ -10,30 +10,29 @@ The backend follows a Domain-Driven Design (DDD) architecture built on [Nitro](h
 ## Theoretical Foundations
 
 This architecture draws from two foundational DDD books:
-
-- **Eric Evans** — *Domain-Driven Design: Tackling Complexity in the Heart of Software* (2003)
-- **Scott Wlashin** — *Domain Modeling Made Functional: Tackle Software Complexity with Domain-Driven Design and F#* (2018)
+- **Eric Evans** — _Domain-Driven Design: Tackling Complexity in the Heart of Software_ (2003)
+- **Scott Wlashin** — _Domain Modeling Made Functional: Tackle Software Complexity with Domain-Driven Design and F#_ (2018)
 
 **Evans concepts used in this project:**
 
-| Concept | Where |
-|---------|-------|
-| Bounded Context | Each `server/domain/{domain}/` is a self-contained context with clear boundaries |
-| Ubiquitous Language | Function and type names carry business meaning, not technical jargon |
-| Value Objects | Branded types in `types.ts` — identity through value, not reference |
-| Entities | Domain types with an `id` field in `types.ts` |
-| Repository | `infrastructure/repository.ts` — abstracts Firestore, private to the bounded context |
-| Application Services | `query.ts`, `command.ts`, `use-case.ts` — orchestrate domain operations |
-| Anti-Corruption Layer | Zod validation at domain boundaries prevents invalid data from entering |
+| Concept               | Where                                                                                |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| Bounded Context       | Each `server/domain/{domain}/` is a self-contained context with clear boundaries     |
+| Ubiquitous Language   | Function and type names carry business meaning, not technical jargon                 |
+| Value Objects         | Branded types in `types.ts` — identity through value, not reference                  |
+| Entities              | Domain types with an `id` field in `types.ts`                                        |
+| Repository            | `infrastructure/repository.ts` — abstracts Firestore, private to the bounded context |
+| Application Services  | `query.ts`, `command.ts`, `use-case.ts` — orchestrate domain operations              |
+| Anti-Corruption Layer | Zod validation at domain boundaries prevents invalid data from entering              |
 
 **Wlashin concepts used in this project:**
 
-| Concept | Where |
-|---------|-------|
-| Making illegal states unrepresentable | Branded types + Zod constructors in `primitives.ts`, discriminated unions in `types.ts` |
-| Railway-Oriented Programming | String-literal outcomes returned from commands — reserved for expected business outcomes only, not technical errors. `throw` for impossible states. |
-| Types as documentation | Branded types make the domain model self-documenting |
-| Pure domain functions | `business-rules.ts` — no IO, no async, pure input/output |
+| Concept                               | Where                                                                                                                                               |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Making illegal states unrepresentable | Branded types + Zod constructors in `primitives.ts`, discriminated unions in `types.ts`                                                             |
+| Railway-Oriented Programming          | String-literal outcomes returned from commands — reserved for expected business outcomes only, not technical errors. `throw` for impossible states. |
+| Types as documentation                | Branded types make the domain model self-documenting                                                                                                |
+| Pure domain functions                 | `business-rules.ts` — no IO, no async, pure input/output                                                                                            |
 
 ## Directory Structure
 
@@ -71,7 +70,6 @@ There is **no `read-model/` layer and no event bus**. Composite, cross-domain re
 ### Domain Layer (`server/domain/`)
 
 Each domain is a self-contained bounded context:
-
 - **types.ts** — Branded types using `ts-brand`, plus discriminated unions. Evans: Value Objects (identity through value) and Entities (types with an `id`).
 - **primitives.ts** — Zod constructors that validate and brand raw values. Wlashin: making illegal states unrepresentable — if it parses, it's valid.
 - **infrastructure/repository.ts** — Firestore access (private, never imported from outside the domain). A module of bare exported functions, imported as `* as repository` from `command.ts`/`query.ts`. Evans: Repository pattern — abstracts persistence behind a domain-oriented interface.
@@ -83,7 +81,6 @@ Each domain is a self-contained bounded context:
 ### GraphQL Layer (`server/domain/{domain}/infrastructure/graphql/` + `server/domain/shared/graphql/`)
 
 Code-first GraphQL API using Apollo Server + [Pothos](https://pothos-graphql.dev/). The schema is assembled from per-domain `infrastructure/graphql/` folders; the shared infrastructure lives in `server/domain/shared/graphql/`:
-
 - **builder.ts** — the Pothos `SchemaBuilder`, `GraphQLContext` type (`event`, `userId`, `loaders`), and the `Scalars` map. `DefaultFieldNullability: false` — every field is non-null unless it opts in with `nullable: true`.
 - **scalars.ts** — one custom scalar per branded type. Resolvers receive pre-validated branded args; invalid input becomes a `BAD_USER_INPUT` GraphQL error at parse time.
 - **schema.ts** — imports every domain's GraphQL module (registering its types/queries/mutations on the shared `builder`) and exports the assembled schema.
@@ -139,7 +136,6 @@ const beverages = () => db().collection('beverages').withConverter(genericDataCo
 ```
 
 `genericDataConverter<T>()` (in `server/utils/firestore.ts`) recursively turns Firestore `Timestamp` values back into JS `Date` on read. Other helpers in the same file:
-
 - **`atomically(batch => …)`** — runs the callback against a fresh `WriteBatch` and commits it once: every enlisted write lands or none does. Reads inside the callback see pre-batch state.
 - **`deleteInBatches(refs)`** — deletes many document refs, chunked under the 500-op batch cap.
 - **`bulkSave(rows, save)`** — persists many records with bounded write concurrency (used by import/restore, where the row count can exceed a single batch).
@@ -166,17 +162,18 @@ Terms that belong to a person rather than to the wine carry their owner's id, be
 ## Cross-Domain Reads
 
 Because there is no read-model layer, composite views are assembled in two ways:
-
 1. **In `query.ts`** — a domain query may call another domain's public `Query` namespace. Example: `BeverageQuery.list` serves the favorite/gifted/recommended/in-cellar/consumed views by asking `TastingQuery`, `GiftQuery`, `RecommendationQuery` and `CellarQuery` which wines they name, then reading just those wines by id. A facet view (colour, type, subtype) asks Firestore for the wines carrying the facet term of their `searchIndex`. Only the unfiltered view sorted on an optional field (vintage, region, colour, price) reads the whole library, because Firestore's `orderBy` drops the documents missing the field.
 2. **In GraphQL nested resolvers** — the satellite fields on `Beverage` resolve independently through the per-request loaders, so clients pay only for the fields they select.
 
 ## Observability
 
 - **Logging** — structured logging via [consola](https://github.com/unjs/consola). Each module creates a tagged logger:
+
   ```ts
   import { createLogger } from '~/system/logger'
   const log = createLogger('migration')
   log.info('Applied migration', { version })
   ```
+
   The factory is in `server/system/logger.ts`. Never use raw `console.log`.
 - **Sentry** — initialised in `server/plugins/00-sentry.ts` with the instrumentation in `server/system/sentry/`. Unexpected errors (thrown from resolvers/commands) are captured automatically.

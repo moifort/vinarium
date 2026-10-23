@@ -165,11 +165,11 @@ concept qu'elles calculent. Couverture de test complète attendue.
 
 Co-localisés avec le fichier testé, pas de dossier séparé.
 
-| Suffixe | Portée |
-|---|---|
-| `*.unit.test.ts` | Primitives et fonctions pures |
-| `*.int.test.ts` | Commandes et requêtes contre un stockage simulé |
-| `*.feat.test.ts` | Scénarios métier à la frontière de l'API |
+| Suffixe          | Portée                                          |
+| ---------------- | ----------------------------------------------- |
+| `*.unit.test.ts` | Primitives et fonctions pures                   |
+| `*.int.test.ts`  | Commandes et requêtes contre un stockage simulé |
+| `*.feat.test.ts` | Scénarios métier à la frontière de l'API        |
 
 Le stockage se simule par substitution du module, de sorte que l'ordre des fichiers n'ait pas
 d'importance. Les budgets de lecture s'affirment en comptant séparément les lectures de documents

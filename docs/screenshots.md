@@ -37,7 +37,6 @@ pixels. It needs a JDK, like
 [the e2e run](./e2e.md).
 
 Two pieces make it work:
-
 - **`scripts/seed-screenshot-cellar.ts`** fills one fixed account
   (`screenshots@vinarium.test`) through the public GraphQL API: twenty-odd
   bottles spread over regions and colours, some placed in the grid, a few
@@ -86,7 +85,6 @@ whatever uses it: a shorter panorama keeps its left panels, which is why one
 prompt and one cache serve both.
 
 Three things are kept away from the image model on purpose:
-
 - **The app's UI.** The model renders plausible-looking but wrong text
   ("Appelletion", "Eortie"), so `scripts/composite-panorama.swift` pastes the
   real captures instead.

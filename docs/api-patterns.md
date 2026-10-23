@@ -18,7 +18,6 @@ A missing `userId` yields a `401` before Apollo runs.
 ## Local Development: Apollo Sandbox
 
 In dev (`bun run dev`), opening http://localhost:3000/graphql in a browser loads the embedded Apollo Sandbox: schema browser, docs, and a query runner. Two dev-only pieces make this work:
-
 - `server/plugins/02-graphql.ts` registers `ApolloServerPluginLandingPageLocalDefault({ embed: true })` under `import.meta.dev`.
 - `server/middleware/auth.ts` has a dev-only bypass: a request to `/graphql` with **no** `Authorization` header is authenticated as the Firebase UID from `NITRO_DEV_USER_ID` (set it in the gitignored `.env`). A request that does carry a `Bearer` token is still verified normally, and the whole bypass is tree-shaken out of production builds (`import.meta.dev`).
 
@@ -35,7 +34,11 @@ builder.queryField('beverages', (t) =>
     description: 'A page of the current user’s beverage list, filtered and sorted per view',
     args: {
       mode: t.arg({ type: BeverageListModeEnum, defaultValue: 'all', description: 'List preset' }),
-      sort: t.arg({ type: BeverageSortEnum, defaultValue: 'updatedAt', description: 'Order field' }),
+      sort: t.arg({
+        type: BeverageSortEnum,
+        defaultValue: 'updatedAt',
+        description: 'Order field',
+      }),
       limit: t.arg.int({ defaultValue: 40, description: 'Maximum beverages returned' }),
       after: t.arg({ type: 'BeverageId', description: 'Cursor: the beverage id to page after' }),
     },
@@ -86,7 +89,12 @@ builder.mutationField('addBeverage', (t) =>
     },
     resolve: async (_root, { input }, { userId }) => {
       const clean = stripNulls(input)
-      const result = await BeverageUseCase.add(userId, clean.name, clean.beverageType ?? 'wine', toData(clean))
+      const result = await BeverageUseCase.add(
+        userId,
+        clean.name,
+        clean.beverageType ?? 'wine',
+        toData(clean),
+      )
       return match(result)
         .with('color-required', () => badUserInput('A wine requires a color'))
         .with('subtype-invalid', () => badUserInput('This subtype does not fit the beverage type'))

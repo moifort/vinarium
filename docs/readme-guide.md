@@ -54,10 +54,10 @@ A table with three columns: what to install, what it does, how to install it.
 ```md
 ## Prerequisites
 
-| Tool | What it does | Install |
-|------|-------------|---------|
-| [Bun](https://bun.sh/) | Runs the backend server | `curl -fsSL https://bun.sh/install \| bash` |
-| [Xcode](https://developer.apple.com/xcode/) | Builds the iOS app | Mac App Store |
+| Tool                                        | What it does            | Install                                     |
+| ------------------------------------------- | ----------------------- | ------------------------------------------- |
+| [Bun](https://bun.sh/)                      | Runs the backend server | `curl -fsSL https://bun.sh/install \| bash` |
+| [Xcode](https://developer.apple.com/xcode/) | Builds the iOS app      | Mac App Store                               |
 ```
 
 Only list things the reader installs themselves. Don't list transitive dependencies (TypeScript, Swift packages — handled automatically).
@@ -66,7 +66,7 @@ Only list things the reader installs themselves. Don't list transitive dependenc
 
 Walk through every step from "I just cloned the repo" to "the project is ready".
 
-```md
+````md
 ## Installation
 
 1. Clone the repo:
@@ -75,25 +75,23 @@ Walk through every step from "I just cloned the repo" to "the project is ready".
 git clone https://github.com/you/vinarium.git
 cd vinarium
 \```
-
 2. Install dependencies:
 
 \```bash
 bun install
 \```
-```
+````
 
 List each manual step: install deps, create config files, set up Firebase credentials, etc.
 
 ### 5. Setting up keys
 
 One subsection per key. Each answers three questions:
-
 1. **What it does** — one sentence, no jargon
 2. **How to get it** — exact steps (create account, generate token, copy value)
 3. **Where to put it** — table with file path + variable name
 
-```md
+````md
 ### API token
 
 **What it does:** protects your server so only your app can talk to it.
@@ -106,12 +104,12 @@ openssl rand -hex 32
 
 **Where to put it:**
 
-| File | Variable |
-|------|----------|
-| `.env` | `NITRO_API_TOKEN=your-token-here` |
-| `ios/Vinarium/Shared/Secrets.swift` | `static let apiToken = "your-token-here"` |
+| File                                            | Variable                                  |
+| ----------------------------------------------- | ----------------------------------------- |
+| `.env`                                          | `NITRO_API_TOKEN=your-token-here`         |
+| `ios/Vinarium/Shared/Secrets.swift`             | `static let apiToken = "your-token-here"` |
 | `ios/VinariumUITests/Support/TestSecrets.swift` | `static let apiToken = "your-token-here"` |
-```
+````
 
 Rules:
 - Mark optional keys as optional
@@ -123,7 +121,7 @@ Rules:
 
 Two subsections: backend + iOS. Each should be copy-pasteable.
 
-```md
+````md
 ## Running the project
 
 ### Start the backend
@@ -141,10 +139,9 @@ The server starts at `http://localhost:3000`. GraphQL (and the Apollo Sandbox in
 \```bash
 open ios/Vinarium.xcodeproj
 \```
-
 2. Set your Development Team in Signing & Capabilities
 3. Pick a simulator and hit Run
-```
+````
 
 Include a way to verify it works (a GraphQL query in the Sandbox, an expected screen, etc.).
 
@@ -159,12 +156,12 @@ A table linking to the guides in `docs/`. One line per guide, with a plain-langu
 ```md
 ## Documentation
 
-| Guide | What it covers |
-|-------|---------------|
-| [Architecture](docs/architecture.md) | How the backend is organized |
-| [Domain guide](docs/domain-guide.md) | How to add a new domain |
-| [API patterns](docs/api-patterns.md) | How the GraphQL layer is built |
-| [iOS guide](docs/ios-guide.md) | How to add screens to the iOS app |
+| Guide                                | What it covers                    |
+| ------------------------------------ | --------------------------------- |
+| [Architecture](docs/architecture.md) | How the backend is organized      |
+| [Domain guide](docs/domain-guide.md) | How to add a new domain           |
+| [API patterns](docs/api-patterns.md) | How the GraphQL layer is built    |
+| [iOS guide](docs/ios-guide.md)       | How to add screens to the iOS app |
 ```
 
 Describe what the reader will learn, not the technical content. "How to add screens to the iOS app" — not "SwiftUI feature structure with atomic design and MVVM ViewModels".

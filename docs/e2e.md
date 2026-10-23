@@ -28,7 +28,6 @@ A run takes about 9 minutes, 6 of them in the four scenarios. They share one emu
 ### Cellar — `CellarFlowTest`
 
 The main journey, a new account taken through the product end to end:
-
 1. **Onboarding** — prénom, cellar dimensions, finish (`completeOnboarding` provisions the grid)
 2. **Scan** — the bundled label photo, the review form, add to cellar (`scanBeverage`, quota, `addBeverage`)
 3. **Placement** — slot A1, confirmation (`placeBottle`)
@@ -46,7 +45,7 @@ Scan, flag the bottle favorite from the form's inline toggle, save without placi
 
 ### Gift — `GiveAsGiftFlowTest`
 
-Scan, place, then give the bottle away with a recipient name. It leaves the cellar, stays in the full list, and its detail shows the "Offert" section. Note that the **Offerts** filter is not involved: it holds bottles *received* as a gift (`gift.received`), not given ones.
+Scan, place, then give the bottle away with a recipient name. It leaves the cellar, stays in the full list, and its detail shows the "Offert" section. Note that the **Offerts** filter is not involved: it holds bottles _received_ as a gift (`gift.received`), not given ones.
 
 ### Recommendation — `RecommendationFlowTest`
 

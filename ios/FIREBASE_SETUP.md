@@ -8,17 +8,16 @@ else (Auth flow, GraphQL client, codegen, feature refactors) is in code.
 
 `File → Add Package Dependencies…`
 
-| URL | Product(s) | Min version |
-| --- | --- | --- |
-| `https://github.com/apollographql/apollo-ios.git` | `Apollo`, `ApolloAPI` | 1.18.0 |
-| `https://github.com/firebase/firebase-ios-sdk.git` | `FirebaseCore`, `FirebaseAuth` | 11.0.0 |
+| URL                                                | Product(s)                     | Min version |
+| -------------------------------------------------- | ------------------------------ | ----------- |
+| `https://github.com/apollographql/apollo-ios.git`  | `Apollo`, `ApolloAPI`          | 1.18.0      |
+| `https://github.com/firebase/firebase-ios-sdk.git` | `FirebaseCore`, `FirebaseAuth` | 11.0.0      |
 
 Both attached to the `Vinarium` target.
 
 ## 2. Capabilities
 
 `Target Vinarium → Signing & Capabilities → + Capability`
-
 - **Sign in with Apple** — required for Apple Sign-In to work with Firebase Auth.
 
 ## 3. GoogleService-Info.plist
@@ -33,11 +32,13 @@ Both attached to the `Vinarium` target.
 ## 4. Apollo iOS codegen
 
 1. Install once globally:
+
    ```bash
    brew install apollo-ios-cli
    # or: swift package experimental-install apollo-cli
    ```
 2. Whenever the GraphQL schema or any operation changes, regenerate:
+
    ```bash
    # from repo root: regenerate the schema SDL first
    bun run generate:graphql

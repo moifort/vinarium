@@ -3,6 +3,7 @@
 ## 1.7 (2026.10.04)
 
 ### Nouveautés
+
 - Vinarium Premium permet maintenant de tenir plusieurs caves, une par meuble ou par pièce, chacune avec son nom et sa grille. Elles se créent depuis l'onglet Cave ou dans les Réglages, sous « Caves », et une bouteille peut passer de l'une à l'autre.
 - L'onglet de scan s'ouvre maintenant sur « Ajouter un vin » : l'appareil photo, les dernières photos et un champ de texte. Un vin peut être ajouté sans photo, en le décrivant : « Chablis 2019 de William Fèvre ».
 - La fiche d'un vin accueille des « Pièces jointes » : jusqu'à cinq photos ou documents, par exemple une facture ou la fiche technique du producteur.
@@ -13,15 +14,18 @@
 - Dans les Réglages, le profil, Premium, les caves et le partage sont réunis dans une même section, et « Importer / Exporter » se trouve maintenant dans « Profil ».
 
 ### Corrections
+
 - Les lignes des Réglages réagissent sur toute leur largeur, et non plus sur leur seul titre.
 
 ### Performance
+
 - L'accueil, la cave et la liste des vins s'ouvrent sur leur dernier contenu, sans écran de chargement, puis se mettent à jour.
 - Les écrans s'ouvrent plus vite, et une liste filtrée s'affiche plus rapidement, même sur un grand nombre de bouteilles.
 
 ## 1.6 (2026.08.08)
 
 ### Nouveautés
+
 - Dans le menu Réglages, vous pouvez maintenant signaler un bug, suggérer des améliorations ou de nouvelles fonctionnalités.
 - En cadeau de bienvenue, nous offrons 20 scans à l'ouverture du compte, afin que vous puissiez tester et apprécier l'application au mieux.
 - Toutes les informations sur vos quotas sont maintenant accessibles depuis les Réglages.
@@ -29,21 +33,25 @@
 - Dans le menu d'une bouteille, « Modifier » permet maintenant de corriger toute sa fiche : la note de dégustation avec ses étoiles, la date, les personnes présentes et vos commentaires, mais aussi le degré, le lieu de dégustation, qui vous a conseillé la bouteille et à qui vous l'avez offerte.
 
 ### Corrections
+
 - La recherche retrouve vos bouteilles même si vous oubliez les accents ou les pluriels : « chateaux margaux » trouve « Château Margaux ».
 - Un champ que vous videz est maintenant effacé pour de bon, au lieu de retrouver son ancienne valeur.
 - Un prix saisi avec une virgule est enfin pris en compte, et ses centimes ne sont plus arrondis quand vous rouvrez la fiche.
 - La fiche s'enregistre d'un seul bloc : si quelque chose échoue, plus rien n'est enregistré à moitié.
 
 ### Performance
+
 - La recherche affiche maintenant les résultats plus rapidement, même sur un grand nombre de bouteilles.
 
 ## 1.5 (2026.07.29)
 
 ### Nouveautés
+
 - L'écran Premium s'ouvre maintenant sur les chiffres du compte : les scans utilisés, ceux qui restent et la date de renouvellement du quota.
 - La fiche d'une bouteille rangée indique maintenant son emplacement dans la cave.
 
 ### Corrections
+
 - Un abonnement souscrit sur l'App Store s'active maintenant dès le paiement.
 - Une bouteille se range maintenant dans l'emplacement choisi, et non dans celui d'à côté.
 - La grille affichée pour déplacer une bouteille reprend maintenant les dimensions de la cave.
@@ -52,15 +60,18 @@
 ## 1.4 (2026.07.22)
 
 ### Nouveautés
+
 - Le scan d'étiquette dispose maintenant d'un quota mensuel de cinq scans gratuits. Quand le quota du mois est atteint, l'écran de scan propose Vinarium Premium. Tout le reste de l'application reste gratuit et sans limite.
 - Vinarium Premium débloque le scan illimité, avec une formule mensuelle ou une formule annuelle qui commence par sept jours offerts. L'offre se trouve dans les Réglages, et l'abonnement se gère depuis le compte App Store.
 
 ### Performance
+
 - Le tableau de bord s'ouvre plus vite.
 
 ## 1.3 (2026.07.18)
 
 ### Nouveautés
+
 - Pendant un scan, l'étiquette photographiée reste à l'écran avec une animation le temps de l'analyse, au lieu d'un écran de chargement vide.
 - Quand un scan ne reconnaît pas d'étiquette, un écran clair l'indique et propose de réessayer, au lieu d'ouvrir une fiche vide.
 - La cave partagée réunit maintenant sa valeur totale, ses alertes de bouteilles prêtes à boire et son journal pour tout le foyer. Chaque mouvement du journal indique le membre qui en est à l'origine.
@@ -68,16 +79,19 @@
 ## 1.2 (2026.07.16)
 
 ### Nouveautés
+
 - La taille de la cave peut maintenant être modifiée depuis les Réglages, en repartant d'un modèle ou en définissant le nombre de rangées et d'emplacements. Les bouteilles restent à leur place.
 - Les bouteilles de la cave partagée sont maintenant accessibles à la recherche. Celles de tout le foyer apparaissent dans la liste et la recherche, avec le nom de leur propriétaire.
 - Le prénom apparaît sur le profil.
 
 ### Corrections
+
 - Les liens d'invitation ouvrent maintenant l'application de façon fiable.
 
 ## 1.1 (2026.07.15)
 
 ### Nouveautés
+
 - Un parcours de configuration au premier lancement demande le prénom, puis les dimensions de la cave (nombre de rangées et d'emplacements). Le modèle peut être choisi dans un catalogue de caves à vin du commerce, avec une recherche par marque ou par modèle, pour un dimensionnement automatique, ou les dimensions saisies à la main. Le nombre de zones de température est aussi enregistré.
 - La taille de la cave n'est plus figée. Elle correspond aux dimensions choisies à la configuration, et la grille de placement comme la capacité affichée s'y adaptent.
 - La barre d'onglets se réduit automatiquement au défilement pour agrandir la zone de contenu, et le bouton Scanner reste en place à droite.
@@ -86,11 +100,13 @@
 - Chaque code d'invitation affiche un badge « En attente ».
 
 ### Corrections
+
 - Les actions Copier le lien, E-mail et Révoquer se déclenchent maintenant indépendamment. Un seul appui n'active plus les trois à la fois.
 
 ## 1.0 (2026.07.11)
 
 ### Nouveautés
+
 - Partage de la cave : les personnes du foyer sont invitées avec un code pour partager une seule cave commune. Chacun garde sa bibliothèque, ses notes de dégustation et son journal, et seules les bouteilles en cave sont mises en commun.
 - Dans une cave partagée, toutes les bouteilles du foyer apparaissent dans la même grille, avec le nom du propriétaire sur celles des autres. N'importe quel membre peut placer, déplacer, consommer ou offrir n'importe quelle bouteille. La sortie est enregistrée dans le journal du propriétaire du vin, et chaque note de dégustation reste celle de son auteur.
 - Sur la fiche d'un vin appartenant à un autre membre, le nom du propriétaire est affiché et les actions réservées comme modifier, supprimer ou conseiller sont masquées.
@@ -108,8 +124,10 @@
 - Les données peuvent être exportées et importées au format JSON.
 
 ### Corrections
+
 - La liste « Mes Vins » s'affiche de nouveau au lieu d'un message d'erreur.
 
 ### Performance
+
 - Les listes, la recherche et le tableau de bord sont plus rapides. Le serveur regroupe et mutualise ses lectures, sans jamais recharger plusieurs fois les mêmes vins ni parcourir la cave entière pour un simple filtre.
 - L'ouverture de la fiche détaillée est nettement plus rapide. Le serveur lit maintenant uniquement les informations du vin consulté au lieu de parcourir toute la cave.

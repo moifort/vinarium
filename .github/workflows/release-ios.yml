@@ -2,20 +2,20 @@ name: Release
 
 on:
   push:
-    tags: ['ios-v*']
+    tags: ["ios-v*"]
   workflow_dispatch:
     inputs:
       marketing_version:
-        description: 'Marketing version (CFBundleShortVersionString), e.g. 1.1'
+        description: "Marketing version (CFBundleShortVersionString), e.g. 1.1"
         required: false
-        default: '1.0'
+        default: "1.0"
       e2e_only:
-        description: 'Run the end-to-end scenario and stop there (no build, no upload)'
+        description: "Run the end-to-end scenario and stop there (no build, no upload)"
         required: false
         type: boolean
         default: false
       skip_upload:
-        description: 'Archive and push the symbols to Sentry, but stop before App Store Connect'
+        description: "Archive and push the symbols to Sentry, but stop before App Store Connect"
         required: false
         type: boolean
         default: false
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: '25.0.4+101.0.LTS'
+          java-version: "25.0.5+8.0.LTS"
 
       - name: Materialize gitignored build files
         run: |
@@ -104,7 +104,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0   # git rev-list --count HEAD must see the full history
+          fetch-depth: 0 # git rev-list --count HEAD must see the full history
 
       - name: Select the latest final Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -295,18 +295,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: write   # create/update the GitHub release for the tag
+      contents: write # create/update the GitHub release for the tag
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
       ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0   # git rev-list --count HEAD must see the full history
+          fetch-depth: 0 # git rev-list --count HEAD must see the full history
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.11'
+          ruby-version: "3.4.11"
           bundler-cache: true
           working-directory: infra
 

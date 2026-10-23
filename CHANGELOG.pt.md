@@ -3,6 +3,7 @@
 ## 1.7 (2026.10.04)
 
 ### Novidades
+
 - O Vinarium Premium permite agora ter várias adegas, uma por móvel ou por divisão, cada uma com o seu nome e a sua grelha. Criam-se no separador Adega ou nas Definições, em «Adegas», e uma garrafa pode passar de uma para outra.
 - O separador de digitalização abre agora em «Adicionar um vinho»: a câmara, as últimas fotografias e um campo de texto. Um vinho pode ser adicionado sem fotografia, descrevendo-o: «Chablis 2019 de William Fèvre».
 - A ficha de um vinho recebe «Anexos»: até cinco fotografias ou documentos, por exemplo uma fatura ou a ficha técnica do produtor.
@@ -13,15 +14,18 @@
 - Nas Definições, o perfil, o Premium, as adegas e a partilha ficam reunidos numa mesma secção, e «Importar / Exportar» encontra-se agora em «Perfil».
 
 ### Correções
+
 - As linhas das Definições respondem em toda a largura, e já não apenas no título.
 
 ### Desempenho
+
 - O início, a adega e a lista de vinhos abrem com o último conteúdo, sem ecrã de carregamento, e depois atualizam-se.
 - Os ecrãs abrem mais depressa, e uma lista filtrada aparece mais rapidamente, mesmo com muitas garrafas.
 
 ## 1.6 (2026.08.08)
 
 ### Novidades
+
 - No menu Definições, pode agora comunicar um erro ou sugerir melhorias e novas funcionalidades.
 - Como prenda de boas-vindas, oferecemos 20 digitalizações na abertura da conta, para que possa experimentar bem a aplicação.
 - Todas as informações sobre a sua quota estão agora disponíveis nas Definições.
@@ -29,21 +33,25 @@
 - No menu de uma garrafa, «Editar» corrige agora toda a sua ficha: a nota de prova com as estrelas, a data, quem estava presente e os seus comentários, mas também a graduação, o local da prova, quem lhe recomendou a garrafa e a quem a ofereceu.
 
 ### Correções
+
 - A pesquisa encontra as suas garrafas mesmo que se esqueça dos acentos ou dos plurais: «chateaux margaux» encontra «Château Margaux».
 - Um campo que esvazia fica agora apagado de vez, em vez de recuperar o valor anterior.
 - Um preço escrito com vírgula é finalmente tido em conta, e os cêntimos deixam de ser arredondados quando reabre a ficha.
 - A ficha é guardada de uma só vez: se algo falhar, nada fica guardado a meio.
 
 ### Desempenho
+
 - A pesquisa mostra agora os resultados mais depressa, mesmo com muitas garrafas.
 
 ## 1.5 (2026.07.29)
 
 ### Novidades
+
 - O ecrã Premium abre agora com os números da conta: as digitalizações usadas, as que restam e a data de renovação da quota.
 - A ficha de uma garrafa arrumada indica agora a sua posição na garrafeira.
 
 ### Correções
+
 - Uma subscrição comprada na App Store é agora ativada assim que é paga.
 - Uma garrafa é agora arrumada na posição escolhida, e não na do lado.
 - A grelha mostrada para mover uma garrafa tem agora as dimensões da garrafeira.
@@ -52,15 +60,18 @@
 ## 1.4 (2026.07.22)
 
 ### Novidades
+
 - A digitalização de rótulos dispõe agora de uma quota mensal de cinco digitalizações gratuitas. Quando a quota do mês se esgota, o ecrã de digitalização propõe o Vinarium Premium. Todo o resto da aplicação continua gratuito e sem limite.
 - O Vinarium Premium desbloqueia a digitalização ilimitada, com um plano mensal ou um plano anual que começa com sete dias grátis. A oferta encontra-se nas Definições, e a subscrição gere-se a partir da conta App Store.
 
 ### Desempenho
+
 - O painel abre mais depressa.
 
 ## 1.3 (2026.07.18)
 
 ### Novidades
+
 - Durante uma digitalização, o rótulo fotografado permanece no ecrã com uma animação enquanto a análise decorre, em vez de um ecrã de carregamento vazio.
 - Quando uma digitalização não reconhece nenhum rótulo, um ecrã claro indica-o e propõe tentar de novo, em vez de abrir uma ficha vazia.
 - A adega partilhada reúne agora o seu valor total, os seus avisos de garrafas prontas a beber e o seu diário para todo o agregado. Cada movimento do diário mostra o membro que lhe deu origem.
@@ -68,16 +79,19 @@
 ## 1.2 (2026.07.16)
 
 ### Novidades
+
 - O tamanho da adega pode agora ser alterado nas Definições, partindo de um modelo ou definindo o número de filas e espaços. As garrafas permanecem no seu lugar.
 - As garrafas da adega partilhada são agora acessíveis à pesquisa. As de todo o agregado aparecem na lista e na pesquisa, com o nome do seu proprietário.
 - O nome aparece no perfil.
 
 ### Correções
+
 - As ligações de convite abrem agora a aplicação de forma fiável.
 
 ## 1.1 (2026.07.15)
 
 ### Novidades
+
 - Um fluxo de configuração no primeiro arranque pede o nome e depois as dimensões da adega (número de filas e espaços). O modelo pode ser escolhido num catálogo de garrafeiras do mercado, com pesquisa por marca ou modelo, para um dimensionamento automático, ou as dimensões são inseridas à mão. O número de zonas de temperatura também é guardado.
 - O tamanho da adega deixou de ser fixo. Corresponde às dimensões escolhidas na configuração, e tanto a grelha de colocação como a capacidade apresentada se adaptam a elas.
 - A barra de separadores reduz-se automaticamente ao deslizar para ampliar a área de conteúdo, e o botão Digitalizar permanece fixo à direita.
@@ -86,11 +100,13 @@
 - Cada código de convite mostra um emblema «Pendente».
 
 ### Correções
+
 - As ações Copiar ligação, E-mail e Revogar acionam-se agora de forma independente. Um único toque já não dispara as três ao mesmo tempo.
 
 ## 1.0 (2026.07.11)
 
 ### Novidades
+
 - Partilha da adega: as pessoas do agregado são convidadas com um código para partilhar uma única adega comum. Cada um mantém a sua biblioteca, as suas notas de prova e o seu diário, e apenas as garrafas na adega são postas em comum.
 - Numa adega partilhada, todas as garrafas do agregado aparecem na mesma grelha, com o nome do proprietário nas dos outros. Qualquer membro pode colocar, mover, consumir ou oferecer qualquer garrafa. A saída é registada no diário do proprietário do vinho, e cada nota de prova continua a ser a do seu autor.
 - Na ficha de um vinho pertencente a outro membro é mostrado o nome do proprietário e as ações reservadas como editar, eliminar e recomendar ficam ocultas.
@@ -108,8 +124,10 @@
 - Os dados podem ser exportados e importados em formato JSON.
 
 ### Correções
+
 - A lista «Os meus vinhos» volta a ser mostrada em vez de uma mensagem de erro.
 
 ### Desempenho
+
 - As listas, a pesquisa e o painel são mais rápidos. O servidor agrupa e partilha as suas leituras, sem nunca recarregar várias vezes os mesmos vinhos nem percorrer toda a adega para um simples filtro.
 - A abertura da ficha detalhada é muito mais rápida. O servidor lê agora apenas a informação do vinho consultado em vez de percorrer toda a adega.

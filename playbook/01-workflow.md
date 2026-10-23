@@ -15,7 +15,6 @@
 ## Ce que contient un plan
 
 Un plan ne commence jamais par un bloc de code. Il s'ouvre sur une section « en clair » :
-
 - comment ça marche aujourd'hui,
 - ce que ça donne après, idéalement un tableau d'exemples avant et après,
 - les mécanismes en jeu, expliqués sans jargon,
