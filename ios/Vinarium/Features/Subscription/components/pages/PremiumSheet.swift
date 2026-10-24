@@ -219,7 +219,7 @@ struct PremiumView: View {
 /// Connect, not the Firebase host, which never served that path.
 enum SubscriptionLinks {
     static let terms = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    static let privacy = URL(string: "https://vinarium.polyforms.co/")!
+    static let privacy = URL(string: "https://vinarium.polyforms.co/privacy.html")!
 }
 
 private struct BenefitRow: View {

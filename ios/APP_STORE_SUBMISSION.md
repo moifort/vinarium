@@ -9,10 +9,10 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 
 ## Prepared in the repo (done)
 
-- **Privacy policy** — `index.html` on the dedicated **`gh-pages`** branch (the `docs/`
-  folder is gitignored on `main`), served at **https://vinarium.polyforms.co/** (paste
-  this as the Privacy Policy URL). To edit: `git checkout gh-pages`, change `index.html`,
-  `git push`; GitHub Pages redeploys automatically.
+- **Privacy policy** — `site/privacy.html` on `main`, served at
+  **https://vinarium.polyforms.co/privacy.html** (paste this as the Privacy Policy URL). The
+  landing page beside it, `site/index.html`, is the marketing URL. Any push to `main` that
+  touches `site/` republishes both through the `Website` workflow (GitHub Pages).
 - **Encryption declaration** — `INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO` in the app
   target (uses only standard HTTPS), so App Store Connect won't ask about export compliance
   on every upload.
@@ -31,7 +31,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 ## Phase 2 — Metadata & privacy [ASC]
 
 - **Description / keywords / support URL** (your GitHub repo URL is fine).
-- **Privacy Policy URL**: `https://vinarium.polyforms.co/`.
+- **Privacy Policy URL**: `https://vinarium.polyforms.co/privacy.html`.
 - **Terms of Use (EULA) link in every description** — guideline 3.1.2 refuses any submission
   selling auto-renewable subscriptions whose _metadata_ carries no functional link to the terms,
   and the check is automated: 1.4 was refused on it on 2026-07-22, with the subscription group

@@ -30,4 +30,4 @@ A adega, o diário e o compartilhamento em família são gratuitos e ilimitados.
 O Premium vem no plano mensal ou no plano anual, que começa com 7 dias de teste grátis; os dois preços aparecem na App Store. A assinatura é renovada automaticamente, salvo cancelamento pelo menos 24 horas antes do fim do período em curso. É gerenciada e cancelada nos ajustes da conta App Store.
 
 Termos de uso: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Política de privacidade: https://vinarium.polyforms.co/
+Política de privacidade: https://vinarium.polyforms.co/privacy.html

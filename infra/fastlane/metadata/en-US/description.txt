@@ -30,4 +30,4 @@ The cellar, the journal and household sharing are free and unlimited. Only the l
 Premium comes as a monthly plan or a yearly plan that opens on a 7-day free trial; both prices are shown in the App Store. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. It is managed and cancelled from the App Store account settings.
 
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
-Privacy Policy: https://vinarium.polyforms.co/
+Privacy Policy: https://vinarium.polyforms.co/privacy.html
