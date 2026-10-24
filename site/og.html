@@ -1,0 +1,35 @@
+<!doctype html>
+<!-- The share image: rendered once at 1200×630 into og.jpg, never served as a page. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="style.css">
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--bg); }
+  .og { position: relative; width: 1200px; height: 630px; overflow: hidden; }
+  .og-text { position: absolute; left: 72px; top: 0; bottom: 0; width: 500px; display: flex; flex-direction: column; justify-content: center; z-index: 2; }
+  .og-brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 26px; margin-bottom: 26px; }
+  .og-brand img { width: 44px; height: 44px; border-radius: 11px; box-shadow: 0 0 0 1px rgba(0,0,0,0.06); }
+  .og h1 { font-family: var(--display); font-size: 70px; line-height: 1.02; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 22px; }
+  .og p { font-size: 24px; color: var(--text-muted); margin: 0; max-width: 480px; line-height: 1.35; }
+  /* The landing page's three iPhones, home screen in front, standing on the
+     right and running off the bottom edge. */
+  .og .trio { --pw: 240px; --fan: 1; position: absolute; right: -50px; top: 80px; z-index: 1; }
+  .og .device-side { animation: none; transform: none; }
+</style>
+</head>
+<body>
+<div class="og">
+  <div class="og-text">
+    <div class="og-brand"><img src="icon-256.png" alt="">Vinarium</div>
+    <h1><span class="gradient-text">Your cellar<br>in your pocket.</span></h1>
+    <p>Snap a label and the record fills itself in. Every bottle in its slot, the cellar shared with the household. Free on iPhone.</p>
+  </div>
+  <div class="trio">
+    <figure class="device device-side"><img src="screens/en-cellar.jpg" alt=""></figure>
+    <figure class="device device-main"><img src="screens/en-dashboard.jpg" alt=""></figure>
+    <figure class="device device-side"><img src="screens/en-wine-list.jpg" alt=""></figure>
+  </div>
+</div>
+</body>
+</html>

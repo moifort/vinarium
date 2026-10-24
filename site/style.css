@@ -1,0 +1,736 @@
+/* Vinarium landing page: white, San Francisco as on apple.com, one accent
+   taken from the app icon: the burgundy of the capsules, warmed towards their
+   gold. The screens carry the colour; everything else stays quiet. */
+
+:root {
+  --bg: #fff;
+  --bg-card: #f5f5f7;
+  --line: rgba(40, 20, 25, 0.09);
+  --text: #1d1a1b;
+  --text-muted: #6b6264;
+  --text-dim: #8e8587;
+  --wine: #8e2a3c;
+  --wine-deep: #5e1a2a;
+  --gold: #c98f3a;
+  --radius: 28px;
+  --nav-h: 52px;
+  --max: 1080px;
+  /* Apple's own stacks: San Francisco on Apple devices, Helvetica elsewhere,
+     since SF Pro may not be served as a web font. */
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* The app's wine colours, as its list dots draw them. */
+  --red: #7b1e30;
+  --white: #d4d58a;
+  --rose: #f0728a;
+}
+
+* { box-sizing: border-box; }
+
+/* Hidden for the few milliseconds i18n.js takes to put English in. */
+html.i18n-pending body { visibility: hidden; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+a { color: inherit; text-decoration: none; }
+img { -webkit-user-drag: none; user-select: none; }
+
+.gradient-text {
+  background: linear-gradient(100deg, var(--wine-deep) 0%, var(--wine) 45%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* An SF Symbol, rendered from macOS into site/symbols and painted in the
+   text's colour, so an icon is the one the app draws. */
+.sf { flex: none; display: block; width: 18px; height: 18px; background: currentColor; -webkit-mask: var(--sf) center / contain no-repeat; mask: var(--sf) center / contain no-repeat; }
+
+/* ---------- Navigation ---------- */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 max(20px, calc((100% - var(--max)) / 2));
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 17px; }
+.nav-icon { width: 26px; height: 26px; border-radius: 7px; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06); display: block; }
+
+.nav-links { display: flex; align-items: center; gap: 26px; color: var(--text-muted); }
+.nav-links a:hover { color: var(--text); }
+.nav-gh { display: inline-flex; align-items: center; gap: 6px; line-height: 1; }
+.nav-github { display: block; flex: 0 0 auto; width: 16px; height: 16px; }
+.nav-cta { color: #fff !important; background: var(--text); padding: 5px 13px; border-radius: 99px; font-weight: 500; }
+.nav-cta:hover { background: #000; }
+
+@media (max-width: 720px) { .nav-links a:not(.nav-cta) { display: none; } }
+@media (max-width: 560px) {
+  section { padding-top: 88px; padding-bottom: 88px; }
+  .section-lead { margin-bottom: 40px; }
+}
+
+/* ---------- Layout ---------- */
+
+main { display: block; }
+
+section {
+  padding: 120px max(20px, calc((100% - var(--max)) / 2));
+  text-align: center;
+  scroll-margin-top: var(--nav-h);
+}
+
+.section-title {
+  font-family: var(--display);
+  font-size: clamp(36px, 6vw, 64px);
+  line-height: 1.0625;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+  margin: 0 0 20px;
+}
+
+.section-lead {
+  max-width: 620px;
+  margin: 0 auto 56px;
+  font-size: clamp(17px, 2vw, 21px);
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* ---------- Hero ---------- */
+
+/* The hero and the three iPhones fill the first screen, whatever its height:
+   the text scales with the height as well as the width, and the phones take
+   what is left under it. */
+.first-screen {
+  min-height: calc(100svh - var(--nav-h));
+  display: flex;
+  flex-direction: column;
+}
+
+.hero {
+  padding-top: clamp(16px, 3vh, 56px);
+  padding-bottom: 0;
+  position: relative;
+  z-index: 3;
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(34px, min(6vw, 5.4vh), 66px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  font-weight: 600;
+  margin: 0 0 clamp(8px, 1.4vh, 16px);
+}
+
+.hero-subtitle {
+  font-size: clamp(16px, min(2vw, 2vh), 20px);
+  color: var(--text-muted);
+  max-width: 700px;
+  margin: 0 auto clamp(12px, 2vh, 22px);
+  line-height: 1.4;
+}
+
+.hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; align-items: center; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  padding: 0 26px;
+  border-radius: 99px;
+  font-size: 17px;
+  font-weight: 500;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.button:active { transform: scale(0.97); }
+.button.ghost { color: var(--text); background: rgba(40, 20, 25, 0.05); border: 1px solid rgba(40, 20, 25, 0.08); }
+.button.ghost:hover { background: rgba(40, 20, 25, 0.09); }
+
+/* The App Store badge: black, the apple, two lines. */
+.store-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 18px 0 14px;
+  border-radius: 12px;
+  background: #000;
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.store-badge:hover { box-shadow: 0 14px 40px rgba(0, 0, 0, 0.26); }
+.store-badge:active { transform: scale(0.97); }
+.store-badge .apple-mark { display: block; flex: none; margin-top: -3px; }
+.store-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1; text-align: left; }
+.store-text small { font-size: 10px; letter-spacing: 0.02em; margin-bottom: 3px; opacity: 0.9; }
+.store-text b { font-size: 19px; font-weight: 600; letter-spacing: -0.01em; }
+
+.hero-meta { margin: clamp(8px, 1.2vh, 14px) 0 0; font-size: 14px; color: var(--text-dim); }
+
+/* ---------- The showcase: three iPhones ---------- */
+
+/* What the hero leaves of the first screen, measured as a container so the
+   phones can size themselves to its height. Below a floor it stops shrinking
+   them and lets them run past the fold. */
+.showcase {
+  flex: 1 1 0;
+  min-height: 460px;
+  container-type: size;
+  margin-top: clamp(14px, 2.2vh, 32px);
+  padding-bottom: clamp(20px, 3vh, 48px);
+  overflow-x: clip;
+}
+
+/* The cellar, the home screen, the wines: the home screen in front, the
+   other two tucked behind it, fanning out as the page scrolls (--fan, 0 to
+   1, set by main.js). A main phone is 2.24 times as tall as it is wide,
+   frame included. */
+.trio {
+  --pw: min(clamp(260px, 34vw, 420px), 100cqh / 2.24);
+  --fan: 1;
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.device {
+  --dw: var(--pw);
+  position: relative;
+  flex: none;
+  width: var(--dw);
+  margin: 0;
+  padding: calc(var(--dw) * 0.03);
+  border-radius: calc(var(--dw) * 0.175);
+  background: #0b0b0c;
+  /* The black glass, a hairline, then the titanium band, then the shadow
+     the phone casts on the page. */
+  box-shadow:
+    0 0 0 1px #3a3a3d,
+    0 0 0 calc(var(--dw) * 0.011) #c4c4c9,
+    0 0 0 calc(var(--dw) * 0.016) #8e8e93,
+    0 calc(var(--dw) * 0.18) calc(var(--dw) * 0.3) calc(var(--dw) * -0.06) rgba(60, 20, 30, 0.4),
+    0 calc(var(--dw) * 0.03) calc(var(--dw) * 0.07) rgba(0, 0, 0, 0.16);
+}
+.device > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: calc(var(--dw) * 0.148);
+  background: #f2f2f7;
+}
+.device::before {
+  /* The Dynamic Island, over the screenshot's empty top centre. */
+  content: "";
+  position: absolute;
+  top: calc(var(--dw) * 0.062);
+  left: 50%;
+  width: calc(var(--dw) * 0.29);
+  height: calc(var(--dw) * 0.085);
+  border-radius: 99px;
+  background: #000;
+  transform: translateX(-50%);
+}
+.device::after {
+  /* The side button on the right; its shadows are the volume buttons on the left. */
+  content: "";
+  position: absolute;
+  top: 27%;
+  right: calc(var(--dw) * -0.024);
+  width: calc(var(--dw) * 0.014);
+  height: calc(var(--dw) * 0.3);
+  border-radius: 0 3px 3px 0;
+  background: #a6a6ab;
+  box-shadow:
+    calc(var(--dw) * -1.034) calc(var(--dw) * -0.02) 0 #a6a6ab,
+    calc(var(--dw) * -1.034) calc(var(--dw) * 0.34) 0 #a6a6ab;
+}
+.device-main { z-index: 2; }
+.device-side {
+  --dw: calc(var(--pw) * 0.86);
+  z-index: 1;
+  margin-top: calc(var(--pw) * 0.24);
+  transform: translateX(calc((1 - var(--fan)) * var(--pw) * 0.55)) scale(calc(0.9 + var(--fan) * 0.1));
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+.device-side:first-child { margin-right: calc(var(--pw) * -0.1); }
+.device-side:last-child {
+  margin-left: calc(var(--pw) * -0.1);
+  transform: translateX(calc((1 - var(--fan)) * var(--pw) * -0.55)) scale(calc(0.9 + var(--fan) * 0.1));
+}
+/* Where the browser can tie an animation to the scroll, the fan runs on the
+   compositor and main.js leaves --fan alone. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .device-side {
+      animation: fan-left linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 33vh;
+    }
+    .device-side:last-child { animation-name: fan-right; }
+  }
+}
+@keyframes fan-left {
+  from { transform: translateX(calc(var(--pw) * 0.55)) scale(0.9); }
+  to { transform: none; }
+}
+@keyframes fan-right {
+  from { transform: translateX(calc(var(--pw) * -0.55)) scale(0.9); }
+  to { transform: none; }
+}
+@media (max-width: 560px) {
+  .trio { --pw: min(56vw, 100cqh / 2.24); }
+  .device-side:first-child { margin-right: calc(var(--pw) * -0.3); }
+  .device-side:last-child { margin-left: calc(var(--pw) * -0.3); }
+}
+
+/* ---------- Tour: one screen of the app per tile ---------- */
+
+/* As Apple presents its own apps: grey tiles on the white page, a short bold
+   line, a few quiet words, and the screen itself on an iPhone that the tile
+   cuts off at its foot. */
+.tour-grid {
+  max-width: var(--max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  text-align: left;
+}
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 44px 0;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+.tile-text { align-self: stretch; margin-bottom: 44px; }
+.tile h3 {
+  font-family: var(--display);
+  font-size: clamp(24px, 2.6vw, 32px);
+  line-height: 1.125;
+  letter-spacing: -0.01em;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.tile p { margin: 0; max-width: 440px; font-size: 17px; line-height: 1.47; color: var(--text-muted); }
+/* The phone stands at the foot of the tile and sinks into it: every tile
+   shows the same phone, cut at the same height, whatever its text. */
+.tour { --tile-phone: clamp(220px, 27vw, 300px); }
+.tile-device {
+  --dw: var(--tile-phone);
+  margin-top: auto;
+  margin-bottom: calc(var(--dw) * (1.45 - 2.102));
+  flex: none;
+}
+.tile-wide {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  column-gap: 48px;
+  padding: 0 64px;
+}
+.tile-wide .tile-text { align-self: center; max-width: 420px; margin-bottom: 0; }
+.tile-wide h3 { font-size: clamp(28px, 3.4vw, 40px); }
+.tile-wide p { font-size: 19px; }
+.tile-wide .tile-device { align-self: end; justify-self: center; margin-top: 64px; }
+@media (max-width: 760px) {
+  .tour-grid { grid-template-columns: 1fr; gap: 16px; }
+  .tile, .tile-wide { display: flex; padding: 36px 28px 0; }
+  .tile-wide .tile-text { align-self: stretch; }
+  .tile-wide .tile-device { align-self: center; margin-top: auto; }
+  .tour { --tile-phone: min(270px, 68vw); }
+  .tile-text, .tile-wide .tile-text { margin-bottom: 36px; }
+}
+
+/* ---------- Features ---------- */
+
+.features { padding-top: 64px; }
+
+.bento {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  text-align: left;
+}
+@media (max-width: 560px) { .bento { grid-template-columns: 1fr; gap: 14px; } }
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  padding: 28px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 340px;
+  overflow: hidden;
+}
+.card h3 { order: 1; margin: 0; font-size: 22px; line-height: 1.2; letter-spacing: -0.015em; font-weight: 600; }
+.card p { order: 2; margin: 0; color: var(--text-muted); font-size: 15px; line-height: 1.45; letter-spacing: -0.005em; }
+.card-visual { order: 3; flex: 1 1 auto; min-height: 180px; padding-top: 16px; display: flex; align-items: center; justify-content: center; }
+
+.card.wide {
+  grid-column: span 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  grid-template-rows: 1fr auto auto 1fr;
+  column-gap: 32px;
+  row-gap: 8px;
+}
+.card.wide h3 { grid-column: 1; grid-row: 2; }
+.card.wide p { grid-column: 1; grid-row: 3; }
+.card.wide .card-visual { grid-column: 2; grid-row: 1 / -1; padding-top: 0; }
+@media (max-width: 900px) {
+  .card.wide { display: flex; }
+  .card.wide .card-visual { padding-top: 16px; }
+}
+@media (max-width: 560px) {
+  .card { padding: 24px 22px 22px; min-height: 0; }
+  .card.wide { grid-column: span 1; }
+}
+
+.card.dark { background: #1b1517; }
+.card.dark h3 { color: #f6eee6; }
+.card.dark p { color: #a2969a; }
+
+/* The pieces of the app the cards draw: white rounded cards on the grey, in
+   the app's own type sizes and greys. */
+.dot { flex: none; display: block; width: 10px; height: 10px; border-radius: 50%; background: var(--red); }
+.dot.white { background: var(--white); }
+.dot.rose { background: var(--rose); }
+.row-producer { display: block; font-size: 12px; line-height: 1.2; color: rgba(60, 60, 67, 0.6); }
+.row-title { display: block; font-size: 16px; line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; color: #000; }
+.row-sub { display: block; font-size: 13px; line-height: 1.3; color: rgba(60, 60, 67, 0.6); }
+.slot { flex: none; padding: 2px 7px; border-radius: 6px; background: rgba(120, 120, 128, 0.14); color: rgba(60, 60, 67, 0.6); font-size: 12px; font-weight: 500; font-variant-numeric: tabular-nums; }
+
+/* The cellar grid: a dark rack, a capsule dropping into one slot after
+   another in the icon's colours, the count following. */
+.rack-demo { width: 100%; max-width: 440px; padding: 18px 18px 20px; border-radius: 22px; background: #261d20; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 40px rgba(0, 0, 0, 0.3); }
+.rack-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; color: #f6eee6; font-size: 14px; font-weight: 600; }
+.rack-count { color: #a2969a; font-weight: 500; font-variant-numeric: tabular-nums; }
+.rack-count b { color: #f6eee6; font-weight: 600; }
+.rack { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; }
+.rack i {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #120d0f 0 55%, #0d090a 56% 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+}
+.rack i::after {
+  /* The capsule seen from above, as the icon draws it: a ring round a flat top. */
+  content: "";
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 52%, rgba(0, 0, 0, 0.28) 54%, transparent 60%),
+    radial-gradient(circle at 38% 32%, color-mix(in srgb, var(--c) 70%, #fff) 0%, var(--c) 45%, color-mix(in srgb, var(--c) 65%, #000) 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: scale(1.5);
+  transition: opacity 0.25s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rack i.in::after { opacity: 1; transform: none; }
+
+/* Ready to drink, as the home screen lists it. */
+.list-demo, .files-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.list-head { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 600; color: #000; }
+.list-head .sf { width: 18px; height: 18px; }
+.list-card { padding: 4px 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); }
+.list-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 15px; color: #000; }
+.list-row + .list-row { border-top: 0.5px solid rgba(60, 60, 67, 0.2); }
+.list-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ready-tag { flex: none; padding: 2px 8px; border-radius: 99px; background: #ff9500; color: #fff; font-size: 11px; font-weight: 600; animation: ready-pulse 3s ease-in-out infinite; }
+@keyframes ready-pulse { 0%, 70%, 100% { transform: none; } 80% { transform: scale(1.12); } 90% { transform: none; } }
+
+/* Every drink the cellar takes, as a wall of labelled capsules. */
+.kinds { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 400px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px 10px; }
+.kinds li { display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); white-space: nowrap; animation: kind-bob 6s ease-in-out infinite; animation-delay: calc(var(--i) * 0.5s); }
+.kinds li::before {
+  content: "";
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, transparent 0 52%, rgba(0, 0, 0, 0.22) 54%, transparent 60%),
+    radial-gradient(circle at 38% 32%, color-mix(in srgb, var(--c) 65%, #fff) 0%, var(--c) 45%, color-mix(in srgb, var(--c) 60%, #000) 100%);
+  box-shadow: 0 8px 18px rgba(40, 20, 25, 0.2);
+}
+@keyframes kind-bob { 0%, 100% { transform: none; } 8% { transform: translateY(-5px); } 16% { transform: none; } }
+
+/* The search field and its answer: a few letters typed, the bottle found,
+   the match marked as the app marks it. */
+.search-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.search-field { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border-radius: 99px; background: #fff; box-shadow: 0 6px 18px rgba(40, 20, 25, 0.08); color: rgba(60, 60, 67, 0.6); font-size: 16px; white-space: nowrap; overflow: hidden; }
+.search-typed, .describe-typed { color: #000; }
+.search-typed::after { content: ""; animation: search-type 6s steps(1) infinite; }
+.describe-typed::after { content: ""; animation: describe-type 7s steps(1) infinite; }
+.search-caret { flex: none; width: 2px; height: 20px; margin-left: -6px; background: #007aff; animation: search-caret 1s steps(1) infinite; }
+@keyframes search-type { 0% { content: ""; } 6% { content: "p"; } 10% { content: "pu"; } 14% { content: "puc"; } 18% { content: "puce"; } 22% { content: "pucel"; } 26%, 100% { content: "pucelles"; } }
+@keyframes describe-type {
+  0% { content: ""; } 3% { content: "Ch"; } 6% { content: "Chab"; } 9% { content: "Chablis"; } 12% { content: "Chablis 20"; }
+  15% { content: "Chablis 2019"; } 18% { content: "Chablis 2019 de"; } 21% { content: "Chablis 2019 de Will"; } 24% { content: "Chablis 2019 de William"; }
+  27%, 100% { content: "Chablis 2019 de William Fèvre"; }
+}
+.i18n-en .describe-typed::after { animation-name: describe-type-en; }
+@keyframes describe-type-en {
+  0% { content: ""; } 3% { content: "Wi"; } 6% { content: "Willi"; } 9% { content: "William"; } 12% { content: "William Fè"; }
+  15% { content: "William Fèvre"; } 18% { content: "William Fèvre Cha"; } 21% { content: "William Fèvre Chablis"; } 24% { content: "William Fèvre Chablis 20"; }
+  27%, 100% { content: "William Fèvre Chablis 2019"; }
+}
+@keyframes search-caret { 50% { opacity: 0; } }
+.search-results { padding: 4px 0 8px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.1); opacity: 0; animation: search-results 6s ease infinite; }
+.describe-results { padding-top: 8px; animation: describe-results 7s ease infinite; }
+@keyframes search-results { 0%, 22% { opacity: 0; transform: translateY(6px); } 32%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+@keyframes describe-results { 0%, 30% { opacity: 0; transform: translateY(6px); } 40%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.search-head { display: block; padding: 10px 16px 4px; font-size: 13px; font-weight: 600; color: rgba(60, 60, 67, 0.6); }
+.search-row { display: flex; gap: 12px; align-items: flex-start; padding: 6px 16px 4px; }
+.search-row .dot { margin-top: 20px; }
+.search-row mark { background: rgba(255, 204, 0, 0.35); color: inherit; border-radius: 3px; }
+
+/* A bottle and what is said about it, as its page shows it. */
+.note-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; padding: 4px 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); }
+.note-wine { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid rgba(60, 60, 67, 0.29); }
+.note-wine .dot { margin-top: 20px; }
+.note-wine > div { flex: 1; min-width: 0; }
+.note-text { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; font-size: 15px; line-height: 1.35; color: #000; }
+.note-text .sf { width: 22px; height: 20px; color: rgba(60, 60, 67, 0.6); }
+.note-text + .note-text { border-top: 0.5px solid rgba(60, 60, 67, 0.29); }
+.note-text.gift { align-items: center; }
+.note-text.gift span { flex: 1; }
+.note-text.gift b { font-weight: 400; color: #007aff; }
+.note-text.gift .sf { color: var(--wine); }
+
+/* Stars filling one by one, the heart beating after them. */
+.rate-stars { display: flex; gap: 3px; margin-top: 6px; }
+.rate-star .sf { width: 20px; height: 19px; background-color: rgba(120, 120, 128, 0.2); animation: rate-fill 5s ease infinite; animation-delay: calc(var(--i) * 0.18s); }
+.rate-star:nth-child(5) .sf { animation-name: rate-fill-four; }
+@keyframes rate-fill { 0%, 6% { background-color: rgba(120, 120, 128, 0.2); transform: scale(0.8); } 12% { background-color: #ffcc00; transform: scale(1.15); } 16%, 90% { background-color: #ffcc00; transform: none; } 100% { background-color: rgba(120, 120, 128, 0.2); } }
+@keyframes rate-fill-four { 0%, 100% { background-color: rgba(120, 120, 128, 0.2); } }
+.rate-heart { margin-top: 2px; }
+.rate-heart .sf { width: 26px; height: 23px; background-color: rgba(120, 120, 128, 0.2); animation: rate-heart 5s ease infinite; animation-delay: 1.2s; }
+@keyframes rate-heart { 0%, 4% { background-color: rgba(120, 120, 128, 0.2); transform: none; } 10% { background-color: #ff3b30; transform: scale(1.3); } 16%, 85% { background-color: #ff3b30; transform: none; } 100% { background-color: rgba(120, 120, 128, 0.2); } }
+
+/* The household: the code, the members, the second one joining. */
+.household-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.invite-code { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); font-size: 15px; color: rgba(60, 60, 67, 0.6); }
+.invite-code b { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 20px; letter-spacing: 0.12em; color: #000; }
+.members { display: flex; gap: 10px; }
+.member { flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); font-size: 15px; font-weight: 600; color: #000; }
+.member i { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: #fff; font-size: 14px; font-style: normal; }
+.member.join { animation: member-join 5s ease infinite; }
+@keyframes member-join { 0%, 20% { opacity: 0; transform: translateY(8px) scale(0.96); } 30%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.household-rows { display: flex; flex-direction: column; padding: 2px 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); }
+.household-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 15px; color: #000; }
+.household-row + .household-row { border-top: 0.5px solid rgba(60, 60, 67, 0.29); }
+.household-row .sf { width: 20px; height: 18px; color: rgba(60, 60, 67, 0.6); }
+.household-row.shared .sf { color: var(--wine); }
+
+/* Where the bottle was found: a plain map, the pin dropping on it. */
+.map-demo { position: relative; width: 100%; max-width: 380px; aspect-ratio: 16 / 10; border-radius: 22px; overflow: hidden; background: #f3eee4; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.1); }
+.map-roads {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(118deg, transparent 46%, #fff 46.5%, #fff 50%, transparent 50.5%),
+    linear-gradient(28deg, transparent 58%, #fff 58.5%, #fff 61%, transparent 61.5%),
+    linear-gradient(170deg, transparent 30%, #fdf8ee 30.5%, #fdf8ee 32%, transparent 32.5%),
+    radial-gradient(ellipse 60% 30% at 15% 90%, #bfd9ea 0 98%, transparent 100%),
+    radial-gradient(ellipse 40% 50% at 85% 15%, #d3e4c3 0 98%, transparent 100%);
+}
+.map-pin {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50% 50% 50% 0;
+  background: var(--wine);
+  color: #fff;
+  box-shadow: 0 8px 16px rgba(94, 26, 42, 0.35);
+  transform: translate(-50%, -100%) rotate(-45deg);
+  animation: pin-drop 5s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+.map-pin .sf { width: 20px; height: 20px; transform: rotate(45deg); }
+@keyframes pin-drop { 0%, 8% { opacity: 0; transform: translate(-50%, -260%) rotate(-45deg); } 18%, 92% { opacity: 1; transform: translate(-50%, -100%) rotate(-45deg); } 100% { opacity: 0; transform: translate(-50%, -100%) rotate(-45deg); } }
+.map-label { position: absolute; left: 50%; top: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 6px 12px; border-radius: 12px; background: rgba(255, 255, 255, 0.92); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); font-size: 13px; line-height: 1.25; white-space: nowrap; }
+.map-label b { font-weight: 600; color: #000; }
+.map-label span { font-size: 11px; color: rgba(60, 60, 67, 0.6); }
+
+/* Attachments: three files sliding onto the bottle's page. */
+.files { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.file { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 22px 8px 14px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); color: var(--wine); animation: file-in 6s ease infinite; animation-delay: calc(var(--i) * 0.4s); }
+.file .sf { width: 34px; height: 42px; }
+.file.photo .sf { width: 40px; height: 32px; margin: 5px 0; color: var(--gold); }
+.file em { font-style: normal; font-size: 12px; font-weight: 600; color: #000; text-align: center; line-height: 1.2; }
+@keyframes file-in { 0%, 5% { opacity: 0; transform: translateY(10px); } 15%, 90% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+
+/* What Premium adds to a scanned bottle, line after line. */
+.estimate-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; padding: 4px 16px; border-radius: 22px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); }
+.estimate-wine { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid rgba(60, 60, 67, 0.29); }
+.estimate-wine .dot { margin-top: 20px; }
+.estimate-wine > div { flex: 1; min-width: 0; }
+.premium-tag { flex: none; padding: 3px 9px; border-radius: 99px; background: linear-gradient(120deg, var(--wine-deep), var(--wine), var(--gold)); color: #fff; font-size: 11px; font-weight: 600; }
+.estimate-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; font-size: 15px; color: #000; animation: file-in 6s ease infinite; animation-delay: calc(0.6s + var(--i) * 0.35s); }
+.estimate-row + .estimate-row { border-top: 0.5px solid rgba(60, 60, 67, 0.29); }
+.estimate-row .sf { width: 20px; height: 20px; color: #007aff; }
+.estimate-row span { flex: 1; }
+.estimate-row b { font-weight: 400; color: rgba(60, 60, 67, 0.6); font-variant-numeric: tabular-nums; }
+
+/* Several cellars, each with its own grid. */
+.cellars-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.cellar-chip { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; align-items: center; column-gap: 14px; padding: 12px 16px; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); outline: 2px solid transparent; }
+.cellar-chip span { font-size: 16px; font-weight: 600; color: #000; }
+.cellar-chip small { grid-row: 2; font-size: 13px; color: rgba(60, 60, 67, 0.6); font-variant-numeric: tabular-nums; }
+.cellar-chip .mini-grid {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  width: 64px;
+  height: 44px;
+  border-radius: 6px;
+  background:
+    radial-gradient(circle, var(--wine) 0 32%, transparent 36%) 0 0 / calc(100% / var(--cols)) calc(100% / var(--rows)),
+    #f2eef0;
+}
+.cellar-chip { animation: cellar-on 7.5s ease infinite; }
+.cellar-chip:nth-child(2) { animation-delay: 2.5s; }
+.cellar-chip:nth-child(3) { animation-delay: 5s; }
+@keyframes cellar-on { 0%, 30% { outline-color: var(--wine); } 34%, 100% { outline-color: transparent; } }
+
+/* The export: the file, what it holds, the share button. */
+.export-demo { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+.export-file { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 20px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14px; color: #000; }
+.export-file .sf { width: 22px; height: 28px; color: var(--wine); }
+.export-counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.export-counts span { display: flex; flex-direction: column; align-items: center; padding: 12px 6px; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(40, 20, 25, 0.08); }
+.export-counts b { font-family: var(--display); font-size: 24px; font-weight: 600; color: #000; font-variant-numeric: tabular-nums; }
+.export-counts em { font-style: normal; font-size: 12px; color: rgba(60, 60, 67, 0.6); }
+.export-share { align-self: center; display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 99px; background: #007aff; color: #fff; font-size: 15px; font-weight: 600; animation: ready-pulse 4s ease-in-out infinite; }
+.export-share .sf { width: 16px; height: 18px; }
+
+/* ---------- FAQ ---------- */
+
+.faq-list { max-width: 720px; margin: 0 auto; text-align: left; border-top: 1px solid var(--line); }
+.faq-list details { border-bottom: 1px solid var(--line); }
+.faq-list summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 20px 36px 20px 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  position: relative;
+}
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary::after {
+  content: "";
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid var(--text-dim);
+  border-bottom: 2px solid var(--text-dim);
+  transform: translateY(-70%) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+.faq-list details[open] summary::after { transform: translateY(-30%) rotate(225deg); }
+.faq-list p { margin: 0 0 22px; color: var(--text-muted); font-size: 16px; line-height: 1.55; max-width: 640px; }
+.faq-list p a { color: var(--wine); }
+
+/* ---------- Download ---------- */
+
+.download { padding-top: 120px; padding-bottom: 120px; }
+.download-icon {
+  width: 120px;
+  aspect-ratio: 1;
+  border-radius: 22.5%;
+  overflow: hidden;
+  margin: 0 auto 28px;
+  box-shadow: 0 20px 50px rgba(60, 20, 30, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  animation: icon-float 6s ease-in-out infinite;
+}
+.download-icon img { display: block; width: 100%; height: 100%; }
+@keyframes icon-float { 0%, 100% { transform: none; } 50% { transform: translateY(-6px) rotate(-2deg); } }
+
+/* Free and Premium as an App Store paywall compares them: a short table of
+   what each holds, limits in numbers, the Premium column lifted out. */
+.plan-table { width: 100%; max-width: 680px; margin: 0 auto 14px; border-collapse: separate; border-spacing: 0; font-size: 15px; text-align: center; }
+.plan-table thead th { padding: 26px 12px 18px; vertical-align: bottom; font-weight: 600; }
+.plan-table thead th span { display: block; font-size: 15px; color: var(--text-muted); font-weight: 600; }
+.plan-table thead th b { display: block; margin-top: 4px; font-family: var(--display); font-size: 26px; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.plan-table thead th small { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; color: var(--text-dim); }
+.plan-table th[scope="row"] { text-align: left; font-weight: 400; color: var(--text); padding: 13px 16px 13px 0; }
+.plan-table td { padding: 13px 12px; color: var(--text-muted); width: 26%; }
+.plan-table tbody tr + tr > * { border-top: 1px solid var(--line); }
+.plan-table .premium { position: relative; background: #fff; }
+.plan-table thead .premium { border-radius: 20px 20px 0 0; box-shadow: inset 0 1.5px 0 var(--wine), inset 1.5px 0 0 var(--wine), inset -1.5px 0 0 var(--wine); }
+.plan-table tbody .premium { box-shadow: inset 1.5px 0 0 var(--wine), inset -1.5px 0 0 var(--wine); color: var(--text); }
+.plan-table tbody tr:last-child .premium { border-radius: 0 0 20px 20px; box-shadow: inset 1.5px 0 0 var(--wine), inset -1.5px 0 0 var(--wine), inset 0 -1.5px 0 var(--wine); }
+.plan-table thead .premium span:not(.plan-tag) { color: var(--wine); }
+.plan-table .sf { width: 17px; height: 17px; margin: 0 auto; }
+.plan-table .sf.yes { color: #34c759; }
+.plan-table .premium .sf.yes { color: var(--wine); }
+.plan-table .sf.no { color: rgba(60, 60, 67, 0.3); }
+.plan-tag { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); white-space: nowrap; padding: 5px 12px; border-radius: 99px; background: linear-gradient(120deg, var(--wine-deep), var(--wine), var(--gold)); color: #fff !important; font-size: 12px !important; font-weight: 600; }
+@media (max-width: 560px) { .plan-table { font-size: 14px; } .plan-table td { width: 30%; } .plan-table thead th b { font-size: 20px; } }
+.prices-note { max-width: 460px; margin: 0 auto 44px; font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+/* ---------- Footer ---------- */
+
+.footer { padding: 40px 20px 60px; text-align: center; font-size: 13px; color: var(--text-dim); border-top: 1px solid var(--line); }
+.footer p { margin: 6px 0; }
+.footer a { color: var(--text-muted); }
+.footer a:hover { color: var(--text); }
+
+/* ---------- Reveal on scroll ---------- */
+
+.reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+  .ready-tag, .kinds li, .search-caret, .member.join, .map-pin, .file, .estimate-row, .cellar-chip, .export-share, .download-icon { animation: none; }
+  .rate-star .sf { animation: none; background-color: #ffcc00; }
+  .rate-star:nth-child(5) .sf { background-color: rgba(120, 120, 128, 0.2); }
+  .rate-heart .sf { animation: none; background-color: #ff3b30; }
+  .search-typed::after { animation: none; content: "pucelles"; }
+  .describe-typed::after { animation: none; content: "Chablis 2019 de William Fèvre"; }
+  .i18n-en .describe-typed::after { content: "William Fèvre Chablis 2019"; }
+  .search-results { animation: none; opacity: 1; }
+  .cellar-chip:first-child { outline-color: var(--wine); }
+}

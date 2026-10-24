@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="meta.title">Vinarium · Photographiez une étiquette, votre cave se range toute seule</title>
+  <meta name="description" content="Une photo de l'étiquette suffit : domaine, cuvée, millésime, appellation et région sont remplis. Chaque bouteille trouve sa place dans la grille de la cave, et la cave se partage avec le foyer. Gratuit sur iPhone.">
+  <!-- Share previews: crawlers run no JavaScript, so the English copy is the
+       static one here and French is declared as the alternate. -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vinarium.polyforms.co/">
+  <meta property="og:site_name" content="Vinarium">
+  <meta property="og:title" content="Vinarium · Snap a label, your cellar sorts itself">
+  <meta property="og:description" content="Snap a label: the estate, cuvée, vintage, appellation and region are filled in. Every bottle finds its slot in the cellar grid, and the cellar is shared with the household. Free on iPhone.">
+  <meta property="og:image" content="https://vinarium.polyforms.co/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Vinarium: an iPhone showing the cellar's home screen, between the cellar grid and the wine list">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:locale:alternate" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vinarium · Snap a label, your cellar sorts itself">
+  <meta name="twitter:description" content="Snap a label: the whole record is filled in. Every bottle in its slot, tasting notes, a journal of what comes in and out, a cellar shared with the household. Free on iPhone.">
+  <meta name="twitter:image" content="https://vinarium.polyforms.co/og.jpg">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-256.png">
+  <meta name="apple-itunes-app" content="app-id=6789688303">
+  <script>
+    // French browsers get the page as written; every other language gets English.
+    // ?lang=fr or ?lang=en forces one.
+    (() => {
+      const forced = new URLSearchParams(location.search).get("lang");
+      const lang = forced || (navigator.languages && navigator.languages[0]) || navigator.language || "en";
+      if (!/^fr\b/i.test(lang)) document.documentElement.classList.add("i18n-en", "i18n-pending");
+    })();
+  </script>
+  <link rel="stylesheet" href="style.css?v=20261024-1">
+</head>
+<body>
+
+<header class="nav">
+  <a class="nav-brand" href="#top" aria-label="Vinarium">
+    <img class="nav-icon" src="icon-256.png" width="26" height="26" alt="">
+    <span>Vinarium</span>
+  </a>
+  <nav class="nav-links" aria-label="Sections">
+    <a href="#tour" data-i18n="nav.tour">Aperçu</a>
+    <a href="#features" data-i18n="nav.features">Fonctionnalités</a>
+    <a href="#faq" data-i18n="nav.faq">Questions</a>
+    <a href="#download" data-i18n="nav.pricing">Tarifs</a>
+    <a class="nav-gh" href="https://github.com/moifort/vinarium" rel="noopener"><svg class="nav-github" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>GitHub</a>
+    <a class="nav-cta" href="https://apps.apple.com/app/id6789688303" data-i18n="nav.download">App Store</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- The first screen: the hero, then the three iPhones sized to the height
+       left under it. -->
+  <div class="first-screen">
+
+    <section class="hero">
+      <h1 class="hero-title" data-i18n="hero.title"><span class="gradient-text">Votre cave<br>dans la poche.</span></h1>
+      <p class="hero-subtitle" data-i18n="hero.subtitle">Une photo de l'étiquette suffit. La fiche se remplit, chaque bouteille trouve sa place, et la cave se partage avec le foyer.</p>
+      <div class="hero-actions">
+        <a class="store-badge" href="https://apps.apple.com/app/id6789688303" aria-label="Télécharger dans l'App Store" data-i18n-aria="aria.store">
+          <svg class="apple-mark" viewBox="0 0 17 20" width="22" height="26" aria-hidden="true"><path fill="currentColor" d="M14.2 10.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.7 1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.7-1-2.7-3.7ZM11.9 3.8c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3Z"/></svg>
+          <span class="store-text"><small data-i18n="store.small">Télécharger dans</small><b>App Store</b></span>
+        </a>
+      </div>
+      <p class="hero-meta" data-i18n="hero.meta">iPhone · iOS 26</p>
+    </section>
+
+    <!-- The app on three iPhones. -->
+    <div class="showcase">
+      <div class="trio">
+        <figure class="device device-side"><img data-shot="cellar" width="660" height="1434" alt="La cave : les bouteilles rangées par rangée, chacune avec sa case" data-i18n-alt="alt.cellar"></figure>
+        <figure class="device device-main"><img data-shot="dashboard" width="660" height="1434" alt="L'accueil : les bouteilles en cave, la valeur de la cave et les vins prêts à déguster" data-i18n-alt="alt.dashboard"></figure>
+        <figure class="device device-side"><img data-shot="wine-list" width="660" height="1434" alt="Mes vins : la collection mois par mois, avec domaine, millésime, région et prix" data-i18n-alt="alt.wines"></figure>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- The tour: one screen of the app per tile, as Apple presents its own
+       apps. The screens are the App Store captures (scripts/site-screens.sh). -->
+  <section class="tour" id="tour">
+    <h2 class="section-title" data-i18n="tour.title">Toute votre cave.<br>Dans une seule app.</h2>
+    <p class="section-lead" data-i18n="tour.lead">L'essentiel, écran par écran.</p>
+
+    <div class="tour-grid">
+      <article class="tile tile-wide">
+        <div class="tile-text">
+          <h3 data-i18n="tour.scan.title">Une photo, la fiche se remplit.</h3>
+          <p data-i18n="tour.scan.text">L'étiquette suffit&nbsp;: nom, domaine, cuvée, millésime, appellation, région. La fiche arrive prête à vérifier, et chaque champ se corrige d'un toucher.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="scan-review" width="660" height="1434" loading="lazy" alt="Vérifier la bouteille : la photo de l'étiquette et la fiche remplie à partir d'elle" data-i18n-alt="tour.scan.alt"></figure>
+      </article>
+      <article class="tile">
+        <div class="tile-text">
+          <h3 data-i18n="tour.cellar.title">Chaque bouteille à sa place.</h3>
+          <p data-i18n="tour.cellar.text">La cave se range par rangée et par colonne, comme le vrai meuble. A1, B3&nbsp;: la bouteille se retrouve sans ouvrir la porte.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="cellar" width="660" height="1434" loading="lazy" alt="Ma cave : la rangée A et la rangée B, chaque bouteille avec sa case" data-i18n-alt="tour.cellar.alt"></figure>
+      </article>
+      <article class="tile">
+        <div class="tile-text">
+          <h3 data-i18n="tour.wines.title">Toute la collection.</h3>
+          <p data-i18n="tour.wines.text">Les vins ajoutés, mois par mois, avec leur domaine, leur millésime, leur région et leur prix. Favoris, cadeaux et conseils à un toucher.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="wine-list" width="660" height="1434" loading="lazy" alt="Mes vins : Pavillon Rouge du Château Margaux, Priorat Clos Mogador, Meursault Les Charmes" data-i18n-alt="tour.wines.alt"></figure>
+      </article>
+      <article class="tile tile-wide">
+        <div class="tile-text">
+          <h3 data-i18n="tour.detail.title">Chaque vin, sa fiche complète.</h3>
+          <p data-i18n="tour.detail.text">Sa case dans la cave, son domaine, sa cuvée, son millésime, son appellation et sa région. Et sur la carte, le lieu où la bouteille a été découverte.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="wine-detail" width="660" height="1434" loading="lazy" alt="La fiche du Pavillon Rouge du Château Margaux 2015, en case A1" data-i18n-alt="tour.detail.alt"></figure>
+      </article>
+      <article class="tile">
+        <div class="tile-text">
+          <h3 data-i18n="tour.home.title">La cave en un coup d'œil.</h3>
+          <p data-i18n="tour.home.text">Les bouteilles en cave, leur valeur, les vins prêts à déguster, les favoris et les derniers mouvements.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="dashboard" width="660" height="1434" loading="lazy" alt="L'accueil : 18 bouteilles sur 48, 2 434 € de valeur et cinq vins prêts à déguster" data-i18n-alt="tour.home.alt"></figure>
+      </article>
+      <article class="tile">
+        <div class="tile-text">
+          <h3 data-i18n="tour.journal.title">Le journal de la cave.</h3>
+          <p data-i18n="tour.journal.text">Chaque entrée et chaque sortie, datée, avec la case de la bouteille. Rien ne se perd entre deux dîners.</p>
+        </div>
+        <figure class="device tile-device"><img data-shot="journal" width="660" height="1434" loading="lazy" alt="Le journal : les entrées du 4 octobre, chacune avec sa case" data-i18n-alt="tour.journal.alt"></figure>
+      </article>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features" id="features">
+    <h2 class="section-title" data-i18n="feat.title">Tout ce qu'une cave demande.</h2>
+    <p class="section-lead" data-i18n="feat.lead">Chaque bouteille trouve sa place, le reste se fait tout seul.</p>
+
+    <div class="bento">
+      <article class="card dark wide">
+        <div class="card-visual">
+          <div class="rack-demo" aria-hidden="true" data-rack-demo>
+            <div class="rack-head"><span data-i18n="rack.name">Cave du salon</span><span class="rack-count" data-rack-count><b>0</b>/48</span></div>
+            <div class="rack" data-rack></div>
+          </div>
+        </div>
+        <h3 data-i18n="rack.title">La cave, case par case</h3>
+        <p data-i18n="rack.text">La grille reproduit le meuble&nbsp;: rangées, colonnes, capacité. Une bouteille se place d'un toucher, passe d'une case à l'autre, et l'accueil affiche le remplissage de la cave.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="list-demo" aria-hidden="true">
+            <span class="list-head"><i class="sf" style="--sf: url(symbols/wineglass.png)"></i><span data-i18n="ready.head">Prêt à déguster</span></span>
+            <div class="list-card">
+              <div class="list-row"><i class="dot rose"></i><span class="list-name">Bandol Rosé</span><span class="ready-tag" data-i18n="ready.tag">Avant 2027</span><span class="slot">B4</span></div>
+              <div class="list-row"><i class="dot white"></i><span class="list-name">Sancerre Les Monts Damnés</span><span class="slot">B1</span></div>
+              <div class="list-row"><i class="dot white"></i><span class="list-name">Pouilly-Fuissé Les Crays</span><span class="slot">C3</span></div>
+              <div class="list-row"><i class="dot white"></i><span class="list-name">Chablis Grand Cru Les Clos</span><span class="slot">A3</span></div>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="ready.title">Prêt à déguster</h3>
+        <p data-i18n="ready.text">D'après leur période de garde, l'accueil remonte les bouteilles à ouvrir bientôt, avant qu'elles ne passent leur apogée.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <ul class="kinds" aria-label="Vin, champagne, porto, whisky, rhum, saké, bière et cidre" data-i18n-aria="kinds.aria">
+            <li style="--c:#7b1e30;--i:0" data-i18n="kinds.red">Vin rouge</li>
+            <li style="--c:#d8c25e;--i:1" data-i18n="kinds.champagne">Champagne</li>
+            <li style="--c:#5a1424;--i:2" data-i18n="kinds.port">Porto</li>
+            <li style="--c:#b8742a;--i:3" data-i18n="kinds.whisky">Whisky</li>
+            <li style="--c:#8a4b1f;--i:4" data-i18n="kinds.rum">Rhum</li>
+            <li style="--c:#cfd6c4;--i:5" data-i18n="kinds.sake">Saké</li>
+            <li style="--c:#e0a73a;--i:6" data-i18n="kinds.beer">Bière IPA</li>
+            <li style="--c:#c9b04a;--i:7" data-i18n="kinds.cider">Cidre</li>
+          </ul>
+        </div>
+        <h3 data-i18n="kinds.title">Pas que du vin</h3>
+        <p data-i18n="kinds.text">Champagne, porto, whisky, rhum, saké, bière ou cidre&nbsp;: chaque boisson a sa place dans la cave, avec les informations propres à son type.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="search-demo" aria-hidden="true">
+            <div class="search-field"><i class="sf" style="--sf: url(symbols/magnifyingglass.png); width: 16px; height: 16px"></i><span class="search-typed"></span><i class="search-caret"></i></div>
+            <div class="search-results">
+              <span class="search-head" data-i18n="search.head">1 résultat</span>
+              <div class="search-row"><i class="dot white"></i><div><span class="row-producer">Domaine Leflaive</span><span class="row-title">Puligny-Montrachet Les <mark>Pucelles</mark></span><span class="row-sub">2019 · <span data-i18n="search.region">Bourgogne</span></span></div></div>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="search.title">La recherche comprend</h3>
+        <p data-i18n="search.text">Nom, domaine, cuvée, région, millésime ou personne. «&nbsp;pucelles&nbsp;» trouve un Puligny-Montrachet Les Pucelles, «&nbsp;champagne&nbsp;» trouve les effervescents, accents oubliés compris.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="search-demo describe-demo" aria-hidden="true">
+            <div class="search-field"><i class="sf" style="--sf: url(symbols/text.cursor.png); width: 16px; height: 16px"></i><span class="describe-typed"></span><i class="search-caret"></i></div>
+            <div class="search-results describe-results">
+              <div class="search-row"><i class="dot white"></i><div><span class="row-producer">William Fèvre</span><span class="row-title">Chablis</span><span class="row-sub">2019 · <span data-i18n="describe.region">Bourgogne</span></span></div></div>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="describe.title">Sans photo, en une phrase</h3>
+        <p data-i18n="describe.text">Pas d'étiquette sous la main&nbsp;? Une description suffit, par exemple «&nbsp;Chablis 2019 de William Fèvre&nbsp;», et la fiche se remplit de la même façon.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="note-demo" aria-hidden="true">
+            <div class="note-wine"><i class="dot red"></i><div><span class="row-producer">E. Guigal</span><span class="row-title">Côte-Rôtie La Landonne</span><span class="rate-stars"><i class="rate-star" style="--i:0"><i class="sf" style="--sf: url(symbols/star.fill.png)"></i></i><i class="rate-star" style="--i:1"><i class="sf" style="--sf: url(symbols/star.fill.png)"></i></i><i class="rate-star" style="--i:2"><i class="sf" style="--sf: url(symbols/star.fill.png)"></i></i><i class="rate-star" style="--i:3"><i class="sf" style="--sf: url(symbols/star.fill.png)"></i></i><i class="rate-star" style="--i:4"><i class="sf" style="--sf: url(symbols/star.fill.png)"></i></i></span></div><i class="rate-heart"><i class="sf" style="--sf: url(symbols/heart.fill.png)"></i></i></div>
+            <div class="note-text"><i class="sf" style="--sf: url(symbols/text.bubble.png)"></i><span data-i18n="note.sample">Olive noire et violette, encore serré. À rouvrir dans cinq ans.</span></div>
+            <div class="note-text"><i class="sf" style="--sf: url(symbols/person.2.fill.png)"></i><span data-i18n="note.people">Avec Lamia et Guillaume</span></div>
+          </div>
+        </div>
+        <h3 data-i18n="note.title">Les notes de dégustation</h3>
+        <p data-i18n="note.text">Des étoiles, un commentaire, la date et les personnes présentes. Un cœur marque les vins qui ont marqué. Chaque bouteille ouverte laisse un souvenir.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="household-demo" aria-hidden="true">
+            <div class="invite-code"><span data-i18n="household.code">Code d'invitation</span><b>K7P2QM</b></div>
+            <div class="members">
+              <span class="member"><i style="background:#8e2a3c">T</i><span data-i18n="household.you">Vous</span></span>
+              <span class="member join"><i style="background:#c98f3a">L</i><span>Lamia</span></span>
+            </div>
+            <div class="household-rows">
+              <span class="household-row shared"><i class="sf" style="--sf: url(symbols/person.2.fill.png)"></i><span data-i18n="household.shared">Cave commune</span></span>
+              <span class="household-row"><i class="sf" style="--sf: url(symbols/heart.fill.png)"></i><span data-i18n="household.private">Notes, favoris et journal privés</span></span>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="household.title">Une cave pour tout le foyer</h3>
+        <p data-i18n="household.text">Un code d'invitation suffit. Chacun range, déplace ou déguste les bouteilles de la cave commune, et garde ses notes, ses favoris et son journal pour lui.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="note-demo" aria-hidden="true">
+            <div class="note-wine"><i class="dot red"></i><div><span class="row-producer">Domaine Armand Rousseau</span><span class="row-title">Gevrey-Chambertin</span><span class="row-sub">2019</span></div></div>
+            <div class="note-text gift"><i class="sf" style="--sf: url(symbols/gift.fill.png)"></i><span data-i18n="gift.by">Offert par</span><b data-i18n="gift.name">Camille</b></div>
+            <div class="note-text gift"><i class="sf" style="--sf: url(symbols/hand.thumbsup.fill.png)"></i><span data-i18n="rec.by">Conseillé par</span><b data-i18n="rec.name">Hugo</b></div>
+          </div>
+        </div>
+        <h3 data-i18n="gift.title">Offert, reçu, conseillé</h3>
+        <p data-i18n="gift.text">La trace des vins offerts, reçus ou conseillés par un ami, avec le nom de chacun. Le jour d'ouvrir la bouteille, on sait qui remercier.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="map-demo" aria-hidden="true">
+            <div class="map-roads"></div>
+            <div class="map-pin"><i class="sf" style="--sf: url(symbols/wineglass.png)"></i></div>
+            <div class="map-label"><b>Domaine Huet</b><span>Vouvray</span></div>
+          </div>
+        </div>
+        <h3 data-i18n="place.title">Là où le vin a été découvert</h3>
+        <p data-i18n="place.text">Le lieu peut s'enregistrer au moment du scan&nbsp;: la fiche rappelle sur la carte le restaurant ou le domaine où la bouteille a été goûtée.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="files-demo" aria-hidden="true">
+            <span class="list-head"><i class="sf" style="--sf: url(symbols/paperclip.png)"></i><span data-i18n="files.head">Pièces jointes</span></span>
+            <div class="files">
+              <span class="file" style="--i:0"><i class="sf" style="--sf: url(symbols/doc.fill.png)"></i><em data-i18n="files.invoice">Facture</em></span>
+              <span class="file" style="--i:1"><i class="sf" style="--sf: url(symbols/doc.fill.png)"></i><em data-i18n="files.sheet">Fiche technique</em></span>
+              <span class="file photo" style="--i:2"><i class="sf" style="--sf: url(symbols/photo.fill.png)"></i><em data-i18n="files.photo">Contre-étiquette</em></span>
+            </div>
+          </div>
+        </div>
+        <h3 data-i18n="files.title">Factures et fiches techniques</h3>
+        <p data-i18n="files.text">Jusqu'à cinq photos ou documents par vin, dans «&nbsp;Pièces jointes&nbsp;»&nbsp;: la facture, la fiche technique du producteur, la contre-étiquette.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="estimate-demo" aria-hidden="true">
+            <div class="estimate-wine"><i class="dot red"></i><div><span class="row-producer">Château Canon</span><span class="row-title">Saint-Émilion Grand Cru</span><span class="row-sub">2016</span></div><span class="premium-tag">Premium</span></div>
+            <div class="estimate-row" style="--i:0"><i class="sf" style="--sf: url(symbols/eurosign.png)"></i><span data-i18n="estimate.price">Prix estimé</span><b>130&nbsp;€</b></div>
+            <div class="estimate-row" style="--i:1"><i class="sf" style="--sf: url(symbols/hourglass.png)"></i><span data-i18n="estimate.window">À boire</span><b data-i18n="estimate.years">2024 à 2040</b></div>
+            <div class="estimate-row" style="--i:2"><i class="sf" style="--sf: url(symbols/map.fill.png)"></i><span data-i18n="estimate.region">Région</span><b>Bordeaux</b></div>
+          </div>
+        </div>
+        <h3 data-i18n="estimate.title">Prix et période de garde</h3>
+        <p data-i18n="estimate.text">Avec Premium, chaque bouteille scannée reçoit une estimation de son prix, sa période de garde et sa région.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="cellars-demo" aria-hidden="true">
+            <div class="cellar-chip on"><span data-i18n="cellars.one">Cave du salon</span><small>18/48</small><i class="mini-grid" style="--cols:8;--rows:6"></i></div>
+            <div class="cellar-chip"><span data-i18n="cellars.two">Cellier</span><small>42/120</small><i class="mini-grid" style="--cols:12;--rows:10"></i></div>
+            <div class="cellar-chip"><span data-i18n="cellars.three">Cave de service</span><small>6/12</small><i class="mini-grid" style="--cols:4;--rows:3"></i></div>
+          </div>
+        </div>
+        <h3 data-i18n="cellars.title">Plusieurs caves</h3>
+        <p data-i18n="cellars.text">Une cave par meuble ou par pièce, chacune avec son nom et sa grille, et une bouteille passe de l'une à l'autre. Avec Premium.</p>
+      </article>
+
+      <article class="card">
+        <div class="card-visual">
+          <div class="export-demo" aria-hidden="true">
+            <div class="export-file"><i class="sf" style="--sf: url(symbols/doc.fill.png)"></i><span>vinarium-2026-10-24.json</span></div>
+            <div class="export-counts">
+              <span><b>48</b> <em data-i18n="export.wines">vins</em></span>
+              <span><b>31</b> <em data-i18n="export.notes">notes</em></span>
+              <span><b>112</b> <em data-i18n="export.moves">mouvements</em></span>
+            </div>
+            <div class="export-share"><i class="sf" style="--sf: url(symbols/square.and.arrow.up.png)"></i><span data-i18n="export.action">Exporter</span></div>
+          </div>
+        </div>
+        <h3 data-i18n="export.title">Les données restent les vôtres</h3>
+        <p data-i18n="export.text">Pas de publicité, pas de traçage. Toute la cave s'exporte et se réimporte depuis les Réglages, dans «&nbsp;Profil&nbsp;».</p>
+      </article>
+    </div>
+  </section>
+
+  <script>
+    // Each visitor downloads the screens in their own language, and only those.
+    for (const img of document.querySelectorAll("[data-shot]")) {
+      const lang = document.documentElement.classList.contains("i18n-en") ? "en" : "fr";
+      img.src = `screens/${lang}-${img.dataset.shot}.jpg?v=20261024`;
+    }
+  </script>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <h2 class="section-title" data-i18n="faq.title">Questions fréquentes</h2>
+    <div class="faq-list">
+      <details>
+        <summary data-i18n="faq.q1">Comment l'étiquette est-elle lue&nbsp;?</summary>
+        <p data-i18n="faq.a1">La photo est lue par une intelligence artificielle qui en tire le nom, le domaine, la cuvée, le millésime, l'appellation et la région. La fiche arrive à vérifier avant d'entrer dans la cave, et chaque champ se corrige. Une étiquette illisible&nbsp;? Une phrase suffit, ou la saisie à la main.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q2">Combien ça coûte&nbsp;?</summary>
+        <p data-i18n="faq.a2">Gratuit, avec 20 scans offerts à l'ouverture du compte puis 5 par mois. La cave, le journal, la recherche et le partage en foyer sont gratuits et sans limite, et une bouteille s'ajoute toujours à la main. Premium, 2,99&nbsp;€ par mois ou 24,99&nbsp;€ par an avec 7 jours d'essai, lève la limite de scans, estime le prix et la garde, et ouvre plusieurs caves.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q3">Comment fonctionne le partage en foyer&nbsp;?</summary>
+        <p data-i18n="faq.a3">Le partage se lance depuis les Réglages, avec un code d'invitation à transmettre. Chaque membre du foyer range, déplace ou déguste les bouteilles de la cave commune, depuis son propre iPhone et son propre compte.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q4">Que voient les autres membres du foyer&nbsp;?</summary>
+        <p data-i18n="faq.a4">Les bouteilles placées dans la cave commune, avec le nom de la personne qui les a rangées. Les notes de dégustation, le journal et les favoris de chacun restent privés.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q5">Où vont mes données&nbsp;?</summary>
+        <p data-i18n="faq.a5">Connexion avec un compte Apple, e-mail masquable. La cave est hébergée sur Google Cloud, en Europe. La photo d'une étiquette sert à la lire, et reste en cache sans lien avec son auteur. Pas de publicité, pas de traçage, et toute la cave s'exporte depuis l'app. Le détail est dans la <a href="privacy.html">politique de confidentialité</a>.</p>
+      </details>
+      <details>
+        <summary data-i18n="faq.q6">Sur quels appareils, dans quelles langues&nbsp;?</summary>
+        <p data-i18n="faq.a6">iPhone, iOS 26. En français, anglais, allemand, espagnol, italien, japonais ou portugais, selon la langue du téléphone. Les étiquettes sont lues dans toutes les langues.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- Download: the two plans, then the badge -->
+  <section class="download" id="download">
+    <div class="download-icon" aria-hidden="true">
+      <img src="icon-256.png" width="120" height="120" alt="">
+    </div>
+    <h2 class="section-title" data-i18n="dl.title">Gratuit, ou Premium sans limite</h2>
+    <p class="section-lead" data-i18n="dl.lead">La cave, le journal et le partage sont gratuits et sans limite. Seul le scan est compté.</p>
+
+    <table class="plan-table">
+      <thead>
+        <tr>
+          <td></td>
+          <th scope="col"><span data-i18n="plan.free.name">Gratuit</span><b data-i18n="plan.free.price">0&nbsp;€</b><small data-i18n="plan.free.lead">Sans limite de temps.</small></th>
+          <th scope="col" class="premium"><span class="plan-tag" data-i18n="plan.premium.tag">7 jours d'essai sur l'annuel</span><span>Premium</span><b data-i18n="plan.premium.price">2,99&nbsp;€&nbsp;/&nbsp;mois</b><small data-i18n="plan.premium.lead">ou 24,99&nbsp;€ par an</small></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row" data-i18n="plan.row.scan">Scan d'étiquette</th><td><span data-i18n="plan.row.scan.free">20 offerts, puis 5&nbsp;/&nbsp;mois</span></td><td class="premium"><b data-i18n="plan.row.scan.premium">Illimité*</b></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.estimate">Prix, garde et région estimés</th><td><i class="sf no" style="--sf: url(symbols/minus.png)"></i></td><td class="premium"><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.cellars">Plusieurs caves</th><td><i class="sf no" style="--sf: url(symbols/minus.png)"></i></td><td class="premium"><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.cellar">Cave en grille et journal</th><td><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td><td class="premium"><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.notes">Dégustations, favoris et cadeaux</th><td><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td><td class="premium"><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.household">Partage en foyer</th><td><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td><td class="premium"><i class="sf yes" style="--sf: url(symbols/checkmark.png)"></i></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.manual">Ajout à la main</th><td><span data-i18n="plan.unlimited">Illimité</span></td><td class="premium"><span data-i18n="plan.unlimited">Illimité</span></td></tr>
+        <tr><th scope="row" data-i18n="plan.row.ads">Publicité</th><td><span data-i18n="plan.none">Aucune</span></td><td class="premium"><span data-i18n="plan.none">Aucune</span></td></tr>
+      </tbody>
+    </table>
+    <p class="prices-note" data-i18n="plan.note">*&nbsp;Usage raisonnable&nbsp;: 100 scans par mois. Abonnement géré et résilié dans l'App Store.</p>
+
+    <div class="hero-actions">
+      <a class="store-badge" href="https://apps.apple.com/app/id6789688303" aria-label="Télécharger dans l'App Store" data-i18n-aria="aria.store">
+        <svg class="apple-mark" viewBox="0 0 17 20" width="22" height="26" aria-hidden="true"><path fill="currentColor" d="M14.2 10.6c0-2.3 1.9-3.4 2-3.5-1.1-1.6-2.8-1.8-3.4-1.8-1.4-.1-2.8.9-3.5.9-.7 0-1.8-.8-3-.8-1.5 0-3 .9-3.8 2.3-1.6 2.8-.4 7 1.2 9.3.8 1.1 1.7 2.4 2.9 2.4 1.2 0 1.6-.8 3.1-.8 1.4 0 1.8.8 3.1.7 1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.3-2.6 1.3-2.7-.1 0-2.7-1-2.7-3.7ZM11.9 3.8c.6-.8 1.1-1.9 1-3-.9 0-2.1.6-2.7 1.4-.6.7-1.1 1.8-1 2.9 1 .1 2.1-.5 2.7-1.3Z"/></svg>
+        <span class="store-text"><small data-i18n="store.small">Télécharger dans</small><b>App Store</b></span>
+      </a>
+      <a class="button ghost" href="https://github.com/moifort/vinarium" rel="noopener" data-i18n="dl.code">Voir le code</a>
+    </div>
+    <p class="hero-meta" data-i18n="dl.meta">iPhone · iOS 26 · Sept langues</p>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p data-i18n="footer.credit">Vinarium est une application de <a href="https://github.com/moifort" rel="noopener">Polyforms</a>.</p>
+  <p><a href="https://github.com/moifort/vinarium" data-i18n="footer.source">Code source</a> · <a href="https://github.com/moifort/vinarium/issues" data-i18n="footer.issues">Signaler un problème</a> · <a href="privacy.html" data-i18n="footer.privacy">Confidentialité</a></p>
+</footer>
+
+<script src="i18n.js?v=20261024-1"></script>
+<script src="main.js?v=20261024-1" defer></script>
+</body>
+</html>

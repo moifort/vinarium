@@ -1,8 +1,12 @@
 name: Deploy
 
+# A push that touches only the landing page skips this: the site never reaches
+# the backend, and the Website workflow publishes it on its own.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "site/**"
   workflow_dispatch:
 
 # One deployment at a time, and never stopped halfway: a newer push waits for
