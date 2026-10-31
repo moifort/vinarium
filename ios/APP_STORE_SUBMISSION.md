@@ -117,7 +117,7 @@ automatic signing, deployment target iOS 26.0, backend already deployed.
 > 6. **Attach the build** to the version in App Store Connect (Phase 4 below) once it finishes
 >    processing.
 >     >
-  One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
+One-time setup — GitHub secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8` (an App Store
 > Connect API key with the _App Manager_ role) and `IOS_GOOGLE_SERVICE_INFO_PLIST` (base64 of
 > the gitignored `GoogleService-Info.plist`). Do **not** reuse the `APPLE_*` secrets — those
 > are the _Sign in with Apple_ AuthKey used by Terraform.
