@@ -15,6 +15,9 @@ https://claude.ai/artifact/A2GU9AgwrjxJM1c8Nb6jGA. It is not the SwiftUI preview
   (`Admin*`).
 - Layout lives in `project/canvas.json` (`boards`, `order`). A new artboard sits 80 px from its
   siblings in the same row, with its `boards` entry and `order` slot.
+- Every screen carries a `mode` tweak, `Clair` by default or `Sombre`: `renderVals()` turns it into
+  `themeClass` on the root, and `.ph.dark` swaps the CSS colour tokens. A new artboard takes the
+  same tweak and uses the tokens, never a raw colour for anything that changes with the theme.
 
 ## Board first, then code
 
