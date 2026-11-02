@@ -23,6 +23,11 @@ Compte utilisateur unique en production : `KyTjMU39NBhfakGxExfqLmC5OYU2`.
   `?authuser=thibaut@polyforms.co` dans l'URL.
 - Dépôt GitHub : `moifort/vinarium`, fusion en squash uniquement.
 
+## Design
+
+- Vinarium Board : https://claude.ai/artifact/A2GU9AgwrjxJM1c8Nb6jGA, artefact Design privé.
+  Méthode dans [docs/board.md](docs/board.md).
+
 ## Analytique et supervision
 
 - Propriété GA4 `548838755` (projet `vinarium-prod`), dans le compte Analytics `343114634`
