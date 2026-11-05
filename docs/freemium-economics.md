@@ -119,6 +119,7 @@ half of the bill without any expected loss on a structured extraction.
 | Manual entry                                  | unlimited                                                        | unlimited                                         |
 
 Why these numbers:
+
 - **5 scans a month** caps the free tier at €0.05 per user (€0.21 in the worst case) and is enough
   to judge whether the scan is any good. The wall it creates is the conversion moment.
 - **20 scans granted once**, at the end of onboarding (`WELCOME_SCANS`, added 2026.08.04). The

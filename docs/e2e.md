@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/93-annexe-captures-e2e.md](../playbook/93-annexe-captures-e2e.md). This guide keeps the project-specific detail.
 
-
 ## Overview
 
 One scenario, replayed against the whole product before every App Store release: the real app on a simulator, the real Nitro backend, and Firebase emulators standing in for Firestore and Auth.
@@ -28,6 +27,7 @@ A run takes about 9 minutes, 6 of them in the four scenarios. They share one emu
 ### Cellar — `CellarFlowTest`
 
 The main journey, a new account taken through the product end to end:
+
 1. **Onboarding** — prénom, cellar dimensions, finish (`completeOnboarding` provisions the grid)
 2. **Scan** — the bundled label photo, the review form, add to cellar (`scanBeverage`, quota, `addBeverage`)
 3. **Placement** — slot A1, confirmation (`placeBottle`)

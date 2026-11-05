@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/08-copywriting.md](../playbook/08-copywriting.md). This guide keeps the project-specific detail.
 
-
 Guide for writing and maintaining the top-level `README.md`. The README is the first thing someone reads — it should answer "what is this, how do I install it, how do I run it" without requiring prior knowledge of the codebase. Deep architecture belongs in `docs/`, not here.
 
 ## Principles
@@ -43,6 +42,7 @@ A short list (3-6 bullet points) of what the project contains, from a user's per
 ```
 
 Rules:
+
 - Lead with the user benefit, not the technology
 - Put "(optional)" next to things that aren't required
 - Don't list internal implementation details (migrations, middleware, plugins)
@@ -87,6 +87,7 @@ List each manual step: install deps, create config files, set up Firebase creden
 ### 5. Setting up keys
 
 One subsection per key. Each answers three questions:
+
 1. **What it does** — one sentence, no jargon
 2. **How to get it** — exact steps (create account, generate token, copy value)
 3. **Where to put it** — table with file path + variable name
@@ -112,6 +113,7 @@ openssl rand -hex 32
 ````
 
 Rules:
+
 - Mark optional keys as optional
 - If a key comes from an external service (Firebase, Sentry, …), link to it and give the exact navigation path to find the value
 - Show the actual file paths from the project, not generic ones

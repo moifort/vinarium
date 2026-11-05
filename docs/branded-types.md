@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
 
-
 ## Overview
 
 We use [ts-brand](https://github.com/kourge/ts-brand) to create nominal types that prevent accidental mixing of semantically different values (e.g. `BeverageId` vs `UserId`, `Eur` vs `Year`), combined with [Zod](https://zod.dev/) for runtime validation.
@@ -96,6 +95,7 @@ When you add a new branded type, also update the Apollo iOS codegen scalar mappi
 ## Shared Types
 
 Cross-domain branded types live in `server/domain/shared/types.ts`, with their constructors in `server/domain/shared/primitives.ts`:
+
 - `UserId` — Firebase Auth user identifier
 - `Eur` — Euro amount (non-negative)
 - `Year` — calendar year (integer >= 1800)

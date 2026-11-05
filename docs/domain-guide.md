@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
 
-
 Step-by-step guide to adding a new domain to the backend. Each step corresponds to a DDD building block from Evans (_Domain-Driven Design_) or Wlashin (_Domain Modeling Made Functional_).
 
 ## 1. Create the Domain Directory
@@ -193,6 +192,7 @@ export namespace BeverageUseCase {
 ```
 
 **Rules:**
+
 - Names carry business intent (`addWithTasting`, `removeCompletely` — never `handleX`, `processX`).
 - No direct storage access — go through commands/queries (`atomically` is the one exception: multi-domain deletes enlist into a single batch for atomicity).
 
@@ -214,6 +214,7 @@ export const beverageStatus = (context: {
 ```
 
 **Rules:**
+
 - Function names ARE the business concept (`beverageStatus`, `readyToDrink` — never `computeX`, `getX`).
 - No IO, no async, no `db()` — pure input/output.
 - Must have 100% test coverage (`business-rules.unit.test.ts`).
@@ -221,6 +222,7 @@ export const beverageStatus = (context: {
 ## Tests
 
 Co-locate tests next to the file under test (no `__test__/` directories). Suffixes, highest to lowest level:
+
 - **`*.feat.test.ts`** — feature tests: business scenarios at the GraphQL boundary (execute a query/mutation against the assembled schema).
 - **`*.int.test.ts`** — integration tests: domain queries/commands with Firestore mocked via the in-memory fake.
 - **`*.unit.test.ts`** — unit tests: primitives and pure `business-rules.ts` functions (no IO).
