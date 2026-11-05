@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/11-ops.md](../playbook/11-ops.md). This guide keeps the project-specific detail.
 
-
 ## Overview
 
 Forward-only sequential migrations for the Firestore database. The current version is tracked in the Firestore collection `migration-meta`, document `state`. Migrations are **not** run at boot — there is no boot-time plugin. They run only when `POST /admin/migrate` is called, which `scripts/bootstrap.sh` invokes during provisioning (and CI invokes on deploy).
@@ -10,12 +9,14 @@ Forward-only sequential migrations for the Firestore database. The current versi
 ## When to Migrate
 
 **Migration needed:**
+
 - Renaming a field
 - Changing a field's structure (e.g. flattening `giftedBy` into a nested `gift.received` object)
 - Changing enum values
 - Removing stale data
 
 **No migration needed:**
+
 - Adding a new optional (`?`) field
 - Adding a new Firestore collection
 - Changing query logic or resolvers
@@ -80,6 +81,7 @@ export const migrations: Migration[] = [
 ## How It Works
 
 `server/system/migration/runner.ts`:
+
 1. `POST /admin/migrate` calls `runMigrations(migrations)`.
 2. The runner reads `migration-meta/state` to get the current version (defaulting to `MigrationVersion(0)` when absent).
 3. Pending migrations (version > current) are sorted by version and applied sequentially.

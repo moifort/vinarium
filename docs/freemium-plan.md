@@ -76,6 +76,7 @@ profitable because it targets the real cost source rather than blocking everythi
 **Feasibility: high.** Everything is provided by iOS 26; the target is already `26.0`.
 
 On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cloud path):
+
 1. **OCR** — **Vision** framework (`RecognizeTextRequest`, iOS 26 async API) on the `UIImage`
    already captured by `CameraView` / `PhotosPicker`. Available on **all** iOS 26 devices.
 2. **Structuring** — two branches by hardware:
@@ -89,6 +90,7 @@ On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cl
    combines **two** conditions: entitlement (Q3) **and** hardware capability.
 
 **Macro plan (iOS)**:
+
 - **`WineScanner` abstraction** (protocol) with 3 implementations: `ServerScanner` (current
   `WineAPI.scan`), `OnDeviceIntelligenceScanner` (Vision + FoundationModels), `OnDeviceOCRScanner`
   (Vision + heuristic). A `ScannerFactory` picks based on `entitlement × availability`.
@@ -115,6 +117,7 @@ On-device pipeline (0 server calls, produces the **same `ScanResult`** as the cl
 custom claim**.
 
 **Macro plan (backend, Nitro/DDD)**:
+
 - **New `server/domain/entitlement/` domain** (follow `docs/domain-guide.md` + the `ddd-architecture`
   skill): `types.ts` (`Entitlement { userId, tier: 'free'|'pro', source, expiresAt, ... }`),
   `command.ts` (`EntitlementCommand.activateFromReceipt`, `.refreshFromNotification`), `query.ts`
@@ -138,6 +141,7 @@ custom claim**.
     domain's `create` mutation.
 
 **Macro plan (iOS)**:
+
 - **StoreKit 2**: `Product.products(for:)`, `product.purchase()`, `Transaction.currentEntitlements`,
   `Transaction.updates` (listen to renewals). A `.storekit` config file for simulator testing.
 - **`EntitlementStore`** (`@Observable`, app scope next to `AuthSession`): reads the tier from
@@ -211,6 +215,7 @@ the grounding free tier holds — but once grounding is billed (growth, or a for
 2.5 is deprecated): 10 scans × $0.037 = $0.37 per free user per month. At 3% conversion each
 subscriber "carries" ~33 free users → **~€11/month of cost against €3.53 of net revenue: a 3×
 structural deficit.** Structural fixes (no deficit by construction, at any volume):
+
 - **Free quota = one-time lifetime trial** (5 full scans), not monthly. Afterwards: **on-device**
   (lever A — Apple Intelligence, else Vision OCR: zero server cost, no unbounded free-tier
   spend); market enrichment stays the paid differentiator (lever D unchanged). A cloud
@@ -326,6 +331,7 @@ vision scans + **60 enrichments/month** hard cap. Adjust after observing real co
 Goal: carry `appBuild` and `tier` into request and GraphQL context. No behavior change.
 
 **Modify**
+
 - `server/middleware/auth.ts`: after `verifyIdToken`, set
   `event.context.tier = decoded.tier === 'pro' ? 'pro' : 'free'` and
   `event.context.appBuild = Number(getHeader(event, 'x-app-build')) || undefined`. Extend the
@@ -339,6 +345,7 @@ Goal: carry `appBuild` and `tier` into request and GraphQL context. No behavior 
   paywall-carrying iOS release.
 
 **Create**
+
 - `server/domain/entitlement/enforcement.ts`:
   `export const shouldEnforceQuota = (appBuild?: number) => appBuild != null && appBuild >= QUOTA_ENFORCEMENT_MIN_BUILD`.
 
@@ -366,6 +373,7 @@ Firestore doc **`entitlements/{userId}`** (first per-user doc; id = userId):
 Absence of the doc ⇒ free.
 
 **Create** (mirror `server/domain/gift/`)
+
 - `types.ts`: `Tier = 'free' | 'pro'`, `Entitlement` (shape above), `AppStoreEnvironment`.
 - `primitives.ts`: `ProductId` brand + `TIER_BY_PRODUCT` map;
   `deriveTier(expiresAt): Tier = expiresAt && expiresAt > new Date() ? 'pro' : 'free'`.
@@ -420,6 +428,7 @@ extend type Mutation {
 ```
 
 **Create**
+
 - `infrastructure/apple/verifier.ts`: wraps `SignedDataVerifier`; `verifyTransaction(jws)` and
   `verifyNotification(signedPayload)` returning a normalized `DecodedTransaction
   { originalTransactionId, productId, expiresAt, environment, autoRenew }`. Reads key material
@@ -429,6 +438,7 @@ extend type Mutation {
   return status. Register the new block in `server/domain/shared/graphql/schema.ts`.
 
 **Webhook — App Store Server Notifications V2** (`server/routes/webhooks/app-store.post.ts`)
+
 - **Auth whitelist**: add a branch in `auth.ts` — `if (path.startsWith('/webhooks/app-store')) return`
   (Apple signs with JWS, not a Firebase token; security = `verifyNotification`, not bearer).
 - Body `{ signedPayload }` → `verifier.verifyNotification` →
@@ -458,11 +468,13 @@ per scan, correct under `concurrency: 80`, no transaction round-trip. The gating
 separate and eventually consistent; slight drift on a 60-cap is harmless.
 
 **Doc shapes** (collection `scan-usage`, no migration, default-deny rules unchanged)
+
 - Monthly `scan-usage/{userId}_{YYYYMM}`: `{ userId, period, visionScans, enrichments, updatedAt }`.
 - Lifetime trial `scan-usage/{userId}`: `{ userId, trialScansUsed, updatedAt }` — a separate doc
   because the trial is lifetime, must survive month rollover and entitlement webhook overwrites.
 
 **Create**
+
 - `server/domain/scan/infrastructure/usage-repository.ts`: `monthlyUsage(userId)`,
   `trialUsage(userId)` (both memoizedPerRequest, 1 docRead each), `incrementMonthly(userId,
   { vision, enrichment })`, `incrementTrial(userId)`.
@@ -573,6 +585,7 @@ change** (the IAP capability is provisioning-profile driven, so it won't force a
 version bump).
 
 **Create** `ios/Vinarium/Features/Subscription/`
+
 - `SubscriptionStore.swift` (`@MainActor @Observable`): `products` via `Product.products(for:)`;
   `purchase(_:)` → on `.success(.verified(transaction))` submit
   `verificationResult.jwsRepresentation`, `await transaction.finish()`; `restore()` =
@@ -615,6 +628,7 @@ the existing screens (the app does address the user), never an em or en dash. **
 Extend `ios/Vinarium/Shared/GraphQLHelpers.swift` `unwrap` to read
 `errors.first?.extensions?["code"]` and throw a typed `APIError.domain(code:message:)` (add the
 case) — this is the enabler for paywall triggering.
+
 - **Scan flow** (`ScanViewModel.capturePhoto`, the sole `WineAPI.scan` caller): catch
   `APIError.domain(code: "QUOTA_EXCEEDED")` → set a `paywallReason` and present the Paywall
   instead of the generic error alert; other errors keep current behavior.
@@ -628,6 +642,7 @@ case) — this is the enabler for paywall triggering.
 ### Ops / release checklist & activation
 
 **App Store Connect (manual, owner)**
+
 - Create the subscription group `Vinarium Pro` and 2 auto-renewable products
   (`com.polyforms.vinarium.pro.monthly` €4.99, `.yearly` €39.99), localized descriptions, review
   screenshot.
@@ -646,6 +661,7 @@ case) — this is the enabler for paywall triggering.
 auto-derives `NITRO_APPLE_IAP_KEY` etc.
 
 **Deploy order** (all backend increments are dark)
+
 1. Push B0→B5 to `main` (auto-deploy). Nothing enforces (no client sends `X-App-Build ≥
    threshold`, none submits a transaction); the webhook is live but idle.
 2. Provision secrets + terraform apply; configure the ASSN webhook; verify a sandbox purchase

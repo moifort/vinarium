@@ -18,6 +18,7 @@ Both attached to the `Vinarium` target.
 ## 2. Capabilities
 
 `Target Vinarium → Signing & Capabilities → + Capability`
+
 - **Sign in with Apple** — required for Apple Sign-In to work with Firebase Auth.
 
 ## 3. GoogleService-Info.plist

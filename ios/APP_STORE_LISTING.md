@@ -82,6 +82,7 @@ Gratuit — tous pays.
 ## Confidentialité de l'app (questionnaire « Commencer »)
 
 Déclare la collecte des types suivants. Pour CHACUN : lié à l'utilisateur = **Oui**, utilisé pour le suivi (tracking) = **Non**, finalité = **Fonctionnement de l'app**.
+
 - **Coordonnées** → Nom, Adresse e-mail (uniquement si l'utilisateur les partage via Sign in with Apple)
 - **Contenu utilisateur** → Photos (scans d'étiquettes) + Autre contenu (fiches de vins, notes de dégustation)
 - **Identifiants** → Identifiant utilisateur (compte)
@@ -100,6 +101,7 @@ Dans le questionnaire, à « Alcool, tabac ou drogues (usage ou références) »
 App Store Connect exige au moins le format **6.9"/6.7" iPhone**. Depuis le simulateur iPhone 17, une fois connecté : menu **Fichier → Enregistrer l'écran** (⌘S) enregistre une capture au bon format sur le Bureau. ASC les accepte telles quelles.
 
 5 écrans qui racontent l'app, dans cet ordre :
+
 1. **Accueil** (tableau de bord — stats, prêts à boire)
 2. **Cave** (la grille de bouteilles)
 3. **Résultat de scan** (après avoir scanné une étiquette)

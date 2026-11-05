@@ -80,6 +80,7 @@ bun run bootstrap
 ```
 
 That single command :
+
 1. validates prerequisites,
 2. builds the Nitro firebase-preset bundle (`.output/server/`),
 3. `terraform init && terraform apply` — creates the GCP project, enables

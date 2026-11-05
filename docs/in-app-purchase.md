@@ -82,6 +82,7 @@ inspector (Debug → StoreKit → Manage Transactions) fakes renewals, refunds a
 ## App Store Connect setup — to do once, by a human
 
 Credential-gated; none of it is scriptable.
+
 1. **App Store Connect → Vinarium → Subscriptions** → create a subscription group
    `Vinarium Premium`.
 2. Add **`com.polyforms.vinarium.app.premium.yearly`**, duration 1 year, price 24,99 € (France;
@@ -132,6 +133,7 @@ build in the wild is metered, including the ones that predate the paywall and wo
 server message in a generic error alert rather than the offer.
 
 So, in order:
+
 1. Set `PREMIUM_USER_IDS` **before** the backend deploy, so the accounts in use are unaffected.
 2. Deploy the backend. The webhook is live and idle; nothing can be bought yet.
 3. Ship the iOS release carrying the paywall.

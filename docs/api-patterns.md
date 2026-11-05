@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/91-annexe-graphql.md](../playbook/91-annexe-graphql.md). This guide keeps the project-specific detail.
 
-
 The public API is **GraphQL only** — a single `POST /graphql` served by Apollo Server, plus the operational `POST /admin/migrate`. There are no REST resource routes. The schema is code-first with [Pothos](https://pothos-graphql.dev/); each domain contributes its types/queries/mutations from `server/domain/{domain}/infrastructure/graphql/`, all registered on the shared `builder` and assembled in `server/domain/shared/graphql/schema.ts`.
 
 ## The Endpoint
@@ -18,6 +17,7 @@ A missing `userId` yields a `401` before Apollo runs.
 ## Local Development: Apollo Sandbox
 
 In dev (`bun run dev`), opening http://localhost:3000/graphql in a browser loads the embedded Apollo Sandbox: schema browser, docs, and a query runner. Two dev-only pieces make this work:
+
 - `server/plugins/02-graphql.ts` registers `ApolloServerPluginLandingPageLocalDefault({ embed: true })` under `import.meta.dev`.
 - `server/middleware/auth.ts` has a dev-only bypass: a request to `/graphql` with **no** `Authorization` header is authenticated as the Firebase UID from `NITRO_DEV_USER_ID` (set it in the gitignored `.env`). A request that does carry a `Bearer` token is still verified normally, and the whole bypass is tree-shaken out of production builds (`import.meta.dev`).
 

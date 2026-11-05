@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
 
-
 ## Principle
 
 We use **string-literal outcomes** (a lightweight discriminated union) instead of exceptions for domain-level errors. Exceptions are reserved for truly unexpected failures.
@@ -50,6 +49,7 @@ export namespace BeverageCommand {
 ```
 
 Key points:
+
 - Always use `as const` on literal returns for type narrowing.
 - Each failure is a distinct string discriminant.
 - No exceptions thrown for expected failures.

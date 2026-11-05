@@ -2,7 +2,6 @@
 
 > The portable rules live in [playbook/92-annexe-ios.md](../playbook/92-annexe-ios.md). This guide keeps the project-specific detail.
 
-
 ## Tech Stack
 
 - **SwiftUI** with iOS 26.0 deployment target
@@ -75,6 +74,7 @@ final class WineListViewModel {
 ```
 
 Key conventions:
+
 - `@MainActor` on all ViewModels
 - `@Observable` (not `ObservableObject`)
 - `private(set)` for published state
@@ -208,6 +208,7 @@ struct WineListRow: View {
 ```
 
 **Allowed types in leaf views:**
+
 - `String`, `Int`, `Int?`, `Double?`, `Bool`, `Date?`
 - Simple enums without logic (like `WineColor` — equivalent to a typed String)
 - Closures (`() -> Void`, `(String) -> Void`)
@@ -331,6 +332,7 @@ Top-of-screen CTAs (navigation bars, sheet headers) follow one convention across
 
 Render every toolbar CTA through the two shared atoms in `Shared/Components/` — never an inline
 `Button` with a visible label:
+
 - **`ToolbarIconButton(title:systemImage:role:action:)`** — synchronous icon-only button for
   cancel / close / back and secondary actions. Applies `.labelStyle(.iconOnly)`; keeps `title` for VoiceOver.
 - **`AsyncToolbarButton(title:systemImage:action:)`** — async confirm button; shows a `ProgressView`
@@ -367,6 +369,7 @@ The feature-root `{Feature}View` coordinator owns the ViewModel, so its preview 
 **smoke preview**: it renders the loading or empty state the canvas can reach on its own
 and never proves the data path. Keep it cheap and never make it the place where a screen
 is designed — that stays the `Page`'s job. Two coordinators need a nudge to get there:
+
 - `AuthRoot` calls `FirebaseApp.configure()` first, because the canvas does not run
   `VinariumApp.init` and `AuthSession` traps on an unconfigured Firebase.
 - `ScanView` renders its controls over an empty preview layer: the canvas has no camera,
@@ -394,6 +397,7 @@ enum WineAPI {
 ```
 
 **Architecture:**
+
 - `Shared/GraphQLClient.swift` — the Apollo singleton (Firebase Bearer auth, logging interceptor)
 - `Features/{Feature}/{Feature}API.swift` — feature API enum returning app model types
 - `.graphql` operation files in `Features/{Feature}/GraphQL/` — queries and mutations
