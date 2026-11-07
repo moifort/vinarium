@@ -156,7 +156,7 @@
     'plan.row.ads': 'Ads',
     'plan.none': 'None',
     'plan.note':
-      '*&nbsp;Fair use: 100 scans a month. The subscription is managed and cancelled in the App Store.',
+      '*&nbsp;Fair use: 500 scans a month. The subscription is managed and cancelled in the App Store.',
     'dl.code': 'View the code',
     'dl.meta': 'iPhone · iOS 26 · Seven languages',
 
