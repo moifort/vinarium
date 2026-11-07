@@ -1,3 +1,4 @@
+import type { H3Event } from 'h3'
 import { match } from 'ts-pattern'
 import { EntitlementUseCase } from '~/domain/entitlement/use-case'
 
@@ -8,7 +9,7 @@ import { EntitlementUseCase } from '~/domain/entitlement/use-case'
 //
 // Unauthenticated by design: the caller is Apple, and the proof is the signature
 // on the payload itself, checked in `EntitlementUseCase.applyNotification`.
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   const body = await readBody<{ signedPayload?: string }>(event)
   if (!body?.signedPayload) throw createError({ statusCode: 400, statusMessage: 'Missing payload' })
 

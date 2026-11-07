@@ -1,8 +1,9 @@
+import type { H3Event } from 'h3'
 import { readLocalObject } from '~/domain/attachment/infrastructure/object-store'
 import { ObjectPath } from '~/domain/attachment/primitives'
 
 // The read half of the development object store — see the .put route next to it.
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404, statusMessage: 'Not found' })
 
   const path = getRouterParam(event, 'path')

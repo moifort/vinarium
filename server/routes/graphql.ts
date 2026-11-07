@@ -1,8 +1,9 @@
 import { type ApolloServer, HeaderMap } from '@apollo/server'
+import { getHeaders, type H3Event } from 'h3'
 import { beverageSatelliteLoaders } from '~/domain/shared/graphql/loaders'
 import type { UserId } from '~/domain/shared/types'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   const apollo = useApollo()
   const userId = (event.context as { userId?: UserId }).userId
   if (!userId) throw createError({ statusCode: 401, statusMessage: 'Missing user context' })
