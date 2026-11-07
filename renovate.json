@@ -33,6 +33,11 @@
       "allowedVersions": "<14"
     },
     {
+      "description": "Pin h3 to 1.x: Nitro 2 hands handlers a Node-based h3 v1 event, and h3 v2's getRequestHeader calls event.req.headers.get on it, so every request through the Sentry plugin throws (VINARIUM-NODE-2; #124 and #142 were both reverted). Revisit with the move to Nitro 3.",
+      "matchPackageNames": ["h3"],
+      "allowedVersions": "<2"
+    },
+    {
       "description": "Pin ruby to 3.x: the release-ios submit job runs fastlane, which supports Ruby 3.0+ (3.3+ recommended) and has announced no Ruby 4 support; it also caps bundler at <3.0.0, which Ruby 4's bundled version breaks. infra/ has no Gemfile.lock, so gems resolve on the runner and a bad bump would only surface while submitting a build to the App Store — no CI job runs fastlane. Revisit once fastlane declares Ruby 4 support.",
       "matchPackageNames": ["ruby"],
       "allowedVersions": "<4"
