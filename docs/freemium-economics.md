@@ -112,11 +112,11 @@ half of the bill without any expected loss on a structured extraction.
 
 ## 4. What is recommended
 
-|                                               | **Free**                                                         | **Premium — €2.99 / month · €24.99 / year**       |
-| --------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
-| AI scans                                      | **5 / month**, plus **20 granted once** at the end of onboarding | unlimited (fair use, safety ceiling ~100 / month) |
-| Bottles, cellar, tastings, dashboard, sharing | unlimited                                                        | unlimited                                         |
-| Manual entry                                  | unlimited                                                        | unlimited                                         |
+|                                               | **Free**                                                         | **Premium — €2.99 / month · €24.99 / year**      |
+| --------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------ |
+| AI scans                                      | **5 / month**, plus **20 granted once** at the end of onboarding | unlimited (fair use, safety ceiling 500 / month) |
+| Bottles, cellar, tastings, dashboard, sharing | unlimited                                                        | unlimited                                        |
+| Manual entry                                  | unlimited                                                        | unlimited                                        |
 
 Why these numbers:
 
@@ -144,9 +144,14 @@ Why these numbers:
 - The **safety ceiling on Premium** is not a product feature and does not need to be shown; it
   exists so no single account can ever cost more than it pays. Its sizing rule: a month at the
   ceiling may cost at most **70% of the cheapest plan's net proceeds** — the annual plan's
-  €1.48 / month, so a €1.03 budget, i.e. ~100 scans at the current ~€0.01 scan
-  (`PREMIUM_MONTHLY_SCANS` in `server/domain/quota/business-rules.ts`). Recompute it when the
-  scan cost moves, e.g. once grounding is billed.
+  €1.48 / month, so a €1.03 budget (`PREMIUM_MONTHLY_SCANS` in
+  `server/domain/quota/business-rules.ts`). It was first set at 100, on the estimated ~€0.01 scan.
+  Raised to **500** on 2026-11-07, on the measured cost: November's 116 scans on 3.5 Flash-Lite
+  came to ~€0.17, i.e. ~€0.0015 a scan, so a month at the ceiling is ~€0.75, three quarters of the
+  budget. 100 had been met by a real account stocking 58 bottles in three days (~2 scans a bottle
+  once retakes count). Recompute it when the scan cost moves: once grounding is billed past the free
+  5,000 requests a month (~€0.013 a scan more), 500 scans would cost ~€7.25 and the ceiling must
+  come down to ~70.
 
 ## 5. Guard rails to put in place
 

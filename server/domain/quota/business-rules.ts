@@ -12,10 +12,12 @@ export const FREE_MONTHLY_SCANS: CountType = Count(5)
 // A subscriber is not metered, but no single account may cost more than it pays:
 // past this, a month's scans are refused as abuse rather than served at a loss.
 // Sized so a month at the ceiling costs at most 70% of the cheapest plan's net
-// proceeds (the annual one, ~1.48 EUR/month) at the current ~0.01 EUR scan cost,
-// while staying far above real use: stocking a whole cellar is ~30 scans. To
-// recalibrate when the scan cost changes, see docs/freemium-economics.md.
-export const PREMIUM_MONTHLY_SCANS: CountType = Count(100)
+// proceeds (the annual one, ~1.48 EUR/month) at the measured ~0.0015 EUR scan
+// cost (November 2026: 116 scans, ~0.17 EUR), so ~0.75 EUR at the ceiling. 100
+// proved too low: one real account stocked 58 bottles in three days, ~2 scans a
+// bottle once retakes count, and met it. To recalibrate when the scan cost
+// changes (grounding billed, a new model), see docs/freemium-economics.md.
+export const PREMIUM_MONTHLY_SCANS: CountType = Count(500)
 
 // What a new account is handed when it finishes onboarding, once and for good.
 // Stocking a whole cellar is ~30 scans, so five a month turns the first session
