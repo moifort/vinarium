@@ -1,11 +1,10 @@
 import { getAuth } from 'firebase-admin/auth'
-import type { H3Event } from 'h3'
 import { UserId } from '~/domain/shared/primitives'
 // Side-effect import: ensures firebase-admin is initialized before verifyIdToken.
 import '~/system/firebase'
 import { config } from '~/system/config'
 
-export default defineEventHandler(async (event: H3Event) => {
+export default defineEventHandler(async (event) => {
   const path = event.path ?? ''
 
   // Admin endpoints (separate token, never a Firebase user)
