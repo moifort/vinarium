@@ -1,3 +1,4 @@
+import type { H3Event } from 'h3'
 import { writeLocalObject } from '~/domain/attachment/infrastructure/object-store'
 import { ObjectPath } from '~/domain/attachment/primitives'
 
@@ -5,7 +6,7 @@ import { ObjectPath } from '~/domain/attachment/primitives'
 // cannot sign a V4 URL, and `scripts/e2e.sh` gates every release on the local
 // stack, so the bytes land on disk here instead. `import.meta.dev` is resolved at
 // build time: this handler does not exist in a deployed bundle.
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event: H3Event) => {
   if (!import.meta.dev) throw createError({ statusCode: 404, statusMessage: 'Not found' })
 
   const path = getRouterParam(event, 'path')

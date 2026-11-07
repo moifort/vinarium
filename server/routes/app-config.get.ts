@@ -1,3 +1,4 @@
+import type { H3Event } from 'h3'
 import { APP_STORE_URL, MINIMUM_SUPPORTED_IOS_BUILD } from '~/system/app-support'
 
 /**
@@ -5,7 +6,7 @@ import { APP_STORE_URL, MINIMUM_SUPPORTED_IOS_BUILD } from '~/system/app-support
  * sign-in, so this route is whitelisted in the auth middleware). Drives the
  * force-update gate: builds below `minimumSupportedIOSBuild` are blocked.
  */
-export default defineEventHandler((event) => {
+export default defineEventHandler((event: H3Event) => {
   // A cached floor would defeat the foreground re-check on already-open apps.
   setResponseHeader(event, 'cache-control', 'no-store')
   return {
