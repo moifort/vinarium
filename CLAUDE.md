@@ -46,6 +46,7 @@ Runtime : toujours `bun` / `bunx`, jamais `npm` / `npx`.
 Le [Vinarium Board](https://claude.ai/artifact/A2GU9AgwrjxJM1c8Nb6jGA) et l'app restent
 synchronisés. Le board d'abord, la zone de prototypage, les variantes et les captures sont dans
 [docs/board.md](docs/board.md) ; le traitement des commentaires est ci-dessous.
+
 1. **Un fil de commentaire traité est résolu.** Sur un fil du board, faire la modification, puis
    résoudre le fil soi-même, sans y répondre, pour qu'il quitte le canvas (quand une session
    enfant s'en charge, cela se fait à la validation de l'utilisateur : règle 3). Cette règle

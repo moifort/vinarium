@@ -8,6 +8,7 @@ board's working rules. They are the Shiori Board's, carried over as they are.
 
 "The board" / "the canvas" is the **Vinarium Board**, a Design (canvas) artifact:
 https://claude.ai/artifact/A2GU9AgwrjxJM1c8Nb6jGA. It is not the SwiftUI previews.
+
 - One `project/<Name>.dc.html` artboard per screen, in rows by feature on the page "App":
   opening (`Ouverture`, `Connexion`), onboarding (`Onboarding-*`), home (`Main`, `Accueil-*`),
   cellar (`Cave-*`, `Journal*`, `Nouvelle-cave-*`), wines (`Vins-*`), wine sheet (`Fiche-*`,
@@ -22,6 +23,7 @@ https://claude.ai/artifact/A2GU9AgwrjxJM1c8Nb6jGA. It is not the SwiftUI preview
 ## Board first, then code
 
 SwiftUI and the board are always in sync.
+
 - A requested UI change is drawn on the board first, then sent as a capture.
 - **Outside the prototyping zone** (`Zone-Prototypage.dc.html`, page "App"): the change goes all
   the way to iOS in the same task — board edit, capture, SwiftUI, simulator screenshot, commit.
@@ -37,6 +39,7 @@ SwiftUI and the board are always in sync.
 
 Once the user validates a prototype and it is built on iOS, it leaves the prototyping zone in the
 same task:
+
 - the retained design becomes a production artboard on the page "App", next to its sibling
   screens (as a full screen, not cropped), drawn from the SwiftUI source and a real capture;
 - every other variant of that prototype moves to the Variants page, marked as in the
@@ -66,6 +69,7 @@ closed themself, only the parent listens to the board.
 
 Artboards reference images by a relative path (`./img/…`) or as `/_blob/<id>`, served only by the
 board's frame origin.
+
 1. In the built-in browser open the board, read `document.querySelector('iframe').src`.
 2. In a second tab open that `_t` URL, then `https://<id>.frame.claudeusercontent.com/x`.
 3. There, `fetch('/_f/<version>/project/<Name>.dc.html')`, drop the `support.js` line, put each
