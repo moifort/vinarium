@@ -7,11 +7,18 @@ query Dashboard {
     bottleCount
     capacity
     totalValue
+    readyToDrinkCount
+    favoriteCount
     readyToDrink {
       id
       name
       beverageType
+      subtype
+      producer
       color
+      vintage
+      notes
+      isFavorite
       cellarId
       position
       urgent
@@ -21,6 +28,8 @@ query Dashboard {
       id
       name
       beverageType
+      subtype
+      producer
       color
       vintage
       estimatedPrice
@@ -46,7 +55,9 @@ query Dashboard {
       beverageName
       beverageProducer
       wineBeverageType
+      wineSubtype
       wineColor
+      wineVintage
       position
       actor {
         displayName
@@ -60,7 +71,9 @@ query Dashboard {
       beverageName
       beverageProducer
       wineBeverageType
+      wineSubtype
       wineColor
+      wineVintage
       position
       actor {
         displayName

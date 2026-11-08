@@ -60,7 +60,7 @@ struct ContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Tab(value: .home) {
-                DashboardView(selectedTab: $selectedTab)
+                DashboardView(selectedTab: $selectedTab, showFavorites: $showFavorites)
             } label: {
                 tabLabel(for: .home)
             }

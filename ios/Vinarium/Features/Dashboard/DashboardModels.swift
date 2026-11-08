@@ -4,6 +4,9 @@ struct DashboardData: Codable, Sendable {
     let bottleCount: Int
     let capacity: Int
     let totalValue: Double
+    /// Every ready bottle and every favorite, the two lists below being capped.
+    let readyToDrinkCount: Int
+    let favoriteCount: Int
     let readyToDrink: [DashboardWine]
     let favorites: [DashboardFavorite]
     let lastBottle: DashboardEntry?
@@ -15,6 +18,8 @@ struct DashboardFavorite: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let beverageType: BeverageType
+    let subtype: BeverageSubtype?
+    let producer: String?
     let color: WineColor?
     let vintage: Int?
     let estimatedPrice: Double?
@@ -26,7 +31,12 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     let id: String
     let name: String
     let beverageType: BeverageType
+    let subtype: BeverageSubtype?
+    let producer: String?
     let color: WineColor?
+    let vintage: Int?
+    let notes: String?
+    let isFavorite: Bool
     let position: String
     /// The cellar the bottle stands in, once the household has several.
     var cellarName: String? = nil
@@ -55,7 +65,9 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let wineId: String
     let wineName: String
     let wineBeverageType: BeverageType
+    let wineSubtype: BeverageSubtype?
     let wineColor: WineColor?
+    let wineVintage: Int?
     let position: String
     let rating: Int?
     /// The household member behind the move, nil when it was you.

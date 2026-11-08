@@ -9,7 +9,7 @@ final class SearchPresenter {
     func present() { isPresented = true }
 }
 
-private struct SearchToolbarButton: View {
+struct SearchToolbarButton: View {
     // Optional: absent from page previews, present in the app through ContentView.
     @Environment(SearchPresenter.self) private var presenter: SearchPresenter?
 

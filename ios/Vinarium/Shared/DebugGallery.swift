@@ -35,6 +35,8 @@ struct DebugGallery: View {
             NavigationStack { producerCellar(.journal) }
         case "dashboard":
             NavigationStack { producerDashboard }
+        case "dashboardEmpty":
+            NavigationStack { DashboardPage(content: .empty) }
         case "settings":
             SettingsHomeView(cellarCount: 2, sharedWithCount: 1)
                 .environment(AuthSession())
@@ -199,22 +201,9 @@ extension DebugGallery {
         )
     }
 
-    /// The home tab's journal, the producer above the name of the last entry.
+    /// The home tab's recent moves, the producer written on each bottle's label.
     private var producerDashboard: some View {
-        DashboardPage(
-            content: .init(
-                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
-                readyToDrink: [],
-                favorites: [],
-                events: [
-                    .init(isEntry: true, wineName: "Les Pucelles", position: "A2", wineId: "2", date: Date(), producer: "Domaine Leflaive"),
-                    .init(isEntry: false, wineName: "Château Margaux", position: "A1", wineId: "1", date: Date(), memberName: "Marie"),
-                ]
-            ),
-            onStatsTapped: {},
-            onWineTapped: { _ in },
-            onSettingsTapped: {}
-        )
+        DashboardPage(content: .sample)
     }
 
     /// A relaunch on last session's wines, before the server has answered.
@@ -254,23 +243,7 @@ extension DebugGallery {
 
     /// The home tab reopened on last session's figures.
     private var cachedDashboard: some View {
-        DashboardPage(
-            content: .init(
-                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
-                readyToDrink: [
-                    .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
-                ],
-                favorites: [
-                    .init(id: "3", color: .red, name: "Romanée-Conti 2015", vintage: 2015, tastingDate: Date(), estimatedPrice: 3500, rating: 5),
-                ],
-                events: [
-                    .init(isEntry: true, wineName: "Pétrus 2012", position: "C2", wineId: "5", date: Date()),
-                ]
-            ),
-            onStatsTapped: {},
-            onWineTapped: { _ in },
-            onSettingsTapped: {}
-        )
+        DashboardPage(content: .sample)
     }
 
     /// The cellar tab reopened on last session's bottles.
@@ -302,20 +275,7 @@ private struct AdminDashboard: View {
     var metrics: AdminMetrics = .preview
 
     var body: some View {
-        DashboardPage(
-            content: .init(
-                stats: .init(bottleCount: 42, capacity: 48, totalValue: 1850),
-                readyToDrink: [
-                    .init(id: "1", color: .red, name: "Château Margaux 2018", urgent: true, drinkUntil: 2026, position: "A3"),
-                ],
-                favorites: [],
-                events: []
-            ),
-            onStatsTapped: {},
-            onWineTapped: { _ in },
-            onSettingsTapped: {},
-            onAdminTapped: { adminShown = true }
-        )
+        DashboardPage(content: .sample, onAdminTapped: { adminShown = true })
         .sheet(isPresented: $adminShown) {
             NavigationStack {
                 AdminPage(metrics: metrics)

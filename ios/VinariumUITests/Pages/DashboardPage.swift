@@ -38,12 +38,12 @@ struct DashboardPage {
     }
 
     func verifyJournalShowsEntry() throws {
-        // The direction badge is an image carrying it as its accessibility label,
-        // so match that exactly. The French version searched staticTexts for
-        // "entrée" and was really matching the "Dernière entrée le ..." caption,
-        // never the badge; in English, a CONTAINS on "in" would match "In cellar"
-        // and pass whatever the journal shows.
-        try app.images["In"].firstMatch.waitOrFail(timeout: 15, "no entry badge in the journal")
+        // A move card opens on its direction and slot ("In · A1"): match the
+        // direction at the head of that line, never a CONTAINS on "In", which would
+        // match "In cellar" whatever the cards show.
+        let predicate = NSPredicate(format: "label BEGINSWITH %@", "In · ")
+        try app.descendants(matching: .any).matching(predicate).firstMatch
+            .waitOrFail(timeout: 15, "no entry card in the recent moves")
     }
 
     func verifyFavoritesContains(_ wineName: String) throws {

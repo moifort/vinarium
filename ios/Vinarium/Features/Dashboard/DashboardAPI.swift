@@ -14,12 +14,19 @@ enum DashboardAPI {
             bottleCount: d.bottleCount,
             capacity: d.capacity,
             totalValue: d.totalValue,
+            readyToDrinkCount: d.readyToDrinkCount,
+            favoriteCount: d.favoriteCount,
             readyToDrink: d.readyToDrink.map {
                 DashboardWine(
                     id: $0.id,
                     name: $0.name,
                     beverageType: BeverageType(graphql: $0.beverageType),
+                    subtype: $0.subtype.flatMap { BeverageSubtype(graphql: $0) },
+                    producer: $0.producer,
                     color: $0.color.map { WineColor(graphql: $0) },
+                    vintage: $0.vintage,
+                    notes: $0.notes,
+                    isFavorite: $0.isFavorite,
                     position: $0.position,
                     cellarName: CellarPositionLabel.cellarName(cellarId: $0.cellarId, cellars: cellars),
                     urgent: $0.urgent,
@@ -31,6 +38,8 @@ enum DashboardAPI {
                     id: $0.id,
                     name: $0.name,
                     beverageType: BeverageType(graphql: $0.beverageType),
+                    subtype: $0.subtype.flatMap { BeverageSubtype(graphql: $0) },
+                    producer: $0.producer,
                     color: $0.color.map { WineColor(graphql: $0) },
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
@@ -65,7 +74,9 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         wineId: e.wineIdString,
         wineName: e.wineNameString,
         wineBeverageType: e.wineBeverageTypeValue,
+        wineSubtype: e.wineSubtypeValue,
         wineColor: e.wineColorValue,
+        wineVintage: e.wineVintageValue,
         position: e.positionString,
         rating: nil,
         memberName: e.memberNameValue,
@@ -79,7 +90,9 @@ protocol DashboardJournalEvent {
     var wineIdString: String { get }
     var wineNameString: String { get }
     var wineBeverageTypeValue: BeverageType { get }
+    var wineSubtypeValue: BeverageSubtype? { get }
     var wineColorValue: WineColor? { get }
+    var wineVintageValue: Int? { get }
     var positionString: String { get }
     /// The household member behind the move, nil when it was you.
     var memberNameValue: String? { get }
@@ -94,7 +107,9 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var wineIdString: String { beverageId }
     var wineNameString: String { beverageName }
     var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
+    var wineSubtypeValue: BeverageSubtype? { wineSubtype.flatMap { BeverageSubtype(graphql: $0) } }
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
+    var wineVintageValue: Int? { wineVintage }
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }
@@ -108,7 +123,9 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var wineIdString: String { beverageId }
     var wineNameString: String { beverageName }
     var wineBeverageTypeValue: BeverageType { BeverageType(graphql: wineBeverageType) }
+    var wineSubtypeValue: BeverageSubtype? { wineSubtype.flatMap { BeverageSubtype(graphql: $0) } }
     var wineColorValue: WineColor? { wineColor.map { WineColor(graphql: $0) } }
+    var wineVintageValue: Int? { wineVintage }
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }

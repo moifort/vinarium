@@ -2,9 +2,12 @@ import SwiftUI
 
 struct DashboardView: View {
     @Binding var selectedTab: TabSelection
+    /// Opens the wine list on the favorites.
+    var showFavorites: Binding<Bool> = .constant(false)
 
     @State private var viewModel = DashboardViewModel()
-    @State private var selectedWineId: String?
+    /// The wine sheet on screen, and what it opens straight onto.
+    @State private var openedWine: OpenedWine?
     @State private var showSettings = false
     @State private var showAdmin = false
     @Environment(\.isAdmin) private var isAdmin
@@ -15,8 +18,19 @@ struct DashboardView: View {
                 if let data = viewModel.data {
                     DashboardPage(
                         content: Self.map(data),
-                        onStatsTapped: { selectedTab = .cellar },
-                        onWineTapped: { selectedWineId = $0 },
+                        onFigureTapped: { figure in
+                            switch figure {
+                            case .bottles, .ready, .value: selectedTab = .cellar
+                            case .favorites: openFavorites()
+                            }
+                        },
+                        onWineTapped: { openedWine = OpenedWine(id: $0) },
+                        onRemoveTapped: { openedWine = OpenedWine(id: $0, action: .remove) },
+                        onFavoriteTapped: { openedWine = OpenedWine(id: $0, action: .favorite) },
+                        onMoveTapped: { openedWine = OpenedWine(id: $0, action: .move) },
+                        onRecentTapped: { selectedTab = .cellar },
+                        onReadyTapped: { selectedTab = .cellar },
+                        onFavoritesTapped: { openFavorites() },
                         onSettingsTapped: { showSettings = true },
                         onAdminTapped: isAdmin ? { showAdmin = true } : nil
                     )
@@ -41,12 +55,10 @@ struct DashboardView: View {
                     Task { await viewModel.load() }
                 }
             }
-            .sheet(item: Binding(
-                get: { selectedWineId.map { WineIdWrapper(id: $0) } },
-                set: { selectedWineId = $0?.id }
-            )) { wrapper in
+            .sheet(item: $openedWine) { opened in
                 WineDetailView(
-                    wineId: wrapper.id,
+                    wineId: opened.id,
+                    initialAction: opened.action,
                     onRemoved: { Task { await viewModel.load() } },
                     onUpdated: { Task { await viewModel.load() } }
                 )
@@ -72,28 +84,91 @@ struct DashboardView: View {
         }
     }
 
+    private func openFavorites() {
+        showFavorites.wrappedValue = true
+        selectedTab = .wines
+    }
+
+    private struct OpenedWine: Identifiable {
+        let id: String
+        var action: WineDetailView.InitialAction?
+    }
+
     private static func map(_ data: DashboardData) -> DashboardPage.Content {
-        .init(
-            stats: .init(bottleCount: data.bottleCount, capacity: data.capacity, totalValue: data.totalValue),
-            readyToDrink: data.readyToDrink.map { wine in
-                .init(id: wine.id, beverageType: wine.beverageType, color: wine.color, name: wine.name, urgent: wine.urgent, drinkUntil: wine.drinkUntil, position: wine.position, cellarName: wine.cellarName)
+        // The wines due soonest open the page in large; with none due, the first
+        // ready one does. The rest stand on the shelf below.
+        let urgent = data.readyToDrink.filter(\.urgent)
+        let featured = urgent.isEmpty ? Array(data.readyToDrink.prefix(1)) : urgent
+        let featuredIds = Set(featured.map(\.id))
+        return .init(
+            figures: .init(
+                bottleCount: data.bottleCount,
+                readyCount: data.readyToDrinkCount,
+                favoriteCount: data.favoriteCount,
+                totalValue: data.totalValue
+            ),
+            featured: featured.map { wine in
+                .init(
+                    id: wine.id,
+                    beverageType: wine.beverageType,
+                    subtype: wine.subtype,
+                    color: wine.color,
+                    producer: ProducerOverline.text(for: wine.producer, name: wine.name),
+                    name: wine.name,
+                    vintage: wine.vintage,
+                    notes: wine.notes?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
+                    isFavorite: wine.isFavorite,
+                    urgent: wine.urgent,
+                    drinkUntil: wine.drinkUntil,
+                    place: wine.cellarName.map { "\($0) · \(wine.position)" } ?? wine.position
+                )
+            },
+            moves: data.history.map { event in
+                .init(
+                    id: event.id,
+                    wineId: event.wineId,
+                    isEntry: event.isEntry,
+                    beverageType: event.wineBeverageType,
+                    subtype: event.wineSubtype,
+                    color: event.wineColor,
+                    producer: ProducerOverline.text(for: event.producer, name: event.wineName),
+                    name: event.wineName,
+                    vintage: event.wineVintage,
+                    position: event.position,
+                    date: event.date,
+                    memberName: event.memberName
+                )
+            },
+            ready: data.readyToDrink.filter { !featuredIds.contains($0.id) }.map { wine in
+                .init(
+                    id: wine.id,
+                    beverageType: wine.beverageType,
+                    subtype: wine.subtype,
+                    color: wine.color,
+                    producer: ProducerOverline.text(for: wine.producer, name: wine.name),
+                    name: wine.name,
+                    vintage: wine.vintage,
+                    caption: wine.position
+                )
             },
             favorites: data.favorites.map { favorite in
-                .init(id: favorite.id, beverageType: favorite.beverageType, color: favorite.color, name: favorite.name, vintage: favorite.vintage, tastingDate: favorite.tastingDate, estimatedPrice: favorite.estimatedPrice, rating: favorite.rating)
-            },
-            events: data.history.map { event in
                 .init(
-                    isEntry: event.isEntry,
-                    wineName: event.wineName,
-                    position: event.position,
-                    wineId: event.wineId,
-                    date: event.date,
-                    memberName: event.memberName,
-                    producer: ProducerOverline.text(for: event.producer, name: event.wineName)
+                    id: favorite.id,
+                    beverageType: favorite.beverageType,
+                    subtype: favorite.subtype,
+                    color: favorite.color,
+                    producer: ProducerOverline.text(for: favorite.producer, name: favorite.name),
+                    name: favorite.name,
+                    vintage: favorite.vintage,
+                    caption: favorite.estimatedPrice.map { Money.formattedFromEur($0, fractionLength: 0) }
                 )
             }
         )
     }
+}
+
+private extension String {
+    var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
 #Preview {

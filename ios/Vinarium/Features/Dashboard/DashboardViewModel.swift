@@ -16,7 +16,7 @@ final class DashboardViewModel {
 
     /// The last dashboard on disk. Bump the version whenever `DashboardData` changes
     /// shape.
-    private let cache = SnapshotCache<DashboardData>("dashboard", version: 1)
+    private let cache = SnapshotCache<DashboardData>("dashboard", version: 2)
 
     /// A cellar worth opening the app for. Below this the app is a form that was
     /// filled in once; above it, it is being used.

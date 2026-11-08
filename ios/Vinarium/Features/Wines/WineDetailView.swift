@@ -4,8 +4,13 @@ import UniformTypeIdentifiers
 
 struct WineDetailView: View {
     let wineId: String
+    /// What the sheet opens straight onto once the wine is loaded: the home screen's
+    /// buttons take a bottle out, mark it a favorite or move it from here.
+    var initialAction: InitialAction?
     var onRemoved: (() -> Void)?
     var onUpdated: (() -> Void)?
+
+    enum InitialAction { case remove, favorite, move }
 
     @Environment(\.dismiss) private var dismiss
     @State private var detail: UserWineDetail?
@@ -35,6 +40,7 @@ struct WineDetailView: View {
     @State private var isUploadingAttachment = false
     @State private var previewedFile: PreviewedFile?
     @State private var attachmentError = ErrorPresenter()
+    @State private var initialActionDone = false
 
     var body: some View {
         NavigationStack {
@@ -127,6 +133,7 @@ struct WineDetailView: View {
             }
             .task {
                 await loadData()
+                runInitialAction()
             }
             .sheet(isPresented: $showConsumption) {
                 if let detail {
@@ -416,6 +423,32 @@ struct WineDetailView: View {
     }
 
     // MARK: - Helpers
+
+    /// Opens what the caller asked for, once, over the loaded wine. A bottle that left
+    /// the cellar meanwhile simply shows its sheet.
+    private func runInitialAction() {
+        guard let initialAction, !initialActionDone, let detail else { return }
+        initialActionDone = true
+        let inCellar = detail.cellar != nil && detail.cellar?.dateOut == nil
+        switch initialAction {
+        case .remove:
+            if inCellar { showRemovalChoice = true }
+        case .move:
+            if inCellar { showMove = true }
+        case .favorite:
+            if detail.consumption?.favorite == true {
+                Task {
+                    await actionError.run {
+                        self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(favorite: false))
+                    } onSuccess: {
+                        onUpdated?()
+                    }
+                }
+            } else {
+                showFavorite = true
+            }
+        }
+    }
 
     private func loadData() async {
         // A pull-to-refresh: keep the content on screen and show the scrim rather
