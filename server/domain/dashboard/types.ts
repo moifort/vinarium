@@ -1,4 +1,12 @@
-import type { BeverageId, BeverageName, BeverageType, WineColor } from '~/domain/beverage/types'
+import type {
+  BeverageId,
+  BeverageName,
+  BeverageSubtype,
+  BeverageType,
+  Notes,
+  Producer,
+  WineColor,
+} from '~/domain/beverage/types'
 import type { CellarId } from '~/domain/cellar/types'
 import type { JournalEventView } from '~/domain/journal/types'
 import type { Eur, Year } from '~/domain/shared/types'
@@ -8,6 +16,10 @@ export type DashboardView = {
   capacity: number
   totalValue: number
   readyToDrink: ReadyToDrinkWine[]
+  // How many bottles are ready and how many wines are favorites in all, the
+  // shortlists above being capped.
+  readyToDrinkCount: number
+  favoriteCount: number
   favorites: FavoriteWine[]
   lastBottle?: LastBottle
   lastExit?: JournalEventView
@@ -18,6 +30,8 @@ export type FavoriteWine = {
   id: BeverageId
   name: BeverageName
   beverageType: BeverageType
+  subtype?: BeverageSubtype
+  producer?: Producer
   color?: WineColor
   vintage?: Year
   estimatedPrice?: Eur
@@ -29,7 +43,13 @@ export type ReadyToDrinkWine = {
   id: BeverageId
   name: BeverageName
   beverageType: BeverageType
+  subtype?: BeverageSubtype
+  producer?: Producer
   color?: WineColor
+  vintage?: Year
+  notes?: Notes
+  // Whether the viewer flagged this wine as a favorite.
+  isFavorite: boolean
   cellarId: CellarId
   position: string
   urgent: boolean

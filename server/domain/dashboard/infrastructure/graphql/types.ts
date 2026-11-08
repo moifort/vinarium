@@ -1,4 +1,8 @@
-import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructure/graphql/enums'
+import {
+  BeverageSubtypeEnum,
+  BeverageTypeEnum,
+  WineColorEnum,
+} from '~/domain/beverage/infrastructure/graphql/enums'
 import { JournalEventType } from '~/domain/journal/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from '../../types'
@@ -14,6 +18,16 @@ const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').impleme
     beverageType: t.expose('beverageType', {
       type: BeverageTypeEnum,
       description: 'Beverage family (wine, spirit, beer, ...)',
+    }),
+    subtype: t.expose('subtype', {
+      type: BeverageSubtypeEnum,
+      nullable: true,
+      description: 'Structured subtype (sparkling, ...); null when unset',
+    }),
+    producer: t.expose('producer', {
+      type: 'Producer',
+      nullable: true,
+      description: 'Producer of the beverage (estate, distillery, brewery); null when unknown',
     }),
     color: t.expose('color', {
       type: WineColorEnum,
@@ -55,10 +69,33 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
       type: BeverageTypeEnum,
       description: 'Beverage family (wine, spirit, beer, ...)',
     }),
+    subtype: t.expose('subtype', {
+      type: BeverageSubtypeEnum,
+      nullable: true,
+      description: 'Structured subtype (sparkling, ...); null when unset',
+    }),
+    producer: t.expose('producer', {
+      type: 'Producer',
+      nullable: true,
+      description: 'Producer of the beverage (estate, distillery, brewery); null when unknown',
+    }),
     color: t.expose('color', {
       type: WineColorEnum,
       nullable: true,
       description: 'Wine color; null for non-wine beverages',
+    }),
+    vintage: t.expose('vintage', {
+      type: 'Year',
+      nullable: true,
+      description: 'Vintage year; null when unknown or not applicable',
+    }),
+    notes: t.expose('notes', {
+      type: 'Notes',
+      nullable: true,
+      description: 'Free-text notes about the beverage; null when none',
+    }),
+    isFavorite: t.exposeBoolean('isFavorite', {
+      description: 'True when the viewer flagged this wine as a favorite',
     }),
     cellarId: t.expose('cellarId', {
       type: 'CellarId',
@@ -161,6 +198,13 @@ export const DashboardType = builder.objectRef<DashboardView>('Dashboard').imple
       type: [ReadyToDrinkWineType],
       description: 'Cellared bottles that have entered their drinking window',
       resolve: (d) => d.readyToDrink,
+    }),
+    readyToDrinkCount: t.exposeInt('readyToDrinkCount', {
+      description:
+        'How many cellared bottles are in their drinking window, `readyToDrink` being capped',
+    }),
+    favoriteCount: t.exposeInt('favoriteCount', {
+      description: 'How many wines the user flagged as favorites, `favorites` being capped',
     }),
     favorites: t.field({
       type: [FavoriteWineType],

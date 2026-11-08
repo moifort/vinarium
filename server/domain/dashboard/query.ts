@@ -5,7 +5,7 @@ import {
   wineDetails,
 } from '~/domain/beverage/business-rules'
 import { BeverageQuery } from '~/domain/beverage/query'
-import type { Beverage } from '~/domain/beverage/types'
+import type { Beverage, BeverageId } from '~/domain/beverage/types'
 import { CellarQuery } from '~/domain/cellar/query'
 import type { PlacedBottleWithWine } from '~/domain/cellar/types'
 import { HouseholdQuery } from '~/domain/household/query'
@@ -38,13 +38,16 @@ export namespace DashboardQuery {
 
     const totalValue = allBottles.reduce((sum, b) => sum + (b.wine.purchase?.price ?? 0), 0)
 
-    const readyToDrink = sortBy(
+    // The viewer's favorites, from the notes already read: no extra lookup.
+    const favoriteIds = new Set(favoriteTastings.map(({ beverageId }) => beverageId))
+    const allReady = sortBy(
       allBottles
         .filter((b) => isReadyToDrink(wineDetails(b.wine)?.drinkWindow ?? {}, currentYear))
-        .map((b) => toReadyToDrinkWine(b, currentYear)),
+        .map((b) => toReadyToDrinkWine(b, currentYear, favoriteIds)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Number.POSITIVE_INFINITY,
-    ).slice(0, DASHBOARD_SECTION_LIMIT)
+    )
+    const readyToDrink = allReady.slice(0, DASHBOARD_SECTION_LIMIT)
 
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
@@ -57,6 +60,8 @@ export namespace DashboardQuery {
       capacity: cellars.reduce((sum, { rows, cols }) => sum + rows * cols, 0),
       totalValue,
       readyToDrink,
+      readyToDrinkCount: allReady.length,
+      favoriteCount: favoriteTastings.length,
       favorites,
       lastBottle,
       lastExit,
@@ -67,13 +72,19 @@ export namespace DashboardQuery {
   const toReadyToDrinkWine = (
     bottle: PlacedBottleWithWine,
     currentYear: number,
+    favoriteIds: Set<BeverageId>,
   ): ReadyToDrinkWine => {
     const details = wineDetails(bottle.wine)
     return {
       id: bottle.wine.id,
       name: bottle.wine.name,
       beverageType: bottle.wine.beverageType,
+      subtype: bottle.wine.subtype,
+      producer: bottle.wine.producer,
       color: details?.color,
+      vintage: details?.vintage,
+      notes: bottle.wine.notes,
+      isFavorite: favoriteIds.has(bottle.wine.id),
       cellarId: bottle.cellarId,
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       urgent: urgentToDrink(details?.drinkWindow ?? {}, currentYear),
@@ -130,6 +141,8 @@ export namespace DashboardQuery {
           id: wine.id,
           name: wine.name,
           beverageType: wine.beverageType,
+          subtype: wine.subtype,
+          producer: wine.producer,
           color: details?.color,
           vintage: details?.vintage,
           estimatedPrice: wine.purchase?.price,

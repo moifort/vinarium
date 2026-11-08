@@ -1,4 +1,8 @@
-import { BeverageTypeEnum, WineColorEnum } from '~/domain/beverage/infrastructure/graphql/enums'
+import {
+  BeverageSubtypeEnum,
+  BeverageTypeEnum,
+  WineColorEnum,
+} from '~/domain/beverage/infrastructure/graphql/enums'
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import { JournalQuery } from '../../query'
@@ -63,10 +67,20 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
       type: BeverageTypeEnum,
       description: 'Kind of beverage (wine, spirit, ...) for display.',
     }),
+    wineSubtype: t.expose('wineSubtype', {
+      type: BeverageSubtypeEnum,
+      nullable: true,
+      description: 'Structured subtype of the beverage (sparkling, ...); null when unset.',
+    }),
     wineColor: t.expose('wineColor', {
       type: WineColorEnum,
       nullable: true,
       description: 'Wine color for display; null for non-wine beverages.',
+    }),
+    wineVintage: t.expose('wineVintage', {
+      type: 'Year',
+      nullable: true,
+      description: 'Vintage year of the wine; null when unknown or not a wine.',
     }),
     position: t.exposeString('position', {
       description: 'Human-facing grid slot the bottle occupied (e.g. "A1").',

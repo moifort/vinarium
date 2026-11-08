@@ -24,8 +24,14 @@ const seedDashboardData = () => {
     userId,
     name: 'Château Cave',
     beverageType: 'wine',
+    producer: 'Domaine Cave',
+    notes: 'À carafer une heure.',
     purchase: { price: 30 },
-    wine: { color: 'red', drinkWindow: { from: currentYear - 1, until: currentYear + 5 } },
+    wine: {
+      color: 'red',
+      vintage: 2018,
+      drinkWindow: { from: currentYear - 1, until: currentYear + 5 },
+    },
     createdAt: new Date('2026-01-10'),
   })
   fake.seed('beverages', 'w2', {
@@ -168,6 +174,56 @@ describe('DashboardQuery.view', () => {
     expect(view.lastBottle).toMatchObject({ wine: { id: 'w1' }, position: 'A1' })
     expect(view.lastExit).toMatchObject({ beverageId: 'w2', type: 'out' })
     expect(view.history).toHaveLength(2)
+  })
+
+  test('the ready wine and the movements carry what the home screen draws', async () => {
+    seedDashboardData()
+    fake.seed('tasting', `${userId}_w1`, { userId, beverageId: 'w1', favorite: true })
+
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.readyToDrink).toMatchObject([
+      {
+        id: 'w1',
+        producer: 'Domaine Cave',
+        vintage: 2018,
+        notes: 'À carafer une heure.',
+        isFavorite: true,
+      },
+    ])
+    expect(view.history.find(({ beverageId }) => beverageId === 'w2')).toMatchObject({
+      wineVintage: 2019,
+    })
+  })
+
+  test('the counts span every ready bottle and favorite, beyond the capped lists', async () => {
+    seedDashboardData()
+    for (let i = 0; i < 7; i++) {
+      fake.seed('beverages', `r${i}`, {
+        id: `r${i}`,
+        userId,
+        name: `Prêt ${i}`,
+        beverageType: 'wine',
+        wine: { color: 'white', drinkWindow: { from: currentYear - 1 } },
+        createdAt: new Date('2026-01-01'),
+      })
+      fake.seed('cellar', `${userId}_r${i}`, {
+        userId,
+        beverageId: `r${i}`,
+        row: 2,
+        col: i,
+        createdAt: new Date('2026-01-01'),
+        updatedAt: new Date('2026-01-01'),
+      })
+      fake.seed('tasting', `${userId}_r${i}`, { userId, beverageId: `r${i}`, favorite: true })
+    }
+
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.readyToDrink).toHaveLength(5)
+    expect(view.readyToDrinkCount).toBe(8)
+    expect(view.favorites).toHaveLength(5)
+    expect(view.favoriteCount).toBe(8)
   })
 
   test('the total value counts the bottles in the cellar, not the whole library', async () => {

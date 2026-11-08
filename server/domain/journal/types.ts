@@ -2,12 +2,13 @@ import type { Brand } from 'ts-brand'
 import type {
   BeverageId,
   BeverageName,
+  BeverageSubtype,
   BeverageType,
   Producer,
   WineColor,
 } from '~/domain/beverage/types'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
-import type { PersonName, UserId } from '~/domain/shared/types'
+import type { PersonName, UserId, Year } from '~/domain/shared/types'
 
 // The storage id of a journal entry, handed to the client as a page cursor.
 export type JournalEntryId = Brand<string, 'JournalEntryId'>
@@ -47,7 +48,9 @@ export type JournalEventView = {
   beverageName: BeverageName
   beverageProducer?: Producer
   wineBeverageType: BeverageType
+  wineSubtype?: BeverageSubtype
   wineColor?: WineColor
+  wineVintage?: Year
   position: string
   actor: JournalEventActor
 }

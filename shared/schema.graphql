@@ -1024,6 +1024,9 @@ type Dashboard {
   """Total cellar capacity (number of grid spots)"""
   capacity: Int!
 
+  """How many wines the user flagged as favorites, `favorites` being capped"""
+  favoriteCount: Int!
+
   """Wines the user flagged as favorites"""
   favorites: [FavoriteWine!]!
 
@@ -1040,6 +1043,11 @@ type Dashboard {
 
   """Cellared bottles that have entered their drinking window"""
   readyToDrink: [ReadyToDrinkWine!]!
+
+  """
+  How many cellared bottles are in their drinking window, `readyToDrink` being capped
+  """
+  readyToDrinkCount: Int!
 
   """Sum of the estimated values of all cellared bottles, in euros"""
   totalValue: Float!
@@ -1125,8 +1133,16 @@ type FavoriteWine {
   """Display name of the beverage"""
   name: BeverageName!
 
+  """
+  Producer of the beverage (estate, distillery, brewery); null when unknown
+  """
+  producer: Producer
+
   """Rating from the latest tasting note; null when never rated"""
   rating: Float
+
+  """Structured subtype (sparkling, ...); null when unset"""
+  subtype: BeverageSubtype
 
   """Date of the most recent tasting note; null when never tasted"""
   tastingDate: DateTime
@@ -1373,6 +1389,12 @@ type JournalEvent {
 
   """Wine color for display; null for non-wine beverages."""
   wineColor: WineColor
+
+  """Structured subtype of the beverage (sparkling, ...); null when unset."""
+  wineSubtype: BeverageSubtype
+
+  """Vintage year of the wine; null when unknown or not a wine."""
+  wineVintage: Year
 }
 
 """
@@ -2245,16 +2267,33 @@ type ReadyToDrinkWine {
   """Identifier of the beverage"""
   id: BeverageId!
 
+  """True when the viewer flagged this wine as a favorite"""
+  isFavorite: Boolean!
+
   """Display name of the beverage"""
   name: BeverageName!
+
+  """Free-text notes about the beverage; null when none"""
+  notes: Notes
 
   """Cellar grid slot where the bottle is stored"""
   position: String!
 
   """
+  Producer of the beverage (estate, distillery, brewery); null when unknown
+  """
+  producer: Producer
+
+  """Structured subtype (sparkling, ...); null when unset"""
+  subtype: BeverageSubtype
+
+  """
   True when the bottle is near or past its drinking window and should be drunk soon
   """
   urgent: Boolean!
+
+  """Vintage year; null when unknown or not applicable"""
+  vintage: Year
 }
 
 """

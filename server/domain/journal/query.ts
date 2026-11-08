@@ -108,7 +108,9 @@ export namespace JournalQuery {
     beverageName: wine.name,
     beverageProducer: wine.producer,
     wineBeverageType: wine.beverageType,
+    wineSubtype: wine.subtype,
     wineColor: wineDetails(wine)?.color,
+    wineVintage: wineDetails(wine)?.vintage,
     position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     actor: actorOf(entry, viewerId, scope),
   })
