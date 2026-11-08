@@ -32,6 +32,7 @@ SwiftUI and the board are always in sync.
   the same task.
 - **One element, every screen**: changing a badge, label, button or component on one artboard
   means changing it on every artboard that shows it.
+- A rail holding a single card draws it full width (353 px on a 393 px phone), as iOS does.
 - A prod component is drawn from its SwiftUI source and a real capture, never copied from an
   older artboard, which may lag.
 
@@ -61,9 +62,10 @@ same task:
 ## Comment sessions
 
 The comment rules of CLAUDE.md: one child session per comment, started without asking (a card
-when the app refuses the start from an automated turn), the child resolves its thread and
-archives itself on the user's validation, the parent resolves the thread of a child the user
-closed themself, only the parent listens to the board.
+when the app refuses the start from an automated turn), the child resolves each thread it
+handles as soon as the change is made and archives itself on the user's validation, the parent
+resolves the thread of a child the user closed themself, and a new comment goes to the child
+working on its theme, or to the parent when no child is.
 
 ## Capturing artboards
 
