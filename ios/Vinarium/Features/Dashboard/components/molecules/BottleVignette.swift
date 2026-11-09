@@ -1,10 +1,10 @@
 import SwiftUI
 
 /// A portrait tile on a home shelf: the bottle drawn close enough to read its
-/// label, and on its right, over a blurred veil, a column that never changes
-/// shape: the slot, the drinking limit, the stock and the price, in that order,
-/// a dash for what is unknown. The label names the wine, so nothing is written
-/// under the tile.
+/// label, and on its right, over a blurred veil, a compact column centred on
+/// the height: the slot, the drinking limit, the stock and the price, in that
+/// order, each line left out when there is nothing to show. The label names
+/// the wine, so nothing is written under the tile.
 struct BottleVignette: View {
     let style: BottleArtwork.Style
     let beverageType: BeverageType
@@ -28,14 +28,14 @@ struct BottleVignette: View {
         var price: Double?
     }
 
-    static let size = CGSize(width: 198, height: 248)
+    static let size = CGSize(width: 160, height: 232)
     /// The room on the left the bottle stands in, the column taking the rest.
-    private static let artWidth: CGFloat = 110
+    private static let artWidth: CGFloat = 88
     /// Every bottle is drawn this wide, whatever its shape, so the column always
     /// sits beside the glass and never over it.
-    private static let bottleWidth: CGFloat = 92
+    private static let bottleWidth: CGFloat = 80
     private static let columnWidth: CGFloat = size.width - artWidth
-    private static let veilWidth: CGFloat = 96
+    private static let veilWidth: CGFloat = 76
     private static let cornerRadius: CGFloat = 14
 
     var body: some View {
@@ -48,7 +48,7 @@ struct BottleVignette: View {
                 .overlay(Color.black.opacity(0.22))
                 .mask(alignment: .trailing) {
                     LinearGradient(
-                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.08)],
+                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.05)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -103,38 +103,50 @@ struct BottleVignette: View {
             }
     }
 
+    /// The lines worth showing: a wine not stored has no slot, an empty stock
+    /// says nothing either.
+    private var rows: [(value: String, label: LocalizedStringKey)] {
+        var rows: [(value: String, label: LocalizedStringKey)] = []
+        if let place = facts.place { rows.append((place, "cave")) }
+        if let drinkUntil = facts.drinkUntil { rows.append((String(drinkUntil), "garde")) }
+        if let stock = facts.stock, stock > 0 { rows.append((stock.formatted(), "stock")) }
+        if let price = facts.price { rows.append((Money.formattedFromEur(price, fractionLength: 0), "prix")) }
+        return rows
+    }
+
     private var column: some View {
         VStack(spacing: 0) {
-            row(facts.place, label: "cave", first: true)
-            row(facts.drinkUntil.map { String($0) }, label: "garde")
-            row(facts.stock.map { $0.formatted() }, label: "stock")
-            row(facts.price.map { Money.formattedFromEur($0, fractionLength: 0) }, label: "prix")
+            ForEach(Array(rows.enumerated()), id: \.offset) { index, row in
+                self.row(row.value, label: row.label, first: index == 0)
+            }
         }
-        .padding(.vertical, 12)
-        .padding(.leading, 6)
-        .padding(.trailing, 8)
+        .padding(.horizontal, 6)
         .frame(width: Self.columnWidth)
+        .frame(maxHeight: .infinity)
         .foregroundStyle(.white)
         .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
     }
 
-    private func row(_ value: String?, label: LocalizedStringKey, first: Bool = false) -> some View {
+    private func row(_ value: String, label: LocalizedStringKey, first: Bool) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(value ?? "—")
-                .font(.system(size: 18, weight: .semibold))
+            Text(value)
+                .font(.system(size: 15, weight: .semibold))
                 .tracking(-0.2)
                 .monospacedDigit()
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
+                .frame(height: 18)
             Text(label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 9, weight: .semibold))
                 .tracking(0.7)
                 .textCase(.uppercase)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
                 .opacity(0.7)
+                .frame(height: 11)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .top) {
             if !first {
                 Rectangle().fill(.white.opacity(0.22)).frame(height: 1)
