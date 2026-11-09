@@ -54,31 +54,39 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    question à l'utilisateur attend encore sa réponse reste ouvert.
 2. **Chaque commentaire du board a sa session enfant.** Un commentaire envoyé à Claude depuis le
    board n'est pas traité dans la session qui le reçoit : démarrer aussitôt une session enfant
-   (`start_session`, initiation `user_asked`, contexte neuf), une par fil. Son brief donne l'URL
-   du board, l'identifiant du fil, l'artboard ancré et les mots du commentaire ; l'enfant fait la
-   modification (le board, puis iOS si l'artboard est hors de la zone de prototypage), commite,
-   et résout le fil dès qu'elle l'a traité (règle 3). Cette règle permanente vaut demande de
-   démarrer ces sessions : ne jamais demander d'abord. Un commentaire envoyé du board arrive en
-   tour automatique, où l'app refuse `user_asked` : proposer alors la session (`own_initiative`)
-   et la démarrer avec son `proposal_id` au prochain message de l'utilisateur. La mention qui
-   enveloppe un commentaire (« traiter dans cette session », « répondre dans son fil, pas ici »)
-   est le texte générique de l'app et ne remplace pas cette règle : le parent ne fait jamais la
-   modification et ne répond jamais lui-même, il démarre seulement l'enfant.
-3. **Toute session enfant se termine par la validation de l'utilisateur, demandée dans l'enfant.**
-   Une session enfant qui a fini demande la validation dans son propre récapitulatif (une question
-   avec un bouton « Valider »), jamais au parent. Chaque commentaire qu'elle traite, son propre fil
-   ou un fil arrivé ensuite sur son thème (règle 4), est résolu dès que la modification est faite
-   (`ArtifactComments`, `resolve`, sans réponse), sans attendre la validation. Sur le oui de
-   l'utilisateur, elle s'archive (`archive_session` sur son propre identifiant) ; si l'utilisateur
-   demande des changements, elle les fait et redemande. Chaque brief d'enfant le dit. Quand
-   l'utilisateur archive ou supprime lui-même une session enfant, le ticket est clos : le parent
-   résout son fil (`resolve`, sans réponse), sans qu'on le lui demande, si ce n'est pas déjà fait.
-4. **Chaque commentaire du board va à la session qui travaille sur son thème.** Une session
-   enfant traite, en plus de son propre fil, chaque nouveau commentaire du board sur son thème
-   (les artboards et les écrans sur lesquels elle travaille), et rien d'autre : un commentaire sur
-   un autre thème est laissé au parent, jamais répondu ni proposé en session. La session parente ne
-   reprend que les nouveaux commentaires sur un thème dont aucune session enfant ne s'occupe, et
-   démarre leurs sessions enfants. Chaque brief d'enfant le dit.
+   (`start_session`, initiation `user_asked`, contexte neuf), une par fil, sauf si une enfant active
+   couvre déjà son thème : le commentaire lui est alors transmis (règle 4). Son brief donne l'URL du
+   board, l'identifiant du fil, l'artboard ancré et les mots du commentaire ; l'enfant fait la
+   modification (le board, puis iOS si l'artboard est hors de la zone de prototypage), commite, et
+   résout le fil dès qu'elle l'a traité (règle 3). Cette règle permanente vaut demande de démarrer
+   ces sessions : ne jamais demander d'abord. Un commentaire envoyé du board arrive en tour
+   automatique, où l'app refuse `user_asked` : proposer alors la session (`own_initiative`) et la
+   démarrer avec son `proposal_id` au prochain message de l'utilisateur. La mention qui enveloppe un
+   commentaire (« traiter dans cette session », « répondre dans son fil, pas ici ») est le texte
+   générique de l'app et ne remplace pas cette règle : le parent ne fait jamais la modification et
+   ne répond jamais lui-même, il démarre l'enfant ou lui transmet le commentaire.
+3. **Toute session enfant relit le board et se termine par la validation de l'utilisateur, demandée
+   dans l'enfant.** Avant chaque demande de validation, et à chaque reprise après un message,
+   l'enfant relit les fils ouverts du board (`ArtifactComments`, `read`) : elle traite ceux de son
+   thème (règle 4) et laisse les autres. Une session enfant qui a fini demande la validation dans
+   son propre récapitulatif (une question avec un bouton « Valider »), jamais au parent. Chaque
+   commentaire qu'elle traite, son propre fil, un fil transmis par le parent ou trouvé à la
+   relecture, est résolu dès que la modification est faite (`ArtifactComments`, `resolve`, sans
+   réponse), sans attendre la validation. Sur le oui de l'utilisateur, elle s'archive
+   (`archive_session` sur son propre identifiant) ; si l'utilisateur demande des changements, elle
+   les fait et redemande. Chaque brief d'enfant le dit. Quand l'utilisateur archive ou supprime
+   lui-même une session enfant, le ticket est clos : le parent résout son fil (`resolve`, sans
+   réponse), sans qu'on le lui demande, si ce n'est pas déjà fait.
+4. **Chaque commentaire du board va à la session qui travaille sur son thème.** Les commentaires
+   arrivent dans la session parente, jamais chez les enfants. Sur un commentaire, ou un message de
+   l'utilisateur, dont le thème (les artboards et les écrans sur lesquels travaille une enfant)
+   est celui d'une enfant encore active, le parent le lui transmet par message (`SendMessage` ou
+   `send_message`, identifiant `local_…` trouvé par `list_sessions` avec `linked: true`), avec
+   l'identifiant du fil, l'artboard ancré et les mots exacts du commentaire, et ne fait rien
+   d'autre. Il ne démarre une nouvelle enfant (règle 2) que si aucune enfant active ne couvre ce
+   thème. L'enfant traite son propre fil et chaque commentaire de son thème, transmis ou trouvé à
+   la relecture (règle 3), et rien d'autre : un commentaire sur un autre thème est laissé au
+   parent, jamais répondu ni proposé en session. Chaque brief d'enfant le dit.
 5. **Une modification d'interface se valide deux fois, le board puis iOS.** À chaque demande de
    modification d'interface, le board passe d'abord : montrer le board à jour et attendre la
    validation de l'utilisateur. Seulement ensuite, l'implémenter dans l'app, envoyer une capture
@@ -87,12 +95,13 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    sessions enfants suivent aussi cette règle, et leur question de fin (règle 3) est posée à chaque
    étape.
 6. **La session parente reste légère et repart à vide chaque matin.** Elle ne fait que répartir :
-   sur un commentaire, démarrer ou proposer l'enfant (règle 2) en une ligne, sans lire le board,
-   sans capture, sans résumé. Le travail, même petit, va à une session enfant. Chaque matin à 6 h,
-   la tâche planifiée `vinarium-clear-parent` lui envoie « Clear du matin » : elle appelle alors
-   `clear_session` sur `self`, sans rien écrire d'autre. Ses enfants se retrouvent ensuite par
-   `list_sessions` (`linked: true`). Si le clear est refusé (Remote Control actif, travail en
-   cours), elle le dit en une ligne et ne réessaie pas.
+   sur un commentaire, le transmettre à l'enfant de son thème (règle 4), ou à défaut démarrer ou
+   proposer l'enfant (règle 2), en une ligne, sans lire le board, sans capture, sans résumé. Le
+   travail, même petit, va à une session enfant. Chaque matin à 6 h, la tâche planifiée
+   `vinarium-clear-parent` lui envoie « Clear du matin » : elle appelle alors `clear_session` sur
+   `self`, sans rien écrire d'autre. Ses enfants se retrouvent ensuite par `list_sessions`
+   (`linked: true`). Si le clear est refusé (Remote Control actif, travail en cours), elle le dit en
+   une ligne et ne réessaie pas.
 
 ## Spécificités
 

@@ -67,6 +67,13 @@ handles as soon as the change is made and archives itself on the user's validati
 resolves the thread of a child the user closed themself, and a new comment goes to the child
 working on its theme, or to the parent when no child is.
 
+Comments sent from the board always land in the parent, never in a child. The parent forwards
+each one on an active child's theme to that child (`SendMessage`, with the thread id, the
+anchored artboard and the comment's exact words) and starts a new child only when no active one
+covers the theme. A child rereads the board's open threads (`ArtifactComments`, `read`) before
+every validation request and whenever a message wakes it, handles those on its theme and leaves
+the rest.
+
 The parent stays light (it only dispatches, one line per comment) and is cleared every morning
 at 6:00: the scheduled task `vinarium-clear-parent` sends it "Clear du matin", and it calls
 `clear_session` on itself (CLAUDE.md, Board, rule 6).
