@@ -37,7 +37,7 @@ struct FeaturedWineCarousel: View {
     private func page(_ item: Item) -> some View {
         VStack(spacing: 18) {
             Button { onOpen(item.id) } label: {
-                HStack(alignment: .top, spacing: 18) {
+                HStack(alignment: .top, spacing: 14) {
                     cover(item)
                     VStack(alignment: .leading, spacing: 0) {
                         tag(item)
@@ -76,13 +76,14 @@ struct FeaturedWineCarousel: View {
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    /// The bottle alone, no tile behind it: it stands on the page's ambience.
+    /// The bottle alone, no tile behind it: it stands on the page's ambience,
+    /// in a lane barely wider than the bottle so the text gets the room.
     private func cover(_ item: Item) -> some View {
         BottleArtwork(
             style: item.style, producer: item.producer, name: item.name, vintage: item.vintage,
             appellation: item.appellation, classification: item.classification, height: 184
         )
-            .frame(width: 132, height: 198)
+            .frame(width: 72, height: 198)
     }
 
     private func tag(_ item: Item) -> some View {
