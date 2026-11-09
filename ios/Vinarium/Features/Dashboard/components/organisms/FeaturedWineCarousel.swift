@@ -78,7 +78,10 @@ struct FeaturedWineCarousel: View {
 
     /// The bottle alone, no tile behind it: it stands on the page's ambience.
     private func cover(_ item: Item) -> some View {
-        BottleArtwork(style: item.style, producer: item.producer, name: item.name, vintage: item.vintage, height: 184)
+        BottleArtwork(
+            style: item.style, producer: item.producer, name: item.name, vintage: item.vintage,
+            appellation: item.appellation, classification: item.classification, height: 184
+        )
             .frame(width: 132, height: 198)
     }
 
@@ -169,9 +172,12 @@ extension FeaturedWineCarousel {
         let drinkUntil: Int?
         /// Where the bottle stands: its slot, with its cellar once there are several.
         let place: String
+        var labelFamily: BottleArtwork.LabelFamily? = nil
+        var appellation: String? = nil
+        var classification: String? = nil
 
         var style: BottleArtwork.Style {
-            .of(id: id, beverageType: beverageType, subtype: subtype, color: color)
+            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
         }
 
         var subtitle: String? {

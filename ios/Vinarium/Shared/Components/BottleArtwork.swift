@@ -1,15 +1,17 @@
 import SwiftUI
 
-/// A whole bottle drawn with its label written on it: the producer in small capitals,
-/// a rule, the name and the vintage. The shape follows the family (a Bordeaux for a
-/// red, a Burgundy for a white, a Champagne for a sparkling wine, a Provence flute
-/// for a rosé), the glass and the capsule take the wine's tint. Drawn in a 100 × 300
-/// space scaled to `height`, so the label stays sharp at every size.
+/// A whole bottle drawn with its label written on it, in the house style of the
+/// wine's family (see `BottleLabel.swift`): a framed château label on a Bordeaux
+/// bottle, a domaine label on a Burgundy one, a shield on a Champagne, a veil on a
+/// Provence flute. The glass and the capsule take the wine's tint. Drawn in a
+/// 100 × 300 space scaled to `height`, so the label stays sharp at every size.
 struct BottleArtwork: View {
     let style: Style
     let producer: String?
     let name: String
     let vintage: Int?
+    var appellation: String? = nil
+    var classification: String? = nil
     let height: CGFloat
 
     var body: some View {
@@ -48,19 +50,16 @@ struct BottleArtwork: View {
             Path(CGRect(x: 0, y: shape.capsuleHeight - 3, width: 100, height: 3)),
             with: .color(.black.opacity(0.2))
         )
-        // The paper label.
-        let label = shape.label
-        inside.fill(Path(label), with: .linearGradient(
-            Gradient(stops: [
-                .init(color: Color(hex: 0xB4B0A7), location: 0),
-                .init(color: Color(hex: 0xF4EFE2), location: 0.22),
-                .init(color: Color(hex: 0xF4EFE2), location: 0.72),
-                .init(color: Color(hex: 0x9C9890), location: 1),
-            ]),
-            startPoint: CGPoint(x: label.minX, y: 0),
-            endPoint: CGPoint(x: label.maxX, y: 0)
-        ))
-        writeLabel(in: label, context: &inside)
+        // The paper label, in the family's style.
+        BottleArtwork.drawLabel(
+            style.look,
+            text: LabelText(
+                producer: producer, name: name, vintage: vintage,
+                appellation: appellation, classification: classification, kind: style.kind
+            ),
+            in: shape.label,
+            context: inside
+        )
         // Two reflections running down the glass.
         let shine = Gradient(stops: [
             .init(color: .white.opacity(0), location: 0),
@@ -69,8 +68,8 @@ struct BottleArtwork: View {
             .init(color: .white.opacity(0), location: 1),
         ])
         for (rect, opacity) in [
-            (CGRect(x: 27, y: shape.capsuleHeight + 8, width: 7, height: 288 - shape.capsuleHeight - 8), 0.9),
-            (CGRect(x: 38, y: shape.capsuleHeight + 30, width: 2.5, height: 250 - shape.capsuleHeight - 30), 0.5),
+            (CGRect(x: shape.shineX, y: shape.capsuleHeight + 8, width: 7, height: 288 - shape.capsuleHeight - 8), 0.9),
+            (CGRect(x: shape.shineX + 11, y: shape.capsuleHeight + 30, width: 2.5, height: 250 - shape.capsuleHeight - 30), 0.5),
         ] {
             var reflection = inside
             reflection.opacity = opacity
@@ -79,97 +78,6 @@ struct BottleArtwork: View {
                 with: .linearGradient(shine, startPoint: CGPoint(x: 0, y: rect.minY), endPoint: CGPoint(x: 0, y: rect.maxY))
             )
         }
-    }
-
-    /// The producer, a rule, the name on up to three lines and the vintage, each line
-    /// centred, the block centred in the label. A word too wide for the label, or a
-    /// name too long for three lines, sets the name smaller.
-    private func writeLabel(in label: CGRect, context: inout GraphicsContext) {
-        let width = label.width - 8
-        let ink = Color(hex: 0x2B2620)
-
-        var producerLine: GraphicsContext.ResolvedText?
-        if let producer {
-            let base: CGFloat = label.width < 50 ? 3.4 : 4.6
-            func resolved(_ size: CGFloat) -> GraphicsContext.ResolvedText {
-                context.resolve(
-                    Text(producer.uppercased())
-                        .font(.system(size: size, weight: .semibold))
-                        .tracking(size * 0.15)
-                        .foregroundStyle(Color(hex: 0x6B6150))
-                )
-            }
-            let natural = resolved(base).measure(in: .init(width: CGFloat.infinity, height: 20)).width
-            producerLine = resolved(natural > width ? max(base * width / natural, 2.4) : base)
-        }
-
-        let (nameLines, nameSize) = wrappedName(width: width, context: context)
-        let resolvedName = nameLines.map {
-            context.resolve(Text(verbatim: $0).font(.system(size: nameSize, weight: .bold)).foregroundStyle(ink))
-        }
-        let nameLineHeight = nameSize * 1.2
-        let vintageLine = vintage.map {
-            context.resolve(Text(verbatim: String($0)).font(.system(size: 8.5, weight: .semibold)).foregroundStyle(ink))
-        }
-
-        let producerHeight: CGFloat = producerLine == nil ? 0 : (label.width < 50 ? 4 : 5.5) + 5.5 + 0.7 + 4.5
-        let vintageHeight: CGFloat = vintageLine == nil ? 0 : 2 + 10
-        let total = producerHeight + CGFloat(nameLines.count) * nameLineHeight + vintageHeight
-        var y = label.midY - total / 2
-
-        if let producerLine {
-            context.draw(producerLine, at: CGPoint(x: label.midX, y: y), anchor: .top)
-            y += (label.width < 50 ? 4 : 5.5) + 5.5
-            let ruleWidth = min(label.width * 0.35, 23)
-            context.fill(
-                Path(CGRect(x: label.midX - ruleWidth / 2, y: y, width: ruleWidth, height: 0.7)),
-                with: .color(Color(hex: 0x8A8070))
-            )
-            y += 0.7 + 4.5
-        }
-        for line in resolvedName {
-            context.draw(line, at: CGPoint(x: label.midX, y: y), anchor: .top)
-            y += nameLineHeight
-        }
-        if let vintageLine {
-            context.draw(vintageLine, at: CGPoint(x: label.midX, y: y + 2), anchor: .top)
-        }
-    }
-
-    /// The name broken into at most three lines at the largest size that holds it,
-    /// the last line cut short when even the smallest does not.
-    private func wrappedName(width: CGFloat, context: GraphicsContext) -> ([String], CGFloat) {
-        let words = name.split(separator: " ").map(String.init)
-        func measure(_ text: String, _ size: CGFloat) -> CGFloat {
-            context.resolve(Text(verbatim: text).font(.system(size: size, weight: .bold)))
-                .measure(in: .init(width: CGFloat.infinity, height: 40)).width
-        }
-        func wrap(_ size: CGFloat) -> [String]? {
-            var lines: [String] = []
-            var current = ""
-            for word in words {
-                guard measure(word, size) <= width else { return nil }
-                let candidate = current.isEmpty ? word : current + " " + word
-                if measure(candidate, size) <= width {
-                    current = candidate
-                } else {
-                    lines.append(current)
-                    current = word
-                }
-            }
-            if !current.isEmpty { lines.append(current) }
-            return lines
-        }
-        for size in stride(from: 8.2, through: 5.6, by: -0.65) {
-            if let lines = wrap(size), lines.count <= 3 { return (lines, size) }
-        }
-        let size: CGFloat = 5.6
-        var lines = wrap(size) ?? [name]
-        if lines.count > 3 {
-            lines = Array(lines.prefix(3))
-            lines[2] += "…"
-        }
-        return (lines, size)
     }
 }
 
@@ -180,35 +88,48 @@ extension BottleArtwork {
         let shape: Shape
         let glass: Glass
         let capsule: Capsule
+        let look: LabelLook
+        /// What a drink that is not wine is, written on its label.
+        var kind: String? = nil
 
-        /// The bottle a wine is drawn in. The capsule colour is picked from the
-        /// wine's id, so a wine always wears the same one.
+        /// The bottle a wine is drawn in. The family picks the shape, the glass and
+        /// the label's layout; the wine's id picks one of the family's six looks,
+        /// so a wine always wears the same label; a vintage twenty-five years old
+        /// yellows the paper. Without a family from the API, the broad one is
+        /// guessed from the type and the colour.
         static func of(
             id: String,
             beverageType: BeverageType,
             subtype: BeverageSubtype?,
-            color: WineColor?
+            color: WineColor?,
+            family: LabelFamily? = nil,
+            vintage: Int? = nil,
+            year: Int = Calendar.current.component(.year, from: .now)
         ) -> Style {
             let pick = abs(id.unicodeScalars.reduce(0) { ($0 &* 31) &+ Int($1.value) })
-            guard beverageType == .wine else {
-                return Style(shape: .bordeaux, glass: .brown, capsule: [.black, .bronze][pick % 2])
+            let family = family ?? .guess(beverageType: beverageType, subtype: subtype, color: color)
+            var look = LabelLook.looks(of: family)[(pick / 7) % 6]
+            let aged = vintage.map { $0 <= year - 25 } ?? false
+            look.aged = aged && [.chateau, .burgundy, .south, .sweet, .italy].contains(family)
+            let kind: String? = beverageType == .wine ? nil : subtype.map { $0.label(for: beverageType) } ?? beverageType.label
+            let (shape, glass): (Shape, Glass) = switch family {
+            case .chateau: (.bordeaux, aged || pick % 4 == 0 ? .brown : .green)
+            case .burgundy: (.burgundy, color == .white ? .olive : .green)
+            case .champagne: (.champagne, .green)
+            case .provence: (.provence, .pink)
+            case .south: (.burgundy, .brown)
+            case .alsace: (.flute, .green)
+            case .sweet: (.bordeaux, .gold)
+            case .natural: (.burgundy, .olive)
+            case .italy: (.burgundy, .brown)
+            case .spirit: (.whisky, .amber)
             }
-            if subtype == .sparkling {
-                return Style(shape: .champagne, glass: .green, capsule: .champagne)
-            }
-            switch color {
-            case .rosé:
-                return Style(shape: .provence, glass: .pink, capsule: .pink)
-            case .white:
-                return Style(shape: .burgundy, glass: pick % 3 == 0 ? .green : .olive, capsule: [.gold, .cream, .white, .bronze][pick % 4])
-            case .red, nil:
-                return Style(shape: .bordeaux, glass: pick % 4 == 0 ? .brown : .green, capsule: [.black, .bordeaux][pick % 2])
-            }
+            return Style(shape: shape, glass: glass, capsule: look.capsule, look: look, kind: kind)
         }
     }
 
     enum Shape: Equatable {
-        case bordeaux, burgundy, champagne, provence
+        case bordeaux, burgundy, champagne, provence, flute, whisky
 
         var path: Path {
             switch self {
@@ -255,6 +176,26 @@ extension BottleArtwork {
                     p.addCurve(to: CGPoint(x: 43, y: 80), control1: CGPoint(x: 20, y: 120), control2: CGPoint(x: 43, y: 100))
                     p.closeSubpath()
                 }
+            case .flute:
+                Path { p in
+                    p.move(to: CGPoint(x: 44, y: 8)); p.addLine(to: CGPoint(x: 56, y: 8)); p.addLine(to: CGPoint(x: 56, y: 78))
+                    p.addCurve(to: CGPoint(x: 70, y: 175), control1: CGPoint(x: 56, y: 120), control2: CGPoint(x: 70, y: 140))
+                    p.addLine(to: CGPoint(x: 70, y: 286)); p.addQuadCurve(to: CGPoint(x: 62, y: 294), control: CGPoint(x: 70, y: 294))
+                    p.addLine(to: CGPoint(x: 38, y: 294)); p.addQuadCurve(to: CGPoint(x: 30, y: 286), control: CGPoint(x: 30, y: 294))
+                    p.addLine(to: CGPoint(x: 30, y: 175))
+                    p.addCurve(to: CGPoint(x: 44, y: 78), control1: CGPoint(x: 30, y: 140), control2: CGPoint(x: 44, y: 120))
+                    p.closeSubpath()
+                }
+            case .whisky:
+                Path { p in
+                    p.move(to: CGPoint(x: 41, y: 8)); p.addLine(to: CGPoint(x: 59, y: 8)); p.addLine(to: CGPoint(x: 59, y: 62))
+                    p.addCurve(to: CGPoint(x: 84, y: 102), control1: CGPoint(x: 59, y: 80), control2: CGPoint(x: 84, y: 82))
+                    p.addLine(to: CGPoint(x: 84, y: 288)); p.addQuadCurve(to: CGPoint(x: 78, y: 294), control: CGPoint(x: 84, y: 294))
+                    p.addLine(to: CGPoint(x: 22, y: 294)); p.addQuadCurve(to: CGPoint(x: 16, y: 288), control: CGPoint(x: 16, y: 294))
+                    p.addLine(to: CGPoint(x: 16, y: 102))
+                    p.addCurve(to: CGPoint(x: 41, y: 62), control1: CGPoint(x: 16, y: 82), control2: CGPoint(x: 41, y: 80))
+                    p.closeSubpath()
+                }
             }
         }
 
@@ -264,25 +205,32 @@ extension BottleArtwork {
             case .burgundy: 52
             case .champagne: 92
             case .provence: 56
+            case .flute: 64
+            case .whisky: 34
             }
         }
+
+        /// Where the first reflection runs down the glass.
+        var shineX: CGFloat { self == .flute ? 35 : 27 }
 
         /// Where the paper label sits, in the 100 × 300 drawing space.
         var label: CGRect {
             switch self {
-            case .bordeaux: CGRect(x: 19, y: 150, width: 62, height: 106)
-            case .burgundy: CGRect(x: 17, y: 166, width: 66, height: 98)
-            case .champagne: CGRect(x: 15, y: 170, width: 70, height: 94)
-            case .provence: CGRect(x: 27, y: 222, width: 46, height: 54)
+            case .bordeaux: CGRect(x: 19, y: 148, width: 62, height: 110)
+            case .burgundy: CGRect(x: 17, y: 166, width: 66, height: 100)
+            case .champagne: CGRect(x: 15, y: 166, width: 70, height: 100)
+            case .provence: CGRect(x: 24, y: 206, width: 52, height: 74)
+            case .flute: CGRect(x: 30, y: 192, width: 40, height: 82)
+            case .whisky: CGRect(x: 16, y: 138, width: 68, height: 116)
             }
         }
     }
 
     enum Glass: Equatable {
-        case green, olive, brown, pink
+        case green, olive, brown, pink, gold, amber
 
         /// Clear glass shows the wine through it, lightened.
-        var isClear: Bool { self == .pink }
+        var isClear: Bool { [.pink, .gold, .amber].contains(self) }
 
         var gradient: Gradient {
             let colors: [UInt32] = switch self {
@@ -290,6 +238,8 @@ extension BottleArtwork {
             case .olive: [0x19190A, 0x3B3B18, 0xB6B6A5, 0x4A4A1E, 0x333315, 0x161609]
             case .brown: [0x190E06, 0x3B210E, 0xB6A9A0, 0x4A2A12, 0x331D0C, 0x160C05]
             case .pink: [0x55393B, 0xC28287, 0xF7C3C7, 0xF3A3A9, 0xAA7276, 0x483032]
+            case .gold: [0x4A300A, 0xB07A1E, 0xF3D58A, 0xE2A83E, 0x9A6516, 0x3E2808]
+            case .amber: [0x3A1E06, 0x9A5414, 0xE9B97A, 0xC77A26, 0x80430C, 0x2E1704]
             }
             return Gradient(stops: zip(colors, [0, 0.16, 0.3, 0.42, 0.78, 1]).map {
                 .init(color: Color(hex: $0), location: $1)
@@ -298,7 +248,7 @@ extension BottleArtwork {
     }
 
     enum Capsule: Equatable {
-        case black, bordeaux, cream, gold, white, bronze, champagne, pink
+        case black, bordeaux, cream, gold, white, bronze, champagne, pink, wood, navy, green, terracotta
 
         var gradient: Gradient {
             let colors: [UInt32] = switch self {
@@ -310,6 +260,10 @@ extension BottleArtwork {
             case .bronze: [0x4F3E1B, 0xD7C49D, 0xB08A3C, 0x463718]
             case .champagne: [0x605128, 0xEBD9AC, 0xD7B45A, 0x564824]
             case .pink: [0x614B48, 0xEBD3CF, 0xD8A7A0, 0x564240]
+            case .wood: [0x2A1A0E, 0x9A7454, 0x5A3A22, 0x24160B]
+            case .navy: [0x0B1020, 0x8A90A6, 0x1C2440, 0x090D1A]
+            case .green: [0x0E2414, 0x7FA088, 0x24502E, 0x0B1D10]
+            case .terracotta: [0x4A1A0E, 0xD99A80, 0xA8442A, 0x40160B]
             }
             return Gradient(stops: zip(colors, [0, 0.3, 0.55, 1]).map {
                 .init(color: Color(hex: $0), location: $1)

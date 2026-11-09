@@ -13,6 +13,8 @@ struct BottleVignette: View {
     /// The figure in the corner; none leaves the bottle bare.
     let caption: String?
     var captionKind: CaptionKind = .position
+    var appellation: String? = nil
+    var classification: String? = nil
 
     enum CaptionKind {
         /// A slot: a light blur, the text straight on it.
@@ -59,7 +61,10 @@ struct BottleVignette: View {
         BottleBackdrop(beverageType: beverageType, color: color)
             .frame(width: Self.size.width, height: Self.size.height)
             .overlay(alignment: .topLeading) {
-                BottleArtwork(style: style, producer: producer, name: name, vintage: vintage, height: 250)
+                BottleArtwork(
+                    style: style, producer: producer, name: name, vintage: vintage,
+                    appellation: appellation, classification: classification, height: 250
+                )
                     .offset(x: -3, y: -97)
             }
     }

@@ -25,6 +25,10 @@ struct DashboardFavorite: Codable, Identifiable, Sendable {
     let estimatedPrice: Double?
     let tastingDate: Date?
     let rating: Int?
+    // Optional so a dashboard cached before the drawn labels still decodes.
+    var labelFamily: BottleArtwork.LabelFamily? = nil
+    var appellation: String? = nil
+    var classification: String? = nil
 }
 
 struct DashboardWine: Codable, Identifiable, Sendable {
@@ -42,6 +46,10 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     var cellarName: String? = nil
     let urgent: Bool
     let drinkUntil: Int?
+    // Optional so a dashboard cached before the drawn labels still decodes.
+    var labelFamily: BottleArtwork.LabelFamily? = nil
+    var appellation: String? = nil
+    var classification: String? = nil
 }
 
 struct DashboardEntry: Codable, Sendable {
@@ -74,6 +82,7 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     let memberName: String?
     /// The wine's producer; optional so a dashboard cached before it existed still decodes.
     var producer: String? = nil
+    var labelFamily: BottleArtwork.LabelFamily? = nil
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
 

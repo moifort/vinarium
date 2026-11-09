@@ -17,6 +17,9 @@ query Dashboard {
       producer
       color
       vintage
+      appellation
+      classification
+      labelFamily
       notes
       isFavorite
       cellarId
@@ -32,6 +35,9 @@ query Dashboard {
       producer
       color
       vintage
+      appellation
+      classification
+      labelFamily
       estimatedPrice
       tastingDate
       rating
@@ -58,6 +64,7 @@ query Dashboard {
       wineSubtype
       wineColor
       wineVintage
+      wineLabelFamily
       position
       actor {
         displayName
@@ -74,6 +81,7 @@ query Dashboard {
       wineSubtype
       wineColor
       wineVintage
+      wineLabelFamily
       position
       actor {
         displayName

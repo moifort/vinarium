@@ -120,7 +120,10 @@ struct DashboardView: View {
                     isFavorite: wine.isFavorite,
                     urgent: wine.urgent,
                     drinkUntil: wine.drinkUntil,
-                    place: wine.cellarName.map { "\($0) · \(wine.position)" } ?? wine.position
+                    place: wine.cellarName.map { "\($0) · \(wine.position)" } ?? wine.position,
+                    labelFamily: wine.labelFamily,
+                    appellation: wine.appellation,
+                    classification: wine.classification
                 )
             },
             moves: data.history.map { event in
@@ -136,7 +139,8 @@ struct DashboardView: View {
                     vintage: event.wineVintage,
                     position: event.position,
                     date: event.date,
-                    memberName: event.memberName
+                    memberName: event.memberName,
+                    labelFamily: event.labelFamily
                 )
             },
             ready: data.readyToDrink.filter { !featuredIds.contains($0.id) }.map { wine in
@@ -148,7 +152,10 @@ struct DashboardView: View {
                     producer: ProducerOverline.text(for: wine.producer, name: wine.name),
                     name: wine.name,
                     vintage: wine.vintage,
-                    caption: wine.position
+                    caption: wine.position,
+                    labelFamily: wine.labelFamily,
+                    appellation: wine.appellation,
+                    classification: wine.classification
                 )
             },
             favorites: data.favorites.map { favorite in
@@ -160,7 +167,10 @@ struct DashboardView: View {
                     producer: ProducerOverline.text(for: favorite.producer, name: favorite.name),
                     name: favorite.name,
                     vintage: favorite.vintage,
-                    caption: favorite.estimatedPrice.map { Money.formattedFromEur($0, fractionLength: 0) }
+                    caption: favorite.estimatedPrice.map { Money.formattedFromEur($0, fractionLength: 0) },
+                    labelFamily: favorite.labelFamily,
+                    appellation: favorite.appellation,
+                    classification: favorite.classification
                 )
             }
         )

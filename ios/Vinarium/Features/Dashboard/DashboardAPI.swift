@@ -30,7 +30,10 @@ enum DashboardAPI {
                     position: $0.position,
                     cellarName: CellarPositionLabel.cellarName(cellarId: $0.cellarId, cellars: cellars),
                     urgent: $0.urgent,
-                    drinkUntil: $0.drinkUntil
+                    drinkUntil: $0.drinkUntil,
+                    labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
+                    appellation: $0.appellation,
+                    classification: $0.classification
                 )
             },
             favorites: d.favorites.map {
@@ -44,7 +47,10 @@ enum DashboardAPI {
                     vintage: $0.vintage,
                     estimatedPrice: $0.estimatedPrice,
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) },
-                    rating: $0.rating.map { Int($0) }
+                    rating: $0.rating.map { Int($0) },
+                    labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
+                    appellation: $0.appellation,
+                    classification: $0.classification
                 )
             },
             lastBottle: d.lastBottle.map {
@@ -80,7 +86,8 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         position: e.positionString,
         rating: nil,
         memberName: e.memberNameValue,
-        producer: e.producerValue
+        producer: e.producerValue,
+        labelFamily: e.labelFamilyValue
     )
 }
 
@@ -97,6 +104,14 @@ protocol DashboardJournalEvent {
     /// The household member behind the move, nil when it was you.
     var memberNameValue: String? { get }
     var producerValue: String? { get }
+    var labelFamilyValue: BottleArtwork.LabelFamily? { get }
+}
+
+extension BottleArtwork.LabelFamily {
+    /// The family the API names, nil for one this build does not draw yet.
+    init?(graphql value: GraphQLEnum<VinariumGraphQL.LabelFamily>) {
+        self.init(rawValue: value.rawValue.lowercased())
+    }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJournalEvent {
@@ -113,6 +128,7 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }
+    var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJournalEvent {
@@ -129,4 +145,5 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var positionString: String { position }
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }
+    var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
 }

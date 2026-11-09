@@ -25,7 +25,9 @@ struct BottleShelfSection: View {
                                     name: item.name,
                                     vintage: item.vintage,
                                     caption: item.caption,
-                                    captionKind: captionKind
+                                    captionKind: captionKind,
+                                    appellation: item.appellation,
+                                    classification: item.classification
                                 )
                                 Text(item.name)
                                     .font(.system(size: 13, weight: .semibold))
@@ -62,9 +64,12 @@ extension BottleShelfSection {
         let vintage: Int?
         /// The slot or the price in the vignette's corner.
         let caption: String?
+        var labelFamily: BottleArtwork.LabelFamily? = nil
+        var appellation: String? = nil
+        var classification: String? = nil
 
         var style: BottleArtwork.Style {
-            .of(id: id, beverageType: beverageType, subtype: subtype, color: color)
+            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
         }
     }
 }

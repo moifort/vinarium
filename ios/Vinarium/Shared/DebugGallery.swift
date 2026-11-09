@@ -35,6 +35,8 @@ struct DebugGallery: View {
             NavigationStack { producerCellar(.journal) }
         case "dashboard":
             NavigationStack { producerDashboard }
+        case "bottleLabels":
+            DebugBottleLabels()
         case "dashboardEmpty":
             NavigationStack { DashboardPage(content: .empty) }
         case "settings":
