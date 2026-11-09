@@ -86,6 +86,13 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    demandes séparées, dans cet ordre ; dans la zone de prototypage, on s'arrête après le board. Les
    sessions enfants suivent aussi cette règle, et leur question de fin (règle 3) est posée à chaque
    étape.
+6. **La session parente reste légère et repart à vide chaque matin.** Elle ne fait que répartir :
+   sur un commentaire, démarrer ou proposer l'enfant (règle 2) en une ligne, sans lire le board,
+   sans capture, sans résumé. Le travail, même petit, va à une session enfant. Chaque matin à 6 h,
+   la tâche planifiée `vinarium-clear-parent` lui envoie « Clear du matin » : elle appelle alors
+   `clear_session` sur `self`, sans rien écrire d'autre. Ses enfants se retrouvent ensuite par
+   `list_sessions` (`linked: true`). Si le clear est refusé (Remote Control actif, travail en
+   cours), elle le dit en une ligne et ne réessaie pas.
 
 ## Spécificités
 

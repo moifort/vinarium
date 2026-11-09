@@ -67,6 +67,10 @@ handles as soon as the change is made and archives itself on the user's validati
 resolves the thread of a child the user closed themself, and a new comment goes to the child
 working on its theme, or to the parent when no child is.
 
+The parent stays light (it only dispatches, one line per comment) and is cleared every morning
+at 6:00: the scheduled task `vinarium-clear-parent` sends it "Clear du matin", and it calls
+`clear_session` on itself (CLAUDE.md, Board, rule 6).
+
 ## Capturing artboards
 
 Artboards reference images by a relative path (`./img/…`) or as `/_blob/<id>`, served only by the
