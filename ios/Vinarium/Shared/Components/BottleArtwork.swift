@@ -60,19 +60,22 @@ struct BottleArtwork: View {
             in: shape.label,
             context: inside
         )
-        // Two reflections running down the glass.
+        // Two reflections running down the glass, softened like light on curved
+        // glass, and quieter on dark glass, where they would read as stripes.
         let shine = Gradient(stops: [
             .init(color: .white.opacity(0), location: 0),
             .init(color: .white.opacity(0.5), location: 0.25),
             .init(color: .white.opacity(0.22), location: 0.8),
             .init(color: .white.opacity(0), location: 1),
         ])
+        let strength = style.glass.isClear ? 1 : 2 / 3.0
         for (rect, opacity) in [
             (CGRect(x: shape.shineX, y: shape.capsuleHeight + 8, width: 7, height: 288 - shape.capsuleHeight - 8), 0.9),
             (CGRect(x: shape.shineX + 11, y: shape.capsuleHeight + 30, width: 2.5, height: 250 - shape.capsuleHeight - 30), 0.5),
         ] {
             var reflection = inside
-            reflection.opacity = opacity
+            reflection.opacity = opacity * strength
+            reflection.addFilter(.blur(radius: 1.4))
             reflection.fill(
                 Path(roundedRect: rect, cornerRadius: rect.width / 2),
                 with: .linearGradient(shine, startPoint: CGPoint(x: 0, y: rect.minY), endPoint: CGPoint(x: 0, y: rect.maxY))
