@@ -28,11 +28,14 @@ struct BottleVignette: View {
         var price: Double?
     }
 
-    static let size = CGSize(width: 198, height: 228)
-    /// The width the bottle is drawn in; the column overlaps its right edge.
-    private static let artWidth: CGFloat = 132
-    private static let columnWidth: CGFloat = 72
-    private static let veilWidth: CGFloat = 100
+    static let size = CGSize(width: 198, height: 248)
+    /// The room on the left the bottle stands in, the column taking the rest.
+    private static let artWidth: CGFloat = 110
+    /// Every bottle is drawn this wide, whatever its shape, so the column always
+    /// sits beside the glass and never over it.
+    private static let bottleWidth: CGFloat = 92
+    private static let columnWidth: CGFloat = size.width - artWidth
+    private static let veilWidth: CGFloat = 96
     private static let cornerRadius: CGFloat = 14
 
     var body: some View {
@@ -45,7 +48,7 @@ struct BottleVignette: View {
                 .overlay(Color.black.opacity(0.22))
                 .mask(alignment: .trailing) {
                     LinearGradient(
-                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.34)],
+                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.08)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -76,12 +79,11 @@ struct BottleVignette: View {
         .shadow(color: .black.opacity(0.28), radius: 9, y: 6)
     }
 
-    /// The tinted ground and the bottle, framed on its label: the label fills
-    /// most of the bottle's width, the shoulder and the base run off the edges.
+    /// The tinted ground and the bottle, the same width for every shape and
+    /// centred on its label: the shoulder and the base run off the edges.
     private var scene: some View {
         let label = style.shape.label
-        let viewWidth = max(label.width / 0.88, label.height / 0.84 * Self.artWidth / Self.size.height)
-        let scale = Self.artWidth / viewWidth
+        let scale = Self.bottleWidth / style.shape.path.boundingRect.width
         return BottleBackdrop(beverageType: beverageType, color: color)
             .frame(width: Self.size.width, height: Self.size.height)
             .overlay(alignment: .topLeading) {
@@ -108,8 +110,8 @@ struct BottleVignette: View {
             row(facts.stock.map { $0.formatted() }, label: "stock")
             row(facts.price.map { Money.formattedFromEur($0, fractionLength: 0) }, label: "prix")
         }
-        .padding(.vertical, 10)
-        .padding(.leading, 4)
+        .padding(.vertical, 12)
+        .padding(.leading, 6)
         .padding(.trailing, 8)
         .frame(width: Self.columnWidth)
         .foregroundStyle(.white)
