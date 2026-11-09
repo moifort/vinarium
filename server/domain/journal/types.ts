@@ -4,6 +4,7 @@ import type {
   BeverageName,
   BeverageSubtype,
   BeverageType,
+  LabelFamily,
   Producer,
   WineColor,
 } from '~/domain/beverage/types'
@@ -51,6 +52,7 @@ export type JournalEventView = {
   wineSubtype?: BeverageSubtype
   wineColor?: WineColor
   wineVintage?: Year
+  wineLabelFamily: LabelFamily
   position: string
   actor: JournalEventActor
 }

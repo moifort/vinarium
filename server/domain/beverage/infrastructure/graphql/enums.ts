@@ -12,6 +12,48 @@ export const WineColorEnum = builder.enumType('WineColor', {
   } as const,
 })
 
+export const LabelFamilyEnum = builder.enumType('LabelFamily', {
+  description:
+    "The house style a bottle's label is drawn in on the home screen.\n\n" +
+    'Read from what the wine says of itself: its type and subtype first (a spirit, a ' +
+    'sparkling wine, a sweet one), then where it comes from (Italy, a rosé, a region with a ' +
+    'label tradition), then how the producer names itself (a château, a domaine). The app ' +
+    'draws the family and varies paper, ink and ornament per wine.',
+  values: {
+    CHATEAU: {
+      value: 'chateau',
+      description: 'Bordeaux château: framed ivory label, emblem, classification',
+    },
+    BURGUNDY: {
+      value: 'burgundy',
+      description: 'Burgundy domaine: sober white label, the appellation first',
+    },
+    CHAMPAGNE: {
+      value: 'champagne',
+      description: 'Champagne: a shield on a dark ground and a neck collar',
+    },
+    PROVENCE: { value: 'provence', description: 'Provence rosé: a light veil and a sun' },
+    SOUTH: {
+      value: 'south',
+      description: 'Rhône and the South: warm paper and a round vintage stamp',
+    },
+    ALSACE: { value: 'alsace', description: 'Alsace: a coloured band, the grape in title' },
+    SWEET: {
+      value: 'sweet',
+      description: 'Sweet and fortified wines: gold accents and a script name',
+    },
+    NATURAL: {
+      value: 'natural',
+      description: 'Vin de France: a bold coloured ground, hand-set type',
+    },
+    ITALY: { value: 'italy', description: 'Italy: a crest, capitals and a DOCG band on the neck' },
+    SPIRIT: {
+      value: 'spirit',
+      description: 'Anything that is not wine: a dark label with gold type',
+    },
+  } as const,
+})
+
 export const BeverageSubtypeEnum = builder.enumType('BeverageSubtype', {
   description:
     'A structured refinement of a beverage type.\n\n' +

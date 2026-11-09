@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test'
 import {
   beverageStatus,
+  labelFamily,
   readyToDrink,
   requiresColor,
   retainedSubtype,
@@ -172,4 +173,77 @@ describe('requiresColor', () => {
       expect(requiresColor(beverageType)).toBe(false)
     },
   )
+})
+
+describe('labelFamily', () => {
+  const wine = (fields: Record<string, unknown> = {}, details: Record<string, unknown> = {}) =>
+    ({ beverageType: 'wine', ...fields, wine: { color: 'red', ...details } }) as Beverage
+
+  test.each(['spirit', 'beer', 'sake', 'cider', 'other'] as const)(
+    'a %s wears the spirit label',
+    (beverageType) => {
+      expect(labelFamily({ beverageType } as Beverage)).toBe('spirit')
+    },
+  )
+
+  test('a sparkling wine wears the champagne label, whatever its region', () => {
+    expect(labelFamily(wine({ subtype: 'sparkling', region: 'Alsace' }, { color: 'white' }))).toBe(
+      'champagne',
+    )
+  })
+
+  test.each(['sweet', 'late-harvest', 'porto', 'fortified'])(
+    'a %s wine wears the sweet label',
+    (subtype) => {
+      expect(labelFamily(wine({ subtype, region: 'Bordeaux' }, { color: 'white' }))).toBe('sweet')
+    },
+  )
+
+  test.each(['Italie', 'Italy', 'Italia', 'Italien', 'イタリア'])(
+    'a wine from %s wears the Italian label',
+    (country) => {
+      expect(labelFamily(wine({ country, region: 'Piemonte' }))).toBe('italy')
+    },
+  )
+
+  test('a rosé wears the Provence label, even from Bordeaux', () => {
+    expect(labelFamily(wine({ region: 'Bordeaux' }, { color: 'rosé' }))).toBe('provence')
+  })
+
+  test.each([
+    ['Alsace', 'alsace'],
+    ['Elsass', 'alsace'],
+    ['Bourgogne', 'burgundy'],
+    ['Burgundy', 'burgundy'],
+    ['Borgoña', 'burgundy'],
+    ['ブルゴーニュ', 'burgundy'],
+    ['Bordeaux', 'chateau'],
+    ['Médoc', 'chateau'],
+    ['Vallée du Rhône', 'south'],
+    ['RHÔNE', 'south'],
+    ['Languedoc-Roussillon', 'south'],
+  ] as const)('a wine from %s wears the %s label', (region, family) => {
+    expect(labelFamily(wine({ region, producer: 'Domaine X' }))).toBe(family)
+  })
+
+  test('a Vin de France wears the natural label', () => {
+    expect(
+      labelFamily(wine({ producer: 'Domaine de l’Écu' }, { appellation: 'Vin de France' })),
+    ).toBe('natural')
+  })
+
+  test('a producer named Château wears the château label', () => {
+    expect(labelFamily(wine({ producer: 'Château Musar' }, { color: 'white' }))).toBe('chateau')
+  })
+
+  test('a producer named Domaine or Clos wears the Burgundy label', () => {
+    expect(labelFamily(wine({ producer: 'Domaine Gauby' }))).toBe('burgundy')
+    expect(labelFamily(wine({ producer: 'Clos Rougeard' }))).toBe('burgundy')
+  })
+
+  test('with nothing else to go on, a white wears the Burgundy label and a red the château', () => {
+    expect(labelFamily(wine({}, { color: 'white' }))).toBe('burgundy')
+    expect(labelFamily(wine())).toBe('chateau')
+    expect(labelFamily(wine({}, { color: undefined }))).toBe('chateau')
+  })
 })

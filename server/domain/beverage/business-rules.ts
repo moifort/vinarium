@@ -12,6 +12,7 @@ import type {
   BeverageSubtype,
   BeverageType,
   ErasableField,
+  LabelFamily,
   WineDetails,
 } from '~/domain/beverage/types'
 
@@ -132,3 +133,49 @@ export const retainedSubtype = (
   subtype?: BeverageSubtype,
 ): BeverageSubtype | undefined =>
   subtype !== undefined && subtypeAllowed(beverageType, subtype) ? subtype : undefined
+
+// Free text folded for matching: lower case, without accents, so "Rhône",
+// "rhone" and "RHÔNE" read the same.
+const folded = (text?: string) => (text ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+
+// The regions whose labels have a house style, in the seven languages a region
+// may be written in. Region is free text: a scan writes it in the user's
+// language, a hand-typed one in any.
+const REGION_FAMILIES: readonly [RegExp, LabelFamily][] = [
+  [/alsace|elsass|alsazia|alsacia|アルザス/, 'alsace'],
+  [/bourgogne|burgund|borgogna|borgona|borgonha|beaujolais|chablis|ブルゴーニュ/, 'burgundy'],
+  [/bordeaux|bordeus|burdeos|bordo|medoc|graves|saint-emilion|pomerol|ボルドー/, 'chateau'],
+  [/rhone|rodano|languedoc|roussillon|provence|provenza|corse|corsica|corcega|ローヌ/, 'south'],
+]
+
+// Wines drawn with the sweet label: what is served with dessert or after it.
+const SWEET_SUBTYPES: readonly BeverageSubtype[] = ['sweet', 'late-harvest', 'porto', 'fortified']
+
+// Appellations that say the wine stands outside the appellation system: the
+// natural-wine label, loose and hand-drawn.
+const NATURAL_APPELLATION = /vin de france|vin de table|vino da tavola|vino de mesa/
+
+// The label family a bottle is drawn with. What the wine is decides first (a
+// spirit, a sparkling wine, a sweet one), then where it comes from (Italy, a
+// rosé, a region with a house style), then how it names itself (a château, a
+// domaine); a white falls back to the Burgundy label, everything else to the
+// château.
+export const labelFamily = (beverage: Beverage): LabelFamily => {
+  if (beverage.beverageType !== 'wine') return 'spirit'
+  const { subtype } = beverage
+  // A wine stored before the details object existed carries none.
+  const wine: WineDetails = beverage.wine ?? {}
+  if (subtype === 'sparkling') return 'champagne'
+  if (SWEET_SUBTYPES.includes(subtype as BeverageSubtype)) return 'sweet'
+  const country = folded(beverage.country)
+  if (/ital|イタリア/.test(country)) return 'italy'
+  if (wine.color === 'rosé') return 'provence'
+  const region = folded(beverage.region)
+  const byRegion = REGION_FAMILIES.find(([pattern]) => pattern.test(region))
+  if (byRegion) return byRegion[1]
+  if (NATURAL_APPELLATION.test(folded(wine.appellation))) return 'natural'
+  const producer = folded(beverage.producer)
+  if (/^(chateau|castello|castillo)\b/.test(producer)) return 'chateau'
+  if (/^(domaine|clos)\b/.test(producer)) return 'burgundy'
+  return wine.color === 'white' ? 'burgundy' : 'chateau'
+}

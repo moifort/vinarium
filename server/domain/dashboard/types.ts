@@ -1,8 +1,11 @@
 import type {
+  Appellation,
   BeverageId,
   BeverageName,
   BeverageSubtype,
   BeverageType,
+  Classification,
+  LabelFamily,
   Notes,
   Producer,
   WineColor,
@@ -34,6 +37,9 @@ export type FavoriteWine = {
   producer?: Producer
   color?: WineColor
   vintage?: Year
+  appellation?: Appellation
+  classification?: Classification
+  labelFamily: LabelFamily
   estimatedPrice?: Eur
   tastingDate?: Date
   rating?: number
@@ -47,6 +53,9 @@ export type ReadyToDrinkWine = {
   producer?: Producer
   color?: WineColor
   vintage?: Year
+  appellation?: Appellation
+  classification?: Classification
+  labelFamily: LabelFamily
   notes?: Notes
   // Whether the viewer flagged this wine as a favorite.
   isFavorite: boolean

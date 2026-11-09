@@ -1,6 +1,7 @@
 import {
   BeverageSubtypeEnum,
   BeverageTypeEnum,
+  LabelFamilyEnum,
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
@@ -81,6 +82,10 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
       type: 'Year',
       nullable: true,
       description: 'Vintage year of the wine; null when unknown or not a wine.',
+    }),
+    wineLabelFamily: t.expose('wineLabelFamily', {
+      type: LabelFamilyEnum,
+      description: 'House style the bottle label is drawn in.',
     }),
     position: t.exposeString('position', {
       description: 'Human-facing grid slot the bottle occupied (e.g. "A1").',

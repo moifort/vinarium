@@ -106,6 +106,22 @@ export type BeverageSubtype =
   | CiderSubtype
   | OtherSubtype
 
+// The family of label a bottle is drawn with on the home screen: the house style
+// of the wine's region or kind (a Bordeaux château, a Burgundy domaine, a
+// Champagne shield...). Read from what the wine says of itself; the app draws
+// the family and varies it per wine.
+export type LabelFamily =
+  | 'chateau'
+  | 'burgundy'
+  | 'champagne'
+  | 'provence'
+  | 'south'
+  | 'alsace'
+  | 'sweet'
+  | 'natural'
+  | 'italy'
+  | 'spirit'
+
 export type BeverageSort = 'createdAt' | 'updatedAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'
 export type BeverageStatus = 'in-cellar' | 'consumed' | 'gifted' | 'recommended'

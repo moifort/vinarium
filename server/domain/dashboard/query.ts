@@ -1,6 +1,7 @@
 import { keyBy, sortBy } from 'lodash-es'
 import {
   readyToDrink as isReadyToDrink,
+  labelFamily,
   urgentToDrink,
   wineDetails,
 } from '~/domain/beverage/business-rules'
@@ -83,6 +84,9 @@ export namespace DashboardQuery {
       producer: bottle.wine.producer,
       color: details?.color,
       vintage: details?.vintage,
+      appellation: details?.appellation,
+      classification: details?.classification,
+      labelFamily: labelFamily(bottle.wine),
       notes: bottle.wine.notes,
       isFavorite: favoriteIds.has(bottle.wine.id),
       cellarId: bottle.cellarId,
@@ -145,6 +149,9 @@ export namespace DashboardQuery {
           producer: wine.producer,
           color: details?.color,
           vintage: details?.vintage,
+          appellation: details?.appellation,
+          classification: details?.classification,
+          labelFamily: labelFamily(wine),
           estimatedPrice: wine.purchase?.price,
           tastingDate: tasting.consumedDate,
           rating: tasting.rating,

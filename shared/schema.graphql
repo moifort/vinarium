@@ -1118,8 +1118,18 @@ A wine the user flagged as a favorite, summarized for the dashboard.
 Carries the identity fields plus the latest tasting metadata (`tastingDate`, `rating`) so the home screen can surface the highest-rated bottles without a second query.
 """
 type FavoriteWine {
+  """
+  Appellation printed on the drawn label; null when unknown or not a wine
+  """
+  appellation: Appellation
+
   """Beverage family (wine, spirit, beer, ...)"""
   beverageType: BeverageType!
+
+  """
+  Classification printed on the drawn label (Grand Cru Classé...); null when none
+  """
+  classification: Classification
 
   """Wine color (red, white, rose); null for non-wine beverages"""
   color: WineColor
@@ -1129,6 +1139,9 @@ type FavoriteWine {
 
   """Identifier of the favorite beverage"""
   id: BeverageId!
+
+  """House style the bottle label is drawn in"""
+  labelFamily: LabelFamily!
 
   """Display name of the beverage"""
   name: BeverageName!
@@ -1390,6 +1403,9 @@ type JournalEvent {
   """Wine color for display; null for non-wine beverages."""
   wineColor: WineColor
 
+  """House style the bottle label is drawn in."""
+  wineLabelFamily: LabelFamily!
+
   """Structured subtype of the beverage (sparkling, ...); null when unset."""
   wineSubtype: BeverageSubtype
 
@@ -1442,6 +1458,43 @@ type JournalEvents {
 
   """The events in this page, most recent first."""
   items: [JournalEvent!]!
+}
+
+"""
+The house style a bottle's label is drawn in on the home screen.
+
+Read from what the wine says of itself: its type and subtype first (a spirit, a sparkling wine, a sweet one), then where it comes from (Italy, a rosé, a region with a label tradition), then how the producer names itself (a château, a domaine). The app draws the family and varies paper, ink and ornament per wine.
+"""
+enum LabelFamily {
+  """Alsace: a coloured band, the grape in title"""
+  ALSACE
+
+  """Burgundy domaine: sober white label, the appellation first"""
+  BURGUNDY
+
+  """Champagne: a shield on a dark ground and a neck collar"""
+  CHAMPAGNE
+
+  """Bordeaux château: framed ivory label, emblem, classification"""
+  CHATEAU
+
+  """Italy: a crest, capitals and a DOCG band on the neck"""
+  ITALY
+
+  """Vin de France: a bold coloured ground, hand-set type"""
+  NATURAL
+
+  """Provence rosé: a light veil and a sun"""
+  PROVENCE
+
+  """Rhône and the South: warm paper and a round vintage stamp"""
+  SOUTH
+
+  """Anything that is not wine: a dark label with gold type"""
+  SPIRIT
+
+  """Sweet and fortified wines: gold accents and a script name"""
+  SWEET
 }
 
 """
@@ -2252,11 +2305,21 @@ A cellared bottle that has entered its drinking window, surfaced on the dashboar
 The `urgent` flag marks bottles at risk of being kept past their peak, and `drinkUntil` is the last recommended year to drink them. Includes the cellar `position` so the bottle can be located at a glance.
 """
 type ReadyToDrinkWine {
+  """
+  Appellation printed on the drawn label; null when unknown or not a wine
+  """
+  appellation: Appellation
+
   """Beverage family (wine, spirit, beer, ...)"""
   beverageType: BeverageType!
 
   """The cellar the bottle stands in, one of `cellars`."""
   cellarId: CellarId!
+
+  """
+  Classification printed on the drawn label (Grand Cru Classé...); null when none
+  """
+  classification: Classification
 
   """Wine color; null for non-wine beverages"""
   color: WineColor
@@ -2269,6 +2332,9 @@ type ReadyToDrinkWine {
 
   """True when the viewer flagged this wine as a favorite"""
   isFavorite: Boolean!
+
+  """House style the bottle label is drawn in"""
+  labelFamily: LabelFamily!
 
   """Display name of the beverage"""
   name: BeverageName!

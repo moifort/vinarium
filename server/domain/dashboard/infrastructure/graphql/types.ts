@@ -1,6 +1,7 @@
 import {
   BeverageSubtypeEnum,
   BeverageTypeEnum,
+  LabelFamilyEnum,
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
 import { JournalEventType } from '~/domain/journal/infrastructure/graphql/types'
@@ -38,6 +39,21 @@ const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').impleme
       type: 'Year',
       nullable: true,
       description: 'Vintage year; null when unknown or not applicable',
+    }),
+    appellation: t.expose('appellation', {
+      type: 'Appellation',
+      nullable: true,
+      description: 'Appellation printed on the drawn label; null when unknown or not a wine',
+    }),
+    classification: t.expose('classification', {
+      type: 'Classification',
+      nullable: true,
+      description:
+        'Classification printed on the drawn label (Grand Cru Classé...); null when none',
+    }),
+    labelFamily: t.expose('labelFamily', {
+      type: LabelFamilyEnum,
+      description: 'House style the bottle label is drawn in',
     }),
     estimatedPrice: t.expose('estimatedPrice', {
       type: 'Eur',
@@ -88,6 +104,21 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
       type: 'Year',
       nullable: true,
       description: 'Vintage year; null when unknown or not applicable',
+    }),
+    appellation: t.expose('appellation', {
+      type: 'Appellation',
+      nullable: true,
+      description: 'Appellation printed on the drawn label; null when unknown or not a wine',
+    }),
+    classification: t.expose('classification', {
+      type: 'Classification',
+      nullable: true,
+      description:
+        'Classification printed on the drawn label (Grand Cru Classé...); null when none',
+    }),
+    labelFamily: t.expose('labelFamily', {
+      type: LabelFamilyEnum,
+      description: 'House style the bottle label is drawn in',
     }),
     notes: t.expose('notes', {
       type: 'Notes',

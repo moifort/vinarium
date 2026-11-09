@@ -1,5 +1,5 @@
 import { keyBy, sortBy, uniq } from 'lodash-es'
-import { wineDetails } from '~/domain/beverage/business-rules'
+import { labelFamily, wineDetails } from '~/domain/beverage/business-rules'
 import { BeverageQuery } from '~/domain/beverage/query'
 import type { Beverage, BeverageId } from '~/domain/beverage/types'
 import { CellarCol, CellarRow } from '~/domain/cellar/primitives'
@@ -111,6 +111,7 @@ export namespace JournalQuery {
     wineSubtype: wine.subtype,
     wineColor: wineDetails(wine)?.color,
     wineVintage: wineDetails(wine)?.vintage,
+    wineLabelFamily: labelFamily(wine),
     position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     actor: actorOf(entry, viewerId, scope),
   })
