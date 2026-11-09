@@ -1,11 +1,11 @@
 import SwiftUI
 
-/// A titled shelf of bottle vignettes sliding sideways, the wine's name under each:
-/// the wines ready to drink, with their slot, or the favorites, with their price.
+/// A titled shelf of bottle vignettes sliding sideways, each with its slot, its
+/// drinking limit, its stock and its price: the wines ready to drink, or the
+/// favorites.
 struct BottleShelfSection: View {
     let title: LocalizedStringKey
     let items: [Item]
-    var captionKind: BottleVignette.CaptionKind = .position
     var onSeeAll: (() -> Void)?
     var onWineTapped: (String) -> Void
 
@@ -16,28 +16,20 @@ struct BottleShelfSection: View {
                 LazyHStack(alignment: .top, spacing: 12) {
                     ForEach(items) { item in
                         Button { onWineTapped(item.id) } label: {
-                            VStack(alignment: .leading, spacing: 8) {
-                                BottleVignette(
-                                    style: item.style,
-                                    beverageType: item.beverageType,
-                                    color: item.color,
-                                    producer: item.producer,
-                                    name: item.name,
-                                    vintage: item.vintage,
-                                    caption: item.caption,
-                                    captionKind: captionKind,
-                                    appellation: item.appellation,
-                                    classification: item.classification
-                                )
-                                Text(item.name)
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .lineLimit(2, reservesSpace: true)
-                                    .multilineTextAlignment(.leading)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                            .frame(width: BottleVignette.size.width)
+                            BottleVignette(
+                                style: item.style,
+                                beverageType: item.beverageType,
+                                color: item.color,
+                                producer: item.producer,
+                                name: item.name,
+                                vintage: item.vintage,
+                                appellation: item.appellation,
+                                classification: item.classification,
+                                facts: item.facts
+                            )
                             .contentShape(.rect)
                         }
+                        .accessibilityLabel(Text(item.name))
                         .buttonStyle(.plain)
                     }
                 }
@@ -62,8 +54,8 @@ extension BottleShelfSection {
         let producer: String?
         let name: String
         let vintage: Int?
-        /// The slot or the price in the vignette's corner.
-        let caption: String?
+        /// The slot, drinking limit, stock and price in the vignette's column.
+        var facts = BottleVignette.Facts()
         var labelFamily: BottleArtwork.LabelFamily? = nil
         var appellation: String? = nil
         var classification: String? = nil
@@ -77,11 +69,7 @@ extension BottleShelfSection {
 #Preview("Ready to drink") {
     BottleShelfSection(
         title: "Prêt à déguster",
-        items: [
-            .init(id: "1", color: .white, producer: "Vacheron", name: "Sancerre Les Monts Damnés", vintage: 2022, caption: "B1"),
-            .init(id: "2", color: .white, producer: "Château des Rontets", name: "Pouilly-Fuissé Les Crays", vintage: 2021, caption: "C3"),
-            .init(id: "3", subtype: .sparkling, color: .white, producer: "Pierre Péters", name: "Champagne Blanc de Blancs", vintage: 2017, caption: "E1"),
-        ],
+        items: DashboardPage.Content.sample.ready,
         onSeeAll: {},
         onWineTapped: { _ in }
     )
@@ -90,11 +78,7 @@ extension BottleShelfSection {
 #Preview("Favorites") {
     BottleShelfSection(
         title: "Mes favoris",
-        items: [
-            .init(id: "4", color: .red, producer: "La Rioja Alta", name: "Rioja Gran Reserva 904", vintage: 2011, caption: "62 €"),
-            .init(id: "5", color: .white, producer: "Domaine Roulot", name: "Meursault Les Charmes", vintage: 2020, caption: nil),
-        ],
-        captionKind: .price,
+        items: DashboardPage.Content.sample.favorites,
         onWineTapped: { _ in }
     )
 }

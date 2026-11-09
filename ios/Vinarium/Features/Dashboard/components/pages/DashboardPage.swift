@@ -69,7 +69,6 @@ struct DashboardPage: View {
                         BottleShelfSection(
                             title: "Mes favoris",
                             items: content.favorites,
-                            captionKind: .price,
                             onSeeAll: onFavoritesTapped,
                             onWineTapped: onWineTapped
                         )
@@ -146,15 +145,14 @@ extension DashboardPage.Content {
             .init(id: "m2", wineId: "w2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now.addingTimeInterval(-9 * 86400)),
         ],
         ready: [
-            .init(id: "r1", color: .white, producer: "Vacheron", name: "Sancerre Les Monts Damnés", vintage: 2022, caption: "B1"),
-            .init(id: "r2", color: .white, producer: "Château des Rontets", name: "Pouilly-Fuissé Les Crays", vintage: 2021, caption: "C3"),
-            .init(id: "r3", subtype: .sparkling, color: .white, producer: "Pierre Péters", name: "Champagne Blanc de Blancs", vintage: 2017, caption: "E1"),
-            .init(id: "r4", color: .white, producer: "William Fèvre", name: "Chablis Grand Cru Les Clos", vintage: 2020, caption: "A3"),
+            .init(id: "r1", color: .white, producer: "Weinbach", name: "Riesling Schlossberg", vintage: 2021, facts: .init(place: "C3", drinkUntil: 2029, stock: 2, price: 54), labelFamily: .alsace, classification: "Grand Cru"),
+            .init(id: "r2", color: .white, producer: "Vacheron", name: "Sancerre Les Romains", vintage: 2022, facts: .init(place: "B4", drinkUntil: 2027, stock: 3, price: 42), labelFamily: .loire, appellation: "Sancerre"),
+            .init(id: "r3", color: .red, producer: "E. Guigal", name: "Côte-Rôtie Brune et Blonde", vintage: 2019, facts: .init(place: "A2", drinkUntil: 2030, stock: 6, price: 38), labelFamily: .rhone, appellation: "Côte-Rôtie"),
         ],
         favorites: [
-            .init(id: "v1", color: .red, producer: "La Rioja Alta", name: "Rioja Gran Reserva 904", vintage: 2011, caption: "62 €"),
-            .init(id: "v2", color: .white, producer: "Domaine Roulot", name: "Meursault Les Charmes", vintage: 2020, caption: "240 €"),
-            .init(id: "w1", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, caption: "250 €"),
+            .init(id: "v1", color: .red, producer: "Château Talbot", name: "Château Talbot", vintage: 2016, facts: .init(place: "C2", drinkUntil: 2036, stock: 2, price: 68), labelFamily: .chateau, appellation: "Saint-Julien", classification: "Grand Cru Classé"),
+            .init(id: "v2", color: .white, producer: "Domaine Roulot", name: "Meursault Les Charmes", vintage: 2020, facts: .init(place: "A3", drinkUntil: 2030, stock: 1, price: 240), labelFamily: .burgundy, appellation: "Meursault"),
+            .init(id: "w1", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, facts: .init(place: "D1", drinkUntil: 2040, stock: 3, price: 95), labelFamily: .chateau, appellation: "Margaux"),
         ]
     )
 

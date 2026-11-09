@@ -33,7 +33,9 @@ enum DashboardAPI {
                     drinkUntil: $0.drinkUntil,
                     labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
                     appellation: $0.appellation,
-                    classification: $0.classification
+                    classification: $0.classification,
+                    estimatedPrice: $0.estimatedPrice,
+                    stock: $0.stock
                 )
             },
             favorites: d.favorites.map {
@@ -50,7 +52,10 @@ enum DashboardAPI {
                     rating: $0.rating.map { Int($0) },
                     labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
                     appellation: $0.appellation,
-                    classification: $0.classification
+                    classification: $0.classification,
+                    position: $0.position,
+                    drinkUntil: $0.drinkUntil,
+                    stock: $0.stock
                 )
             },
             lastBottle: d.lastBottle.map {

@@ -29,6 +29,12 @@ struct DashboardFavorite: Codable, Identifiable, Sendable {
     var labelFamily: BottleArtwork.LabelFamily? = nil
     var appellation: String? = nil
     var classification: String? = nil
+    // Optional so a dashboard cached before the vignettes' column still decodes.
+    /// The slot of this wine, or of an identical bottle; nil when none is stored.
+    var position: String? = nil
+    var drinkUntil: Int? = nil
+    /// How many identical bottles the cellars hold.
+    var stock: Int? = nil
 }
 
 struct DashboardWine: Codable, Identifiable, Sendable {
@@ -50,6 +56,10 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     var labelFamily: BottleArtwork.LabelFamily? = nil
     var appellation: String? = nil
     var classification: String? = nil
+    // Optional so a dashboard cached before the vignettes' column still decodes.
+    var estimatedPrice: Double? = nil
+    /// How many identical bottles the cellars hold.
+    var stock: Int? = nil
 }
 
 struct DashboardEntry: Codable, Sendable {

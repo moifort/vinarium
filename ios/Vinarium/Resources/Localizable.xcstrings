@@ -17789,6 +17789,47 @@
         }
       }
     },
+    "cave": {
+      "comment": "Short label under a figure in the home shelf tile's column, shown in capitals; keep it under nine letters.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fach"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "slot"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sitio"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "posto"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "場所"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lugar"
+          }
+        }
+      }
+    },
     "colors: %@": {},
     "favorite: %@ · status: %@": {
       "localizations": {
@@ -17796,6 +17837,47 @@
           "stringUnit": {
             "state": "new",
             "value": "favorite: %1$@ · status: %2$@"
+          }
+        }
+      }
+    },
+    "garde": {
+      "comment": "Short label under a figure in the home shelf tile's column, shown in capitals; keep it under nine letters.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "bis"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "drink by"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hasta"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "entro"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "飲み頃"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "até"
           }
         }
       }
@@ -17836,6 +17918,88 @@
           "stringUnit": {
             "state": "translated",
             "value": "em %@"
+          }
+        }
+      }
+    },
+    "prix": {
+      "comment": "Short label under a figure in the home shelf tile's column, shown in capitals; keep it under nine letters.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preis"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "price"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "precio"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "prezzo"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "価格"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "preço"
+          }
+        }
+      }
+    },
+    "stock": {
+      "comment": "Short label under a figure in the home shelf tile's column, shown in capitals; keep it under nine letters.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bestand"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stock"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stock"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "scorte"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在庫"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stock"
           }
         }
       }

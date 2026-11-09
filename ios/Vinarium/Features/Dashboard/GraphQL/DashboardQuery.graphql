@@ -26,6 +26,8 @@ query Dashboard {
       position
       urgent
       drinkUntil
+      estimatedPrice
+      stock
     }
     favorites {
       id
@@ -41,6 +43,10 @@ query Dashboard {
       estimatedPrice
       tastingDate
       rating
+      cellarId
+      position
+      drinkUntil
+      stock
     }
     lastBottle {
       wine {

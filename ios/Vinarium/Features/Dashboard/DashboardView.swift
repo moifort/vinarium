@@ -152,7 +152,12 @@ struct DashboardView: View {
                     producer: ProducerOverline.text(for: wine.producer, name: wine.name),
                     name: wine.name,
                     vintage: wine.vintage,
-                    caption: wine.position,
+                    facts: .init(
+                        place: wine.position,
+                        drinkUntil: wine.drinkUntil,
+                        stock: wine.stock,
+                        price: wine.estimatedPrice
+                    ),
                     labelFamily: wine.labelFamily,
                     appellation: wine.appellation,
                     classification: wine.classification
@@ -167,7 +172,12 @@ struct DashboardView: View {
                     producer: ProducerOverline.text(for: favorite.producer, name: favorite.name),
                     name: favorite.name,
                     vintage: favorite.vintage,
-                    caption: favorite.estimatedPrice.map { Money.formattedFromEur($0, fractionLength: 0) },
+                    facts: .init(
+                        place: favorite.position,
+                        drinkUntil: favorite.drinkUntil,
+                        stock: favorite.stock,
+                        price: favorite.estimatedPrice
+                    ),
                     labelFamily: favorite.labelFamily,
                     appellation: favorite.appellation,
                     classification: favorite.classification
