@@ -198,6 +198,65 @@ describe('DashboardQuery.view', () => {
     })
   })
 
+  test('each shelf carries the slot, keeping window, stock and price its vignettes show', async () => {
+    seedDashboardData()
+    // A second bottle of the ready wine, and one of the favorite, in the cellar.
+    fake.seed('beverages', 'w1b', {
+      id: 'w1b',
+      userId,
+      name: 'château cave',
+      beverageType: 'wine',
+      producer: 'Domaine Cave',
+      purchase: { price: 30 },
+      wine: { color: 'red', vintage: 2018, drinkWindow: { until: currentYear + 5 } },
+      createdAt: new Date('2026-01-11'),
+    })
+    fake.seed('cellar', `${userId}_w1b`, {
+      userId,
+      beverageId: 'w1b',
+      row: 0,
+      col: 1,
+      createdAt: new Date('2026-01-11'),
+      updatedAt: new Date('2026-01-11'),
+    })
+    fake.seed('beverages', 'w2b', {
+      id: 'w2b',
+      userId,
+      name: 'Domaine Favori',
+      beverageType: 'wine',
+      wine: { color: 'white', vintage: 2019, drinkWindow: { until: currentYear + 9 } },
+      createdAt: new Date('2026-01-12'),
+    })
+    fake.seed('cellar', `${userId}_w2b`, {
+      userId,
+      beverageId: 'w2b',
+      row: 1,
+      col: 2,
+      createdAt: new Date('2026-01-12'),
+      updatedAt: new Date('2026-01-12'),
+    })
+
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.readyToDrink.find(({ id }) => id === 'w1')).toMatchObject({
+      position: 'A1',
+      drinkUntil: currentYear + 5,
+      estimatedPrice: 30,
+      stock: 2,
+    })
+    // The favorite itself was drunk: its slot is the identical bottle's.
+    expect(view.favorites).toMatchObject([{ id: 'w2', position: 'B3', stock: 1 }])
+  })
+
+  test('a favorite with no bottle left has no slot and a stock of zero', async () => {
+    seedDashboardData()
+
+    const view = await DashboardQuery.view(userId)
+
+    expect(view.favorites[0]?.position).toBeUndefined()
+    expect(view.favorites[0]?.stock).toBe(0)
+  })
+
   test('the counts span every ready bottle and favorite, beyond the capped lists', async () => {
     seedDashboardData()
     for (let i = 0; i < 7; i++) {

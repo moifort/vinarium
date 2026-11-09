@@ -101,6 +101,25 @@ export const urgentToDrink = (window: YearRange, year: number) => {
   return window.until <= year + 1
 }
 
+// The key two bottles share when they are the same wine: one beverage is one
+// bottle, so a stock of a wine is the count of placed bottles with this key.
+// Case, accents and spacing are ignored, the vintage is not.
+export const sameWineKey = (beverage: Beverage): string => {
+  const normalize = (text?: string) =>
+    (text ?? '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .trim()
+  return [
+    beverage.beverageType,
+    normalize(beverage.producer),
+    normalize(beverage.name),
+    wineDetails(beverage)?.vintage ?? '',
+  ].join('|')
+}
+
 // A wine is the only type that must declare its color.
 export const requiresColor = (beverageType: BeverageType) => beverageType === 'wine'
 

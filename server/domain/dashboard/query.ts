@@ -1,7 +1,8 @@
-import { keyBy, sortBy } from 'lodash-es'
+import { groupBy, keyBy, sortBy } from 'lodash-es'
 import {
   readyToDrink as isReadyToDrink,
   labelFamily,
+  sameWineKey,
   urgentToDrink,
   wineDetails,
 } from '~/domain/beverage/business-rules'
@@ -41,10 +42,13 @@ export namespace DashboardQuery {
 
     // The viewer's favorites, from the notes already read: no extra lookup.
     const favoriteIds = new Set(favoriteTastings.map(({ beverageId }) => beverageId))
+    // The placed bottles grouped by wine, for each shelf's stock and a
+    // favorite's slot: one pass over what is already loaded.
+    const bottlesByWine = groupBy(allBottles, (b) => sameWineKey(b.wine))
     const allReady = sortBy(
       allBottles
         .filter((b) => isReadyToDrink(wineDetails(b.wine)?.drinkWindow ?? {}, currentYear))
-        .map((b) => toReadyToDrinkWine(b, currentYear, favoriteIds)),
+        .map((b) => toReadyToDrinkWine(b, currentYear, favoriteIds, bottlesByWine)),
       (w) => (w.urgent ? 0 : 1),
       (w) => w.drinkUntil ?? Number.POSITIVE_INFINITY,
     )
@@ -53,7 +57,7 @@ export namespace DashboardQuery {
     const sortedBottles = sortBy(allBottles, (bottle) => -new Date(bottle.createdAt).getTime())
     const lastBottle = toLastBottle(sortedBottles[0])
 
-    const favorites = await loadFavorites(userId, favoriteTastings, allBottles)
+    const favorites = await loadFavorites(userId, favoriteTastings, allBottles, bottlesByWine)
 
     return {
       bottleCount: allBottles.length,
@@ -74,6 +78,7 @@ export namespace DashboardQuery {
     bottle: PlacedBottleWithWine,
     currentYear: number,
     favoriteIds: Set<BeverageId>,
+    bottlesByWine: Record<string, PlacedBottleWithWine[]>,
   ): ReadyToDrinkWine => {
     const details = wineDetails(bottle.wine)
     return {
@@ -93,6 +98,8 @@ export namespace DashboardQuery {
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       urgent: urgentToDrink(details?.drinkWindow ?? {}, currentYear),
       drinkUntil: details?.drinkWindow?.until,
+      estimatedPrice: bottle.wine.purchase?.price,
+      stock: bottlesByWine[sameWineKey(bottle.wine)]?.length ?? 1,
     }
   }
 
@@ -123,6 +130,7 @@ export namespace DashboardQuery {
     userId: UserId,
     tastings: TastingNote[],
     allBottles: PlacedBottleWithWine[],
+    bottlesByWine: Record<string, PlacedBottleWithWine[]>,
   ): Promise<FavoriteWine[]> => {
     const favorites = tastings.slice(0, DASHBOARD_SECTION_LIMIT)
     if (favorites.length === 0) return []
@@ -141,6 +149,9 @@ export namespace DashboardQuery {
         const wine: Beverage | undefined = visible[tasting.beverageId]
         if (!wine) return undefined
         const details = wineDetails(wine)
+        const identical = bottlesByWine[sameWineKey(wine)] ?? []
+        const placedBottle =
+          identical.find(({ beverageId }) => beverageId === wine.id) ?? identical[0]
         return {
           id: wine.id,
           name: wine.name,
@@ -155,6 +166,10 @@ export namespace DashboardQuery {
           estimatedPrice: wine.purchase?.price,
           tastingDate: tasting.consumedDate,
           rating: tasting.rating,
+          cellarId: placedBottle?.cellarId,
+          position: placedBottle && `${placedBottle.rowLabel}${placedBottle.colLabel}`,
+          drinkUntil: details?.drinkWindow?.until,
+          stock: identical.length,
         }
       })
       .filter((favorite): favorite is FavoriteWine => favorite !== undefined)

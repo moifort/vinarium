@@ -43,6 +43,13 @@ export type FavoriteWine = {
   estimatedPrice?: Eur
   tastingDate?: Date
   rating?: number
+  // Where the wine stands when it is in the household's cellars: its own bottle,
+  // else one identical to it. Absent once every such bottle is gone.
+  cellarId?: CellarId
+  position?: string
+  drinkUntil?: Year
+  // How many identical bottles the household's cellars hold (see sameWineKey).
+  stock: number
 }
 
 export type ReadyToDrinkWine = {
@@ -63,6 +70,9 @@ export type ReadyToDrinkWine = {
   position: string
   urgent: boolean
   drinkUntil?: Year
+  estimatedPrice?: Eur
+  // How many identical bottles the household's cellars hold (see sameWineKey).
+  stock: number
 }
 
 export type LastBottle = {

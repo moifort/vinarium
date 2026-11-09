@@ -6,6 +6,7 @@ import {
   requiresColor,
   retainedSubtype,
   SUBTYPES_BY_BEVERAGE,
+  sameWineKey,
   subtypeAllowed,
   urgentToDrink,
   wineDetails,
@@ -297,5 +298,32 @@ describe('labelFamily', () => {
     expect(labelFamily(wine({}, { color: 'white' }))).toBe('burgundy')
     expect(labelFamily(wine())).toBe('chateau')
     expect(labelFamily(wine({}, { color: undefined }))).toBe('chateau')
+  })
+})
+
+describe('sameWineKey', () => {
+  const wine = (fields: Partial<Record<string, unknown>>) =>
+    ({
+      id: 'w',
+      userId: 'u',
+      name: 'Les Charmes',
+      beverageType: 'wine',
+      producer: 'Domaine Roulot',
+      wine: { color: 'white', vintage: 2020 },
+      ...fields,
+    }) as unknown as Beverage
+
+  test('two bottles of one wine share a key, whatever the case, accents or spaces', () => {
+    expect(sameWineKey(wine({ name: '  les  charmes ', producer: 'DOMAINE ROULOT' }))).toBe(
+      sameWineKey(wine({})),
+    )
+    expect(sameWineKey(wine({ producer: 'Domaine Roulôt' }))).toBe(sameWineKey(wine({})))
+  })
+
+  test('another vintage or producer is another wine', () => {
+    expect(sameWineKey(wine({ wine: { color: 'white', vintage: 2021 } }))).not.toBe(
+      sameWineKey(wine({})),
+    )
+    expect(sameWineKey(wine({ producer: 'Coche-Dury' }))).not.toBe(sameWineKey(wine({})))
   })
 })

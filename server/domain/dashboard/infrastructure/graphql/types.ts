@@ -69,6 +69,26 @@ const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').impleme
       nullable: true,
       description: 'Rating from the latest tasting note; null when never rated',
     }),
+    cellarId: t.expose('cellarId', {
+      type: 'CellarId',
+      nullable: true,
+      description:
+        'The cellar holding this wine, or an identical bottle of it; null when none is placed',
+    }),
+    position: t.exposeString('position', {
+      nullable: true,
+      description:
+        'Cellar grid slot of this wine, or of an identical bottle; null when none is placed',
+    }),
+    drinkUntil: t.expose('drinkUntil', {
+      type: 'Year',
+      nullable: true,
+      description: 'Last recommended year to drink the wine; null when unknown',
+    }),
+    stock: t.exposeInt('stock', {
+      description:
+        'How many bottles of this wine (same producer, name and vintage) the cellars hold',
+    }),
   }),
 })
 
@@ -143,6 +163,15 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
       type: 'Year',
       nullable: true,
       description: 'Last recommended year to drink the bottle; null when unknown',
+    }),
+    estimatedPrice: t.expose('estimatedPrice', {
+      type: 'Eur',
+      nullable: true,
+      description: 'Estimated unit value in euros; null when unpriced',
+    }),
+    stock: t.exposeInt('stock', {
+      description:
+        'How many bottles of this wine (same producer, name and vintage) the cellars hold',
     }),
   }),
 })
