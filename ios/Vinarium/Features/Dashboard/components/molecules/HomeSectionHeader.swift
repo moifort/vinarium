@@ -42,25 +42,25 @@ struct HomeAmbience: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color(red: 0.47, green: 0.24, blue: 0.28).opacity(0.35), .clear],
+                colors: [Color(red: 0.47, green: 0.24, blue: 0.28).opacity(0.45), .clear],
                 startPoint: .top,
                 endPoint: UnitPoint(x: 0.5, y: 0.85)
             )
             EllipticalGradient(
-                colors: [Color(red: 0.84, green: 0.47, blue: 0.55).opacity(0.55), .clear],
+                colors: [Color(red: 0.84, green: 0.47, blue: 0.55).opacity(0.7), .clear],
                 center: UnitPoint(x: 0.3, y: 0.3),
                 startRadiusFraction: 0,
                 endRadiusFraction: 0.5
             )
             EllipticalGradient(
-                colors: [Color(red: 0.71, green: 0.55, blue: 0.35).opacity(0.45), .clear],
+                colors: [Color(red: 0.71, green: 0.55, blue: 0.35).opacity(0.55), .clear],
                 center: UnitPoint(x: 0.8, y: 0.18),
                 startRadiusFraction: 0,
                 endRadiusFraction: 0.45
             )
         }
         .blur(radius: 30)
-        .opacity(colorScheme == .dark ? 1 : 0.55)
+        .opacity(colorScheme == .dark ? 1 : 0.8)
         .allowsHitTesting(false)
         .accessibilityHidden(true)
     }

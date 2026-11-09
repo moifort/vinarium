@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The wines to open first, one page each: the bottle on its tinted ground, why it
+/// The wines to open first, one page each: the bottle on the page's haze, why it
 /// is due, where it stands, the notes kept on it, then the three things done with
 /// a bottle that is ready: take it out, mark it a favorite, move it.
 struct FeaturedWineCarousel: View {
@@ -76,14 +76,10 @@ struct FeaturedWineCarousel: View {
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
+    /// The bottle alone, no tile behind it: it stands on the page's ambience.
     private func cover(_ item: Item) -> some View {
-        ZStack {
-            BottleBackdrop(beverageType: item.beverageType, color: item.color)
-            BottleArtwork(style: item.style, producer: item.producer, name: item.name, vintage: item.vintage, height: 184)
-        }
-        .frame(width: 132, height: 198)
-        .clipShape(.rect(cornerRadius: 6))
-        .shadow(color: .black.opacity(0.28), radius: 9, y: 6)
+        BottleArtwork(style: item.style, producer: item.producer, name: item.name, vintage: item.vintage, height: 184)
+            .frame(width: 132, height: 198)
     }
 
     private func tag(_ item: Item) -> some View {
