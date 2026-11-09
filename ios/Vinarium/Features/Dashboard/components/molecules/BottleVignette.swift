@@ -28,14 +28,16 @@ struct BottleVignette: View {
         var price: Double?
     }
 
-    static let size = CGSize(width: 160, height: 208)
+    static let size = CGSize(width: 160, height: 224)
     /// The room on the left the bottle stands in, the column taking the rest.
-    private static let artWidth: CGFloat = 88
+    private static let artWidth: CGFloat = 84
     /// Every bottle is drawn this wide, whatever its shape, so the column always
     /// sits beside the glass and never over it.
     private static let bottleWidth: CGFloat = 80
     private static let columnWidth: CGFloat = size.width - artWidth
-    private static let veilWidth: CGFloat = 76
+    private static let veilWidth: CGFloat = 78
+    /// How far the bottle's base sits below the tile's bottom edge.
+    private static let baseDrop: CGFloat = 6
     private static let cornerRadius: CGFloat = 14
 
     var body: some View {
@@ -48,7 +50,7 @@ struct BottleVignette: View {
                 .overlay(Color.black.opacity(0.22))
                 .mask(alignment: .trailing) {
                     LinearGradient(
-                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.05)],
+                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.03)],
                         startPoint: .leading,
                         endPoint: .trailing
                     )
@@ -80,10 +82,11 @@ struct BottleVignette: View {
     }
 
     /// The tinted ground and the bottle, the same width for every shape and
-    /// centred on its label: the shoulder and the base run off the edges.
+    /// standing on the tile's bottom edge, its base just below it: the neck
+    /// runs off the top.
     private var scene: some View {
-        let label = style.shape.label
-        let scale = Self.bottleWidth / style.shape.path.boundingRect.width
+        let outline = style.shape.path.boundingRect
+        let scale = Self.bottleWidth / outline.width
         return BottleBackdrop(beverageType: beverageType, color: color)
             .frame(width: Self.size.width, height: Self.size.height)
             .overlay(alignment: .topLeading) {
@@ -95,8 +98,8 @@ struct BottleVignette: View {
                             appellation: appellation, classification: classification, height: 300 * scale
                         )
                         .offset(
-                            x: Self.artWidth / 2 - label.midX * scale,
-                            y: Self.size.height / 2 - label.midY * scale
+                            x: Self.artWidth / 2 - outline.midX * scale,
+                            y: Self.size.height + Self.baseDrop - outline.maxY * scale
                         )
                     }
                     .clipped()
