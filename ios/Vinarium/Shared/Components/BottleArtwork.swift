@@ -175,16 +175,19 @@ extension BottleArtwork {
                     p.closeSubpath()
                 }
             case .provence:
+                // The waist sits above the label and the body runs straight under it,
+                // so the paper is never cut by the glass.
                 Path { p in
-                    p.move(to: CGPoint(x: 43, y: 8)); p.addLine(to: CGPoint(x: 57, y: 8)); p.addLine(to: CGPoint(x: 57, y: 80))
-                    p.addCurve(to: CGPoint(x: 80, y: 150), control1: CGPoint(x: 57, y: 100), control2: CGPoint(x: 80, y: 120))
-                    p.addCurve(to: CGPoint(x: 72, y: 215), control1: CGPoint(x: 80, y: 175), control2: CGPoint(x: 70, y: 190))
-                    p.addCurve(to: CGPoint(x: 82, y: 280), control1: CGPoint(x: 74, y: 240), control2: CGPoint(x: 82, y: 255))
-                    p.addQuadCurve(to: CGPoint(x: 70, y: 294), control: CGPoint(x: 82, y: 294))
-                    p.addLine(to: CGPoint(x: 30, y: 294)); p.addQuadCurve(to: CGPoint(x: 18, y: 280), control: CGPoint(x: 18, y: 294))
-                    p.addCurve(to: CGPoint(x: 28, y: 215), control1: CGPoint(x: 18, y: 255), control2: CGPoint(x: 26, y: 240))
-                    p.addCurve(to: CGPoint(x: 20, y: 150), control1: CGPoint(x: 30, y: 190), control2: CGPoint(x: 20, y: 175))
-                    p.addCurve(to: CGPoint(x: 43, y: 80), control1: CGPoint(x: 20, y: 120), control2: CGPoint(x: 43, y: 100))
+                    p.move(to: CGPoint(x: 43, y: 8)); p.addLine(to: CGPoint(x: 57, y: 8)); p.addLine(to: CGPoint(x: 57, y: 74))
+                    p.addCurve(to: CGPoint(x: 79, y: 138), control1: CGPoint(x: 57, y: 94), control2: CGPoint(x: 79, y: 110))
+                    p.addCurve(to: CGPoint(x: 73, y: 180), control1: CGPoint(x: 79, y: 160), control2: CGPoint(x: 73, y: 166))
+                    p.addCurve(to: CGPoint(x: 82, y: 228), control1: CGPoint(x: 73, y: 196), control2: CGPoint(x: 82, y: 206))
+                    p.addLine(to: CGPoint(x: 82, y: 282)); p.addQuadCurve(to: CGPoint(x: 70, y: 294), control: CGPoint(x: 82, y: 294))
+                    p.addLine(to: CGPoint(x: 30, y: 294)); p.addQuadCurve(to: CGPoint(x: 18, y: 282), control: CGPoint(x: 18, y: 294))
+                    p.addLine(to: CGPoint(x: 18, y: 228))
+                    p.addCurve(to: CGPoint(x: 27, y: 180), control1: CGPoint(x: 18, y: 206), control2: CGPoint(x: 27, y: 196))
+                    p.addCurve(to: CGPoint(x: 21, y: 138), control1: CGPoint(x: 27, y: 166), control2: CGPoint(x: 21, y: 160))
+                    p.addCurve(to: CGPoint(x: 43, y: 74), control1: CGPoint(x: 21, y: 110), control2: CGPoint(x: 43, y: 94))
                     p.closeSubpath()
                 }
             case .flute:
