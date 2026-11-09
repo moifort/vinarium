@@ -344,16 +344,6 @@ struct BottleBackdrop: View {
         case .red, nil: (Color(hex: 0x5A1622), Color(hex: 0x16060A))
         }
     }
-
-    /// The flat colour of a card carrying this wine, a shade of its backdrop.
-    static func cardColor(beverageType: BeverageType, color: WineColor?) -> Color {
-        guard beverageType == .wine else { return Color(hex: 0x2C1A12) }
-        return switch color {
-        case .white: Color(hex: 0x2E2810)
-        case .rosé: Color(hex: 0x3D1A24)
-        case .red, nil: Color(hex: 0x3B1220)
-        }
-    }
 }
 
 #Preview("Families") {

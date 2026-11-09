@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// The latest bottles in and out of the cellar, one dark card each in the wine's
-/// colour, sliding sideways: the bottle on the left, the move, the wine and its
+/// The latest bottles in and out of the cellar, one card each on the bottle's
+/// own backdrop, sliding sideways: the bottle on the left, the move, the wine and its
 /// date on the right, and what to do next with it.
 struct RecentMovesSection: View {
     let moves: [Move]
@@ -27,37 +27,40 @@ struct RecentMovesSection: View {
         .accessibilityIdentifier("dashboard-recent-section")
     }
 
+    private static let cardSize = CGSize(width: 340, height: 164)
+    /// The bottle's lane on the leading edge, the text starting just past it.
+    private static let bottleLane: CGFloat = 80
+    private static let textLeading: CGFloat = 4
+
+    // The type sizes of Shiori's "En cours" card: subheadline, bold title 3,
+    // caption, as they stand at the default text size.
     private func card(_ move: Move) -> some View {
         Button { onOpen(move.wineId) } label: {
             HStack(spacing: 0) {
-                ZStack {
-                    BottleBackdrop(beverageType: move.beverageType, color: move.color)
-                    BottleArtwork(style: move.style, producer: move.producer, name: move.name, vintage: move.vintage, height: 150)
-                }
-                .frame(width: 104, height: 164)
+                BottleArtwork(style: move.style, producer: move.producer, name: move.name, vintage: move.vintage, height: 156)
+                    .frame(width: Self.bottleLane, height: Self.cardSize.height)
 
                 VStack(alignment: .leading, spacing: 0) {
                     Text(move.overline)
-                        .font(.system(size: 13))
+                        .font(.system(size: 15))
                         .foregroundStyle(.white.opacity(0.72))
                         .lineLimit(1)
                     Text(move.name)
-                        .font(.system(size: 19, weight: .bold))
+                        .font(.system(size: 20, weight: .bold))
                         .lineLimit(2)
-                        .padding(.top, 2)
                     Text(move.dateLine)
-                        .font(.system(size: 13))
+                        .font(.system(size: 12))
                         .foregroundStyle(.white.opacity(0.72))
                         .lineLimit(1)
-                        .padding(.top, 4)
+                        .padding(.top, 6)
                     Spacer(minLength: 0)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(EdgeInsets(top: 14, leading: 16, bottom: 14, trailing: 14))
+                .padding(EdgeInsets(top: 14, leading: Self.textLeading, bottom: 14, trailing: 14))
             }
-            .frame(width: 340, height: 164)
-            .background(BottleBackdrop.cardColor(beverageType: move.beverageType, color: move.color))
+            .frame(width: Self.cardSize.width, height: Self.cardSize.height)
+            .background { ground(move) }
             .clipShape(.rect(cornerRadius: 18))
             .contentShape(.rect(cornerRadius: 18))
         }
@@ -70,18 +73,29 @@ struct RecentMovesSection: View {
                     pill("Déplacer", filled: false) { onMove(move.wineId) }
                 }
             }
-            .padding(.leading, 104 + 16)
+            .padding(.leading, Self.bottleLane + Self.textLeading)
             .padding(.bottom, 14)
+        }
+    }
+
+    /// One ground under the bottle and the text: the bottle's own backdrop, lit
+    /// behind the bottle and darkening towards the far edge, as the board draws it.
+    private func ground(_ move: Move) -> some View {
+        let (center, edge) = BottleBackdrop.tones(beverageType: move.beverageType, color: move.color)
+        return edge.overlay(alignment: .topLeading) {
+            EllipticalGradient(colors: [center, edge], center: .center, startRadiusFraction: 0, endRadiusFraction: 0.5)
+                .frame(width: 660, height: 460)
+                .position(x: 40, y: Self.cardSize.height * 0.32)
         }
     }
 
     private func pill(_ title: LocalizedStringKey, filled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 12, weight: .semibold))
                 .lineLimit(1)
-                .padding(.horizontal, 14)
-                .frame(height: 32)
+                .padding(.horizontal, 12)
+                .frame(height: 28)
                 .foregroundStyle(filled ? Color.black : Color.white)
                 .background(filled ? Color.white : Color.white.opacity(0.18), in: .capsule)
                 .contentShape(.capsule)
