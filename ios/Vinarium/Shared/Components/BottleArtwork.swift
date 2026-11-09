@@ -96,7 +96,7 @@ extension BottleArtwork {
         var kind: String? = nil
 
         /// The bottle a wine is drawn in. The family picks the shape, the glass and
-        /// the label's layout; the wine's id picks one of the family's six looks,
+        /// the label's layout; the wine's id picks one of the family's nine looks,
         /// so a wine always wears the same label; a vintage twenty-five years old
         /// yellows the paper. Without a family from the API, the broad one is
         /// guessed from the type and the colour.
@@ -111,9 +111,10 @@ extension BottleArtwork {
         ) -> Style {
             let pick = abs(id.unicodeScalars.reduce(0) { ($0 &* 31) &+ Int($1.value) })
             let family = family ?? .guess(beverageType: beverageType, subtype: subtype, color: color)
-            var look = LabelLook.looks(of: family)[(pick / 7) % 6]
+            let looks = LabelLook.looks(of: family)
+            var look = looks[(pick / 7) % looks.count]
             let aged = vintage.map { $0 <= year - 25 } ?? false
-            look.aged = aged && [.chateau, .burgundy, .south, .sweet, .italy].contains(family)
+            look.aged = aged && [.chateau, .burgundy, .south, .sweet, .italy, .rhone, .spain, .portugal].contains(family)
             let kind: String? = beverageType == .wine ? nil : subtype.map { $0.label(for: beverageType) } ?? beverageType.label
             let (shape, glass): (Shape, Glass) = switch family {
             case .chateau: (.bordeaux, aged || pick % 4 == 0 ? .brown : .green)
@@ -126,6 +127,13 @@ extension BottleArtwork {
             case .natural: (.burgundy, .olive)
             case .italy: (.burgundy, .brown)
             case .spirit: (.whisky, .amber)
+            case .loire: (.burgundy, color == .white ? .olive : .green)
+            case .rhone: (.burgundy, .brown)
+            case .spain: (.bordeaux, .brown)
+            case .portugal: (.bordeaux, pick % 3 == 0 ? .green : .brown)
+            case .germany: (.flute, pick % 2 == 0 ? .brown : .green)
+            case .newWorld: (.bordeaux, color == .white ? .olive : .green)
+            case .sparkling: (.champagne, .green)
             }
             return Style(shape: shape, glass: glass, capsule: look.capsule, look: look, kind: kind)
         }
