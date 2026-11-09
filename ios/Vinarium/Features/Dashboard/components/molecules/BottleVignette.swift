@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// A portrait tile on a home shelf: the bottle drawn close enough to read its
-/// label, and on its right, over a blurred veil, a compact column centred on
-/// the height: the slot, the drinking limit, the stock and the price, in that
+/// label, and on its right, over a blurred veil, a compact column set at the
+/// bottom: the slot, the drinking limit, the stock and the price, in that
 /// order, each line left out when there is nothing to show. The label names
 /// the wine, so nothing is written under the tile.
 struct BottleVignette: View {
@@ -28,7 +28,7 @@ struct BottleVignette: View {
         var price: Double?
     }
 
-    static let size = CGSize(width: 160, height: 232)
+    static let size = CGSize(width: 160, height: 208)
     /// The room on the left the bottle stands in, the column taking the rest.
     private static let artWidth: CGFloat = 88
     /// Every bottle is drawn this wide, whatever its shape, so the column always
@@ -121,8 +121,9 @@ struct BottleVignette: View {
             }
         }
         .padding(.horizontal, 6)
+        .padding(.bottom, 6)
         .frame(width: Self.columnWidth)
-        .frame(maxHeight: .infinity)
+        .frame(maxHeight: .infinity, alignment: .bottom)
         .foregroundStyle(.white)
         .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
     }
