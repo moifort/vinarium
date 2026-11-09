@@ -121,6 +121,13 @@ export type LabelFamily =
   | 'natural'
   | 'italy'
   | 'spirit'
+  | 'loire'
+  | 'rhone'
+  | 'spain'
+  | 'portugal'
+  | 'germany'
+  | 'new-world'
+  | 'sparkling'
 
 export type BeverageSort = 'createdAt' | 'updatedAt' | 'vintage' | 'region' | 'color' | 'price'
 export type SortOrder = 'asc' | 'desc'

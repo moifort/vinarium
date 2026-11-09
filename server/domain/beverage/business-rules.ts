@@ -135,43 +135,77 @@ export const retainedSubtype = (
   subtype !== undefined && subtypeAllowed(beverageType, subtype) ? subtype : undefined
 
 // Free text folded for matching: lower case, without accents, so "Rhône",
-// "rhone" and "RHÔNE" read the same.
-const folded = (text?: string) => (text ?? '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
+// "rhone" and "RHÔNE" read the same. Only Latin accents go: the voicing marks of
+// kana ("スペイン", "ブルゴーニュ") are part of the word and stay.
+const folded = (text?: string) =>
+  (text ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .normalize('NFC')
+    .toLowerCase()
+
+// The countries whose wines have a label tradition of their own, in the seven
+// languages a country may be written in (folded, so "Österreich" reads
+// "osterreich"). Country is free text, like region.
+const COUNTRY_FAMILIES: readonly [RegExp, LabelFamily][] = [
+  [/ital|イタリア/, 'italy'],
+  [/espagne|spain|espana|spanien|spagna|espanha|スペイン/, 'spain'],
+  [/portugal|portogallo|ポルトガル/, 'portugal'],
+  [
+    /allemagne|germany|deutschland|alemania|germania|alemanha|ドイツ|autriche|austria|osterreich|oesterreich|オーストリア/,
+    'germany',
+  ],
+  [
+    /etats-unis|united states|\busa\b|\bus\b|estados unidos|vereinigte staaten|stati uniti|アメリカ|chili|chile|\bcile\b|チリ|argentin|アルゼンチン|australi|オーストラリア|zelande|zealand|neuseeland|zelanda|zelandia|ニュージーランド|afrique du sud|south africa|sudafrika|sudafrica|africa do sul|南アフリカ|canada|kanada|カナダ|uruguay|uruguai|ウルグアイ/,
+    'new-world',
+  ],
+]
 
 // The regions whose labels have a house style, in the seven languages a region
-// may be written in. Region is free text: a scan writes it in the user's
-// language, a hand-typed one in any.
+// may be written in, and the appellations that name them. Region is free text:
+// a scan writes it in the user's language, a hand-typed one in any.
 const REGION_FAMILIES: readonly [RegExp, LabelFamily][] = [
   [/alsace|elsass|alsazia|alsacia|アルザス/, 'alsace'],
   [/bourgogne|burgund|borgogna|borgona|borgonha|beaujolais|chablis|ブルゴーニュ/, 'burgundy'],
   [/bordeaux|bordeus|burdeos|bordo|medoc|graves|saint-emilion|pomerol|ボルドー/, 'chateau'],
-  [/rhone|rodano|languedoc|roussillon|provence|provenza|corse|corsica|corcega|ローヌ/, 'south'],
+  [/rhone|rodano|chateauneuf|hermitage|cote-rotie|gigondas|condrieu|ローヌ/, 'rhone'],
+  [/loire|sancerre|vouvray|anjou|saumur|muscadet|touraine|chinon|pouilly-fume|ロワール/, 'loire'],
+  [/languedoc|roussillon|provence|provenza|corse|corsica|corcega|ラングドック/, 'south'],
 ]
 
 // Wines drawn with the sweet label: what is served with dessert or after it.
 const SWEET_SUBTYPES: readonly BeverageSubtype[] = ['sweet', 'late-harvest', 'porto', 'fortified']
+
+// Where a sparkling wine says Champagne, in any of the seven languages.
+const CHAMPAGNE = /champagne|champana|champanhe|シャンパーニュ/
 
 // Appellations that say the wine stands outside the appellation system: the
 // natural-wine label, loose and hand-drawn.
 const NATURAL_APPELLATION = /vin de france|vin de table|vino da tavola|vino de mesa/
 
 // The label family a bottle is drawn with. What the wine is decides first (a
-// spirit, a sparkling wine, a sweet one), then where it comes from (Italy, a
-// rosé, a region with a house style), then how it names itself (a château, a
-// domaine); a white falls back to the Burgundy label, everything else to the
-// château.
+// spirit, a sparkling wine, a sweet one), then where it comes from (a country
+// with a label tradition, a rosé, a region with a house style), then how it
+// names itself (a château, a domaine); a white falls back to the Burgundy
+// label, everything else to the château.
 export const labelFamily = (beverage: Beverage): LabelFamily => {
   if (beverage.beverageType !== 'wine') return 'spirit'
   const { subtype } = beverage
   // A wine stored before the details object existed carries none.
   const wine: WineDetails = beverage.wine ?? {}
-  if (subtype === 'sparkling') return 'champagne'
-  if (SWEET_SUBTYPES.includes(subtype as BeverageSubtype)) return 'sweet'
   const country = folded(beverage.country)
-  if (/ital|イタリア/.test(country)) return 'italy'
+  const place = `${folded(beverage.region)} ${folded(wine.appellation)}`.trim()
+  // A sparkling wine wears the Champagne shield when it says Champagne, or says
+  // nothing of a place beyond France; a crémant, a cava or a prosecco the sash.
+  if (subtype === 'sparkling') {
+    if (CHAMPAGNE.test(place)) return 'champagne'
+    return place || (country && country !== 'france') ? 'sparkling' : 'champagne'
+  }
+  if (SWEET_SUBTYPES.includes(subtype as BeverageSubtype)) return 'sweet'
+  const byCountry = COUNTRY_FAMILIES.find(([pattern]) => pattern.test(country))
+  if (byCountry) return byCountry[1]
   if (wine.color === 'rosé') return 'provence'
-  const region = folded(beverage.region)
-  const byRegion = REGION_FAMILIES.find(([pattern]) => pattern.test(region))
+  const byRegion = REGION_FAMILIES.find(([pattern]) => pattern.test(place))
   if (byRegion) return byRegion[1]
   if (NATURAL_APPELLATION.test(folded(wine.appellation))) return 'natural'
   const producer = folded(beverage.producer)

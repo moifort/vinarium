@@ -16,9 +16,9 @@ export const LabelFamilyEnum = builder.enumType('LabelFamily', {
   description:
     "The house style a bottle's label is drawn in on the home screen.\n\n" +
     'Read from what the wine says of itself: its type and subtype first (a spirit, a ' +
-    'sparkling wine, a sweet one), then where it comes from (Italy, a rosé, a region with a ' +
-    'label tradition), then how the producer names itself (a château, a domaine). The app ' +
-    'draws the family and varies paper, ink and ornament per wine.',
+    'sparkling wine, a sweet one), then where it comes from (a country or a region with a ' +
+    'label tradition, a rosé), then how the producer names itself (a château, a domaine). ' +
+    'The app draws the family and varies paper, ink and ornament per wine.',
   values: {
     CHATEAU: {
       value: 'chateau',
@@ -30,12 +30,12 @@ export const LabelFamilyEnum = builder.enumType('LabelFamily', {
     },
     CHAMPAGNE: {
       value: 'champagne',
-      description: 'Champagne: a shield on a dark ground and a neck collar',
+      description: 'Champagne, or a sparkling wine from nowhere else: a shield and a neck collar',
     },
     PROVENCE: { value: 'provence', description: 'Provence rosé: a light veil and a sun' },
     SOUTH: {
       value: 'south',
-      description: 'Rhône and the South: warm paper and a round vintage stamp',
+      description: 'Languedoc, Roussillon, Provence, Corsica: warm paper and a vintage stamp',
     },
     ALSACE: { value: 'alsace', description: 'Alsace: a coloured band, the grape in title' },
     SWEET: {
@@ -50,6 +50,31 @@ export const LabelFamilyEnum = builder.enumType('LabelFamily', {
     SPIRIT: {
       value: 'spirit',
       description: 'Anything that is not wine: a dark label with gold type',
+    },
+    LOIRE: {
+      value: 'loire',
+      description: 'Loire: an Optima label set flush left, a river at its foot',
+    },
+    RHONE: {
+      value: 'rhone',
+      description: 'Rhône: an arched label under the crossed keys of the popes',
+    },
+    SPAIN: {
+      value: 'spain',
+      description: 'Spain: the gilded Rioja wire over the glass, the ageing on a band',
+    },
+    PORTUGAL: { value: 'portugal', description: 'Portugal (port aside): a frieze of azulejos' },
+    GERMANY: {
+      value: 'germany',
+      description: 'Germany and Austria: the flute, a bunch of grapes, the Prädikat in a box',
+    },
+    NEW_WORLD: {
+      value: 'new-world',
+      description: 'The New World: white space, a line drawing of the land, the grape in title',
+    },
+    SPARKLING: {
+      value: 'sparkling',
+      description: 'Sparkling wines beyond Champagne (crémant, cava, prosecco): a sash across',
     },
   } as const,
 })

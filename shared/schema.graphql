@@ -1463,7 +1463,7 @@ type JournalEvents {
 """
 The house style a bottle's label is drawn in on the home screen.
 
-Read from what the wine says of itself: its type and subtype first (a spirit, a sparkling wine, a sweet one), then where it comes from (Italy, a rosé, a region with a label tradition), then how the producer names itself (a château, a domaine). The app draws the family and varies paper, ink and ornament per wine.
+Read from what the wine says of itself: its type and subtype first (a spirit, a sparkling wine, a sweet one), then where it comes from (a country or a region with a label tradition, a rosé), then how the producer names itself (a château, a domaine). The app draws the family and varies paper, ink and ornament per wine.
 """
 enum LabelFamily {
   """Alsace: a coloured band, the grape in title"""
@@ -1472,23 +1472,54 @@ enum LabelFamily {
   """Burgundy domaine: sober white label, the appellation first"""
   BURGUNDY
 
-  """Champagne: a shield on a dark ground and a neck collar"""
+  """
+  Champagne, or a sparkling wine from nowhere else: a shield and a neck collar
+  """
   CHAMPAGNE
 
   """Bordeaux château: framed ivory label, emblem, classification"""
   CHATEAU
 
+  """
+  Germany and Austria: the flute, a bunch of grapes, the Prädikat in a box
+  """
+  GERMANY
+
   """Italy: a crest, capitals and a DOCG band on the neck"""
   ITALY
+
+  """Loire: an Optima label set flush left, a river at its foot"""
+  LOIRE
 
   """Vin de France: a bold coloured ground, hand-set type"""
   NATURAL
 
+  """
+  The New World: white space, a line drawing of the land, the grape in title
+  """
+  NEW_WORLD
+
+  """Portugal (port aside): a frieze of azulejos"""
+  PORTUGAL
+
   """Provence rosé: a light veil and a sun"""
   PROVENCE
 
-  """Rhône and the South: warm paper and a round vintage stamp"""
+  """Rhône: an arched label under the crossed keys of the popes"""
+  RHONE
+
+  """
+  Languedoc, Roussillon, Provence, Corsica: warm paper and a vintage stamp
+  """
   SOUTH
+
+  """Spain: the gilded Rioja wire over the glass, the ageing on a band"""
+  SPAIN
+
+  """
+  Sparkling wines beyond Champagne (crémant, cava, prosecco): a sash across
+  """
+  SPARKLING
 
   """Anything that is not wine: a dark label with gold type"""
   SPIRIT

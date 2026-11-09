@@ -186,10 +186,29 @@ describe('labelFamily', () => {
     },
   )
 
-  test('a sparkling wine wears the champagne label, whatever its region', () => {
-    expect(labelFamily(wine({ subtype: 'sparkling', region: 'Alsace' }, { color: 'white' }))).toBe(
-      'champagne',
-    )
+  test.each([
+    [{ region: 'Champagne' }, {}],
+    [{ region: 'Alsace' }, { appellation: 'Champagne' }],
+    [{}, {}],
+    [{ country: 'France' }, {}],
+  ])(
+    'a sparkling wine from Champagne, or from nowhere named, wears the shield',
+    (fields, details) => {
+      expect(
+        labelFamily(wine({ subtype: 'sparkling', ...fields }, { color: 'white', ...details })),
+      ).toBe('champagne')
+    },
+  )
+
+  test.each([
+    [{ region: 'Alsace' }, { appellation: "Crémant d'Alsace" }],
+    [{ country: 'Espagne' }, { appellation: 'Cava' }],
+    [{ country: 'Italia' }, {}],
+    [{ region: 'Loire' }, {}],
+  ])('a sparkling wine from elsewhere wears the sash', (fields, details) => {
+    expect(
+      labelFamily(wine({ subtype: 'sparkling', ...fields }, { color: 'white', ...details })),
+    ).toBe('sparkling')
   })
 
   test.each(['sweet', 'late-harvest', 'porto', 'fortified'])(
@@ -206,6 +225,31 @@ describe('labelFamily', () => {
     },
   )
 
+  test.each([
+    ['Espagne', 'spain'],
+    ['España', 'spain'],
+    ['Spanien', 'spain'],
+    ['スペイン', 'spain'],
+    ['Portugal', 'portugal'],
+    ['Allemagne', 'germany'],
+    ['Deutschland', 'germany'],
+    ['Autriche', 'germany'],
+    ['Österreich', 'germany'],
+    ['États-Unis', 'new-world'],
+    ['USA', 'new-world'],
+    ['Chili', 'new-world'],
+    ['Argentina', 'new-world'],
+    ['Australie', 'new-world'],
+    ['Nouvelle-Zélande', 'new-world'],
+    ['Südafrika', 'new-world'],
+  ] as const)('a wine from %s wears the %s label', (country, family) => {
+    expect(labelFamily(wine({ country, region: 'X' }))).toBe(family)
+  })
+
+  test('a port stays a sweet wine, though Portuguese', () => {
+    expect(labelFamily(wine({ subtype: 'porto', country: 'Portugal' }))).toBe('sweet')
+  })
+
   test('a rosé wears the Provence label, even from Bordeaux', () => {
     expect(labelFamily(wine({ region: 'Bordeaux' }, { color: 'rosé' }))).toBe('provence')
   })
@@ -219,11 +263,19 @@ describe('labelFamily', () => {
     ['ブルゴーニュ', 'burgundy'],
     ['Bordeaux', 'chateau'],
     ['Médoc', 'chateau'],
-    ['Vallée du Rhône', 'south'],
-    ['RHÔNE', 'south'],
+    ['Vallée du Rhône', 'rhone'],
+    ['RHÔNE', 'rhone'],
     ['Languedoc-Roussillon', 'south'],
+    ['Corse', 'south'],
+    ['Vallée de la Loire', 'loire'],
+    ['ロワール', 'loire'],
   ] as const)('a wine from %s wears the %s label', (region, family) => {
-    expect(labelFamily(wine({ region, producer: 'Domaine X' }))).toBe(family)
+    expect(labelFamily(wine({ region, producer: 'Château X' }, { color: 'white' }))).toBe(family)
+  })
+
+  test('the appellation names the region when the region is missing', () => {
+    expect(labelFamily(wine({}, { appellation: 'Châteauneuf-du-Pape' }))).toBe('rhone')
+    expect(labelFamily(wine({}, { appellation: 'Sancerre', color: 'white' }))).toBe('loire')
   })
 
   test('a Vin de France wears the natural label', () => {
