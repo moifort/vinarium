@@ -151,7 +151,7 @@ extension DashboardPage.Content {
         ],
         favorites: [
             .init(id: "v1", color: .red, producer: "Château Talbot", name: "Château Talbot", vintage: 2016, facts: .init(place: "C2", drinkUntil: 2036, stock: 2, price: 68), labelFamily: .chateau, appellation: "Saint-Julien", classification: "Grand Cru Classé"),
-            .init(id: "v2", color: .white, producer: "Domaine Roulot", name: "Meursault Les Charmes", vintage: 2020, facts: .init(place: "A3", drinkUntil: 2030, stock: 1, price: 240), labelFamily: .burgundy, appellation: "Meursault"),
+            .init(id: "v2", color: .white, producer: "Domaine Roulot", name: "Meursault Les Charmes", vintage: 2020, facts: .init(place: nil, drinkUntil: 2030, stock: 0, price: 240), labelFamily: .burgundy, appellation: "Meursault"),
             .init(id: "w1", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, facts: .init(place: "D1", drinkUntil: 2040, stock: 3, price: 95), labelFamily: .chateau, appellation: "Margaux"),
         ]
     )
