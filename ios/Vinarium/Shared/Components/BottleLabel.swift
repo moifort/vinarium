@@ -829,9 +829,10 @@ extension BottleArtwork {
         pen.paper(r, v)
         func frieze(top: CGFloat, rows: Int, side s: CGFloat) {
             let band = CGRect(x: r.minX, y: top, width: r.width, height: CGFloat(rows) * s)
+            // Painted straight on the paper, so the tiles take its colour and the
+            // curve of the glass instead of a flat white band.
             var tiles = pen
             tiles.context.clip(to: Path(band))
-            tiles.fill(Path(band), Color(hex: 0xF5F6F8))
             let columns = Int((r.width / s).rounded(.up))
             for row in 0..<rows {
                 for i in 0..<columns {
@@ -851,6 +852,17 @@ extension BottleArtwork {
                     tiles.fill(Path(ellipseIn: corner), blue)
                 }
             }
+            // The same falloff as the paper's edges, so the tiles turn with the glass.
+            tiles.context.fill(Path(band), with: .linearGradient(
+                Gradient(stops: [
+                    .init(color: .black.opacity(0.28), location: 0),
+                    .init(color: .black.opacity(0), location: 0.22),
+                    .init(color: .black.opacity(0), location: 0.72),
+                    .init(color: .black.opacity(0.38), location: 1),
+                ]),
+                startPoint: CGPoint(x: r.minX, y: 0),
+                endPoint: CGPoint(x: r.maxX, y: 0)
+            ))
         }
         let side = r.width / 6
         let rows = v.banded ? 2 : 1
