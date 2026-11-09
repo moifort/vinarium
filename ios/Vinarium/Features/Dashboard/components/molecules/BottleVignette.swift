@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// A portrait tile on a home shelf: the bottle drawn close enough to read its
-/// label, and on its right, over a blurred veil, a compact column set at the
-/// bottom: the slot, the drinking limit, the stock and the price, in that
-/// order, each line left out when there is nothing to show. The label names
+/// label, and on its right, on the same plain ground as the bottle, a compact
+/// column set at the bottom: the slot, the drinking limit, the stock and the
+/// price, in that order, each line left out when there is nothing to show. The label names
 /// the wine, so nothing is written under the tile.
 struct BottleVignette: View {
     let style: BottleArtwork.Style
@@ -28,14 +28,13 @@ struct BottleVignette: View {
         var price: Double?
     }
 
-    static let size = CGSize(width: 160, height: 224)
+    static let size = CGSize(width: 160, height: 210)
     /// The room on the left the bottle stands in, the column taking the rest.
     private static let artWidth: CGFloat = 84
     /// Every bottle is drawn this wide, whatever its shape, so the column always
     /// sits beside the glass and never over it.
     private static let bottleWidth: CGFloat = 80
     private static let columnWidth: CGFloat = size.width - artWidth
-    private static let veilWidth: CGFloat = 78
     /// How far the bottle's base sits below the tile's bottom edge.
     private static let baseDrop: CGFloat = 6
     private static let cornerRadius: CGFloat = 14
@@ -43,32 +42,6 @@ struct BottleVignette: View {
     var body: some View {
         ZStack {
             scene
-            // The veil behind the column: the scene blurred and darkened, fading in
-            // from the left.
-            scene
-                .blur(radius: 10, opaque: true)
-                .overlay(Color.black.opacity(0.22))
-                .mask(alignment: .trailing) {
-                    LinearGradient(
-                        stops: [.init(color: .clear, location: 0), .init(color: .black, location: 0.03)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .frame(width: Self.veilWidth)
-                }
-            // Soft edges where the bottle runs off the top and the bottom.
-            scene
-                .blur(radius: 6, opaque: true)
-                .mask(alignment: .top) {
-                    LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 30)
-                }
-            scene
-                .blur(radius: 6, opaque: true)
-                .mask(alignment: .bottom) {
-                    LinearGradient(colors: [.clear, .black], startPoint: .top, endPoint: .bottom)
-                        .frame(height: 24)
-                }
             column
                 .frame(maxWidth: .infinity, alignment: .trailing)
         }
