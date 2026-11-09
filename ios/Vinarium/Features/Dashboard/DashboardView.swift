@@ -100,6 +100,11 @@ struct DashboardView: View {
         let urgent = data.readyToDrink.filter(\.urgent)
         let featured = urgent.isEmpty ? Array(data.readyToDrink.prefix(1)) : urgent
         let featuredIds = Set(featured.map(\.id))
+        // The shelf holds the ready wines the carousel leaves out. When the carousel
+        // takes them all (every wine sent is due soon, or only one is ready), the
+        // shelf shows them all again rather than vanishing.
+        let others = data.readyToDrink.filter { !featuredIds.contains($0.id) }
+        let shelf = others.isEmpty ? data.readyToDrink : others
         return .init(
             figures: .init(
                 bottleCount: data.bottleCount,
@@ -143,7 +148,7 @@ struct DashboardView: View {
                     labelFamily: event.labelFamily
                 )
             },
-            ready: data.readyToDrink.filter { !featuredIds.contains($0.id) }.map { wine in
+            ready: shelf.map { wine in
                 .init(
                     id: wine.id,
                     beverageType: wine.beverageType,
