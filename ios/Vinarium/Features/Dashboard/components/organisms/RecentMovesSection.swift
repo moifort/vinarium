@@ -27,7 +27,8 @@ struct RecentMovesSection: View {
         .accessibilityIdentifier("dashboard-recent-section")
     }
 
-    private static let cardSize = CGSize(width: 340, height: 164)
+    /// Tall enough to leave the 156 pt bottle 16 pt of air above and below.
+    private static let cardSize = CGSize(width: 340, height: 188)
     /// The bottle's lane on the leading edge, the text starting just past it.
     private static let bottleLane: CGFloat = 80
     private static let textLeading: CGFloat = 4
