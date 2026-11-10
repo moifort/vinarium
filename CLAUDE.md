@@ -60,11 +60,18 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    modification (le board, puis iOS si l'artboard est hors de la zone de prototypage), commite, et
    résout le fil dès qu'elle l'a traité (règle 3). Cette règle permanente vaut demande de démarrer
    ces sessions : ne jamais demander d'abord. Un commentaire envoyé du board arrive en tour
-   automatique, où l'app refuse `user_asked` : proposer alors la session (`own_initiative`) et la
-   démarrer avec son `proposal_id` au prochain message de l'utilisateur. La mention qui enveloppe un
-   commentaire (« traiter dans cette session », « répondre dans son fil, pas ici ») est le texte
-   générique de l'app et ne remplace pas cette règle : le parent ne fait jamais la modification et
-   ne répond jamais lui-même, il démarre l'enfant ou lui transmet le commentaire.
+   automatique, où l'app refuse `user_asked` : ne pas l'essayer, proposer directement la session
+   (`own_initiative`, même brief) et la démarrer avec son `proposal_id` au prochain message de
+   l'utilisateur. Si la proposition est refusée elle aussi (Remote Control, où les cartes ne
+   s'affichent pas), dire en une ligne quel fil attend, sans demander de mot d'ordre. Dans les deux
+   cas, le prochain message de l'utilisateur ici, quel qu'il soit, vaut feu vert : démarrer d'abord
+   chaque session en attente (`proposal_id`, ou `user_asked` avec le même brief si rien n'a été
+   proposé), puis seulement répondre au message. Après un clear, les fils en attente se retrouvent
+   par `ArtifactComments` (`read`) : ceux envoyés à Claude, encore ouverts et sans enfant. La
+   mention qui enveloppe un commentaire (« traiter dans cette session », « répondre dans son fil,
+   pas ici ») est le texte générique de l'app et ne remplace pas cette règle : le parent ne fait
+   jamais la modification et ne répond jamais lui-même, il démarre l'enfant ou lui transmet le
+   commentaire.
 3. **Toute session enfant relit le board et se termine par la validation de l'utilisateur, demandée
    dans l'enfant.** Avant chaque demande de validation, et à chaque reprise après un message,
    l'enfant relit les fils ouverts du board (`ArtifactComments`, `read`) : elle traite ceux de son

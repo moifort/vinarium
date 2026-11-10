@@ -74,6 +74,16 @@ covers the theme. A child rereads the board's open threads (`ArtifactComments`, 
 every validation request and whenever a message wakes it, handles those on its theme and leaves
 the rest.
 
+Why a child does not always start at once: a comment sent from the board reaches the parent as
+an automated turn, not as the user's own message, and the app refuses to start a session
+(`user_asked`) on such a turn. The parent proposes it instead (`own_initiative`, a card the user
+clicks). Over Remote Control the cards do not show and the app refuses the proposal too: the
+parent then says in one line which thread is waiting. Either way, the user's next message in the
+parent, whatever it says, is the go-ahead: the parent starts every waiting child first
+(`proposal_id`, or `user_asked` with the same brief when nothing could be proposed), then answers
+the message. It never asks for a keyword. After a clear, the waiting threads are the open ones
+sent to Claude with no child (`ArtifactComments`, `read`).
+
 The parent stays light (it only dispatches, one line per comment) and is cleared every morning
 at 6:00: the scheduled task `vinarium-clear-parent` sends it "Clear du matin", and it calls
 `clear_session` on itself (CLAUDE.md, Board, rule 6).
