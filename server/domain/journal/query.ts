@@ -113,6 +113,7 @@ export namespace JournalQuery {
     wineVintage: wineDetails(wine)?.vintage,
     wineLabelFamily: labelFamily(wine),
     wineLabelTraits: wine.labelTraits,
+    winePrice: wine.purchase?.price,
     position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     actor: actorOf(entry, viewerId, scope),
   })

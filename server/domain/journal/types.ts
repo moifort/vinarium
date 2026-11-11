@@ -10,7 +10,7 @@ import type {
   WineColor,
 } from '~/domain/beverage/types'
 import type { CellarCol, CellarRow } from '~/domain/cellar/types'
-import type { PersonName, UserId, Year } from '~/domain/shared/types'
+import type { Eur, PersonName, UserId, Year } from '~/domain/shared/types'
 
 // The storage id of a journal entry, handed to the client as a page cursor.
 export type JournalEntryId = Brand<string, 'JournalEntryId'>
@@ -55,6 +55,8 @@ export type JournalEventView = {
   wineVintage?: Year
   wineLabelFamily: LabelFamily
   wineLabelTraits?: LabelTraits
+  // What one bottle cost, when it was bought.
+  winePrice?: Eur
   position: string
   actor: JournalEventActor
 }

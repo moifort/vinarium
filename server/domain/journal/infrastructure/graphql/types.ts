@@ -94,6 +94,11 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
       description: 'What the real label looks like, when scanned: the app draws its closest look.',
       resolve: (e) => e.wineLabelTraits,
     }),
+    winePrice: t.expose('winePrice', {
+      type: 'Eur',
+      nullable: true,
+      description: 'What one bottle of the wine cost, in euros; null when unpriced.',
+    }),
     position: t.exposeString('position', {
       description: 'Human-facing grid slot the bottle occupied (e.g. "A1").',
     }),

@@ -1449,6 +1449,9 @@ type JournalEvent {
   """
   wineLabelTraits: LabelTraits
 
+  """What one bottle of the wine cost, in euros; null when unpriced."""
+  winePrice: Eur
+
   """Structured subtype of the beverage (sparkling, ...); null when unset."""
   wineSubtype: BeverageSubtype
 
