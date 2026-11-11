@@ -68,10 +68,10 @@ struct FeaturedWineCarousel: View {
     private static let corkTop: CGFloat = 5 + bottleHeight * 8 / 300
     private static let base: CGFloat = 5 + bottleHeight * 294 / 300
 
-    /// Three blocks spread from the cork to the base, nothing below the bottle:
-    /// the wine, its drinking window, then its slot, stock and value.
+    /// Three blocks stacked on the bottle's base, nothing below it and no gap
+    /// between them: the wine, its drinking window, then its slot, stock and value.
     private func details(_ item: Item) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 0) {
                 tag(item)
                 Text(item.name)
@@ -89,19 +89,18 @@ struct FeaturedWineCarousel: View {
                         .padding(.top, 2)
                 }
             }
-            Spacer(minLength: 8)
             if let window = item.window {
                 DrinkingWindowRail(window: window)
-                Spacer(minLength: 8)
             }
             figures(item)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .frame(height: Self.base - Self.corkTop, alignment: .top)
+        .frame(height: Self.base - Self.corkTop, alignment: .bottom)
         .padding(.top, Self.corkTop)
     }
 
-    /// Slot, stock and value on three equal columns, as wide as the rail.
+    /// Slot, stock and value on three equal columns, as wide as the rail, each
+    /// centred in its column.
     private func figures(_ item: Item) -> some View {
         let cells = item.figures
         return HStack(spacing: 0) {
@@ -111,9 +110,8 @@ struct FeaturedWineCarousel: View {
                         Rectangle()
                             .fill(Color(.separator))
                             .frame(width: 1)
-                            .padding(.trailing, 12)
                     }
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .center, spacing: 2) {
                         Text(cell.value)
                             .font(.system(size: 20, weight: .semibold))
                             .tracking(-0.4)
@@ -127,7 +125,8 @@ struct FeaturedWineCarousel: View {
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .frame(maxWidth: .infinity)
                 }
                 .accessibilityElement(children: .combine)
             }

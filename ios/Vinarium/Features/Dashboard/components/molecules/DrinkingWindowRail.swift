@@ -2,8 +2,8 @@ import SwiftUI
 
 /// A wine's drinking window as the Weather app draws a day's temperatures: a
 /// faint rail from a little before the window to a little after, the window
-/// itself in a solid stroke, a dot for today. Above it, how long is left; below
-/// it, the window's first and last years under its two ends. One tint only.
+/// itself in a solid stroke, a dot for today. Above it, its title; below it,
+/// the window's first and last years under its two ends. One tint only.
 struct DrinkingWindowRail: View {
     struct Window: Equatable {
         let from: Int
@@ -19,17 +19,11 @@ struct DrinkingWindowRail: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                Text("Fenêtre de garde")
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(0.6)
-                    .textCase(.uppercase)
-                    .foregroundStyle(.secondary)
-                Spacer(minLength: 8)
-                remaining
-                    .font(.system(size: 15, weight: .semibold))
-                    .lineLimit(1)
-            }
+            Text("Garde")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(0.6)
+                .textCase(.uppercase)
+                .foregroundStyle(.secondary)
             rail
                 .frame(height: 12)
                 .padding(.top, 6)
@@ -37,17 +31,8 @@ struct DrinkingWindowRail: View {
                 .padding(.top, 3)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Fenêtre de garde"))
-        .accessibilityValue(Text("De \(String(window.from)) à \(String(window.until))") + Text(verbatim: ", ") + remaining)
-    }
-
-    /// How long is left, said plainly: before the window, during it, past it.
-    private var remaining: Text {
-        let year = Calendar.current.component(.year, from: now)
-        if year < window.from { return Text("dès \(String(window.from))") }
-        if year > window.until { return Text("à ouvrir sans tarder") }
-        let left = window.until - year
-        return left == 0 ? Text("dernière année") : Text("encore \(left) an")
+        .accessibilityLabel(Text("Garde"))
+        .accessibilityValue(Text("De \(String(window.from)) à \(String(window.until))"))
     }
 
     /// Where today falls on the rail, the window running from the first day of
