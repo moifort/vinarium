@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A bottle turning on itself, for the home of an empty cellar: a Grange des Pères
 /// 1985 in green Bordeaux glass, its paper label wrapped round the glass. The glass,
-/// its shading and its reflections stay still, as on a real bottle turned by hand;
+/// its shading and its reflections (`BottleGlass`) stay still, as on a real bottle turned by hand;
 /// only the label travels round, cut in thin strips laid on the cylinder, so it
 /// narrows towards the edges and disappears behind. One turn every nine seconds,
 /// held face on when Reduce Motion is on. Drawn in the 100 × 300 space of
@@ -45,18 +45,10 @@ struct SpinningBottle: View {
         let outline = shape.path
         var glass = context
         glass.scaleBy(x: scale, y: scale)
-        glass.fill(outline, with: .linearGradient(
-            BottleArtwork.Glass.green.gradient,
-            startPoint: .zero,
-            endPoint: CGPoint(x: 100, y: 0)
-        ))
+        BottleGlass.fill(BottleArtwork.Glass.green.gradient, shape: shape, in: glass)
         var inside = glass
         inside.clip(to: outline)
-        inside.fill(Path(CGRect(x: 0, y: 0, width: 100, height: shape.capsuleHeight)), with: .linearGradient(
-            BottleArtwork.Capsule.bordeaux.gradient,
-            startPoint: .zero,
-            endPoint: CGPoint(x: 100, y: 0)
-        ))
+        BottleGlass.fill(BottleArtwork.Capsule.bordeaux.gradient, shape: shape, to: shape.capsuleHeight, in: inside)
         inside.fill(
             Path(CGRect(x: 0, y: shape.capsuleHeight - 3, width: 100, height: 3)),
             with: .color(.black.opacity(0.25))
@@ -92,38 +84,9 @@ struct SpinningBottle: View {
             }
         }
 
-        // The cylinder's shading, over glass and paper alike, then the two reflections
-        // running down the glass, which do not turn with the label.
-        let shade = Gradient(stops: [
-            .init(color: .black.opacity(0.4), location: 0),
-            .init(color: .black.opacity(0.1), location: 0.2),
-            .init(color: .white.opacity(0.22), location: 0.32),
-            .init(color: .white.opacity(0), location: 0.42),
-            .init(color: .black.opacity(0.12), location: 0.75),
-            .init(color: .black.opacity(0.45), location: 1),
-        ])
-        inside.fill(
-            Path(CGRect(x: 0, y: shape.capsuleHeight + 2, width: 100, height: 300)),
-            with: .linearGradient(shade, startPoint: CGPoint(x: left, y: 0), endPoint: CGPoint(x: right, y: 0))
-        )
-        let shine = Gradient(stops: [
-            .init(color: .white.opacity(0), location: 0),
-            .init(color: .white.opacity(0.5), location: 0.25),
-            .init(color: .white.opacity(0.2), location: 0.8),
-            .init(color: .white.opacity(0), location: 1),
-        ])
-        for (rect, opacity) in [
-            (CGRect(x: shape.shineX, y: 66, width: 7, height: 222), 0.8),
-            (CGRect(x: shape.shineX + 11, y: 88, width: 2.5, height: 162), 0.45),
-        ] {
-            var reflection = inside
-            reflection.opacity = opacity
-            reflection.addFilter(.blur(radius: 1.4))
-            reflection.fill(
-                Path(roundedRect: rect, cornerRadius: rect.width / 2),
-                with: .linearGradient(shine, startPoint: CGPoint(x: 0, y: rect.minY), endPoint: CGPoint(x: 0, y: rect.maxY))
-            )
-        }
+        // The light of the round glass, over glass and paper alike: it does not
+        // turn with the label.
+        BottleGlass.light(shape: shape, clear: false, in: glass)
     }
 }
 

@@ -32,23 +32,16 @@ struct BottleArtwork: View {
     private func draw(in context: inout GraphicsContext) {
         let shape = style.shape
         let outline = shape.path
-        context.fill(outline, with: .linearGradient(
-            style.glass.gradient,
-            startPoint: CGPoint(x: 0, y: 0),
-            endPoint: CGPoint(x: 100, y: 0)
-        ))
+        // The glass, shaded across its own width at every height (`BottleGlass`).
+        BottleGlass.fill(style.glass.gradient, shape: shape, in: context)
 
         var inside = context
         inside.clip(to: outline)
         if style.glass.isClear {
             inside.fill(Path(CGRect(x: 0, y: 0, width: 100, height: 300)), with: .color(.white.opacity(0.18)))
         }
-        // The capsule over the neck, with the shadow line at its lip.
-        inside.fill(Path(CGRect(x: 0, y: 0, width: 100, height: shape.capsuleHeight)), with: .linearGradient(
-            style.capsule.gradient,
-            startPoint: .zero,
-            endPoint: CGPoint(x: 100, y: 0)
-        ))
+        // The capsule round the neck, with the shadow line at its lip.
+        BottleGlass.fill(style.capsule.gradient, shape: shape, to: shape.capsuleHeight, in: inside)
         inside.fill(
             Path(CGRect(x: 0, y: shape.capsuleHeight - 3, width: 100, height: 3)),
             with: .color(.black.opacity(0.2))
@@ -63,27 +56,8 @@ struct BottleArtwork: View {
         } else {
             BottleArtwork.drawLabel(style.look, text: text, in: shape.label, context: inside)
         }
-        // Two reflections running down the glass, softened like light on curved
-        // glass, and quieter on dark glass, where they would read as stripes.
-        let shine = Gradient(stops: [
-            .init(color: .white.opacity(0), location: 0),
-            .init(color: .white.opacity(0.5), location: 0.25),
-            .init(color: .white.opacity(0.22), location: 0.8),
-            .init(color: .white.opacity(0), location: 1),
-        ])
-        let strength = style.glass.isClear ? 1 : 2 / 3.0
-        for (rect, opacity) in [
-            (CGRect(x: shape.shineX, y: shape.capsuleHeight + 8, width: 7, height: 288 - shape.capsuleHeight - 8), 0.9),
-            (CGRect(x: shape.shineX + 11, y: shape.capsuleHeight + 30, width: 2.5, height: 250 - shape.capsuleHeight - 30), 0.5),
-        ] {
-            var reflection = inside
-            reflection.opacity = opacity * strength
-            reflection.addFilter(.blur(radius: 1.4))
-            reflection.fill(
-                Path(roundedRect: rect, cornerRadius: rect.width / 2),
-                with: .linearGradient(shine, startPoint: CGPoint(x: 0, y: rect.minY), endPoint: CGPoint(x: 0, y: rect.maxY))
-            )
-        }
+        // Light that follows the glass round the shoulder and down the neck.
+        BottleGlass.light(shape: shape, clear: style.glass.isClear, in: context)
     }
 }
 
@@ -230,9 +204,6 @@ extension BottleArtwork {
             case .whisky: 34
             }
         }
-
-        /// Where the first reflection runs down the glass.
-        var shineX: CGFloat { self == .flute ? 35 : 27 }
 
         /// Where the paper label sits, in the 100 × 300 drawing space.
         var label: CGRect {
