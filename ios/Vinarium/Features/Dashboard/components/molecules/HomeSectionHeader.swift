@@ -35,25 +35,44 @@ struct HomeSectionHeader: View {
 }
 
 /// The wine-coloured haze at the top of the home screen: rosé on the left, old gold
-/// on the right, fading into the page's ground as it scrolls away.
+/// on the right, fading into the page's ground as it scrolls away. An empty cellar
+/// takes it in purple, deeper, around its turning bottle.
 struct HomeAmbience: View {
+    enum Tone {
+        case wine, purple
+    }
+
+    var tone: Tone = .wine
+
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
+        let (ground, left, right): (Color, Color, Color) = switch tone {
+        case .wine: (
+            Color(red: 0.47, green: 0.24, blue: 0.28).opacity(0.45),
+            Color(red: 0.84, green: 0.47, blue: 0.55).opacity(0.7),
+            Color(red: 0.71, green: 0.55, blue: 0.35).opacity(0.55)
+        )
+        case .purple: (
+            Color(red: 0.31, green: 0.05, blue: 0.2).opacity(0.5),
+            Color(red: 0.48, green: 0.09, blue: 0.29).opacity(0.78),
+            Color(red: 0.36, green: 0.11, blue: 0.41).opacity(0.62)
+        )
+        }
         ZStack {
             LinearGradient(
-                colors: [Color(red: 0.47, green: 0.24, blue: 0.28).opacity(0.45), .clear],
+                colors: [ground, .clear],
                 startPoint: .top,
                 endPoint: UnitPoint(x: 0.5, y: 0.85)
             )
             EllipticalGradient(
-                colors: [Color(red: 0.84, green: 0.47, blue: 0.55).opacity(0.7), .clear],
+                colors: [left, .clear],
                 center: UnitPoint(x: 0.3, y: 0.3),
                 startRadiusFraction: 0,
                 endRadiusFraction: 0.5
             )
             EllipticalGradient(
-                colors: [Color(red: 0.71, green: 0.55, blue: 0.35).opacity(0.55), .clear],
+                colors: [right, .clear],
                 center: UnitPoint(x: 0.8, y: 0.18),
                 startRadiusFraction: 0,
                 endRadiusFraction: 0.45

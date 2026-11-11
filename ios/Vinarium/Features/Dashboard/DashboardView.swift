@@ -32,6 +32,8 @@ struct DashboardView: View {
                         onReadyTapped: { selectedTab = .cellar },
                         onFavoritesTapped: { openFavorites() },
                         onSettingsTapped: { showSettings = true },
+                        // The scan tab opens the add sheet and hands the selection back.
+                        onScanTapped: { selectedTab = .scan },
                         onAdminTapped: isAdmin ? { showAdmin = true } : nil
                     )
                 } else if viewModel.error != nil {

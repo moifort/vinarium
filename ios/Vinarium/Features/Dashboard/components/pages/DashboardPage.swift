@@ -2,7 +2,8 @@ import SwiftUI
 
 /// The home tab, in the tone of a magazine rather than a form: no cards, a ground
 /// tinted with wine at the top, the figures in a line, the wines to open first in
-/// large, then shelves of whole bottles with their labels written on them.
+/// large, then shelves of whole bottles with their labels written on them. An empty
+/// cellar shows none of it at zero: a bottle turning on a purple ground, and the scan.
 struct DashboardPage: View {
     let content: Content
     var onFigureTapped: (HomeFigures.Figure) -> Void = { _ in }
@@ -14,6 +15,8 @@ struct DashboardPage: View {
     var onReadyTapped: (() -> Void)?
     var onFavoritesTapped: (() -> Void)?
     var onSettingsTapped: () -> Void = {}
+    /// Opens the add flow, as the Scanner tab does: the empty cellar's one button.
+    var onScanTapped: () -> Void = {}
     /// Admin only: opens the metrics sheet. Nil hides the button for every other account.
     var onAdminTapped: (() -> Void)?
 
@@ -38,66 +41,17 @@ struct DashboardPage: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
-                HomeFigures(figures: content.figures, onTapped: onFigureTapped)
-                    .padding(.top, 8)
-
-                if !content.featured.isEmpty {
-                    FeaturedWineCarousel(
-                        items: content.featured,
-                        onOpen: onWineTapped,
-                        onRemove: onRemoveTapped,
-                        onFavorite: onFavoriteTapped,
-                        onMove: onMoveTapped
-                    )
-                    .padding(.top, 26)
-                }
-
-                section {
-                    if content.moves.isEmpty {
-                        emptySection("Activité de la cave", message: "Aucun événement récent")
-                    } else {
-                        RecentMovesSection(
-                            moves: content.moves,
-                            onSeeAll: onRecentTapped,
-                            onOpen: onWineTapped,
-                            onMove: onMoveTapped
-                        )
-                    }
-                }
-
-                section {
-                    if content.ready.isEmpty {
-                        if content.featured.isEmpty {
-                            emptySection("Prêt à déguster", message: "Aucun vin prêt à déguster")
-                        }
-                    } else {
-                        BottleShelfSection(
-                            title: "Prêt à déguster",
-                            items: content.ready,
-                            onSeeAll: onReadyTapped,
-                            onWineTapped: onWineTapped
-                        )
-                    }
-                }
-
-                section {
-                    if content.favorites.isEmpty {
-                        emptySection("Mes favoris", message: "Aucun favori")
-                    } else {
-                        BottleShelfSection(
-                            title: "Mes favoris",
-                            items: content.favorites,
-                            onSeeAll: onFavoritesTapped,
-                            onWineTapped: onWineTapped
-                        )
-                        .accessibilityIdentifier("dashboard-favorites-section")
-                    }
+                if content.isEmptyCellar {
+                    EmptyCellarWelcome(onScanTapped: onScanTapped)
+                        .padding(.top, 44)
+                } else {
+                    filled
                 }
             }
             .padding(.bottom, 32)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(alignment: .top) {
-                HomeAmbience()
+                HomeAmbience(tone: content.isEmptyCellar ? .purple : .wine)
                     .frame(height: 760)
                     .padding(.horizontal, -60)
                     .offset(y: -280)
@@ -166,6 +120,67 @@ struct DashboardPage: View {
         }
     }
 
+    /// The page of a cellar with wines in it: the figures, the wines to open first, the
+    /// cellar's moves, then the shelves.
+    @ViewBuilder
+    private var filled: some View {
+        HomeFigures(figures: content.figures, onTapped: onFigureTapped)
+            .padding(.top, 8)
+
+        if !content.featured.isEmpty {
+            FeaturedWineCarousel(
+                items: content.featured,
+                onOpen: onWineTapped,
+                onRemove: onRemoveTapped,
+                onFavorite: onFavoriteTapped,
+                onMove: onMoveTapped
+            )
+            .padding(.top, 26)
+        }
+
+        section {
+            if content.moves.isEmpty {
+                emptySection("Activité de la cave", message: "Aucun événement récent")
+            } else {
+                RecentMovesSection(
+                    moves: content.moves,
+                    onSeeAll: onRecentTapped,
+                    onOpen: onWineTapped,
+                    onMove: onMoveTapped
+                )
+            }
+        }
+
+        section {
+            if content.ready.isEmpty {
+                if content.featured.isEmpty {
+                    emptySection("Prêt à déguster", message: "Aucun vin prêt à déguster")
+                }
+            } else {
+                BottleShelfSection(
+                    title: "Prêt à déguster",
+                    items: content.ready,
+                    onSeeAll: onReadyTapped,
+                    onWineTapped: onWineTapped
+                )
+            }
+        }
+
+        section {
+            if content.favorites.isEmpty {
+                emptySection("Mes favoris", message: "Aucun favori")
+            } else {
+                BottleShelfSection(
+                    title: "Mes favoris",
+                    items: content.favorites,
+                    onSeeAll: onFavoritesTapped,
+                    onWineTapped: onWineTapped
+                )
+                .accessibilityIdentifier("dashboard-favorites-section")
+            }
+        }
+    }
+
     private func section<Body: View>(@ViewBuilder _ body: () -> Body) -> some View {
         body().padding(.top, 34)
     }
@@ -200,6 +215,11 @@ extension DashboardPage {
 }
 
 extension DashboardPage.Content {
+    /// Nothing in the cellar and nothing to show yet: no bottle, no move, no favorite.
+    var isEmptyCellar: Bool {
+        figures.bottleCount == 0 && featured.isEmpty && moves.isEmpty && ready.isEmpty && favorites.isEmpty
+    }
+
     /// The board's home screen, for the previews and the debug gallery.
     static let sample = DashboardPage.Content(
         figures: .init(bottleCount: 18, readyCount: 5, favoriteCount: 3, totalValue: 2434),

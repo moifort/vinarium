@@ -9813,6 +9813,46 @@
         }
       }
     },
+    "La cave est vide": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Der Keller ist leer"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your cellar is empty"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La bodega está vacía"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La cantina è vuota"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "セラーは空です"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A adega está vazia"
+          }
+        }
+      }
+    },
     "La version de l'application et le modèle d'appareil accompagnent le message. Ni votre nom ni votre adresse e-mail ne sont transmis.": {
       "localizations": {
         "de": {
@@ -14840,6 +14880,86 @@
           "stringUnit": {
             "state": "translated",
             "value": "Digitalizar o rótulo"
+          }
+        }
+      }
+    },
+    "Scanner une étiquette": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Etikett scannen"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scan a label"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Escanear una etiqueta"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scansiona un’etichetta"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラベルをスキャン"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digitalizar um rótulo"
+          }
+        }
+      }
+    },
+    "Scanner une étiquette remplit la fiche de la première bouteille.": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ein gescanntes Etikett füllt die Angaben der ersten Flasche aus."
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scanning a label fills in the first bottle’s details."
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Al escanear una etiqueta se completa la ficha de la primera botella."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "La scansione di un’etichetta compila la scheda della prima bottiglia."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ラベルをスキャンすると、最初のボトルの情報が入力されます。"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Digitalizar um rótulo preenche a ficha da primeira garrafa."
           }
         }
       }
