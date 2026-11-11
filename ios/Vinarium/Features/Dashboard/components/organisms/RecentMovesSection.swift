@@ -94,18 +94,32 @@ struct RecentMovesSection: View {
         }
     }
 
-    /// "↓ ENTRÉE", with the housemate who made the move.
+    /// "↓ ENTRÉE" in a thin white outline, as Shiori tags a recording "AUDIO",
+    /// the housemate who made the move beside it.
     private func overline(_ move: Move) -> some View {
-        HStack(spacing: 5) {
-            Image(systemName: move.isEntry ? "arrow.down" : "arrow.up")
-                .font(.system(size: 10, weight: .bold))
-            Text(move.overline)
-                .font(.system(size: 12, weight: .semibold))
-                .tracking(0.7)
-                .textCase(.uppercase)
-                .lineLimit(1)
+        HStack(spacing: 6) {
+            HStack(spacing: 2) {
+                Image(systemName: move.isEntry ? "arrow.down" : "arrow.up")
+                    .font(.system(size: 8, weight: .heavy))
+                Text(move.direction)
+                    .font(.system(size: 11, weight: .bold))
+                    .textCase(.uppercase)
+            }
+            .foregroundStyle(.white.opacity(0.9))
+            .padding(.leading, 2)
+            .padding(.trailing, 3)
+            .frame(height: 15)
+            .overlay { RoundedRectangle(cornerRadius: 3).strokeBorder(.white.opacity(0.75), lineWidth: 1) }
+            .fixedSize()
+            if let member = move.memberName {
+                Text(member)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(.white.opacity(0.72))
+                    .lineLimit(1)
+            }
         }
-        .foregroundStyle(.white.opacity(0.72))
+        .padding(.bottom, 1)
+        .accessibilityElement(children: .combine)
     }
 
     /// The day and what one bottle cost, as the home vignettes and the hero set
@@ -215,10 +229,9 @@ extension RecentMovesSection {
             return parts.isEmpty ? nil : parts.joined(separator: " · ")
         }
 
-        /// "Entrée", with the housemate who made the move.
-        var overline: String {
-            let direction = isEntry ? String(localized: "Entrée") : String(localized: "Sortie")
-            return [direction, memberName].compactMap(\.self).joined(separator: " · ")
+        /// "Entrée" or "Sortie".
+        var direction: String {
+            isEntry ? String(localized: "Entrée") : String(localized: "Sortie")
         }
 
         /// "4 oct.", the year added to a date from another year.
