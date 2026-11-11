@@ -26,8 +26,11 @@ SwiftUI and the board are always in sync.
 
 - A requested UI change is drawn on the board first, then sent as a capture.
 - **Outside the prototyping zone** (`Zone-Prototypage.dc.html`, page "App"): the change goes all
-  the way to iOS in the same task — board edit, capture, SwiftUI, simulator screenshot, commit.
-- **Inside the prototyping zone**: board-only exploration until the user says to build it.
+  the way to iOS in one run, with no stop for a board validation — board edit, SwiftUI,
+  simulator screenshot, commit — then one validation request showing both captures.
+- **Inside the prototyping zone**: board-only loops (edit, show, ask again), never iOS until the
+  user says to build it.
+- Every child's brief names the zone of the anchored artboard, and so where the child stops.
 - A change that lands in code by another route (a fix, a refactor) is mirrored on the board in
   the same task.
 - **One element, every screen**: changing a badge, label, button or component on one artboard

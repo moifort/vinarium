@@ -94,13 +94,14 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    thème. L'enfant traite son propre fil et chaque commentaire de son thème, transmis ou trouvé à
    la relecture (règle 3), et rien d'autre : un commentaire sur un autre thème est laissé au
    parent, jamais répondu ni proposé en session. Chaque brief d'enfant le dit.
-5. **Une modification d'interface se valide deux fois, le board puis iOS.** À chaque demande de
-   modification d'interface, le board passe d'abord : montrer le board à jour et attendre la
-   validation de l'utilisateur. Seulement ensuite, l'implémenter dans l'app, envoyer une capture
-   du simulateur de l'écran modifié (`SendUserFile`) et attendre une seconde validation. Deux
-   demandes séparées, dans cet ordre ; dans la zone de prototypage, on s'arrête après le board. Les
-   sessions enfants suivent aussi cette règle, et leur question de fin (règle 3) est posée à chaque
-   étape.
+5. **La zone du commentaire décide jusqu'où va la modification.** Un commentaire sur un artboard
+   de production (tout ce qui est hors de la zone de prototypage) va jusqu'à iOS d'une traite :
+   modifier le board, puis l'app, sans s'arrêter entre les deux, et demander une seule validation
+   avec la capture du board et celle du simulateur sur l'écran modifié (`SendUserFile`). Un
+   commentaire dans la zone de prototypage reste sur le board : ce sont des boucles d'exploration,
+   on modifie, on montre, on redemande, sans toucher à iOS tant que l'utilisateur ne dit pas de le
+   construire. Chaque brief d'enfant dit dans quelle zone est l'artboard ancré et donc où
+   s'arrêter.
 6. **La session parente reste légère et repart à vide chaque matin.** Elle ne fait que répartir :
    sur un commentaire, le transmettre à l'enfant de son thème (règle 4), ou à défaut démarrer ou
    proposer l'enfant (règle 2), en une ligne, sans lire le board, sans capture, sans résumé. Le
