@@ -17,6 +17,13 @@ struct DashboardPage: View {
     /// Admin only: opens the metrics sheet. Nil hides the button for every other account.
     var onAdminTapped: (() -> Void)?
 
+    /// Shiori's bar: the page's name on the left and round buttons on the right, over the
+    /// page with no ground of its own, sent away while scrolling down and called back by
+    /// scrolling up.
+    @State private var bar = ScrollBarState()
+    // Optional: absent from page previews, present in the app through ContentView.
+    @Environment(SearchPresenter.self) private var searchPresenter: SearchPresenter?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -85,24 +92,50 @@ struct DashboardPage: View {
                     .offset(y: -280)
             }
         }
+        .onScrollGeometryChange(for: CGFloat.self) { geometry in
+            geometry.contentOffset.y + geometry.contentInsets.top
+        } action: { old, offset in
+            bar.follow(from: old, to: offset)
+        }
         .background(Color(.systemBackground))
+        // The bar keeps the title for VoiceOver and the Back button, and draws its own on
+        // the left, in Shiori's size.
         .navigationTitle("Accueil")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .navigationBarTitleDisplayMode(.inline)
+        // The bar stays clear over the page, as Shiori's does, the buttons on their own glass.
+        .scrollEdgeEffectHidden(true, for: .top)
         .toolbar {
+            ToolbarItem(placement: .principal) { Text(verbatim: "").accessibilityHidden(true) }
+            ToolbarItem(placement: .topBarLeading) {
+                ScrollBarItem(bar: bar) { ScrollBarTitle(title: "Accueil") }
+            }
+            .sharedBackgroundVisibility(.hidden)
             if let onAdminTapped {
                 ToolbarItem(placement: .topBarTrailing) {
-                    ToolbarIconButton(title: "Admin", systemImage: "shield", action: onAdminTapped)
-                        .accessibilityIdentifier("dashboard-admin-button")
+                    ScrollBarItem(bar: bar) {
+                        ScrollBarButton(title: "Admin", systemImage: "shield", action: onAdminTapped)
+                            .accessibilityIdentifier("dashboard-admin-button")
+                    }
                 }
-                ToolbarSpacer(.fixed, placement: .topBarTrailing)
+                .sharedBackgroundVisibility(.hidden)
             }
+            // Round buttons, each on its own glass: the settings, then the search.
             ToolbarItem(placement: .topBarTrailing) {
-                ToolbarIconButton(title: "Réglages", systemImage: "gearshape", action: onSettingsTapped)
-                    .accessibilityIdentifier("dashboard-settings-button")
+                ScrollBarItem(bar: bar) {
+                    ScrollBarButton(title: "Réglages", systemImage: "gearshape", action: onSettingsTapped)
+                        .accessibilityIdentifier("dashboard-settings-button")
+                }
             }
-            // Two round buttons, not one bar: the settings, then the search.
-            ToolbarSpacer(.fixed, placement: .topBarTrailing)
-            ToolbarItem(placement: .topBarTrailing) { SearchToolbarButton() }
+            .sharedBackgroundVisibility(.hidden)
+            ToolbarItem(placement: .topBarTrailing) {
+                ScrollBarItem(bar: bar) {
+                    ScrollBarButton(title: "Rechercher", systemImage: "magnifyingglass") {
+                        searchPresenter?.present()
+                    }
+                    .accessibilityIdentifier("search-button")
+                }
+            }
+            .sharedBackgroundVisibility(.hidden)
         }
     }
 
