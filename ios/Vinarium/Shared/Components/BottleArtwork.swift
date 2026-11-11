@@ -13,6 +13,9 @@ struct BottleArtwork: View {
     var appellation: String? = nil
     var classification: String? = nil
     let height: CGFloat
+    /// The label set large enough to read on a home vignette, where the bottle is
+    /// cropped to its label; a whole bottle keeps the finer one, its name beside it.
+    var legible = false
 
     var body: some View {
         let scale = height / 300
@@ -51,15 +54,15 @@ struct BottleArtwork: View {
             with: .color(.black.opacity(0.2))
         )
         // The paper label, in the family's style.
-        BottleArtwork.drawLabel(
-            style.look,
-            text: LabelText(
-                producer: producer, name: name, vintage: vintage,
-                appellation: appellation, classification: classification, kind: style.kind
-            ),
-            in: shape.label,
-            context: inside
+        let text = LabelText(
+            producer: producer, name: name, vintage: vintage,
+            appellation: appellation, classification: classification, kind: style.kind
         )
+        if legible {
+            BottleArtwork.drawLegibleLabel(style.look, text: text, in: shape.label, context: inside)
+        } else {
+            BottleArtwork.drawLabel(style.look, text: text, in: shape.label, context: inside)
+        }
         // Two reflections running down the glass, softened like light on curved
         // glass, and quieter on dark glass, where they would read as stripes.
         let shine = Gradient(stops: [

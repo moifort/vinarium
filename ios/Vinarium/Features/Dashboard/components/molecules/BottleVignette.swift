@@ -68,7 +68,8 @@ struct BottleVignette: View {
                     .overlay(alignment: .topLeading) {
                         BottleArtwork(
                             style: style, producer: producer, name: name, vintage: vintage,
-                            appellation: appellation, classification: classification, height: 300 * scale
+                            appellation: appellation, classification: classification, height: 300 * scale,
+                            legible: true
                         )
                         .offset(
                             x: Self.artWidth / 2 - outline.midX * scale,

@@ -827,47 +827,10 @@ extension BottleArtwork {
     private static func portugal(_ v: LabelLook, _ t: LabelText, _ r: CGRect, _ pen: LabelPen) {
         let cx = r.midX, ink = Color(hex: v.ink), accent = Color(hex: v.accent), blue = Color(hex: v.mark)
         pen.paper(r, v)
-        func frieze(top: CGFloat, rows: Int, side s: CGFloat) {
-            let band = CGRect(x: r.minX, y: top, width: r.width, height: CGFloat(rows) * s)
-            // Painted straight on the paper, so the tiles take its colour and the
-            // curve of the glass instead of a flat white band.
-            var tiles = pen
-            tiles.context.clip(to: Path(band))
-            let columns = Int((r.width / s).rounded(.up))
-            for row in 0..<rows {
-                for i in 0..<columns {
-                    let x = r.minX + CGFloat(i) * s, y = top + CGFloat(row) * s
-                    let mx = x + s / 2, my = y + s / 2
-                    tiles.stroke(Path(CGRect(x: x, y: y, width: s, height: s)), blue.opacity(0.5), 0.2)
-                    tiles.diamond(mx, my, s * 0.2, blue)
-                    for (dx, dy) in [(0.0, -1.0), (1, 0), (0, 1), (-1, 0)] {
-                        let petal = CGRect(x: mx + dx * s * 0.3 - s * 0.07, y: my + dy * s * 0.3 - s * 0.07, width: s * 0.14, height: s * 0.14)
-                        tiles.fill(Path(ellipseIn: petal), blue)
-                    }
-                }
-            }
-            for row in 0...rows {
-                for i in 0...columns {
-                    let corner = CGRect(x: r.minX + CGFloat(i) * s - s * 0.2, y: top + CGFloat(row) * s - s * 0.2, width: s * 0.4, height: s * 0.4)
-                    tiles.fill(Path(ellipseIn: corner), blue)
-                }
-            }
-            // The same falloff as the paper's edges, so the tiles turn with the glass.
-            tiles.context.fill(Path(band), with: .linearGradient(
-                Gradient(stops: [
-                    .init(color: .black.opacity(0.28), location: 0),
-                    .init(color: .black.opacity(0), location: 0.22),
-                    .init(color: .black.opacity(0), location: 0.72),
-                    .init(color: .black.opacity(0.38), location: 1),
-                ]),
-                startPoint: CGPoint(x: r.minX, y: 0),
-                endPoint: CGPoint(x: r.maxX, y: 0)
-            ))
-        }
         let side = r.width / 6
         let rows = v.banded ? 2 : 1
-        frieze(top: r.minY, rows: rows, side: side)
-        if v.framed { frieze(top: r.maxY - side / 2, rows: 1, side: side / 2) }
+        pen.azulejos(r, top: r.minY, rows: rows, side: side, blue: blue)
+        if v.framed { pen.azulejos(r, top: r.maxY - side / 2, rows: 1, side: side / 2, blue: blue) }
         var y = r.minY + CGFloat(rows) * side + 9
         if let producer = t.producer {
             pen.write(producer, .cochinItalic, 3.6, ink, x: cx, y: y, maxWidth: r.width - 12)
@@ -1167,6 +1130,44 @@ struct LabelPen {
                 up.toggle()
             }
         }
+    }
+
+    /// A frieze of azulejos `rows` tiles deep across the label `r`, painted straight on
+    /// the paper so the tiles take its colour and the curve of the glass.
+    func azulejos(_ r: CGRect, top: CGFloat, rows: Int, side s: CGFloat, blue: Color) {
+        let band = CGRect(x: r.minX, y: top, width: r.width, height: CGFloat(rows) * s)
+        var tiles = self
+        tiles.context.clip(to: Path(band))
+        let columns = Int((r.width / s).rounded(.up))
+        for row in 0..<rows {
+            for i in 0..<columns {
+                let x = r.minX + CGFloat(i) * s, y = top + CGFloat(row) * s
+                let mx = x + s / 2, my = y + s / 2
+                tiles.stroke(Path(CGRect(x: x, y: y, width: s, height: s)), blue.opacity(0.5), 0.2)
+                tiles.diamond(mx, my, s * 0.2, blue)
+                for (dx, dy) in [(0.0, -1.0), (1, 0), (0, 1), (-1, 0)] {
+                    let petal = CGRect(x: mx + dx * s * 0.3 - s * 0.07, y: my + dy * s * 0.3 - s * 0.07, width: s * 0.14, height: s * 0.14)
+                    tiles.fill(Path(ellipseIn: petal), blue)
+                }
+            }
+        }
+        for row in 0...rows {
+            for i in 0...columns {
+                let corner = CGRect(x: r.minX + CGFloat(i) * s - s * 0.2, y: top + CGFloat(row) * s - s * 0.2, width: s * 0.4, height: s * 0.4)
+                tiles.fill(Path(ellipseIn: corner), blue)
+            }
+        }
+        // The same falloff as the paper's edges, so the tiles turn with the glass.
+        tiles.context.fill(Path(band), with: .linearGradient(
+            Gradient(stops: [
+                .init(color: .black.opacity(0.28), location: 0),
+                .init(color: .black.opacity(0), location: 0.22),
+                .init(color: .black.opacity(0), location: 0.72),
+                .init(color: .black.opacity(0.38), location: 1),
+            ]),
+            startPoint: CGPoint(x: r.minX, y: 0),
+            endPoint: CGPoint(x: r.maxX, y: 0)
+        ))
     }
 
     /// A four-pointed star.

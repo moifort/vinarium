@@ -4,7 +4,8 @@ import SwiftUI
 /// The whole label catalogue, the nine looks of each family on real wines: what the
 /// board's "Étiquettes de la bouteille" artboard shows, drawn by the app. Opened
 /// from the debug gallery (`-debugScreen bottleLabels`); `-debugLabelFamilies
-/// loire,rhone` keeps only the families named.
+/// loire,rhone` keeps only the families named, `-debugLabelLegible YES` shows the
+/// legible labels as the home vignettes crop them.
 struct DebugBottleLabels: View {
     struct Sample {
         var beverageType: BeverageType = .wine
@@ -124,9 +125,13 @@ struct DebugBottleLabels: View {
                 ForEach(shown) { family in
                     VStack(alignment: .leading, spacing: 10) {
                         Text(family.title).font(.system(size: 22, weight: .bold))
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: 3), spacing: 12) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 4), count: legible ? 2 : 3), spacing: 12) {
                             ForEach(0..<9, id: \.self) { index in
-                                bottle(family.samples[index % 3], family: family.family, look: index)
+                                if legible {
+                                    vignette(family.samples[index % 3], family: family.family, look: index)
+                                } else {
+                                    bottle(family.samples[index % 3], family: family.family, look: index)
+                                }
                             }
                         }
                     }
@@ -136,6 +141,27 @@ struct DebugBottleLabels: View {
         }
         .background(BottleBackdrop(beverageType: .wine, color: .red).ignoresSafeArea())
         .foregroundStyle(.white)
+    }
+
+    private var legible: Bool { UserDefaults.standard.bool(forKey: "debugLabelLegible") }
+
+    private func style(_ sample: Sample, family: BottleArtwork.LabelFamily, look index: Int) -> BottleArtwork.Style {
+        let base = BottleArtwork.Style.of(
+            id: "\(family.rawValue)-\(index)", beverageType: sample.beverageType, subtype: sample.subtype,
+            color: sample.color, family: family, vintage: sample.vintage
+        )
+        var look = BottleArtwork.LabelLook.looks(of: family)[index]
+        look.aged = base.look.aged
+        return BottleArtwork.Style(shape: base.shape, glass: base.glass, capsule: look.capsule, look: look, kind: base.kind)
+    }
+
+    private func vignette(_ sample: Sample, family: BottleArtwork.LabelFamily, look index: Int) -> some View {
+        BottleVignette(
+            style: style(sample, family: family, look: index), beverageType: sample.beverageType, color: sample.color,
+            producer: sample.producer, name: sample.name, vintage: sample.vintage,
+            appellation: sample.appellation, classification: sample.classification, facts: .init()
+        )
+        .frame(maxWidth: .infinity)
     }
 
     private func bottle(_ sample: Sample, family: BottleArtwork.LabelFamily, look index: Int) -> some View {
