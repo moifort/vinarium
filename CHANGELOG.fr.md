@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### Nouveautés
+
+- L'accueil fait peau neuve.
+
+### Corrections
+
+- Les fiches de note de dégustation, de favori et de recommandation passent en pleine hauteur à l'ouverture du clavier, et un long commentaire reste visible pendant la saisie.
+
+### Performance
+
+- Le scan d'une étiquette répond en quelques secondes.
+- L'application se charge plus vite quand elle n'a pas été ouverte depuis un moment.
+
 ## 1.7 (2026.10.04)
 
 ### Nouveautés

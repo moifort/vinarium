@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### New
+
+- The home gets a fresh new look.
+
+### Fixes
+
+- The tasting, favorite and recommendation note sheets rise to full height when the keyboard opens, and a long comment stays in view as it is typed.
+
+### Performance
+
+- Scanning a label answers in a few seconds.
+- The app loads faster when it has not been opened for a while.
+
 ## 1.7 (2026.10.04)
 
 ### New

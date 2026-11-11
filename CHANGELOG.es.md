@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### Novedades
+
+- La pantalla de inicio se renueva por completo.
+
+### Correcciones
+
+- Las fichas de nota de cata, de favorito y de recomendación pasan a altura completa al abrirse el teclado, y un comentario largo sigue a la vista mientras se escribe.
+
+### Rendimiento
+
+- El escaneo de una etiqueta responde en pocos segundos.
+- La app carga más rápido cuando lleva un tiempo sin abrirse.
+
 ## 1.7 (2026.10.04)
 
 ### Novedades

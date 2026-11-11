@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### Novità
+
+- La schermata iniziale si rinnova.
+
+### Correzioni
+
+- Le schede di nota di degustazione, di preferito e di raccomandazione passano ad altezza piena all'apertura della tastiera, e un commento lungo resta visibile durante la scrittura.
+
+### Prestazioni
+
+- La scansione di un'etichetta risponde in pochi secondi.
+- L'app si carica più in fretta quando non viene aperta da un po'.
+
 ## 1.7 (2026.10.04)
 
 ### Novità

@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### Neu
+
+- Die Startseite erscheint in neuem Gewand.
+
+### Fehlerbehebungen
+
+- Die Notizblätter für Verkostung, Favorit und Empfehlung wechseln beim Öffnen der Tastatur auf volle Höhe, und ein langer Kommentar bleibt beim Tippen sichtbar.
+
+### Leistung
+
+- Das Scannen eines Etiketts dauert nur noch wenige Sekunden.
+- Die App lädt schneller, wenn sie eine Weile nicht geöffnet wurde.
+
 ## 1.7 (2026.10.04)
 
 ### Neu

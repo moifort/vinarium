@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8 (2026.11.11)
+
+### Novidades
+
+- O ecrã inicial ganha um novo visual.
+
+### Correções
+
+- As fichas de nota de prova, de favorito e de recomendação passam a altura total quando o teclado abre, e um comentário longo fica visível enquanto é escrito.
+
+### Desempenho
+
+- A digitalização de um rótulo responde em poucos segundos.
+- A app carrega mais depressa quando não é aberta há algum tempo.
+
 ## 1.7 (2026.10.04)
 
 ### Novidades
