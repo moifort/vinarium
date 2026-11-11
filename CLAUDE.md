@@ -60,7 +60,12 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    modification (le board, puis iOS si l'artboard est hors de la zone de prototypage), commite, et
    résout le fil dès qu'elle l'a traité (règle 3). Cette règle permanente vaut demande de démarrer
    ces sessions : ne jamais demander d'abord. Un commentaire envoyé du board arrive en tour
-   automatique, où l'app refuse `user_asked` : ne pas l'essayer, proposer directement la session
+   automatique, où l'app refuse `user_asked`, mais pas l'envoi d'un message : le parent garde donc
+   **deux sessions de réserve** (titre « Réserve board », démarrées vides, `user_asked`, contexte
+   neuf, en attente d'une mission). Sur un commentaire sans enfant de son thème, il envoie le brief
+   complet à une réserve (`send_message`), qui devient l'enfant de ce fil et se renomme. À chaque
+   message de l'utilisateur, il complète d'abord la réserve à deux (`list_sessions`, `linked: true`,
+   pour les compter, y compris après un clear). Réserve vide : proposer la session
    (`own_initiative`, même brief) et la démarrer avec son `proposal_id` au prochain message de
    l'utilisateur. Si la proposition est refusée elle aussi (Remote Control, où les cartes ne
    s'affichent pas), le dire en une ligne qui commence par « ⏸ Bloqué » et qui dit quoi faire,
