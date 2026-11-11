@@ -230,11 +230,12 @@ extension FeaturedWineCarousel {
         /// What one bottle is worth, in euros.
         var price: Double? = nil
         var labelFamily: BottleArtwork.LabelFamily? = nil
+        var labelTraits: BottleArtwork.LabelTraits? = nil
         var appellation: String? = nil
         var classification: String? = nil
 
         var style: BottleArtwork.Style {
-            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
+            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, traits: labelTraits, vintage: vintage)
         }
 
         var subtitle: String? {

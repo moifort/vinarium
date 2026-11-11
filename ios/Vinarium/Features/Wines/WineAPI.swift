@@ -344,6 +344,7 @@ private func addWineInput(from r: CreateWineRequest) -> VinariumGraphQL.AddBever
         drinkUntil: GraphQLHelpers.graphQLNullable(r.drinkUntil),
         giftedBy: GraphQLHelpers.graphQLNullable(r.giftedBy),
         grapeVarieties: GraphQLHelpers.graphQLNullable(r.grapeVarieties),
+        labelTraits: r.labelTraits.map { .some($0.graphQLInput) } ?? .none,
         latitude: GraphQLHelpers.graphQLNullable(r.latitude),
         longitude: GraphQLHelpers.graphQLNullable(r.longitude),
         name: r.name,

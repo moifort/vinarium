@@ -102,20 +102,24 @@ extension BottleArtwork {
         /// the label's layout; the wine's id picks one of the family's nine looks,
         /// so a wine always wears the same label; a vintage twenty-five years old
         /// yellows the paper. Without a family from the API, the broad one is
-        /// guessed from the type and the colour.
+        /// guessed from the type and the colour. A label read by the scan overrides
+        /// the id: the closest look of the catalogue is drawn, in another family
+        /// when the region's has nothing like it (`LabelTraits.closestLook`).
         static func of(
             id: String,
             beverageType: BeverageType,
             subtype: BeverageSubtype?,
             color: WineColor?,
             family: LabelFamily? = nil,
+            traits: LabelTraits? = nil,
             vintage: Int? = nil,
             year: Int = Calendar.current.component(.year, from: .now)
         ) -> Style {
             let pick = abs(id.unicodeScalars.reduce(0) { ($0 &* 31) &+ Int($1.value) })
-            let family = family ?? .guess(beverageType: beverageType, subtype: subtype, color: color)
+            let regional = family ?? .guess(beverageType: beverageType, subtype: subtype, color: color)
+            let (family, index) = traits?.closestLook(regional: regional) ?? (regional, pick / 7)
             let looks = LabelLook.looks(of: family)
-            var look = looks[(pick / 7) % looks.count]
+            var look = looks[index % looks.count]
             let aged = vintage.map { $0 <= year - 25 } ?? false
             look.aged = aged && [.chateau, .burgundy, .south, .sweet, .italy, .rhone, .spain, .portugal].contains(family)
             let kind: String? = beverageType == .wine ? nil : subtype.map { $0.label(for: beverageType) } ?? beverageType.label

@@ -108,6 +108,8 @@ struct CreateWineRequest: Encodable, Sendable {
     var latitude: Double?
     var longitude: Double?
     var placeName: String?
+    /// The real label as the scan read it, passed on so the bottle is drawn like it.
+    var labelTraits: BottleArtwork.LabelTraits?
 }
 
 struct UpdateWineRequest: Encodable, Sendable {

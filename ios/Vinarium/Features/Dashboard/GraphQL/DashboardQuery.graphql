@@ -20,6 +20,9 @@ query Dashboard {
       appellation
       classification
       labelFamily
+      labelTraits {
+        ...LabelTraitsFields
+      }
       notes
       isFavorite
       cellarId
@@ -41,6 +44,9 @@ query Dashboard {
       appellation
       classification
       labelFamily
+      labelTraits {
+        ...LabelTraitsFields
+      }
       estimatedPrice
       tastingDate
       rating
@@ -72,6 +78,9 @@ query Dashboard {
       wineColor
       wineVintage
       wineLabelFamily
+      wineLabelTraits {
+        ...LabelTraitsFields
+      }
       position
       actor {
         displayName
@@ -89,6 +98,9 @@ query Dashboard {
       wineColor
       wineVintage
       wineLabelFamily
+      wineLabelTraits {
+        ...LabelTraitsFields
+      }
       position
       actor {
         displayName

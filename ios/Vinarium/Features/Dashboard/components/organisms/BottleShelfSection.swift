@@ -57,11 +57,12 @@ extension BottleShelfSection {
         /// The slot, drinking limit, stock and price in the vignette's column.
         var facts = BottleVignette.Facts()
         var labelFamily: BottleArtwork.LabelFamily? = nil
+        var labelTraits: BottleArtwork.LabelTraits? = nil
         var appellation: String? = nil
         var classification: String? = nil
 
         var style: BottleArtwork.Style {
-            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
+            .of(id: id, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, traits: labelTraits, vintage: vintage)
         }
     }
 }

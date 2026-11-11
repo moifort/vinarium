@@ -1,0 +1,12 @@
+fragment LabelTraitsFields on LabelTraits {
+  paper
+  ink
+  accent
+  metallic
+  typeface
+  capitals
+  frame
+  band
+  emblem
+  shape
+}

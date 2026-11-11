@@ -33,6 +33,7 @@ enum DashboardAPI {
                     drinkFrom: $0.drinkFrom,
                     drinkUntil: $0.drinkUntil,
                     labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
+                    labelTraits: BottleArtwork.LabelTraits($0.labelTraits?.fragments.labelTraitsFields),
                     appellation: $0.appellation,
                     classification: $0.classification,
                     estimatedPrice: $0.estimatedPrice,
@@ -52,6 +53,7 @@ enum DashboardAPI {
                     tastingDate: $0.tastingDate.flatMap { GraphQLHelpers.parseISO8601($0) },
                     rating: $0.rating.map { Int($0) },
                     labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
+                    labelTraits: BottleArtwork.LabelTraits($0.labelTraits?.fragments.labelTraitsFields),
                     appellation: $0.appellation,
                     classification: $0.classification,
                     position: $0.position,
@@ -93,7 +95,8 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         rating: nil,
         memberName: e.memberNameValue,
         producer: e.producerValue,
-        labelFamily: e.labelFamilyValue
+        labelFamily: e.labelFamilyValue,
+        labelTraits: e.labelTraitsValue
     )
 }
 
@@ -111,6 +114,7 @@ protocol DashboardJournalEvent {
     var memberNameValue: String? { get }
     var producerValue: String? { get }
     var labelFamilyValue: BottleArtwork.LabelFamily? { get }
+    var labelTraitsValue: BottleArtwork.LabelTraits? { get }
 }
 
 extension BottleArtwork.LabelFamily {
@@ -135,6 +139,7 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }
     var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
+    var labelTraitsValue: BottleArtwork.LabelTraits? { BottleArtwork.LabelTraits(wineLabelTraits?.fragments.labelTraitsFields) }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJournalEvent {
@@ -152,4 +157,5 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var memberNameValue: String? { actor.isMine ? nil : actor.displayName }
     var producerValue: String? { beverageProducer }
     var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
+    var labelTraitsValue: BottleArtwork.LabelTraits? { BottleArtwork.LabelTraits(wineLabelTraits?.fragments.labelTraitsFields) }
 }

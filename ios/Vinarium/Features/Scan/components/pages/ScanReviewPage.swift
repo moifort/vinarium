@@ -509,7 +509,8 @@ struct ScanReviewPage: View {
             giftedBy: giftedBy.isEmpty ? nil : giftedBy,
             latitude: location?.latitude,
             longitude: location?.longitude,
-            placeName: location?.placeName
+            placeName: location?.placeName,
+            labelTraits: scanResult.labelTraits
         )
     }
 }

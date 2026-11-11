@@ -20,6 +20,8 @@ struct ScanResult: Decodable, Sendable {
     let drinkFrom: Int?
     let drinkUntil: Int?
     let estimatedPrice: Double?
+    /// What the photographed label looks like; nil for a typed description.
+    var labelTraits: BottleArtwork.LabelTraits? = nil
 }
 
 extension ScanResult {
@@ -42,7 +44,8 @@ extension ScanResult {
             classification: s.classification,
             drinkFrom: s.drinkFrom,
             drinkUntil: s.drinkUntil,
-            estimatedPrice: s.estimatedPrice
+            estimatedPrice: s.estimatedPrice,
+            labelTraits: BottleArtwork.LabelTraits(s.labelTraits?.fragments.labelTraitsFields)
         )
     }
 }

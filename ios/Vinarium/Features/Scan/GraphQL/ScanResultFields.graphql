@@ -16,4 +16,7 @@ fragment ScanResultFields on ScanResult {
   drinkFrom
   drinkUntil
   estimatedPrice
+  labelTraits {
+    ...LabelTraitsFields
+  }
 }

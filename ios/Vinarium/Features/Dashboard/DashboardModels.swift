@@ -27,6 +27,8 @@ struct DashboardFavorite: Codable, Identifiable, Sendable {
     let rating: Int?
     // Optional so a dashboard cached before the drawn labels still decodes.
     var labelFamily: BottleArtwork.LabelFamily? = nil
+    /// The real label as the scan read it, absent for a wine never scanned.
+    var labelTraits: BottleArtwork.LabelTraits? = nil
     var appellation: String? = nil
     var classification: String? = nil
     // Optional so a dashboard cached before the vignettes' column still decodes.
@@ -56,6 +58,8 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     let drinkUntil: Int?
     // Optional so a dashboard cached before the drawn labels still decodes.
     var labelFamily: BottleArtwork.LabelFamily? = nil
+    /// The real label as the scan read it, absent for a wine never scanned.
+    var labelTraits: BottleArtwork.LabelTraits? = nil
     var appellation: String? = nil
     var classification: String? = nil
     // Optional so a dashboard cached before the vignettes' column still decodes.
@@ -95,6 +99,8 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     /// The wine's producer; optional so a dashboard cached before it existed still decodes.
     var producer: String? = nil
     var labelFamily: BottleArtwork.LabelFamily? = nil
+    /// The real label as the scan read it, absent for a wine never scanned.
+    var labelTraits: BottleArtwork.LabelTraits? = nil
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
 

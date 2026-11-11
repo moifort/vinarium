@@ -130,6 +130,7 @@ struct DashboardView: View {
                     stock: wine.stock,
                     price: wine.estimatedPrice,
                     labelFamily: wine.labelFamily,
+                    labelTraits: wine.labelTraits,
                     appellation: wine.appellation,
                     classification: wine.classification
                 )
@@ -148,7 +149,8 @@ struct DashboardView: View {
                     position: event.position,
                     date: event.date,
                     memberName: event.memberName,
-                    labelFamily: event.labelFamily
+                    labelFamily: event.labelFamily,
+                    labelTraits: event.labelTraits
                 )
             },
             ready: shelf.map { wine in
@@ -167,6 +169,7 @@ struct DashboardView: View {
                         price: wine.estimatedPrice
                     ),
                     labelFamily: wine.labelFamily,
+                    labelTraits: wine.labelTraits,
                     appellation: wine.appellation,
                     classification: wine.classification
                 )
@@ -187,6 +190,7 @@ struct DashboardView: View {
                         price: favorite.estimatedPrice
                     ),
                     labelFamily: favorite.labelFamily,
+                    labelTraits: favorite.labelTraits,
                     appellation: favorite.appellation,
                     classification: favorite.classification
                 )

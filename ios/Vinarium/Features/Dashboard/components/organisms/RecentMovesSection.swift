@@ -181,9 +181,10 @@ extension RecentMovesSection {
         /// The housemate behind the move, nil when it was the viewer.
         var memberName: String? = nil
         var labelFamily: BottleArtwork.LabelFamily? = nil
+        var labelTraits: BottleArtwork.LabelTraits? = nil
 
         var style: BottleArtwork.Style {
-            .of(id: wineId, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
+            .of(id: wineId, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, traits: labelTraits, vintage: vintage)
         }
 
         /// "Entrée", with the housemate who made the move.
