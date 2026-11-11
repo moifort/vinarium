@@ -17871,6 +17871,47 @@
       }
     },
     "colors: %@": {},
+    "date": {
+      "comment": "Short label under the move's date on a home recent-move card, shown in capitals; keep it under nine letters.",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Datum"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "date"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "fecha"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "data"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "日付"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "data"
+          }
+        }
+      }
+    },
     "favorite: %@ · status: %@": {
       "localizations": {
         "fr": {

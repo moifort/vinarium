@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The latest bottles in and out of the cellar, one card each on the bottle's
-/// own backdrop, sliding sideways: the bottle on the left, the move, the wine and its
-/// date on the right, and what to do next with it.
+/// own backdrop, sliding sideways: the bottle on the left, the move, the wine, its
+/// slot and its day on the right, and what to do next with it.
 struct RecentMovesSection: View {
     let moves: [Move]
     var onSeeAll: (() -> Void)?
@@ -32,9 +32,11 @@ struct RecentMovesSection: View {
     /// The bottle's lane on the leading edge, the text starting just past it.
     private static let bottleLane: CGFloat = 80
     private static let textLeading: CGFloat = 4
+    private static let pillHeight: CGFloat = 28
 
-    // The type sizes of Shiori's "En cours" card: subheadline, bold title 3,
-    // caption, as they stand at the default text size.
+    /// The move on top, the wine under it, then its slot and day just above the
+    /// pills, so the card's height goes to larger type rather than to a gap. The
+    /// vintage stays on the bottle's label.
     private func card(_ move: Move) -> some View {
         Button { onOpen(move.wineId) } label: {
             HStack(spacing: 0) {
@@ -42,23 +44,20 @@ struct RecentMovesSection: View {
                     .frame(width: Self.bottleLane, height: Self.cardSize.height)
 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text(move.overline)
-                        .font(.system(size: 15))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(1)
+                    overline(move)
                     Text(move.name)
-                        .font(.system(size: 20, weight: .bold))
+                        .font(.system(size: 22, weight: .bold))
+                        .tracking(-0.4)
                         .lineLimit(2)
-                    Text(move.dateLine)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.white.opacity(0.72))
-                        .lineLimit(1)
                         .padding(.top, 6)
                     Spacer(minLength: 0)
+                    figures(move)
+                    // Room for the pills laid over the card.
+                    Color.clear.frame(height: Self.pillHeight + 12)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(EdgeInsets(top: 14, leading: Self.textLeading, bottom: 14, trailing: 14))
+                .padding(EdgeInsets(top: 16, leading: Self.textLeading, bottom: 16, trailing: 14))
             }
             .frame(width: Self.cardSize.width, height: Self.cardSize.height)
             .background { ground(move) }
@@ -75,8 +74,56 @@ struct RecentMovesSection: View {
                 }
             }
             .padding(.leading, Self.bottleLane + Self.textLeading)
-            .padding(.bottom, 14)
+            .padding(.bottom, 16)
         }
+    }
+
+    /// "↓ ENTRÉE", with the housemate who made the move.
+    private func overline(_ move: Move) -> some View {
+        HStack(spacing: 5) {
+            Image(systemName: move.isEntry ? "arrow.down" : "arrow.up")
+                .font(.system(size: 10, weight: .bold))
+            Text(move.overline)
+                .font(.system(size: 12, weight: .semibold))
+                .tracking(0.7)
+                .textCase(.uppercase)
+                .lineLimit(1)
+        }
+        .foregroundStyle(.white.opacity(0.72))
+    }
+
+    /// The slot and the day, as the home vignettes and the hero set their figures:
+    /// the value large, a short capitalised label under it, a hairline between.
+    private func figures(_ move: Move) -> some View {
+        let cells: [(value: String, label: LocalizedStringKey)] = [
+            (move.position, "cave"),
+            (move.dayFigure, "date"),
+        ]
+        return HStack(spacing: 0) {
+            ForEach(Array(cells.enumerated()), id: \.offset) { index, cell in
+                HStack(spacing: 14) {
+                    if index > 0 {
+                        Rectangle().fill(.white.opacity(0.22)).frame(width: 1)
+                    }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(cell.value)
+                            .font(.system(size: 18, weight: .semibold))
+                            .tracking(-0.3)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                        Text(cell.label)
+                            .font(.system(size: 10, weight: .semibold))
+                            .tracking(0.7)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.white.opacity(0.72))
+                            .lineLimit(1)
+                    }
+                }
+                .padding(.trailing, 14)
+                .accessibilityElement(children: .combine)
+            }
+        }
+        .fixedSize()
     }
 
     /// One ground under the bottle and the text: the bottle's own backdrop, lit
@@ -96,7 +143,7 @@ struct RecentMovesSection: View {
                 .font(.system(size: 12, weight: .semibold))
                 .lineLimit(1)
                 .padding(.horizontal, 12)
-                .frame(height: 28)
+                .frame(height: Self.pillHeight)
                 .foregroundStyle(filled ? Color.black : Color.white)
                 .background(filled ? Color.white : Color.white.opacity(0.18), in: .capsule)
                 .contentShape(.capsule)
@@ -126,20 +173,18 @@ extension RecentMovesSection {
             .of(id: wineId, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, vintage: vintage)
         }
 
-        /// "Entrée · A1", with the housemate who made the move.
+        /// "Entrée", with the housemate who made the move.
         var overline: String {
             let direction = isEntry ? String(localized: "Entrée") : String(localized: "Sortie")
-            return [direction, position, memberName].compactMap(\.self).joined(separator: " · ")
+            return [direction, memberName].compactMap(\.self).joined(separator: " · ")
         }
 
-        /// "2015 · le 4 octobre", the year added to a date from another year.
-        var dateLine: String {
+        /// "4 oct.", the year added to a date from another year.
+        var dayFigure: String {
             let sameYear = Calendar.current.isDate(date, equalTo: .now, toGranularity: .year)
-            let day = sameYear
-                ? date.formatted(.dateTime.day().month(.wide))
-                : date.formatted(.dateTime.day().month(.wide).year())
-            let when = String(localized: "le \(day)")
-            return [vintage.map { String($0) }, when].compactMap(\.self).joined(separator: " · ")
+            return sameYear
+                ? date.formatted(.dateTime.day().month(.abbreviated))
+                : date.formatted(.dateTime.day().month(.abbreviated).year())
         }
     }
 }
