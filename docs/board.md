@@ -82,7 +82,9 @@ Why a child does not always start at once: a comment sent from the board reaches
 an automated turn, not as the user's own message, and the app refuses to start a session
 (`user_asked`) on such a turn. The parent proposes it instead (`own_initiative`, a card the user
 clicks). Over Remote Control the cards do not show and the app refuses the proposal too: the
-parent then says in one line which thread is waiting. Either way, the user's next message in the
+parent then says so in one line starting with "⏸ Bloqué" that tells the user what to do ("⏸
+Bloqué : fil X en attente, envoie n'importe quel message ici pour lancer sa session"), never a
+bare "waiting for its session". Either way, the user's next message in the
 parent, whatever it says, is the go-ahead: the parent starts every waiting child first
 (`proposal_id`, or `user_asked` with the same brief when nothing could be proposed), then answers
 the message. It never asks for a keyword. After a clear, the waiting threads are the open ones
