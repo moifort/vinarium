@@ -51,6 +51,8 @@ struct DashboardWine: Codable, Identifiable, Sendable {
     /// The cellar the bottle stands in, once the household has several.
     var cellarName: String? = nil
     let urgent: Bool
+    // Optional so a dashboard cached before the hero's drinking window still decodes.
+    var drinkFrom: Int? = nil
     let drinkUntil: Int?
     // Optional so a dashboard cached before the drawn labels still decodes.
     var labelFamily: BottleArtwork.LabelFamily? = nil

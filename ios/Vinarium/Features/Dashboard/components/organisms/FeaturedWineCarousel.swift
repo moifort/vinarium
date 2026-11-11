@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// The wines to open first, one page each: the bottle on the page's haze, why it
-/// is due, where it stands, the notes kept on it, then the three things done with
-/// a bottle that is ready: take it out, mark it a favorite, move it.
+/// The wines to open first, one page each: the bottle on the page's haze and, at
+/// its right between its cork and its base, the wine, its drinking window and its
+/// slot, stock and value, then the three things done with a bottle that is ready:
+/// take it out, mark it a favorite, move it.
 struct FeaturedWineCarousel: View {
     let items: [Item]
     var onOpen: (String) -> Void
@@ -21,7 +22,7 @@ struct FeaturedWineCarousel: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
-            .frame(height: 270)
+            .frame(height: 320)
 
             if items.count > 1 {
                 dots
@@ -37,33 +38,9 @@ struct FeaturedWineCarousel: View {
     private func page(_ item: Item) -> some View {
         VStack(spacing: 18) {
             Button { onOpen(item.id) } label: {
-                HStack(alignment: .top, spacing: 14) {
+                HStack(alignment: .top, spacing: 16) {
                     cover(item)
-                    VStack(alignment: .leading, spacing: 0) {
-                        tag(item)
-                        Text(item.name)
-                            .font(.system(size: 24, weight: .bold))
-                            .tracking(-0.4)
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .padding(.top, 10)
-                        if let subtitle = item.subtitle {
-                            Text(subtitle)
-                                .font(.system(size: 15))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .padding(.top, 2)
-                        }
-                        if let notes = item.notes {
-                            Text(notes)
-                                .font(.system(size: 15))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(4)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .padding(.top, 10)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                    details(item)
                 }
                 .contentShape(.rect)
             }
@@ -76,14 +53,87 @@ struct FeaturedWineCarousel: View {
         .frame(maxHeight: .infinity, alignment: .top)
     }
 
-    /// The bottle alone, no tile behind it: it stands on the page's ambience,
-    /// in a lane barely wider than the bottle so the text gets the room.
+    /// The bottle alone, no tile behind it: it stands on the page's ambience.
     private func cover(_ item: Item) -> some View {
         BottleArtwork(
             style: item.style, producer: item.producer, name: item.name, vintage: item.vintage,
-            appellation: item.appellation, classification: item.classification, height: 184
+            appellation: item.appellation, classification: item.classification, height: Self.bottleHeight
         )
-            .frame(width: 72, height: 198)
+        .frame(width: Self.bottleHeight / 3 + 8, height: Self.bottleHeight + 10)
+    }
+
+    /// The bottle's height, and where its cork and its base fall in its lane: the
+    /// artwork is drawn on a 300-high frame, the glass from 8 to 294.
+    private static let bottleHeight: CGFloat = 240
+    private static let corkTop: CGFloat = 5 + bottleHeight * 8 / 300
+    private static let base: CGFloat = 5 + bottleHeight * 294 / 300
+
+    /// Three blocks spread from the cork to the base, nothing below the bottle:
+    /// the wine, its drinking window, then its slot, stock and value.
+    private func details(_ item: Item) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                tag(item)
+                Text(item.name)
+                    .font(.system(size: 24, weight: .bold))
+                    .tracking(-0.4)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 10)
+                if let subtitle = item.subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .padding(.top, 2)
+                }
+            }
+            Spacer(minLength: 8)
+            if let window = item.window {
+                DrinkingWindowRail(window: window)
+                Spacer(minLength: 8)
+            }
+            figures(item)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(height: Self.base - Self.corkTop, alignment: .top)
+        .padding(.top, Self.corkTop)
+    }
+
+    /// Slot, stock and value on three equal columns, as wide as the rail.
+    private func figures(_ item: Item) -> some View {
+        let cells = item.figures
+        return HStack(spacing: 0) {
+            ForEach(Array(cells.enumerated()), id: \.offset) { index, cell in
+                HStack(spacing: 0) {
+                    if index > 0 {
+                        Rectangle()
+                            .fill(Color(.separator))
+                            .frame(width: 1)
+                            .padding(.trailing, 12)
+                    }
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(cell.value)
+                            .font(.system(size: 20, weight: .semibold))
+                            .tracking(-0.4)
+                            .monospacedDigit()
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.6)
+                        cell.label
+                            .font(.system(size: 11, weight: .medium))
+                            .tracking(0.7)
+                            .textCase(.uppercase)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .accessibilityElement(children: .combine)
+            }
+            ForEach(cells.count..<3, id: \.self) { _ in Color.clear.frame(maxWidth: .infinity) }
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private func tag(_ item: Item) -> some View {
@@ -167,12 +217,17 @@ extension FeaturedWineCarousel {
         let producer: String?
         let name: String
         let vintage: Int?
-        let notes: String?
         let isFavorite: Bool
         let urgent: Bool
+        var drinkFrom: Int? = nil
         let drinkUntil: Int?
-        /// Where the bottle stands: its slot, with its cellar once there are several.
-        let place: String
+        /// The bottle's slot, and its cellar once the household has several.
+        let position: String
+        var cellarName: String? = nil
+        /// How many identical bottles the cellars hold.
+        var stock: Int? = nil
+        /// What one bottle is worth, in euros.
+        var price: Double? = nil
         var labelFamily: BottleArtwork.LabelFamily? = nil
         var appellation: String? = nil
         var classification: String? = nil
@@ -182,7 +237,29 @@ extension FeaturedWineCarousel {
         }
 
         var subtitle: String? {
-            [producer, vintage.map { String($0) }, place].compactMap(\.self).joined(separator: " · ")
+            let parts = [producer, vintage.map { String($0) }].compactMap(\.self)
+            return parts.isEmpty ? nil : parts.joined(separator: " · ")
+        }
+
+        /// The drinking window, from its first year (else the vintage) to its last.
+        var window: DrinkingWindowRail.Window? {
+            guard let until = drinkUntil else { return nil }
+            let from = min(drinkFrom ?? vintage ?? until, until)
+            return .init(from: from, until: until)
+        }
+
+        /// The slot under its cellar's name, the stock, then what the stock is
+        /// worth; a figure the wine lacks is left out.
+        var figures: [(value: String, label: Text)] {
+            var cells: [(value: String, label: Text)] = [
+                (position, cellarName.map { Text(verbatim: $0) } ?? Text("cave")),
+            ]
+            if let stock, stock > 0 { cells.append((stock.formatted(), Text("stock"))) }
+            if let price {
+                let worth = price * Double(max(stock ?? 1, 1))
+                cells.append((Money.formattedFromEur(worth, fractionLength: 0), Text("Valeur")))
+            }
+            return cells
         }
     }
 }
@@ -190,8 +267,8 @@ extension FeaturedWineCarousel {
 #Preview {
     FeaturedWineCarousel(
         items: [
-            .init(id: "1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, notes: "Un rosé de garde qui gagne à être servi à 12 °C, avec une cuisine provençale ou des grillades.", isFavorite: false, urgent: true, drinkUntil: 2027, place: "B4"),
-            .init(id: "2", color: .red, producer: "Château Margaux", name: "Pavillon Rouge", vintage: 2015, notes: nil, isFavorite: true, urgent: false, drinkUntil: nil, place: "A1"),
+            .init(id: "1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
+            .init(id: "2", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, isFavorite: true, urgent: false, drinkUntil: nil, position: "A1"),
         ],
         onOpen: { _ in },
         onRemove: { _ in },

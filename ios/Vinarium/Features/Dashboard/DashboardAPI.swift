@@ -30,6 +30,7 @@ enum DashboardAPI {
                     position: $0.position,
                     cellarName: CellarPositionLabel.cellarName(cellarId: $0.cellarId, cellars: cellars),
                     urgent: $0.urgent,
+                    drinkFrom: $0.drinkFrom,
                     drinkUntil: $0.drinkUntil,
                     labelFamily: BottleArtwork.LabelFamily(graphql: $0.labelFamily),
                     appellation: $0.appellation,

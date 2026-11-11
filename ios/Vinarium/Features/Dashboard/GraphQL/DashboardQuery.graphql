@@ -25,6 +25,7 @@ query Dashboard {
       cellarId
       position
       urgent
+      drinkFrom
       drinkUntil
       estimatedPrice
       stock

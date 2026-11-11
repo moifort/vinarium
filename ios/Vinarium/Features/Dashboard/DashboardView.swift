@@ -121,11 +121,14 @@ struct DashboardView: View {
                     producer: ProducerOverline.text(for: wine.producer, name: wine.name),
                     name: wine.name,
                     vintage: wine.vintage,
-                    notes: wine.notes?.trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty,
                     isFavorite: wine.isFavorite,
                     urgent: wine.urgent,
+                    drinkFrom: wine.drinkFrom,
                     drinkUntil: wine.drinkUntil,
-                    place: wine.cellarName.map { "\($0) · \(wine.position)" } ?? wine.position,
+                    position: wine.position,
+                    cellarName: wine.cellarName,
+                    stock: wine.stock,
+                    price: wine.estimatedPrice,
                     labelFamily: wine.labelFamily,
                     appellation: wine.appellation,
                     classification: wine.classification
@@ -190,10 +193,6 @@ struct DashboardView: View {
             }
         )
     }
-}
-
-private extension String {
-    var nilIfEmpty: String? { isEmpty ? nil : self }
 }
 
 #Preview {

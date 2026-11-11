@@ -138,7 +138,7 @@ extension DashboardPage.Content {
     static let sample = DashboardPage.Content(
         figures: .init(bottleCount: 18, readyCount: 5, favoriteCount: 3, totalValue: 2434),
         featured: [
-            .init(id: "f1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, notes: "Un rosé de garde qui gagne à être servi à 12 °C, avec une cuisine provençale ou des grillades.", isFavorite: false, urgent: true, drinkUntil: 2027, place: "B4", labelFamily: .provence, appellation: "Bandol"),
+            .init(id: "f1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
         ],
         moves: [
             .init(id: "m1", wineId: "w1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now.addingTimeInterval(-3 * 86400)),
