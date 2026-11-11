@@ -190,6 +190,8 @@ describe('DashboardQuery.view', () => {
         notes: 'À carafer une heure.',
         isFavorite: true,
         labelFamily: 'burgundy',
+        drinkFrom: currentYear - 1,
+        drinkUntil: currentYear + 5,
       },
     ])
     expect(view.history.find(({ beverageId }) => beverageId === 'w2')).toMatchObject({

@@ -69,6 +69,7 @@ export type ReadyToDrinkWine = {
   cellarId: CellarId
   position: string
   urgent: boolean
+  drinkFrom?: Year
   drinkUntil?: Year
   estimatedPrice?: Eur
   // How many identical bottles the household's cellars hold (see sameWineKey).

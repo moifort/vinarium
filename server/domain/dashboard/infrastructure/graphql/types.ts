@@ -159,6 +159,11 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
       description:
         'True when the bottle is near or past its drinking window and should be drunk soon',
     }),
+    drinkFrom: t.expose('drinkFrom', {
+      type: 'Year',
+      nullable: true,
+      description: 'First recommended year to drink the bottle; null when unknown',
+    }),
     drinkUntil: t.expose('drinkUntil', {
       type: 'Year',
       nullable: true,

@@ -97,6 +97,7 @@ export namespace DashboardQuery {
       cellarId: bottle.cellarId,
       position: `${bottle.rowLabel}${bottle.colLabel}`,
       urgent: urgentToDrink(details?.drinkWindow ?? {}, currentYear),
+      drinkFrom: details?.drinkWindow?.from,
       drinkUntil: details?.drinkWindow?.until,
       estimatedPrice: bottle.wine.purchase?.price,
       stock: bottlesByWine[sameWineKey(bottle.wine)]?.length ?? 1,

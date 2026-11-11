@@ -2373,6 +2373,9 @@ type ReadyToDrinkWine {
   """Wine color; null for non-wine beverages"""
   color: WineColor
 
+  """First recommended year to drink the bottle; null when unknown"""
+  drinkFrom: Year
+
   """Last recommended year to drink the bottle; null when unknown"""
   drinkUntil: Year
 
