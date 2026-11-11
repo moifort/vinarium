@@ -3,6 +3,7 @@ import { SearchIndexUseCase } from '~/domain/search/use-case'
 import { builder } from '~/domain/shared/graphql/builder'
 import { badUserInput, notFound } from '~/domain/shared/graphql/errors'
 import { stripNulls } from '~/utils/input'
+import { LabelTraits } from '../../primitives'
 import type { BeverageData, ErasableField, WineDetails } from '../../types'
 import { BeverageUseCase } from '../../use-case'
 import { AddBeverageInput, BeverageSheetInput, UpdateBeverageInput } from './inputs'
@@ -41,6 +42,7 @@ type BeverageFlatInput = {
   country?: unknown
   notes?: unknown
   subtype?: unknown
+  labelTraits?: unknown
 }
 
 const toData = (input: BeverageFlatInput): BeverageData => {
@@ -74,6 +76,7 @@ const toData = (input: BeverageFlatInput): BeverageData => {
     ...(purchase ? { purchase } : {}),
     ...(place ? { place } : {}),
     ...(wine ? { wine } : {}),
+    ...(input.labelTraits ? { labelTraits: LabelTraits(input.labelTraits) } : {}),
   } as BeverageData
 }
 

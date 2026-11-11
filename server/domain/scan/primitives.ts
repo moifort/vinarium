@@ -2,7 +2,7 @@ import { make } from 'ts-brand'
 import { z } from 'zod'
 import { retainedSubtype } from '~/domain/beverage/business-rules'
 import { pureColor, subtypeFromLegacy } from '~/domain/beverage/legacy-mapping'
-import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
+import { BEVERAGE_SUBTYPE_VALUES, LabelTraits } from '~/domain/beverage/primitives'
 import type {
   BottleDescription as BottleDescriptionType,
   ImageHash as ImageHashType,
@@ -42,6 +42,18 @@ const lenientSubtype = z
   .catch(undefined)
   .transform((v) => v ?? undefined)
 
+// A label described wrong (a colour that is no hex, a typeface out of the list)
+// is dropped whole: the bottle then falls back to the look its region picks,
+// and the rest of the scan still stands.
+const lenientLabelTraits = z.unknown().transform((v) => {
+  if (v === null || v === undefined) return undefined
+  try {
+    return LabelTraits(v)
+  } catch {
+    return undefined
+  }
+})
+
 // Gemini's structured output marks absent fields as explicit null (the prompt
 // instructs it to), so every optional field must accept null and coerce it away.
 // The input side still accepts the legacy cache shape (5-value color enum,
@@ -71,9 +83,11 @@ export const ScanResultSchema = z
     drinkFrom: nullToUndefined(z.number().int().nullable()).optional(),
     drinkUntil: nullToUndefined(z.number().int().nullable()).optional(),
     estimatedPrice: nullToUndefined(z.number().nullable()).optional(),
+    labelTraits: lenientLabelTraits.optional(),
   })
-  .transform(({ style, ...raw }) => ({
+  .transform(({ style, labelTraits, ...raw }) => ({
     ...raw,
+    ...(labelTraits ? { labelTraits } : {}),
     color: pureColor(raw.color),
     // retainedSubtype also guards against a model answer incoherent with the
     // beverage type (a 'junmai' beer) — better no subtype than a nonsensical one.

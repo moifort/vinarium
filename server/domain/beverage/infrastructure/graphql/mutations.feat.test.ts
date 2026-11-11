@@ -281,3 +281,61 @@ describe('the cuvee of a wine', () => {
     expect(wineOf()?.appellation).toBe('Margaux')
   })
 })
+
+// The scan reads what the label looks like and the app passes it on as it came:
+// it is kept on the wine, so the home screen draws the bottle with its closest
+// label, and is read back in lower case whatever case the scan answered in.
+describe('the label traits of a scanned wine', () => {
+  const traits = `{
+    paper: "#18181A", ink: "#d4b25c", metallic: true, typeface: DIDONE, capitals: true,
+    frame: true, band: false, emblem: NONE, shape: PORTRAIT
+  }`
+
+  test('are stored with the wine and read back', async () => {
+    const result = await execute(`
+      mutation {
+        addBeverage(input: { name: "Château Varenne", color: RED, labelTraits: ${traits} }) {
+          labelTraits { paper ink accent metallic typeface capitals frame band emblem shape }
+        }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.addBeverage).toEqual({
+      labelTraits: {
+        paper: '#18181a',
+        ink: '#d4b25c',
+        accent: null,
+        metallic: true,
+        typeface: 'DIDONE',
+        capitals: true,
+        frame: true,
+        band: false,
+        emblem: 'NONE',
+        shape: 'PORTRAIT',
+      },
+    })
+  })
+
+  test('refuse a colour that is not six hexadecimal digits', async () => {
+    const result = await execute(`
+      mutation {
+        addBeverage(input: {
+          name: "Château Varenne", color: RED,
+          labelTraits: { paper: "black", ink: "#d4b25c", metallic: true, typeface: DIDONE,
+            capitals: true, frame: true, band: false, emblem: NONE, shape: PORTRAIT }
+        }) { id }
+      }
+    `)
+
+    expect(result.errors?.[0]?.extensions?.code).toBe('BAD_USER_INPUT')
+  })
+
+  test('stay absent on a wine added by hand', async () => {
+    const result = await execute(`
+      mutation { addBeverage(input: { name: "Sans scan", color: WHITE }) { labelTraits { paper } } }
+    `)
+
+    expect(result.data?.addBeverage).toEqual({ labelTraits: null })
+  })
+})

@@ -159,6 +159,45 @@ export type WineDetails = {
   servingTemperature?: Celsius
 }
 
+// What a label looks like, as the scan reads it off the photo: its colours,
+// its type, its ornaments. The app draws the bottle with the closest of its
+// label looks, so a wine on the shelf resembles the bottle in the cellar.
+// Stored raw rather than as a chosen look: a look added to the app later is
+// matched against every label already read.
+export type HexColor = Brand<string, 'HexColor'>
+export type LabelTypeface =
+  | 'didone'
+  | 'garalde'
+  | 'script'
+  | 'geometric-sans'
+  | 'humanist-sans'
+  | 'slab'
+  | 'blackletter'
+  | 'hand'
+export type LabelEmblem =
+  | 'castle'
+  | 'crest'
+  | 'keys'
+  | 'grapes'
+  | 'mountains'
+  | 'sun'
+  | 'stars'
+  | 'illustration'
+  | 'none'
+export type LabelShape = 'portrait' | 'landscape' | 'square' | 'oval' | 'shield' | 'irregular'
+export type LabelTraits = {
+  paper: HexColor
+  ink: HexColor
+  accent?: HexColor
+  metallic: boolean
+  typeface: LabelTypeface
+  capitals: boolean
+  frame: boolean
+  band: boolean
+  emblem: LabelEmblem
+  shape: LabelShape
+}
+
 // Fields shared by every beverage, whatever its type.
 type BeverageBase = {
   id: BeverageId
@@ -171,6 +210,7 @@ type BeverageBase = {
   purchase?: Purchase
   notes?: Notes
   place?: Place
+  labelTraits?: LabelTraits
   /**
    * Every term this wine can be found by, written ahead of time so Firestore can
    * search it (see `server/domain/search/tokens.ts`). Optional: a wine written
@@ -204,6 +244,7 @@ export type BeverageData = {
   purchase?: Purchase
   notes?: Notes
   place?: Place
+  labelTraits?: LabelTraits
   subtype?: BeverageSubtype
   wine?: WineDetails
 }

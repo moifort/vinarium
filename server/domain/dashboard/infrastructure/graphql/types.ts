@@ -4,6 +4,7 @@ import {
   LabelFamilyEnum,
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
+import { LabelTraitsType } from '~/domain/beverage/infrastructure/graphql/label-traits'
 import { JournalEventType } from '~/domain/journal/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { DashboardView, FavoriteWine, LastBottle, ReadyToDrinkWine } from '../../types'
@@ -54,6 +55,12 @@ const FavoriteWineType = builder.objectRef<FavoriteWine>('FavoriteWine').impleme
     labelFamily: t.expose('labelFamily', {
       type: LabelFamilyEnum,
       description: 'House style the bottle label is drawn in',
+    }),
+    labelTraits: t.field({
+      type: LabelTraitsType,
+      nullable: true,
+      description: 'What the real label looks like, when scanned: the app draws its closest look',
+      resolve: (w) => w.labelTraits,
     }),
     estimatedPrice: t.expose('estimatedPrice', {
       type: 'Eur',
@@ -139,6 +146,12 @@ const ReadyToDrinkWineType = builder.objectRef<ReadyToDrinkWine>('ReadyToDrinkWi
     labelFamily: t.expose('labelFamily', {
       type: LabelFamilyEnum,
       description: 'House style the bottle label is drawn in',
+    }),
+    labelTraits: t.field({
+      type: LabelTraitsType,
+      nullable: true,
+      description: 'What the real label looks like, when scanned: the app draws its closest look',
+      resolve: (w) => w.labelTraits,
     }),
     notes: t.expose('notes', {
       type: 'Notes',

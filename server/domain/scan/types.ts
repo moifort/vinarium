@@ -1,5 +1,5 @@
 import type { Brand } from 'ts-brand'
-import type { BeverageSubtype, BeverageType, WineColor } from '~/domain/beverage/types'
+import type { BeverageSubtype, BeverageType, LabelTraits, WineColor } from '~/domain/beverage/types'
 import type { Language } from '~/domain/shared/language'
 
 export type ImageHash = Brand<string, 'ImageHash'>
@@ -34,6 +34,9 @@ export type ScanResult = {
   drinkFrom?: number
   drinkUntil?: number
   estimatedPrice?: number
+  // What the label looks like, read off the photo; absent for a typed
+  // description, and on results cached before the scan read it.
+  labelTraits?: LabelTraits
 }
 
 export type CachedScanResult = {

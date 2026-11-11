@@ -3,6 +3,7 @@ import { RecommendationInput } from '~/domain/recommendation/infrastructure/grap
 import { builder } from '~/domain/shared/graphql/builder'
 import { TastingInput } from '~/domain/tasting/infrastructure/graphql/inputs'
 import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
+import { LabelTraitsInput } from './label-traits'
 
 export const AddBeverageInput = builder.inputType('AddBeverageInput', {
   description:
@@ -58,6 +59,10 @@ export const AddBeverageInput = builder.inputType('AddBeverageInput', {
     latitude: t.field({ type: 'Latitude', description: 'Latitude of the purchase place' }),
     longitude: t.field({ type: 'Longitude', description: 'Longitude of the purchase place' }),
     placeName: t.field({ type: 'PlaceName', description: 'Name of the place of purchase' }),
+    labelTraits: t.field({
+      type: LabelTraitsInput,
+      description: 'What the label looks like, as the scan read it; draws the closest label',
+    }),
   }),
 })
 

@@ -112,6 +112,7 @@ export namespace JournalQuery {
     wineColor: wineDetails(wine)?.color,
     wineVintage: wineDetails(wine)?.vintage,
     wineLabelFamily: labelFamily(wine),
+    wineLabelTraits: wine.labelTraits,
     position: `${CellarRow.toLabel(entry.row)}${CellarCol.toLabel(entry.col)}`,
     actor: actorOf(entry, viewerId, scope),
   })

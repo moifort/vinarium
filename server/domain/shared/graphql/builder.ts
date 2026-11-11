@@ -16,6 +16,7 @@ import type {
   Classification,
   Cuvee,
   GrapeVariety,
+  HexColor,
   Notes,
   Producer,
 } from '~/domain/beverage/types'
@@ -70,6 +71,7 @@ export const builder = new SchemaBuilder<{
     Notes: { Input: Notes; Output: Notes }
     Appellation: { Input: Appellation; Output: Appellation }
     Cuvee: { Input: Cuvee; Output: Cuvee }
+    HexColor: { Input: HexColor; Output: HexColor }
     Classification: { Input: Classification; Output: Classification }
     GrapeVariety: { Input: GrapeVariety; Output: GrapeVariety }
     Celsius: { Input: Celsius; Output: Celsius }

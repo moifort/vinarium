@@ -37,6 +37,11 @@ input AddBeverageInput {
   """Grape varieties of the wine"""
   grapeVarieties: [GrapeVariety!]
 
+  """
+  What the label looks like, as the scan read it; draws the closest label
+  """
+  labelTraits: LabelTraitsInput
+
   """Latitude of the purchase place"""
   latitude: Latitude
 
@@ -361,6 +366,9 @@ type Beverage {
   Whether this beverage belongs to the viewer (false for a housemate bottle)
   """
   isMine: Boolean!
+
+  """What the label looks like, as the scan read it; null when never read"""
+  labelTraits: LabelTraits
 
   """Display name of the beverage"""
   name: BeverageName!
@@ -1151,6 +1159,11 @@ type FavoriteWine {
   """House style the bottle label is drawn in"""
   labelFamily: LabelFamily!
 
+  """
+  What the real label looks like, when scanned: the app draws its closest look
+  """
+  labelTraits: LabelTraits
+
   """Display name of the beverage"""
   name: BeverageName!
 
@@ -1263,6 +1276,13 @@ A single grape variety (cepage), a non-empty string.
 A wine carries a list of these. Example: "Cabernet Sauvignon".
 """
 scalar GrapeVariety
+
+"""
+A colour as six hexadecimal digits after a hash, lower case on the way out.
+
+Example: "#d4b25c".
+"""
+scalar HexColor
 
 """
 A group of people who share one physical cellar.
@@ -1424,6 +1444,11 @@ type JournalEvent {
   """House style the bottle label is drawn in."""
   wineLabelFamily: LabelFamily!
 
+  """
+  What the real label looks like, when scanned: the app draws its closest look.
+  """
+  wineLabelTraits: LabelTraits
+
   """Structured subtype of the beverage (sparkling, ...); null when unset."""
   wineSubtype: BeverageSubtype
 
@@ -1476,6 +1501,36 @@ type JournalEvents {
 
   """The events in this page, most recent first."""
   items: [JournalEvent!]!
+}
+
+"""The main picture a label carries, if any."""
+enum LabelEmblem {
+  """A château or a building"""
+  CASTLE
+
+  """A coat of arms, a shield or a monogram"""
+  CREST
+
+  """A bunch of grapes or vine leaves"""
+  GRAPES
+
+  """Any other drawing: an animal, a figure"""
+  ILLUSTRATION
+
+  """Crossed keys"""
+  KEYS
+
+  """Hills or mountains"""
+  MOUNTAINS
+
+  """Type only, no picture"""
+  NONE
+
+  """Stars"""
+  STARS
+
+  """A sun"""
+  SUN
 }
 
 """
@@ -1544,6 +1599,124 @@ enum LabelFamily {
 
   """Sweet and fortified wines: gold accents and a script name"""
   SWEET
+}
+
+"""The outline of the label."""
+enum LabelShape {
+  """A cut-out or free shape"""
+  IRREGULAR
+
+  """A rectangle wider than tall"""
+  LANDSCAPE
+
+  """An oval or a circle"""
+  OVAL
+
+  """A rectangle taller than wide"""
+  PORTRAIT
+
+  """A shield or an arched top"""
+  SHIELD
+
+  """A square"""
+  SQUARE
+}
+
+"""
+What a bottle's label looks like, as the scan reads it off the photo.
+
+The app draws the bottle with the closest of its label looks. Absent on a beverage added by hand, named in words, or scanned before the scan read it.
+"""
+type LabelTraits {
+  """Second colour of the type or ornaments, when there is one"""
+  accent: HexColor
+
+  """A coloured band across the label"""
+  band: Boolean!
+
+  """The name set in capitals"""
+  capitals: Boolean!
+
+  """Main picture"""
+  emblem: LabelEmblem!
+
+  """A drawn frame or border"""
+  frame: Boolean!
+
+  """Colour of the main text"""
+  ink: HexColor!
+
+  """Gold, silver or foil printing"""
+  metallic: Boolean!
+
+  """Colour of the paper"""
+  paper: HexColor!
+
+  """Outline of the label"""
+  shape: LabelShape!
+
+  """Type of the name"""
+  typeface: LabelTypeface!
+}
+
+"""What the label looks like, passed on from the scan result as it came."""
+input LabelTraitsInput {
+  """Second colour, when there is one"""
+  accent: HexColor
+
+  """A coloured band across the label"""
+  band: Boolean!
+
+  """The name set in capitals"""
+  capitals: Boolean!
+
+  """Main picture"""
+  emblem: LabelEmblem!
+
+  """A drawn frame or border"""
+  frame: Boolean!
+
+  """Colour of the main text"""
+  ink: HexColor!
+
+  """Gold, silver or foil printing"""
+  metallic: Boolean!
+
+  """Colour of the paper"""
+  paper: HexColor!
+
+  """Outline of the label"""
+  shape: LabelShape!
+
+  """Type of the name"""
+  typeface: LabelTypeface!
+}
+
+"""The family of type the name on a label is set in."""
+enum LabelTypeface {
+  """Gothic blackletter"""
+  BLACKLETTER
+
+  """High-contrast serif, as Didot or Bodoni"""
+  DIDONE
+
+  """Classic serif, as Baskerville or Garamond"""
+  GARALDE
+
+  """Geometric sans, as Futura"""
+  GEOMETRIC_SANS
+
+  """Hand-drawn or hand-written lettering"""
+  HAND
+
+  """Humanist sans, as Gill Sans or Optima"""
+  HUMANIST_SANS
+
+  """Joined, calligraphic script"""
+  SCRIPT
+
+  """Slab serif, square-ended serifs"""
+  SLAB
 }
 
 """
@@ -2391,6 +2564,11 @@ type ReadyToDrinkWine {
   """House style the bottle label is drawn in"""
   labelFamily: LabelFamily!
 
+  """
+  What the real label looks like, when scanned: the app draws its closest look
+  """
+  labelTraits: LabelTraits
+
   """Display name of the beverage"""
   name: BeverageName!
 
@@ -2521,6 +2699,11 @@ type ScanResult {
 
   """Grape varieties mentioned; null or empty when none identified"""
   grapeVarieties: [String!]
+
+  """
+  What the photographed label looks like (colours, type, ornaments). Pass it on to `addBeverage` so the bottle is drawn with its closest label; null for a typed description or when no label is visible
+  """
+  labelTraits: LabelTraits
 
   """Beverage name read from the label; empty string when not recognized"""
   name: String!

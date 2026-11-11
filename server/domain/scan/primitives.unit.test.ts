@@ -56,4 +56,51 @@ describe('BottleDescription', () => {
     )
     expect(() => BottleDescription('a'.repeat(MAX_BOTTLE_DESCRIPTION_LENGTH + 1))).toThrow()
   })
+
+  const traits = {
+    paper: '#F3EAD6',
+    ink: '#3a2c1c',
+    accent: null,
+    metallic: false,
+    typeface: 'garalde',
+    capitals: true,
+    frame: true,
+    band: false,
+    emblem: 'castle',
+    shape: 'portrait',
+  }
+
+  test('keeps the label traits read off the photo, colours in lower case', () => {
+    const parsed = parseScanResponse(
+      JSON.stringify({ name: 'Talbot', beverageType: 'wine', labelTraits: traits }),
+    )
+    expect(parsed.labelTraits as unknown).toEqual({
+      paper: '#f3ead6',
+      ink: '#3a2c1c',
+      metallic: false,
+      typeface: 'garalde',
+      capitals: true,
+      frame: true,
+      band: false,
+      emblem: 'castle',
+      shape: 'portrait',
+    })
+  })
+
+  // A label described wrong must not cost the scan: the wine stays, drawn with
+  // the look its region picks.
+  test('drops label traits it cannot read and keeps the rest of the scan', () => {
+    const parsed = parseScanResponse(
+      JSON.stringify({
+        name: 'Talbot',
+        beverageType: 'wine',
+        labelTraits: { ...traits, typeface: 'comic-sans' },
+      }),
+    )
+    expect(parsed.name).toBe('Talbot')
+    expect(parsed).not.toHaveProperty('labelTraits')
+    expect(
+      parseScanResponse('{"name":"Talbot","beverageType":"wine","labelTraits":null}'),
+    ).not.toHaveProperty('labelTraits')
+  })
 })

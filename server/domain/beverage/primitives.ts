@@ -12,6 +12,8 @@ import type {
   Classification as ClassificationType,
   Cuvee as CuveeType,
   GrapeVariety as GrapeVarietyType,
+  HexColor as HexColorType,
+  LabelTraits as LabelTraitsType,
   Notes as NotesType,
   Producer as ProducerType,
   SortOrder as SortOrderType,
@@ -65,6 +67,65 @@ export const Celsius = (value: unknown) => {
     .preprocess((v) => (typeof v === 'string' ? Number(v) : v), z.number().min(-50).max(100))
     .parse(value)
   return make<CelsiusType>()(v)
+}
+
+export const HexColor = (value: unknown) => {
+  const v = z
+    .string()
+    .regex(/^#[0-9a-fA-F]{6}$/)
+    .transform((hex) => hex.toLowerCase())
+    .parse(value)
+  return make<HexColorType>()(v)
+}
+
+export const LABEL_TYPEFACES = [
+  'didone',
+  'garalde',
+  'script',
+  'geometric-sans',
+  'humanist-sans',
+  'slab',
+  'blackletter',
+  'hand',
+] as const
+export const LABEL_EMBLEMS = [
+  'castle',
+  'crest',
+  'keys',
+  'grapes',
+  'mountains',
+  'sun',
+  'stars',
+  'illustration',
+  'none',
+] as const
+export const LABEL_SHAPES = [
+  'portrait',
+  'landscape',
+  'square',
+  'oval',
+  'shield',
+  'irregular',
+] as const
+
+const hexColor = z.string().transform((v) => HexColor(v))
+
+export const LabelTraitsSchema = z.object({
+  paper: hexColor,
+  ink: hexColor,
+  accent: hexColor.nullish().transform((v) => v ?? undefined),
+  metallic: z.boolean(),
+  typeface: z.enum(LABEL_TYPEFACES),
+  capitals: z.boolean(),
+  frame: z.boolean(),
+  band: z.boolean(),
+  emblem: z.enum(LABEL_EMBLEMS),
+  shape: z.enum(LABEL_SHAPES),
+})
+
+export const LabelTraits = (value: unknown): LabelTraitsType => {
+  const { accent, ...rest } = LabelTraitsSchema.parse(value)
+  return accent ? { ...rest, accent } : rest
 }
 
 export const WineColor = (value: unknown) =>

@@ -1,7 +1,13 @@
 import { createHash } from 'node:crypto'
 import type { AiStepUsage } from '~/domain/admin/types'
 import { SUBTYPES_BY_BEVERAGE } from '~/domain/beverage/business-rules'
-import { BEVERAGE_SUBTYPE_VALUES } from '~/domain/beverage/primitives'
+import {
+  BEVERAGE_SUBTYPE_VALUES,
+  LABEL_EMBLEMS,
+  LABEL_SHAPES,
+  LABEL_TYPEFACES,
+  LabelTraits,
+} from '~/domain/beverage/primitives'
 import * as repository from '~/domain/scan/infrastructure/repository'
 import {
   EnrichSchema,
@@ -147,6 +153,17 @@ export namespace Scan {
     drinkFrom: 2025,
     drinkUntil: 2035,
     estimatedPrice: 42,
+    labelTraits: LabelTraits({
+      paper: '#18181a',
+      ink: '#d4b25c',
+      metallic: true,
+      typeface: 'didone',
+      capitals: true,
+      frame: true,
+      band: false,
+      emblem: 'none',
+      shape: 'portrait',
+    }),
   }
 
   // The language name is written into the (French) prompt so Gemini emits every
@@ -253,6 +270,59 @@ export namespace Scan {
           description:
             "Prix estimé en euros basé sur les caractéristiques, le millésime, l'appellation, la classification et la réputation du producteur",
         },
+        labelTraits: {
+          type: 'object',
+          nullable: true,
+          description:
+            "Allure de l'étiquette photographiée (couleurs, police, ornements) ; null sans photo d'étiquette",
+          properties: {
+            paper: { type: 'string', description: 'Couleur du papier, #rrggbb' },
+            ink: { type: 'string', description: 'Couleur du texte principal, #rrggbb' },
+            accent: {
+              type: 'string',
+              nullable: true,
+              description: 'Seconde couleur du texte ou des ornements, #rrggbb ; null si aucune',
+            },
+            metallic: { type: 'boolean', description: 'Impression dorée, argentée ou métallisée' },
+            typeface: {
+              type: 'string',
+              enum: [...LABEL_TYPEFACES],
+              description: 'Famille de la police du nom',
+            },
+            capitals: { type: 'boolean', description: 'Nom composé en capitales' },
+            frame: { type: 'boolean', description: 'Cadre ou filet tracé autour du texte' },
+            band: { type: 'boolean', description: "Bandeau de couleur en travers de l'étiquette" },
+            emblem: { type: 'string', enum: [...LABEL_EMBLEMS], description: 'Image principale' },
+            shape: {
+              type: 'string',
+              enum: [...LABEL_SHAPES],
+              description: "Contour de l'étiquette",
+            },
+          },
+          required: [
+            'paper',
+            'ink',
+            'metallic',
+            'typeface',
+            'capitals',
+            'frame',
+            'band',
+            'emblem',
+            'shape',
+          ],
+          propertyOrdering: [
+            'paper',
+            'ink',
+            'accent',
+            'metallic',
+            'typeface',
+            'capitals',
+            'frame',
+            'band',
+            'emblem',
+            'shape',
+          ],
+        },
       },
       required: ['recognized', 'name', 'beverageType'],
       propertyOrdering: [
@@ -273,6 +343,7 @@ export namespace Scan {
         'drinkFrom',
         'drinkUntil',
         'estimatedPrice',
+        'labelTraits',
       ],
     },
   }
@@ -282,12 +353,17 @@ export namespace Scan {
   const extractionSteps = (language: ScanLanguage) =>
     `ÉTAPE 1 — Détermine d'abord beverageType parmi : wine (vin), spirit (spiritueux/alcool fort distillé), beer (bière), sake (saké japonais), cider (cidre/poiré), other. Indices de classification :\n- wine : mention de cépages, d'appellation (AOC/AOP/DOC), millésime, ~11-15% vol, bouteille bordelaise/bourguignonne.\n- spirit : whisky, rhum, gin, vodka, cognac, armagnac, tequila, mezcal, liqueur — souvent 37,5-50%+ vol, mention d'âge (ex : 12 ans) ou de distillerie.\n- beer : brasserie, IPA/Lager/Stout/Pils/Triple, ~4-9% vol, canette ou bouteille capsulée.\n- sake : texte japonais, mention 純米/吟醸/大吟醸 (Junmai/Ginjo/Daiginjo), kura (brasserie de saké), ~14-17% vol.\n- cider : pomme/poire, cidrerie, Brut/Doux/Fermier, ~2-8% vol.\nSi le type est réellement indéterminable, mets 'other'.\n\nÉTAPE 2 — Selon le type :\n- Pour un vin : color est OBLIGATOIRE parmi red/white/rosé — c'est la robe. Un champagne, crémant ou autre effervescent garde sa robe en color (white ou rosé) et reçoit subtype 'sparkling'. Estime drinkFrom/drinkUntil selon le type de vin, le millésime, la région et la classification.\n- Pour toute autre boisson : mets color à null et laisse les champs spécifiques au vin (grapeVarieties, appellation, cuvee, classification, drinkFrom, drinkUntil) à null.\n\nÉTAPE 3 — Renseigne subtype avec une valeur COHÉRENTE avec beverageType, ou null si incertain :\n- wine → sparkling (effervescent), sweet (moelleux/liquoreux), late-harvest (vendanges tardives), vin-jaune, porto, fortified (autre vin muté : Banyuls, Madère, Xérès…)\n- spirit → rum, whisky, gin, vodka, cognac, armagnac, tequila (ou mezcal), liqueur, eau-de-vie\n- beer → blonde, blanche, amber (ambrée), brune, ipa, stout, pils (ou lager), triple\n- sake → junmai, ginjo, daiginjo, honjozo, nigori, sparkling (saké pétillant)\n- cider → brut, doux, demi-sec, poire (poiré)\n- 'other' si aucune valeur ne convient.\n\nÉTAPE 4 — Sépare trois champs qui se confondent facilement, et renseigne-les indépendamment même quand ils se recoupent :\n- domain : le PRODUCTEUR seul, tel qu'il signe l'étiquette (domaine, château, maison, négociant, distillerie, brasserie, kura). Retire-en la cuvée, l'appellation, la classification et le millésime : « Domaine Leflaive » et non « Domaine Leflaive Puligny-Montrachet 1er Cru ». Quand le producteur et le vin portent le même nom (« Château Margaux »), reprends-le tel quel. Quand aucun producteur n'est lisible, mets null plutôt que de recopier le nom du vin.\n- cuvee : le nom PROPRE de cet embouteillage précis, quand l'étiquette en porte un distinct du producteur et de l'appellation — un lieu-dit, un climat ou un nom de fantaisie : « Les Pucelles », « La Grande Année », « Cuvée Alexandre ». Une appellation seule (« Puligny-Montrachet »), une classification (« Premier Cru ») ou une mention de cépage ne sont pas des cuvées : mets null. Uniquement pour un vin, null pour toute autre boisson.\n- name : le nom d'usage de la bouteille tel qu'il est lu sur l'étiquette. Il peut reprendre le producteur ou la cuvée, cela ne dispense pas de remplir domain et cuvee.\n\nPour alcoholContent, indique le degré d'alcool en % vol s'il est visible. Pour estimatedPrice, estime le prix actuel du marché en euros selon le producteur et les caractéristiques. Toutes les valeurs textuelles (nom, producteur, cuvée, région, pays, cépages, appellation, classification) doivent être en ${LANGUAGE_NAMES[language]}. Si une information n'est pas visible ou estimable, mets la valeur à null (ou un tableau vide pour grapeVarieties).`
 
+  // Step 5, for a photo only: what the label looks like, so the app draws the
+  // bottle with its closest look. Colours are the printed ones, corrected for
+  // the light of the photo: a white paper under a warm bulb is still white.
+  const LABEL_STEP = `ÉTAPE 5 — Décris l'allure de l'étiquette principale dans labelTraits, sans tenir compte de la bouteille, de la capsule ni du fond de la photo :\n- paper : couleur dominante du papier, en #rrggbb, telle qu'imprimée (corrige la lumière de la photo : un papier blanc sous une lampe chaude reste blanc).\n- ink : couleur du texte principal (le nom), en #rrggbb. accent : seconde couleur nette du texte ou des ornements, sinon null. metallic : true si l'or, l'argent ou une dorure à chaud domine.\n- typeface : police du nom. didone (Didot, Bodoni, fort contraste), garalde (Garamond, Baskerville, empattements classiques, capitales romaines gravées comprises), script (anglaise, calligraphie liée), geometric-sans (Futura, Avenir), humanist-sans (Gill Sans, Optima), slab (empattements carrés), blackletter (gothique), hand (lettrage dessiné à la main). capitals : true si le nom est en capitales.\n- frame : true si un cadre ou un filet entoure le texte. band : true si un bandeau de couleur traverse l'étiquette.\n- emblem : castle (château, bâtiment), crest (blason, écusson, monogramme), keys (clés croisées), grapes (grappe, feuilles de vigne), mountains, sun, stars, illustration (tout autre dessin : animal, personnage), none (texte seul).\n- shape : portrait, landscape, square, oval, shield (écusson ou haut cintré), irregular (découpe libre).\nSi aucune étiquette n'est visible, mets labelTraits à null.`
+
   const scanLabel = async (
     imageBuffer: Buffer,
     language: ScanLanguage,
     description?: BottleDescription,
   ) => {
-    const prompt = `Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name="" si l'image n'est PAS une étiquette de boisson identifiable (aucune étiquette lisible, objet quelconque, photo floue ou illisible). Sinon mets recognized=true et poursuis. Ne mets recognized=false que si tu ne peux vraiment rien identifier.\n\n${extractionSteps(language)}`
+    const prompt = `Analyse cette image d'étiquette de boisson alcoolisée et extrais toutes les informations visibles.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name="" si l'image n'est PAS une étiquette de boisson identifiable (aucune étiquette lisible, objet quelconque, photo floue ou illisible). Sinon mets recognized=true et poursuis. Ne mets recognized=false que si tu ne peux vraiment rien identifier.\n\n${extractionSteps(language)}\n\n${LABEL_STEP}`
     // What the photographer typed alongside goes last: the label comes first,
     // the text fills what it does not show and settles what it leaves unclear.
     const complement = description
@@ -302,7 +378,7 @@ export namespace Scan {
   const identifyFromText = async (description: BottleDescription, language: ScanLanguage) =>
     extract([
       {
-        text: `Identifie la boisson alcoolisée désignée par ce texte, écrit par quelqu'un qui décrit une bouteille sans la photographier : « ${description} ».\n\nLe texte tient lieu d'étiquette : dans les étapes ci-dessous, lis « étiquette » comme ce texte, et complète avec tes connaissances ce qu'il ne dit pas (producteur, appellation, cépages, garde) dès lors que la bouteille désignée est sans ambiguïté.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name="" si le texte ne désigne aucune boisson identifiable (texte sans rapport, trop vague pour nommer une bouteille). Sinon mets recognized=true et poursuis.\n\n${extractionSteps(language)}`,
+        text: `Identifie la boisson alcoolisée désignée par ce texte, écrit par quelqu'un qui décrit une bouteille sans la photographier : « ${description} ».\n\nLe texte tient lieu d'étiquette : dans les étapes ci-dessous, lis « étiquette » comme ce texte, et complète avec tes connaissances ce qu'il ne dit pas (producteur, appellation, cépages, garde) dès lors que la bouteille désignée est sans ambiguïté.\n\nÉTAPE 0 — Détermine recognized : mets recognized=false et name="" si le texte ne désigne aucune boisson identifiable (texte sans rapport, trop vague pour nommer une bouteille). Sinon mets recognized=true et poursuis.\n\n${extractionSteps(language)}\n\nMets labelTraits à null : sans photo, l'allure de l'étiquette est inconnue.`,
       },
     ])
 

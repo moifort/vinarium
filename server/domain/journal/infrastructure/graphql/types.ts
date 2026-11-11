@@ -4,6 +4,7 @@ import {
   LabelFamilyEnum,
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
+import { LabelTraitsType } from '~/domain/beverage/infrastructure/graphql/label-traits'
 import { BeverageType } from '~/domain/beverage/infrastructure/graphql/types'
 import { builder } from '~/domain/shared/graphql/builder'
 import { JournalQuery } from '../../query'
@@ -86,6 +87,12 @@ export const JournalEventType = builder.objectRef<JournalEventView>('JournalEven
     wineLabelFamily: t.expose('wineLabelFamily', {
       type: LabelFamilyEnum,
       description: 'House style the bottle label is drawn in.',
+    }),
+    wineLabelTraits: t.field({
+      type: LabelTraitsType,
+      nullable: true,
+      description: 'What the real label looks like, when scanned: the app draws its closest look.',
+      resolve: (e) => e.wineLabelTraits,
     }),
     position: t.exposeString('position', {
       description: 'Human-facing grid slot the bottle occupied (e.g. "A1").',

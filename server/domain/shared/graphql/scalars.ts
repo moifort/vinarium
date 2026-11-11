@@ -15,6 +15,7 @@ import {
   Classification,
   Cuvee,
   GrapeVariety,
+  HexColor,
   Notes,
   Producer,
 } from '~/domain/beverage/primitives'
@@ -130,6 +131,14 @@ builder.scalarType('Cuvee', {
     'and from the appellation. Example: "Les Pucelles".',
   serialize: (value) => value as string,
   parseValue: validatedParse('Cuvee', Cuvee),
+})
+
+builder.scalarType('HexColor', {
+  description:
+    'A colour as six hexadecimal digits after a hash, lower case on the way out.\n\n' +
+    'Example: "#d4b25c".',
+  serialize: (value) => value as string,
+  parseValue: validatedParse('HexColor', HexColor),
 })
 
 builder.scalarType('Classification', {

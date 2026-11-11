@@ -3,6 +3,7 @@ import {
   BeverageTypeEnum,
   WineColorEnum,
 } from '~/domain/beverage/infrastructure/graphql/enums'
+import { LabelTraitsType } from '~/domain/beverage/infrastructure/graphql/label-traits'
 import { builder } from '~/domain/shared/graphql/builder'
 import type { ScanResult } from '../../types'
 
@@ -100,6 +101,15 @@ export const ScanResultType = builder.objectRef<ScanResult>('ScanResult').implem
     estimatedPrice: t.exposeFloat('estimatedPrice', {
       nullable: true,
       description: 'Estimated market price in euros; null when not estimable',
+    }),
+    labelTraits: t.field({
+      type: LabelTraitsType,
+      nullable: true,
+      description:
+        'What the photographed label looks like (colours, type, ornaments). Pass it on to ' +
+        '`addBeverage` so the bottle is drawn with its closest label; null for a typed ' +
+        'description or when no label is visible',
+      resolve: (r) => r.labelTraits,
     }),
   }),
 })
