@@ -76,6 +76,8 @@ struct RecentMovesSection: View {
             .contentShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)
+        // The scenarios find a move by its direction, whatever the card's spoken label.
+        .accessibilityIdentifier(move.isEntry ? "recent-move-entry" : "recent-move-exit")
         .overlay(alignment: .topTrailing) {
             LocationPlate(position: move.position)
                 .padding([.top, .trailing], Self.plateInset)

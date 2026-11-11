@@ -38,21 +38,24 @@ struct DashboardPage {
     }
 
     func verifyJournalShowsEntry() throws {
-        // A move card opens on its direction and slot ("In · A1"): match the
-        // direction at the head of that line, never a CONTAINS on "In", which would
+        // Each move card carries its direction as an identifier: its spoken label
+        // starts with the arrow and the outlined tag, and a CONTAINS on "In" would
         // match "In cellar" whatever the cards show.
-        let predicate = NSPredicate(format: "label BEGINSWITH %@", "In · ")
-        try app.descendants(matching: .any).matching(predicate).firstMatch
+        try app.buttons["recent-move-entry"].firstMatch
             .waitOrFail(timeout: 15, "no entry card in the recent moves")
     }
 
     func verifyFavoritesContains(_ wineName: String) throws {
-        let predicate = NSPredicate(format: "label CONTAINS %@", wineName)
-        let element = app.staticTexts.matching(predicate).firstMatch
-        if !element.waitForExistence(timeout: 15) {
-            let button = app.buttons.matching(predicate).firstMatch
-            try button.waitOrFail(timeout: 2, "'\(wineName)' not found in favorites")
-        }
+        // A shelf tile is a button whose label is the wine's name: the name itself
+        // is drawn on the bottle, never written as text.
+        let tile = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", wineName)).firstMatch
+        if tile.waitForExistence(timeout: 15) { return }
+        // "My favorites" is the home's last shelf, below the fold: bring it on
+        // screen before giving up.
+        app.swipeUp()
+        if tile.waitForExistence(timeout: 5) { return }
+        print("Home accessibility tree:\n\(app.debugDescription)")
+        try tile.waitOrFail(timeout: 1, "'\(wineName)' not found in favorites")
     }
 
     func tapWine(named name: String) throws -> WineDetailPage {
