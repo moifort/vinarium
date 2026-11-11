@@ -31,7 +31,7 @@ struct RecentMovesSection: View {
     /// Low enough to keep the rail light on the home, tall enough for a name on
     /// two lines and its domain above the figures.
     private static let cardSize = CGSize(width: 340, height: 148)
-    private static let bottleHeight: CGFloat = 108
+    private static let bottleHeight: CGFloat = 120
     /// The bottle's lane on the leading edge, the text starting just past it.
     private static let bottleLane: CGFloat = 64
     private static let textLeading: CGFloat = 4
