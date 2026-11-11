@@ -223,9 +223,12 @@ extension FeaturedWineCarousel {
         var beverageType: BeverageType = .wine
         var subtype: BeverageSubtype? = nil
         let color: WineColor?
+        /// The producer the bottle's label carries.
         let producer: String?
         let name: String
         let vintage: Int?
+        /// The domain under the name, nil when the name is the domain itself.
+        var domain: String? = nil
         let isFavorite: Bool
         let urgent: Bool
         var drinkFrom: Int? = nil
@@ -247,7 +250,7 @@ extension FeaturedWineCarousel {
         }
 
         var subtitle: String? {
-            let parts = [producer, vintage.map { String($0) }].compactMap(\.self)
+            let parts = [domain, vintage.map { String($0) }].compactMap(\.self)
             return parts.isEmpty ? nil : parts.joined(separator: " · ")
         }
 
@@ -272,8 +275,8 @@ extension FeaturedWineCarousel {
 #Preview {
     FeaturedWineCarousel(
         items: [
-            .init(id: "1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
-            .init(id: "2", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, isFavorite: true, urgent: false, drinkUntil: nil, position: "A1"),
+            .init(id: "1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, domain: "Domaine Tempier", isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
+            .init(id: "2", color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, domain: "Château Margaux", isFavorite: true, urgent: false, drinkUntil: nil, position: "A1"),
         ],
         onOpen: { _ in },
         onRemove: { _ in },

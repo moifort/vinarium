@@ -2,7 +2,7 @@ import SwiftUI
 
 /// The latest bottles in and out of the cellar, one card each on the bottle's
 /// own backdrop, sliding sideways: the bottle on the left, the move, the wine, its
-/// day and its price on the right, the slot's plate in the top trailing corner,
+/// domain and vintage, its day and its price on the right, the slot's plate in the top trailing corner,
 /// and what to do next with it.
 struct RecentMovesSection: View {
     let moves: [Move]
@@ -12,7 +12,7 @@ struct RecentMovesSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HomeSectionHeader(title: "Récemment", onTapped: onSeeAll)
+            HomeSectionHeader(title: "Activité de la cave", onTapped: onSeeAll)
             ScrollView(.horizontal) {
                 LazyHStack(spacing: 12) {
                     ForEach(moves) { move in
@@ -28,9 +28,9 @@ struct RecentMovesSection: View {
         .accessibilityIdentifier("dashboard-recent-section")
     }
 
-    /// Low enough to keep the rail light on the home, the 108 pt bottle still
-    /// clear of the edges.
-    private static let cardSize = CGSize(width: 340, height: 136)
+    /// Low enough to keep the rail light on the home, tall enough for a name on
+    /// two lines and its domain above the figures.
+    private static let cardSize = CGSize(width: 340, height: 148)
     private static let bottleHeight: CGFloat = 108
     /// The bottle's lane on the leading edge, the text starting just past it.
     private static let bottleLane: CGFloat = 64
@@ -40,8 +40,9 @@ struct RecentMovesSection: View {
     /// How far the slot's plate sits from the card's top and trailing edges.
     private static let plateInset: CGFloat = 12
 
-    /// The move on top, the wine under it, then its day and price on the bottom
-    /// edge, the buttons beside them. The vintage stays on the bottle's label.
+    /// The move on top, the wine under it on two lines at most, its domain and
+    /// vintage as the home's hero sets them, then its day and price on the bottom
+    /// edge, the buttons beside them.
     private func card(_ move: Move) -> some View {
         Button { onOpen(move.wineId) } label: {
             HStack(spacing: 0) {
@@ -55,6 +56,13 @@ struct RecentMovesSection: View {
                         .tracking(-0.3)
                         .lineLimit(2)
                         .padding(.top, 3)
+                    if let subtitle = move.subtitle {
+                        Text(subtitle)
+                            .font(.system(size: 13))
+                            .foregroundStyle(.white.opacity(0.72))
+                            .lineLimit(1)
+                            .padding(.top, 1)
+                    }
                     Spacer(minLength: 0)
                     figures(move)
                 }
@@ -182,11 +190,14 @@ extension RecentMovesSection {
         var beverageType: BeverageType = .wine
         var subtype: BeverageSubtype? = nil
         let color: WineColor?
+        /// The producer the bottle's label carries.
         let producer: String?
         let name: String
         let vintage: Int?
         let position: String
         let date: Date
+        /// The domain under the name, nil when the name is the domain itself.
+        var domain: String? = nil
         /// What one bottle cost, in euros, nil when unpriced.
         var price: Double? = nil
         /// The housemate behind the move, nil when it was the viewer.
@@ -196,6 +207,12 @@ extension RecentMovesSection {
 
         var style: BottleArtwork.Style {
             .of(id: wineId, beverageType: beverageType, subtype: subtype, color: color, family: labelFamily, traits: labelTraits, vintage: vintage)
+        }
+
+        /// "Château Margaux · 2015", as the home's hero writes it.
+        var subtitle: String? {
+            let parts = [domain, vintage.map { String($0) }].compactMap(\.self)
+            return parts.isEmpty ? nil : parts.joined(separator: " · ")
         }
 
         /// "Entrée", with the housemate who made the move.
@@ -217,8 +234,8 @@ extension RecentMovesSection {
 #Preview {
     RecentMovesSection(
         moves: [
-            .init(id: "a", wineId: "1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now, price: 250),
-            .init(id: "b", wineId: "2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now, memberName: "Marie"),
+            .init(id: "a", wineId: "1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now, domain: "Château Margaux", price: 250),
+            .init(id: "b", wineId: "2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now, domain: "Château Latour", memberName: "Marie"),
         ],
         onSeeAll: {},
         onOpen: { _ in },

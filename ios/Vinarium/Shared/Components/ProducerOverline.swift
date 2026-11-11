@@ -20,6 +20,20 @@ struct ProducerOverline: View {
               !producer.isEmpty else { return nil }
         return name.localizedStandardContains(producer) ? nil : producer
     }
+
+    /// The domain written under a wine's name, as the home sets it beside the
+    /// vintage: kept when the name only contains it ("Pavillon Rouge du Château
+    /// Margaux" by Château Margaux), nil only when the name is the domain itself,
+    /// case and accents aside.
+    static func domain(for producer: String?, name: String) -> String? {
+        guard let producer = producer?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !producer.isEmpty else { return nil }
+        let same = producer.compare(
+            name.trimmingCharacters(in: .whitespacesAndNewlines),
+            options: [.caseInsensitive, .diacriticInsensitive]
+        ) == .orderedSame
+        return same ? nil : producer
+    }
 }
 
 /// The top of a wine row: the producer above the name, tight against it, and the

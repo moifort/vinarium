@@ -68,7 +68,7 @@ struct HomeAmbience: View {
 
 #Preview("Header") {
     VStack(spacing: 24) {
-        HomeSectionHeader(title: "Récemment", onTapped: {})
+        HomeSectionHeader(title: "Activité de la cave", onTapped: {})
         HomeSectionHeader(title: "Mes favoris")
     }
 }

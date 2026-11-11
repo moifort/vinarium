@@ -36,7 +36,7 @@ struct DashboardPage: View {
 
                 section {
                     if content.moves.isEmpty {
-                        emptySection("Récemment", message: "Aucun événement récent")
+                        emptySection("Activité de la cave", message: "Aucun événement récent")
                     } else {
                         RecentMovesSection(
                             moves: content.moves,
@@ -138,11 +138,11 @@ extension DashboardPage.Content {
     static let sample = DashboardPage.Content(
         figures: .init(bottleCount: 18, readyCount: 5, favoriteCount: 3, totalValue: 2434),
         featured: [
-            .init(id: "f1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
+            .init(id: "f1", color: .rosé, producer: "Domaine Tempier", name: "Bandol Rosé", vintage: 2023, domain: "Domaine Tempier", isFavorite: false, urgent: true, drinkFrom: 2024, drinkUntil: 2027, position: "B4", cellarName: "Entrée", stock: 3, price: 42, labelFamily: .provence, appellation: "Bandol"),
         ],
         moves: [
-            .init(id: "m1", wineId: "w1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now.addingTimeInterval(-3 * 86400), price: 250),
-            .init(id: "m2", wineId: "w2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now.addingTimeInterval(-9 * 86400), price: 120),
+            .init(id: "m1", wineId: "w1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now.addingTimeInterval(-3 * 86400), domain: "Château Margaux", price: 250),
+            .init(id: "m2", wineId: "w2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now.addingTimeInterval(-9 * 86400), domain: "Château Latour", price: 120),
         ],
         ready: [
             .init(id: "r1", color: .white, producer: "Weinbach", name: "Riesling Schlossberg", vintage: 2021, facts: .init(place: "C3", drinkUntil: 2029, stock: 2, price: 54), labelFamily: .alsace, classification: "Grand Cru"),
