@@ -95,9 +95,10 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    la relecture (règle 3), et rien d'autre : un commentaire sur un autre thème est laissé au
    parent, jamais répondu ni proposé en session. Chaque brief d'enfant le dit.
 5. **La zone du commentaire décide jusqu'où va la modification.** Un commentaire sur un artboard
-   de production (tout ce qui est hors de la zone de prototypage) va jusqu'à iOS d'une traite :
-   modifier le board, puis l'app, sans s'arrêter entre les deux, et demander une seule validation
-   avec la capture du board et celle du simulateur sur l'écran modifié (`SendUserFile`). Un
+   de production (tout ce qui est hors de la zone de prototypage) va jusqu'à iOS en deux
+   validations : modifier le board et faire valider le design sur sa capture (`SendUserFile`) ;
+   sur ce oui seulement, coder sur iOS, puis faire valider la capture du simulateur sur l'écran
+   modifié. Jamais de code avant la validation du board. Un
    commentaire dans la zone de prototypage reste sur le board : ce sont des boucles d'exploration,
    on modifie, on montre, on redemande, sans toucher à iOS tant que l'utilisateur ne dit pas de le
    construire. Chaque brief d'enfant dit dans quelle zone est l'artboard ancré et donc où
