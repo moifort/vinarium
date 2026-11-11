@@ -35,7 +35,9 @@ jobs:
   e2e:
     name: 🧪 End-to-end
     runs-on: macos-26
-    timeout-minutes: 30
+    # The redesigned home made the cellar journey twice as long on the runner:
+    # four journeys plus a retry no longer fit in thirty minutes.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
 
