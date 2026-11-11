@@ -9,14 +9,14 @@ The final report is written in **French**.
 
 ## Scope
 
-| | |
-|---|---|
-| Repository | `/Users/thibaut/Code/vinarium` |
-| GCP project | `vinarium-prod`, region `europe-west3` |
-| Backend | Cloud Function gen2 `vinarium-server`, 512 MiB, 60 s timeout, scale-to-zero |
-| Request logs | `resource.type="cloud_run_revision"` |
-| Production host | https://vinarium-server-okw6e376wq-ey.a.run.app |
-| Billing export | `vinarium-prod.billing_export.gcp_billing_export_v1_01B9B2_D51D23_1EF14D` |
+|                 |                                                                             |
+| --------------- | --------------------------------------------------------------------------- |
+| Repository      | `/Users/thibaut/Code/vinarium`                                              |
+| GCP project     | `vinarium-prod`, region `europe-west3`                                      |
+| Backend         | Cloud Function gen2 `vinarium-server`, 512 MiB, 60 s timeout, scale-to-zero |
+| Request logs    | `resource.type="cloud_run_revision"`                                        |
+| Production host | https://vinarium-server-okw6e376wq-ey.a.run.app                             |
+| Billing export  | `vinarium-prod.billing_export.gcp_billing_export_v1_01B9B2_D51D23_1EF14D`   |
 
 **Error logs are out of scope.** Every `warn` / `error` is reported to Sentry and handled by the
 separate 6-hourly `sentry-autofix-6h` routine. Never triage error logs or Sentry issues here.
@@ -44,10 +44,10 @@ GCP access goes through read-only service accounts, each in its own gcloud confi
 user's account is never touched. **Never fall back to the user's own gcloud login and never run
 `gcloud auth login`.** These accounts only read: never try to write anything to GCP with them.
 
-| Use | Configuration |
-|---|---|
+| Use                                                                        | Configuration                                                                                                                |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Production reads (logs, Monitoring, Cloud Scheduler, Cloud Run, Firestore) | `CLOUDSDK_CONFIG=$HOME/.config/vinarium-observer/gcloud` (account `vinarium-observer@vinarium-prod.iam.gserviceaccount.com`) |
-| Billing export (READER on the dataset, jobUser on `shiori-polyforms`) | `CLOUDSDK_CONFIG=$HOME/.config/shiori-observer/gcloud`, queries run with `--project_id=shiori-polyforms` |
+| Billing export (READER on the dataset, jobUser on `shiori-polyforms`)      | `CLOUDSDK_CONFIG=$HOME/.config/shiori-observer/gcloud`, queries run with `--project_id=shiori-polyforms`                     |
 
 ```bash
 CLOUDSDK_CONFIG=$HOME/.config/vinarium-observer/gcloud gcloud auth print-access-token >/dev/null && echo ok
