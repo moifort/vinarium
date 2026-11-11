@@ -19,13 +19,14 @@ final class ScrollBarState {
     }
 
     /// Follows the scroll: at the very top, or bouncing above it, the bar shows; scrolling
-    /// down sends it away, scrolling up calls it back.
-    func follow(from old: CGFloat, to offset: CGFloat) {
+    /// down sends it away, scrolling up calls it back once past `floor`, below which it would
+    /// land over what heads the page.
+    func follow(from old: CGFloat, to offset: CGFloat, callingBackPast floor: CGFloat = 0) {
         if offset <= 6 {
             call(true)
         } else if offset > old + 4 {
             call(false)
-        } else if offset < old - 4 {
+        } else if offset < old - 4, offset > floor {
             call(true)
         }
     }

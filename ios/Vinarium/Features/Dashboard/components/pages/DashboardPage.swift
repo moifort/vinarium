@@ -18,11 +18,22 @@ struct DashboardPage: View {
     var onAdminTapped: (() -> Void)?
 
     /// Shiori's bar: the page's name on the left and round buttons on the right, over the
-    /// page with no ground of its own, sent away while scrolling down and called back by
-    /// scrolling up.
-    @State private var bar = ScrollBarState()
+    /// page with no ground of its own. Out of sight as the page opens, sent away while
+    /// scrolling down, called back at the very top and by scrolling up below the figures.
+    @State private var bar = ScrollBarState(isCalled: false)
+    /// Where the page stands, set once to open it under the bar.
+    @State private var position = ScrollPosition()
+    @State private var openedUnderBar = false
     // Optional: absent from page previews, present in the app through ContentView.
     @Environment(SearchPresenter.self) private var searchPresenter: SearchPresenter?
+
+    /// How far the page is scrolled as it opens: the bar's height, so the page starts just
+    /// under the status bar with the bar out of sight, as Shiori's home opens. Scrolled back
+    /// to the very top, the page leaves the bar its room.
+    static let openingOffset: CGFloat = 50
+    /// How far past that the page scrolls before scrolling up calls the bar: above it, the bar
+    /// would land over the figures.
+    private static let figuresClearance: CGFloat = 70
 
     var body: some View {
         ScrollView {
@@ -92,10 +103,26 @@ struct DashboardPage: View {
                     .offset(y: -280)
             }
         }
-        .onScrollGeometryChange(for: CGFloat.self) { geometry in
-            geometry.contentOffset.y + geometry.contentInsets.top
-        } action: { old, offset in
-            bar.follow(from: old, to: offset)
+        .scrollPosition($position)
+        .onAppear {
+            guard !openedUnderBar else { return }
+            openedUnderBar = true
+            position.scrollTo(y: Self.openingOffset)
+        }
+        .onScrollGeometryChange(for: ScrollRoom.self) { geometry in
+            ScrollRoom(
+                offset: geometry.contentOffset.y + geometry.contentInsets.top,
+                room: geometry.contentSize.height + geometry.contentInsets.top
+                    + geometry.contentInsets.bottom - geometry.containerSize.height
+            )
+        } action: { old, new in
+            // A page too short to open under the bar keeps it in sight.
+            guard new.room > Self.openingOffset else { return bar.call(true) }
+            bar.follow(
+                from: old.offset,
+                to: new.offset,
+                callingBackPast: Self.openingOffset + Self.figuresClearance
+            )
         }
         .background(Color(.systemBackground))
         // The bar keeps the title for VoiceOver and the Back button, and draws its own on
@@ -152,6 +179,12 @@ struct DashboardPage: View {
                 .padding(.horizontal, 20)
         }
     }
+}
+
+/// How far the page is scrolled, and how far it can be.
+private struct ScrollRoom: Equatable {
+    let offset: CGFloat
+    let room: CGFloat
 }
 
 extension DashboardPage {
