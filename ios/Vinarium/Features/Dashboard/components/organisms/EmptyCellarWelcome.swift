@@ -22,7 +22,7 @@ struct EmptyCellarWelcome: View {
                 .padding(.top, 6)
 
             Button(action: onScanTapped) {
-                Label("Scanner une étiquette", systemImage: "text.viewfinder")
+                Label("Scanner une étiquette", image: "tab.scan.fill")
                     .font(.system(size: 17, weight: .semibold))
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
