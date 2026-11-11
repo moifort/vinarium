@@ -69,9 +69,10 @@ struct FeaturedWineCarousel: View {
     private static let base: CGFloat = 5 + bottleHeight * 294 / 300
 
     /// Three blocks stacked on the bottle's base, nothing below it and no gap
-    /// between them: the wine, its drinking window, then its slot, stock and value.
+    /// between them: the wine, its drinking window close under it, then its slot,
+    /// stock and value.
     private func details(_ item: Item) -> some View {
-        VStack(alignment: .leading, spacing: 18) {
+        VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 0) {
                 tag(item)
                 Text(item.name)
@@ -93,6 +94,7 @@ struct FeaturedWineCarousel: View {
                 DrinkingWindowRail(window: window)
             }
             figures(item)
+                .padding(.top, 8)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: Self.base - Self.corkTop, alignment: .bottom)
