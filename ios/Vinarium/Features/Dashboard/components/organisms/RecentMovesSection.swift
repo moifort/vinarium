@@ -27,37 +27,37 @@ struct RecentMovesSection: View {
         .accessibilityIdentifier("dashboard-recent-section")
     }
 
-    /// Tall enough to leave the 156 pt bottle 16 pt of air above and below.
-    private static let cardSize = CGSize(width: 340, height: 188)
+    /// Low enough to keep the rail light on the home, the 108 pt bottle still
+    /// clear of the edges.
+    private static let cardSize = CGSize(width: 340, height: 136)
+    private static let bottleHeight: CGFloat = 108
     /// The bottle's lane on the leading edge, the text starting just past it.
-    private static let bottleLane: CGFloat = 80
+    private static let bottleLane: CGFloat = 64
     private static let textLeading: CGFloat = 4
-    private static let pillHeight: CGFloat = 28
+    private static let inset: CGFloat = 14
+    private static let buttonHeight: CGFloat = 28
 
-    /// The move on top, the wine under it, then its slot and day just above the
-    /// pills, so the card's height goes to larger type rather than to a gap. The
-    /// vintage stays on the bottle's label.
+    /// The move on top, the wine under it, then its slot and day on the bottom
+    /// edge, the buttons beside them. The vintage stays on the bottle's label.
     private func card(_ move: Move) -> some View {
         Button { onOpen(move.wineId) } label: {
             HStack(spacing: 0) {
-                BottleArtwork(style: move.style, producer: move.producer, name: move.name, vintage: move.vintage, height: 156)
+                BottleArtwork(style: move.style, producer: move.producer, name: move.name, vintage: move.vintage, height: Self.bottleHeight)
                     .frame(width: Self.bottleLane, height: Self.cardSize.height)
 
                 VStack(alignment: .leading, spacing: 0) {
                     overline(move)
                     Text(move.name)
-                        .font(.system(size: 22, weight: .bold))
-                        .tracking(-0.4)
+                        .font(.system(size: 19, weight: .bold))
+                        .tracking(-0.3)
                         .lineLimit(2)
-                        .padding(.top, 6)
+                        .padding(.top, 3)
                     Spacer(minLength: 0)
                     figures(move)
-                    // Room for the pills laid over the card.
-                    Color.clear.frame(height: Self.pillHeight + 12)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(EdgeInsets(top: 16, leading: Self.textLeading, bottom: 16, trailing: 14))
+                .padding(EdgeInsets(top: Self.inset, leading: Self.textLeading, bottom: Self.inset, trailing: Self.inset))
             }
             .frame(width: Self.cardSize.width, height: Self.cardSize.height)
             .background { ground(move) }
@@ -65,16 +65,16 @@ struct RecentMovesSection: View {
             .contentShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)
-        // The two pills sit over the card, each answering its own tap.
-        .overlay(alignment: .bottomLeading) {
+        // The buttons sit over the card's bottom corner, each answering its own
+        // tap: moving a bottle that just came in, then its sheet.
+        .overlay(alignment: .bottomTrailing) {
             HStack(spacing: 8) {
-                pill("Voir la fiche", filled: true) { onOpen(move.wineId) }
                 if move.isEntry {
-                    pill("Déplacer", filled: false) { onMove(move.wineId) }
+                    moveButton { onMove(move.wineId) }
                 }
+                sheetButton { onOpen(move.wineId) }
             }
-            .padding(.leading, Self.bottleLane + Self.textLeading)
-            .padding(.bottom, 16)
+            .padding([.trailing, .bottom], Self.inset)
         }
     }
 
@@ -101,25 +101,25 @@ struct RecentMovesSection: View {
         ]
         return HStack(spacing: 0) {
             ForEach(Array(cells.enumerated()), id: \.offset) { index, cell in
-                HStack(spacing: 14) {
+                HStack(spacing: 12) {
                     if index > 0 {
                         Rectangle().fill(.white.opacity(0.22)).frame(width: 1)
                     }
                     VStack(alignment: .leading, spacing: 1) {
                         Text(cell.value)
-                            .font(.system(size: 18, weight: .semibold))
-                            .tracking(-0.3)
+                            .font(.system(size: 15, weight: .semibold))
+                            .tracking(-0.2)
                             .monospacedDigit()
                             .lineLimit(1)
                         Text(cell.label)
-                            .font(.system(size: 10, weight: .semibold))
+                            .font(.system(size: 9, weight: .semibold))
                             .tracking(0.7)
                             .textCase(.uppercase)
                             .foregroundStyle(.white.opacity(0.72))
                             .lineLimit(1)
                     }
                 }
-                .padding(.trailing, 14)
+                .padding(.trailing, 12)
                 .accessibilityElement(children: .combine)
             }
         }
@@ -137,18 +137,31 @@ struct RecentMovesSection: View {
         }
     }
 
-    private func pill(_ title: LocalizedStringKey, filled: Bool, action: @escaping () -> Void) -> some View {
+    private func sheetButton(action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text("Voir la fiche")
                 .font(.system(size: 12, weight: .semibold))
                 .lineLimit(1)
                 .padding(.horizontal, 12)
-                .frame(height: Self.pillHeight)
-                .foregroundStyle(filled ? Color.black : Color.white)
-                .background(filled ? Color.white : Color.white.opacity(0.18), in: .capsule)
+                .frame(height: Self.buttonHeight)
+                .foregroundStyle(.black)
+                .background(.white, in: .capsule)
                 .contentShape(.capsule)
         }
         .buttonStyle(.plain)
+    }
+
+    private func moveButton(action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: "arrow.left.arrow.right")
+                .font(.system(size: 12, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: Self.buttonHeight, height: Self.buttonHeight)
+                .background(.white.opacity(0.18), in: .circle)
+                .contentShape(.circle)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Déplacer")
     }
 }
 
