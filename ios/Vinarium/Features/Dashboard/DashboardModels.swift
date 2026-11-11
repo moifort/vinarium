@@ -101,6 +101,9 @@ struct DashboardHistoryEvent: Codable, Identifiable, Sendable {
     var labelFamily: BottleArtwork.LabelFamily? = nil
     /// The real label as the scan read it, absent for a wine never scanned.
     var labelTraits: BottleArtwork.LabelTraits? = nil
+    /// What one bottle cost, in euros; optional so a dashboard cached before it
+    /// existed still decodes.
+    var price: Double? = nil
 
     var id: String { "\(type)-\(wineName)-\(date.timeIntervalSince1970)" }
 

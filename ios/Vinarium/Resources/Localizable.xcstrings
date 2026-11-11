@@ -12441,6 +12441,47 @@
         }
       }
     },
+    "Position %@": {
+      "comment": "VoiceOver label of the plate showing a bottle's slot on the home cards, e.g. \"Position Entrée · B4\".",
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position %@"
+          }
+        },
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position %@"
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posición %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posizione %@"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "位置 %@"
+          }
+        },
+        "pt": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Posição %@"
+          }
+        }
+      }
+    },
     "Position : %@": {
       "localizations": {
         "de": {

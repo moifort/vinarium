@@ -2,7 +2,8 @@ import SwiftUI
 
 /// The latest bottles in and out of the cellar, one card each on the bottle's
 /// own backdrop, sliding sideways: the bottle on the left, the move, the wine, its
-/// slot and its day on the right, and what to do next with it.
+/// day and its price on the right, the slot's plate in the top trailing corner,
+/// and what to do next with it.
 struct RecentMovesSection: View {
     let moves: [Move]
     var onSeeAll: (() -> Void)?
@@ -36,8 +37,10 @@ struct RecentMovesSection: View {
     private static let textLeading: CGFloat = 4
     private static let inset: CGFloat = 14
     private static let buttonHeight: CGFloat = 28
+    /// How far the slot's plate sits from the card's top and trailing edges.
+    private static let plateInset: CGFloat = 12
 
-    /// The move on top, the wine under it, then its slot and day on the bottom
+    /// The move on top, the wine under it, then its day and price on the bottom
     /// edge, the buttons beside them. The vintage stays on the bottle's label.
     private func card(_ move: Move) -> some View {
         Button { onOpen(move.wineId) } label: {
@@ -65,6 +68,11 @@ struct RecentMovesSection: View {
             .contentShape(.rect(cornerRadius: 18))
         }
         .buttonStyle(.plain)
+        .overlay(alignment: .topTrailing) {
+            LocationPlate(position: move.position)
+                .padding([.top, .trailing], Self.plateInset)
+                .allowsHitTesting(false)
+        }
         // The buttons sit over the card's bottom corner, each answering its own
         // tap: moving a bottle that just came in, then its sheet.
         .overlay(alignment: .bottomTrailing) {
@@ -92,13 +100,14 @@ struct RecentMovesSection: View {
         .foregroundStyle(.white.opacity(0.72))
     }
 
-    /// The slot and the day, as the home vignettes and the hero set their figures:
-    /// the value large, a short capitalised label under it, a hairline between.
+    /// The day and what one bottle cost, as the home vignettes and the hero set
+    /// their figures: the value large, a short capitalised label under it, a
+    /// hairline between. A wine with no price shows its day alone.
     private func figures(_ move: Move) -> some View {
-        let cells: [(value: String, label: LocalizedStringKey)] = [
-            (move.position, "cave"),
-            (move.dayFigure, "date"),
-        ]
+        var cells: [(value: String, label: LocalizedStringKey)] = [(move.dayFigure, "date")]
+        if let price = move.price {
+            cells.append((Money.formattedFromEur(price, fractionLength: 0), "prix"))
+        }
         return HStack(spacing: 0) {
             ForEach(Array(cells.enumerated()), id: \.offset) { index, cell in
                 HStack(spacing: 12) {
@@ -178,6 +187,8 @@ extension RecentMovesSection {
         let vintage: Int?
         let position: String
         let date: Date
+        /// What one bottle cost, in euros, nil when unpriced.
+        var price: Double? = nil
         /// The housemate behind the move, nil when it was the viewer.
         var memberName: String? = nil
         var labelFamily: BottleArtwork.LabelFamily? = nil
@@ -206,7 +217,7 @@ extension RecentMovesSection {
 #Preview {
     RecentMovesSection(
         moves: [
-            .init(id: "a", wineId: "1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now),
+            .init(id: "a", wineId: "1", isEntry: true, color: .red, producer: "Château Margaux", name: "Pavillon Rouge du Château Margaux", vintage: 2015, position: "A1", date: .now, price: 250),
             .init(id: "b", wineId: "2", isEntry: false, color: .red, producer: "Château Latour", name: "Pauillac Les Forts de Latour", vintage: 2016, position: "E3", date: .now, memberName: "Marie"),
         ],
         onSeeAll: {},

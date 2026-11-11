@@ -1,9 +1,10 @@
 import SwiftUI
 
 /// The wines to open first, one page each: the bottle on the page's haze and, at
-/// its right between its cork and its base, the wine, its drinking window and its
-/// slot, stock and value, then the three things done with a bottle that is ready:
-/// take it out, mark it a favorite, move it.
+/// its right between its cork and its base, the wine, its drinking window, its
+/// stock and price, with its tag and its slot's plate on the bottle's top line,
+/// then the three things done with a bottle that is ready: take it out, mark it
+/// a favorite, move it.
 struct FeaturedWineCarousel: View {
     let items: [Item]
     var onOpen: (String) -> Void
@@ -69,12 +70,12 @@ struct FeaturedWineCarousel: View {
     private static let base: CGFloat = 5 + bottleHeight * 294 / 300
 
     /// Three blocks stacked on the bottle's base, nothing below it and no gap
-    /// between them: the wine, its drinking window close under it, then its slot,
-    /// stock and value.
+    /// between them: the wine, its drinking window close under it, then its stock
+    /// and price. The tag and the slot's plate sit on the bottle's top line, the
+    /// tag on the leading edge, the plate on the trailing one.
     private func details(_ item: Item) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 0) {
-                tag(item)
                 Text(item.name)
                     .font(.system(size: 24, weight: .bold))
                     .tracking(-0.4)
@@ -99,10 +100,17 @@ struct FeaturedWineCarousel: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: Self.base - Self.corkTop, alignment: .bottom)
         .padding(.top, Self.corkTop)
+        .overlay(alignment: .top) {
+            HStack(alignment: .top, spacing: 8) {
+                tag(item)
+                Spacer(minLength: 0)
+                LocationPlate(position: item.position, style: .page, cellarName: item.cellarName)
+            }
+        }
     }
 
-    /// Slot, stock and value on three equal columns, as wide as the rail, each
-    /// centred in its column.
+    /// Stock and price on two equal columns, as wide as the rail, each centred
+    /// in its column.
     private func figures(_ item: Item) -> some View {
         let cells = item.figures
         return HStack(spacing: 0) {
@@ -132,7 +140,7 @@ struct FeaturedWineCarousel: View {
                 }
                 .accessibilityElement(children: .combine)
             }
-            ForEach(cells.count..<3, id: \.self) { _ in Color.clear.frame(maxWidth: .infinity) }
+            ForEach(cells.count..<2, id: \.self) { _ in Color.clear.frame(maxWidth: .infinity) }
         }
         .fixedSize(horizontal: false, vertical: true)
     }
@@ -250,17 +258,12 @@ extension FeaturedWineCarousel {
             return .init(from: from, until: until)
         }
 
-        /// The slot under its cellar's name, the stock, then what the stock is
-        /// worth; a figure the wine lacks is left out.
+        /// The stock, then what one bottle costs; a figure the wine lacks is left
+        /// out. The slot has its own plate.
         var figures: [(value: String, label: Text)] {
-            var cells: [(value: String, label: Text)] = [
-                (position, cellarName.map { Text(verbatim: $0) } ?? Text("cave")),
-            ]
+            var cells: [(value: String, label: Text)] = []
             if let stock, stock > 0 { cells.append((stock.formatted(), Text("stock"))) }
-            if let price {
-                let worth = price * Double(max(stock ?? 1, 1))
-                cells.append((Money.formattedFromEur(worth, fractionLength: 0), Text("Valeur")))
-            }
+            if let price { cells.append((Money.formattedFromEur(price, fractionLength: 0), Text("prix"))) }
             return cells
         }
     }

@@ -1,10 +1,11 @@
 import SwiftUI
 
 /// A portrait tile on a home shelf: the bottle drawn close enough to read its
-/// label, and on its right, on the same plain ground as the bottle, a compact
-/// column set at the bottom: the slot, the drinking limit, the stock and the
-/// price, in that order, each line left out when there is nothing to show. The label names
-/// the wine, so nothing is written under the tile.
+/// label, the slot's plate in the top trailing corner, and on the bottle's right,
+/// on the same plain ground, a compact column set at the bottom: the drinking
+/// limit, the stock and the price, in that order, each line left out when there
+/// is nothing to show. The label names the wine, so nothing is written under the
+/// tile.
 struct BottleVignette: View {
     let style: BottleArtwork.Style
     let beverageType: BeverageType
@@ -38,12 +39,20 @@ struct BottleVignette: View {
     /// How far the bottle's base sits below the tile's bottom edge.
     private static let baseDrop: CGFloat = 6
     private static let cornerRadius: CGFloat = 14
+    /// How far the slot's plate sits from the tile's top and trailing edges.
+    private static let plateInset: CGFloat = 8
 
     var body: some View {
         ZStack {
             scene
             column
                 .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .overlay(alignment: .topTrailing) {
+            if let place = facts.place {
+                LocationPlate(position: place)
+                    .padding([.top, .trailing], Self.plateInset)
+            }
         }
         .frame(width: Self.size.width, height: Self.size.height)
         .clipShape(.rect(cornerRadius: Self.cornerRadius))
@@ -80,11 +89,10 @@ struct BottleVignette: View {
             }
     }
 
-    /// The lines worth showing: a wine not stored has no slot, an empty stock
-    /// says nothing either.
+    /// The lines worth showing: an empty stock says nothing. The slot has its own
+    /// plate.
     private var rows: [(value: String, label: LocalizedStringKey)] {
         var rows: [(value: String, label: LocalizedStringKey)] = []
-        if let place = facts.place { rows.append((place, "cave")) }
         if let drinkUntil = facts.drinkUntil { rows.append((String(drinkUntil), "garde")) }
         if let stock = facts.stock, stock > 0 { rows.append((stock.formatted(), "stock")) }
         if let price = facts.price { rows.append((Money.formattedFromEur(price, fractionLength: 0), "prix")) }

@@ -148,6 +148,7 @@ struct DashboardView: View {
                     vintage: event.wineVintage,
                     position: event.position,
                     date: event.date,
+                    price: event.price,
                     memberName: event.memberName,
                     labelFamily: event.labelFamily,
                     labelTraits: event.labelTraits

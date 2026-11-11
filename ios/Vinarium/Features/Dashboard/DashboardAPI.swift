@@ -96,7 +96,8 @@ private func mapHistory<T: DashboardJournalEvent>(_ e: T) -> DashboardHistoryEve
         memberName: e.memberNameValue,
         producer: e.producerValue,
         labelFamily: e.labelFamilyValue,
-        labelTraits: e.labelTraitsValue
+        labelTraits: e.labelTraitsValue,
+        price: e.winePriceValue
     )
 }
 
@@ -115,6 +116,8 @@ protocol DashboardJournalEvent {
     var producerValue: String? { get }
     var labelFamilyValue: BottleArtwork.LabelFamily? { get }
     var labelTraitsValue: BottleArtwork.LabelTraits? { get }
+    /// What one bottle cost, in euros, nil when unpriced.
+    var winePriceValue: Double? { get }
 }
 
 extension BottleArtwork.LabelFamily {
@@ -140,6 +143,7 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJourn
     var producerValue: String? { beverageProducer }
     var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
     var labelTraitsValue: BottleArtwork.LabelTraits? { BottleArtwork.LabelTraits(wineLabelTraits?.fragments.labelTraitsFields) }
+    var winePriceValue: Double? { winePrice }
 }
 
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJournalEvent {
@@ -158,4 +162,5 @@ extension VinariumGraphQL.DashboardQuery.Data.Dashboard.History: DashboardJourna
     var producerValue: String? { beverageProducer }
     var labelFamilyValue: BottleArtwork.LabelFamily? { BottleArtwork.LabelFamily(graphql: wineLabelFamily) }
     var labelTraitsValue: BottleArtwork.LabelTraits? { BottleArtwork.LabelTraits(wineLabelTraits?.fragments.labelTraitsFields) }
+    var winePriceValue: Double? { winePrice }
 }
