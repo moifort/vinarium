@@ -13,7 +13,12 @@
       "!site",
       "!server/system/changelog-content.ts",
       "!ios/Vinarium/Assets.xcassets",
-      "!ios/Vinarium/Resources/Localizable.xcstrings"
+      "!ios/Vinarium/Resources/Localizable.xcstrings",
+      "!stack",
+      "!stack.config.json",
+      "!build",
+      "!.claude",
+      "!**/.context-*"
     ]
   },
   "formatter": {
@@ -35,6 +40,16 @@
     "formatter": {
       "quoteStyle": "single",
       "semicolons": "asNeeded"
+    }
+  },
+  "markdown": {
+    "formatter": {
+      "enabled": false
+    }
+  },
+  "yaml": {
+    "formatter": {
+      "enabled": false
     }
   },
   "assist": {

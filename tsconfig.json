@@ -13,5 +13,5 @@
     "types": ["nitropack", "bun-types"],
     "lib": ["ESNext", "DOM"]
   },
-  "exclude": ["node_modules", "build"]
+  "exclude": ["node_modules", "build", ".claude", ".output", "dist"]
 }
