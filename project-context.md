@@ -1,9 +1,9 @@
 # Contexte projet Vinarium
 
-Les faits propres à ce dépôt. La méthode de travail est dans [playbook/](playbook/README.md) ;
+Les faits propres à ce dépôt. La méthode de travail est dans [stack/rules/](stack/rules/) (paquet `@moifort/stack`) ;
 ici, uniquement ce qui n'a de sens que pour Vinarium.
 
-Règle : ce qui est une **règle** va dans le playbook, ce qui est un **fait** reste ici.
+Règle : ce qui est une **règle** va dans le paquet `@moifort/stack`, ce qui est un **fait** reste ici.
 
 ## Environnements
 

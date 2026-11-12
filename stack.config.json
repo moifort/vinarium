@@ -1,0 +1,23 @@
+{
+  "stacks": ["backend", "ios", "ai", "paid", "admin", "e2e", "site"],
+  "placeholders": {
+    "AI_DAILY_ALERT": "3 euros",
+    "APPLE_TEAM_ID": "46C337T7YN",
+    "APP_NAME": "Vinarium",
+    "APP_SLUG": "vinarium",
+    "APP_STORE_ID": "6789688303",
+    "APP_TAGLINE": "Une photo de l'étiquette suffit à cataloguer chaque bouteille.",
+    "APP_TAGLINE_EN": "One photo of the label catalogues every bottle.",
+    "BILLING_TABLE": "vinarium-prod.billing_export.gcp_billing_export_v1_01B9B2_D51D23_1EF14D",
+    "BUNDLE_ID": "com.polyforms.vinarium.app",
+    "CODE_DIR": "/Users/thibaut/Code",
+    "GITHUB_OWNER": "moifort",
+    "GITHUB_REPO": "moifort/vinarium",
+    "REPO_NAME": "vinarium",
+    "REVIEW_LANGUAGE": "French",
+    "SERVED_LANGUAGES": "English, French, German, Spanish, Italian, Japanese and Portuguese",
+    "SERVER_URL": "https://vinarium-server-okw6e376wq-ey.a.run.app",
+    "SOURCE_LANGUAGE": "English"
+  },
+  "exclude": []
+}

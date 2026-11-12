@@ -1,27 +1,35 @@
 # Vinarium - Project Directives
 
-## Playbook
+<!-- stack:rules -->
+@stack/rules/00-collaboration.md
+@stack/rules/01-workflow.md
+@stack/rules/02-commits.md
+@stack/rules/03-code-review.md
+@stack/rules/04-push.md
+@stack/rules/05-release.md
+@stack/rules/06-changelog.md
+@stack/rules/07-appstore.md
+@stack/rules/08-copy.md
+@stack/rules/09-backend.md
+@stack/rules/10-ios.md
+@stack/rules/11-ops.md
+@stack/rules/12-ci.md
+@stack/rules/13-ai.md
+@stack/rules/14-infra.md
+@stack/rules/15-tooling.md
+@stack/rules/16-routines.md
+@stack/rules/17-landing.md
+@stack/rules/18-design.md
+<!-- /stack:rules -->
 
-La méthode de travail est dans [playbook/](playbook/README.md). Ces fichiers font autorité ; ce
-document ne contient que ce qui est propre au projet.
+## Méthode
 
-| Sujet                            | Fichier                                                      |
-| -------------------------------- | ------------------------------------------------------------ |
-| Comportement, langues, autonomie | [playbook/00-collaboration.md](playbook/00-collaboration.md) |
-| Cycle d'une tâche, plans, skills | [playbook/01-workflow.md](playbook/01-workflow.md)           |
-| Commits, branche, push           | [playbook/02-commits.md](playbook/02-commits.md)             |
-| Revue avant commit               | [playbook/03-code-review.md](playbook/03-code-review.md)     |
-| Check-list de push               | [playbook/04-push-protocol.md](playbook/04-push-protocol.md) |
-| Release par tag                  | [playbook/05-release.md](playbook/05-release.md)             |
-| Changelog                        | [playbook/06-changelog.md](playbook/06-changelog.md)         |
-| Soumission App Store             | [playbook/07-appstore.md](playbook/07-appstore.md)           |
-| Copy utilisateur                 | [playbook/08-copywriting.md](playbook/08-copywriting.md)     |
-| Backend                          | [playbook/09-backend.md](playbook/09-backend.md)             |
-| iOS                              | [playbook/10-ios.md](playbook/10-ios.md)                     |
-| Exploitation                     | [playbook/11-ops.md](playbook/11-ops.md)                     |
-
-Les faits propres au projet (identifiants, accès, certificats, travaux en attente) sont dans
-[project-context.md](project-context.md).
+La méthode de travail est celle du paquet [`@moifort/stack`](https://github.com/moifort/polyforms-stack),
+importée ci-dessus depuis [stack/rules/](stack/rules/) (version dans [stack/VERSION](stack/VERSION),
+réglages dans [stack.config.json](stack.config.json)). `stack/` est régénéré par `bunx stack
+sync` et ne se modifie jamais à la main : une règle à changer se change dans le paquet. Ce
+document ne contient que ce qui est propre au projet ; les faits (identifiants, accès,
+certificats, travaux en attente) sont dans [project-context.md](project-context.md).
 
 ## Commandes
 

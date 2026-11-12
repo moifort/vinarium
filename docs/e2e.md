@@ -1,6 +1,6 @@
 # End-to-End Tests
 
-> The portable rules live in [playbook/93-annexe-captures-e2e.md](../playbook/93-annexe-captures-e2e.md). This guide keeps the project-specific detail.
+> The portable rules live in [stack/rules/07-appstore.md](../stack/rules/07-appstore.md). This guide keeps the project-specific detail.
 
 ## Overview
 

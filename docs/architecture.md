@@ -1,6 +1,6 @@
 # Backend Architecture
 
-> The portable rules live in [playbook/09-backend.md](../playbook/09-backend.md), [playbook/90-annexe-domaine.md](../playbook/90-annexe-domaine.md). This guide keeps the project-specific detail.
+> The portable rules live in [stack/rules/09-backend.md](../stack/rules/09-backend.md), [stack/rules/09-backend.md](../stack/rules/09-backend.md). This guide keeps the project-specific detail.
 
 ## Overview
 

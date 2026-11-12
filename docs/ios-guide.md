@@ -1,6 +1,6 @@
 # iOS Development Guide
 
-> The portable rules live in [playbook/92-annexe-ios.md](../playbook/92-annexe-ios.md). This guide keeps the project-specific detail.
+> The portable rules live in [stack/rules/10-ios.md](../stack/rules/10-ios.md). This guide keeps the project-specific detail.
 
 ## Tech Stack
 
@@ -108,7 +108,7 @@ three tabs a user opens every time — the wine list, the dashboard and the cell
 they showed last as JSON, through `SnapshotCache<Value>` (`Shared/SnapshotCache.swift`), in one
 `snapshots/` folder of the caches directory. Each view model reads its snapshot **synchronously**
 in `init`, before anything is asked of the network, so the screen is readable in the first frame.
-The rule is in [playbook/10-ios.md](../playbook/10-ios.md#chargements).
+The rule is in [stack/rules/10-ios.md](../stack/rules/10-ios.md).
 
 | Screen    | Snapshot                             | What is written                                                                                                       |
 | --------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
@@ -346,7 +346,7 @@ and keep the `Label`'s text for accessibility.
 A row that opens or triggers something is a `.plain` `Button` whose label carries
 `.contentShape(.rect)`, stretched to the full width when its content is not: the whole row answers
 the tap, never only its title. Set it in the row view itself (`SettingsRow`, `SuggestionRow`) so
-every caller inherits it. Rule: [playbook/10-ios.md](../playbook/10-ios.md#zones-de-tap).
+every caller inherits it. Rule: [stack/rules/10-ios.md](../stack/rules/10-ios.md).
 
 ### Previews as Storybook
 

@@ -60,8 +60,13 @@ infra/fastlane/metadata/*/release_notes.txt
 infra/fastlane/screenshots/
 infra/fastlane/test_output/
 
-# Claude Code
-.claude/
+# Claude Code: the stack's skills, hooks and settings are shared, the rest is local
+.claude/*
+!.claude/skills/
+!.claude/hooks/
+!.claude/settings.json
+.claude/skills/new-domain/
+.claude/skills/new-migration/
 
 # Terraform auto-installed binary (pinned version, managed by scripts/install-terraform.sh)
 infra/.bin/

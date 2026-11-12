@@ -25,8 +25,8 @@ separate 6-hourly `sentry-autofix-6h` routine. Never triage error logs or Sentry
 
 ## Ground rules
 
-- Read [CLAUDE.md](../CLAUDE.md) first and follow it, with the playbook it links
-  ([02-commits.md](../playbook/02-commits.md), [04-push-protocol.md](../playbook/04-push-protocol.md)):
+- Read [CLAUDE.md](../CLAUDE.md) first and follow it, with the stack rules it imports
+  ([02-commits.md](../stack/rules/02-commits.md), [04-push-protocol.md](../stack/rules/04-push.md)):
   `bun` only, `bun run preflight` before commit and push, logging rules, API evolution rules.
 - **Never touch any `CHANGELOG*.md`.**
 - Work inline: never launch sub-agents.
@@ -244,7 +244,7 @@ It must answer 200 (a few seconds is a cold start, not a failure).
 
 For each real problem with a clear cause in the code:
 
-- Fix it following [CLAUDE.md](../CLAUDE.md) and the playbook: domain layout, logger, no
+- Fix it following [CLAUDE.md](../CLAUDE.md) and the stack rules: domain layout, logger, no
   `console.*`, deprecate rather than remove GraphQL fields.
 - Verify with `bun run preflight` (run the test suffixes separately if `mock.module` leaks across
   files), and `bun run generate:graphql` if the schema changed. iOS changes: build with
@@ -252,7 +252,7 @@ For each real problem with a clear cause in the code:
   simulator.
 - Commit without asking for approval: conventional commits, English, explicit pathspec, the
   message ending with `Co-Authored-By: Claude <noreply@anthropic.com>`.
-- Push directly to `main`, after the checklist of [04-push-protocol.md](../playbook/04-push-protocol.md):
+- Push directly to `main`, after the checklist of [04-push-protocol.md](../stack/rules/04-push.md):
   the user authorised it for this routine, and only for the fixes it makes. If
   `.github/workflows` changed and the HTTPS push is refused for lack of workflow scope, push to
   `git@github.com:moifort/vinarium.git` over SSH.

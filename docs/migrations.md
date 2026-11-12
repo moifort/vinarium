@@ -1,6 +1,6 @@
 # Migration System
 
-> The portable rules live in [playbook/11-ops.md](../playbook/11-ops.md). This guide keeps the project-specific detail.
+> The portable rules live in [stack/rules/11-ops.md](../stack/rules/11-ops.md). This guide keeps the project-specific detail.
 
 ## Overview
 
