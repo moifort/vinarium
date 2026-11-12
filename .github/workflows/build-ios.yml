@@ -1,27 +1,21 @@
 name: Build
 
+# Runs at release only: the iOS release workflow calls it before anything is
+# archived, and a failure there stops the release (no upload, no submission). A push
+# to main builds no app, so the backend ships without waiting on a macOS runner. A
+# manual run checks the app at any time.
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-# A newer push to the same branch, or to the same pull request, makes this run
-# pointless: it is cancelled rather than left to use a runner for nothing. Keyed on
-# the workflow file and the ref, since workflows may share a name.
-concurrency:
-  group: ${{ github.workflow_ref }}
-  cancel-in-progress: true
+  workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  # The app never compiled outside a release until now: release-ios.yml only fires on
-  # an `ios-v*` tag, so a broken build (or a schema change the generated Apollo code
-  # no longer matches) surfaced while shipping to the App Store. This builds the same
-  # way, on the same runner, minus signing and uploading. macos-26 is a standard
-  # runner, so this costs nothing: Actions is free on public repositories.
+  # Whether the app still compiles, with the Apollo code regenerated from the
+  # committed schema: a backend change the iOS operations no longer match fails here,
+  # before the archive. Builds the same way as the release, minus signing and
+  # uploading. macos-26 is a standard runner, free on a public repository.
   ios:
     name: 📱 iOS
     runs-on: macos-26

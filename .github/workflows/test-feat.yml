@@ -1,16 +1,17 @@
 name: Tests
 
 on:
-  push:
-    branches: [main]
+  # On main these tests run inside Deploy, which waits for them.
+  workflow_call:
   pull_request:
     branches: [main]
 
 # A newer push to the same branch, or to the same pull request, makes this run
-# pointless: it is cancelled rather than left to use a runner for nothing. Keyed on
-# the workflow file and the ref, since workflows may share a name.
+# pointless: it is cancelled rather than left to use a runner for nothing. Named by
+# hand: called from Deploy, github.workflow_ref is Deploy's, the same for all three,
+# and they would cancel one another.
 concurrency:
-  group: ${{ github.workflow_ref }}
+  group: tests-feat-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:

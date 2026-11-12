@@ -9,21 +9,32 @@ on:
       - "site/**"
   workflow_dispatch:
 
-# One deployment at a time, and never stopped halfway: a newer push waits for
-# the one running, and only the newest one waiting runs next.
-concurrency:
-  group: deploy
-  cancel-in-progress: false
-
 permissions:
   contents: read
   id-token: write # required for Workload Identity Federation
 
 jobs:
+  # Nothing reaches production on red backend tests: Deploy calls the three test
+  # workflows and waits for them (on main they no longer run on their own). A push
+  # that follows cancels these runs, which skips this deploy: the newer one ships both.
+  unit:
+    uses: ./.github/workflows/test-unit.yml
+  int:
+    uses: ./.github/workflows/test-int.yml
+  feat:
+    uses: ./.github/workflows/test-feat.yml
+
   deploy:
     name: 🚀 Backend
+    needs: [unit, int, feat]
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # One deployment at a time, and never stopped halfway: a newer push waits for
+    # the one running, and only the newest one waiting runs next. On the job, not
+    # the workflow, so a run's tests start at once and only the applies queue.
+    concurrency:
+      group: deploy
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
         with:
