@@ -9,7 +9,7 @@
     "test:coverage": "bun run generate:assets && bun test --coverage",
     "lint": "bunx biome check",
     "typecheck": "bunx nitro prepare && bun tsc --noEmit",
-    "preflight": "bun run lint && bun run typecheck && bun test",
+    "preflight": "bun run lint && bun run typecheck && bun test && bun run rules:check && bun run stack:check",
     "lint:fix": "bunx biome check --write",
     "generate:assets": "bun scripts/generate-changelog-asset.ts",
     "generate:graphql": "bun scripts/export-graphql-schema.ts",
@@ -20,6 +20,7 @@
     "infra:init": "cd infra && ../scripts/tf init",
     "infra:plan": "bun run infra:build && cd infra && ../scripts/tf plan",
     "infra:apply": "bun run infra:build && cd infra && ../scripts/tf apply",
+    "rules:check": "bun scripts/check-rules.ts",
     "stack:check": "bunx stack check"
   },
   "devDependencies": {
