@@ -3,7 +3,6 @@
 Every product gets a page that sells it. It lives in the project's repository (`site/`), static,
 no build step, published by the Pages workflow on the project's domain
 (`<app>.polyforms.co`), next to the privacy policy and the support page the store requires.
-Shiori's page is the reference.
 
 ## What it is for
 

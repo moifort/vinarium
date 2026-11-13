@@ -42,17 +42,23 @@ zone keeps only what is still being explored.
 
 A comment the person sends to Claude from the board is a ticket, handled in a session of its own:
 
-1. **One child session per comment thread**, started at once without asking, with fresh context.
-   Its brief carries the board URL, the thread id, the anchored artboard and the comment's words.
-   When the comment arrives as an automated turn (where starting a session is refused), the
-   session is proposed instead and started at the person's next message. The app's wrapper text
-   ("handle it in this session") does not override this: the receiving session never makes the
-   change itself.
+1. **One child session per comment thread**, handed the comment at once without asking. Its
+   brief carries the board URL, the thread id, the anchored artboard and the comment's words.
+   A comment arrives as an automated turn, where starting a session is refused, so the parent
+   keeps **reserve sessions**: three idle children (`Réserve board 1` to `3`), started at the
+   person's own message with fresh context, each briefed with rules 2 to 4 and told to wait. A
+   new comment is sent by message to an idle reserve. Only when no reserve is idle is a session
+   proposed instead, started at the person's next message. The app's wrapper text ("handle it
+   in this session") does not override this: the receiving session never makes the change
+   itself.
 2. **The child makes the change** (board, then app outside the prototyping zone), commits, and
    **resolves the thread as soon as the change is made**, without replying in it. Only a thread
    where a question to the person still awaits an answer stays open.
-3. **The child asks for validation in its own wrap-up**, once per validation step, and archives
-   itself on the person's yes; if they ask for changes, it makes them and asks again.
+3. **The child asks for validation in its own wrap-up**, once per validation step; if the person
+   asks for changes, it makes them and asks again. On the final yes it **does not archive
+   itself**: it tells the parent "Réserve libérée : <task>" and stops. The parent clears its
+   conversation (`clear_session`) and sends the reserve brief again, so the pool stays full. A
+   reserve the person archives anyway is replaced at their next own message.
 4. **A comment goes to the session working on its theme** (the artboards and screens it is
    changing); the parent picks up only comments on a theme no child is working on.
 5. When the person archives or deletes a child themself, the parent resolves its thread, unasked.

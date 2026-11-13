@@ -64,11 +64,48 @@ struct OrdersScreen: View {
 - A button that waits: `AsyncButton` / `AsyncToolbarButton`.
 - Lists: `CursorPage`, a `LoadMoreRow`-style closer, a generation token in the ViewModel.
 
-## Patterns
+## Screen patterns
 
-A list row, a detail page (fiche), a tab's main screen, a form: as described in rule 10-ios,
-"Screen patterns". The toolbar of a detail page: `xmark` left; on the right the one repeated
-action as an icon, then a `…` menu, edit first, delete last and red.
+The shapes every app repeats, so they are not re-explained per project. Code in the app's
+`Shared/Components/`.
+
+**A list row.** Image or icon on the left; the text block **top-aligned** beside it: title, one
+secondary line, at most one tag; a status tag in the top corner when the list is not already
+sectioned by it. The whole row opens the detail page. The one frequent action is a swipe action;
+the context menu mirrors the detail page's menu. A row never carries more than three pieces of
+information below its title: the rest belongs to the detail page.
+
+**A detail page (fiche).** Opened from a row as a sheet, or pushed when it is the tab's own
+object. From top to bottom: a header section (image, title, one line under it, the state), the
+facts as labelled rows with an icon (long press copies the value), the long text, the actions
+that belong to the object. **The toolbar**: close (`xmark`) on the left; on the right, the one
+action the person takes over and over as its own icon (a favourite heart, a check), then a `…`
+menu with the rest, edit first, delete last and red. A single fact is edited **inline in its
+row** (tap, type, done), never through a form; the full edit form is one sheet from the menu.
+Only known fields are drawn: an absent fact has no row, not an empty one.
+
+**A tab's main screen.** Large title, icon-only actions on the right (add, filter, settings),
+search attached to the list when there is one, sections with plain headers, the empty state
+drawn in the list body with the one action that fills it.
+
+**A form or a sheet that asks something.** Cancel (`xmark`) left, confirm (`checkmark`) right as
+an `AsyncToolbarButton`; the first field focused on appear; a picker shows its current value in
+its row; destructive confirmation as a dialog, never a toggle.
+
+## Scrolling performance
+
+Scrolling holds on the oldest supported iPhones, as Apple's own apps do.
+
+- GPU and main-thread cost is a budget on every scrolled screen: no live blur, mask or shadow per
+  cell; compute such effects once (a baked image) and reuse it.
+- Never put a per-frame scroll value in a page's `@State`: it rebuilds the page on every frame.
+  Use an `@Observable` read only by a small modifier.
+- Hitches are measured on a phone, in Release, never judged on the simulator: a temporary UI test
+  measuring `XCTOSSignpostMetric.scrollingAndDecelerationMetric`, with slow finger-like drags
+  (about 220 pt/s) as well as fast swipes. When the tests look clean and the person still feels
+  lag, a Release build with a frame probe (a `CADisplayLink` logging frame deltas) finds it.
+  Compare runs minutes apart, never an hour apart: the device heats and drifts.
+- Say plainly when old phones were not measured.
 
 ## Strings
 
@@ -86,8 +123,10 @@ inline from `.preview` with one closure overridden; `Boom`, `Flag`, `Calls` from
 
 1. A temporary launch argument in `App.swift` that shows the page with its fixtures
    (`if CommandLine.arguments.contains("-shot-orders") { OrdersPage(orders: Order.previews, ...) }`).
-2. Build into `/tmp/<app>-shot-<topic>` with `SWIFT_ENABLE_EXPLICIT_MODULES=NO`, install on
-   the reference simulator, launch with the argument, `xcrun simctl io <udid> screenshot`.
+2. Build into the default derived data, or the worktree's fixed one, never a new path per
+   build (stack rule 15-tooling, Derived data and disk), with `SWIFT_ENABLE_EXPLICIT_MODULES=NO`
+   if Sentry's import fails; install on the reference simulator, launch with the argument,
+   `xcrun simctl io <udid> screenshot`.
 3. Revert the harness before the commit; keep fixtures and previews.
 4. Check the design conventions, send the screenshot, wait for approval.
 

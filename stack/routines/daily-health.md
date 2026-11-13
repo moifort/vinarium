@@ -1,7 +1,7 @@
 ---
 id: daily-health
 scope: project
-runtime: cloud
+runtime: desktop
 cadence: "0 12 * * *"
 title: "Vinarium health (daily at noon)"
 ---
@@ -45,6 +45,10 @@ files with an explicit pathspec; never stash, reset, switch branches, amend or f
   the previous day. Flag p95 above 2 s not explained by cold starts, a regression above 50 %,
   memory near the limit. Cold starts are a figure, never an action item: scaling to zero is the
   rule.
+- Per operation, from the `operation served` log lines (rule 09-backend, Observability): count,
+  p50, p95 and median reads of each GraphQL operation over 48 h. Name the slowest operations and
+  say whether reads explain them; an operation above a hundred reads or a second at p50 is a
+  read model candidate, proposed in "To decide", never built by the routine.
 - Firestore usage when a cost or latency spike points there. Production data may be read to
   explain a spike; never copy personal data into the report.
 
@@ -53,6 +57,12 @@ files with an explicit pathspec; never stash, reset, switch branches, amend or f
   any failed run on main in 24 h, Deploy first, including its migrations step.
 - Cloud Scheduler: `gcloud scheduler jobs list --project=vinarium-polyforms --location=europe-west3`,
   state and last attempt of each job; a paused or failed job is a finding.
+- A job answering 200 is not a job doing its work. For each pass that keeps shared documents
+  fresh (release watches, catalogues), read the age of what it refreshes (`checkedAt` and the
+  like, with a `select` on that field only) and compare it with the pass's cadence and daily cap:
+  a backlog older than the cadence, or nothing refreshed for days while documents are due, is a
+  finding; documents not due yet because of a long cadence are a figure, said in plain words,
+  since that is what readers see as "nothing new".
 - The app configuration endpoint on the production host answers 200.
 - App Store and TestFlight are out of scope.
 
