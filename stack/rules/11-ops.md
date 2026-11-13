@@ -63,25 +63,13 @@ must never be blocked with no update to install.
 
 Never a warm instance (`min_instance_count`), whatever the p95 says. Scaling to zero is the point;
 cold starts are absorbed by the launch screen, and when traffic grows the users keep instances
-warm. A p95 driven by cold starts is a figure to report, not an action item.
+warm. A p95 driven by cold starts is a figure to report, not an action item. `bun run rules:check`
+refuses a `min_instance_count` or a `minInstances` above zero.
 
-What is worked on instead is the cold start itself, measured before it is changed:
-
-- `server/system/boot-marks.ts` logs one `boot steps` line per instance (time before the
-  bundle, the rest of the bundle, Sentry, the GraphQL server): read it from production logs to
-  choose what to load later.
-- The production bundle inlines its dependencies, except the Firebase, gRPC and Sentry packages
-  (`externals` in `nitro.config.ts`): thousands of files in `node_modules` were most of a cold
-  start.
-- Firestore talks REST (`preferRest`), so the first read does not load gRPC; Sentry runs with
-  `enableRuntimeChannelInjection: false`, which skips a module loader hook that produced no span.
-- Concurrency per instance is sized on memory, not CPU (`max_instance_request_concurrency` in
-  `infra/function.tf`, mirrored in `nitro.config.ts`): sixteen on 1 GiB, since requests mostly
-  wait on Firestore and the models.
-- Measure locally without deploying: `bun run build`, run `.output/server` under
-  `@google-cloud/functions-framework` with `node`, read the `boot steps` line, alternate the two
-  builds a dozen times and compare medians. A Mac is about six times faster than Cloud Run on
-  the dependency load: scale the gain, and say it is an estimate.
+What is worked on instead is the cold start itself, **measured before it is changed**: the
+`boot steps` line each instance logs says where a cold start goes, and a change is compared
+locally on the built bundle before it is pushed. What the template already does and how to
+measure: the `cold-start` skill.
 
 ## Monitoring and Sentry
 
@@ -122,6 +110,14 @@ one pull request automerged when CI is green, weekly lockfile maintenance. Every
 `allowedVersions` bound carries its reason in `description` (a peer dependency the deploy's
 stricter package manager rejects, a framework not yet on the new major). A strict install
 replayed on the build artefact catches what the permissive local install let through.
+
+**Security fixes go through Renovate too.** The repository has Dependabot alerts on and
+Dependabot security updates off: GitHub detects the vulnerable dependency, Renovate opens the
+fix (its `vulnerabilityAlerts`, labelled `security`, outside any schedule, at the lowest fixed
+version) and merges it under the same rules as any other update, so one bot owns every
+dependency pull request. Renovate's token must read the alerts: a classic token with `repo`, a
+fine-grained token or the GitHub App with **Dependabot alerts: read**; without it Renovate
+skips them silently.
 
 **Majors are never automerged.** The upgrade routine ([16-routines.md](16-routines.md)) takes
 every open major pull request each morning: it reads the dependency's changelog and migration
