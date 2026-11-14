@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 
 struct WineDetailView: View {
     let wineId: String
-    /// What the sheet opens straight onto once the wine is loaded: the home screen's
+    /// What the page opens straight onto once the wine is loaded: the home screen's
     /// buttons take a bottle out, mark it a favorite or move it from here.
     var initialAction: InitialAction?
     var onRemoved: (() -> Void)?
@@ -43,244 +43,242 @@ struct WineDetailView: View {
     @State private var initialActionDone = false
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    LoadingStateView()
-                } else if let detail {
-                    if isEditing {
-                        WineEditForm(
-                            initial: Self.editFields(from: detail),
-                            onSave: { submission in
-                                self.detail = try await save(submission, of: detail)
-                                isEditing = false
-                                onUpdated?()
-                            },
-                            onCancel: { isEditing = false }
-                        )
-                    } else {
-                        WineDetailPage(
-                            content: Self.mapContent(
-                                detail,
-                                cellars: cellars,
-                                isUploadingAttachment: isUploadingAttachment
-                            ),
-                            onAction: handle,
-                            onRefresh: { await loadData() }
-                        )
+        Group {
+            if isLoading {
+                LoadingStateView()
+            } else if let detail {
+                WineDetailPage(
+                    content: Self.mapContent(
+                        detail,
+                        cellars: cellars,
+                        isUploadingAttachment: isUploadingAttachment
+                    ),
+                    onAction: handle,
+                    onRefresh: { await loadData() }
+                )
+            } else if error != nil {
+                // Nothing shows, and a pull tries again.
+                PullToRefreshSpace()
+                    .refreshable { await loadData() }
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { readToolbar }
+        .confirmationDialog(
+            "Sortir de la cave",
+            isPresented: $showRemovalChoice,
+            titleVisibility: .visible
+        ) {
+            Button("Consommer") { showConsumption = true }
+                .accessibilityIdentifier("choice-consume")
+            Button("Offrir") { showGift = true }
+                .accessibilityIdentifier("choice-gift")
+        } message: {
+            Text("Comment souhaitez-vous sortir ce vin ?")
+        }
+        // Menu actions (favorite, deletion, …) close the menu before the mutation
+        // leaves, and a refresh keeps the content on screen: in both cases the
+        // network call is made visible by a scrim and a spinner. A mutation hands
+        // back the sheet it leaves behind, so none is followed by a second read.
+        .overlay {
+            if actionError.isRunning || isRefreshing {
+                ZStack {
+                    Color.black.opacity(0.1).ignoresSafeArea()
+                    ProgressView()
+                }
+            }
+        }
+        .disabled(actionError.isRunning || isRefreshing)
+        .errorAlert(actionError)
+        .errorAlert(attachmentError)
+        .attachmentPickers(
+            showChoice: $showAttachmentChoice,
+            pendingSource: $pendingAttachmentSource,
+            showCamera: $showCamera,
+            showPhotoPicker: $showPhotoPicker,
+            pickedPhoto: $pickedPhoto,
+            showFileImporter: $showFileImporter,
+            onImage: { image in Task { await upload(image) } },
+            onFile: { url in Task { await upload(fileAt: url) } },
+            onFailure: { message in error = message }
+        )
+        .fullScreenCover(item: $previewedFile) { file in
+            NavigationStack {
+                DocumentPreview(url: file.url)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            ToolbarIconButton(
+                                title: "Fermer",
+                                systemImage: "xmark",
+                                role: .cancel
+                            ) { previewedFile = nil }
+                        }
                     }
-                } else if error != nil {
-                    // Nothing shows, and a pull tries again.
-                    PullToRefreshSpace()
-                        .refreshable { await loadData() }
-                }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if !isEditing {
-                    readToolbar
-                }
-            }
-            .confirmationDialog(
-                "Sortir de la cave",
-                isPresented: $showRemovalChoice,
-                titleVisibility: .visible
-            ) {
-                Button("Consommer") { showConsumption = true }
-                    .accessibilityIdentifier("choice-consume")
-                Button("Offrir") { showGift = true }
-                    .accessibilityIdentifier("choice-gift")
-            } message: {
-                Text("Comment souhaitez-vous sortir ce vin ?")
-            }
-            // Menu actions (favorite, deletion, …) close the menu before the mutation
-            // leaves, and a refresh keeps the content on screen: in both cases the
-            // network call is made visible by a scrim and a spinner. A mutation hands
-            // back the sheet it leaves behind, so none is followed by a second read.
-            .overlay {
-                if actionError.isRunning || isRefreshing {
-                    ZStack {
-                        Color.black.opacity(0.1).ignoresSafeArea()
-                        ProgressView()
-                    }
-                }
-            }
-            .disabled(actionError.isRunning || isRefreshing)
-            .errorAlert(actionError)
-            .errorAlert(attachmentError)
-            .attachmentPickers(
-                showChoice: $showAttachmentChoice,
-                pendingSource: $pendingAttachmentSource,
-                showCamera: $showCamera,
-                showPhotoPicker: $showPhotoPicker,
-                pickedPhoto: $pickedPhoto,
-                showFileImporter: $showFileImporter,
-                onImage: { image in Task { await upload(image) } },
-                onFile: { url in Task { await upload(fileAt: url) } },
-                onFailure: { message in error = message }
-            )
-            .fullScreenCover(item: $previewedFile) { file in
+        }
+        .task {
+            await loadData()
+            runInitialAction()
+        }
+        // Editing is a task, so a sheet over the page, as Shiori edits a book.
+        .sheet(isPresented: $isEditing) {
+            if let detail {
                 NavigationStack {
-                    DocumentPreview(url: file.url)
-                        .ignoresSafeArea(edges: .bottom)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                ToolbarIconButton(
-                                    title: "Fermer",
-                                    systemImage: "xmark",
-                                    role: .cancel
-                                ) { previewedFile = nil }
-                            }
-                        }
+                    WineEditForm(
+                        initial: Self.editFields(from: detail),
+                        onSave: { submission in
+                            self.detail = try await save(submission, of: detail)
+                            isEditing = false
+                            onUpdated?()
+                        },
+                        onCancel: { isEditing = false }
+                    )
                 }
             }
-            .task {
-                await loadData()
-                runInitialAction()
-            }
-            .sheet(isPresented: $showConsumption) {
-                if let detail {
-                    ConsumptionSheet { date, rating, notes, contacts in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            _ = try await CellarAPI.remove(
-                                wineId: detail.id,
-                                consumedDate: formatter.string(from: date),
-                                rating: rating,
-                                tastingNotes: notes,
-                                contacts: contacts.isEmpty ? nil : contacts
-                            )
-                        } onSuccess: {
-                            showConsumption = false
-                            dismiss()
-                            onRemoved?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showGift) {
-                if let detail {
-                    GiftSheet { date, recipientName in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            _ = try await CellarAPI.gift(
-                                wineId: detail.id,
-                                giftedDate: formatter.string(from: date),
-                                recipientName: recipientName
-                            )
-                        } onSuccess: {
-                            showGift = false
-                            dismiss()
-                            onRemoved?()
-                        }
-                    }
-                    .presentationDetents([.height(250)])
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showPlacement) {
-                if let detail {
-                    NavigationStack {
-                        CellarPlacementView(
+        }
+        .sheet(isPresented: $showConsumption) {
+            if let detail {
+                ConsumptionSheet { date, rating, notes, contacts in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        _ = try await CellarAPI.remove(
                             wineId: detail.id,
-                            wineName: detail.name,
-                            beverageType: detail.beverageType,
-                            wineColor: detail.color,
-                            wineVintage: detail.vintage,
-                            onCancel: { showPlacement = false }
-                        ) { _ in
-                            showPlacement = false
-                            dismiss()
-                            onRemoved?()
-                        }
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            tastingNotes: notes,
+                            contacts: contacts.isEmpty ? nil : contacts
+                        )
+                    } onSuccess: {
+                        showConsumption = false
+                        dismiss()
+                        onRemoved?()
                     }
                 }
+                .errorAlert(sheetError)
             }
-            .sheet(isPresented: $showMove) {
-                if let detail, let cellar = detail.cellar {
-                    BottleMoveView(
+        }
+        .sheet(isPresented: $showGift) {
+            if let detail {
+                GiftSheet { date, recipientName in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        _ = try await CellarAPI.gift(
+                            wineId: detail.id,
+                            giftedDate: formatter.string(from: date),
+                            recipientName: recipientName
+                        )
+                    } onSuccess: {
+                        showGift = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                }
+                .presentationDetents([.height(250)])
+                .errorAlert(sheetError)
+            }
+        }
+        .sheet(isPresented: $showPlacement) {
+            if let detail {
+                NavigationStack {
+                    CellarPlacementView(
                         wineId: detail.id,
                         wineName: detail.name,
-                        wineBeverageType: detail.beverageType,
+                        beverageType: detail.beverageType,
                         wineColor: detail.color,
                         wineVintage: detail.vintage,
-                        currentRow: cellar.row,
-                        currentCol: cellar.col,
-                        currentCellarId: cellar.cellarId,
-                        onCancel: { showMove = false }
-                    ) { _, _ in
-                        showMove = false
-                        // The bottle may have changed cellar as well as slot: the
-                        // sheet reads it back rather than guess.
-                        Task { await loadData() }
+                        onCancel: { showPlacement = false }
+                    ) { _ in
+                        showPlacement = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showMove) {
+            if let detail, let cellar = detail.cellar {
+                BottleMoveView(
+                    wineId: detail.id,
+                    wineName: detail.name,
+                    wineBeverageType: detail.beverageType,
+                    wineColor: detail.color,
+                    wineVintage: detail.vintage,
+                    currentRow: cellar.row,
+                    currentCol: cellar.col,
+                    currentCellarId: cellar.cellarId,
+                    onCancel: { showMove = false }
+                ) { _, _ in
+                    showMove = false
+                    // The bottle may have changed cellar as well as slot: the
+                    // sheet reads it back rather than guess.
+                    Task { await loadData() }
+                    onUpdated?()
+                }
+            }
+        }
+        .sheet(isPresented: $showFavorite) {
+            if let detail {
+                FavoriteSheet { date, contacts, notes, rating in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveNotes(
+                            id: detail.id,
+                            tasting: TastingEntry(
+                                consumedDate: formatter.string(from: date),
+                                rating: rating == 0 ? nil : rating,
+                                contacts: contacts.isEmpty ? nil : contacts,
+                                tastingNotes: notes,
+                                favorite: true
+                            )
+                        )
+                    } onSuccess: {
+                        showFavorite = false
                         onUpdated?()
                     }
                 }
+                .errorAlert(sheetError)
             }
-            .sheet(isPresented: $showFavorite) {
-                if let detail {
-                    FavoriteSheet { date, contacts, notes, rating in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveNotes(
-                                id: detail.id,
-                                tasting: TastingEntry(
-                                    consumedDate: formatter.string(from: date),
-                                    rating: rating == 0 ? nil : rating,
-                                    contacts: contacts.isEmpty ? nil : contacts,
-                                    tastingNotes: notes,
-                                    favorite: true
-                                )
+        }
+        .sheet(isPresented: $showRecommendation) {
+            if let detail {
+                RecommendationSheet { recommenderName, comment in
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveNotes(
+                            id: detail.id,
+                            recommendation: RecommendationEntry(
+                                recommenderName: recommenderName,
+                                comment: comment
                             )
-                        } onSuccess: {
-                            showFavorite = false
-                            onUpdated?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showRecommendation) {
-                if let detail {
-                    RecommendationSheet { recommenderName, comment in
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveNotes(
-                                id: detail.id,
-                                recommendation: RecommendationEntry(
-                                    recommenderName: recommenderName,
-                                    comment: comment
-                                )
-                            )
-                        } onSuccess: {
-                            showRecommendation = false
-                            onUpdated?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showLocationEditor) {
-                if let detail {
-                    LocationEditorSheet(initial: Self.locationDraft(from: detail)) { draft in
-                        // "Aucun lieu" has to say so out loud: an absent coordinate
-                        // reads as "unchanged" and would leave the old pin in place.
-                        let request = UpdateWineRequest(
-                            latitude: draft?.latitude,
-                            longitude: draft?.longitude,
-                            placeName: draft?.placeName,
-                            cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
                         )
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveSheet(id: detail.id, wine: request)
-                        } onSuccess: {
-                            showLocationEditor = false
-                            onUpdated?()
-                        }
+                    } onSuccess: {
+                        showRecommendation = false
+                        onUpdated?()
                     }
-                    .errorAlert(sheetError)
                 }
+                .errorAlert(sheetError)
+            }
+        }
+        .sheet(isPresented: $showLocationEditor) {
+            if let detail {
+                LocationEditorSheet(initial: Self.locationDraft(from: detail)) { draft in
+                    // "Aucun lieu" has to say so out loud: an absent coordinate
+                    // reads as "unchanged" and would leave the old pin in place.
+                    let request = UpdateWineRequest(
+                        latitude: draft?.latitude,
+                        longitude: draft?.longitude,
+                        placeName: draft?.placeName,
+                        cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
+                    )
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveSheet(id: detail.id, wine: request)
+                    } onSuccess: {
+                        showLocationEditor = false
+                        onUpdated?()
+                    }
+                }
+                .errorAlert(sheetError)
             }
         }
     }
@@ -289,9 +287,6 @@ struct WineDetailView: View {
 
     @ToolbarContentBuilder
     private var readToolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
-        }
         if let detail, detail.isMine, detail.cellar == nil, detail.recommendation != nil {
             ToolbarItemGroup {
                 ToolbarIconButton(title: "Ajouter à la cave", systemImage: "plus") {
@@ -757,15 +752,15 @@ struct WineDetailView: View {
 }
 
 #Preview("Bottle taken out") {
-    WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
+    NavigationStack { WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a") }
 }
 
 #Preview("In cellar") {
-    WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
+    NavigationStack { WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1") }
 }
 
 #Preview("Recommend") {
-    WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
+    NavigationStack { WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326") }
 }
 
 

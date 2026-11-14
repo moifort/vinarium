@@ -43,7 +43,7 @@ struct SearchView: View {
                 isPresented: $searchActive,
                 prompt: "Vin, producteur, personne…"
             )
-            .sheet(item: Binding(
+            .pushesDetail(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
@@ -62,8 +62,8 @@ struct SearchView: View {
                 didActivate = true
             } else if didActivate && selectedWineId == nil {
                 // The field deactivates on the native Cancel, so close the overlay.
-                // Guard: do not close when the deactivation comes from presenting the
-                // detail sheet (coming back to the search is expected there).
+                // Guard: do not close when the deactivation comes from pushing the
+                // wine page (coming back to the search is expected there).
                 dismiss()
             }
         }

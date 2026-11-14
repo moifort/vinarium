@@ -86,7 +86,8 @@ struct WineDetailPage {
         try app.buttons[label].firstMatch.tapOrFail()
     }
 
+    /// The page is pushed: the system's Back button, the bar's first, closes it.
     func close() throws {
-        try app.buttons["Close"].tapOrFail()
+        try app.navigationBars.buttons.element(boundBy: 0).tapOrFail()
     }
 }

@@ -6,7 +6,7 @@ struct DashboardView: View {
     var showFavorites: Binding<Bool> = .constant(false)
 
     @State private var viewModel = DashboardViewModel()
-    /// The wine sheet on screen, and what it opens straight onto.
+    /// The wine page pushed, and what it opens straight onto.
     @State private var openedWine: OpenedWine?
     @State private var showSettings = false
     @State private var showAdmin = false
@@ -57,7 +57,7 @@ struct DashboardView: View {
                     Task { await viewModel.load() }
                 }
             }
-            .sheet(item: $openedWine) { opened in
+            .pushesDetail(item: $openedWine) { opened in
                 WineDetailView(
                     wineId: opened.id,
                     initialAction: opened.action,

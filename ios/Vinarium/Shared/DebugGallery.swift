@@ -53,9 +53,9 @@ struct DebugGallery: View {
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
         case "wineDetail":
-            WineSheetHost()
+            WinePageHost()
         case "wineDetailOut":
-            WineSheetHost(content: Self.tastedWine)
+            WinePageHost(content: Self.tastedWine)
         case "consumptionSheet":
             NoteSheetHost(sheet: .consumption)
         case "favoriteSheet":
@@ -140,7 +140,7 @@ struct DebugGallery: View {
                     }
                 }
                 Section("Fiche vin") {
-                    NavigationLink("Fiche en cave") { WineSheetHost() }
+                    NavigationLink("Fiche en cave") { WineDetailPage(content: .preview) }
                     NavigationLink("Feuille de consommation") { NoteSheetHost(sheet: .consumption) }
                     NavigationLink("Feuille de favori") { NoteSheetHost(sheet: .favorite) }
                     NavigationLink("Feuille de recommandation") { NoteSheetHost(sheet: .recommendation) }
@@ -349,22 +349,19 @@ extension DebugGallery {
     }
 }
 
-private struct WineSheetHost: View {
+private struct WinePageHost: View {
     var content: WineDetailPage.Content = .preview
-    @State private var shown = false
+    @State private var opened: WineIdWrapper?
 
     var body: some View {
-        Button("Rouvrir") { shown = true }
-            // Opened once the screen is up: a sheet asked for before it is not shown.
-            .task { shown = true }
-            .sheet(isPresented: $shown) {
-                NavigationStack {
+        NavigationStack {
+            Button("Rouvrir") { opened = WineIdWrapper(id: "1") }
+                // Pushed once the stack is up, as a tapped row pushes it in the app.
+                .task { opened = WineIdWrapper(id: "1") }
+                .pushesDetail(item: $opened) { _ in
                     WineDetailPage(content: content)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { shown = false }
-                            }
                             ToolbarItem {
                                 Menu {
                                     Button("Modifier", systemImage: "pencil") {}
@@ -374,7 +371,7 @@ private struct WineSheetHost: View {
                             }
                         }
                 }
-            }
+        }
     }
 }
 

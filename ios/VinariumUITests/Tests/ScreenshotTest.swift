@@ -114,12 +114,9 @@ final class ScreenshotTest: XCTestCase {
         // the sort puts there.
         try app.buttons["wine-detail-menu"].firstMatch.waitOrFail()
         save("wine-detail")
-        // The detail is a sheet, dismissed by dragging it down rather than by
-        // its close button, whose label is a translated word. The drag starts
-        // near the top: a swipe from mid-screen scrolls the sheet's content
-        // instead of moving the sheet, and the tab bar stays out of reach.
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08))
-            .press(forDuration: 0.05, thenDragTo: app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.95)))
+        // The wine page is pushed: the system's Back button, the bar's first,
+        // leaves it, whatever its translated label.
+        try app.navigationBars.buttons.element(boundBy: 0).tapOrFail()
 
         try open("scan", at: 3)
         try app.buttons["add-wine-camera"].tapOrFail()

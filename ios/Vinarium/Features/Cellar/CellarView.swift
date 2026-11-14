@@ -92,7 +92,7 @@ struct CellarView: View {
             } message: { item in
                 Text(item.name)
             }
-            .sheet(item: Binding(
+            .pushesDetail(item: Binding(
                 get: { selectedWineId.map { WineIdWrapper(id: $0) } },
                 set: { selectedWineId = $0?.id }
             )) { wrapper in
