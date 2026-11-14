@@ -57,7 +57,8 @@ struct WineDetailPage {
 
     func verifyRecommendationSection() throws {
         app.swipeUp()
-        try app.staticTexts["Recommended"].waitOrFail("'Recommended' section not found")
+        try app.descendants(matching: .any)["wine-recommendation-comment"].firstMatch
+            .waitOrFail("Recommendation comment not found")
     }
 
     /// Flags the bottle as a favorite through the detail menu and its sheet. A

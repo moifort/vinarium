@@ -4,8 +4,8 @@ import SwiftUI
 /// bottle turning on itself, what the wine is, how long it has been in the cellar,
 /// what is done to it), then where it stands in the cellar and in its drinking window
 /// on two glass cards, then blocks on the page without cards around them: the facts,
-/// what happened to the bottle (tasted, given, recommended), where it was tasted, the
-/// notes and the files. Only what is known is drawn. Pure and previewable: the screen
+/// what happened to the bottle (tasted, given), what was said of it as a conversation,
+/// where it was tasted and the files. Only what is known is drawn. Pure and previewable: the screen
 /// owns the sheets and the calls, the page says what was tapped.
 struct WineDetailPage: View {
     let content: Content
@@ -41,15 +41,13 @@ struct WineDetailPage: View {
                     block("Informations", detail: content.canEdit ? "modifier" : nil, action: { onAction(.edit) }) {
                         WineFactList(facts: content.facts)
                     }
-                    if let consumption = content.consumption {
+                    if let consumption = content.consumption, consumption.hasFacts {
                         block("Consommé") { consumptionBody(consumption) }
                     }
                     if !content.history.isEmpty {
                         block("Historique") { WineFactList(facts: content.history) }
                     }
-                    if let recommendation = content.recommendation {
-                        block("Conseillé") { recommendationBody(recommendation) }
-                    }
+                    comments
                     block("Lieu de dégustation") {
                         WineLocationMap(
                             placeName: content.placeName,
@@ -57,13 +55,6 @@ struct WineDetailPage: View {
                             longitude: content.longitude,
                             onTap: { onAction(.editLocation) }
                         )
-                    }
-                    if let notes = content.notes {
-                        block("Notes") {
-                            Text(notes)
-                                .font(.body)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
                     }
                     if content.canAttach || !content.attachments.isEmpty {
                         VStack(alignment: .leading, spacing: 10) {
@@ -170,29 +161,41 @@ struct WineDetailPage: View {
                         .foregroundStyle(.orange)
                 }
             }
-            if let notes = consumption.tastingNotes {
-                Text(notes)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
         }
     }
 
-    private func recommendationBody(_ recommendation: Content.Recommendation) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            if let name = recommendation.recommenderName {
-                WineFactList(facts: [
-                    .init(title: String(localized: "Conseillé par"), value: name, isWide: true, id: "recommender"),
-                ])
-            } else {
-                Text("Vin conseillé")
-                    .font(.body.weight(.medium))
-            }
-            if let comment = recommendation.comment {
-                Text(comment)
-                    .font(.body)
-                    .italic()
-                    .frame(maxWidth: .infinity, alignment: .leading)
+    // MARK: - Comments
+
+    /// What was said of the wine, as a conversation: the words of whoever
+    /// recommended it in a grey bubble under their name, the owner's own notes and
+    /// tasting notes in blue ones, as Messages draws a group. Nothing when nobody
+    /// said anything: the words are written from the edit form, which a tap on a
+    /// bubble opens.
+    @ViewBuilder private var comments: some View {
+        let tastingNotes = content.consumption?.tastingNotes
+        if content.recommendation != nil || content.notes != nil || tastingNotes != nil {
+            let edit: (() -> Void)? = content.canEdit ? { onAction(.edit) } : nil
+            block("Commentaires") {
+                VStack(spacing: 10) {
+                    // A recommendation that names someone and says nothing still
+                    // reads as their word on it.
+                    if let recommendation = content.recommendation {
+                        MessageBubble(
+                            text: recommendation.comment ?? String(localized: "Je te le conseille."),
+                            sender: recommendation.recommenderName ?? String(localized: "Conseillé"),
+                            action: edit
+                        )
+                        .accessibilityIdentifier("wine-recommendation-comment")
+                    }
+                    if let notes = content.notes {
+                        MessageBubble(text: notes, isMine: true, action: edit)
+                            .accessibilityIdentifier("wine-notes")
+                    }
+                    if let tastingNotes {
+                        MessageBubble(text: tastingNotes, isMine: true, action: edit)
+                            .accessibilityIdentifier("wine-tasting-notes")
+                    }
+                }
             }
         }
     }
@@ -238,6 +241,9 @@ extension WineDetailPage {
             let facts: [WineFactList.Fact]
             let rating: Int?
             let tastingNotes: String?
+
+            /// The tasting's day, company or rating: its words alone go to the comments.
+            var hasFacts: Bool { !facts.isEmpty || rating != nil }
         }
 
         struct Recommendation {
@@ -269,6 +275,7 @@ extension WineDetailPage.Content {
         placeName: "Margaux, France",
         latitude: 45.0436,
         longitude: -0.6731,
+        notes: "Acheté chez Lavinia pour les 40 ans de Paul. À carafer deux heures avant.",
         canEdit: true,
         canAttach: true
     )
@@ -311,6 +318,7 @@ extension WineDetailPage.Content {
         rating: 4,
         tastingNotes: "Très frais, belle minéralité"
     )
+    content.recommendation = .init(recommenderName: "Marie", comment: "Parfait sur des huîtres.")
     return NavigationStack {
         WineDetailPage(content: content)
     }

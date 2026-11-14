@@ -672,7 +672,10 @@ struct WineDetailView: View {
             },
             history: history,
             recommendation: detail.recommendation.map {
-                .init(recommenderName: $0.recommenderName, comment: $0.comment)
+                .init(
+                    recommenderName: $0.recommenderName.flatMap { $0.isEmpty ? nil : $0 },
+                    comment: $0.comment.flatMap { $0.isEmpty ? nil : $0 }
+                )
             },
             placeName: detail.placeName,
             latitude: detail.latitude,

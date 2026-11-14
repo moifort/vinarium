@@ -342,7 +342,7 @@ extension DebugGallery {
                 tastingNotes: "Très belle tension, tanins fondus, une longue finale sur le cassis.",
                 contacts: ["Jean", "Marie"], favorite: false
             ),
-            gift: nil, recommendation: nil,
+            gift: nil, recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Garde-le pour un gigot d'agneau, il est superbe."),
             latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France"
         )
         return WineDetailView.mapContent(wine, cellars: [], isUploadingAttachment: false)
