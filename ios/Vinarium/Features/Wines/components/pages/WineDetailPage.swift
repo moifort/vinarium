@@ -12,6 +12,13 @@ struct WineDetailPage: View {
     var onAction: (Action) -> Void = { _ in }
     var onRefresh: () async -> Void = {}
 
+    /// Where the timeline ends on the page: the wine's colours hold down to it, so its
+    /// white thread always sits on them, then melt slowly into the page.
+    @State private var timelineBottom: CGFloat?
+
+    /// How far above the page's top the colours start, up under the toolbar.
+    private static let backdropLead: CGFloat = 200
+
     enum Action {
         case removeFromCellar
         case rate(Int)
@@ -39,11 +46,19 @@ struct WineDetailPage: View {
 
                 VStack(alignment: .leading, spacing: 30) {
                     if !content.timeline.isEmpty {
-                        block("Historique") {
-                            WineTimeline(steps: content.timeline, accent: content.tone.accent)
+                        block("Historique", onColour: true) {
+                            WineTimeline(steps: content.timeline, accent: content.tone.accent, onColour: true)
+                        }
+                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.space)).maxY } action: {
+                            timelineBottom = $0
                         }
                     }
-                    block("Informations", detail: content.canEdit ? "modifier" : nil, action: { onAction(.edit) }) {
+                    block(
+                        "Informations",
+                        detail: content.canEdit ? "modifier" : nil,
+                        onColour: hasTimeline,
+                        action: { onAction(.edit) }
+                    ) {
                         WineFactList(facts: content.facts)
                     }
                     if let consumption = content.consumption, consumption.hasFacts {
@@ -75,10 +90,15 @@ struct WineDetailPage: View {
                 .padding(.top, 30)
                 .padding(.bottom, 44)
             }
+            .coordinateSpace(.named(Self.space))
             .background(alignment: .top) {
                 // Up under the toolbar, whose glass buttons float over the colours.
-                WineSheetBackdrop(tone: content.tone)
-                    .padding(.top, -200)
+                WineSheetBackdrop(
+                    tone: content.tone,
+                    // A little above the last step's line, so the melt starts under it.
+                    solidUntil: hasTimeline ? timelineBottom.map { $0 + Self.backdropLead - 16 } : nil
+                )
+                .padding(.top, -Self.backdropLead)
             }
         }
         .background(Color(.systemGroupedBackground))
@@ -111,36 +131,43 @@ struct WineDetailPage: View {
 
     // MARK: - Blocks
 
+    private static let space = "wine-page"
+
+    private var hasTimeline: Bool { !content.timeline.isEmpty }
+
     private func block(
         _ title: LocalizedStringKey,
         detail: LocalizedStringKey? = nil,
+        onColour: Bool = false,
         action: @escaping () -> Void = {},
         @ViewBuilder content: () -> some View
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            header(title, detail: detail, action: action)
+            header(title, detail: detail, onColour: onColour, action: action)
             content()
                 .padding(.horizontal, 20)
         }
     }
 
     /// A block's title, as the TV app heads a row; "modifier" on its right when the
-    /// block can be edited.
+    /// block can be edited. White when it still sits on the wine's colours.
     private func header(
         _ title: LocalizedStringKey,
         detail: LocalizedStringKey? = nil,
+        onColour: Bool = false,
         action: @escaping () -> Void = {}
     ) -> some View {
         HStack(alignment: .firstTextBaseline) {
             Text(title)
                 .font(.title2.weight(.bold))
+                .foregroundStyle(onColour ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
                 .accessibilityAddTraits(.isHeader)
             Spacer()
             if let detail {
                 Button(action: action) {
                     Text(detail)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(onColour ? AnyShapeStyle(.white.opacity(0.8)) : AnyShapeStyle(.secondary))
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)

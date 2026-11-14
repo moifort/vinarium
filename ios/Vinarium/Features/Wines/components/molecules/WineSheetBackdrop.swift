@@ -4,12 +4,38 @@ import SwiftUI
 /// old gold for a white, salmon for a rosé, amber for what is not wine. They run up
 /// under the toolbar and melt into the page under the hero, as the TV app opens a film
 /// over its own colours. The hero's text is white whatever the device's appearance:
-/// the top of the backdrop stays dark in both.
+/// the top of the backdrop stays dark in both. When the page says how far white text
+/// runs on them (its timeline), the colours hold down to there, then melt slowly.
 struct WineSheetBackdrop: View {
     let tone: WineSheetTone
+    /// How far the colours hold at full strength; nil for the default melt under the hero.
+    var solidUntil: CGFloat?
+
     /// How far the colours run before they are gone: down behind the facts, so their
     /// glass tiles show the wine through, as the board draws them.
-    var height: CGFloat = 960
+    private static let defaultHeight: CGFloat = 960
+    /// The long melt under a timeline, eased so no edge shows where it starts.
+    private static let fade: CGFloat = 360
+    private static let fadeCurve: [(at: CGFloat, opacity: Double)] = [
+        (0, 1), (0.12, 0.94), (0.25, 0.82), (0.4, 0.62), (0.55, 0.4), (0.7, 0.2), (0.85, 0.07), (1, 0),
+    ]
+
+    private var height: CGFloat { solidUntil.map { $0 + Self.fade } ?? Self.defaultHeight }
+
+    private var maskStops: [Gradient.Stop] {
+        guard let solidUntil else {
+            return [
+                .init(color: .black, location: 0),
+                .init(color: .black, location: 0.52),
+                .init(color: .black.opacity(0.45), location: 0.78),
+                .init(color: .clear, location: 1),
+            ]
+        }
+        let total = solidUntil + Self.fade
+        return [.init(color: .black, location: 0)] + Self.fadeCurve.map {
+            .init(color: .black.opacity($0.opacity), location: (solidUntil + $0.at * Self.fade) / total)
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -24,16 +50,7 @@ struct WineSheetBackdrop: View {
         }
         .frame(height: height)
         .mask {
-            LinearGradient(
-                stops: [
-                    .init(color: .black, location: 0),
-                    .init(color: .black, location: 0.52),
-                    .init(color: .black.opacity(0.45), location: 0.78),
-                    .init(color: .clear, location: 1),
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            LinearGradient(stops: maskStops, startPoint: .top, endPoint: .bottom)
         }
         // One flat image, composed once: the blur is not redrawn as the page scrolls.
         .drawingGroup()

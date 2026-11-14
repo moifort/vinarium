@@ -5,9 +5,13 @@ import SwiftUI
 /// joining them. The present (today in the cellar, or how the bottle ended) is filled
 /// with the wine's accent; what is still to come (the end of its drinking window)
 /// sits on a dotted line in a dotted disc. Pure: the screen words the steps.
+///
+/// On the wine's colours (`onColour`) it takes the hero's whites: white text, discs of
+/// white glass, the present in plain white as the "Sortir" button is.
 struct WineTimeline: View {
     let steps: [Step]
     let accent: Color
+    var onColour = false
 
     struct Step: Identifiable {
         let id: String
@@ -57,11 +61,11 @@ struct WineTimeline: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(verbatim: step.title)
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(step.state == .future ? .secondary : .primary)
+                    .foregroundStyle(step.state == .future ? secondaryText : primaryText)
                 if let detail = step.detail {
                     Text(verbatim: detail)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(secondaryText)
                 }
             }
             .padding(.top, 1)
@@ -73,10 +77,53 @@ struct WineTimeline: View {
         .accessibilityElement(children: .combine)
     }
 
+    private var primaryText: AnyShapeStyle { onColour ? AnyShapeStyle(.white) : AnyShapeStyle(.primary) }
+    private var secondaryText: AnyShapeStyle {
+        onColour ? AnyShapeStyle(.white.opacity(0.8)) : AnyShapeStyle(.secondary)
+    }
+
     @ViewBuilder private func disc(_ step: Step) -> some View {
         let icon = Image(systemName: step.symbol)
             .font(.system(size: 14, weight: .semibold))
             .accessibilityHidden(true)
+        if onColour {
+            whiteDisc(step, icon: icon)
+        } else {
+            plainDisc(step, icon: icon)
+        }
+    }
+
+    @ViewBuilder private func whiteDisc(_ step: Step, icon: some View) -> some View {
+        switch step.state {
+        case .past:
+            icon
+                .foregroundStyle(.white)
+                .frame(width: Self.disc, height: Self.disc)
+                .background {
+                    Circle().fill(.ultraThinMaterial).opacity(0.5)
+                    Circle().fill(.white.opacity(0.16))
+                }
+                .overlay { Circle().strokeBorder(.white.opacity(0.28), lineWidth: 1) }
+                .environment(\.colorScheme, .dark)
+        case .current:
+            icon
+                .foregroundStyle(Self.onWhite)
+                .frame(width: Self.disc, height: Self.disc)
+                .background(Circle().fill(.white))
+        case .future:
+            icon
+                .foregroundStyle(.white.opacity(0.86))
+                .frame(width: Self.disc, height: Self.disc)
+                .overlay {
+                    Circle().strokeBorder(.white.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [3, 3]))
+                }
+        }
+    }
+
+    /// The deep wine of the "Sortir" button's text, on white.
+    private static let onWhite = Color(red: 42 / 255, green: 6 / 255, blue: 20 / 255)
+
+    @ViewBuilder private func plainDisc(_ step: Step, icon: some View) -> some View {
         switch step.state {
         case .past:
             icon
@@ -106,12 +153,15 @@ struct WineTimeline: View {
     @ViewBuilder private func connector(toFuture: Bool) -> some View {
         if toFuture {
             Line()
-                .stroke(.tertiary, style: StrokeStyle(lineWidth: 2, dash: [4, 4]))
+                .stroke(
+                    onColour ? AnyShapeStyle(.white.opacity(0.55)) : AnyShapeStyle(.tertiary),
+                    style: StrokeStyle(lineWidth: 2, dash: [4, 4])
+                )
                 .frame(width: 2)
                 .frame(maxHeight: .infinity)
         } else {
             Capsule()
-                .fill(Self.hairline)
+                .fill(onColour ? AnyShapeStyle(.white.opacity(0.32)) : AnyShapeStyle(Self.hairline))
                 .frame(width: 2)
                 .frame(maxHeight: .infinity)
         }
@@ -154,6 +204,17 @@ extension WineTimeline.Step {
     WineTimeline(steps: WineTimeline.Step.previewTasted, accent: Color(red: 0.64, green: 0.07, blue: 0.18))
         .padding(20)
         .background(Color(.systemGroupedBackground))
+}
+
+#Preview("On the wine's colours") {
+    ScrollView {
+        WineTimeline(steps: WineTimeline.Step.previewInCellar, accent: .red, onColour: true)
+            .padding(20)
+            .background(alignment: .top) {
+                WineSheetBackdrop(tone: .red, solidUntil: 300).padding(.top, -60)
+            }
+    }
+    .background(Color(.systemGroupedBackground))
 }
 
 #Preview("Largest text") {
