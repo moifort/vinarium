@@ -44,6 +44,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     /// What the real label looks like, when a scan read it: the drawn bottle wears
     /// the closest look.
     var labelTraits: BottleArtwork.LabelTraits?
+    /// The bottle's moves in the cellar, as the journal recorded them, most recent
+    /// first: what the sheet's timeline is drawn from.
+    var moves: [CellarMove] = []
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -81,6 +84,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         attachments = try container.decodeIfPresent([BeverageAttachment].self, forKey: .attachments) ?? []
         labelFamily = try container.decodeIfPresent(BottleArtwork.LabelFamily.self, forKey: .labelFamily)
         labelTraits = try container.decodeIfPresent(BottleArtwork.LabelTraits.self, forKey: .labelTraits)
+        moves = try container.decodeIfPresent([CellarMove].self, forKey: .moves) ?? []
     }
 
     init(
@@ -97,7 +101,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         isMine: Bool = true, ownerName: String? = nil,
         attachments: [BeverageAttachment] = [],
         labelFamily: BottleArtwork.LabelFamily? = nil,
-        labelTraits: BottleArtwork.LabelTraits? = nil
+        labelTraits: BottleArtwork.LabelTraits? = nil,
+        moves: [CellarMove] = []
     ) {
         self.id = id
         self.name = name
@@ -133,6 +138,7 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.attachments = attachments
         self.labelFamily = labelFamily
         self.labelTraits = labelTraits
+        self.moves = moves
     }
 }
 
@@ -154,6 +160,22 @@ struct CellarInfo: Codable, Sendable {
         case dateOut
         case cellarId
     }
+}
+
+/// One line of the cellar journal for this bottle: placed in a slot or taken out of
+/// it. A move between two slots is a removal and a placement on the same day.
+struct CellarMove: Codable, Sendable {
+    enum Kind: String, Codable, Sendable {
+        case placed
+        case removed
+    }
+
+    let kind: Kind
+    let date: Date
+    /// The slot, as the grid labels it ("A1").
+    let position: String
+    /// The housemate who moved it; nil when the viewer did.
+    var byName: String?
 }
 
 struct GiftInfo: Codable, Sendable {

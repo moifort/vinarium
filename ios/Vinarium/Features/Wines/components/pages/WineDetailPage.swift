@@ -3,8 +3,8 @@ import SwiftUI
 /// One wine's sheet in the TV app's grammar: a hero over the wine's colours (the
 /// bottle turning on itself, what the wine is, how long it has been in the cellar,
 /// what is done to it), then where it stands in the cellar and in its drinking window
-/// on two glass cards, then blocks on the page without cards around them: the facts,
-/// what happened to the bottle (tasted, given), what was said of it as a conversation,
+/// on two glass cards, then blocks on the page without cards around them: the bottle's
+/// life on a thread, the facts, the tasting, what was said of it as a conversation,
 /// where it was tasted and the files. Only what is known is drawn. Pure and previewable: the screen
 /// owns the sheets and the calls, the page says what was tapped.
 struct WineDetailPage: View {
@@ -38,14 +38,16 @@ struct WineDetailPage: View {
                 cards
 
                 VStack(alignment: .leading, spacing: 30) {
+                    if !content.timeline.isEmpty {
+                        block("Historique") {
+                            WineTimeline(steps: content.timeline, accent: content.tone.accent)
+                        }
+                    }
                     block("Informations", detail: content.canEdit ? "modifier" : nil, action: { onAction(.edit) }) {
                         WineFactList(facts: content.facts)
                     }
                     if let consumption = content.consumption, consumption.hasFacts {
                         block("Consommé") { consumptionBody(consumption) }
-                    }
-                    if !content.history.isEmpty {
-                        block("Historique") { WineFactList(facts: content.history) }
                     }
                     comments
                     block("Lieu de dégustation") {
@@ -212,8 +214,8 @@ extension WineDetailPage {
         var window: Window?
         let facts: [WineFactList.Fact]
         var consumption: Consumption?
-        /// Given, received, taken out: when and to whom.
-        var history: [WineFactList.Fact] = []
+        /// The bottle's life, oldest first, ending on the present.
+        var timeline: [WineTimeline.Step] = []
         var recommendation: Recommendation?
         var placeName: String?
         var latitude: Double?
@@ -272,6 +274,7 @@ extension WineDetailPage.Content {
             .init(title: "Date d'achat", value: "12 sept. 2026", id: "purchaseDate"),
             .init(title: "Cépages", value: "Cabernet Sauvignon, Merlot", isWide: true, id: "grapes"),
         ],
+        timeline: WineTimeline.Step.previewInCellar,
         placeName: "Margaux, France",
         latitude: 45.0436,
         longitude: -0.6731,
@@ -319,6 +322,7 @@ extension WineDetailPage.Content {
         tastingNotes: "Très frais, belle minéralité"
     )
     content.recommendation = .init(recommenderName: "Marie", comment: "Parfait sur des huîtres.")
+    content.timeline = WineTimeline.Step.previewTasted
     return NavigationStack {
         WineDetailPage(content: content)
     }

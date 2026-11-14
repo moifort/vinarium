@@ -587,20 +587,6 @@ struct WineDetailView: View {
         fact(String(localized: "Propriétaire"), detail.ownerName, "owner")
         fact(String(localized: "Cépages"), detail.grapeVarieties.isEmpty ? nil : detail.grapeVarieties.joined(separator: ", "), wide: true, "grapes")
 
-        var history: [WineFactList.Fact] = []
-        if let dateOut = detail.cellar?.dateOut {
-            history.append(.init(title: String(localized: "Sortie le"), value: day(dateOut), id: "dateOut"))
-        }
-        if let gift = detail.gift {
-            history.append(.init(title: String(localized: "Offert le"), value: day(gift.giftedDate), id: "giftedDate"))
-            if let recipient = gift.recipientName {
-                history.append(.init(title: String(localized: "Destinataire"), value: recipient, id: "recipient"))
-            }
-        }
-        if let giftedBy = detail.giftedBy {
-            history.append(.init(title: String(localized: "Offert par"), value: giftedBy, id: "giftedBy"))
-        }
-
         let tone = WineSheetTone(beverageType: detail.beverageType, color: detail.color)
         let tag: String? = detail.subtype?.label(for: detail.beverageType)
             ?? (detail.beverageType == .wine ? detail.color?.label : detail.beverageType.label)
@@ -673,7 +659,7 @@ struct WineDetailView: View {
                 guard !facts.isEmpty || rating != nil || notes != nil else { return nil }
                 return .init(facts: facts, rating: rating, tastingNotes: notes)
             },
-            history: history,
+            timeline: timeline(detail, now: now),
             recommendation: detail.recommendation.map {
                 .init(
                     recommenderName: $0.recommenderName.flatMap { $0.isEmpty ? nil : $0 },
@@ -693,7 +679,7 @@ struct WineDetailView: View {
 
     /// "En cave depuis 41 jours", then in months past two months and in years past two
     /// years, as a person would say it.
-    private static func timeInCellar(since dateIn: Date, now: Date) -> String {
+    static func timeInCellar(since dateIn: Date, now: Date) -> String {
         let parts = Calendar.current.dateComponents([.day, .month, .year], from: dateIn, to: now)
         let days = max(Calendar.current.dateComponents([.day], from: dateIn, to: now).day ?? 0, 0)
         if let years = parts.year, years >= 2 {
@@ -707,7 +693,7 @@ struct WineDetailView: View {
     }
 
     /// The purchase day the API gives ("2026-09-12"), written as the sheet writes days.
-    private static func purchaseDay(_ raw: String) -> String? {
+    static func purchaseDay(_ raw: String) -> String? {
         let parser = ISO8601DateFormatter()
         parser.formatOptions = [.withFullDate]
         let date = parser.date(from: String(raw.prefix(10)))

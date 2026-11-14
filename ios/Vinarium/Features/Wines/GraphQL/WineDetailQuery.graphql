@@ -75,6 +75,16 @@ fragment WineDetailFields on Beverage {
   attachments {
     ...BeverageAttachmentFields
   }
+  # The bottle's moves in the cellar, most recent first: the sheet's timeline.
+  history {
+    type
+    date
+    position
+    actor {
+      displayName
+      isMine
+    }
+  }
 }
 
 query WineDetail($id: BeverageId!) {

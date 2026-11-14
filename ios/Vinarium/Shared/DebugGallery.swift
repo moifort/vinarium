@@ -343,7 +343,11 @@ extension DebugGallery {
                 contacts: ["Jean", "Marie"], favorite: false
             ),
             gift: nil, recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Garde-le pour un gigot d'agneau, il est superbe."),
-            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France"
+            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France",
+            moves: [
+                CellarMove(kind: .removed, date: day(2026, 11, 8), position: "A1"),
+                CellarMove(kind: .placed, date: day(2026, 10, 4), position: "A1"),
+            ]
         )
         return WineDetailView.mapContent(wine, cellars: [], isUploadingAttachment: false)
     }
@@ -385,7 +389,14 @@ extension DebugGallery {
             gift: nil,
             recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Le second vin de Margaux, à attendre encore cinq ans."),
             latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France",
-            attachments: attachments
+            attachments: attachments,
+            // Placed in B3, then moved to A1 by a housemate: a removal and a placement
+            // on the same day, most recent first as the journal gives them.
+            moves: [
+                CellarMove(kind: .placed, date: day(2026, 11, 2), position: "A1", byName: "Marie"),
+                CellarMove(kind: .removed, date: day(2026, 11, 2), position: "B3", byName: "Marie"),
+                CellarMove(kind: .placed, date: day(2026, 10, 4), position: "B3"),
+            ]
         )
         return WineDetailView.mapContent(wine, cellars: cellars, isUploadingAttachment: false)
     }

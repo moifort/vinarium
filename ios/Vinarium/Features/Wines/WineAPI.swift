@@ -331,7 +331,16 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailFields) -> UserWineDetail 
             BeverageAttachment(fields: $0.fragments.beverageAttachmentFields)
         },
         labelFamily: BottleArtwork.LabelFamily(graphql: w.labelFamily),
-        labelTraits: BottleArtwork.LabelTraits(w.labelTraits?.fragments.labelTraitsFields)
+        labelTraits: BottleArtwork.LabelTraits(w.labelTraits?.fragments.labelTraitsFields),
+        moves: w.history.compactMap { event in
+            guard let date = GraphQLHelpers.parseISO8601(event.date) else { return nil }
+            return CellarMove(
+                kind: event.type == .out ? .removed : .placed,
+                date: date,
+                position: event.position,
+                byName: event.actor.isMine ? nil : event.actor.displayName
+            )
+        }
     )
 }
 
