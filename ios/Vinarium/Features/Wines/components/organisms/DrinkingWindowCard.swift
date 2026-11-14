@@ -25,14 +25,15 @@ struct DrinkingWindowCard: View {
                     .background(Circle().fill(state.tint.opacity(0.25)).frame(width: 14, height: 14))
                     .accessibilityHidden(true)
             }
+            // Centred in the room the title and the words leave it, rather than
+            // hung under the title with the gap all below.
             gauge(state)
-                .padding(.top, 4)
+                .frame(maxHeight: .infinity)
             Text(state.label)
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
-                .frame(maxHeight: .infinity, alignment: .bottom)
         }
         .padding(.horizontal, 16)
         .padding(.top, 15)

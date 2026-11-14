@@ -74,11 +74,9 @@ private struct SlotGrid: View {
                         width: side, height: side
                     )
                     let cell = Path(roundedRect: rect, cornerRadius: side * 0.28)
+                    // The bottle's slot is lit in the wine's colour, with no halo: one
+                    // drawn round a corner slot was cut by the canvas's edge.
                     if firstRow + r == grid.row, firstCol + c == grid.col {
-                        context.fill(
-                            Path(roundedRect: rect.insetBy(dx: -3, dy: -3), cornerRadius: side * 0.36),
-                            with: .color(accent.opacity(0.25))
-                        )
                         context.fill(cell, with: .color(accent))
                     } else {
                         context.fill(cell, with: .color(Color(.systemFill)))
