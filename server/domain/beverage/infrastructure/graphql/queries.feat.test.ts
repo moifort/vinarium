@@ -130,6 +130,25 @@ describe('wine(id) detail query', () => {
     expect(fake.queryReads - before.queryReads).toBe(2)
   })
 
+  test('names the label family the bottle is drawn with, as the home screen does', async () => {
+    seedWine(wid(1), {
+      producer: 'Château Margaux',
+      region: 'Bordeaux',
+      wine: { color: 'red', appellation: 'Margaux' },
+    })
+    seedWine(wid(2), { name: 'Lagavulin 16', beverageType: 'spirit' })
+
+    const result = await execute(`
+      query {
+        a: beverage(id: "${wid(1)}") { labelFamily }
+        b: beverage(id: "${wid(2)}") { labelFamily }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data).toEqual({ a: { labelFamily: 'CHATEAU' }, b: { labelFamily: 'SPIRIT' } })
+  })
+
   test('returns null for a wine owned by another user', async () => {
     fake.seed('beverages', wid(1), {
       id: wid(1),
