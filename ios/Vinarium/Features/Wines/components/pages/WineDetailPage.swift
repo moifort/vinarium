@@ -14,7 +14,7 @@ struct WineDetailPage: View {
 
     enum Action {
         case removeFromCellar
-        case toggleFavorite
+        case rate(Int)
         case move
         case edit
         case editLocation
@@ -29,7 +29,7 @@ struct WineDetailPage: View {
                 WineSheetHero(
                     item: content.hero,
                     onRemove: { onAction(.removeFromCellar) },
-                    onToggleFavorite: { onAction(.toggleFavorite) },
+                    onRate: { onAction(.rate($0)) },
                     onMove: { onAction(.move) }
                 )
                 .padding(.horizontal, 20)
@@ -302,7 +302,7 @@ extension WineDetailPage.Content {
             tag: "Blanc",
             status: nil,
             isInCellar: false,
-            isFavorite: true
+            rating: 4
         ),
         facts: [
             .init(title: "Millésime", value: "2022", id: "vintage"),

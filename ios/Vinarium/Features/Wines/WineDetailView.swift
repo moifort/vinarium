@@ -306,8 +306,21 @@ struct WineDetailView: View {
         if let detail {
             let isFavorite = detail.consumption?.favorite == true
             let canOfferFromCellar = detail.cellar != nil && detail.cellar?.dateOut == nil
+            // A friend's advice not yet in the cellar has its own heart, beside "add".
+            let hasAdviceHeart = detail.isMine && detail.cellar == nil && detail.recommendation != nil
 
+            // The favourite and the menu share one glass, as on Shiori's book page.
             ToolbarItemGroup {
+                if !hasAdviceHeart {
+                    ToolbarIconButton(
+                        title: isFavorite ? "Retirer des favoris" : "Ajouter aux favoris",
+                        systemImage: isFavorite ? "heart.fill" : "heart"
+                    ) {
+                        toggleFavorite()
+                    }
+                    .accessibilityIdentifier("toolbar-favorite-button")
+                }
+
                 Menu {
                     if detail.isMine {
                         Button("Modifier", systemImage: "pencil") {
@@ -316,31 +329,6 @@ struct WineDetailView: View {
                     }
 
                     Section {
-                        if isFavorite {
-                            Button {
-                                Task {
-                                    await actionError.run {
-                                        self.detail = try await WineAPI.saveNotes(
-                                            id: detail.id,
-                                            tasting: TastingEntry(favorite: false)
-                                        )
-                                    } onSuccess: {
-                                        onUpdated?()
-                                    }
-                                }
-                            } label: {
-                                Label("Retirer des favoris", systemImage: "heart.slash")
-                            }
-                            .accessibilityIdentifier("menu-favorite-button")
-                        } else {
-                            Button {
-                                showFavorite = true
-                            } label: {
-                                Label("Ajouter aux favoris", systemImage: "heart")
-                            }
-                            .accessibilityIdentifier("menu-favorite-button")
-                        }
-
                         if detail.isMine {
                             Button {
                                 showRecommendation = true
@@ -397,18 +385,30 @@ struct WineDetailView: View {
     // MARK: - Actions
 
     /// What the page asks for. Taking the bottle out, moving it, editing it and its
-    /// place open their sheets; the favourite opens its sheet or, already set, is
-    /// taken off at once.
+    /// place open their sheets; the stars are saved at once.
     private func handle(_ action: WineDetailPage.Action) {
         switch action {
         case .removeFromCellar: showRemovalChoice = true
-        case .toggleFavorite: toggleFavorite()
+        case .rate(let stars): rate(stars)
         case .move: showMove = true
         case .edit: isEditing = true
         case .editLocation: showLocationEditor = true
         case .addAttachment: showAttachmentChoice = true
         case .openAttachment(let attachment): Task { await openAttachment(attachment) }
         case .deleteAttachment(let attachment): Task { await deleteAttachment(attachment) }
+        }
+    }
+
+    /// The stars tapped on the hero, saved at once on the wine's note: the server
+    /// merges them in, so the favourite and the tasting notes stay as they were.
+    private func rate(_ stars: Int) {
+        guard let detail, detail.consumption?.rating != stars else { return }
+        Task {
+            await actionError.run {
+                self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(rating: stars))
+            } onSuccess: {
+                onUpdated?()
+            }
         }
     }
 
@@ -636,7 +636,7 @@ struct WineDetailView: View {
                 tag: tag,
                 status: inCellar ? detail.cellar.map { Self.timeInCellar(since: $0.dateIn, now: now) } : nil,
                 isInCellar: inCellar,
-                isFavorite: detail.consumption?.favorite == true
+                rating: detail.consumption?.rating
             ),
             slot: inCellar ? detail.cellar.map { cellar in
                 let household = cellars.map { ($0.id, $0.name) }
@@ -667,8 +667,11 @@ struct WineDetailView: View {
                     facts.append(.init(title: String(localized: "Avec"), value: contacts.joined(separator: ", "), id: "contacts"))
                 }
                 let notes = consumption.tastingNotes.flatMap { $0.isEmpty ? nil : $0 }
-                guard !facts.isEmpty || consumption.rating != nil || notes != nil else { return nil }
-                return .init(facts: facts, rating: consumption.rating, tastingNotes: notes)
+                // A bottle still in the cellar shows its stars on the hero, not as a
+                // tasting it has not had.
+                let rating = inCellar ? nil : consumption.rating
+                guard !facts.isEmpty || rating != nil || notes != nil else { return nil }
+                return .init(facts: facts, rating: rating, tastingNotes: notes)
             },
             history: history,
             recommendation: detail.recommendation.map {

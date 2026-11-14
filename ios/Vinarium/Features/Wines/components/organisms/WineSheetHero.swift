@@ -5,12 +5,14 @@ import SwiftUI
 /// foot, the producer, the name, the vintage with where it comes from and its colour
 /// in an outlined tag, then how long it has been in the cellar. Under them, the
 /// bottle's actions while it is in the cellar: taking it out first, in white, then
-/// the favourite and the move on glass. White text whatever the appearance: it sits
+/// its rating and the move on glass. The favourite lives in the toolbar, beside the
+/// menu, as Shiori sets a book's. White text whatever the appearance: it sits
 /// on the dark top of the backdrop.
 struct WineSheetHero: View {
     let item: Item
     var onRemove: () -> Void = {}
-    var onToggleFavorite: () -> Void = {}
+    /// The stars tapped on the rating, from one to five.
+    var onRate: (Int) -> Void = { _ in }
     var onMove: () -> Void = {}
 
     struct Item {
@@ -25,7 +27,8 @@ struct WineSheetHero: View {
         let status: String?
         /// Whether the bottle stands in the cellar: the actions only make sense then.
         let isInCellar: Bool
-        let isFavorite: Bool
+        /// The stars given, from one to five; nil while the wine has none.
+        let rating: Int?
     }
 
     var body: some View {
@@ -104,11 +107,11 @@ struct WineSheetHero: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// Take it out, love it, move it: the three things done to a bottle in the cellar.
+    /// Take it out, rate it, move it: the three things done to a bottle in the cellar.
     private var actions: some View {
         HStack(spacing: 10) {
             Button(action: onRemove) {
-                Label("Sortir de la cave", systemImage: "arrow.up")
+                Label("Sortir", systemImage: "arrow.up")
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
@@ -119,12 +122,7 @@ struct WineSheetHero: View {
             .buttonStyle(.plain)
             .accessibilityIdentifier("remove-from-cellar-button")
 
-            roundButton(
-                title: item.isFavorite ? "Retirer des favoris" : "Ajouter aux favoris",
-                systemImage: item.isFavorite ? "heart.fill" : "heart",
-                identifier: "hero-favorite-button",
-                action: onToggleFavorite
-            )
+            ratingStars
             roundButton(
                 title: "Déplacer",
                 systemImage: "arrow.left.arrow.right",
@@ -132,6 +130,36 @@ struct WineSheetHero: View {
                 action: onMove
             )
         }
+    }
+
+    /// The rating, five stars on glass: a tap on a star sets the rating to it, in
+    /// place, without a sheet. Empty stars while the wine has none.
+    private var ratingStars: some View {
+        let rating = item.rating ?? 0
+        return HStack(spacing: 2) {
+            ForEach(1...5, id: \.self) { star in
+                Button { onRate(star) } label: {
+                    Image(systemName: star <= rating ? "star.fill" : "star")
+                        .font(.body)
+                        .foregroundStyle(star <= rating ? .white : .white.opacity(0.7))
+                        .frame(width: 25, height: 52)
+                        .contentShape(.rect)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 12)
+        .glassEffect(.regular.interactive(), in: .capsule)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("Note : \(rating) sur \(5)"))
+        .accessibilityAdjustableAction { direction in
+            switch direction {
+            case .increment: if rating < 5 { onRate(rating + 1) }
+            case .decrement: if rating > 1 { onRate(rating - 1) }
+            @unknown default: break
+            }
+        }
+        .accessibilityIdentifier("hero-rating")
     }
 
     private func roundButton(
@@ -168,7 +196,7 @@ extension WineSheetHero.Item {
         tag: "Rouge",
         status: "En cave depuis 41 jours",
         isInCellar: true,
-        isFavorite: false
+        rating: 4
     )
 }
 

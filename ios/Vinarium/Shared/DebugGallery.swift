@@ -362,7 +362,8 @@ private struct WinePageHost: View {
                     WineDetailPage(content: content)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
-                            ToolbarItem {
+                            ToolbarItemGroup {
+                                ToolbarIconButton(title: "Ajouter aux favoris", systemImage: "heart") {}
                                 Menu {
                                     Button("Modifier", systemImage: "pencil") {}
                                 } label: {
