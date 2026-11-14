@@ -5,8 +5,8 @@ import SwiftUI
 /// label the home screen draws it with (`BottleArtwork`). The glass, its shading and
 /// its reflections (`BottleGlass`) stay still, as on a real bottle turned by hand;
 /// only the label travels round, cut in thin strips laid on the cylinder, so it
-/// narrows towards the edges and disappears behind. One turn every nine seconds,
-/// held face on when Reduce Motion is on. Drawn in the 100 × 300 space of
+/// narrows towards the edges and disappears behind. One turn every nine seconds from
+/// the moment it appears, label face on, held face on when Reduce Motion is on. Drawn in the 100 × 300 space of
 /// `BottleArtwork`, scaled to `height`.
 struct SpinningBottle: View {
     /// The wine whose label turns; nil for the empty cellar's Grange des Pères.
@@ -22,6 +22,10 @@ struct SpinningBottle: View {
     }
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// When the bottle came on screen: the turn counts from there, so it opens face
+    /// on, its label read first, and starts turning with the page rather than
+    /// joining a turn already halfway round.
+    @State private var shownAt = Date()
 
     private var shape: BottleArtwork.Shape { wine?.style.shape ?? .bordeaux }
     private var glassTint: BottleArtwork.Glass { wine?.style.glass ?? .green }
@@ -32,7 +36,7 @@ struct SpinningBottle: View {
     var body: some View {
         let scale = height / 300
         TimelineView(.animation(paused: reduceMotion)) { timeline in
-            let angle = reduceMotion ? 0 : timeline.date.timeIntervalSinceReferenceDate
+            let angle = reduceMotion ? 0 : max(0, timeline.date.timeIntervalSince(shownAt))
                 .truncatingRemainder(dividingBy: period) / period * 2 * .pi
             Canvas { context, _ in
                 draw(in: context, scale: scale, angle: angle)
