@@ -53,7 +53,7 @@ struct DebugGallery: View {
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
         case "wineDetail":
-            WinePageHost()
+            WinePageHost(content: Self.completeWine)
         case "wineDetailOut":
             WinePageHost(content: Self.tastedWine)
         case "consumptionSheet":
@@ -346,6 +346,48 @@ extension DebugGallery {
             latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France"
         )
         return WineDetailView.mapContent(wine, cellars: [], isUploadingAttachment: false)
+    }
+
+    /// A bottle in the cellar carrying every fact a wine can have, to see how each one
+    /// shows: the cellar named among two, a classification, a gift received, a
+    /// recommendation, notes, a rating, the place and two files. Mapped as the live
+    /// page maps it.
+    static var completeWine: WineDetailPage.Content {
+        let day: (Int, Int, Int) -> Date = { y, m, d in
+            Calendar(identifier: .gregorian).date(from: DateComponents(year: y, month: m, day: d)) ?? .now
+        }
+        let cellars = [
+            CellarSummary(id: "main", name: nil, isPrimary: true, rows: 6, cols: 8),
+            CellarSummary(id: "lower", name: "Cave du bas", isPrimary: false, rows: 4, cols: 6),
+        ]
+        var attachments: [BeverageAttachment] = []
+        if let label = Bundle.main.url(forResource: "etiquette", withExtension: "jpg") {
+            attachments.append(BeverageAttachment(
+                id: "label", kind: .image, fileName: "Étiquette", contentType: "image/jpeg",
+                size: 51_511, url: label, createdAt: day(2026, 10, 4)
+            ))
+        }
+        attachments.append(BeverageAttachment(
+            id: "invoice", kind: .document, fileName: "facture.pdf", contentType: "application/pdf",
+            size: 88_000, url: URL(string: "https://example.com/facture.pdf")!, createdAt: day(2026, 10, 4)
+        ))
+        let wine = UserWineDetail(
+            id: "debug-complete", name: "Pavillon Rouge du Château Margaux", color: .red,
+            domain: "Château Margaux", vintage: 2015, appellation: "Margaux", cuvee: "Pavillon Rouge",
+            region: "Bordeaux", country: "France", grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
+            alcoholContent: 13.5, classification: "Premier Grand Cru Classé", purchasePrice: 250,
+            purchaseDate: "2026-09-12", drinkFrom: 2025, drinkUntil: 2040,
+            notes: "Acheté chez Lavinia pour les 40 ans de Paul. À carafer deux heures avant.",
+            giftedBy: "Julien", createdAt: day(2026, 9, 12), updatedAt: day(2026, 11, 8),
+            cellar: CellarInfo(row: "A", col: 1, dateIn: day(2026, 10, 4), dateOut: nil,
+                               cellarId: "lower", rowIndex: 0, colIndex: 0),
+            consumption: ConsumptionInfo(consumedDate: nil, rating: 4, tastingNotes: nil, contacts: nil, favorite: true),
+            gift: nil,
+            recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Le second vin de Margaux, à attendre encore cinq ans."),
+            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France",
+            attachments: attachments
+        )
+        return WineDetailView.mapContent(wine, cellars: cellars, isUploadingAttachment: false)
     }
 }
 
