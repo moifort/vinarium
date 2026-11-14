@@ -64,16 +64,17 @@ struct DrinkingWindowCard: View {
                     .frame(width: 16, height: 16)
                     .offset(x: 46)
                     .rotationEffect(.degrees(135 + 270 * state.progress))
-                VStack(spacing: 0) {
-                    Text(verbatim: "\(state.years)")
-                        .font(.system(size: 32, weight: .bold))
-                        .monospacedDigit()
-                    Group {
-                        if state.years == 1 { Text("an") } else { Text("ans") }
-                    }
-                    .font(.footnote.weight(.medium))
-                    .foregroundStyle(.secondary)
+                // The count at the ring's very centre; its unit below, in the
+                // opening between the ring's two ends.
+                Text(verbatim: "\(state.years)")
+                    .font(.system(size: 32, weight: .bold))
+                    .monospacedDigit()
+                Group {
+                    if state.years == 1 { Text("an") } else { Text("ans") }
                 }
+                .font(.footnote.weight(.medium))
+                .foregroundStyle(.secondary)
+                .offset(y: 30)
             }
             .frame(width: 92, height: 92)
             HStack {
