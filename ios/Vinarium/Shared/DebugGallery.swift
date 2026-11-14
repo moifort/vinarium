@@ -54,6 +54,8 @@ struct DebugGallery: View {
                 .environment(SubscriptionStore())
         case "wineDetail":
             WineSheetHost()
+        case "wineDetailOut":
+            WineSheetHost(content: Self.tastedWine)
         case "consumptionSheet":
             NoteSheetHost(sheet: .consumption)
         case "favoriteSheet":
@@ -320,7 +322,35 @@ private struct NoteSheetHost: View {
 
 /// A wine's sheet in the cellar, opened as the app opens it, over a plain screen,
 /// with its toolbar: the hero, the slot and the drinking window from fixtures.
+extension DebugGallery {
+    /// A bottle taken out and drunk, with a drinking window on record: mapped as the
+    /// live sheet maps it, so neither the slot nor the window shows.
+    static var tastedWine: WineDetailPage.Content {
+        let day: (Int, Int, Int) -> Date = { y, m, d in
+            Calendar(identifier: .gregorian).date(from: DateComponents(year: y, month: m, day: d)) ?? .now
+        }
+        let wine = UserWineDetail(
+            id: "debug-tasted", name: "Pavillon Rouge", color: .red, domain: "Château Margaux",
+            vintage: 2015, appellation: "Margaux", cuvee: "Pavillon Rouge", region: "Bordeaux",
+            country: "France", grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
+            alcoholContent: 13.5, classification: nil, purchasePrice: 250, purchaseDate: "2026-09-12",
+            drinkFrom: 2025, drinkUntil: 2040, notes: nil, giftedBy: nil,
+            createdAt: day(2026, 9, 12), updatedAt: day(2026, 11, 8),
+            cellar: nil,
+            consumption: ConsumptionInfo(
+                consumedDate: day(2026, 11, 8), rating: 4,
+                tastingNotes: "Très belle tension, tanins fondus, une longue finale sur le cassis.",
+                contacts: ["Jean", "Marie"], favorite: false
+            ),
+            gift: nil, recommendation: nil,
+            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France"
+        )
+        return WineDetailView.mapContent(wine, cellars: [], isUploadingAttachment: false)
+    }
+}
+
 private struct WineSheetHost: View {
+    var content: WineDetailPage.Content = .preview
     @State private var shown = false
 
     var body: some View {
@@ -329,7 +359,7 @@ private struct WineSheetHost: View {
             .task { shown = true }
             .sheet(isPresented: $shown) {
                 NavigationStack {
-                    WineDetailPage(content: .preview)
+                    WineDetailPage(content: content)
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItem(placement: .cancellationAction) {

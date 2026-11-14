@@ -561,7 +561,8 @@ struct WineDetailView: View {
         }
     }
 
-    private static func mapContent(
+    /// Internal so the debug gallery can draw a sheet from a wine fixture.
+    static func mapContent(
         _ detail: UserWineDetail,
         cellars: [CellarSummary],
         isUploadingAttachment: Bool,
@@ -657,9 +658,10 @@ struct WineDetailView: View {
                     grid: grid
                 )
             } : nil,
-            window: detail.drinkFrom.flatMap { from in
+            // Like the slot, the drinking window only matters for a bottle still to open.
+            window: inCellar ? detail.drinkFrom.flatMap { from in
                 detail.drinkUntil.flatMap { until in until >= from ? .init(from: from, until: until) : nil }
-            },
+            } : nil,
             facts: facts,
             consumption: detail.consumption.flatMap { consumption in
                 var facts: [WineFactList.Fact] = []
