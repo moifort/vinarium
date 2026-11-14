@@ -67,7 +67,8 @@ same task:
 
 The comment rules of CLAUDE.md: one child session per comment, started without asking (a card
 when the app refuses the start from an automated turn), the child resolves each thread it
-handles as soon as the change is made and archives itself on the user's validation, the parent
+handles as soon as the change is made and, on the user's validation, is cleared and re-briefed
+by the parent if it was a standby (archived otherwise), the parent
 resolves the thread of a child the user closed themself, and a new comment goes to the child
 working on its theme, or to the parent when no child is.
 
@@ -81,11 +82,13 @@ the rest.
 Why a child does not always start at once: a comment sent from the board reaches the parent as
 an automated turn, not as the user's own message, and the app refuses to start a session
 (`user_asked`) on such a turn, though it still lets the parent message an existing session. So
-the parent keeps two **standby sessions** ("Réserve board", started empty, waiting for a
-mission): on a comment with no child on its theme, it sends the full brief to a standby, which
-becomes that thread's child at once and renames itself. On each of the user's messages the
-parent first tops the standbys back up to two (`list_sessions`, `linked: true`, also after a
-clear). With no standby left, the parent proposes the child instead (`own_initiative`, a card
+the parent keeps **standby sessions**, at least three free, titled `B1`, `B2`… (started empty,
+waiting for a mission): on a comment with no child on its theme, it sends the full brief to a
+free standby, which becomes that thread's child at once (the parent renames it "BN · <theme>").
+Once the user validates its work, the standby sends "Réserve libérée : <title>"; the parent
+clears its context (`clear_session`), renames it "BN · libre" and re-sends the standby brief. A
+standby is never archived. On each of the user's messages the parent first tops the free
+standbys back up to three (`list_sessions`, `linked: true`, also after a clear). With no standby left, the parent proposes the child instead (`own_initiative`, a card
 the user clicks). Over Remote Control the cards do not show and the app refuses the proposal too: the
 parent then says so in one line starting with "⏸ Bloqué" that tells the user what to do ("⏸
 Bloqué : fil X en attente, envoie n'importe quel message ici pour lancer sa session"), never a
