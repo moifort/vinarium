@@ -40,7 +40,7 @@ struct CellarSlotCard: View {
         .padding(.top, 15)
         .padding(.bottom, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .glassEffect(.regular, in: .rect(cornerRadius: 26))
+        .wineCardSurface()
         .accessibilityElement(children: .combine)
     }
 }

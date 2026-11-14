@@ -39,7 +39,7 @@ struct DrinkingWindowCard: View {
         .padding(.top, 15)
         .padding(.bottom, 14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .glassEffect(.regular, in: .rect(cornerRadius: 26))
+        .wineCardSurface()
         .accessibilityElement(children: .combine)
         .accessibilityIdentifier("wine-detail-drinking-window")
     }
