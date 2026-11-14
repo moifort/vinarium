@@ -576,7 +576,11 @@ struct WineDetailView: View {
         fact(detail.beverageType.producerLabel, detail.domain, "producer")
         fact(String(localized: "Cuvée"), detail.cuvee, "cuvee")
         fact(String(localized: "Millésime"), detail.vintage.map(String.init), "vintage")
-        fact(String(localized: "Alcool"), detail.alcoholContent.map { String(format: "%.1f %% vol", $0) }, "alcohol")
+        // Written in the reader's decimal style, "13,5 % vol" in French, and "13 % vol" for a
+        // round degree.
+        fact(String(localized: "Alcool"), detail.alcoholContent.map {
+            "\($0.formatted(.number.precision(.fractionLength(0...1)))) % vol"
+        }, "alcohol")
         fact(String(localized: "Appellation"), detail.appellation, "appellation")
         fact(String(localized: "Région"), detail.region, "region")
         fact(String(localized: "Pays"), detail.country, "country")
