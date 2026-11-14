@@ -7,8 +7,9 @@ import SwiftUI
 /// the top of the backdrop stays dark in both.
 struct WineSheetBackdrop: View {
     let tone: WineSheetTone
-    /// How far the colours run before they are gone.
-    var height: CGFloat = 760
+    /// How far the colours run before they are gone: down behind the facts, so their
+    /// glass tiles show the wine through, as the board draws them.
+    var height: CGFloat = 960
 
     var body: some View {
         ZStack {

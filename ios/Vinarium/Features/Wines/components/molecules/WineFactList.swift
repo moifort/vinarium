@@ -1,8 +1,11 @@
 import SwiftUI
 
-/// What a wine is, as plain label over value pairs two to a row, each under a hairline,
-/// as the TV app lists a film's details: no card around them, no icon beside them.
-/// A wide fact (the grape varieties) takes the whole row. Only the facts given are
+/// What a wine is, as tiles two to a row in one frame, the way Shiori's book sheet
+/// sets its facts: a small caption in capitals over the value, hairlines between the
+/// tiles. The frame is glass rather than a grey card: the wine's colours show blurred
+/// through a faint blue veil, lighter in the light appearance, a deep night blue in the
+/// dark. A wide fact (the grape varieties), and a narrow one left alone on its row,
+/// take the whole row, so the frame never ends on a hole. Only the facts given are
 /// drawn. A long press copies a value.
 struct WineFactList: View {
     let facts: [Fact]
@@ -15,21 +18,40 @@ struct WineFactList: View {
         let id: String
     }
 
+    private static let cornerRadius: CGFloat = 14
+    private static let veil = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            // The board's tints: the wine's colours behind carry the glass.
+            ? UIColor(red: 10 / 255, green: 20 / 255, blue: 36 / 255, alpha: 0.34)
+            : UIColor(red: 240 / 255, green: 247 / 255, blue: 1, alpha: 0.36)
+    })
+    private static let hairline = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 1, alpha: 0.1)
+            : UIColor(red: 60 / 255, green: 84 / 255, blue: 130 / 255, alpha: 0.14)
+    })
+
     var body: some View {
-        Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 0) {
+        let shape = RoundedRectangle(cornerRadius: Self.cornerRadius)
+        Grid(alignment: .leading, horizontalSpacing: 0, verticalSpacing: 0) {
             ForEach(rows.indices, id: \.self) { index in
                 let row = rows[index]
                 GridRow {
-                    ForEach(row) { fact in
-                        cell(fact)
-                            .gridCellColumns(fact.isWide ? 2 : 1)
-                    }
-                    if row.count == 1, !row[0].isWide {
-                        Color.clear.frame(height: 1)
+                    ForEach(row.indices, id: \.self) { column in
+                        cell(row[column], below: index > 0, beside: column > 0)
+                            .gridCellColumns(row.count == 1 ? 2 : 1)
                     }
                 }
             }
         }
+        .background {
+            // The material at part strength: the colours behind read through, still
+            // blurred.
+            shape.fill(.ultraThinMaterial).opacity(0.7)
+            shape.fill(Self.veil)
+        }
+        .clipShape(shape)
+        .overlay { shape.strokeBorder(Self.hairline, lineWidth: 1) }
     }
 
     /// Two narrow facts to a row; a wide one alone.
@@ -51,21 +73,28 @@ struct WineFactList: View {
         return rows
     }
 
-    private func cell(_ fact: Fact) -> some View {
-        VStack(alignment: .leading, spacing: 1) {
+    /// A tile, with a hairline above it under another row and before it beside another
+    /// tile.
+    private func cell(_ fact: Fact, below: Bool, beside: Bool) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
             Text(verbatim: fact.title)
                 .font(.footnote)
+                .textCase(.uppercase)
+                .tracking(0.3)
                 .foregroundStyle(.secondary)
             Text(verbatim: fact.value)
-                .font(.body.weight(.medium))
+                .font(.body.weight(.semibold))
                 .lineLimit(fact.isWide ? 3 : 1)
                 .minimumScaleFactor(0.85)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, 10)
-        .padding(.bottom, 11)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .overlay(alignment: .top) {
-            Rectangle().fill(Color(.separator)).frame(height: 0.5)
+            if below { Rectangle().fill(Self.hairline).frame(height: 1) }
+        }
+        .overlay(alignment: .leading) {
+            if beside { Rectangle().fill(Self.hairline).frame(width: 1) }
         }
         .contentShape(.rect)
         .contextMenu {
@@ -89,4 +118,5 @@ struct WineFactList: View {
         .init(title: "Pays", value: "France", id: "country"),
     ])
     .padding(20)
+    .background(Color(.systemGroupedBackground))
 }
