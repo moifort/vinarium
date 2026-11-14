@@ -65,15 +65,7 @@ struct WineDetailView: View {
                                 cellars: cellars,
                                 isUploadingAttachment: isUploadingAttachment
                             ),
-                            onRemoveRequested: { showRemovalChoice = true },
-                            onEditLocation: { showLocationEditor = true },
-                            onAddAttachment: { showAttachmentChoice = true },
-                            onOpenAttachment: { attachment in
-                                Task { await openAttachment(attachment) }
-                            },
-                            onDeleteAttachment: { attachment in
-                                Task { await deleteAttachment(attachment) }
-                            },
+                            onAction: handle,
                             onRefresh: { await loadData() }
                         )
                     }
@@ -88,6 +80,18 @@ struct WineDetailView: View {
                 if !isEditing {
                     readToolbar
                 }
+            }
+            .confirmationDialog(
+                "Sortir de la cave",
+                isPresented: $showRemovalChoice,
+                titleVisibility: .visible
+            ) {
+                Button("Consommer") { showConsumption = true }
+                    .accessibilityIdentifier("choice-consume")
+                Button("Offrir") { showGift = true }
+                    .accessibilityIdentifier("choice-gift")
+            } message: {
+                Text("Comment souhaitez-vous sortir ce vin ?")
             }
             // Menu actions (favorite, deletion, …) close the menu before the mutation
             // leaves, and a refresh keeps the content on screen: in both cases the
@@ -288,33 +292,6 @@ struct WineDetailView: View {
         ToolbarItem(placement: .cancellationAction) {
             ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
         }
-        if let cellar = detail?.cellar, cellar.dateOut == nil {
-            ToolbarItemGroup {
-                Button("Déplacer", systemImage: "arrow.left.arrow.right") {
-                    showMove = true
-                }
-                .labelStyle(.iconOnly)
-                .accessibilityIdentifier("move-bottle-button")
-
-                Button("Sortir", systemImage: "arrow.up") {
-                    showRemovalChoice = true
-                }
-                .labelStyle(.iconOnly)
-                .accessibilityIdentifier("remove-from-cellar-button")
-                .confirmationDialog(
-                    "Sortir de la cave",
-                    isPresented: $showRemovalChoice,
-                    titleVisibility: .visible
-                ) {
-                    Button("Consommer") { showConsumption = true }
-                        .accessibilityIdentifier("choice-consume")
-                    Button("Offrir") { showGift = true }
-                        .accessibilityIdentifier("choice-gift")
-                } message: {
-                    Text("Comment souhaitez-vous sortir ce vin ?")
-                }
-            }
-        }
         if let detail, detail.isMine, detail.cellar == nil, detail.recommendation != nil {
             ToolbarItemGroup {
                 ToolbarIconButton(title: "Ajouter à la cave", systemImage: "plus") {
@@ -422,6 +399,41 @@ struct WineDetailView: View {
         }
     }
 
+    // MARK: - Actions
+
+    /// What the page asks for. Taking the bottle out, moving it, editing it and its
+    /// place open their sheets; the favourite opens its sheet or, already set, is
+    /// taken off at once.
+    private func handle(_ action: WineDetailPage.Action) {
+        switch action {
+        case .removeFromCellar: showRemovalChoice = true
+        case .toggleFavorite: toggleFavorite()
+        case .move: showMove = true
+        case .edit: isEditing = true
+        case .editLocation: showLocationEditor = true
+        case .addAttachment: showAttachmentChoice = true
+        case .openAttachment(let attachment): Task { await openAttachment(attachment) }
+        case .deleteAttachment(let attachment): Task { await deleteAttachment(attachment) }
+        }
+    }
+
+    /// A favourite is taken off at once; a wine that is not one asks the tasting
+    /// that makes it one.
+    private func toggleFavorite() {
+        guard let detail else { return }
+        if detail.consumption?.favorite == true {
+            Task {
+                await actionError.run {
+                    self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(favorite: false))
+                } onSuccess: {
+                    onUpdated?()
+                }
+            }
+        } else {
+            showFavorite = true
+        }
+    }
+
     // MARK: - Helpers
 
     /// Opens what the caller asked for, once, over the loaded wine. A bottle that left
@@ -436,17 +448,7 @@ struct WineDetailView: View {
         case .move:
             if inCellar { showMove = true }
         case .favorite:
-            if detail.consumption?.favorite == true {
-                Task {
-                    await actionError.run {
-                        self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(favorite: false))
-                    } onSuccess: {
-                        onUpdated?()
-                    }
-                }
-            } else {
-                showFavorite = true
-            }
+            toggleFavorite()
         }
     }
 
@@ -562,63 +564,151 @@ struct WineDetailView: View {
     private static func mapContent(
         _ detail: UserWineDetail,
         cellars: [CellarSummary],
-        isUploadingAttachment: Bool
-    ) -> WineDetailContent.Content {
-        let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
-        return WineDetailContent.Content(
-            beverageType: detail.beverageType,
-            color: detail.color,
-            subtype: detail.subtype,
-            name: detail.name,
-            domain: detail.domain,
-            cuvee: detail.cuvee,
-            vintage: detail.vintage,
-            appellation: detail.appellation,
-            region: detail.region,
-            country: detail.country,
-            classification: detail.classification,
+        isUploadingAttachment: Bool,
+        now: Date = .now
+    ) -> WineDetailPage.Content {
+        let day: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
+        let inCellar = detail.cellar.map { $0.dateOut == nil } ?? false
+        let place = detail.appellation ?? detail.region ?? detail.country
+        let meta = [detail.vintage.map(String.init), place].compactMap { $0 }.joined(separator: " · ")
+
+        var facts: [WineFactList.Fact] = []
+        func fact(_ title: String, _ value: String?, wide: Bool = false, _ id: String) {
+            guard let value, !value.isEmpty else { return }
+            facts.append(.init(title: title, value: value, isWide: wide, id: id))
+        }
+        fact(detail.beverageType.producerLabel, detail.domain, "producer")
+        fact(String(localized: "Cuvée"), detail.cuvee, "cuvee")
+        fact(String(localized: "Millésime"), detail.vintage.map(String.init), "vintage")
+        fact(String(localized: "Alcool"), detail.alcoholContent.map { String(format: "%.1f %% vol", $0) }, "alcohol")
+        fact(String(localized: "Appellation"), detail.appellation, "appellation")
+        fact(String(localized: "Région"), detail.region, "region")
+        fact(String(localized: "Pays"), detail.country, "country")
+        fact(String(localized: "Classification"), detail.classification, "classification")
+        fact(String(localized: "Entrée le"), detail.cellar.map { day($0.dateIn) }, "dateIn")
+        fact(String(localized: "Prix d'achat"), detail.purchasePrice.map { Money.formattedFromEur($0, fractionLength: 0) }, "price")
+        fact(String(localized: "Date d'achat"), detail.purchaseDate.map { Self.purchaseDay($0) ?? $0 }, "purchaseDate")
+        fact(String(localized: "Propriétaire"), detail.ownerName, "owner")
+        fact(String(localized: "Cépages"), detail.grapeVarieties.isEmpty ? nil : detail.grapeVarieties.joined(separator: ", "), wide: true, "grapes")
+
+        var history: [WineFactList.Fact] = []
+        if let dateOut = detail.cellar?.dateOut {
+            history.append(.init(title: String(localized: "Sortie le"), value: day(dateOut), id: "dateOut"))
+        }
+        if let gift = detail.gift {
+            history.append(.init(title: String(localized: "Offert le"), value: day(gift.giftedDate), id: "giftedDate"))
+            if let recipient = gift.recipientName {
+                history.append(.init(title: String(localized: "Destinataire"), value: recipient, id: "recipient"))
+            }
+        }
+        if let giftedBy = detail.giftedBy {
+            history.append(.init(title: String(localized: "Offert par"), value: giftedBy, id: "giftedBy"))
+        }
+
+        let tone = WineSheetTone(beverageType: detail.beverageType, color: detail.color)
+        let tag: String? = detail.subtype?.label(for: detail.beverageType)
+            ?? (detail.beverageType == .wine ? detail.color?.label : detail.beverageType.label)
+
+        return WineDetailPage.Content(
+            tone: tone,
+            hero: .init(
+                bottle: .init(
+                    style: .of(
+                        id: detail.id,
+                        beverageType: detail.beverageType,
+                        subtype: detail.subtype,
+                        color: detail.color,
+                        family: detail.labelFamily,
+                        traits: detail.labelTraits,
+                        vintage: detail.vintage
+                    ),
+                    // Written as the home writes it, so the bottle is the same one.
+                    text: .init(
+                        producer: ProducerOverline.text(for: detail.domain, name: detail.name),
+                        name: detail.name,
+                        vintage: detail.vintage,
+                        appellation: detail.appellation,
+                        classification: detail.classification,
+                        kind: detail.beverageType == .wine
+                            ? nil
+                            : detail.subtype?.label(for: detail.beverageType) ?? detail.beverageType.label
+                    )
+                ),
+                producer: detail.domain,
+                name: detail.name,
+                meta: meta.isEmpty ? nil : meta,
+                tag: tag,
+                status: inCellar ? detail.cellar.map { Self.timeInCellar(since: $0.dateIn, now: now) } : nil,
+                isInCellar: inCellar,
+                isFavorite: detail.consumption?.favorite == true
+            ),
+            slot: inCellar ? detail.cellar.map { cellar in
+                let household = cellars.map { ($0.id, $0.name) }
+                let summary = cellars.first { $0.id == cellar.cellarId } ?? (cellars.count == 1 ? cellars.first : nil)
+                var grid: CellarSlotCard.Grid?
+                if let summary, summary.rows > 0, summary.cols > 0,
+                   let row = cellar.rowIndex, let col = cellar.colIndex,
+                   row < summary.rows, col < summary.cols {
+                    grid = .init(rows: summary.rows, cols: summary.cols, row: row, col: col)
+                }
+                return .init(
+                    position: "\(cellar.row)\(cellar.col)",
+                    cellarName: CellarPositionLabel.cellarName(cellarId: cellar.cellarId, cellars: household),
+                    grid: grid
+                )
+            } : nil,
+            window: detail.drinkFrom.flatMap { from in
+                detail.drinkUntil.flatMap { until in until >= from ? .init(from: from, until: until) : nil }
+            },
+            facts: facts,
+            consumption: detail.consumption.flatMap { consumption in
+                var facts: [WineFactList.Fact] = []
+                if let date = consumption.consumedDate {
+                    facts.append(.init(title: String(localized: "Consommé le"), value: day(date), id: "consumed"))
+                }
+                if let contacts = consumption.contacts, !contacts.isEmpty {
+                    facts.append(.init(title: String(localized: "Avec"), value: contacts.joined(separator: ", "), id: "contacts"))
+                }
+                let notes = consumption.tastingNotes.flatMap { $0.isEmpty ? nil : $0 }
+                guard !facts.isEmpty || consumption.rating != nil || notes != nil else { return nil }
+                return .init(facts: facts, rating: consumption.rating, tastingNotes: notes)
+            },
+            history: history,
+            recommendation: detail.recommendation.map {
+                .init(recommenderName: $0.recommenderName, comment: $0.comment)
+            },
             placeName: detail.placeName,
             latitude: detail.latitude,
             longitude: detail.longitude,
-            alcoholContent: detail.alcoholContent,
-            purchasePrice: detail.purchasePrice,
-            purchaseDate: detail.purchaseDate,
-            grapeVarieties: detail.grapeVarieties,
-            drinkFrom: detail.drinkFrom,
-            drinkUntil: detail.drinkUntil,
-            giftedBy: detail.giftedBy,
-            notes: detail.notes,
-            cellar: detail.cellar.map { cellar in
-                .init(
-                    position: CellarPositionLabel.text(
-                        "\(cellar.row)\(cellar.col)",
-                        cellarId: cellar.cellarId,
-                        cellars: cellars.map { ($0.id, $0.name) }
-                    ),
-                    dateIn: formatter(cellar.dateIn),
-                    dateOut: cellar.dateOut.map(formatter),
-                    isInCellar: cellar.dateOut == nil
-                )
-            },
-            consumption: detail.consumption.map { consumption in
-                .init(
-                    consumedDate: consumption.consumedDate.map(formatter),
-                    rating: consumption.rating,
-                    tastingNotes: consumption.tastingNotes,
-                    contacts: consumption.contacts
-                )
-            },
-            gift: detail.gift.map { gift in
-                .init(giftedDate: formatter(gift.giftedDate), recipientName: gift.recipientName)
-            },
-            recommendation: detail.recommendation.map { reco in
-                .init(recommenderName: reco.recommenderName, comment: reco.comment)
-            },
-            ownerName: detail.ownerName,
+            notes: detail.notes.flatMap { $0.isEmpty ? nil : $0 },
             attachments: detail.attachments,
+            canEdit: detail.isMine,
             canAttach: detail.isMine,
             isUploadingAttachment: isUploadingAttachment
         )
+    }
+
+    /// "En cave depuis 41 jours", then in months past two months and in years past two
+    /// years, as a person would say it.
+    private static func timeInCellar(since dateIn: Date, now: Date) -> String {
+        let parts = Calendar.current.dateComponents([.day, .month, .year], from: dateIn, to: now)
+        let days = max(Calendar.current.dateComponents([.day], from: dateIn, to: now).day ?? 0, 0)
+        if let years = parts.year, years >= 2 {
+            return String(localized: "En cave depuis \(years) ans")
+        }
+        let months = (parts.year ?? 0) * 12 + (parts.month ?? 0)
+        if months >= 2 {
+            return String(localized: "En cave depuis \(months) mois")
+        }
+        return String(localized: "En cave depuis \(days) jours")
+    }
+
+    /// The purchase day the API gives ("2026-09-12"), written as the sheet writes days.
+    private static func purchaseDay(_ raw: String) -> String? {
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [.withFullDate]
+        let date = parser.date(from: String(raw.prefix(10)))
+        return date?.formatted(date: .abbreviated, time: .omitted)
     }
 
     private static func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {

@@ -38,6 +38,12 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     /// The files hung on the sheet, oldest first. Readable on a housemate's
     /// bottle, editable only on one's own.
     var attachments: [BeverageAttachment]
+    /// The house style its bottle is drawn in, the one the home screen draws it with.
+    /// Nil when the server did not say: the app then guesses it from type and colour.
+    var labelFamily: BottleArtwork.LabelFamily?
+    /// What the real label looks like, when a scan read it: the drawn bottle wears
+    /// the closest look.
+    var labelTraits: BottleArtwork.LabelTraits?
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -73,6 +79,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         isMine = try container.decodeIfPresent(Bool.self, forKey: .isMine) ?? true
         ownerName = try container.decodeIfPresent(String.self, forKey: .ownerName)
         attachments = try container.decodeIfPresent([BeverageAttachment].self, forKey: .attachments) ?? []
+        labelFamily = try container.decodeIfPresent(BottleArtwork.LabelFamily.self, forKey: .labelFamily)
+        labelTraits = try container.decodeIfPresent(BottleArtwork.LabelTraits.self, forKey: .labelTraits)
     }
 
     init(
@@ -87,7 +95,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         recommendation: RecommendationInfo?,
         latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil,
         isMine: Bool = true, ownerName: String? = nil,
-        attachments: [BeverageAttachment] = []
+        attachments: [BeverageAttachment] = [],
+        labelFamily: BottleArtwork.LabelFamily? = nil,
+        labelTraits: BottleArtwork.LabelTraits? = nil
     ) {
         self.id = id
         self.name = name
@@ -121,6 +131,8 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.isMine = isMine
         self.ownerName = ownerName
         self.attachments = attachments
+        self.labelFamily = labelFamily
+        self.labelTraits = labelTraits
     }
 }
 
@@ -131,6 +143,9 @@ struct CellarInfo: Codable, Sendable {
     let dateOut: Date?
     /// The cellar the bottle stands in.
     var cellarId: String? = nil
+    /// The slot in the cellar's grid, 0-based, to draw it on the cellar's plan.
+    var rowIndex: Int? = nil
+    var colIndex: Int? = nil
 
     enum CodingKeys: String, CodingKey {
         case row = "rowLabel"

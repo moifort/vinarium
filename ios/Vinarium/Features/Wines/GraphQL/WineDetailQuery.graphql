@@ -10,6 +10,10 @@ fragment WineDetailFields on Beverage {
   subtype
   alcoholContent
   producer
+  labelFamily
+  labelTraits {
+    ...LabelTraitsFields
+  }
   region
   country
   notes

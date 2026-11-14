@@ -205,6 +205,17 @@ extension BottleArtwork {
             }
         }
 
+        /// The glass's edges where the label is, in the 100 × 300 drawing space: the
+        /// cylinder a turning label wraps.
+        var barrel: (left: CGFloat, right: CGFloat) {
+            switch self {
+            case .bordeaux, .provence: (18, 82)
+            case .burgundy, .whisky: (16, 84)
+            case .champagne: (14, 86)
+            case .flute: (30, 70)
+            }
+        }
+
         /// Where the paper label sits, in the 100 × 300 drawing space.
         var label: CGRect {
             switch self {

@@ -52,6 +52,8 @@ struct DebugGallery: View {
         case "premiumPage":
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
+        case "wineDetail":
+            WineSheetHost()
         case "consumptionSheet":
             NoteSheetHost(sheet: .consumption)
         case "favoriteSheet":
@@ -136,6 +138,7 @@ struct DebugGallery: View {
                     }
                 }
                 Section("Fiche vin") {
+                    NavigationLink("Fiche en cave") { WineSheetHost() }
                     NavigationLink("Feuille de consommation") { NoteSheetHost(sheet: .consumption) }
                     NavigationLink("Feuille de favori") { NoteSheetHost(sheet: .favorite) }
                     NavigationLink("Feuille de recommandation") { NoteSheetHost(sheet: .recommendation) }
@@ -310,6 +313,36 @@ private struct NoteSheetHost: View {
                 case .consumption: ConsumptionSheet { _, _, _, _ in }
                 case .favorite: FavoriteSheet { _, _, _, _ in }
                 case .recommendation: RecommendationSheet { _, _ in }
+                }
+            }
+    }
+}
+
+/// A wine's sheet in the cellar, opened as the app opens it, over a plain screen,
+/// with its toolbar: the hero, the slot and the drinking window from fixtures.
+private struct WineSheetHost: View {
+    @State private var shown = false
+
+    var body: some View {
+        Button("Rouvrir") { shown = true }
+            // Opened once the screen is up: a sheet asked for before it is not shown.
+            .task { shown = true }
+            .sheet(isPresented: $shown) {
+                NavigationStack {
+                    WineDetailPage(content: .preview)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { shown = false }
+                            }
+                            ToolbarItem {
+                                Menu {
+                                    Button("Modifier", systemImage: "pencil") {}
+                                } label: {
+                                    Image(systemName: "ellipsis")
+                                }
+                            }
+                        }
                 }
             }
     }

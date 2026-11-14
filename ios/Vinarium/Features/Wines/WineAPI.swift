@@ -294,7 +294,9 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailFields) -> UserWineDetail 
                 col: $0.colLabel,
                 dateIn: GraphQLHelpers.parseISO8601($0.createdAt) ?? Date(),
                 dateOut: nil,
-                cellarId: $0.cellarId
+                cellarId: $0.cellarId,
+                rowIndex: $0.row,
+                colIndex: $0.col
             )
         },
         consumption: w.consumption.map {
@@ -327,7 +329,9 @@ private func mapDetail(_ w: VinariumGraphQL.WineDetailFields) -> UserWineDetail 
         ownerName: w.ownerName,
         attachments: w.attachments.compactMap {
             BeverageAttachment(fields: $0.fragments.beverageAttachmentFields)
-        }
+        },
+        labelFamily: BottleArtwork.LabelFamily(graphql: w.labelFamily),
+        labelTraits: BottleArtwork.LabelTraits(w.labelTraits?.fragments.labelTraitsFields)
     )
 }
 
