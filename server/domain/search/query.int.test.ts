@@ -182,10 +182,10 @@ describe('SearchQuery.acrossCollections', () => {
     const { hits } = await run('margaux')
 
     expect(hits).toHaveLength(1)
-    // Three queries: the indexed wine lookup, plus the gift and recommendation
-    // scans those domains deliberately keep (sparse collections, see their
-    // byBeverageIds). The beverages, cellar and tasting scans are gone.
-    expect(fake.queryReads - before.queryReads).toBe(3)
+    // One query: the indexed wine lookup. A handful of hits reads its gifts and
+    // recommendations by key (see their byBeverageIds); the beverages, cellar and
+    // tasting scans are gone.
+    expect(fake.queryReads - before.queryReads).toBe(1)
   })
 
   test('the cost does not grow with the size of the collection', async () => {
@@ -206,9 +206,9 @@ describe('SearchQuery.acrossCollections', () => {
     const { hits } = await run('margaux')
 
     expect(hits).toHaveLength(1)
-    // Same three queries as on a three-bottle cellar: the forty extra wines are
-    // never read, which is the whole point of the index.
-    expect(fake.queryReads - before).toBe(3)
+    // The same single query as on a three-bottle cellar: the forty extra wines
+    // are never read, which is the whole point of the index.
+    expect(fake.queryReads - before).toBe(1)
   })
 })
 

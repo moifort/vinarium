@@ -88,7 +88,7 @@ describe('wine(id) detail query', () => {
     })
   })
 
-  test('costs 3 keyed doc reads plus the two sparse-satellite scans', async () => {
+  test('costs 5 keyed doc reads and no scan, however many gifts the user keeps', async () => {
     seedWine(wid(1))
     seedSatellites(wid(1))
     // A busy cellar: the doc-read budget must not grow with collection sizes.
@@ -101,12 +101,12 @@ describe('wine(id) detail query', () => {
     const result = await execute(detailQuery(wid(1)))
 
     expect(result.errors).toBeUndefined()
-    // 1 wine + cellar + consumption, each a keyed get on the composed doc id.
-    // The viewer owns the wine, so no household scope is resolved.
-    expect(fake.docReads - before.docReads).toBe(3)
-    // Gift and recommendation are sparse collections served by one memoized
-    // scan each, whatever the page size.
-    expect(fake.queryReads - before.queryReads).toBe(2)
+    // 1 wine + cellar, consumption, gift and recommendation, each a keyed get
+    // on the composed doc id. The viewer owns the wine, so no household scope
+    // is resolved. A page scans gifts and recommendations instead; one wine
+    // reads only its own.
+    expect(fake.docReads - before.docReads).toBe(5)
+    expect(fake.queryReads - before.queryReads).toBe(0)
   })
 
   test('resolves absent satellites to null, at the same read budget', async () => {
@@ -124,10 +124,9 @@ describe('wine(id) detail query', () => {
       gift: null,
       recommendation: null,
     })
-    // 1 wine + the cellar and consumption probes, all on the viewer's own docs;
-    // gift and recommendation probe their memoized scans instead.
-    expect(fake.docReads - before.docReads).toBe(3)
-    expect(fake.queryReads - before.queryReads).toBe(2)
+    // 1 wine + the four satellite probes, all keyed on the viewer's own docs.
+    expect(fake.docReads - before.docReads).toBe(5)
+    expect(fake.queryReads - before.queryReads).toBe(0)
   })
 
   test('names the label family the bottle is drawn with, as the home screen does', async () => {
@@ -231,10 +230,89 @@ describe('wine(id) detail query', () => {
   })
 })
 
+describe('the wine sheet, in one request', () => {
+  test('reads the same whatever the size of the cellar and the number of gifts', async () => {
+    fake.seed('cellar-configs', `usr_${userId}`, { rows: 4, cols: 6, zones: 1 })
+    // A busy cellar: 30 placed bottles, every fifth one a gift with its advice.
+    for (let i = 1; i <= 30; i++) {
+      seedWine(wid(i))
+      fake.seed('cellar', `${userId}_${wid(i)}`, {
+        userId,
+        beverageId: wid(i),
+        row: Math.floor(i / 6) % 4,
+        col: i % 6,
+        createdAt: new Date('2026-01-15'),
+        updatedAt: new Date('2026-01-15'),
+      })
+      if (i % 5 === 0) {
+        fake.seed('gift', `${userId}_${wid(i)}`, {
+          userId,
+          beverageId: wid(i),
+          received: { from: 'Julien' },
+        })
+        fake.seed('recommendation', `${userId}_${wid(i)}`, {
+          userId,
+          beverageId: wid(i),
+          comment: 'x',
+        })
+      }
+    }
+    fake.seed('journal', 'entry-1', {
+      userId,
+      beverageId: wid(5),
+      type: 'in',
+      row: 0,
+      col: 5,
+      date: new Date('2026-03-01'),
+    })
+
+    const before = {
+      docReads: fake.docReads,
+      queryReads: fake.queryReads,
+      queryDocs: fake.queryDocReads,
+    }
+    // What the app's WineDetail asks, but the attachments' signed URLs.
+    const result = await execute(`
+      query {
+        beverage(id: "${wid(5)}") {
+          id
+          cellar { cellarId row col }
+          consumption { rating }
+          gift { received { from } }
+          recommendation { comment }
+          attachments { id }
+          history { type position }
+        }
+        cellars { id name isPrimary rows cols }
+      }
+    `)
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data).toEqual({
+      beverage: {
+        id: wid(5),
+        cellar: { cellarId: `usr_${userId}`, row: 0, col: 5 },
+        consumption: null,
+        gift: { received: { from: 'Julien' } },
+        recommendation: { comment: 'x' },
+        attachments: [],
+        history: [{ type: 'IN', position: 'A6' }],
+      },
+      cellars: [{ id: `usr_${userId}`, name: null, isPrimary: true, rows: 4, cols: 6 }],
+    })
+    // The wine and its four keyed satellites, the membership probe, the primary
+    // cellar: never a read per bottle of the cellar.
+    expect(fake.docReads - before.docReads).toBe(7)
+    // The other cellars, the attachments and the journal of this wine.
+    expect(fake.queryReads - before.queryReads).toBe(3)
+    expect(fake.queryDocReads - before.queryDocs).toBe(3)
+  })
+})
+
 describe('wines list query', () => {
   test('serves satellites through the batched loaders, without per-wine fallbacks', async () => {
-    seedWine(wid(1))
-    seedWine(wid(2))
+    // More wines than a sheet's keyed lookups take, so the page path is the one tested.
+    for (let i = 1; i <= 6; i++) seedWine(wid(i))
     seedSatellites(wid(1))
 
     const before = { docReads: fake.docReads, queryReads: fake.queryReads }
@@ -256,7 +334,7 @@ describe('wines list query', () => {
     const items = (
       result.data as { beverages: { items: Array<{ id: string } & Record<string, unknown>> } }
     ).beverages.items
-    expect(items).toHaveLength(2)
+    expect(items).toHaveLength(6)
     const byId = new Map(items.map((item) => [item.id, item]))
     expect(byId.get(wid(1))).toEqual({
       id: wid(1),
@@ -277,9 +355,9 @@ describe('wines list query', () => {
     // collections — a flat cost however long the page. If a loader ever stopped
     // batching, per-wine fallbacks would blow these numbers up.
     expect(fake.queryReads - before.queryReads).toBe(3)
-    // One batched getAll of 2 refs for cellar and for consumption (the dense
+    // One batched getAll of 6 refs for cellar and for consumption (the dense
     // satellites) + the household-scope membership probe (one doc get).
-    expect(fake.docReads - before.docReads).toBe(5)
+    expect(fake.docReads - before.docReads).toBe(13)
   })
 
   test('history is batched: one journal query for the whole page, not one per wine', async () => {
