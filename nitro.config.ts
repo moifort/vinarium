@@ -13,11 +13,16 @@ export default defineNitroConfig({
   firebase: {
     gen: 2,
     nodeVersion: '22',
+    // Only `firebase deploy` reads this block, and the deploy goes through
+    // Terraform: what runs is `service_config` in infra/function.tf. The values
+    // below mirror it so that neither misleads; change both together.
     httpsOptions: {
       region: 'europe-west3',
-      memory: '512MiB',
+      memory: '1GiB',
+      cpu: 1,
       timeoutSeconds: 60,
-      concurrency: 80,
+      // Bounded by the memory: see `max_instance_request_concurrency`.
+      concurrency: 16,
     },
   },
   // Rollup minifies the whole backend into one file, so an unmapped stack trace

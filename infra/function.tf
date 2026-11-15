@@ -91,11 +91,26 @@ resource "google_cloudfunctions2_function" "server" {
   }
 
   service_config {
-    available_memory      = "512M"
-    timeout_seconds       = 60
-    max_instance_count    = 100
-    min_instance_count    = 0
-    service_account_email = google_service_account.function.email
+    # Cloud Functions defaults to one request per instance on a third of a CPU,
+    # and Cloud Run refuses more on less than a whole one. Until 2026-11-15 the
+    # wine sheet's two requests, sent together, landed on two instances in 27
+    # openings out of 38, the second one often cold: 1.5 s at p50 for the
+    # request, up to 4 s end to end, where a warm instance answers in 0.3 s.
+    # The requests mostly wait on Firestore and the models, so one instance
+    # serves them together. The globals are per-instance on purpose and the
+    # request cache lives on the event, so nothing leaks between requests.
+    #
+    # Sixteen at once, as Shiori: bounded by memory, not by the CPU. An idle
+    # instance holds about 170 MB (the built bundle), the heaviest request, a
+    # scan, about 40 MB while its photo is decoded. Raise it only with the
+    # memory, and mirror all three in nitro.config.ts.
+    available_memory                 = "1Gi"
+    available_cpu                    = "1"
+    max_instance_request_concurrency = 16
+    timeout_seconds                  = 60
+    max_instance_count               = 100
+    min_instance_count               = 0
+    service_account_email            = google_service_account.function.email
 
     environment_variables = {
       NITRO_FIREBASE_PROJECT_ID = google_project.this.project_id
