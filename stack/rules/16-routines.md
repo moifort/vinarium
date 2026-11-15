@@ -14,12 +14,13 @@ interval one hour. What a cloud run does not have: the machine's files (no keych
 sessions. So:
 
 - a cloud routine gets its credentials as environment variables of its cloud environment (the
-  Sentry token, the observer service account key, the store API key), never from a file in a
+  Sentry token, the store API key), never from a file in a
   repository;
 - a change a cloud routine cannot verify itself (an app fix needs Xcode) is pushed as a branch
   with a pull request, and merged by the next pass once CI built it, instead of going to
   `main` directly;
-- a routine that needs the machine (a simulator, the keychain, a capture) is a **desktop**
+- a routine that needs the machine (a simulator, the keychain, a capture, the observer `gcloud`
+  configuration the daily health pass reads production through) is a **desktop**
   scheduled task, which runs only while the app is open and the Mac awake, and catches up one
   missed run on wake.
 
@@ -40,7 +41,7 @@ Remote Control connected and is not reliable from a scheduled run.
 | Routine | Cadence, runtime | Does | Never |
 |---|---|---|---|
 | Sentry triage | Every six hours, cloud, every app | Reads unresolved issues, fixes the cause with a verified commit, pushes to `main`, watches CI, marks `resolvedInNextRelease` | Marks plain `resolved`; touches an issue it did not fix |
-| Daily health | Noon, cloud, per app | Through the observer account: spend from the billing export, performance, monitoring; fixes and pushes what is code; reports cold starts as a figure | Proposes a warm instance; reads errors (Sentry's job) |
+| Daily health | Noon, desktop, per app | Through the observer account: spend from the billing export, performance, monitoring; fixes and pushes what is code; reports cold starts as a figure | Proposes a warm instance; reads errors (Sentry's job) |
 | Upgrades | Every morning after Renovate, cloud | Stack pull requests (label `stack`): the `stack-upgrade` skill, sync, migrations with their checks, merge when every migration is safe and CI is green. Major dependency pull requests: reads the changelog and migration guide, applies the code changes, deploys to staging, merges when CI and staging are green, otherwise comments and leaves open | Force-merges; edits rules; touches a pull request without one of those labels |
 | Deprecations | Monthly, cloud, per app | Runs the deprecations script, removes what is removable, raises the build floor, pushes, watches CI and Deploy | Removes anything in grace or still asked; raises the floor by hand |
 | iOS disk cleanup | Weekly, desktop, the machine | Trims old derived data, unavailable simulators, stale Swift package caches, Xcode caches; reports runtimes and `/tmp` to clean by hand | Deletes a runtime, an archive, a project or anything under `/tmp`; downloads a runtime |
@@ -49,10 +50,10 @@ Remote Control connected and is not reliable from a scheduled run.
 
 The routines' prompts live in `routines/` of this package, with placeholders for the project's
 facts. A routine is `scope: machine` (one instance for every project: Sentry triage, stack
-upgrades) or `scope: project` (one per project: daily health). `sync` renders them into
-`~/.claude/scheduled-tasks/<id>/SKILL.md` (`<id>-<app>` for a project routine); the
-`stack-install` and `stack-upgrade` skills then create the scheduled task when it does not exist
-and update its prompt and cadence when it does, through the app's scheduled-tasks tools. A routine
+upgrades) or `scope: project` (one per project: daily health). `sync` renders them into the
+project's `stack/routines/<id>.md`; the `stack-install` and `stack-upgrade` skills then create
+the scheduled task from that file when it does not exist (named `<id>-<app>` for a project
+routine) and update its prompt and cadence when it does, through the app's scheduled-tasks tools. A routine
 is never edited by hand on the machine: the change goes into the package and reaches every machine
 and project at the next version.
 

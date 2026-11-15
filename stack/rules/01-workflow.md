@@ -35,6 +35,7 @@ A claim of success without the command output behind it has no value. Before eve
 |---|---|
 | Backend | `bun run typecheck` (after `bun run prepare` if routes changed), the three test families **separately** (see below), `bun run lint` |
 | The API schema | `bun run schema:check`: a removal not preceded by a deprecation is refused, see [11-ops.md](11-ops.md#api-evolution) |
+| What `sync` writes (`stack/`, `.claude/skills/`, `.claude/hooks/`) | Never edited by hand: `bun run stack:check`, the last step of `bun run preflight`, fails on any difference, see [12-ci.md](12-ci.md#stack-checks) |
 | The app | `bun run ios:build`; and after any on-screen text change, `bun run ios:strings` until it reports every string translated, see [08-copy.md](08-copy.md#localisation) |
 
 The three test families run **separately** (`bun run test:unit`, `bun run test:int`,
@@ -90,5 +91,7 @@ A change in the board's prototyping zone stops after step 1. Never both steps in
 
 Before starting, look at what is installed and invoke what matches the task. Never cite, impose
 or document a skill without checking it exists on the machine. The skills this package ships are
-in `.claude/skills/` after `sync`; the ones that matter are `domain`, `graphql`, `ios-feature`,
-`appstore`, `stack-upgrade`.
+in `.claude/skills/` after `sync`, for the stacks the project has: `domain`, `graphql` and
+`cold-start` (backend), `ios-feature`, `ios-simulator` and `appstore` (iOS), `ai-calls` (AI),
+`stack-install` and `stack-upgrade`. A rule names the skill that holds its long form; the skill
+is read when the task needs it.

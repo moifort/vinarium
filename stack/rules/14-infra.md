@@ -1,18 +1,19 @@
 # Infrastructure
 
 Terraform in `infra/`, one GCP project per app named `<app>-polyforms`, region `europe-west3`,
-Firestore `eur3`. Templates in `templates/infra/`.
+Firestore `eur3`. Templates in the package, under `templates/backend/infra/` (`ios.tf` under
+`templates/ios/infra/`).
 
 | File | What it provisions |
 |---|---|
-| `project.tf`, `versions.tf`, `state.tf`, `backend.tf` | The project, the providers, the remote state bucket |
+| `main.tf`, `project.tf`, `versions.tf`, `state.tf`, `backend.tf` | The providers, the project, the remote state bucket |
 | `firebase.tf`, `auth.tf` | The Firebase app, Sign in with Apple |
 | `firestore.tf` | The database with delete protection and point-in-time recovery, the indexes |
 | `function.tf` | The Cloud Function gen 2 (Node 22) serving the Nitro build, scale to zero |
 | `secrets.tf`, `variables.tf` | Secret Manager entries fed by Terraform variables from GitHub secrets |
 | `cicd.tf` | Workload Identity Federation for the GitHub workflows |
 | `scheduler.tf` | Cloud Scheduler jobs calling the backend's scheduled routes |
-| `storage.tf` | Buckets for uploads, signed URLs |
+| `storage.tf` | Buckets for uploads, signed URLs. Added by the project that needs them: no template |
 | `ios.tf` | Resources the app needs (APNs key, bundle configuration) |
 | `observer.tf` | A read-only service account for unattended production reads |
 | `outputs.tf` | What the workflows and the app read back |
@@ -28,10 +29,14 @@ stack run against it; a seeded dataset and its own Sentry environment; the app p
 through its server-URL override. Nothing in staging is ever production data.
 
 It exists from the moment an app has real users to protect, and in any case before the first
-paid plan: with a handful of readers, production is the staging. Bazar is built with it from the
-start.
+paid plan: with a handful of readers, production is the staging.
 
 ## Bootstrap: one line creates a project
+
+**Not shipped yet.** The CLI has `init`, `sync`, `check`, `migrations` and `placeholders`;
+`bootstrap`, `teardown` and the `infra/org/` root are the target this section describes. Until
+they exist, the same resources are created by hand, once, in the order of the table below, and
+what was created is written in `project-context.md`.
 
 `bunx @moifort/stack bootstrap <app>` runs once from the person's machine and leaves a project
 that deploys itself. It is a command of the package's CLI (TypeScript on Bun, like the rest), not
@@ -41,7 +46,7 @@ kinds of credentials:
 
 | Root | Runs | Credentials | Creates |
 |---|---|---|---|
-| `infra/org/` | From the machine, at bootstrap and when the organisation-level setup changes | The person's organisation tokens, read from the macOS keychain for the duration of the run | The GitHub repository (settings, Pages, labels, branch rules), its secrets and variables, the Sentry projects (`<app>-node`, `<app>-ios`) with their DSNs written straight into the GitHub secrets, the Renovate installation, the GCP project and the state bucket |
+| `infra/org/` | From the machine, at bootstrap and when the organisation-level setup changes | The person's organisation tokens, read from the macOS keychain for the duration of the run | The GitHub repository (settings, Dependabot alerts on and its security updates off, Pages, labels, branch rules), its secrets and variables, the Sentry projects (`<app>-node`, `<app>-ios`) with their DSNs written straight into the GitHub secrets, the Renovate installation, the GCP project and the state bucket |
 | `infra/` | By the Deploy workflow, through Workload Identity Federation | None on the machine | Everything in the table above |
 
 - **Keychain, not files.** The organisation tokens (GitHub, Sentry, App Store Connect) live in
@@ -50,11 +55,12 @@ kinds of credentials:
   bootstrap process only, never written to a file, never printed, never committed. Each token is
   fine-grained and scoped to the organisation, with an expiry, and its creation date is in the
   person's `project-context.md`.
-- **The CI never holds a personal token.** What a workflow needs at run time is a repository
-  secret Terraform wrote (a DSN, a store API key) or a token it mints itself: Renovate runs
-  with a GitHub App installed on the organisation (the workflow mints a short-lived token from
-  the app's private key, stored once as an organisation secret), not with a personal token
-  that expires.
+- **One token in the CI, Renovate's.** What a workflow needs at run time is a repository secret
+  Terraform wrote (a DSN, a store API key). The one exception is Renovate, which opens pull
+  requests and so needs a token of its own: the `RENOVATE_TOKEN` repository secret, read by
+  `.github/workflows/renovate.yml`, able to read the Dependabot alerts
+  ([11-ops.md](11-ops.md#dependencies)), and listed with the other tokens in
+  `project-context.md`.
 - **Replayable.** Every step of the bootstrap checks whether it is already done and skips it,
   so a run that failed halfway is simply run again. It never deploys the backend itself: it
   ends by pushing the first commit and letting the Deploy workflow do the first deploy.
@@ -81,8 +87,8 @@ kinds of credentials:
 - **A neutral `polyforms-billing` GCP project** holds the billing export dataset and the
   observer account, so that deleting an app never takes the invoice or the reader of every
   other app with it. Each project's runtime account gets `dataViewer` on the dataset through SQL
-  `GRANT`, the IAM binding command being allowlisted. (Today the export lives in Vinarium's
-  project: moving it is a migration of this package.)
+  `GRANT`, the IAM binding command being allowlisted. (The table is the `BILLING_TABLE` placeholder: a project
+  whose export still lives elsewhere names that table until it is moved.)
 - Analytics: the Firebase project is linked to a GA4 property at creation, or sessions go
   nowhere; the property id is a repository variable.
 - Never a warm instance, see [11-ops.md](11-ops.md#scale-to-zero).

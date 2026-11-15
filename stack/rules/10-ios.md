@@ -97,7 +97,7 @@ Long lists load by **cursor, never offset**: an offset shifts under a list that 
 two pages. Page size is sized to the screen, not the dataset; the server caps a page. Prefetch
 before the end, well below the page size. A load-more row closes the list while there is more,
 with a retry once a page failed. **A page asked before a reload is never appended to the list that
-replaced it**, and an edit deep in a list never shrinks it. The mechanisms Shiori uses for that
+replaced it**, and an edit deep in a list never shrinks it. The mechanisms that hold it
 (generation token, reload keeping depth, patching a named row) are in the `ios-feature` skill as
 a pattern to copy, not a requirement.
 
@@ -115,7 +115,8 @@ them. A view that resists previewing is a design smell: pull the pure part out. 
 how a view looks; unit tests check what the app decides: ViewModels with an inline fake client
 (state after a load, after a failure over rows and over nothing, a stale page dropped, a row
 patched), and pure functions on models. Never a test of a SwiftUI `body`. A cached ViewModel takes
-a no-cache option in tests. The unit test target runs in CI on every push.
+a no-cache option in tests. The unit test target runs in `build-ios`: before every release, and by
+hand at any time ([12-ci.md](12-ci.md#rules)).
 
 ## Design conventions
 
@@ -145,58 +146,29 @@ a no-cache option in tests. The unit test target runs in CI on every push.
 
 ## Scrolling performance
 
-Scrolling holds on the oldest supported iPhones, as Apple's own apps do.
-
-- GPU and main-thread cost is a budget on every scrolled screen: no live blur, mask or shadow per
-  cell; compute such effects once (a baked image) and reuse it.
-- Never put a per-frame scroll value in a page's `@State`: it rebuilds the page on every frame.
-  Use an `@Observable` read only by a small modifier.
-- Hitches are measured on a phone, in Release, never judged on the simulator: a temporary UI test
-  measuring `XCTOSSignpostMetric.scrollingAndDecelerationMetric`, with slow finger-like drags
-  (about 220 pt/s) as well as fast swipes. When the tests look clean and the person still feels
-  lag, a Release build with a frame probe (a `CADisplayLink` logging frame deltas) finds it.
-  Compare runs minutes apart, never an hour apart: the device heats and drifts.
-- Say plainly when old phones were not measured.
+Scrolling holds on the oldest supported iPhones, as Apple's own apps do: GPU and main-thread cost
+is a budget on every scrolled screen. Hitches are measured on a phone, in Release, never judged on
+the simulator; say plainly when old phones were not measured. The techniques and the measure: the
+`ios-feature` skill.
 
 ## Screen patterns
 
-The shapes every app repeats, so they are not re-explained per project. Code in the
-`ios-feature` skill and in the shared component package.
+The shapes every app repeats (a list row, a detail page, a tab's main screen, a form or a sheet
+that asks something) are described once, in the `ios-feature` skill, and built from the app's
+`Shared/Components/`. A new screen of one of these kinds follows its pattern.
 
-**A list row.** Image or icon on the left; the text block **top-aligned** beside it: title, one
-secondary line, at most one tag; a status tag in the top corner when the list is not already
-sectioned by it. The whole row opens the detail page. The one frequent action is a swipe action;
-the context menu mirrors the detail page's menu. A row never carries more than three pieces of
-information below its title: the rest belongs to the detail page.
+## Shared components
 
-**A detail page (fiche).** Opened from a row as a sheet, or pushed when it is the tab's own
-object. From top to bottom: a header section (image, title, one line under it, the state), the
-facts as labelled rows with an icon (long press copies the value), the long text, the actions
-that belong to the object. **The toolbar**: close (`xmark`) on the left; on the right, the one
-action the person takes over and over as its own icon (a favourite heart, a check), then a `…`
-menu with the rest, edit first, delete last and red. A single fact is edited **inline in its
-row** (tap, type, done), never through a form; the full edit form is one sheet from the menu.
-Only known fields are drawn: an absent fact has no row, not an empty one.
+The pure atoms, molecules and styles that carry no business meaning are seeded by the template
+into the app's `Shared/Components/`, each with its preview: `AsyncButton`,
+`AsyncToolbarButton`, `ToolbarIconButton`, `EmptyState`, `LabeledInfoRow`, the row and caption
+label styles, `Copyable`, the edge-to-edge separator. A fix to one of them, or a component that
+turns out generic, goes into the template in the same task, so the next app starts with it.
+Organisms (a book row, a cover tile) stay in their app: they carry the product.
 
-**A tab's main screen.** Large title, icon-only actions on the right (add, filter, settings),
-search attached to the list when there is one, sections with plain headers, the empty state
-drawn in the list body with the one action that fills it.
-
-**A form or a sheet that asks something.** Cancel (`xmark`) left, confirm (`checkmark`) right as
-an `AsyncToolbarButton`; the first field focused on appear; a picker shows its current value in
-its row; destructive confirmation as a dialog, never a toggle.
-
-## Shared component package
-
-The pure atoms, molecules and styles that carry no business meaning live in the shared Swift
-package `PolyformsUI`, versioned by tag and tracked by Renovate like any dependency:
-`AsyncButton`, `AsyncToolbarButton`, `ToolbarIconButton`, `EmptyState`, `LabeledInfoRow`,
-`LoadMoreRow`, `MenuPicker`, `SegmentedBar`, `TagList`, `RowChip`, `WidgetCard`, star ratings,
-the row and caption label styles, `Copyable`, the edge-to-edge separator, the AI glow. Each ships
-with its preview, and the package carries a catalogue app showing every component in every
-state. An app's `Shared/Components/` holds only what is specific to that app; a component that
-turns out generic moves up to the package with a version bump. Organisms (a book row, a cover
-tile) stay in their app: they carry the product.
+**Not shipped yet**: a shared Swift package (`PolyformsUI`, versioned by tag, tracked by
+Renovate, with a catalogue app showing every component in every state) is the target. Until it
+exists, no app depends on it and the template is the shared copy.
 
 ## Build and capture
 
