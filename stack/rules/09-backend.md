@@ -15,8 +15,8 @@ domains, no business logic of its own), and `infrastructure/{repository.ts, grap
   the domain's name: `import * as BookCommand from '~/domain/book/command'`, then
   `BookCommand.rate(...)`. The prefix lives at the import site, so `BookCommand.rate` and
   `SeriesCommand.rate` never clash and no TypeScript `namespace` block is needed (an older
-  construct the linter flags). Existing projects that use `namespace` move over through a
-  migration of this package.
+  construct the linter flags). Existing projects that use `namespace` move over through the
+  `namespace-to-module-imports` migration of this package.
 - The repository is bare exported functions (`import * as repository`), private to its domain. A
   domain that needs another goes through that domain's `Query` or `Command`, never its storage.
 - A function's name carries the business concept, never the technical pattern: `versionToOpen`,
@@ -52,7 +52,7 @@ memoisation).
 
 - **Collections are flat.** Never a subcollection: every document sits in a top-level collection
   and names its owner in a `userId` field. Accounts live in `users/{userId}`. Every query filters
-  on `userId`.
+  on `userId`. `bun run rules:check` refuses a subcollection.
 - A shared document (a catalogue two users converge on) holds no reference to any user and is
   keyed deterministically by what identifies it, so the paid call that produced it is paid once.
 - **A field for a decided feature is added before production data exists.** Before the first
@@ -73,6 +73,39 @@ sectioning a library reads no catalogue document). When a nested field needs the
 loader before shipping it. The only server-side cache is per incoming request: a domain query
 called several times during one call reads once.
 
+## Read models
+
+A screen drawn from a whole library and the shared documents around it (a catalogue and a watch
+per saga, a portrait per author) costs hundreds of reads and seconds on every opening, however
+well each request is memoised. When the operation log (see Observability) shows a screen above
+about a hundred reads or a second at p50, project it: keep the screen's answer as a **read
+model**, one document per reader (and per variant: a format, a language), and read it back.
+
+- **Owned by the domain that computes the screen**, as `XxxProjection` in its `types.ts`, written
+  by its command, read by its query; never a domain of its own.
+- **Stored compact**: the rows as one gzipped JSON string (Dates revived on read), beside the
+  fields that say whether it is fresh: the reader, the variant, the day it was dated against, the
+  language, and `builtAt`, taken *before* the first read of the work. A map of rows would be
+  indexed field by field and can pass the 1 MiB a document allows; one too large is not kept,
+  and the screen is worked out on each opening as before.
+- **Freshness by a stamp, not by deletion**: one `{userId, changedAt}` document per reader. The
+  projection is fresh when it was built today, in the asked language, and `builtAt >= changedAt`.
+  Stamping is one write and cannot race with a rebuild in flight, where deleting the projection
+  can be undone by it.
+- **Every writer stamps.** A GraphQL plugin stamps the reader after any mutation of theirs, once
+  it answered, except a short list of root fields known to leave the screen alone (devices,
+  friends, lookups that only answer, and the account deletion, which must leave no document
+  behind): a field forgotten in that list costs one rebuild, a writer forgotten costs a stale
+  screen. Scheduled passes that write a reader's data outside a request (nightly syncs) stamp
+  them themselves. A pass that refreshes shared documents (watches, catalogues) returns the
+  readers following what changed; the hourly route stamps them and rewrites every stale
+  projection of a reader active lately (the new day's included), within its budget, so an
+  opening rarely pays the work.
+- The read model holds the reader's data: the account deletion deletes it and its stamp.
+- Tests: the projection read back equals the one worked out, Dates included; a stamped change, a
+  new day and another language work it out again; the pass rewrites the changed ones; the read
+  budget of a reopening is asserted (two documents).
+
 ## Scheduled routes
 
 A route called by Cloud Scheduler is **idempotent**: the scheduler retries on failure and a
@@ -83,7 +116,8 @@ answers quickly, doing the work in bounded batches.
 
 ## Observability
 
-Never `console.*`. One logger per component, `createLogger(tag)`. Three levels with a meaning:
+Never `console.*` (Biome's `noConsole` refuses it under `server/`, tests excepted). One logger per
+component, `createLogger(tag)`. Three levels with a meaning:
 
 | Level | Meaning | Goes to Sentry |
 |---|---|---|
@@ -98,6 +132,23 @@ constant and pass the rest apart (`logger.warn('cover lookup failed', { error, i
 Sentry groups one problem into one issue and keeps the stack. Sentry activates only in a built
 bundle with its DSN set, never in local development. The logger's extras appear under `.context`
 in the event.
+
+**One log line per GraphQL operation.** The `operationMetrics` plugin (`server/plugins/02-graphql.ts`)
+logs `operation served` at `info` with the operation name, its type, `durationMs`, and the
+Firestore reads the request made (`docReads`, `queryReads`, `queryDocs`, and `reads`, what is
+billed), counted by `server/system/read-meter.ts`. It is the first place to look when a screen
+is slow: rank the operations by p50, p95 and reads before reading any code.
+
+```bash
+gcloud logging read --project=<project> --freshness=2d \
+  'jsonPayload.message:"operation served"' --format=json --limit=5000 \
+  | jq -r '.[].jsonPayload | [.operation, .durationMs, .reads, .docReads, .queryDocs] | @tsv'
+```
+
+A slow operation with many `queryDocs` scans a collection; many `docReads` is one document per
+row of something (catalogues, watches, portraits). Either is a read model candidate (see Read
+models). Few reads and a long duration is an external call, or a cold start when the instance
+served nothing before (`instanceId` in the request log).
 
 ## Tests
 

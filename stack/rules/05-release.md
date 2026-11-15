@@ -24,7 +24,7 @@ TestFlight, submission.
 ## Versioning
 
 The marketing version is manual and explicit: the one in the tag is the one in the notes. The
-build number derives from the pipeline run, never edited by hand, and is the key every
+build number is the commit count of the built commit, never edited by hand, and is the key every
 comparison uses (the build floor, the deprecation report), never the marketing version.
 
 ## End-to-end gate
