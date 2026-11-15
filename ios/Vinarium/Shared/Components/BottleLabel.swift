@@ -277,7 +277,7 @@ extension BottleArtwork {
     }
 
     /// What is written on the label, as the wine gives it.
-    struct LabelText {
+    struct LabelText: Equatable {
         let producer: String?
         let name: String
         let vintage: Int?

@@ -8,6 +8,11 @@ import SwiftUI
 /// narrows towards the edges and disappears behind. One turn every nine seconds from
 /// the moment it appears, label face on, held face on when Reduce Motion is on. Drawn in the 100 × 300 space of
 /// `BottleArtwork`, scaled to `height`.
+///
+/// The label is rendered flat once, as an image, and each frame only slices it: drawing
+/// its words again on every frame kept the main thread busy (88 % of it on the
+/// simulator, 2026-11-15). The turn runs at 30 frames a second, plenty for a turn of
+/// nine, and stops while the bottle is scrolled out of sight or covered.
 struct SpinningBottle: View {
     /// The wine whose label turns; nil for the empty cellar's Grange des Pères.
     var wine: Wine? = nil
@@ -16,7 +21,7 @@ struct SpinningBottle: View {
     var period: TimeInterval = 9
 
     /// A wine's bottle: its style and what its label says.
-    struct Wine {
+    struct Wine: Equatable {
         let style: BottleArtwork.Style
         let text: BottleArtwork.LabelText
     }
@@ -26,6 +31,11 @@ struct SpinningBottle: View {
     /// on, its label read first, and starts turning with the page rather than
     /// joining a turn already halfway round.
     @State private var shownAt = Date()
+    @Environment(\.displayScale) private var displayScale
+    /// The label laid flat, rendered once for the wine and the size; until it is,
+    /// the label is drawn as a symbol of the canvas.
+    @State private var flatLabel: Image?
+    @State private var isOnScreen = true
 
     private var shape: BottleArtwork.Shape { wine?.style.shape ?? .bordeaux }
     private var glassTint: BottleArtwork.Glass { wine?.style.glass ?? .green }
@@ -35,17 +45,35 @@ struct SpinningBottle: View {
 
     var body: some View {
         let scale = height / 300
-        TimelineView(.animation(paused: reduceMotion)) { timeline in
+        TimelineView(.animation(minimumInterval: 1.0 / 30, paused: reduceMotion || !isOnScreen)) { timeline in
             let angle = reduceMotion ? 0 : max(0, timeline.date.timeIntervalSince(shownAt))
                 .truncatingRemainder(dividingBy: period) / period * 2 * .pi
             Canvas { context, _ in
                 draw(in: context, scale: scale, angle: angle)
             } symbols: {
-                label(scale: scale).tag(0)
+                if flatLabel == nil {
+                    label(scale: scale).tag(0)
+                }
             }
         }
         .frame(width: 100 * scale, height: height)
+        .onScrollVisibilityChange(threshold: 0.01) { isOnScreen = $0 }
+        .onAppear {
+            isOnScreen = true
+            renderFlatLabel()
+        }
+        .onDisappear { isOnScreen = false }
+        .onChange(of: wine) { renderFlatLabel() }
+        .onChange(of: height) { renderFlatLabel() }
+        .onChange(of: displayScale) { renderFlatLabel() }
         .accessibilityHidden(true)
+    }
+
+    /// Renders the flat label once, at the screen's scale, for the frames to slice.
+    private func renderFlatLabel() {
+        let renderer = ImageRenderer(content: label(scale: height / 300))
+        renderer.scale = displayScale
+        flatLabel = renderer.uiImage.map { Image(uiImage: $0) }
     }
 
     /// The label laid flat, as long as the arc it covers round the glass, in a frame
@@ -109,7 +137,9 @@ struct SpinningBottle: View {
 
         // The label, strip by strip: each one lands where its angle on the cylinder
         // projects, and the strips facing away are not drawn.
-        if let label = context.resolveSymbol(id: 0) {
+        let flat = flatLabel.map { context.resolve($0) }
+        let symbol = flat == nil ? context.resolveSymbol(id: 0) : nil
+        if flat != nil || symbol != nil {
             let center = (shape.barrel.left + shape.barrel.right) / 2
             let step = span / Double(strips)
             let width = labelLength / CGFloat(strips)
@@ -133,7 +163,11 @@ struct SpinningBottle: View {
                 let stretch = (x1 - x0) / width
                 slice.translateBy(x: (x0 - CGFloat(index) * width * stretch) * scale, y: 0)
                 slice.scaleBy(x: stretch, y: 1)
-                slice.draw(label, at: .zero, anchor: .topLeading)
+                if let flat {
+                    slice.draw(flat, in: CGRect(x: 0, y: 0, width: labelLength * scale, height: 300 * scale))
+                } else if let symbol {
+                    slice.draw(symbol, at: .zero, anchor: .topLeading)
+                }
             }
         }
 
