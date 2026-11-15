@@ -182,7 +182,7 @@ curl -s -H "Authorization: Bearer $TOK" "$FS/admin-metrics/current" | jq -c '.fi
      map(.mapValue.fields | [.day.stringValue, .sessions.integerValue]) | .[-8:])}'
 for d in 1 7; do since=$(date -u -v-${d}d +%Y-%m-%dT%H:%M:%SZ)
   curl -s -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' -X POST \
-    "$FS:runAggregationQuery" -d "{\"structuredAggregationQuery\":{\"structuredQuery\":{
+    "${FS}:runAggregationQuery" -d "{\"structuredAggregationQuery\":{\"structuredQuery\":{
       \"from\":[{\"collectionId\":\"beverages\"}],
       \"where\":{\"fieldFilter\":{\"field\":{\"fieldPath\":\"createdAt\"},\"op\":\"GREATER_THAN_OR_EQUAL\",
       \"value\":{\"timestampValue\":\"$since\"}}}},\"aggregations\":[{\"alias\":\"n\",\"count\":{}}]}}" |
@@ -200,6 +200,8 @@ jq -r '.[] | [(.timestamp[0:10]), .httpRequest.remoteIp, (.httpRequest.userAgent
 ```
 
 The Firestore URL holds parentheses: keep it single-quoted, or curl's output is not JSON.
+Write `${FS}:runAggregationQuery` with braces: in zsh, `$FS:r` applies the `:r` modifier and
+strips the URL, so Firestore answers a 404 page.
 
 ## 4. Monitoring
 
