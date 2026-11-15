@@ -42,6 +42,8 @@ extension Wine {
             isGifted: w.gift?.received != nil,
             isRecommended: w.recommendation != nil,
             ownerName: w.ownerName,
+            labelFamily: BottleArtwork.LabelFamily(graphql: w.labelFamily),
+            labelTraits: BottleArtwork.LabelTraits(w.labelTraits?.fragments.labelTraitsFields),
             createdAt: GraphQLHelpers.parseISO8601(w.createdAt) ?? Date(),
             updatedAt: GraphQLHelpers.parseISO8601(w.updatedAt) ?? Date()
         )

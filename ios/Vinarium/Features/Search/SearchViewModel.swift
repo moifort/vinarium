@@ -12,6 +12,12 @@ final class SearchViewModel {
     /// They differ when the search matched more wines than the page shows.
     private(set) var displayedCount = 0
     private(set) var totalCount = 0
+    /// The wines of the last answer, so the sheet a hit opens draws its hero at once.
+    private var hits: [SearchHit] = []
+
+    func preview(for wineId: String) -> WineSheetPreview? {
+        hits.first { $0.id == wineId }.map { WineSheetPreview(wine: $0.wine) }
+    }
 
     /// Nothing is searched while there is neither text nor filter: the page then shows
     /// its suggestions rather than an empty list.
@@ -54,6 +60,7 @@ final class SearchViewModel {
         do {
             let results = try await SearchAPI.search(query: currentQuery, filters: currentFilters)
             guard requested == generation else { return } // a more recent keystroke landed
+            hits = results.hits
             sections = Self.sections(from: results.hits)
             displayedCount = results.hits.count
             totalCount = results.totalCount

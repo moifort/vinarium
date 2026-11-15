@@ -16,6 +16,10 @@ fragment CellarBottleFields on CellarBottleWithWine {
     beverageType
     subtype
     producer
+    labelFamily
+    labelTraits {
+      ...LabelTraitsFields
+    }
     region
     country
     purchase {

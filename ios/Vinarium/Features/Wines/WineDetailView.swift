@@ -4,6 +4,9 @@ import UniformTypeIdentifiers
 
 struct WineDetailView: View {
     let wineId: String
+    /// What the tapped row knew of the wine: the hero is drawn from it at once,
+    /// the rest of the sheet settles in when the wine answers.
+    var preview: WineSheetPreview?
     /// What the page opens straight onto once the wine is loaded: the home screen's
     /// buttons take a bottle out, mark it a favorite or move it from here.
     var initialAction: InitialAction?
@@ -44,18 +47,16 @@ struct WineDetailView: View {
 
     var body: some View {
         Group {
-            if isLoading {
-                LoadingStateView()
-            } else if let detail {
+            // One page from the first frame: the hero the row knew, then the whole
+            // wine once it answers, so the rest settles in under the same hero.
+            if let content = pageContent {
                 WineDetailPage(
-                    content: Self.mapContent(
-                        detail,
-                        cellars: cellars,
-                        isUploadingAttachment: isUploadingAttachment
-                    ),
+                    content: content,
                     onAction: handle,
                     onRefresh: { await loadData() }
                 )
+            } else if isLoading {
+                LoadingStateView()
             } else if error != nil {
                 // Nothing shows, and a pull tries again.
                 PullToRefreshSpace()
@@ -283,6 +284,18 @@ struct WineDetailView: View {
         }
     }
 
+    /// The wine once loaded; before, the hero the tapped row knew, over a spinner
+    /// while the request runs and alone if it failed.
+    private var pageContent: WineDetailPage.Content? {
+        if let detail {
+            return Self.mapContent(detail, cellars: cellars, isUploadingAttachment: isUploadingAttachment)
+        }
+        guard let preview else { return nil }
+        var content = Self.previewContent(preview)
+        content.phase = isLoading ? .loading : .failed
+        return content
+    }
+
     // MARK: - Toolbar
 
     @ToolbarContentBuilder
@@ -453,16 +466,19 @@ struct WineDetailView: View {
         if detail != nil { isRefreshing = true }
         defer { isRefreshing = false }
         do {
-            // The cellars only name the slot: the sheet opens without them.
-            async let household = try? CellarAPI.cellars()
-            let loadedDetail = try await WineAPI.getDetail(id: wineId)
-            cellars = await household ?? cellars
-            detail = loadedDetail
-            error = nil
-            isLoading = false
+            // One request: the wine and the cellars that name its slot. Two sent
+            // together could wake a second server instance, and the sheet waited
+            // for the slower one.
+            let loaded = try await WineAPI.getDetail(id: wineId)
+            withAnimation(.smooth(duration: 0.4)) {
+                cellars = loaded.cellars
+                detail = loaded.detail
+                error = nil
+                isLoading = false
+            }
         } catch {
             self.error = reportError(error)
-            isLoading = false
+            withAnimation(.smooth(duration: 0.4)) { isLoading = false }
         }
     }
 
@@ -565,8 +581,6 @@ struct WineDetailView: View {
     ) -> WineDetailPage.Content {
         let day: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
         let inCellar = detail.cellar.map { $0.dateOut == nil } ?? false
-        let place = detail.appellation ?? detail.region ?? detail.country
-        let meta = [detail.vintage.map(String.init), place].compactMap { $0 }.joined(separator: " · ")
 
         var facts: [WineFactList.Fact] = []
         func fact(_ title: String, _ value: String?, wide: Bool = false, _ id: String) {
@@ -591,42 +605,27 @@ struct WineDetailView: View {
         fact(String(localized: "Propriétaire"), detail.ownerName, "owner")
         fact(String(localized: "Cépages"), detail.grapeVarieties.isEmpty ? nil : detail.grapeVarieties.joined(separator: ", "), wide: true, "grapes")
 
-        let tone = WineSheetTone(beverageType: detail.beverageType, color: detail.color)
-        let tag: String? = detail.subtype?.label(for: detail.beverageType)
-            ?? (detail.beverageType == .wine ? detail.color?.label : detail.beverageType.label)
-
         return WineDetailPage.Content(
-            tone: tone,
-            hero: .init(
-                bottle: .init(
-                    style: .of(
-                        id: detail.id,
-                        beverageType: detail.beverageType,
-                        subtype: detail.subtype,
-                        color: detail.color,
-                        family: detail.labelFamily,
-                        traits: detail.labelTraits,
-                        vintage: detail.vintage
-                    ),
-                    // Written as the home writes it, so the bottle is the same one.
-                    text: .init(
-                        producer: ProducerOverline.text(for: detail.domain, name: detail.name),
-                        name: detail.name,
-                        vintage: detail.vintage,
-                        appellation: detail.appellation,
-                        classification: detail.classification,
-                        kind: detail.beverageType == .wine
-                            ? nil
-                            : detail.subtype?.label(for: detail.beverageType) ?? detail.beverageType.label
-                    )
+            tone: WineSheetTone(beverageType: detail.beverageType, color: detail.color),
+            hero: hero(
+                of: WineSheetPreview(
+                    id: detail.id,
+                    name: detail.name,
+                    beverageType: detail.beverageType,
+                    subtype: detail.subtype,
+                    color: detail.color,
+                    producer: detail.domain,
+                    vintage: detail.vintage,
+                    appellation: detail.appellation,
+                    region: detail.region,
+                    country: detail.country,
+                    classification: detail.classification,
+                    labelFamily: detail.labelFamily,
+                    labelTraits: detail.labelTraits,
+                    isInCellar: inCellar,
+                    rating: detail.consumption?.rating
                 ),
-                producer: detail.domain,
-                name: detail.name,
-                meta: meta.isEmpty ? nil : meta,
-                tag: tag,
-                status: inCellar ? detail.cellar.map { Self.timeInCellar(since: $0.dateIn, now: now) } : nil,
-                isInCellar: inCellar,
-                rating: detail.consumption?.rating
+                status: inCellar ? detail.cellar.map { Self.timeInCellar(since: $0.dateIn, now: now) } : nil
             ),
             slot: inCellar ? detail.cellar.map { cellar in
                 let household = cellars.map { ($0.id, $0.name) }
@@ -678,6 +677,56 @@ struct WineDetailView: View {
             canEdit: detail.isMine,
             canAttach: detail.isMine,
             isUploadingAttachment: isUploadingAttachment
+        )
+    }
+
+    /// The sheet before the wine has answered: the hero alone, drawn from what the
+    /// tapped row knew. Internal so the debug gallery can draw it.
+    static func previewContent(_ preview: WineSheetPreview) -> WineDetailPage.Content {
+        var content = WineDetailPage.Content(
+            tone: WineSheetTone(beverageType: preview.beverageType, color: preview.color),
+            hero: hero(of: preview, status: nil),
+            facts: []
+        )
+        content.phase = .loading
+        return content
+    }
+
+    /// The hero, from the loaded wine or from the row it was tapped on: one path, so
+    /// the bottle and its words do not move when the wine answers.
+    private static func hero(of wine: WineSheetPreview, status: String?) -> WineSheetHero.Item {
+        let place = wine.appellation ?? wine.region ?? wine.country
+        let meta = [wine.vintage.map(String.init), place].compactMap { $0 }.joined(separator: " · ")
+        let kind = wine.subtype?.label(for: wine.beverageType) ?? wine.beverageType.label
+        return WineSheetHero.Item(
+            bottle: .init(
+                style: .of(
+                    id: wine.id,
+                    beverageType: wine.beverageType,
+                    subtype: wine.subtype,
+                    color: wine.color,
+                    family: wine.labelFamily,
+                    traits: wine.labelTraits,
+                    vintage: wine.vintage
+                ),
+                // Written as the home writes it, so the bottle is the same one.
+                text: .init(
+                    producer: ProducerOverline.text(for: wine.producer, name: wine.name),
+                    name: wine.name,
+                    vintage: wine.vintage,
+                    appellation: wine.appellation,
+                    classification: wine.classification,
+                    kind: wine.beverageType == .wine ? nil : kind
+                )
+            ),
+            producer: wine.producer,
+            name: wine.name,
+            meta: meta.isEmpty ? nil : meta,
+            tag: wine.subtype?.label(for: wine.beverageType)
+                ?? (wine.beverageType == .wine ? wine.color?.label : wine.beverageType.label),
+            status: status,
+            isInCellar: wine.isInCellar,
+            rating: wine.rating
         )
     }
 

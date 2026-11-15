@@ -44,6 +44,7 @@ struct WineListView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
+                    preview: viewModel.wines.first { $0.id == wrapper.id }.map(WineSheetPreview.init(wine:)),
                     // Reloaded in place: the rows stay and move to their new spot
                     // instead of the list emptying behind a loader.
                     onRemoved: { viewModel.reloadInPlace() },

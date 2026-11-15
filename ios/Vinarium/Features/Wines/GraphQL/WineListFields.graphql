@@ -6,6 +6,12 @@ fragment WineListFields on Beverage {
   subtype
   alcoholContent
   producer
+  # The bottle the row stands for, drawn as the home and the sheet draw it: the
+  # sheet opens on it before its own request lands.
+  labelFamily
+  labelTraits {
+    ...LabelTraitsFields
+  }
   region
   country
   notes

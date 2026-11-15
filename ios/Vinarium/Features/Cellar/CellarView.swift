@@ -98,6 +98,8 @@ struct CellarView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
+                    // A bottle of the grid; a journal event names a wine it may not hold.
+                    preview: viewModel.bottles.first { $0.wineId == wrapper.id }.map { WineSheetPreview(wine: $0.wine) },
                     onRemoved: { Task { await viewModel.load() } },
                     onUpdated: { Task { await viewModel.load() } }
                 )

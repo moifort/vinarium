@@ -54,6 +54,8 @@ struct DebugGallery: View {
                 .environment(SubscriptionStore())
         case "wineDetail":
             WinePageHost(content: Self.completeWine)
+        case "wineDetailOpening":
+            WinePageHost(content: Self.completeWine, opening: Self.completeWineOpening)
         case "wineDetailOut":
             WinePageHost(content: Self.tastedWine)
         case "consumptionSheet":
@@ -400,19 +402,41 @@ extension DebugGallery {
         )
         return WineDetailView.mapContent(wine, cellars: cellars, isUploadingAttachment: false)
     }
+
+    /// The same bottle as the row of the list knows it: the sheet opens on this hero
+    /// while the wine is on its way.
+    static var completeWineOpening: WineDetailPage.Content {
+        WineDetailView.previewContent(WineSheetPreview(
+            id: "debug-complete", name: "Pavillon Rouge du Château Margaux", color: .red,
+            producer: "Château Margaux", vintage: 2015, appellation: "Margaux", region: "Bordeaux",
+            country: "France", classification: "Premier Grand Cru Classé", isInCellar: true, rating: 4
+        ))
+    }
 }
 
 private struct WinePageHost: View {
     var content: WineDetailPage.Content = .preview
+    /// When set, the page opens on it and settles on `content` two seconds later,
+    /// as the live sheet does when the wine answers.
+    var opening: WineDetailPage.Content?
     @State private var opened: WineIdWrapper?
+    @State private var hasAnswered = false
 
     var body: some View {
         NavigationStack {
-            Button("Rouvrir") { opened = WineIdWrapper(id: "1") }
+            Button("Rouvrir") {
+                hasAnswered = false
+                opened = WineIdWrapper(id: "1")
+            }
                 // Pushed once the stack is up, as a tapped row pushes it in the app.
                 .task { opened = WineIdWrapper(id: "1") }
                 .pushesDetail(item: $opened) { _ in
-                    WineDetailPage(content: content)
+                    WineDetailPage(content: hasAnswered ? content : opening ?? content)
+                        .task {
+                            guard opening != nil else { return }
+                            try? await Task.sleep(for: .seconds(2))
+                            withAnimation(.smooth(duration: 0.4)) { hasAnswered = true }
+                        }
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItemGroup {

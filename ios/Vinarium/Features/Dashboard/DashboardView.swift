@@ -60,6 +60,7 @@ struct DashboardView: View {
             .pushesDetail(item: $openedWine) { opened in
                 WineDetailView(
                     wineId: opened.id,
+                    preview: viewModel.data?.sheetPreview(for: opened.id),
                     initialAction: opened.action,
                     onRemoved: { Task { await viewModel.load() } },
                     onUpdated: { Task { await viewModel.load() } }

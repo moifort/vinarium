@@ -87,8 +87,18 @@ fragment WineDetailFields on Beverage {
   }
 }
 
+# One request opens the sheet: the wine, and the household's cellars that name its
+# slot and draw its grid. Their fill (`placedCount`) is left out, it would scan
+# every bottle of the household.
 query WineDetail($id: BeverageId!) {
   beverage(id: $id) {
     ...WineDetailFields
+  }
+  cellars {
+    id
+    name
+    isPrimary
+    rows
+    cols
   }
 }

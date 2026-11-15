@@ -49,6 +49,7 @@ struct SearchView: View {
             )) { wrapper in
                 WineDetailView(
                     wineId: wrapper.id,
+                    preview: viewModel.preview(for: wrapper.id),
                     // After a mutation in the detail view, run the search again so the
                     // change shows up (favorite, cellar, deletion).
                     onRemoved: { viewModel.scheduleSearch() },

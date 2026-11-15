@@ -287,6 +287,9 @@ private func bottle(_ b: VinariumGraphQL.CellarBottleFields) -> CellarBottle {
             purchasePrice: b.wine.purchase?.price,
             drinkFrom: details?.drinkWindow?.from,
             drinkUntil: details?.drinkWindow?.until,
+            isInCellar: true,
+            labelFamily: BottleArtwork.LabelFamily(graphql: b.wine.labelFamily),
+            labelTraits: BottleArtwork.LabelTraits(b.wine.labelTraits?.fragments.labelTraitsFields),
             createdAt: Date(),
             updatedAt: Date()
         ),

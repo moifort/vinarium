@@ -41,54 +41,25 @@ struct WineDetailPage: View {
                 )
                 .padding(.horizontal, 20)
                 .padding(.top, 4)
+                // Taking it out, rating or moving it waits for the wine itself; the
+                // buttons keep their look, so nothing changes in the hero when it lands.
+                .allowsHitTesting(content.phase == .loaded)
 
-                cards
-
-                VStack(alignment: .leading, spacing: 30) {
-                    if !content.timeline.isEmpty {
-                        block("Historique", onColour: true) {
-                            WineTimeline(steps: content.timeline, accent: content.tone.accent, onColour: true)
-                        }
-                        .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.space)).maxY } action: {
-                            timelineBottom = $0
-                        }
-                    }
-                    block(
-                        "Informations",
-                        detail: content.canEdit ? "modifier" : nil,
-                        onColour: hasTimeline,
-                        action: { onAction(.edit) }
-                    ) {
-                        WineFactList(facts: content.facts)
-                    }
-                    if let consumption = content.consumption, consumption.hasFacts {
-                        block("Consommé") { consumptionBody(consumption) }
-                    }
-                    comments
-                    block("Lieu de dégustation") {
-                        WineLocationMap(
-                            placeName: content.placeName,
-                            latitude: content.latitude,
-                            longitude: content.longitude,
-                            onTap: { onAction(.editLocation) }
-                        )
-                    }
-                    if content.canAttach || !content.attachments.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            header("Pièces jointes")
-                            AttachmentShelf(
-                                attachments: content.attachments,
-                                canEdit: content.canAttach,
-                                isUploading: content.isUploadingAttachment,
-                                onAdd: { onAction(.addAttachment) },
-                                onOpen: { onAction(.openAttachment($0)) },
-                                onDelete: { onAction(.deleteAttachment($0)) }
-                            )
-                        }
-                    }
+                switch content.phase {
+                case .loading:
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 72)
+                        .transition(.opacity)
+                case .failed:
+                    // The hero stays; a pull tries again.
+                    EmptyView()
+                case .loaded:
+                    details
+                        .transition(.opacity.combined(with: .offset(y: 16)))
                 }
-                .padding(.top, 30)
-                .padding(.bottom, 44)
             }
             .coordinateSpace(.named(Self.space))
             .background(alignment: .top) {
@@ -103,6 +74,59 @@ struct WineDetailPage: View {
         }
         .background(Color(.systemGroupedBackground))
         .refreshable { await onRefresh() }
+    }
+
+    /// Everything under the hero, once the wine has answered.
+    private var details: some View {
+        VStack(spacing: 0) {
+            cards
+
+            VStack(alignment: .leading, spacing: 30) {
+                if !content.timeline.isEmpty {
+                    block("Historique", onColour: true) {
+                        WineTimeline(steps: content.timeline, accent: content.tone.accent, onColour: true)
+                    }
+                    .onGeometryChange(for: CGFloat.self) { $0.frame(in: .named(Self.space)).maxY } action: {
+                        timelineBottom = $0
+                    }
+                }
+                block(
+                    "Informations",
+                    detail: content.canEdit ? "modifier" : nil,
+                    onColour: hasTimeline,
+                    action: { onAction(.edit) }
+                ) {
+                    WineFactList(facts: content.facts)
+                }
+                if let consumption = content.consumption, consumption.hasFacts {
+                    block("Consommé") { consumptionBody(consumption) }
+                }
+                comments
+                block("Lieu de dégustation") {
+                    WineLocationMap(
+                        placeName: content.placeName,
+                        latitude: content.latitude,
+                        longitude: content.longitude,
+                        onTap: { onAction(.editLocation) }
+                    )
+                }
+                if content.canAttach || !content.attachments.isEmpty {
+                    VStack(alignment: .leading, spacing: 10) {
+                        header("Pièces jointes")
+                        AttachmentShelf(
+                            attachments: content.attachments,
+                            canEdit: content.canAttach,
+                            isUploading: content.isUploadingAttachment,
+                            onAdd: { onAction(.addAttachment) },
+                            onOpen: { onAction(.openAttachment($0)) },
+                            onDelete: { onAction(.deleteAttachment($0)) }
+                        )
+                    }
+                }
+            }
+            .padding(.top, 30)
+            .padding(.bottom, 44)
+        }
     }
 
     // MARK: - Cards
@@ -237,6 +261,9 @@ extension WineDetailPage {
     struct Content {
         let tone: WineSheetTone
         let hero: WineSheetHero.Item
+        /// Before the sheet's own request answers, only the hero the tapped row
+        /// knew is drawn, over a spinner; once it answers, the rest settles in.
+        var phase: Phase = .loaded
         var slot: Slot?
         var window: Window?
         let facts: [WineFactList.Fact]
@@ -254,6 +281,10 @@ extension WineDetailPage {
         var canEdit = false
         var canAttach = false
         var isUploadingAttachment = false
+
+        enum Phase {
+            case loading, failed, loaded
+        }
 
         struct Slot {
             let position: String
@@ -314,6 +345,15 @@ extension WineDetailPage.Content {
 #Preview("In cellar") {
     NavigationStack {
         WineDetailPage(content: .preview)
+            .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+#Preview("Opening") {
+    var content = WineDetailPage.Content(tone: .red, hero: .preview, facts: [])
+    content.phase = .loading
+    return NavigationStack {
+        WineDetailPage(content: content)
             .navigationBarTitleDisplayMode(.inline)
     }
 }

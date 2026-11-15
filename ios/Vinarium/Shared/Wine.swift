@@ -76,6 +76,11 @@ struct Wine: Codable, Identifiable, Sendable {
     /// The household member this wine belongs to; nil when it is the viewer's own.
     /// Set for shared-cellar wines a housemate placed, so the list can badge them.
     var ownerName: String? = nil
+    /// The family the bottle's label is drawn from, as the server names it, so a
+    /// row, the home and the sheet draw the same bottle.
+    var labelFamily: BottleArtwork.LabelFamily? = nil
+    /// The real label as the scan read it, absent for a wine never scanned.
+    var labelTraits: BottleArtwork.LabelTraits? = nil
     let createdAt: Date
     let updatedAt: Date
 }

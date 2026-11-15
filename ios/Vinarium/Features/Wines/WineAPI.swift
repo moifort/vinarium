@@ -37,13 +37,18 @@ enum WineAPI {
         )
     }
 
-    static func getDetail(id: String) async throws -> UserWineDetail {
+    /// The sheet in one request: the wine, and the household's cellars that name its
+    /// slot and draw its grid.
+    static func getDetail(id: String) async throws -> (detail: UserWineDetail, cellars: [CellarSummary]) {
         let data = try await GraphQLHelpers.fetch(
             GraphQLClient.shared.apollo,
             query: VinariumGraphQL.WineDetailQuery(id: id)
         )
         guard let wine = data.beverage else { throw APIError.invalidResponse }
-        return mapDetail(wine.fragments.wineDetailFields)
+        let cellars = data.cellars.map {
+            CellarSummary(id: $0.id, name: $0.name, isPrimary: $0.isPrimary, rows: $0.rows, cols: $0.cols)
+        }
+        return (mapDetail(wine.fragments.wineDetailFields), cellars)
     }
 
     /// Add a bottle together with what the form already says about it: the
