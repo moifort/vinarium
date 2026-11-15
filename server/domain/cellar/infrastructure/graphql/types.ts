@@ -202,39 +202,42 @@ export const CellarPositionType = builder
     }),
   })
 
-export const CellarType = builder
-  .objectRef<Cellar & { capacity: number; placedCount: number }>('Cellar')
-  .implement({
-    description:
-      'One cellar of the household: a named grid of slots.\n\n' +
-      'Every household has a primary cellar, the one sized at onboarding; Premium adds more. ' +
-      'Listed by `cellars`, the primary first. A bottle stands in exactly one cellar ' +
-      '(`CellarBottle.cellarId`).',
-    fields: (t) => ({
-      id: t.expose('id', { type: 'CellarId', description: 'Stable id of the cellar.' }),
-      name: t.expose('name', {
-        type: 'CellarName',
-        nullable: true,
-        description:
-          'Name given by the household; null for a primary cellar never named, which the app ' +
-          "names in the reader's language.",
-      }),
-      isPrimary: t.exposeBoolean('isPrimary', {
-        description:
-          'Whether this is the primary cellar: it cannot be deleted, and receives every bottle ' +
-          'that names no cellar of the household.',
-      }),
-      rows: t.exposeInt('rows', { description: 'Number of grid rows.' }),
-      cols: t.exposeInt('cols', { description: 'Number of slots per row.' }),
-      zones: t.exposeInt('zones', { description: 'Number of temperature zones (1..3).' }),
-      capacity: t.exposeInt('capacity', {
-        description: 'Total number of slots (`rows` x `cols`).',
-      }),
-      placedCount: t.exposeInt('placedCount', {
-        description: 'How many slots currently hold a bottle.',
-      }),
+export const CellarType = builder.objectRef<Cellar>('Cellar').implement({
+  description:
+    'One cellar of the household: a named grid of slots.\n\n' +
+    'Every household has a primary cellar, the one sized at onboarding; Premium adds more. ' +
+    'Listed by `cellars`, the primary first. A bottle stands in exactly one cellar ' +
+    '(`CellarBottle.cellarId`).',
+  fields: (t) => ({
+    id: t.expose('id', { type: 'CellarId', description: 'Stable id of the cellar.' }),
+    name: t.expose('name', {
+      type: 'CellarName',
+      nullable: true,
+      description:
+        'Name given by the household; null for a primary cellar never named, which the app ' +
+        "names in the reader's language.",
     }),
-  })
+    isPrimary: t.exposeBoolean('isPrimary', {
+      description:
+        'Whether this is the primary cellar: it cannot be deleted, and receives every bottle ' +
+        'that names no cellar of the household.',
+    }),
+    rows: t.exposeInt('rows', { description: 'Number of grid rows.' }),
+    cols: t.exposeInt('cols', { description: 'Number of slots per row.' }),
+    zones: t.exposeInt('zones', { description: 'Number of temperature zones (1..3).' }),
+    capacity: t.int({
+      description: 'Total number of slots (`rows` x `cols`).',
+      resolve: (cellar) => cellar.rows * cellar.cols,
+    }),
+    placedCount: t.int({
+      description:
+        'How many slots currently hold a bottle.\n\n' +
+        "Counted only when selected: it scans the household's bottles once per request, " +
+        'so a caller that only names a cellar or draws its grid leaves it out.',
+      resolve: (cellar, _, { userId }) => CellarQuery.placedCount(userId, cellar.id),
+    }),
+  }),
+})
 
 // Extend BeverageType with the cellar nested field, batched by the per-request loader.
 builder.objectField(BeverageType, 'cellar', (t) =>

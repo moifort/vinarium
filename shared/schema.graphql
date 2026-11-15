@@ -720,7 +720,11 @@ type Cellar {
   """
   name: CellarName
 
-  """How many slots currently hold a bottle."""
+  """
+  How many slots currently hold a bottle.
+  
+  Counted only when selected: it scans the household's bottles once per request, so a caller that only names a cellar or draws its grid leaves it out.
+  """
   placedCount: Int!
 
   """Number of grid rows."""

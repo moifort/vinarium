@@ -188,3 +188,62 @@ describe('several cellars', () => {
     expect(primary.data?.reconfigureCellar).toEqual({ __typename: 'CellarInfo', capacity: 1 })
   })
 })
+
+describe('cellars read budget', () => {
+  // Seeded rather than created: the request memo spans a whole test, so a
+  // mutation first would leave the reads below already paid.
+  const GARAGE = 'garage-1'
+  const seedTwoCellars = () => {
+    fake.seed('cellar-configs', GARAGE, {
+      scopeKey: 'usr_user-1',
+      name: 'Garage',
+      rows: 3,
+      cols: 4,
+      zones: 1,
+      createdAt: new Date('2026-02-01'),
+    })
+    const bottle = (beverageId: string, cellarId: string) =>
+      fake.seed('cellar', `${userId}_${beverageId}`, {
+        userId,
+        beverageId,
+        cellarId,
+        row: 0,
+        col: 0,
+        createdAt: new Date('2026-02-02'),
+        updatedAt: new Date('2026-02-02'),
+      })
+    bottle(W1, 'usr_user-1')
+    bottle(W2, GARAGE)
+  }
+
+  test('naming the cellars and drawing their grids never scans the bottles', async () => {
+    seedTwoCellars()
+
+    const before = { docReads: fake.docReads, queryReads: fake.queryReads }
+    const result = await execute('{ cellars { id name isPrimary rows cols capacity } }')
+
+    expect(result.errors).toBeUndefined()
+    expect(result.data?.cellars).toEqual([
+      { id: 'usr_user-1', name: null, isPrimary: true, rows: 2, cols: 2, capacity: 4 },
+      { id: GARAGE, name: 'Garage', isPrimary: false, rows: 3, cols: 4, capacity: 12 },
+    ])
+    // The membership probe and the primary cellar, then the household's other
+    // cellars: what a wine's sheet asks, whatever the size of the cellar.
+    expect(fake.docReads - before.docReads).toBe(2)
+    expect(fake.queryReads - before.queryReads).toBe(1)
+  })
+
+  test('the count, when asked, scans the bottles once for every cellar', async () => {
+    seedTwoCellars()
+
+    const before = { queryReads: fake.queryReads }
+    const result = await execute('{ cellars { id placedCount } }')
+
+    expect(result.data?.cellars).toEqual([
+      { id: 'usr_user-1', placedCount: 1 },
+      { id: GARAGE, placedCount: 1 },
+    ])
+    // The household's other cellars, then one scan of its bottles.
+    expect(fake.queryReads - before.queryReads).toBe(2)
+  })
+})

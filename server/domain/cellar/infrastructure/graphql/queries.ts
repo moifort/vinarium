@@ -10,7 +10,7 @@ builder.queryField('cellars', (t) =>
   t.field({
     type: [CellarType],
     description: "The household's cellars with their usage, the primary first",
-    resolve: (_root, _args, { userId }) => CellarQuery.overview(userId),
+    resolve: (_root, _args, { userId }) => CellarQuery.cellars(userId),
   }),
 )
 

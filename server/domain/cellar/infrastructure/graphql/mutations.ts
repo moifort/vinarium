@@ -24,8 +24,8 @@ const parseDimensions = (rows: number, cols: number, zones: number) => {
 const cellarNotFound = () => notFound('Cellar not found')
 
 // A cellar as `cellars` lists it, once a mutation has changed it.
-const listed = async (userId: Parameters<typeof CellarQuery.overview>[0], id: CellarId) => {
-  const cellar = (await CellarQuery.overview(userId)).find((c) => c.id === id)
+const listed = async (userId: Parameters<typeof CellarQuery.cellars>[0], id: CellarId) => {
+  const cellar = (await CellarQuery.cellars(userId)).find((c) => c.id === id)
   return cellar ?? cellarNotFound()
 }
 

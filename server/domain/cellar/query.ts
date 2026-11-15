@@ -114,14 +114,11 @@ export namespace CellarQuery {
     return withUsage(cellar, (await bottlesIn(userId, cellar.id)).length)
   }
 
-  // Every cellar of the household with its usage — the settings list and the
-  // cave screen's picker. One scan of the household's bottles serves them all.
-  export const overview = async (userId: UserId) => {
-    const [all, bottles] = await Promise.all([cellars(userId), placedBottles(userId)])
-    const counts = new Map<CellarIdType, number>()
-    for (const { cellarId } of bottles) counts.set(cellarId, (counts.get(cellarId) ?? 0) + 1)
-    return all.map((cellar) => withUsage(cellar, counts.get(cellar.id) ?? 0))
-  }
+  // How many bottles stand in one cellar of the household. Asked only by a
+  // caller that shows it (the settings list, the cave screen's picker): one scan
+  // of the household's bottles, memoized for the request, serves every cellar.
+  export const placedCount = async (userId: UserId, cellarId: CellarIdType) =>
+    (await placedBottles(userId)).filter((bottle) => bottle.cellarId === cellarId).length
 
   // Every bottle standing in any cellar of the household, joined with its wine and
   // tagged with its owner — what the dashboard sums, sorts and dates. The wines are
