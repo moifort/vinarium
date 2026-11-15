@@ -52,6 +52,10 @@ struct DebugGallery: View {
         case "premiumPage":
             NavigationStack { PremiumView(trigger: .discover) }
                 .environment(SubscriptionStore())
+        case "wineDetail":
+            WinePageHost(content: Self.completeWine)
+        case "wineDetailOut":
+            WinePageHost(content: Self.tastedWine)
         case "consumptionSheet":
             NoteSheetHost(sheet: .consumption)
         case "favoriteSheet":
@@ -136,6 +140,7 @@ struct DebugGallery: View {
                     }
                 }
                 Section("Fiche vin") {
+                    NavigationLink("Fiche en cave") { WineDetailPage(content: .preview) }
                     NavigationLink("Feuille de consommation") { NoteSheetHost(sheet: .consumption) }
                     NavigationLink("Feuille de favori") { NoteSheetHost(sheet: .favorite) }
                     NavigationLink("Feuille de recommandation") { NoteSheetHost(sheet: .recommendation) }
@@ -312,6 +317,115 @@ private struct NoteSheetHost: View {
                 case .recommendation: RecommendationSheet { _, _ in }
                 }
             }
+    }
+}
+
+/// A wine's sheet in the cellar, opened as the app opens it, over a plain screen,
+/// with its toolbar: the hero, the slot and the drinking window from fixtures.
+extension DebugGallery {
+    /// A bottle taken out and drunk, with a drinking window on record: mapped as the
+    /// live sheet maps it, so neither the slot nor the window shows.
+    static var tastedWine: WineDetailPage.Content {
+        let day: (Int, Int, Int) -> Date = { y, m, d in
+            Calendar(identifier: .gregorian).date(from: DateComponents(year: y, month: m, day: d)) ?? .now
+        }
+        let wine = UserWineDetail(
+            id: "debug-tasted", name: "Pavillon Rouge", color: .red, domain: "Château Margaux",
+            vintage: 2015, appellation: "Margaux", cuvee: "Pavillon Rouge", region: "Bordeaux",
+            country: "France", grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
+            alcoholContent: 13.5, classification: nil, purchasePrice: 250, purchaseDate: "2026-09-12",
+            drinkFrom: 2025, drinkUntil: 2040, notes: nil, giftedBy: nil,
+            createdAt: day(2026, 9, 12), updatedAt: day(2026, 11, 8),
+            cellar: nil,
+            consumption: ConsumptionInfo(
+                consumedDate: day(2026, 11, 8), rating: 4,
+                tastingNotes: "Très belle tension, tanins fondus, une longue finale sur le cassis.",
+                contacts: ["Jean", "Marie"], favorite: false
+            ),
+            gift: nil, recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Garde-le pour un gigot d'agneau, il est superbe."),
+            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France",
+            moves: [
+                CellarMove(kind: .removed, date: day(2026, 11, 8), position: "A1"),
+                CellarMove(kind: .placed, date: day(2026, 10, 4), position: "A1"),
+            ]
+        )
+        return WineDetailView.mapContent(wine, cellars: [], isUploadingAttachment: false)
+    }
+
+    /// A bottle in the cellar carrying every fact a wine can have, to see how each one
+    /// shows: the cellar named among two, a classification, a gift received, a
+    /// recommendation, notes, a rating, the place and two files. Mapped as the live
+    /// page maps it.
+    static var completeWine: WineDetailPage.Content {
+        let day: (Int, Int, Int) -> Date = { y, m, d in
+            Calendar(identifier: .gregorian).date(from: DateComponents(year: y, month: m, day: d)) ?? .now
+        }
+        let cellars = [
+            CellarSummary(id: "main", name: nil, isPrimary: true, rows: 6, cols: 8),
+            CellarSummary(id: "lower", name: "Cave du bas", isPrimary: false, rows: 4, cols: 6),
+        ]
+        var attachments: [BeverageAttachment] = []
+        if let label = Bundle.main.url(forResource: "etiquette", withExtension: "jpg") {
+            attachments.append(BeverageAttachment(
+                id: "label", kind: .image, fileName: "Étiquette", contentType: "image/jpeg",
+                size: 51_511, url: label, createdAt: day(2026, 10, 4)
+            ))
+        }
+        attachments.append(BeverageAttachment(
+            id: "invoice", kind: .document, fileName: "facture.pdf", contentType: "application/pdf",
+            size: 88_000, url: URL(string: "https://example.com/facture.pdf")!, createdAt: day(2026, 10, 4)
+        ))
+        let wine = UserWineDetail(
+            id: "debug-complete", name: "Pavillon Rouge du Château Margaux", color: .red,
+            domain: "Château Margaux", vintage: 2015, appellation: "Margaux", cuvee: "Pavillon Rouge",
+            region: "Bordeaux", country: "France", grapeVarieties: ["Cabernet Sauvignon", "Merlot"],
+            alcoholContent: 13.5, classification: "Premier Grand Cru Classé", purchasePrice: 250,
+            purchaseDate: "2026-09-12", drinkFrom: 2025, drinkUntil: 2040,
+            notes: "Acheté chez Lavinia pour les 40 ans de Paul. À carafer deux heures avant.",
+            giftedBy: "Julien", createdAt: day(2026, 9, 12), updatedAt: day(2026, 11, 8),
+            cellar: CellarInfo(row: "A", col: 1, dateIn: day(2026, 10, 4), dateOut: nil,
+                               cellarId: "lower", rowIndex: 0, colIndex: 0),
+            consumption: ConsumptionInfo(consumedDate: nil, rating: 4, tastingNotes: nil, contacts: nil, favorite: true),
+            gift: nil,
+            recommendation: RecommendationInfo(recommenderName: "Marie", comment: "Le second vin de Margaux, à attendre encore cinq ans."),
+            latitude: 45.0436, longitude: -0.6731, placeName: "Margaux, France",
+            attachments: attachments,
+            // Placed in B3, then moved to A1 by a housemate: a removal and a placement
+            // on the same day, most recent first as the journal gives them.
+            moves: [
+                CellarMove(kind: .placed, date: day(2026, 11, 2), position: "A1", byName: "Marie"),
+                CellarMove(kind: .removed, date: day(2026, 11, 2), position: "B3", byName: "Marie"),
+                CellarMove(kind: .placed, date: day(2026, 10, 4), position: "B3"),
+            ]
+        )
+        return WineDetailView.mapContent(wine, cellars: cellars, isUploadingAttachment: false)
+    }
+}
+
+private struct WinePageHost: View {
+    var content: WineDetailPage.Content = .preview
+    @State private var opened: WineIdWrapper?
+
+    var body: some View {
+        NavigationStack {
+            Button("Rouvrir") { opened = WineIdWrapper(id: "1") }
+                // Pushed once the stack is up, as a tapped row pushes it in the app.
+                .task { opened = WineIdWrapper(id: "1") }
+                .pushesDetail(item: $opened) { _ in
+                    WineDetailPage(content: content)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItemGroup {
+                                ToolbarIconButton(title: "Ajouter aux favoris", systemImage: "heart") {}
+                                Menu {
+                                    Button("Modifier", systemImage: "pencil") {}
+                                } label: {
+                                    Image(systemName: "ellipsis")
+                                }
+                            }
+                        }
+                }
+        }
     }
 }
 

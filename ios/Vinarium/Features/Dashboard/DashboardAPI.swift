@@ -120,13 +120,6 @@ protocol DashboardJournalEvent {
     var winePriceValue: Double? { get }
 }
 
-extension BottleArtwork.LabelFamily {
-    /// The family the API names, nil for one this build does not draw yet.
-    init?(graphql value: GraphQLEnum<VinariumGraphQL.LabelFamily>) {
-        self.init(rawValue: value.rawValue.lowercased())
-    }
-}
-
 extension VinariumGraphQL.DashboardQuery.Data.Dashboard.LastExit: DashboardJournalEvent {
     var eventType: String {
         switch type { case .case(.in): return "in"; case .case(.out): return "out"; case .unknown: return "in" }

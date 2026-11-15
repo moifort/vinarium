@@ -367,6 +367,11 @@ type Beverage {
   """
   isMine: Boolean!
 
+  """
+  House style the bottle label is drawn in, the one the home screen draws this bottle with
+  """
+  labelFamily: LabelFamily!
+
   """What the label looks like, as the scan read it; null when never read"""
   labelTraits: LabelTraits
 

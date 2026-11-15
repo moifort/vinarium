@@ -38,6 +38,15 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
     /// The files hung on the sheet, oldest first. Readable on a housemate's
     /// bottle, editable only on one's own.
     var attachments: [BeverageAttachment]
+    /// The house style its bottle is drawn in, the one the home screen draws it with.
+    /// Nil when the server did not say: the app then guesses it from type and colour.
+    var labelFamily: BottleArtwork.LabelFamily?
+    /// What the real label looks like, when a scan read it: the drawn bottle wears
+    /// the closest look.
+    var labelTraits: BottleArtwork.LabelTraits?
+    /// The bottle's moves in the cellar, as the journal recorded them, most recent
+    /// first: what the sheet's timeline is drawn from.
+    var moves: [CellarMove] = []
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -73,6 +82,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         isMine = try container.decodeIfPresent(Bool.self, forKey: .isMine) ?? true
         ownerName = try container.decodeIfPresent(String.self, forKey: .ownerName)
         attachments = try container.decodeIfPresent([BeverageAttachment].self, forKey: .attachments) ?? []
+        labelFamily = try container.decodeIfPresent(BottleArtwork.LabelFamily.self, forKey: .labelFamily)
+        labelTraits = try container.decodeIfPresent(BottleArtwork.LabelTraits.self, forKey: .labelTraits)
+        moves = try container.decodeIfPresent([CellarMove].self, forKey: .moves) ?? []
     }
 
     init(
@@ -87,7 +99,10 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         recommendation: RecommendationInfo?,
         latitude: Double? = nil, longitude: Double? = nil, placeName: String? = nil,
         isMine: Bool = true, ownerName: String? = nil,
-        attachments: [BeverageAttachment] = []
+        attachments: [BeverageAttachment] = [],
+        labelFamily: BottleArtwork.LabelFamily? = nil,
+        labelTraits: BottleArtwork.LabelTraits? = nil,
+        moves: [CellarMove] = []
     ) {
         self.id = id
         self.name = name
@@ -121,6 +136,9 @@ struct UserWineDetail: Codable, Identifiable, Sendable {
         self.isMine = isMine
         self.ownerName = ownerName
         self.attachments = attachments
+        self.labelFamily = labelFamily
+        self.labelTraits = labelTraits
+        self.moves = moves
     }
 }
 
@@ -131,6 +149,9 @@ struct CellarInfo: Codable, Sendable {
     let dateOut: Date?
     /// The cellar the bottle stands in.
     var cellarId: String? = nil
+    /// The slot in the cellar's grid, 0-based, to draw it on the cellar's plan.
+    var rowIndex: Int? = nil
+    var colIndex: Int? = nil
 
     enum CodingKeys: String, CodingKey {
         case row = "rowLabel"
@@ -139,6 +160,22 @@ struct CellarInfo: Codable, Sendable {
         case dateOut
         case cellarId
     }
+}
+
+/// One line of the cellar journal for this bottle: placed in a slot or taken out of
+/// it. A move between two slots is a removal and a placement on the same day.
+struct CellarMove: Codable, Sendable {
+    enum Kind: String, Codable, Sendable {
+        case placed
+        case removed
+    }
+
+    let kind: Kind
+    let date: Date
+    /// The slot, as the grid labels it ("A1").
+    let position: String
+    /// The housemate who moved it; nil when the viewer did.
+    var byName: String?
 }
 
 struct GiftInfo: Codable, Sendable {

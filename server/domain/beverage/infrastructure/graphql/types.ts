@@ -1,7 +1,8 @@
 import { HouseholdQuery } from '~/domain/household/query'
 import { builder } from '~/domain/shared/graphql/builder'
+import { labelFamily } from '../../business-rules'
 import type { Beverage, DrinkWindow, Place, Purchase, WineDetails } from '../../types'
-import { BeverageSubtypeEnum, BeverageTypeEnum, WineColorEnum } from './enums'
+import { BeverageSubtypeEnum, BeverageTypeEnum, LabelFamilyEnum, WineColorEnum } from './enums'
 import { LabelTraitsType } from './label-traits'
 
 const DrinkWindowType = builder.objectRef<DrinkWindow>('DrinkWindow').implement({
@@ -224,6 +225,12 @@ export const BeverageType = builder.objectRef<Beverage>('Beverage').implement({
       nullable: true,
       description: 'What the label looks like, as the scan read it; null when never read',
       resolve: (b) => b.labelTraits,
+    }),
+    labelFamily: t.field({
+      type: LabelFamilyEnum,
+      description:
+        'House style the bottle label is drawn in, the one the home screen draws this bottle with',
+      resolve: (b) => labelFamily(b),
     }),
     details: t.field({
       type: BeverageDetailsUnion,

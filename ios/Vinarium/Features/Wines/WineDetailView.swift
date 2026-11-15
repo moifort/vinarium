@@ -4,7 +4,7 @@ import UniformTypeIdentifiers
 
 struct WineDetailView: View {
     let wineId: String
-    /// What the sheet opens straight onto once the wine is loaded: the home screen's
+    /// What the page opens straight onto once the wine is loaded: the home screen's
     /// buttons take a bottle out, mark it a favorite or move it from here.
     var initialAction: InitialAction?
     var onRemoved: (() -> Void)?
@@ -43,240 +43,242 @@ struct WineDetailView: View {
     @State private var initialActionDone = false
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if isLoading {
-                    LoadingStateView()
-                } else if let detail {
-                    if isEditing {
-                        WineEditForm(
-                            initial: Self.editFields(from: detail),
-                            onSave: { submission in
-                                self.detail = try await save(submission, of: detail)
-                                isEditing = false
-                                onUpdated?()
-                            },
-                            onCancel: { isEditing = false }
-                        )
-                    } else {
-                        WineDetailPage(
-                            content: Self.mapContent(
-                                detail,
-                                cellars: cellars,
-                                isUploadingAttachment: isUploadingAttachment
-                            ),
-                            onRemoveRequested: { showRemovalChoice = true },
-                            onEditLocation: { showLocationEditor = true },
-                            onAddAttachment: { showAttachmentChoice = true },
-                            onOpenAttachment: { attachment in
-                                Task { await openAttachment(attachment) }
-                            },
-                            onDeleteAttachment: { attachment in
-                                Task { await deleteAttachment(attachment) }
-                            },
-                            onRefresh: { await loadData() }
-                        )
+        Group {
+            if isLoading {
+                LoadingStateView()
+            } else if let detail {
+                WineDetailPage(
+                    content: Self.mapContent(
+                        detail,
+                        cellars: cellars,
+                        isUploadingAttachment: isUploadingAttachment
+                    ),
+                    onAction: handle,
+                    onRefresh: { await loadData() }
+                )
+            } else if error != nil {
+                // Nothing shows, and a pull tries again.
+                PullToRefreshSpace()
+                    .refreshable { await loadData() }
+            }
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar { readToolbar }
+        .confirmationDialog(
+            "Sortir de la cave",
+            isPresented: $showRemovalChoice,
+            titleVisibility: .visible
+        ) {
+            Button("Consommer") { showConsumption = true }
+                .accessibilityIdentifier("choice-consume")
+            Button("Offrir") { showGift = true }
+                .accessibilityIdentifier("choice-gift")
+        } message: {
+            Text("Comment souhaitez-vous sortir ce vin ?")
+        }
+        // Menu actions (favorite, deletion, …) close the menu before the mutation
+        // leaves, and a refresh keeps the content on screen: in both cases the
+        // network call is made visible by a scrim and a spinner. A mutation hands
+        // back the sheet it leaves behind, so none is followed by a second read.
+        .overlay {
+            if actionError.isRunning || isRefreshing {
+                ZStack {
+                    Color.black.opacity(0.1).ignoresSafeArea()
+                    ProgressView()
+                }
+            }
+        }
+        .disabled(actionError.isRunning || isRefreshing)
+        .errorAlert(actionError)
+        .errorAlert(attachmentError)
+        .attachmentPickers(
+            showChoice: $showAttachmentChoice,
+            pendingSource: $pendingAttachmentSource,
+            showCamera: $showCamera,
+            showPhotoPicker: $showPhotoPicker,
+            pickedPhoto: $pickedPhoto,
+            showFileImporter: $showFileImporter,
+            onImage: { image in Task { await upload(image) } },
+            onFile: { url in Task { await upload(fileAt: url) } },
+            onFailure: { message in error = message }
+        )
+        .fullScreenCover(item: $previewedFile) { file in
+            NavigationStack {
+                DocumentPreview(url: file.url)
+                    .ignoresSafeArea(edges: .bottom)
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            ToolbarIconButton(
+                                title: "Fermer",
+                                systemImage: "xmark",
+                                role: .cancel
+                            ) { previewedFile = nil }
+                        }
                     }
-                } else if error != nil {
-                    // Nothing shows, and a pull tries again.
-                    PullToRefreshSpace()
-                        .refreshable { await loadData() }
-                }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                if !isEditing {
-                    readToolbar
-                }
-            }
-            // Menu actions (favorite, deletion, …) close the menu before the mutation
-            // leaves, and a refresh keeps the content on screen: in both cases the
-            // network call is made visible by a scrim and a spinner. A mutation hands
-            // back the sheet it leaves behind, so none is followed by a second read.
-            .overlay {
-                if actionError.isRunning || isRefreshing {
-                    ZStack {
-                        Color.black.opacity(0.1).ignoresSafeArea()
-                        ProgressView()
-                    }
-                }
-            }
-            .disabled(actionError.isRunning || isRefreshing)
-            .errorAlert(actionError)
-            .errorAlert(attachmentError)
-            .attachmentPickers(
-                showChoice: $showAttachmentChoice,
-                pendingSource: $pendingAttachmentSource,
-                showCamera: $showCamera,
-                showPhotoPicker: $showPhotoPicker,
-                pickedPhoto: $pickedPhoto,
-                showFileImporter: $showFileImporter,
-                onImage: { image in Task { await upload(image) } },
-                onFile: { url in Task { await upload(fileAt: url) } },
-                onFailure: { message in error = message }
-            )
-            .fullScreenCover(item: $previewedFile) { file in
+        }
+        .task {
+            await loadData()
+            runInitialAction()
+        }
+        // Editing is a task, so a sheet over the page, as Shiori edits a book.
+        .sheet(isPresented: $isEditing) {
+            if let detail {
                 NavigationStack {
-                    DocumentPreview(url: file.url)
-                        .ignoresSafeArea(edges: .bottom)
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .cancellationAction) {
-                                ToolbarIconButton(
-                                    title: "Fermer",
-                                    systemImage: "xmark",
-                                    role: .cancel
-                                ) { previewedFile = nil }
-                            }
-                        }
+                    WineEditForm(
+                        initial: Self.editFields(from: detail),
+                        onSave: { submission in
+                            self.detail = try await save(submission, of: detail)
+                            isEditing = false
+                            onUpdated?()
+                        },
+                        onCancel: { isEditing = false }
+                    )
                 }
             }
-            .task {
-                await loadData()
-                runInitialAction()
-            }
-            .sheet(isPresented: $showConsumption) {
-                if let detail {
-                    ConsumptionSheet { date, rating, notes, contacts in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            _ = try await CellarAPI.remove(
-                                wineId: detail.id,
-                                consumedDate: formatter.string(from: date),
-                                rating: rating,
-                                tastingNotes: notes,
-                                contacts: contacts.isEmpty ? nil : contacts
-                            )
-                        } onSuccess: {
-                            showConsumption = false
-                            dismiss()
-                            onRemoved?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showGift) {
-                if let detail {
-                    GiftSheet { date, recipientName in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            _ = try await CellarAPI.gift(
-                                wineId: detail.id,
-                                giftedDate: formatter.string(from: date),
-                                recipientName: recipientName
-                            )
-                        } onSuccess: {
-                            showGift = false
-                            dismiss()
-                            onRemoved?()
-                        }
-                    }
-                    .presentationDetents([.height(250)])
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showPlacement) {
-                if let detail {
-                    NavigationStack {
-                        CellarPlacementView(
+        }
+        .sheet(isPresented: $showConsumption) {
+            if let detail {
+                ConsumptionSheet { date, rating, notes, contacts in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        _ = try await CellarAPI.remove(
                             wineId: detail.id,
-                            wineName: detail.name,
-                            beverageType: detail.beverageType,
-                            wineColor: detail.color,
-                            wineVintage: detail.vintage,
-                            onCancel: { showPlacement = false }
-                        ) { _ in
-                            showPlacement = false
-                            dismiss()
-                            onRemoved?()
-                        }
+                            consumedDate: formatter.string(from: date),
+                            rating: rating,
+                            tastingNotes: notes,
+                            contacts: contacts.isEmpty ? nil : contacts
+                        )
+                    } onSuccess: {
+                        showConsumption = false
+                        dismiss()
+                        onRemoved?()
                     }
                 }
+                .errorAlert(sheetError)
             }
-            .sheet(isPresented: $showMove) {
-                if let detail, let cellar = detail.cellar {
-                    BottleMoveView(
+        }
+        .sheet(isPresented: $showGift) {
+            if let detail {
+                GiftSheet { date, recipientName in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        _ = try await CellarAPI.gift(
+                            wineId: detail.id,
+                            giftedDate: formatter.string(from: date),
+                            recipientName: recipientName
+                        )
+                    } onSuccess: {
+                        showGift = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                }
+                .presentationDetents([.height(250)])
+                .errorAlert(sheetError)
+            }
+        }
+        .sheet(isPresented: $showPlacement) {
+            if let detail {
+                NavigationStack {
+                    CellarPlacementView(
                         wineId: detail.id,
                         wineName: detail.name,
-                        wineBeverageType: detail.beverageType,
+                        beverageType: detail.beverageType,
                         wineColor: detail.color,
                         wineVintage: detail.vintage,
-                        currentRow: cellar.row,
-                        currentCol: cellar.col,
-                        currentCellarId: cellar.cellarId,
-                        onCancel: { showMove = false }
-                    ) { _, _ in
-                        showMove = false
-                        // The bottle may have changed cellar as well as slot: the
-                        // sheet reads it back rather than guess.
-                        Task { await loadData() }
+                        onCancel: { showPlacement = false }
+                    ) { _ in
+                        showPlacement = false
+                        dismiss()
+                        onRemoved?()
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showMove) {
+            if let detail, let cellar = detail.cellar {
+                BottleMoveView(
+                    wineId: detail.id,
+                    wineName: detail.name,
+                    wineBeverageType: detail.beverageType,
+                    wineColor: detail.color,
+                    wineVintage: detail.vintage,
+                    currentRow: cellar.row,
+                    currentCol: cellar.col,
+                    currentCellarId: cellar.cellarId,
+                    onCancel: { showMove = false }
+                ) { _, _ in
+                    showMove = false
+                    // The bottle may have changed cellar as well as slot: the
+                    // sheet reads it back rather than guess.
+                    Task { await loadData() }
+                    onUpdated?()
+                }
+            }
+        }
+        .sheet(isPresented: $showFavorite) {
+            if let detail {
+                FavoriteSheet { date, contacts, notes, rating in
+                    let formatter = ISO8601DateFormatter()
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveNotes(
+                            id: detail.id,
+                            tasting: TastingEntry(
+                                consumedDate: formatter.string(from: date),
+                                rating: rating == 0 ? nil : rating,
+                                contacts: contacts.isEmpty ? nil : contacts,
+                                tastingNotes: notes,
+                                favorite: true
+                            )
+                        )
+                    } onSuccess: {
+                        showFavorite = false
                         onUpdated?()
                     }
                 }
+                .errorAlert(sheetError)
             }
-            .sheet(isPresented: $showFavorite) {
-                if let detail {
-                    FavoriteSheet { date, contacts, notes, rating in
-                        let formatter = ISO8601DateFormatter()
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveNotes(
-                                id: detail.id,
-                                tasting: TastingEntry(
-                                    consumedDate: formatter.string(from: date),
-                                    rating: rating == 0 ? nil : rating,
-                                    contacts: contacts.isEmpty ? nil : contacts,
-                                    tastingNotes: notes,
-                                    favorite: true
-                                )
+        }
+        .sheet(isPresented: $showRecommendation) {
+            if let detail {
+                RecommendationSheet { recommenderName, comment in
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveNotes(
+                            id: detail.id,
+                            recommendation: RecommendationEntry(
+                                recommenderName: recommenderName,
+                                comment: comment
                             )
-                        } onSuccess: {
-                            showFavorite = false
-                            onUpdated?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showRecommendation) {
-                if let detail {
-                    RecommendationSheet { recommenderName, comment in
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveNotes(
-                                id: detail.id,
-                                recommendation: RecommendationEntry(
-                                    recommenderName: recommenderName,
-                                    comment: comment
-                                )
-                            )
-                        } onSuccess: {
-                            showRecommendation = false
-                            onUpdated?()
-                        }
-                    }
-                    .errorAlert(sheetError)
-                }
-            }
-            .sheet(isPresented: $showLocationEditor) {
-                if let detail {
-                    LocationEditorSheet(initial: Self.locationDraft(from: detail)) { draft in
-                        // "Aucun lieu" has to say so out loud: an absent coordinate
-                        // reads as "unchanged" and would leave the old pin in place.
-                        let request = UpdateWineRequest(
-                            latitude: draft?.latitude,
-                            longitude: draft?.longitude,
-                            placeName: draft?.placeName,
-                            cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
                         )
-                        await sheetError.run {
-                            self.detail = try await WineAPI.saveSheet(id: detail.id, wine: request)
-                        } onSuccess: {
-                            showLocationEditor = false
-                            onUpdated?()
-                        }
+                    } onSuccess: {
+                        showRecommendation = false
+                        onUpdated?()
                     }
-                    .errorAlert(sheetError)
                 }
+                .errorAlert(sheetError)
+            }
+        }
+        .sheet(isPresented: $showLocationEditor) {
+            if let detail {
+                LocationEditorSheet(initial: Self.locationDraft(from: detail)) { draft in
+                    // "Aucun lieu" has to say so out loud: an absent coordinate
+                    // reads as "unchanged" and would leave the old pin in place.
+                    let request = UpdateWineRequest(
+                        latitude: draft?.latitude,
+                        longitude: draft?.longitude,
+                        placeName: draft?.placeName,
+                        cleared: draft == nil ? [.latitude, .longitude, .placeName] : []
+                    )
+                    await sheetError.run {
+                        self.detail = try await WineAPI.saveSheet(id: detail.id, wine: request)
+                    } onSuccess: {
+                        showLocationEditor = false
+                        onUpdated?()
+                    }
+                }
+                .errorAlert(sheetError)
             }
         }
     }
@@ -285,36 +287,6 @@ struct WineDetailView: View {
 
     @ToolbarContentBuilder
     private var readToolbar: some ToolbarContent {
-        ToolbarItem(placement: .cancellationAction) {
-            ToolbarIconButton(title: "Fermer", systemImage: "xmark", role: .cancel) { dismiss() }
-        }
-        if let cellar = detail?.cellar, cellar.dateOut == nil {
-            ToolbarItemGroup {
-                Button("Déplacer", systemImage: "arrow.left.arrow.right") {
-                    showMove = true
-                }
-                .labelStyle(.iconOnly)
-                .accessibilityIdentifier("move-bottle-button")
-
-                Button("Sortir", systemImage: "arrow.up") {
-                    showRemovalChoice = true
-                }
-                .labelStyle(.iconOnly)
-                .accessibilityIdentifier("remove-from-cellar-button")
-                .confirmationDialog(
-                    "Sortir de la cave",
-                    isPresented: $showRemovalChoice,
-                    titleVisibility: .visible
-                ) {
-                    Button("Consommer") { showConsumption = true }
-                        .accessibilityIdentifier("choice-consume")
-                    Button("Offrir") { showGift = true }
-                        .accessibilityIdentifier("choice-gift")
-                } message: {
-                    Text("Comment souhaitez-vous sortir ce vin ?")
-                }
-            }
-        }
         if let detail, detail.isMine, detail.cellar == nil, detail.recommendation != nil {
             ToolbarItemGroup {
                 ToolbarIconButton(title: "Ajouter à la cave", systemImage: "plus") {
@@ -334,8 +306,21 @@ struct WineDetailView: View {
         if let detail {
             let isFavorite = detail.consumption?.favorite == true
             let canOfferFromCellar = detail.cellar != nil && detail.cellar?.dateOut == nil
+            // A friend's advice not yet in the cellar has its own heart, beside "add".
+            let hasAdviceHeart = detail.isMine && detail.cellar == nil && detail.recommendation != nil
 
+            // The favourite and the menu share one glass, as on Shiori's book page.
             ToolbarItemGroup {
+                if !hasAdviceHeart {
+                    ToolbarIconButton(
+                        title: isFavorite ? "Retirer des favoris" : "Ajouter aux favoris",
+                        systemImage: isFavorite ? "heart.fill" : "heart"
+                    ) {
+                        toggleFavorite()
+                    }
+                    .accessibilityIdentifier("toolbar-favorite-button")
+                }
+
                 Menu {
                     if detail.isMine {
                         Button("Modifier", systemImage: "pencil") {
@@ -344,31 +329,6 @@ struct WineDetailView: View {
                     }
 
                     Section {
-                        if isFavorite {
-                            Button {
-                                Task {
-                                    await actionError.run {
-                                        self.detail = try await WineAPI.saveNotes(
-                                            id: detail.id,
-                                            tasting: TastingEntry(favorite: false)
-                                        )
-                                    } onSuccess: {
-                                        onUpdated?()
-                                    }
-                                }
-                            } label: {
-                                Label("Retirer des favoris", systemImage: "heart.slash")
-                            }
-                            .accessibilityIdentifier("menu-favorite-button")
-                        } else {
-                            Button {
-                                showFavorite = true
-                            } label: {
-                                Label("Ajouter aux favoris", systemImage: "heart")
-                            }
-                            .accessibilityIdentifier("menu-favorite-button")
-                        }
-
                         if detail.isMine {
                             Button {
                                 showRecommendation = true
@@ -422,6 +382,53 @@ struct WineDetailView: View {
         }
     }
 
+    // MARK: - Actions
+
+    /// What the page asks for. Taking the bottle out, moving it, editing it and its
+    /// place open their sheets; the stars are saved at once.
+    private func handle(_ action: WineDetailPage.Action) {
+        switch action {
+        case .removeFromCellar: showRemovalChoice = true
+        case .rate(let stars): rate(stars)
+        case .move: showMove = true
+        case .edit: isEditing = true
+        case .editLocation: showLocationEditor = true
+        case .addAttachment: showAttachmentChoice = true
+        case .openAttachment(let attachment): Task { await openAttachment(attachment) }
+        case .deleteAttachment(let attachment): Task { await deleteAttachment(attachment) }
+        }
+    }
+
+    /// The stars tapped on the hero, saved at once on the wine's note: the server
+    /// merges them in, so the favourite and the tasting notes stay as they were.
+    private func rate(_ stars: Int) {
+        guard let detail, detail.consumption?.rating != stars else { return }
+        Task {
+            await actionError.run {
+                self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(rating: stars))
+            } onSuccess: {
+                onUpdated?()
+            }
+        }
+    }
+
+    /// A favourite is taken off at once; a wine that is not one asks the tasting
+    /// that makes it one.
+    private func toggleFavorite() {
+        guard let detail else { return }
+        if detail.consumption?.favorite == true {
+            Task {
+                await actionError.run {
+                    self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(favorite: false))
+                } onSuccess: {
+                    onUpdated?()
+                }
+            }
+        } else {
+            showFavorite = true
+        }
+    }
+
     // MARK: - Helpers
 
     /// Opens what the caller asked for, once, over the loaded wine. A bottle that left
@@ -436,17 +443,7 @@ struct WineDetailView: View {
         case .move:
             if inCellar { showMove = true }
         case .favorite:
-            if detail.consumption?.favorite == true {
-                Task {
-                    await actionError.run {
-                        self.detail = try await WineAPI.saveNotes(id: detail.id, tasting: TastingEntry(favorite: false))
-                    } onSuccess: {
-                        onUpdated?()
-                    }
-                }
-            } else {
-                showFavorite = true
-            }
+            toggleFavorite()
         }
     }
 
@@ -559,66 +556,152 @@ struct WineDetailView: View {
         }
     }
 
-    private static func mapContent(
+    /// Internal so the debug gallery can draw a sheet from a wine fixture.
+    static func mapContent(
         _ detail: UserWineDetail,
         cellars: [CellarSummary],
-        isUploadingAttachment: Bool
-    ) -> WineDetailContent.Content {
-        let formatter: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
-        return WineDetailContent.Content(
-            beverageType: detail.beverageType,
-            color: detail.color,
-            subtype: detail.subtype,
-            name: detail.name,
-            domain: detail.domain,
-            cuvee: detail.cuvee,
-            vintage: detail.vintage,
-            appellation: detail.appellation,
-            region: detail.region,
-            country: detail.country,
-            classification: detail.classification,
+        isUploadingAttachment: Bool,
+        now: Date = .now
+    ) -> WineDetailPage.Content {
+        let day: (Date) -> String = { $0.formatted(date: .abbreviated, time: .omitted) }
+        let inCellar = detail.cellar.map { $0.dateOut == nil } ?? false
+        let place = detail.appellation ?? detail.region ?? detail.country
+        let meta = [detail.vintage.map(String.init), place].compactMap { $0 }.joined(separator: " · ")
+
+        var facts: [WineFactList.Fact] = []
+        func fact(_ title: String, _ value: String?, wide: Bool = false, _ id: String) {
+            guard let value, !value.isEmpty else { return }
+            facts.append(.init(title: title, value: value, isWide: wide, id: id))
+        }
+        fact(detail.beverageType.producerLabel, detail.domain, "producer")
+        fact(String(localized: "Cuvée"), detail.cuvee, "cuvee")
+        fact(String(localized: "Millésime"), detail.vintage.map(String.init), "vintage")
+        // Written in the reader's decimal style, "13,5 % vol" in French, and "13 % vol" for a
+        // round degree.
+        fact(String(localized: "Alcool"), detail.alcoholContent.map {
+            "\($0.formatted(.number.precision(.fractionLength(0...1)))) % vol"
+        }, "alcohol")
+        fact(String(localized: "Appellation"), detail.appellation, "appellation")
+        fact(String(localized: "Région"), detail.region, "region")
+        fact(String(localized: "Pays"), detail.country, "country")
+        fact(String(localized: "Classification"), detail.classification, "classification")
+        fact(String(localized: "Entrée le"), detail.cellar.map { day($0.dateIn) }, "dateIn")
+        fact(String(localized: "Prix d'achat"), detail.purchasePrice.map { Money.formattedFromEur($0, fractionLength: 0) }, "price")
+        fact(String(localized: "Date d'achat"), detail.purchaseDate.map { Self.purchaseDay($0) ?? $0 }, "purchaseDate")
+        fact(String(localized: "Propriétaire"), detail.ownerName, "owner")
+        fact(String(localized: "Cépages"), detail.grapeVarieties.isEmpty ? nil : detail.grapeVarieties.joined(separator: ", "), wide: true, "grapes")
+
+        let tone = WineSheetTone(beverageType: detail.beverageType, color: detail.color)
+        let tag: String? = detail.subtype?.label(for: detail.beverageType)
+            ?? (detail.beverageType == .wine ? detail.color?.label : detail.beverageType.label)
+
+        return WineDetailPage.Content(
+            tone: tone,
+            hero: .init(
+                bottle: .init(
+                    style: .of(
+                        id: detail.id,
+                        beverageType: detail.beverageType,
+                        subtype: detail.subtype,
+                        color: detail.color,
+                        family: detail.labelFamily,
+                        traits: detail.labelTraits,
+                        vintage: detail.vintage
+                    ),
+                    // Written as the home writes it, so the bottle is the same one.
+                    text: .init(
+                        producer: ProducerOverline.text(for: detail.domain, name: detail.name),
+                        name: detail.name,
+                        vintage: detail.vintage,
+                        appellation: detail.appellation,
+                        classification: detail.classification,
+                        kind: detail.beverageType == .wine
+                            ? nil
+                            : detail.subtype?.label(for: detail.beverageType) ?? detail.beverageType.label
+                    )
+                ),
+                producer: detail.domain,
+                name: detail.name,
+                meta: meta.isEmpty ? nil : meta,
+                tag: tag,
+                status: inCellar ? detail.cellar.map { Self.timeInCellar(since: $0.dateIn, now: now) } : nil,
+                isInCellar: inCellar,
+                rating: detail.consumption?.rating
+            ),
+            slot: inCellar ? detail.cellar.map { cellar in
+                let household = cellars.map { ($0.id, $0.name) }
+                let summary = cellars.first { $0.id == cellar.cellarId } ?? (cellars.count == 1 ? cellars.first : nil)
+                var grid: CellarSlotCard.Grid?
+                if let summary, summary.rows > 0, summary.cols > 0,
+                   let row = cellar.rowIndex, let col = cellar.colIndex,
+                   row < summary.rows, col < summary.cols {
+                    grid = .init(rows: summary.rows, cols: summary.cols, row: row, col: col)
+                }
+                return .init(
+                    position: "\(cellar.row)\(cellar.col)",
+                    cellarName: CellarPositionLabel.cellarName(cellarId: cellar.cellarId, cellars: household),
+                    grid: grid
+                )
+            } : nil,
+            // Like the slot, the drinking window only matters for a bottle still to open.
+            window: inCellar ? detail.drinkFrom.flatMap { from in
+                detail.drinkUntil.flatMap { until in until >= from ? .init(from: from, until: until) : nil }
+            } : nil,
+            facts: facts,
+            consumption: detail.consumption.flatMap { consumption in
+                var facts: [WineFactList.Fact] = []
+                if let date = consumption.consumedDate {
+                    facts.append(.init(title: String(localized: "Consommé le"), value: day(date), id: "consumed"))
+                }
+                if let contacts = consumption.contacts, !contacts.isEmpty {
+                    facts.append(.init(title: String(localized: "Avec"), value: contacts.joined(separator: ", "), id: "contacts"))
+                }
+                let notes = consumption.tastingNotes.flatMap { $0.isEmpty ? nil : $0 }
+                // A bottle still in the cellar shows its stars on the hero, not as a
+                // tasting it has not had.
+                let rating = inCellar ? nil : consumption.rating
+                guard !facts.isEmpty || rating != nil || notes != nil else { return nil }
+                return .init(facts: facts, rating: rating, tastingNotes: notes)
+            },
+            timeline: timeline(detail, now: now),
+            recommendation: detail.recommendation.map {
+                .init(
+                    recommenderName: $0.recommenderName.flatMap { $0.isEmpty ? nil : $0 },
+                    comment: $0.comment.flatMap { $0.isEmpty ? nil : $0 }
+                )
+            },
             placeName: detail.placeName,
             latitude: detail.latitude,
             longitude: detail.longitude,
-            alcoholContent: detail.alcoholContent,
-            purchasePrice: detail.purchasePrice,
-            purchaseDate: detail.purchaseDate,
-            grapeVarieties: detail.grapeVarieties,
-            drinkFrom: detail.drinkFrom,
-            drinkUntil: detail.drinkUntil,
-            giftedBy: detail.giftedBy,
-            notes: detail.notes,
-            cellar: detail.cellar.map { cellar in
-                .init(
-                    position: CellarPositionLabel.text(
-                        "\(cellar.row)\(cellar.col)",
-                        cellarId: cellar.cellarId,
-                        cellars: cellars.map { ($0.id, $0.name) }
-                    ),
-                    dateIn: formatter(cellar.dateIn),
-                    dateOut: cellar.dateOut.map(formatter),
-                    isInCellar: cellar.dateOut == nil
-                )
-            },
-            consumption: detail.consumption.map { consumption in
-                .init(
-                    consumedDate: consumption.consumedDate.map(formatter),
-                    rating: consumption.rating,
-                    tastingNotes: consumption.tastingNotes,
-                    contacts: consumption.contacts
-                )
-            },
-            gift: detail.gift.map { gift in
-                .init(giftedDate: formatter(gift.giftedDate), recipientName: gift.recipientName)
-            },
-            recommendation: detail.recommendation.map { reco in
-                .init(recommenderName: reco.recommenderName, comment: reco.comment)
-            },
-            ownerName: detail.ownerName,
+            notes: detail.notes.flatMap { $0.isEmpty ? nil : $0 },
             attachments: detail.attachments,
+            canEdit: detail.isMine,
             canAttach: detail.isMine,
             isUploadingAttachment: isUploadingAttachment
         )
+    }
+
+    /// "En cave depuis 41 jours", then in months past two months and in years past two
+    /// years, as a person would say it.
+    static func timeInCellar(since dateIn: Date, now: Date) -> String {
+        let parts = Calendar.current.dateComponents([.day, .month, .year], from: dateIn, to: now)
+        let days = max(Calendar.current.dateComponents([.day], from: dateIn, to: now).day ?? 0, 0)
+        if let years = parts.year, years >= 2 {
+            return String(localized: "En cave depuis \(years) ans")
+        }
+        let months = (parts.year ?? 0) * 12 + (parts.month ?? 0)
+        if months >= 2 {
+            return String(localized: "En cave depuis \(months) mois")
+        }
+        return String(localized: "En cave depuis \(days) jours")
+    }
+
+    /// The purchase day the API gives ("2026-09-12"), written as the sheet writes days.
+    static func purchaseDay(_ raw: String) -> String? {
+        let parser = ISO8601DateFormatter()
+        parser.formatOptions = [.withFullDate]
+        let date = parser.date(from: String(raw.prefix(10)))
+        return date?.formatted(date: .abbreviated, time: .omitted)
     }
 
     private static func editFields(from detail: UserWineDetail) -> WineEditForm.Fields {
@@ -665,15 +748,15 @@ struct WineDetailView: View {
 }
 
 #Preview("Bottle taken out") {
-    WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a")
+    NavigationStack { WineDetailView(wineId: "5d288fc9-864d-4633-862a-b4410cf8b64a") }
 }
 
 #Preview("In cellar") {
-    WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1")
+    NavigationStack { WineDetailView(wineId: "c2f5486a-29d6-4a32-b3e9-323ab1bee3d1") }
 }
 
 #Preview("Recommend") {
-    WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326")
+    NavigationStack { WineDetailView(wineId: "19fe3138-e125-4df9-afe6-90e1505a0326") }
 }
 
 

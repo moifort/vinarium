@@ -156,11 +156,16 @@ struct WineListView: View {
                 onRefresh: { await viewModel.load() }
             )
             .task { await viewModel.load() }
-            .sheet(item: /* selectedWineId */) { WineDetailView(wineId: $0.id) }
+            .pushesDetail(item: /* selectedWineId */) { WineDetailView(wineId: $0.id) }
         }
     }
 }
 ```
+
+What a person opens to look at, a wine, is **pushed** on the opener's stack with
+`.pushesDetail(item:)` (`Shared/Platform/PushedDetail.swift`), as Shiori pushes a book: the
+system's Back button closes it, and the detail screen owns no `NavigationStack` and draws no Close
+button. What a person does (take a bottle out, offer it, edit it, move it) stays a **sheet**.
 
 ### Page (pure, previewable)
 

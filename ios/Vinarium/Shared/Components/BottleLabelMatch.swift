@@ -1,3 +1,4 @@
+import Apollo
 import Foundation
 
 // The label a scanned wine wears: the scan describes the real label (colours,
@@ -295,5 +296,12 @@ extension BottleArtwork.LabelTraits.Shape {
         case .shield: .shield
         case .irregular: .irregular
         }
+    }
+}
+
+extension BottleArtwork.LabelFamily {
+    /// The family the API names, nil for one this build does not draw yet.
+    init?(graphql value: GraphQLEnum<VinariumGraphQL.LabelFamily>) {
+        self.init(rawValue: value.rawValue.lowercased())
     }
 }

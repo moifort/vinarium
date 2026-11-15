@@ -6,8 +6,9 @@ struct AttachmentThumbnail: View {
     let kind: BeverageAttachment.Kind
     let fileName: String
     let url: URL
-
-    private let side: CGFloat = 84
+    /// A square on the edit form; the sheet's shelf sets its tiles taller, as covers.
+    var size = CGSize(width: 84, height: 84)
+    var cornerRadius: CGFloat = 10
 
     var body: some View {
         Group {
@@ -27,11 +28,11 @@ struct AttachmentThumbnail: View {
                 placeholder(systemImage: "doc.text", caption: fileName)
             }
         }
-        .frame(width: side, height: side)
+        .frame(width: size.width, height: size.height)
         .background(Color(.secondarySystemBackground))
-        .clipShape(.rect(cornerRadius: 10))
+        .clipShape(.rect(cornerRadius: cornerRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(cornerRadius: cornerRadius)
                 .stroke(Color(.separator), lineWidth: 0.5)
         )
         .accessibilityLabel(fileName)

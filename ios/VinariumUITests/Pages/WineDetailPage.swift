@@ -57,13 +57,19 @@ struct WineDetailPage {
 
     func verifyRecommendationSection() throws {
         app.swipeUp()
-        try app.staticTexts["Recommended"].waitOrFail("'Recommended' section not found")
+        try app.descendants(matching: .any)["wine-recommendation-comment"].firstMatch
+            .waitOrFail("Recommendation comment not found")
     }
 
-    /// Flags the bottle as a favorite through the detail menu and its sheet. A
+    /// Flags the bottle as a favorite through the toolbar's heart and its sheet. A
     /// rating does not make a favorite: the flag is its own field on the note.
     func addToFavorites() throws {
-        try tapMenuItem(identifier: "menu-favorite-button", label: "Add to favorites")
+        let heart = app.navigationBars.buttons["toolbar-favorite-button"].firstMatch
+        if heart.waitForExistence(timeout: 5) {
+            try heart.tapOrFail()
+        } else {
+            try app.navigationBars.buttons["Add to favorites"].firstMatch.tapOrFail()
+        }
         try app.buttons["confirm-favorite-button"].tapOrFail(timeout: 10)
     }
 
@@ -86,7 +92,8 @@ struct WineDetailPage {
         try app.buttons[label].firstMatch.tapOrFail()
     }
 
+    /// The page is pushed: the system's Back button, the bar's first, closes it.
     func close() throws {
-        try app.buttons["Close"].tapOrFail()
+        try app.navigationBars.buttons.element(boundBy: 0).tapOrFail()
     }
 }

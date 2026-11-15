@@ -69,11 +69,13 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    résout le fil dès qu'elle l'a traité (règle 3). Cette règle permanente vaut demande de démarrer
    ces sessions : ne jamais demander d'abord. Un commentaire envoyé du board arrive en tour
    automatique, où l'app refuse `user_asked`, mais pas l'envoi d'un message : le parent garde donc
-   **deux sessions de réserve** (titre « Réserve board », démarrées vides, `user_asked`, contexte
-   neuf, en attente d'une mission). Sur un commentaire sans enfant de son thème, il envoie le brief
-   complet à une réserve (`send_message`), qui devient l'enfant de ce fil et se renomme. À chaque
-   message de l'utilisateur, il complète d'abord la réserve à deux (`list_sessions`, `linked: true`,
-   pour les compter, y compris après un clear). Réserve vide : proposer la session
+   des **sessions de réserve**, au moins trois libres à tout moment, titrées `B1`, `B2`…
+   (démarrées vides, `user_asked`, contexte neuf, en attente d'une mission). Sur un commentaire
+   sans enfant de son thème, il envoie le brief complet à une réserve libre (`send_message`), qui
+   devient l'enfant de ce fil ; le parent la renomme « BN · <thème> » (`set_session_title`, court
+   pour que le thème reste lisible dans la barre latérale). À chaque message de l'utilisateur, il
+   complète d'abord les réserves libres à trois (`list_sessions`, `linked: true`, pour les
+   compter, y compris après un clear). Aucune réserve libre : proposer la session
    (`own_initiative`, même brief) et la démarrer avec son `proposal_id` au prochain message de
    l'utilisateur. Si la proposition est refusée elle aussi (Remote Control, où les cartes ne
    s'affichent pas), le dire en une ligne qui commence par « ⏸ Bloqué » et qui dit quoi faire,
@@ -94,9 +96,12 @@ synchronisés. Le board d'abord, la zone de prototypage, les variantes et les ca
    son propre récapitulatif (une question avec un bouton « Valider »), jamais au parent. Chaque
    commentaire qu'elle traite, son propre fil, un fil transmis par le parent ou trouvé à la
    relecture, est résolu dès que la modification est faite (`ArtifactComments`, `resolve`, sans
-   réponse), sans attendre la validation. Sur le oui de l'utilisateur, elle s'archive
-   (`archive_session` sur son propre identifiant) ; si l'utilisateur demande des changements, elle
-   les fait et redemande. Chaque brief d'enfant le dit. Quand l'utilisateur archive ou supprime
+   réponse), sans attendre la validation. Sur le oui de l'utilisateur, une enfant qui était une
+   réserve est recyclée, jamais archivée : elle envoie au parent « Réserve libérée : <titre> » et
+   s'arrête ; le parent vide son contexte (`clear_session`), la renomme « BN · libre »
+   (`set_session_title`) et lui renvoie le brief de réserve, pour qu'elle attende de nouveau
+   (l'archiver viderait la réserve). Toute autre enfant s'archive (`archive_session` sur son
+   propre identifiant). Si l'utilisateur demande des changements, elle les fait et redemande. Chaque brief d'enfant le dit. Quand l'utilisateur archive ou supprime
    lui-même une session enfant, le ticket est clos : le parent résout son fil (`resolve`, sans
    réponse), sans qu'on le lui demande, si ce n'est pas déjà fait.
 4. **Chaque commentaire du board va à la session qui travaille sur son thème.** Les commentaires
