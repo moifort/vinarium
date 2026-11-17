@@ -24,7 +24,7 @@
     "stack:check": "bunx stack check"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@moifort/stack": "0.5.0",
     "@types/bun": "1.4.4",
     "@types/lodash-es": "4.17.12",
@@ -40,7 +40,7 @@
     "@apollo/server": "5.5.2",
     "@apple/app-store-server-library": "3.1.0",
     "@pothos/core": "4.17.0",
-    "@sentry/node": "11.12.0",
+    "@sentry/node": "11.13.0",
     "consola": "3.4.2",
     "firebase-admin": "13.10.0",
     "firebase-functions": "7.4.0",
