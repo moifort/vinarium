@@ -34,7 +34,7 @@ jobs:
   # emulators start empty and are thrown away (see scripts/e2e.sh).
   e2e:
     name: 🧪 End-to-end
-    runs-on: macos-26
+    runs-on: xcode-27
     # The redesigned home made the cellar journey twice as long on the runner:
     # four journeys plus a retry no longer fit in thirty minutes.
     timeout-minutes: 45
@@ -106,7 +106,7 @@ jobs:
     # A manual run can stop after the gate, which is how the scenario gets
     # checked before a tag is pushed.
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.e2e_only != true }}
-    runs-on: macos-26
+    runs-on: xcode-27
     timeout-minutes: 40
     env:
       ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
