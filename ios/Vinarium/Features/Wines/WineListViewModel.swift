@@ -225,12 +225,42 @@ final class WineListViewModel {
         reloadTask = Task { await load() }
     }
 
-    /// Loads the first page (on a view/sort/filter change, on appear, on pull-to-refresh
-    /// and after a mutation). The rows on screen stay while it runs; a failure leaves
-    /// them as they were and says nothing, and a pull tries again.
+    /// Loads the first page (on a view/sort/filter change, on appear and after a
+    /// mutation). The rows on screen stay while it runs; a failure leaves them as they
+    /// were and says nothing, and a pull tries again.
+    ///
+    /// One load per view at a time: a call made while the same view's first page is
+    /// already on its way waits for that answer instead of asking again. On 2026-11-20
+    /// one iPhone asked for an empty view about six times a second for five minutes;
+    /// whatever re-fires a load, it now costs one request per answer at most.
     func load() async {
+        await loadFirstPage(showsLoader: true)
+    }
+
+    /// Pull-to-refresh. Never raises the full-screen loader: on an empty view the
+    /// loader would take the place of the scroll view being pulled, and the scroll view
+    /// rebuilt after the answer came back still pulled down and refreshed again, in a
+    /// loop. The system spinner of the pull is the only progress shown.
+    func refresh() async {
+        await loadFirstPage(showsLoader: false)
+    }
+
+    private var inFlight: (generation: Int, task: Task<Void, Never>)?
+
+    private func loadFirstPage(showsLoader: Bool) async {
+        if let inFlight, inFlight.generation == generation {
+            await inFlight.task.value
+            return
+        }
+        let task = Task { await fetchFirstPage(showsLoader: showsLoader) }
+        inFlight = (generation, task)
+        await task.value
+        if inFlight?.task == task { inFlight = nil }
+    }
+
+    private func fetchFirstPage(showsLoader: Bool) async {
         let requested = generation
-        isLoading = true
+        if showsLoader { isLoading = true }
         error = nil
         do {
             let page = try await fetchPage(after: nil)

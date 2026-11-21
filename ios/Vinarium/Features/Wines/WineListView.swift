@@ -27,7 +27,7 @@ struct WineListView: View {
                 loadMoreFailed: viewModel.loadMoreFailed,
                 loadFailed: viewModel.error != nil,
                 onWineTapped: { selectedWineId = $0 },
-                onRefresh: { await viewModel.load() },
+                onRefresh: { await viewModel.refresh() },
                 onPrefetch: { viewModel.prefetchIfNeeded(for: $0) },
                 onLoadMore: { await viewModel.loadMore() }
             )
