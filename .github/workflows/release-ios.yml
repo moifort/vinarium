@@ -52,7 +52,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: "25.0.5+8.0.LTS"
+          java-version: "25.0.5+100000002.0.LTS"
 
       - name: Materialize gitignored build files
         run: |
@@ -316,7 +316,7 @@ jobs:
 
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.4.12"
+          ruby-version: "3.4.13"
           bundler-cache: true
           working-directory: infra
 
