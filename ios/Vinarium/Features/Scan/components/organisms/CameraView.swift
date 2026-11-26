@@ -21,7 +21,7 @@ struct CameraView: UIViewControllerRepresentable {
     /// The camera must not outlive the view: releasing the controller is not
     /// enough to guarantee the hardware is freed, so the session is closed here.
     static func dismantleUIViewController(_ uiViewController: CameraViewController, coordinator: ()) {
-        uiViewController.closeSession()
+        uiViewController.tearDown()
     }
 }
 
@@ -104,6 +104,28 @@ final class CameraViewController: UIViewController {
             session.stopRunning()
         }
     }
+
+    /// Leaving the screen: a preview layer still attached to its session reconfigures
+    /// that session when it is deallocated, synchronously, on whichever thread drops it
+    /// last, which was the main one, freezing the app for seconds. The layer leaves the
+    /// view here and is detached from its session on the session queue, after the stream
+    /// is stopped, so its release has nothing left to reconfigure.
+    func tearDown() {
+        let session = captureSession
+        let preview = previewLayer.map(DetachedPreview.init)
+        previewLayer?.removeFromSuperlayer()
+        previewLayer = nil
+        sessionQueue.async {
+            if session.isRunning { session.stopRunning() }
+            preview?.layer.session = nil
+        }
+    }
+}
+
+/// Carries the preview layer to the session queue for its detachment; nothing else
+/// touches it once it has left the view.
+private struct DetachedPreview: @unchecked Sendable {
+    let layer: AVCaptureVideoPreviewLayer
 }
 
 final class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate, @unchecked Sendable {
